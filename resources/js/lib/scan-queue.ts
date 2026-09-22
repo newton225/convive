@@ -1,0 +1,73 @@
+/**
+ * La file locale des scans faits hors ligne (README 2.8, CLAUDE.md, « PWA »), gardee dans le
+ * `localStorage` de l'appareil de l'agent, une file par evenement. Le stockage peut etre absent ou
+ * refuse (navigation privee, quota) : chaque acces est protege, et la file retombe alors sur vide
+ * plutot que de casser le scan.
+ */
+
+export type QueuedScan = {
+    token: string;
+    scannedAt: string;
+};
+
+const queueKey = (eventId: number) => `convive:scan-queue:${eventId}`;
+const seenKey = (eventId: number) => `convive:scan-seen:${eventId}`;
+
+function readStored(key: string): unknown {
+    try {
+        const raw = localStorage.getItem(key);
+
+        return raw === null ? null : JSON.parse(raw);
+    } catch {
+        return null;
+    }
+}
+
+function write(key: string, value: unknown): void {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+        // Stockage indisponible : la file ne survivra pas a un rechargement, le scan continue.
+    }
+}
+
+const isQueuedScan = (value: unknown): value is QueuedScan =>
+    typeof value === 'object' &&
+    value !== null &&
+    'token' in value &&
+    typeof value.token === 'string' &&
+    'scannedAt' in value &&
+    typeof value.scannedAt === 'string';
+
+export function readQueue(eventId: number): QueuedScan[] {
+    const stored = readStored(queueKey(eventId));
+
+    return Array.isArray(stored) ? stored.filter(isQueuedScan) : [];
+}
+
+export function writeQueue(eventId: number, queue: QueuedScan[]): void {
+    write(queueKey(eventId), queue);
+}
+
+function readSeen(eventId: number): number[] {
+    const stored = readStored(seenKey(eventId));
+
+    return Array.isArray(stored)
+        ? stored.filter((id): id is number => typeof id === 'number')
+        : [];
+}
+
+/**
+ * Les inscriptions deja acceptees hors ligne sur cet appareil : deux scans du meme billet hors
+ * ligne doivent etre signales, le serveur ne peut pas encore le faire.
+ */
+export function hasSeenLocally(
+    eventId: number,
+    registrationId: number,
+): boolean {
+    return readSeen(eventId).includes(registrationId);
+}
+
+export function markSeenLocally(eventId: number, registrationId: number): void {
+    write(seenKey(eventId), [...readSeen(eventId), registrationId]);
+}

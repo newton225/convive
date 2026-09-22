@@ -1,0 +1,140 @@
+<?php
+
+return [
+    'event' => [
+        'no_date' => 'Date à venir',
+        'venue' => 'Lieu',
+        'price_per_person' => 'Tarif par personne',
+        'capacity' => 'Capacité',
+        'seats' => [
+            'remaining' => '{0} Complet|{1} 1 place restante|[2,*] :count places restantes',
+            'full' => 'Cet événement est complet',
+        ],
+        'companion_limit' => '{0} Sans accompagnateur|{1} 1 accompagnateur autorisé|[2,*] :count accompagnateurs autorisés',
+        'deadline' => [
+            'label' => "Date limite d'inscription",
+            'passed' => "La date limite d'inscription est dépassée.",
+        ],
+        'register' => "S'inscrire",
+        'registration_closed' => 'Les inscriptions sont closes pour cet événement.',
+        'payment_accounts' => [
+            'title' => 'Comptes de versement',
+            'reference_hint' => 'Indiquez « :name » en motif du transfert.',
+        ],
+    ],
+
+    'not_found' => [
+        'title' => "Cet événement n'existe pas",
+        'description' => "Le lien que vous avez suivi n'est plus valide, ou n'a jamais existé.",
+    ],
+
+    'registration' => [
+        'title' => 'Votre inscription',
+        'fields' => [
+            'name' => 'Nom complet',
+            'phone' => 'Téléphone',
+            'email' => 'Email (facultatif)',
+            'unit' => 'Unité',
+            'unit_placeholder' => 'Choisir une unité',
+            'companion_name' => 'Nom de l\'accompagnateur',
+        ],
+        'companions' => [
+            'title' => 'Accompagnateurs',
+            'add' => 'Ajouter un accompagnateur',
+            'remove' => 'Retirer',
+            'limit_reached' => '{1} 1 accompagnateur au maximum pour cet événement.|[2,*] :count accompagnateurs au maximum pour cet événement.',
+        ],
+        'total' => [
+            'label' => 'Montant total dû',
+        ],
+        'submit' => "Continuer l'inscription",
+        'show' => [
+            'countdown_label' => 'Temps restant pour envoyer votre preuve',
+            'expired' => 'Le délai de réservation est écoulé.',
+            'retry' => 'Vérifier les places et relancer',
+            'proof_submitted' => 'Votre preuve a été reçue. Elle est en cours de vérification.',
+            'proof_rejected' => "Votre preuve n'a pas pu être validée. Merci d'en envoyer une nouvelle.",
+            'recap_title' => 'Récapitulatif',
+            'seats_available' => '{0} Aucune place restante pour le moment|{1} 1 place restante|[2,*] :count places restantes',
+            'cancelled_title' => 'Cette inscription a été annulée.',
+            'cancelled_description' => "L'organisation a annulé cette inscription. Contactez-la si vous pensez qu'il s'agit d'une erreur.",
+        ],
+    ],
+
+    'ticket' => [
+        'title' => 'Votre billet',
+        'guests_title' => 'Invités',
+        'table' => 'Table :number',
+        'no_table' => 'Table à venir',
+        'scheduled_send' => 'Votre carte vous sera envoyée par WhatsApp (et par email si vous en avez renseigné un) le :date.',
+    ],
+
+    'mail' => [
+        'invitation_card' => [
+            'subject' => 'Votre billet pour :event',
+            'intro' => 'Bonjour :name, votre inscription à :event est confirmée.',
+            'table' => 'Vous êtes placé à la table :number.',
+            'action' => 'Voir mon billet',
+        ],
+        'proof_reminder' => [
+            'subject' => 'Il manque votre preuve de paiement pour :event',
+            'intro' => "Bonjour :name, votre inscription à :event n'a pas encore de preuve de paiement validée.",
+            'action' => 'Envoyer ma preuve',
+        ],
+        'ticket_reminder' => [
+            'subject' => ':event, c\'est bientôt !',
+            'intro' => 'Bonjour :name, :event a lieu dans trois heures. Gardez votre billet à portée de main.',
+            'action' => 'Voir mon billet',
+        ],
+    ],
+
+    'whatsapp' => [
+        'invitation_card' => 'Bonjour :name, votre inscription à :event est confirmée. Votre billet : :link',
+        'proof_reminder' => 'Bonjour :name, il manque votre preuve de paiement pour :event. Envoyez-la ici : :link',
+        'ticket_reminder' => 'Bonjour :name, :event a lieu dans trois heures. Votre billet : :link',
+    ],
+
+    'proof' => [
+        'title' => 'Preuve de paiement',
+        'fields' => [
+            'payment_account' => 'Compte de versement utilisé',
+            'payment_account_placeholder' => 'Choisir le compte utilisé',
+            'channel' => 'Canal utilisé',
+            'channel_placeholder' => 'Choisir le canal',
+            'reference' => 'Référence de la transaction',
+            'amount_declared' => 'Montant versé',
+            'receipt' => 'Capture du reçu',
+        ],
+        'submit' => 'Envoyer ma preuve',
+    ],
+
+    'waitlist' => [
+        'join' => "Rejoindre la liste d'attente",
+        'title' => "Liste d'attente",
+        'description' => "Cet événement est complet. Dès qu'une place se libère, la première personne de la liste reçoit un lien valable six heures pour finaliser son inscription.",
+        'submit' => "Rejoindre la liste d'attente",
+        'show' => [
+            'position_label' => 'Votre position dans la liste',
+            'invited' => 'Une place est disponible pour vous !',
+            'finalize' => 'Finaliser mon inscription',
+            'expired' => 'Le délai pour finaliser est écoulé.',
+            'converted' => 'Votre inscription a été finalisée.',
+        ],
+    ],
+
+    'deleted' => [
+        'title' => "Cette inscription n'existe plus",
+        'description' => 'Elle a pu être supprimée après la date limite, ou une fois toutes les places prises. Vos données ont été effacées.',
+        'register' => "S'inscrire de nouveau",
+        'waitlist' => "Rejoindre la liste d'attente",
+        'back' => "Voir l'événement",
+    ],
+
+    'resume_link' => [
+        'title' => 'Gardez ce lien',
+        'description' => "Il vous permet de reprendre votre inscription à tout moment avant l'échéance, depuis n'importe quel appareil.",
+        'copy' => 'Copier le lien',
+        'share' => "Me l'envoyer sur WhatsApp",
+        'deadline' => 'À reprendre avant le :date.',
+    ],
+];

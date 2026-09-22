@@ -1,0 +1,19 @@
+services:
+    # Redis local, pour le cache et les files (CLAUDE.md, « Pile imposee »). L'application
+    # elle-meme reste native (php artisan serve, queue:listen) : ce fichier ne demarre rien
+    # d'autre, seul Redis a besoin d'un service a part sur ce poste.
+    redis:
+        image: redis:7-alpine
+        ports:
+            - '127.0.0.1:6379:6379'
+        volumes:
+            - convive-redis-data:/data
+        command: redis-server --appendonly yes
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 5s
+            timeout: 3s
+            retries: 5
+
+volumes:
+    convive-redis-data:

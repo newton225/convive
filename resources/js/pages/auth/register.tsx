@@ -1,0 +1,158 @@
+import { Form, Head } from '@inertiajs/react';
+import InputError from '@/components/input-error';
+import PasswordInput from '@/components/password-input';
+import TenantInvitationAlert from '@/components/tenant-invitation-alert';
+import TextLink from '@/components/text-link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { login } from '@/routes';
+import { store } from '@/routes/register';
+import { translate, useTranslation } from '@/hooks/use-translation';
+import type { TenantInvitationContext, Translations } from '@/types';
+
+type Props = {
+    passwordRules: string;
+    tenantInvitation?: TenantInvitationContext | null;
+};
+
+export default function Register({ passwordRules, tenantInvitation }: Props) {
+    const { t } = useTranslation();
+
+    return (
+        <>
+            <Head title={t('account.register.head')} />
+            <Form
+                {...store.form()}
+                resetOnSuccess={['password', 'password_confirmation']}
+                disableWhileProcessing
+                className="flex flex-col gap-6"
+            >
+                {({ processing, errors }) => (
+                    <>
+                        {tenantInvitation && (
+                            <TenantInvitationAlert
+                                invitation={tenantInvitation}
+                                action="register"
+                            />
+                        )}
+
+                        <div className="grid gap-6">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">
+                                    {t('account.fields.name')}
+                                </Label>
+                                <Input
+                                    id="name"
+                                    type="text"
+                                    required
+                                    autoFocus
+                                    tabIndex={1}
+                                    autoComplete="name"
+                                    name="name"
+                                    placeholder={t('account.placeholders.name')}
+                                />
+                                <InputError
+                                    message={errors.name}
+                                    className="mt-2"
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="email">
+                                    {t('account.fields.email')}
+                                </Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    required
+                                    tabIndex={2}
+                                    autoComplete="email"
+                                    name="email"
+                                    placeholder={t(
+                                        'account.placeholders.email',
+                                    )}
+                                />
+                                <InputError message={errors.email} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="password">
+                                    {t('account.fields.password')}
+                                </Label>
+                                <PasswordInput
+                                    id="password"
+                                    required
+                                    tabIndex={3}
+                                    autoComplete="new-password"
+                                    name="password"
+                                    placeholder={t(
+                                        'account.placeholders.password',
+                                    )}
+                                    passwordrules={passwordRules}
+                                />
+                                <InputError message={errors.password} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="password_confirmation">
+                                    {t('account.fields.password_confirmation')}
+                                </Label>
+                                <PasswordInput
+                                    id="password_confirmation"
+                                    required
+                                    tabIndex={4}
+                                    autoComplete="new-password"
+                                    name="password_confirmation"
+                                    placeholder={t(
+                                        'account.placeholders.password_confirmation',
+                                    )}
+                                    passwordrules={passwordRules}
+                                />
+                                <InputError
+                                    message={errors.password_confirmation}
+                                />
+                            </div>
+
+                            <Button
+                                type="submit"
+                                className="mt-2 w-full"
+                                tabIndex={5}
+                                data-test="register-user-button"
+                            >
+                                {processing && <Spinner />}
+                                {t('account.register.submit')}
+                            </Button>
+                        </div>
+
+                        <div className="text-muted-foreground text-center text-sm">
+                            {t('account.register.have_account')}{' '}
+                            <TextLink
+                                href={
+                                    tenantInvitation
+                                        ? login.url({
+                                              query: {
+                                                  invitation:
+                                                      tenantInvitation.code,
+                                              },
+                                          })
+                                        : login()
+                                }
+                                data-test="tenant-invitation-login-link"
+                                tabIndex={6}
+                            >
+                                {t('account.register.sign_in')}
+                            </TextLink>
+                        </div>
+                    </>
+                )}
+            </Form>
+        </>
+    );
+}
+
+Register.layout = ({ translations }: { translations: Translations }) => ({
+    title: translate(translations, 'account.register.title'),
+    description: translate(translations, 'account.register.description'),
+});

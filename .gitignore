@@ -1,0 +1,50 @@
+/.phpunit.cache
+/bootstrap/ssr
+/node_modules
+/public/build
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/resources/js/actions
+/resources/js/routes
+/resources/js/wayfinder
+/vendor
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/auth.json
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# Bases SQLite de developpement (CLAUDE.md, « Base de donnees ») : une par locataire plus la
+# base centrale, regenerees par les migrations et les seeders, jamais des donnees a versionner.
+/database/*.sqlite
+/database/*.sqlite-*
+/database/*.sqlite.bak-*
+
+# Fichiers de marque et preuves deposes en local pendant le developpement (spatie/medialibrary,
+# CLAUDE.md « Fichiers de marque ») : hors racine web, et hors depot pour la meme raison que les
+# bases SQLite.
+/storage/app/tenant-media/*
+!/storage/app/tenant-media/.gitignore
+
+# Stockage isole par locataire (FilesystemTenancyBootstrapper, CLAUDE.md « Multi-locataire ») :
+# un dossier `storage/tenant{id}/` par organisation, cree localement pendant les tests, jamais a
+# committer, meme raison que `/storage/framework`.
+/storage/tenant*/
+
+# Etat local de l'outil (verrou de tache planifiee d'une session Claude Code), pas du code du
+# projet.
+/.claude/

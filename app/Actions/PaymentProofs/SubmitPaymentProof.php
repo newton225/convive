@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Actions\PaymentProofs;
+
+use App\Actions\Notifications\SendAlert;
+use App\Enums\NotificationType;
+use App\Enums\RegistrationStatus;
+use App\Models\PaymentProof;
+use App\Models\Registration;
+use App\Models\Tenant;
+use App\Support\PerceptualHash;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Spatie\Image\Image;
+
+/**
+ * Depot d'une preuve de paiement (README ecran 6, 2.1), etape 6 de « Ordre de construction ».
+ *
+ * Fait passer l'inscription de `Held` a `ProofSubmitted`. Refuse toute soumission hors de cet
+ * etat : une reservation deja confirmee, expiree, ou dont le decompte est ecoule sans que la
+ * tache planifiee ne soit encore passee (README 2.1, « refuse une preuve deposee apres
+ * expiration du decompte »).
+ */
+class SubmitPaymentProof
+{
+    /**
+     * Attempt to record a payment proof for the given registration.
+     *
+     * @param  array{payment_account_id: int, channel: string, reference: ?string, amount_declared: int}  $data
+     * @return PaymentProof|null null quand la soumission est refusee : l'appelant decide de la
+     *                           reponse (l'etat de l'inscription, deja a jour, la reflete).
+     */
+    public function handle(Registration $registration, array $data, UploadedFile $receipt, string $idempotencyKey): ?PaymentProof
+    {
+        // Idempotence (CLAUDE.md, « Securite ») : un double clic ou un rejeu reseau renvoie la
+        // preuve deja creee plutot que d'en creer une seconde.
+        $existing = PaymentProof::where('idempotency_key', $idempotencyKey)->first();
+
+        if ($existing !== null) {
+            return $existing;
+        }
+
+        if ($registration->status !== RegistrationStatus::Held || $registration->holdHasExpired()) {
+            return null;
+        }
+
+        $reencodedPath = $this->reencode($receipt);
+        $perceptualHash = PerceptualHash::forImageContents(file_get_contents($reencodedPath));
+
+        try {
+            $proof = DB::transaction(function () use ($registration, $data, $reencodedPath, $perceptualHash, $idempotencyKey, $receipt) {
+                $proof = PaymentProof::create([
+                    'registration_id' => $registration->id,
+                    'payment_account_id' => $data['payment_account_id'],
+                    'channel' => $data['channel'],
+                    'reference' => $data['reference'],
+                    'amount_declared' => $data['amount_declared'],
+                    'perceptual_hash' => $perceptualHash,
+                    'idempotency_key' => $idempotencyKey,
+                ]);
+
+                $proof->addMedia($reencodedPath)
+                    ->usingFileName(Str::uuid()->toString().'.'.$this->extension($receipt))
+                    ->usingName('receipt')
+                    ->toMediaCollection(PaymentProof::ReceiptCollection);
+
+                $registration->update(['status' => RegistrationStatus::ProofSubmitted]);
+
+                return $proof;
+            });
+        } finally {
+            if (is_file($reencodedPath)) {
+                unlink($reencodedPath);
+            }
+        }
+
+        // Apres la transaction et apres le retour anticipe de l'idempotence : un rejeu reseau
+        // de la meme preuve ne previent pas deux fois l'equipe.
+        app(SendAlert::class)->toTenantMembers(
+            NotificationType::ProofReceived,
+            ['name' => $registration->name, 'event' => $registration->event->name],
+            route('tenants.events.proofs.index', [Tenant::current(), $registration->event], absolute: false),
+        );
+
+        return $proof;
+    }
+
+    /**
+     * Re-encode the upload to a temporary file, dropping every metadata block (CLAUDE.md,
+     * « Fichiers deposes » ; SECURITY.md H1) : une capture d'ecran porte rarement des donnees
+     * sensibles dans ses metadonnees, mais le reencodage reste ce qui detruit un polyglotte
+     * image plus script, quel que soit le contenu declare.
+     */
+    private function reencode(UploadedFile $upload): string
+    {
+        $destination = tempnam(sys_get_temp_dir(), 'proof').'.'.$this->extension($upload);
+
+        Image::load($upload->getRealPath())->save($destination);
+
+        return $destination;
+    }
+
+    private function extension(UploadedFile $upload): string
+    {
+        return match ($upload->getMimeType()) {
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            default => 'jpg',
+        };
+    }
+}
