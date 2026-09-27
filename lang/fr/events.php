@@ -122,6 +122,14 @@ return [
         'description' => "L'événement \":name\" sera supprimé. Cette action est définitive.",
     ],
 
+    'templates' => [
+        'title' => "Partir d'un modèle",
+        'description' => 'Reprend les tables, le tarif, les accompagnateurs et les comptes de versement. Le nom et les dates restent à saisir ; le gabarit du billet est déjà commun à l\'organisation.',
+        'meta' => ':tables tables · :price',
+        'blank' => 'Modèle vierge',
+        'blank_hint' => 'Tout paramétrer manuellement',
+    ],
+
     'confirm_publish' => [
         'title' => "Publier l'événement ?",
         'description' => "Le lien public s'ouvre aux inscriptions. Une fois publié, l'événement ne peut plus être supprimé (seulement clôturé) et le sous-domaine de l'organisation est figé.",

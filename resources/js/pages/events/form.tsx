@@ -2,6 +2,7 @@ import { Form, Head, router } from '@inertiajs/react';
 import { AlertTriangle, Megaphone, Send } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
+import { TemplatePicker } from '@/components/events/template-picker';
 import Heading from '@/components/heading';
 import EventVisualField from '@/components/events/event-visual-field';
 import InputError from '@/components/input-error';
@@ -24,6 +25,8 @@ import { withdraw as withdrawAnnouncement } from '@/routes/tenants/events/announ
 import type {
     EventDetails,
     EventPaymentAccountOption,
+    EventTemplate,
+    EventTemplateOption,
     TenantSummary,
     Translations,
 } from '@/types';
@@ -34,6 +37,9 @@ type Props = {
     paymentAccounts: EventPaymentAccountOption[];
     defaults: { companionLimit: number; holdDurationMinutes: number };
     tenantColors: { primary: string; secondary: string };
+    // Creation seulement : les modeles proposes et celui applique.
+    templates?: EventTemplateOption[];
+    template?: EventTemplate | null;
 };
 
 export default function EventForm({
@@ -42,12 +48,16 @@ export default function EventForm({
     paymentAccounts,
     defaults,
     tenantColors,
+    templates = [],
+    template = null,
 }: Props) {
     const { t } = useTranslation();
     const [confirmingPublish, setConfirmingPublish] = useState(false);
     const [publishing, setPublishing] = useState(false);
+    // Valeurs de depart des champs : l'evenement edite, sinon le modele choisi a la creation.
+    const prefill = event ?? template;
     const [overrideColors, setOverrideColors] = useState<boolean>(
-        event?.primaryColor !== null && event?.primaryColor !== undefined,
+        prefill?.primaryColor !== null && prefill?.primaryColor !== undefined,
     );
 
     const action = event
@@ -176,7 +186,23 @@ export default function EventForm({
                     </p>
                 ) : null}
 
-                <Form {...action} className="space-y-8">
+                {event === null ? (
+                    <TemplatePicker
+                        tenantSlug={tenant.slug}
+                        templates={templates}
+                        activeId={template?.sourceId ?? null}
+                    />
+                ) : null}
+
+                {/* Cle par modele : les champs ne sont pas controles, ils doivent repartir des
+                    valeurs du modele choisi plutot que garder celles du precedent. */}
+                <Form
+                    key={
+                        event?.id ?? `template-${template?.sourceId ?? 'blank'}`
+                    }
+                    {...action}
+                    className="space-y-8"
+                >
                     {({ errors, processing }) => (
                         <>
                             <Step
@@ -198,7 +224,7 @@ export default function EventForm({
                                     <Field
                                         name="subtitle"
                                         label={t('events.fields.subtitle')}
-                                        defaultValue={event?.subtitle ?? ''}
+                                        defaultValue={prefill?.subtitle ?? ''}
                                         error={errors.subtitle}
                                     />
                                     <Field
@@ -213,7 +239,7 @@ export default function EventForm({
                                     <Field
                                         name="venue"
                                         label={t('events.fields.venue')}
-                                        defaultValue={event?.venue ?? ''}
+                                        defaultValue={prefill?.venue ?? ''}
                                         error={errors.venue}
                                     />
                                     <div className="sm:col-span-2">
@@ -223,7 +249,7 @@ export default function EventForm({
                                                 'events.fields.venue_address',
                                             )}
                                             defaultValue={
-                                                event?.venueAddress ?? ''
+                                                prefill?.venueAddress ?? ''
                                             }
                                             error={errors.venue_address}
                                         />
@@ -253,7 +279,7 @@ export default function EventForm({
                                                     'events.fields.primary_color',
                                                 )}
                                                 defaultValue={
-                                                    event?.primaryColor ??
+                                                    prefill?.primaryColor ??
                                                     tenantColors.primary
                                                 }
                                                 error={errors.primary_color}
@@ -265,7 +291,7 @@ export default function EventForm({
                                                     'events.fields.secondary_color',
                                                 )}
                                                 defaultValue={
-                                                    event?.secondaryColor ??
+                                                    prefill?.secondaryColor ??
                                                     tenantColors.secondary
                                                 }
                                                 error={errors.secondary_color}
@@ -304,7 +330,7 @@ export default function EventForm({
                                         type="number"
                                         label={t('events.fields.table_count')}
                                         defaultValue={String(
-                                            event?.tableCount ?? 0,
+                                            prefill?.tableCount ?? 0,
                                         )}
                                         error={errors.table_count}
                                     />
@@ -315,7 +341,7 @@ export default function EventForm({
                                             'events.fields.seats_per_table',
                                         )}
                                         defaultValue={String(
-                                            event?.seatsPerTable ?? 0,
+                                            prefill?.seatsPerTable ?? 0,
                                         )}
                                         error={errors.seats_per_table}
                                     />
@@ -326,7 +352,7 @@ export default function EventForm({
                                             'events.fields.price_per_person',
                                         )}
                                         defaultValue={String(
-                                            event?.pricePerPerson ?? 0,
+                                            prefill?.pricePerPerson ?? 0,
                                         )}
                                         error={errors.price_per_person}
                                     />
@@ -337,7 +363,7 @@ export default function EventForm({
                                             'events.fields.companion_limit',
                                         )}
                                         defaultValue={String(
-                                            event?.companionLimit ??
+                                            prefill?.companionLimit ??
                                                 defaults.companionLimit,
                                         )}
                                         error={errors.companion_limit}
@@ -358,7 +384,7 @@ export default function EventForm({
                                                 name="payment_accounts[]"
                                                 value={String(account.id)}
                                                 data-test="event-payment-account"
-                                                defaultChecked={event?.paymentAccountIds.includes(
+                                                defaultChecked={prefill?.paymentAccountIds.includes(
                                                     account.id,
                                                 )}
                                             />
@@ -419,7 +445,7 @@ export default function EventForm({
                                             'events.fields.hold_duration_minutes',
                                         )}
                                         defaultValue={String(
-                                            event?.holdDurationMinutes ??
+                                            prefill?.holdDurationMinutes ??
                                                 defaults.holdDurationMinutes,
                                         )}
                                         error={errors.hold_duration_minutes}

@@ -122,6 +122,14 @@ return [
         'description' => 'The ":name" event will be deleted. This cannot be undone.',
     ],
 
+    'templates' => [
+        'title' => 'Start from a template',
+        'description' => 'Reuses tables, price, companions and payment accounts. Name and dates are left for you to fill in; the ticket template is already shared across the organisation.',
+        'meta' => ':tables tables · :price',
+        'blank' => 'Blank template',
+        'blank_hint' => 'Set everything up manually',
+    ],
+
     'confirm_publish' => [
         'title' => 'Publish the event?',
         'description' => "The public link opens for registration. Once published, the event can no longer be deleted (only closed) and the organisation's subdomain is locked.",

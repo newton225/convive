@@ -38,6 +38,30 @@ export type EventDetails = EventSummary & {
     paymentAccountIds: number[];
 };
 
+export type EventTemplateOption = {
+    id: number;
+    name: string;
+    tableCount: number;
+    pricePerPerson: number;
+};
+
+// Ce qu'un evenement modele transmet au nouvel evenement : ni nom ni dates.
+export type EventTemplate = {
+    sourceId: number;
+    sourceName: string;
+    subtitle: string | null;
+    venue: string | null;
+    venueAddress: string | null;
+    primaryColor: string | null;
+    secondaryColor: string | null;
+    tableCount: number;
+    seatsPerTable: number;
+    pricePerPerson: number;
+    companionLimit: number;
+    holdDurationMinutes: number;
+    paymentAccountIds: number[];
+};
+
 export type EventPaymentAccountOption = {
     id: number;
     label: string;

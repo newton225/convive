@@ -49,6 +49,8 @@ class EventController extends Controller
                 'holdDurationMinutes' => Event::DefaultHoldDurationMinutes,
             ],
             'tenantColors' => $tenant->brandingOrCreate()->colors(),
+            'templates' => $this->templates(),
+            'template' => $this->template($request->integer('from')),
         ]);
     }
 
@@ -282,6 +284,60 @@ class EventController extends Controller
             'startsAtLocal' => $event->starts_at?->toDateTimeLocalString(),
             'paymentAccountIds' => $event->paymentAccounts->pluck('id')->all(),
         ]);
+    }
+
+    /**
+     * Les evenements de l'organisation proposes comme modeles (« Partir d'un modele », prototype
+     * Convive.dc.html), les plus recents d'abord.
+     *
+     * @return array<int, array{id: int, name: string, tableCount: int, pricePerPerson: int}>
+     */
+    private function templates(): array
+    {
+        return Event::latest('created_at')->limit(12)->get()
+            ->map(fn (Event $event) => [
+                'id' => $event->id,
+                'name' => $event->name,
+                'tableCount' => $event->table_count,
+                'pricePerPerson' => $event->price_per_person,
+            ])
+            ->all();
+    }
+
+    /**
+     * Les valeurs qu'un evenement modele transmet au nouvel evenement, ou null sans modele.
+     *
+     * Ni le nom ni les dates : ils dependent du nouvel evenement, et des echeances recopiees d'un
+     * evenement passe seraient deja depassees. Seuls les comptes de versement encore visibles des
+     * invites sont repris : un compte desactive ou dans son delai d'activation n'a pas a revenir.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function template(int $sourceId): ?array
+    {
+        $source = $sourceId > 0 ? Event::with('paymentAccounts')->find($sourceId) : null;
+
+        if ($source === null) {
+            return null;
+        }
+
+        $visibleAccountIds = PaymentAccount::publiclyVisible()->pluck('id');
+
+        return [
+            'sourceId' => $source->id,
+            'sourceName' => $source->name,
+            'subtitle' => $source->subtitle,
+            'venue' => $source->venue,
+            'venueAddress' => $source->venue_address,
+            'primaryColor' => $source->primary_color,
+            'secondaryColor' => $source->secondary_color,
+            'tableCount' => $source->table_count,
+            'seatsPerTable' => $source->seats_per_table,
+            'pricePerPerson' => $source->price_per_person,
+            'companionLimit' => $source->companion_limit,
+            'holdDurationMinutes' => $source->hold_duration_minutes,
+            'paymentAccountIds' => $source->paymentAccounts->pluck('id')->intersect($visibleAccountIds)->values()->all(),
+        ];
     }
 
     /**
