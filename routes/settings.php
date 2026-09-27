@@ -39,6 +39,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('throttle:6,1')
         ->name('user-password.update');
 
+    // Code de scan a 4 chiffres (SECURITY.md M8) : choisi par le membre, depuis l'ecran Securite
+    // ou a la premiere ouverture de l'ecran de scan.
+    Route::put('settings/scan-pin', [SecurityController::class, 'updateScanPin'])
+        ->middleware('throttle:6,1')
+        ->name('scan-pin.update');
+
     // Appareils connectes (SECURITY.md, « Deconnexion et sessions ») : fermer les autres sessions.
     Route::delete('settings/sessions/others', [SecurityController::class, 'destroyOtherSessions'])
         ->middleware('throttle:6,1')

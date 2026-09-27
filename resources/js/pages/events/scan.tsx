@@ -14,7 +14,10 @@ import {
     type LocalScanKind,
 } from '@/components/scan/offline-scan-panel';
 import { RotateTicketKeyCard } from '@/components/scan/rotate-ticket-key-card';
+import { ScanLockOverlay } from '@/components/scan/scan-lock-overlay';
+import { ScanPinForm } from '@/components/scan/scan-pin-form';
 import { useOnlineStatus } from '@/hooks/use-online-status';
+import { useScanLock } from '@/hooks/use-scan-lock';
 import { useScanQueue, type SyncOutcome } from '@/hooks/use-scan-queue';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import {
@@ -30,6 +33,7 @@ import {
     type ExpectedEvent,
 } from '@/lib/ticket-verifier';
 import { formatDateTime } from '@/lib/format-date';
+import type { ScanPinVerifier } from '@/lib/scan-pin';
 import { readStation, writeStation } from '@/lib/scan-station';
 import { can, Permission } from '@/lib/permissions';
 import { index as eventsIndex } from '@/routes/tenants/events';
@@ -48,6 +52,7 @@ type Props = {
     event: ScanEventProps;
     revocationList: string | null;
     canRotateKey: boolean;
+    scanPin: ScanPinVerifier | null;
     permissions: TenantPermissions;
     recent: ScanRecentRow[];
     acceptedCount: number;
@@ -96,6 +101,7 @@ export default function EventScan({
     event,
     revocationList,
     canRotateKey,
+    scanPin,
     permissions,
     recent,
     acceptedCount,
@@ -113,6 +119,16 @@ export default function EventScan({
     const [resultDismissed, setResultDismissed] = useState(false);
     const canForce = can(permissions, Permission.ScanForce);
     const online = useOnlineStatus();
+    const lock = useScanLock(scanPin);
+    // La camera tourne en continu : sans code choisi ou ecran verrouille, les billets lus sont
+    // ignores (SECURITY.md M8). Des refs, parce que le lecteur est installe une seule fois.
+    const scanBlockedRef = useRef(scanPin === null || lock.locked);
+    const registerActivityRef = useRef(lock.registerActivity);
+
+    useEffect(() => {
+        scanBlockedRef.current = scanPin === null || lock.locked;
+        registerActivityRef.current = lock.registerActivity;
+    }, [scanPin, lock.locked, lock.registerActivity]);
     const [localResult, setLocalResult] = useState<LocalScanKind | null>(null);
     const expected: ExpectedEvent = {
         tenantId,
@@ -267,9 +283,11 @@ export default function EventScan({
                 undefined,
                 videoRef.current ?? undefined,
                 (decoded) => {
-                    if (cancelled || !decoded) {
+                    if (cancelled || !decoded || scanBlockedRef.current) {
                         return;
                     }
+
+                    registerActivityRef.current();
 
                     const text = decoded.getText();
 
@@ -304,6 +322,32 @@ export default function EventScan({
                 />
 
                 <InstallPrompt />
+
+                {scanPin === null ? (
+                    <Card data-test="scan-pin-setup">
+                        <CardHeader>
+                            <CardTitle className="text-base">
+                                {t('scan.pin_setup.title')}
+                            </CardTitle>
+                            <p className="text-muted-foreground text-sm">
+                                {t('scan.pin_setup.description')}
+                            </p>
+                        </CardHeader>
+                        <CardContent>
+                            <ScanPinForm
+                                submitLabel={t('account.scan_pin.create')}
+                            />
+                        </CardContent>
+                    </Card>
+                ) : null}
+
+                {lock.locked ? (
+                    <ScanLockOverlay
+                        attemptsLeft={lock.attemptsLeft}
+                        online={online}
+                        onUnlock={lock.unlock}
+                    />
+                ) : null}
 
                 <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
                     <Card>

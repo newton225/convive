@@ -104,6 +104,9 @@ class ScanController extends Controller
             // qu'aucun billet n'a ete emis, donc aucune cle generee.
             'revocationList' => $event->qr_public_key !== null ? TicketRevocationList::signedFor($event) : null,
             'canRotateKey' => Gate::allows('update', [$event, $tenant]),
+            // Empreinte du code de scan de l'agent connecte (jamais le code) : le verrouillage
+            // de l'ecran se leve sur l'appareil, meme hors ligne (SECURITY.md M8).
+            'scanPin' => $request->user()->scan_pin_verifier,
             'tenantId' => $tenant->id,
             'permissions' => $request->user()->toTenantPermissions($tenant),
             'recent' => $canViewLog ? $this->recentScans($event) : [],

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\CloseOtherSessionsRequest;
 use App\Http\Requests\Settings\PasswordUpdateRequest;
+use App\Http\Requests\Settings\ScanPinRequest;
 use App\Http\Requests\Settings\TwoFactorAuthenticationRequest;
 use App\Support\ConnectedDevices;
 use Illuminate\Http\RedirectResponse;
@@ -42,6 +43,7 @@ class SecurityController extends Controller
                 : [],
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
             'devices' => ConnectedDevices::for($request->user(), $request->session()->getId()),
+            'hasScanPin' => $request->user()->scan_pin_verifier !== null,
         ];
 
         if (Features::canManageTwoFactorAuthentication()) {
@@ -68,6 +70,18 @@ class SecurityController extends Controller
         Auth::logoutOtherDevices((string) $request->password);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('account.flash.password_updated')]);
+
+        return back();
+    }
+
+    /**
+     * Choose or replace the member's scan code (SECURITY.md M8).
+     */
+    public function updateScanPin(ScanPinRequest $request): RedirectResponse
+    {
+        $request->user()->setScanPin((string) $request->validated('pin'));
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('account.scan_pin.flash')]);
 
         return back();
     }

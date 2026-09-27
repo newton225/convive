@@ -115,6 +115,16 @@ return [
         'description' => 'Use a long, unique password to keep your account secure',
     ],
 
+    'scan_pin' => [
+        'title' => 'Scan code',
+        'description' => 'Four digits to unlock the entrance check screen after 5 minutes of inactivity. Only you know it.',
+        'pin' => '4-digit code',
+        'confirmation' => 'Enter it a second time',
+        'create' => 'Choose my code',
+        'change' => 'Change my code',
+        'flash' => 'Scan code saved.',
+    ],
+
     'devices' => [
         'title' => 'Connected devices',
         'description' => "The browsers where your account is signed in. If you don't recognise one, sign it out and change your password.",

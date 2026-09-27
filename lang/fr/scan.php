@@ -41,6 +41,21 @@ return [
         'empty' => 'Aucun passage pour le moment.',
     ],
 
+    'pin_setup' => [
+        'title' => 'Choisissez votre code de scan',
+        'description' => "Avant de scanner, choisissez un code à 4 chiffres. Il déverrouillera cet écran après 5 minutes sans activité, même sans réseau. Les billets ne sont pas lus tant qu'il n'est pas choisi.",
+    ],
+
+    'lock' => [
+        'title' => 'Écran verrouillé',
+        'description' => 'Saisissez votre code de scan pour reprendre.',
+        'pin_label' => 'Code de scan',
+        'checking' => 'Vérification…',
+        'wrong' => '{1} Code incorrect. Encore 1 essai avant la déconnexion.|[2,*] Code incorrect. Encore :count essais avant la déconnexion.',
+        'exhausted' => 'Trop de codes incorrects : reconnectez-vous avec votre email et votre mot de passe.',
+        'exhausted_offline' => 'Trop de codes incorrects. Reconnectez-vous avec votre email et votre mot de passe dès le retour du réseau.',
+    ],
+
     'rotate_key' => [
         'title' => 'Clé des billets',
         'body' => "Version :version. Changez la clé si un téléphone d'agent a été perdu ou si vous pensez qu'elle a fuité.",

@@ -36,12 +36,13 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property int|null $current_tenant_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property array{salt: string, hash: string, iterations: int}|null $scan_pin_verifier
  * @property-read Tenant|null $currentTenant
  * @property-read Collection<int, Membership> $tenantMemberships
  * @property-read Collection<int, Tenant> $tenants
  */
 #[Fillable(['name', 'email', 'phone', 'password', 'current_tenant_id'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'scan_pin_verifier'])]
 class User extends Authenticatable implements PasskeyUser
 {
     // Toujours la base centrale, meme quand une tenancy est active : un utilisateur
@@ -105,6 +106,30 @@ class User extends Authenticatable implements PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'scan_pin_verifier' => 'array',
         ];
+    }
+
+    /**
+     * Iterations PBKDF2 de l'empreinte du code de scan : assez pour qu'une recherche exhaustive
+     * des 10 000 codes coute un peu, assez peu pour qu'un telephone d'entree de gamme verifie le
+     * code en moins d'une seconde.
+     */
+    public const ScanPinIterations = 210_000;
+
+    /**
+     * Replace the member's 4-digit scan code by its salted PBKDF2 verifier (SECURITY.md M8).
+     */
+    public function setScanPin(string $pin): void
+    {
+        $salt = random_bytes(16);
+
+        $this->forceFill([
+            'scan_pin_verifier' => [
+                'salt' => base64_encode($salt),
+                'hash' => base64_encode(hash_pbkdf2('sha256', $pin, $salt, self::ScanPinIterations, 32, true)),
+                'iterations' => self::ScanPinIterations,
+            ],
+        ])->save();
     }
 }

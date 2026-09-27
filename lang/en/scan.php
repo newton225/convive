@@ -41,6 +41,21 @@ return [
         'empty' => 'No passage yet.',
     ],
 
+    'pin_setup' => [
+        'title' => 'Choose your scan code',
+        'description' => 'Before scanning, choose a 4-digit code. It will unlock this screen after 5 minutes of inactivity, even offline. Tickets are not read until it is chosen.',
+    ],
+
+    'lock' => [
+        'title' => 'Screen locked',
+        'description' => 'Enter your scan code to resume.',
+        'pin_label' => 'Scan code',
+        'checking' => 'Checking…',
+        'wrong' => '{1} Wrong code. 1 more try before signing out.|[2,*] Wrong code. :count more tries before signing out.',
+        'exhausted' => 'Too many wrong codes: sign in again with your email and password.',
+        'exhausted_offline' => 'Too many wrong codes. Sign in again with your email and password once the network is back.',
+    ],
+
     'rotate_key' => [
         'title' => 'Ticket key',
         'body' => 'Version :version. Change the key if a scanning phone was lost or you believe it leaked.',

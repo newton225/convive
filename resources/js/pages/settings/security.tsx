@@ -2,6 +2,7 @@ import { Form, Head } from '@inertiajs/react';
 import { useRef } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import ConnectedDevices from '@/components/connected-devices';
+import { ScanPinForm } from '@/components/scan/scan-pin-form';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -19,6 +20,7 @@ import type { ConnectedDevice, Translations } from '@/types';
 type Props = {
     passwordRules: string;
     devices: ConnectedDevice[];
+    hasScanPin: boolean;
 } & ManagePasskeysProps &
     ManageTwoFactorProps;
 
@@ -147,6 +149,21 @@ export default function Security(props: Props) {
                 canManagePasskeys={props.canManagePasskeys}
                 passkeys={props.passkeys}
             />
+
+            <div className="space-y-6" data-test="scan-pin-settings">
+                <Heading
+                    variant="small"
+                    title={t('account.scan_pin.title')}
+                    description={t('account.scan_pin.description')}
+                />
+                <ScanPinForm
+                    submitLabel={t(
+                        props.hasScanPin
+                            ? 'account.scan_pin.change'
+                            : 'account.scan_pin.create',
+                    )}
+                />
+            </div>
 
             <ConnectedDevices devices={props.devices} />
         </>

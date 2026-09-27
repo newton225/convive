@@ -115,6 +115,16 @@ return [
         'description' => 'Utilisez un mot de passe long et unique pour protéger votre compte',
     ],
 
+    'scan_pin' => [
+        'title' => 'Code de scan',
+        'description' => "Quatre chiffres pour déverrouiller l'écran de contrôle à l'entrée après 5 minutes sans activité. Vous seul le connaissez.",
+        'pin' => 'Code à 4 chiffres',
+        'confirmation' => 'Saisissez-le une seconde fois',
+        'create' => 'Choisir mon code',
+        'change' => 'Changer mon code',
+        'flash' => 'Code de scan enregistré.',
+    ],
+
     'devices' => [
         'title' => 'Appareils connectés',
         'description' => "Les navigateurs où votre compte est ouvert. Si vous n'en reconnaissez pas un, déconnectez-le et changez votre mot de passe.",
