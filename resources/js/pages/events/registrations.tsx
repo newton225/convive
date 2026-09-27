@@ -135,6 +135,11 @@ export default function EventRegistrations({
             cell: ({ row }) => (
                 <div>
                     <p className="font-medium">{row.original.name}</p>
+                    {row.original.reference ? (
+                        <p className="text-muted-foreground font-mono text-xs">
+                            {row.original.reference}
+                        </p>
+                    ) : null}
                     <p className="text-muted-foreground text-xs">
                         {row.original.phone}
                     </p>

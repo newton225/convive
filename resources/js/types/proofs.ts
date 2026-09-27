@@ -8,6 +8,7 @@ export type PaymentProofSignals = {
 export type PaymentProofRow = {
     registrationId: number;
     proofId: number;
+    registrationReference: string | null;
     name: string;
     phone: string;
     unit: string;

@@ -35,6 +35,7 @@ return [
             'phone_backoff' => '{1} Plusieurs réservations ont expiré pour ce numéro sans preuve de paiement. Réessayez dans 1 minute.|[2,*] Plusieurs réservations ont expiré pour ce numéro sans preuve de paiement. Réessayez dans :minutes minutes.',
         ],
         'title' => 'Votre inscription',
+        'reference' => 'Réf. :reference',
         'fields' => [
             'name' => 'Nom complet',
             'phone' => 'Téléphone',

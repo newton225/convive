@@ -196,6 +196,7 @@ class RegistrationController extends Controller
                 'logoUrl' => $tenant->branding?->brandFileUrl(BrandFile::Logo),
             ],
             'registration' => [
+                'reference' => $registration->reference,
                 'name' => $registration->name,
                 'unit' => $registration->unit->name,
                 'amountDue' => $registration->amount_due,

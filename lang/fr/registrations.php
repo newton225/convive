@@ -47,7 +47,7 @@ return [
         'proof_submitted' => 'À vérifier',
         'without_proof' => 'Sans preuve',
         'cancelled' => 'Annulées',
-        'search_placeholder' => 'Nom, téléphone ou email',
+        'search_placeholder' => 'Nom, référence, téléphone ou email',
     ],
 
     'statuses' => [

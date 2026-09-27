@@ -27,6 +27,7 @@ use Illuminate\Support\Str;
  *
  * @property int $id
  * @property int $event_id
+ * @property string|null $reference
  * @property RegistrationStatus $status
  * @property string $name
  * @property string $phone
@@ -52,7 +53,7 @@ use Illuminate\Support\Str;
  * @property-read Collection<int, RegistrationCompanion> $companions
  */
 #[Fillable([
-    'event_id', 'status', 'name', 'phone', 'email', 'unit_id', 'amount_due', 'party_size',
+    'event_id', 'reference', 'status', 'name', 'phone', 'email', 'unit_id', 'amount_due', 'party_size',
     'held_until', 'hold_sequence', 'resume_token_hash', 'card_sent_at',
     'proof_reminder_j7_sent_at', 'proof_reminder_j2_sent_at', 'proof_reminder_j1_sent_at',
     'cancelled_at', 'cancellation_reason', 'cancelled_by_user_id', 'lapsed_holds_count',

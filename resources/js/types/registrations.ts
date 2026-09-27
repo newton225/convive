@@ -49,6 +49,8 @@ export type TicketSummary = {
 };
 
 export type RegistrationShow = {
+    // Reference de dossier lisible (« SP-2026-0008 »), affichage seulement.
+    reference: string | null;
     name: string;
     unit: string;
     amountDue: number;
@@ -60,6 +62,7 @@ export type RegistrationShow = {
 
 export type RegistrationRow = {
     id: number;
+    reference: string | null;
     name: string;
     phone: string;
     unit: string;

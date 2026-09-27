@@ -278,6 +278,7 @@ class RegistrationController extends Controller
                 AllowedFilter::callback('search', function (Builder $query, string $value) {
                     $query->where(function (Builder $query) use ($value) {
                         $query->where('name', 'like', "%{$value}%")
+                            ->orWhere('reference', 'like', "%{$value}%")
                             ->orWhere('phone', 'like', "%{$value}%")
                             ->orWhere('email', 'like', "%{$value}%");
                     });
@@ -303,6 +304,7 @@ class RegistrationController extends Controller
     {
         return [
             'id' => $registration->id,
+            'reference' => $registration->reference,
             'name' => $registration->name,
             'phone' => $registration->phone,
             'unit' => $registration->unit->name,

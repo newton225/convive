@@ -134,6 +134,8 @@ class PaymentProofController extends Controller
         return [
             'registrationId' => $registration->id,
             'proofId' => $proof->id,
+            // Reference du dossier, distincte de `reference` plus bas (celle de la transaction).
+            'registrationReference' => $registration->reference,
             'name' => $registration->name,
             'phone' => $registration->phone,
             'unit' => $registration->unit->name,

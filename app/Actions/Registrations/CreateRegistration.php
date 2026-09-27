@@ -5,6 +5,7 @@ namespace App\Actions\Registrations;
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Support\RegistrationReference;
 use Illuminate\Support\Facades\DB;
 
 class CreateRegistration
@@ -29,6 +30,7 @@ class CreateRegistration
 
             $registration = Registration::create([
                 'event_id' => $event->id,
+                'reference' => RegistrationReference::next(),
                 'status' => RegistrationStatus::Draft,
                 'name' => $data['name'],
                 'phone' => $data['phone'],

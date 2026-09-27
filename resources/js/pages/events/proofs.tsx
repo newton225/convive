@@ -68,6 +68,11 @@ export default function EventProofs({
             cell: ({ row }) => (
                 <div>
                     <p className="font-medium">{row.original.name}</p>
+                    {row.original.registrationReference ? (
+                        <p className="text-muted-foreground font-mono text-xs">
+                            {row.original.registrationReference}
+                        </p>
+                    ) : null}
                     <p className="text-muted-foreground text-xs">
                         {row.original.phone}
                     </p>

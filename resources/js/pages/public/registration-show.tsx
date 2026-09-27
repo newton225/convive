@@ -87,6 +87,16 @@ export default function PublicRegistrationShow({
                     <p className="text-muted-foreground text-sm">
                         {registration.name}
                     </p>
+                    {registration.reference ? (
+                        <p
+                            className="text-muted-foreground font-mono text-xs"
+                            data-test="registration-reference"
+                        >
+                            {t('guest.registration.reference', {
+                                reference: registration.reference,
+                            })}
+                        </p>
+                    ) : null}
                 </div>
 
                 {isCancelled ? (
@@ -304,8 +314,7 @@ export default function PublicRegistrationShow({
                                 <p
                                     className={cn(
                                         'text-3xl font-semibold tabular-nums',
-                                        isUrgent &&
-                                            'text-[oklch(0.55_0.2_25)]',
+                                        isUrgent && 'text-[oklch(0.55_0.2_25)]',
                                     )}
                                     data-test="registration-countdown"
                                 >
