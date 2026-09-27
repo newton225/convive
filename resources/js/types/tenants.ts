@@ -7,6 +7,14 @@ export type Tenant = {
     profileName?: string | null;
     isOwner?: boolean;
     isCurrent?: boolean;
+    planName?: string | null;
+};
+
+// Plan de l'organisation courante et son usage principal (menu lateral).
+export type CurrentPlan = {
+    name: string;
+    activeEvents: number;
+    maxActiveEvents: number | null;
 };
 
 export type TenantMember = {

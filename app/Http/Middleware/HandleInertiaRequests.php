@@ -4,8 +4,10 @@ namespace App\Http\Middleware;
 
 use App\Enums\NotificationType;
 use App\Models\DatabaseNotification;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Locale;
+use App\Support\PlanLimits;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Vite;
@@ -70,6 +72,22 @@ class HandleInertiaRequests extends Middleware
             // Ce que le membre peut faire dans l'organisation courante : sert uniquement a masquer les
             // liens interdits du menu (chaque route revalide cote serveur).
             'tenantPermissions' => fn () => $user?->currentTenant ? $user->toTenantPermissions($user->currentTenant) : null,
+            // Plan courant et son usage principal, pour le menu lateral (prototype Convive.dc.html).
+            'currentPlan' => fn () => $user?->currentTenant ? $this->currentPlan($user->currentTenant) : null,
+        ];
+    }
+
+    /**
+     * @return array{name: string, activeEvents: int, maxActiveEvents: int|null}
+     */
+    private function currentPlan(Tenant $tenant): array
+    {
+        $plan = $tenant->plan();
+
+        return [
+            'name' => $plan->name,
+            'activeEvents' => PlanLimits::for($tenant)->activeEvents(),
+            'maxActiveEvents' => $plan->max_active_events,
         ];
     }
 

@@ -126,7 +126,14 @@ export function TenantSwitcher({ inHeader = false }: TenantSwitcherProps) {
                         }
                         onSelect={() => switchTenant(tenant)}
                     >
-                        {tenant.name}
+                        <span className="grid min-w-0">
+                            <span className="truncate">{tenant.name}</span>
+                            {tenant.planName ? (
+                                <span className="text-muted-foreground truncate text-xs">
+                                    {tenant.planName}
+                                </span>
+                            ) : null}
+                        </span>
                         {currentTenant?.id === tenant.id && (
                             <Check
                                 className={

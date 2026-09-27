@@ -1,7 +1,7 @@
 import type { Auth } from '@/types/auth';
 import type { LocaleCode, SupportedLocales, Translations } from '@/types/i18n';
 import type { NotificationsSummary } from '@/types/notifications';
-import type { TenantPermissions } from '@/types/tenants';
+import type { CurrentPlan, TenantPermissions } from '@/types/tenants';
 import type { Tenant } from '@/types/tenants';
 
 declare module 'react' {
@@ -24,6 +24,7 @@ declare module '@inertiajs/core' {
             tenants: Tenant[];
             notifications: NotificationsSummary | null;
             tenantPermissions: TenantPermissions | null;
+            currentPlan: CurrentPlan | null;
             [key: string]: unknown;
         };
     }

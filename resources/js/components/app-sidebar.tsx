@@ -11,6 +11,7 @@ import {
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { PlanUsage } from '@/components/plan-usage';
 import { TenantSwitcher } from '@/components/tenant-switcher';
 import {
     Sidebar,
@@ -124,6 +125,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
+                <PlanUsage />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

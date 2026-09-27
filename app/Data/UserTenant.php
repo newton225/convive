@@ -13,6 +13,7 @@ readonly class UserTenant
         public ?string $profileName,
         public bool $isOwner = false,
         public ?bool $isCurrent = null,
+        public ?string $planName = null,
     ) {
         //
     }

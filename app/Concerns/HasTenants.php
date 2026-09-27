@@ -241,6 +241,7 @@ trait HasTenants
             profileName: $profile?->name,
             isOwner: $profile?->isOwner() ?? false,
             isCurrent: $this->isCurrentTenant($tenant),
+            planName: $tenant->plan()->name,
         );
     }
 
