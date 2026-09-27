@@ -114,12 +114,17 @@ aux billets validés.
 
 ### 2.8 Authenticité des billets
 
+- **Un billet par personne** (décision du 2026-09-27) : l'invité reçoit un billet à son nom et un
+  billet nominatif par accompagnateur, chacun avec son propre QR. Chaque personne entre quand elle
+  arrive, seule ou en groupe, sans forçage. L'invité transmet à chaque accompagnateur son billet
+  (lien individuel, partageable par WhatsApp depuis sa page).
 - Le QR encode un **jeton signé côté serveur** par signature **asymétrique (Ed25519)**, jamais
   un simple identifiant. Le scan étant hors ligne, l'appareil de l'agent ne détient que la clé
   publique de vérification ; un HMAC symétrique exposerait le secret sur chaque téléphone
   (voir `SECURITY.md` C2).
-- Un billet scanné une seconde fois est signalé « déjà scanné » avec l'heure et l'agent du
-  premier passage ; l'agent peut forcer l'entrée, ce qui est journalisé.
+- Chaque billet ne s'utilise qu'une fois. Un billet scanné une seconde fois est signalé « déjà
+  scanné » avec l'heure et l'agent du premier passage ; l'agent peut forcer l'entrée, ce qui est
+  journalisé.
 - Le scan fonctionne **hors ligne** (file locale, synchronisation au retour du réseau).
 - Chaque scan (accepté, refusé, forcé) est journalisé : agent, heure, poste.
 
@@ -272,7 +277,9 @@ l'ouverture d'un espace, garde-fous contre l'élévation de privilèges, journal
    (3) envoi avant la fin du décompte. Décompte visible, alerte sous 2 min, blocage de l'envoi
    à expiration, bouton « vérifier les places et relancer ».
 6. **Preuve reçue** — en attente de vérification.
-7. **Billet** — nom, liste des invités avec unités, numéro de table, QR, mention d'envoi programmé.
+7. **Billet** — un billet par personne du groupe (invité et chaque accompagnateur) : nom, unité,
+   numéro de table, QR ; bouton d'envoi par WhatsApp du billet de chaque accompagnateur ; mention
+   d'envoi programmé.
 8. **Inscription enregistrée sans preuve** — lien de reprise (copier / se l'envoyer), échéance.
 9. **Reprendre mon inscription** — récapitulatif, places encore libres, vérification avant de continuer.
 10. **Complet** — état complet + liste d'attente (position, lien de 6 h).
@@ -296,11 +303,12 @@ l'ouverture d'un espace, garde-fous contre l'élévation de privilèges, journal
     d'anomalie, valider / rejeter / ouvrir le reçu.
 19. **Rapprochement** — import CSV, statistiques, table des lignes avec action par ligne.
 20. **Base d'inscrits** — recherche, filtres (tous / validées / à vérifier / sans preuve /
-    annulés), table, pagination, exports Excel / PDF / CSV / listes de contrôle, états vides.
+    annulés), table, pagination, personnes entrées par inscription, exports Excel / PDF / CSV /
+    listes de contrôle, états vides.
 21. **Plan de salle** — grille de tables, panneau de table avec occupants, regroupement par
     unité, contraintes, déplacement manuel.
-22. **Rapports post-événement** — présence, absents, recettes, durée moyenne de contrôle,
-    présence et recettes par unité, export PDF.
+22. **Rapports post-événement** — présence et absents comptés par personne, recettes, durée
+    moyenne de contrôle, présence et recettes par unité, export PDF.
 23. **Journalisation** — date, type, message, acteur, IP ; conservation 24 mois.
 24. **Réglages événement** — identité visuelle, places totales, échéances, rappels, règles
     (envoi programmé, attribution automatique, inscription sans preuve, lisibilité de la preuve,
@@ -310,7 +318,8 @@ l'ouverture d'un espace, garde-fous contre l'élévation de privilèges, journal
 
 ### Agent d'accueil (mobile)
 
-26. **Scan** — viseur, compteur, trois résultats : valide (nom, places, table), déjà scanné
+26. **Scan** — viseur, compteur de personnes entrées sur les attendues, trois résultats : valide
+    (nom de la personne, unité, table, « accompagnateur de … » le cas échéant), déjà scanné
     (heure et agent du premier passage, forçage possible), refusé ; hors ligne ; derniers passages.
 
 ---
