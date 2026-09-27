@@ -52,6 +52,7 @@ class DashboardOverview
             'eventName' => $event->name,
             'capacity' => $event->capacity(),
             'kpis' => self::kpis($event),
+            'holdExpiry' => self::holdExpiry($event),
             'registrationsPerDay' => self::registrationsPerDay($event),
             'proofsByChannel' => self::proofsByChannel($event),
             'tableOccupancy' => self::tableOccupancy($event),
@@ -70,6 +71,28 @@ class DashboardOverview
             'toCheck' => $event->registrations()->where('status', RegistrationStatus::ProofSubmitted)->count(),
             'withoutProof' => $event->registrations()->whereIn('status', Registration::UnfinalizedStatuses)->count(),
             'seatsLeft' => $event->remainingSeats(),
+        ];
+    }
+
+    /**
+     * Share of reservations that lapsed without a proof (SECURITY.md C3) : a sudden high rate is
+     * what an automated seat-blocking attack looks like from the organiser's side.
+     *
+     * Une relance apres expiration compte comme une reservation de plus et une expiration de plus
+     * (`lapsed_holds_count`) : sinon l'inscription relancee sans cesse passerait pour une seule.
+     *
+     * @return array{lapsed: int, holds: int, rate: int|null}
+     */
+    private static function holdExpiry(Event $event): array
+    {
+        $relaunched = (int) $event->registrations()->sum('lapsed_holds_count');
+        $lapsed = $event->registrations()->where('status', RegistrationStatus::Expired)->count() + $relaunched;
+        $holds = $event->registrations()->whereNotNull('hold_sequence')->count() + $relaunched;
+
+        return [
+            'lapsed' => $lapsed,
+            'holds' => $holds,
+            'rate' => $holds > 0 ? (int) round(100 * $lapsed / $holds) : null,
         ];
     }
 

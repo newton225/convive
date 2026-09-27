@@ -236,4 +236,27 @@ class DashboardTest extends TestCase
             ->get(route('dashboard'))
             ->assertInertia(fn (Assert $page) => $page->where('overview.eventName', 'Notre evenement'));
     }
+
+    public function test_l_apercu_expose_le_taux_de_reservations_expirees(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $tenant->asCurrent(function () {
+            $event = Event::factory()->open()->create(['table_count' => 5, 'seats_per_table' => 10]);
+            Registration::factory()->confirmed()->create(['event_id' => $event->id, 'hold_sequence' => 1]);
+            Registration::factory()->create(['event_id' => $event->id, 'status' => 'expired', 'hold_sequence' => 2]);
+            // Relancee une fois apres expiration, puis expiree de nouveau : deux reservations,
+            // deux expirations.
+            Registration::factory()->create(['event_id' => $event->id, 'status' => 'expired', 'hold_sequence' => 3, 'lapsed_holds_count' => 1]);
+        });
+
+        $this->actingAs($owner)
+            ->get(route('dashboard'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('overview.holdExpiry.lapsed', 3)
+                ->where('overview.holdExpiry.holds', 4)
+                ->where('overview.holdExpiry.rate', 75),
+            );
+    }
 }

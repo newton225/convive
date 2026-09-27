@@ -6,6 +6,12 @@ export type DashboardKpis = {
     seatsLeft: number;
 };
 
+export type DashboardHoldExpiry = {
+    lapsed: number;
+    holds: number;
+    rate: number | null;
+};
+
 export type DashboardDayCount = { date: string; count: number };
 
 export type DashboardChannelCount = { channel: string; count: number };
@@ -35,6 +41,7 @@ export type DashboardOverview = {
     eventName: string;
     capacity: number;
     kpis: DashboardKpis;
+    holdExpiry: DashboardHoldExpiry;
     registrationsPerDay: DashboardDayCount[];
     proofsByChannel: DashboardChannelCount[];
     tableOccupancy: DashboardTableOccupancy[];

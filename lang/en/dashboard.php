@@ -12,6 +12,12 @@ return [
         'seats_left' => 'Seats left',
     ],
 
+    'hold_expiry' => [
+        'rate' => ':rate% of reservations expired without a proof (:lapsed out of :holds).',
+        'none' => 'No reservation yet.',
+        'help' => 'A rate that jumps suddenly can signal reservations made by a bot to block the seats.',
+    ],
+
     'charts' => [
         'per_day' => 'Registrations per day',
         'per_day_summary' => 'Registrations per day over the last :days days, :total in total.',

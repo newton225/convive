@@ -12,6 +12,12 @@ return [
         'seats_left' => 'Places restantes',
     ],
 
+    'hold_expiry' => [
+        'rate' => ':rate % des réservations ont expiré sans preuve (:lapsed sur :holds).',
+        'none' => 'Aucune réservation pour le moment.',
+        'help' => 'Un taux qui monte brusquement peut signaler des réservations faites par un robot pour bloquer les places.',
+    ],
+
     'charts' => [
         'per_day' => 'Inscriptions par jour',
         'per_day_summary' => 'Inscriptions par jour sur les :days derniers jours, :total au total.',

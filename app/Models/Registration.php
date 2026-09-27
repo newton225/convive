@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RegistrationStatus;
+use Carbon\CarbonInterface;
 use Database\Factories\RegistrationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -43,6 +44,7 @@ use Illuminate\Support\Str;
  * @property Carbon|null $cancelled_at
  * @property string|null $cancellation_reason
  * @property int|null $cancelled_by_user_id
+ * @property int $lapsed_holds_count
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Event $event
@@ -53,7 +55,7 @@ use Illuminate\Support\Str;
     'event_id', 'status', 'name', 'phone', 'email', 'unit_id', 'amount_due', 'party_size',
     'held_until', 'hold_sequence', 'resume_token_hash', 'card_sent_at',
     'proof_reminder_j7_sent_at', 'proof_reminder_j2_sent_at', 'proof_reminder_j1_sent_at',
-    'cancelled_at', 'cancellation_reason', 'cancelled_by_user_id',
+    'cancelled_at', 'cancellation_reason', 'cancelled_by_user_id', 'lapsed_holds_count',
 ])]
 class Registration extends Model
 {
@@ -277,6 +279,47 @@ class Registration extends Model
     }
 
     /**
+     * Premiere attente imposee apres des reservations expirees repetees, en minutes (SECURITY.md
+     * C3). Elle double a chaque expiration supplementaire, jusqu'a `BackoffMaxMinutes`.
+     */
+    public const BackoffBaseMinutes = 10;
+
+    public const BackoffMaxMinutes = 24 * 60;
+
+    /**
+     * Get the moment before which this phone may not hold seats again on the event, or null when
+     * nothing holds it back (SECURITY.md C3, delai croissant).
+     *
+     * Une premiere expiration est un oubli, pas un abus : l'attente commence a la deuxieme. Les
+     * expirations comptees sont celles des inscriptions actuellement expirees, plus celles deja
+     * relancees (`lapsed_holds_count`), dont `held_until` a ete reecrit depuis.
+     */
+    public static function phoneBackoffUntil(Event $event, string $phone): ?CarbonInterface
+    {
+        $digits = preg_replace('/\D+/', '', $phone);
+
+        $samePhone = self::query()
+            ->where('event_id', $event->id)
+            ->get(['id', 'phone', 'status', 'held_until', 'lapsed_holds_count'])
+            ->filter(fn (self $registration) => preg_replace('/\D+/', '', $registration->phone) === $digits);
+
+        $lapsed = $samePhone->filter(fn (self $registration) => $registration->status === RegistrationStatus::Expired
+            || $registration->holdHasExpired());
+
+        $lapses = $lapsed->count() + (int) $samePhone->sum('lapsed_holds_count');
+        $lastLapse = $lapsed->max('held_until');
+
+        if ($lapses < 2 || $lastLapse === null) {
+            return null;
+        }
+
+        $waitMinutes = min(self::BackoffBaseMinutes * 2 ** ($lapses - 2), self::BackoffMaxMinutes);
+        $until = $lastLapse->copy()->addMinutes($waitMinutes);
+
+        return $until->isFuture() ? $until : null;
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -286,6 +329,7 @@ class Registration extends Model
         return [
             'status' => RegistrationStatus::class,
             'amount_due' => 'integer',
+            'lapsed_holds_count' => 'integer',
             'party_size' => 'integer',
             'held_until' => 'datetime',
             'hold_sequence' => 'integer',

@@ -52,22 +52,27 @@ class HoldRegistration
             return false;
         }
 
+        // Une relance apres expiration compte l'expiration precedente (SECURITY.md C3) : `held_until`
+        // va etre reecrit, et le delai croissant par numero ne la verrait plus.
+        $lapsedBefore = $registration->status === RegistrationStatus::Expired || $registration->holdHasExpired();
+
         $lock = Cache::lock("event:{$event->id}:seats", 10);
 
-        return $lock->block(5, function () use ($event, $registration) {
+        return $lock->block(5, function () use ($event, $registration, $lapsedBefore) {
             for ($attempt = 0; $attempt < self::MaxAttempts; $attempt++) {
                 if ($registration->party_size > $event->remainingSeats()) {
                     return false;
                 }
 
                 try {
-                    $held = DB::transaction(function () use ($event, $registration) {
+                    $held = DB::transaction(function () use ($event, $registration, $lapsedBefore) {
                         $nextSequence = 1 + (int) Registration::where('event_id', $event->id)->max('hold_sequence');
 
                         $registration->update([
                             'status' => RegistrationStatus::Held,
                             'held_until' => now()->addMinutes($event->hold_duration_minutes),
                             'hold_sequence' => $nextSequence,
+                            'lapsed_holds_count' => $registration->lapsed_holds_count + ($lapsedBefore ? 1 : 0),
                         ]);
 
                         return true;

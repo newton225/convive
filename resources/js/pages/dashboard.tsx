@@ -2,6 +2,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 import { ChannelsChart } from '@/components/dashboard/channels-chart';
+import { HoldExpiryCard } from '@/components/dashboard/hold-expiry-card';
 import { KpiCard } from '@/components/dashboard/kpi-card';
 import { RecentActivity } from '@/components/dashboard/recent-activity';
 import { RegistrationsChart } from '@/components/dashboard/registrations-chart';
@@ -104,6 +105,8 @@ export default function Dashboard({
                                 />
                             ))}
                         </div>
+
+                        <HoldExpiryCard expiry={overview.holdExpiry} />
 
                         <div className="grid gap-4 lg:grid-cols-2">
                             <RegistrationsChart

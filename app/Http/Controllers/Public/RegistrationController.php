@@ -17,6 +17,7 @@ use App\Models\Tenant;
 use App\Models\Ticket;
 use App\Models\Unit;
 use App\Support\TicketQrCode;
+use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -82,6 +83,10 @@ class RegistrationController extends Controller
 
         if (Registration::phoneHoldsSeats($event, (string) $request->validated('phone'))) {
             return back()->withInput()->withErrors(['phone' => __('guest.registration.errors.phone_already_active')]);
+        }
+
+        if (($waitUntil = Registration::phoneBackoffUntil($event, (string) $request->validated('phone'))) !== null) {
+            return back()->withInput()->withErrors(['phone' => $this->backoffMessage($waitUntil)]);
         }
 
         $created = app(CreateRegistration::class)->handle($event, [
@@ -250,11 +255,28 @@ class RegistrationController extends Controller
             return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
         }
 
+        if (($waitUntil = Registration::phoneBackoffUntil($event, $registration->phone)) !== null) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $this->backoffMessage($waitUntil)]);
+
+            return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
+        }
+
         if (! app(HoldRegistration::class)->handle($event, $registration)) {
             return redirect($event->publicUrl());
         }
 
         return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
+    }
+
+    /**
+     * Tell the guest how long to wait after repeated lapsed reservations (SECURITY.md C3), in
+     * minutes rather than a clock time : the guest's device may not share the server's timezone.
+     */
+    private function backoffMessage(CarbonInterface $waitUntil): string
+    {
+        $minutes = max(1, (int) ceil(now()->diffInSeconds($waitUntil) / 60));
+
+        return trans_choice('guest.registration.errors.phone_backoff', $minutes, ['minutes' => $minutes]);
     }
 
     /**
