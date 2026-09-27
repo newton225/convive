@@ -3,6 +3,7 @@
 return [
     'fields' => [
         'name' => 'Nom complet',
+        'organisation_name' => "Nom de l'organisation",
         'email' => 'Adresse email',
         'phone' => 'Téléphone',
         'password' => 'Mot de passe',
@@ -14,6 +15,7 @@ return [
 
     'placeholders' => [
         'name' => 'Nom complet',
+        'organisation_name' => 'Par exemple : Association des Soldats du Palais',
         'email' => 'email@exemple.com',
         'phone' => '+225 07 00 00 00 00',
         'password' => 'Mot de passe',

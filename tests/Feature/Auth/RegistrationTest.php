@@ -46,7 +46,9 @@ class RegistrationTest extends TestCase
     {
         $response = $this->post(route('register.store'), [
             'name' => 'Test User',
+            'organisation_name' => 'Soldats du Palais',
             'email' => 'test@example.com',
+            'phone' => '+225 07 07 12 34 56',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -60,5 +62,52 @@ class RegistrationTest extends TestCase
         $tenant = $user->personalTenant();
 
         $response->assertRedirect(route('tenants.organisation.edit', $tenant));
+    }
+
+    public function test_l_espace_cree_porte_le_nom_de_l_organisation_et_le_telephone_est_enregistre()
+    {
+        $this->post(route('register.store'), [
+            'name' => 'Amara Kone',
+            'organisation_name' => 'Soldats du Palais',
+            'email' => 'amara@example.com',
+            'phone' => '+225 07 07 12 34 56',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $user = User::where('email', 'amara@example.com')->firstOrFail();
+
+        $this->assertSame('Soldats du Palais', $user->personalTenant()->name);
+        $this->assertSame('+225 07 07 12 34 56', $user->phone);
+    }
+
+    public function test_le_telephone_est_obligatoire_a_l_inscription()
+    {
+        $this->post(route('register.store'), [
+            'name' => 'Amara Kone',
+            'organisation_name' => 'Soldats du Palais',
+            'email' => 'amara@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertSessionHasErrors('phone');
+
+        $this->assertGuest();
+    }
+
+    public function test_sans_nom_d_organisation_l_espace_prend_le_nom_par_defaut()
+    {
+        // Cas de la personne invitee : elle rejoint une organisation existante, son propre espace
+        // d'essai n'a pas besoin d'un nom choisi.
+        $this->post(route('register.store'), [
+            'name' => 'Fatou Diallo',
+            'email' => 'fatou@example.com',
+            'phone' => '+225 05 05 11 22 33',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $user = User::where('email', 'fatou@example.com')->firstOrFail();
+
+        $this->assertSame(__('tenants.personal_name', ['name' => 'Fatou Diallo']), $user->personalTenant()->name);
     }
 }

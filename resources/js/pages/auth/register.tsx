@@ -60,6 +60,28 @@ export default function Register({ passwordRules, tenantInvitation }: Props) {
                             </div>
 
                             <div className="grid gap-2">
+                                <Label htmlFor="organisation_name">
+                                    {t('account.fields.organisation_name')}
+                                </Label>
+                                {/* Facultatif pour une personne invitee : elle rejoint une
+                                    organisation existante. */}
+                                <Input
+                                    id="organisation_name"
+                                    type="text"
+                                    required={!tenantInvitation}
+                                    tabIndex={1}
+                                    autoComplete="organization"
+                                    name="organisation_name"
+                                    placeholder={t(
+                                        'account.placeholders.organisation_name',
+                                    )}
+                                />
+                                <InputError
+                                    message={errors.organisation_name}
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
                                 <Label htmlFor="email">
                                     {t('account.fields.email')}
                                 </Label>
@@ -75,6 +97,24 @@ export default function Register({ passwordRules, tenantInvitation }: Props) {
                                     )}
                                 />
                                 <InputError message={errors.email} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="phone">
+                                    {t('account.fields.phone')}
+                                </Label>
+                                <Input
+                                    id="phone"
+                                    type="tel"
+                                    required
+                                    tabIndex={2}
+                                    autoComplete="tel"
+                                    name="phone"
+                                    placeholder={t(
+                                        'account.placeholders.phone',
+                                    )}
+                                />
+                                <InputError message={errors.phone} />
                             </div>
 
                             <div className="grid gap-2">

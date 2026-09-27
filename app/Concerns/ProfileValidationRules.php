@@ -53,13 +53,13 @@ trait ProfileValidationRules
     /**
      * Get the validation rules used to validate user phone numbers.
      *
-     * Facultatif : sert uniquement a router l'alerte WhatsApp d'un changement de compte de
-     * versement (CLAUDE.md, « Comptes de versement »), jamais une condition d'inscription.
+     * Sert a router les alertes WhatsApp (changement de compte de versement, CLAUDE.md). Facultatif
+     * dans le profil ; demande a l'inscription (prototype Convive.dc.html, decision du 2026-09-27).
      *
      * @return array<int, ValidationRule|array<mixed>|string>
      */
-    protected function phoneRules(): array
+    protected function phoneRules(bool $required = false): array
     {
-        return ['nullable', 'string', 'max:32', 'regex:/^\+?[0-9 ().-]{8,32}$/'];
+        return [$required ? 'required' : 'nullable', 'string', 'max:32', 'regex:/^\+?[0-9 ().-]{8,32}$/'];
     }
 }
