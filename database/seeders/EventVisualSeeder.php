@@ -70,9 +70,9 @@ class EventVisualSeeder extends Seeder
             $ratio = $y / (self::Height - 1);
             $color = imagecolorallocate(
                 $image,
-                (int) round($top[0] + ($bottom[0] - $top[0]) * $ratio),
-                (int) round($top[1] + ($bottom[1] - $top[1]) * $ratio),
-                (int) round($top[2] + ($bottom[2] - $top[2]) * $ratio),
+                $this->channel($top[0], $bottom[0], $ratio),
+                $this->channel($top[1], $bottom[1], $ratio),
+                $this->channel($top[2], $bottom[2], $ratio),
             );
             imageline($image, 0, $y, self::Width, $y, (int) $color);
         }
@@ -101,5 +101,15 @@ class EventVisualSeeder extends Seeder
         mt_srand();
 
         return $path;
+    }
+
+    /**
+     * Interpolate one colour channel of the background gradient.
+     *
+     * @return int<0, 255>
+     */
+    private function channel(int $from, int $to, float $ratio): int
+    {
+        return max(0, min(255, (int) round($from + ($to - $from) * $ratio)));
     }
 }
