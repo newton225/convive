@@ -65,6 +65,9 @@ export default function TicketTemplate({
     const [elements, setElements] = useState<TicketElements>(initialElements);
     const [processing, setProcessing] = useState(false);
     const canEdit = can(permissions, Permission.TenantBranding);
+    const dirty =
+        model !== initialModel ||
+        JSON.stringify(elements) !== JSON.stringify(initialElements);
 
     const save = () => {
         const payload: Record<string, boolean | string> = {
@@ -204,6 +207,7 @@ export default function TicketTemplate({
                             <SubmitButton
                                 type="button"
                                 processing={processing}
+                                dirty={dirty}
                                 onClick={save}
                                 data-test="ticket-template-save"
                             >

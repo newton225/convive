@@ -41,12 +41,13 @@ export default function Profile({
 
                 <Form
                     {...ProfileController.update.form()}
+                    setDefaultsOnSuccess
                     options={{
                         preserveScroll: true,
                     }}
                     className="space-y-6"
                 >
-                    {({ processing, errors }) => (
+                    {({ processing, errors, isDirty }) => (
                         <>
                             <div className="grid gap-2">
                                 <Label htmlFor="name">
@@ -150,6 +151,7 @@ export default function Profile({
                             <div className="flex items-center gap-4">
                                 <SubmitButton
                                     processing={processing}
+                                    dirty={isDirty}
                                     data-test="update-profile-button"
                                 >
                                     {t('common.actions.save')}

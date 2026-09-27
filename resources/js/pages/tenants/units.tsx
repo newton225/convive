@@ -85,8 +85,9 @@ export default function Units({ tenant, units }: Props) {
                             {...update.form([tenant.slug, unit.id])}
                             className="flex flex-wrap items-center gap-3 rounded-lg border p-3"
                             data-test="unit-row"
+                            setDefaultsOnSuccess
                         >
-                            {({ errors, processing }) => (
+                            {({ errors, processing, isDirty }) => (
                                 <>
                                     <Input
                                         name="name"
@@ -122,6 +123,7 @@ export default function Units({ tenant, units }: Props) {
                                         variant="secondary"
                                         size="sm"
                                         processing={processing}
+                                        dirty={isDirty}
                                     >
                                         {t('common.actions.save')}
                                     </SubmitButton>

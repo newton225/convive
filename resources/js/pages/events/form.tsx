@@ -205,9 +205,10 @@ export default function EventForm({
                         event?.id ?? `template-${template?.sourceId ?? 'blank'}`
                     }
                     {...action}
+                    setDefaultsOnSuccess
                     className="space-y-8"
                 >
-                    {({ errors, processing }) => (
+                    {({ errors, processing, isDirty }) => (
                         <>
                             <Step
                                 index={1}
@@ -464,6 +465,7 @@ export default function EventForm({
                                 data-test="event-submit"
                                 data-tour="event-submit"
                                 processing={processing}
+                                dirty={isDirty}
                             >
                                 {t('common.actions.save')}
                             </SubmitButton>

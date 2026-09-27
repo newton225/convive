@@ -318,8 +318,8 @@ function AccountForm({
     const suffix = account?.id ?? 'new';
 
     return (
-        <Form {...action} className="space-y-4">
-            {({ errors, processing }) => (
+        <Form {...action} setDefaultsOnSuccess className="space-y-4">
+            {({ errors, processing, isDirty }) => (
                 <>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div className="grid gap-2">
@@ -421,6 +421,7 @@ function AccountForm({
                     <SubmitButton
                         data-test="payment-account-submit"
                         processing={processing}
+                        dirty={isDirty}
                     >
                         {account ? null : <Plus />}
                         {account

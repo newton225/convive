@@ -130,6 +130,9 @@ export default function EventSettings({
     const [rules, setRules] = useState(initialRules);
     const [processing, setProcessing] = useState(false);
     const canEditEvent = can(permissions, Permission.EventsUpdate);
+    const dirty =
+        JSON.stringify(reminders) !== JSON.stringify(initialReminders) ||
+        JSON.stringify(rules) !== JSON.stringify(initialRules);
 
     const date = (value: string | null) =>
         value
@@ -326,6 +329,7 @@ export default function EventSettings({
                         <SubmitButton
                             type="button"
                             processing={processing}
+                            dirty={dirty}
                             onClick={save}
                             data-test="event-settings-save"
                         >

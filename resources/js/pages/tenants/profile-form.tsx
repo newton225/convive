@@ -53,7 +53,9 @@ export default function ProfileForm({
         event.preventDefault();
 
         if (profile) {
-            form.patch(update([tenant.slug, profile.id]).url);
+            form.patch(update([tenant.slug, profile.id]).url, {
+                onSuccess: () => form.setDefaults(),
+            });
         } else {
             form.post(store(tenant.slug).url);
         }
@@ -211,6 +213,7 @@ export default function ProfileForm({
                 <div className="flex flex-wrap gap-2">
                     <SubmitButton
                         processing={form.processing}
+                        dirty={form.isDirty}
                         data-test="profile-submit"
                     >
                         {t('common.actions.save')}

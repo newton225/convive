@@ -46,8 +46,12 @@ export default function NotificationPreferences({
                     description={t('notifications.preferences.description')}
                 />
 
-                <Form {...update.form()} className="space-y-6">
-                    {({ errors, processing }) => (
+                <Form
+                    {...update.form()}
+                    setDefaultsOnSuccess
+                    className="space-y-6"
+                >
+                    {({ errors, processing, isDirty }) => (
                         <>
                             <div className="grid gap-4">
                                 {preferences.map((preference) => (
@@ -102,6 +106,7 @@ export default function NotificationPreferences({
 
                             <SubmitButton
                                 processing={processing}
+                                dirty={isDirty}
                                 data-test="notification-preferences-save"
                             >
                                 {t('common.actions.save')}

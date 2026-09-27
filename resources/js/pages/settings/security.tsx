@@ -64,7 +64,7 @@ export default function Security(props: Props) {
                     }}
                     className="space-y-6"
                 >
-                    {({ errors, processing }) => (
+                    {({ errors, processing, isDirty }) => (
                         <>
                             <div className="grid gap-2">
                                 <Label htmlFor="current_password">
@@ -129,6 +129,7 @@ export default function Security(props: Props) {
                             <div className="flex items-center gap-4">
                                 <SubmitButton
                                     processing={processing}
+                                    dirty={isDirty}
                                     data-test="update-password-button"
                                 >
                                     {t('common.actions.save')}

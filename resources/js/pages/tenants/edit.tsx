@@ -126,9 +126,10 @@ export default function TenantEdit({
 
                             <Form
                                 {...update.form(tenant.slug)}
+                                setDefaultsOnSuccess
                                 className="space-y-6"
                             >
-                                {({ errors, processing }) => (
+                                {({ errors, processing, isDirty }) => (
                                     <>
                                         <div className="grid gap-2">
                                             <Label htmlFor="name">
@@ -150,6 +151,7 @@ export default function TenantEdit({
                                             <SubmitButton
                                                 data-test="tenant-save-button"
                                                 processing={processing}
+                                                dirty={isDirty}
                                             >
                                                 {t('common.actions.save')}
                                             </SubmitButton>
