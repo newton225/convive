@@ -15,6 +15,14 @@ return [
         'refused' => 'Billet refusé',
     ],
 
+    'entry_control' => [
+        'title' => "Contrôle à l'entrée",
+        'description' => "Choisissez l'événement dont vous contrôlez l'entrée.",
+        'empty_title' => "Aucun événement aujourd'hui",
+        'empty_description' => "Le contrôle s'ouvre le jour d'un événement publié. Pour un autre jour, passez par la liste des événements.",
+        'open' => 'Ouvrir le scan',
+        'all_events' => 'Voir tous les événements',
+    ],
     'result' => [
         'table' => 'Table :number',
         'no_table' => 'Non placée',

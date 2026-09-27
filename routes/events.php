@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Events\EntryControlController;
 use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Events\EventSettingsController;
 use App\Http\Controllers\Events\PaymentProofController;
@@ -62,7 +63,9 @@ Route::prefix('{tenant}')
         Route::post('events/{event}/seating/constraints', [SeatingController::class, 'storeConstraint'])->name('tenants.events.seating.constraints.store');
         Route::delete('events/{event}/seating/constraints/{constraint}', [SeatingController::class, 'destroyConstraint'])->name('tenants.events.seating.constraints.destroy');
 
-        // Le controle a l'entree (README ecran 26), etape 7.
+        // Le controle a l'entree (README ecran 26), etape 7. `entry-control` est le raccourci du
+        // menu : il ouvre le scan de l'evenement du jour, ou propose un choix s'il y en a plusieurs.
+        Route::get('entry-control', EntryControlController::class)->name('tenants.entry-control');
         Route::get('events/{event}/scan', [ScanController::class, 'index'])->name('tenants.events.scan.index');
         Route::post('events/{event}/scan/verify', [ScanController::class, 'verify'])
             ->middleware('throttle:scan')

@@ -14,6 +14,7 @@ return [
 
     'billing' => 'Abonnement',
     'audit' => 'Journalisation',
+    'entry_control' => "Contrôle à l'entrée",
     'ticket_template' => 'Gabarit du billet',
     'profiles' => 'Profils et permissions',
 ];

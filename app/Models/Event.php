@@ -414,6 +414,22 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Scope the query to the events whose doors may open today : published, not closed, and either
+     * starting today or already running (a soiree begun the day before stays reachable after
+     * midnight).
+     *
+     * @param  Builder<Event>  $query
+     */
+    public function scopeCheckInToday(Builder $query): void
+    {
+        $query->published()
+            ->where('status', '!=', EventStatus::Closed)
+            ->where(fn (Builder $query) => $query
+                ->where('status', EventStatus::Ongoing)
+                ->orWhereBetween('starts_at', [now()->startOfDay(), now()->endOfDay()]));
+    }
+
+    /**
      * Scope the query to the order the operator expects on the event list.
      *
      * @param  Builder<Event>  $query

@@ -3,6 +3,7 @@ import {
     CalendarDays,
     CreditCard,
     LayoutGrid,
+    ScanLine,
     ScrollText,
     Settings,
     ShieldCheck,
@@ -29,7 +30,7 @@ import { show as billingShow } from '@/routes/tenants/billing';
 import { index as profilesIndex } from '@/routes/tenants/profiles';
 import { edit as ticketTemplateEdit } from '@/routes/tenants/ticket-template';
 import { index as eventsIndex } from '@/routes/tenants/events';
-import { edit as tenantEdit } from '@/routes/tenants';
+import { entryControl, edit as tenantEdit } from '@/routes/tenants';
 import { useTranslation } from '@/hooks/use-translation';
 import type { NavItem } from '@/types';
 
@@ -56,6 +57,15 @@ export function AppSidebar() {
                       href: eventsIndex(tenant.slug),
                       icon: CalendarDays,
                   },
+                  ...(allowed(Permission.ScanPerform)
+                      ? [
+                            {
+                                title: t('navigation.entry_control'),
+                                href: entryControl(tenant.slug),
+                                icon: ScanLine,
+                            },
+                        ]
+                      : []),
                   ...(allowed(Permission.TenantBranding)
                       ? [
                             {

@@ -15,6 +15,14 @@ return [
         'refused' => 'Ticket refused',
     ],
 
+    'entry_control' => [
+        'title' => 'Entry control',
+        'description' => 'Choose the event whose entrance you are checking.',
+        'empty_title' => 'No event today',
+        'empty_description' => 'Entry control opens on the day of a published event. For another day, go through the event list.',
+        'open' => 'Open scanner',
+        'all_events' => 'See all events',
+    ],
     'result' => [
         'table' => 'Table :number',
         'no_table' => 'Not seated',
