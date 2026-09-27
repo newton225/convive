@@ -4,11 +4,13 @@ namespace App\Providers;
 
 use App\Contracts\SubscriptionBillingGateway;
 use App\Contracts\WhatsAppSender;
+use App\Models\AuditEntry;
 use App\Models\ScanEvent;
 use App\Notifications\Channels\WhatsAppChannel;
 use App\Policies\AuditPolicy;
 use App\Policies\ReportPolicy;
 use App\Policies\ScanPolicy;
+use App\Support\AuditChain;
 use App\Support\AuditTrail;
 use App\Support\EventReport;
 use App\Support\LogWhatsAppSender;
@@ -26,7 +28,6 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Spatie\Activitylog\Models\Activity;
 use Stripe\StripeClient;
 
 class AppServiceProvider extends ServiceProvider
@@ -102,12 +103,19 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureActivityLog(): void
     {
-        Activity::creating(function (Activity $activity): void {
+        // `AuditEntry`, pas `Activity` : les evenements de modele sont propres a chaque classe, et
+        // c'est `AuditEntry` que le paquet instancie (`activitylog.activity_model`).
+        AuditEntry::creating(function (AuditEntry $activity): void {
             $activity->properties = collect($activity->properties)->merge([
                 'ip' => request()->ip(),
                 'user_agent' => request()->userAgent(),
             ]);
+
+            // En dernier : l'empreinte couvre l'adresse IP et l'agent utilisateur (SECURITY.md M6).
+            AuditChain::link($activity);
         });
+
+        AuditEntry::created(fn () => AuditChain::release());
     }
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Audit\PurgeAuditLog;
 use App\Actions\Billing\ProcessOverdueSubscriptions;
 use App\Actions\Registrations\ExpireHolds;
 use App\Actions\Registrations\PurgeRegistrations;
@@ -18,8 +19,9 @@ use App\Models\Tenant;
 use App\Models\TenantInvitation;
 use App\Models\Ticket;
 use App\Models\WaitlistEntry;
+use App\Support\AuditChain;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
-use Spatie\Activitylog\Models\Activity;
 
 Schedule::call(function () {
     TenantInvitation::query()
@@ -212,14 +214,30 @@ Schedule::call(fn (ProcessOverdueSubscriptions $process) => $process->handle())
 /*
  * Conservation du journal d'audit a 24 mois (CLAUDE.md, « Securite » : « ecriture seule...
  * conservation 24 mois »), centrale et par locataire (voir CLAUDE.md, « Multi-locataire » : les
- * deux journaux vivent dans des bases distinctes).
+ * deux journaux vivent dans des bases distinctes). Chaque purge laisse une entree et l'ancre de la
+ * chaine d'empreintes (SECURITY.md M6).
+ */
+Schedule::call(fn (PurgeAuditLog $purge) => $purge->handle())
+    ->daily()
+    ->description('Purge the central audit log entries older than 24 months');
+
+Schedule::call(function (PurgeAuditLog $purge) {
+    Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(fn () => $purge->handle()));
+})->daily()->description('Purge each tenant\'s audit log entries older than 24 months');
+
+/*
+ * Verification quotidienne de la chaine d'empreintes du journal (SECURITY.md M6). Une rupture est
+ * signalee au niveau critique : une entree modifiee ou supprimee hors de la purge tracee.
  */
 Schedule::call(function () {
-    Activity::where('created_at', '<', now()->subMonths(24))->delete();
-})->daily()->description('Purge the central audit log entries older than 24 months');
+    $report = function (string $scope): void {
+        $brokenId = AuditChain::firstBrokenEntry();
 
-Schedule::call(function () {
-    Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(
-        fn () => Activity::where('created_at', '<', now()->subMonths(24))->delete(),
-    ));
-})->daily()->description('Purge each tenant\'s audit log entries older than 24 months');
+        if ($brokenId !== null) {
+            Log::critical('Chaine du journal d\'audit rompue', ['scope' => $scope, 'entry_id' => $brokenId]);
+        }
+    };
+
+    $report('central');
+    Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(fn () => $report('tenant:'.$tenant->id)));
+})->daily()->description('Verify the audit log hash chains');
