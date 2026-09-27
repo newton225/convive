@@ -103,8 +103,11 @@ export function EventActionsMenu({
         },
     ].filter((item) => item !== false);
 
+    // Non modal : « Cloturer » ouvre une fenetre de confirmation depuis ce menu. En mode modal,
+    // Radix laisse `pointer-events: none` sur la page quand un dialogue s'ouvre pendant la
+    // fermeture du menu, et les boutons de la confirmation ne repondent plus.
     return (
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="ghost"
