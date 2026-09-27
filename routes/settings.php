@@ -128,6 +128,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('settings/tenants/{tenant}/units/{unit}', [UnitController::class, 'destroy'])->name('tenants.units.destroy');
 
             Route::get('settings/tenants/{tenant}/profiles', [TenantProfileController::class, 'index'])->name('tenants.profiles.index');
+            Route::get('settings/tenants/{tenant}/profiles/create', [TenantProfileController::class, 'create'])->middleware(RequirePassword::class)->name('tenants.profiles.create');
+            Route::get('settings/tenants/{tenant}/profiles/{profile}/edit', [TenantProfileController::class, 'edit'])->middleware(RequirePassword::class)->name('tenants.profiles.edit');
             Route::post('settings/tenants/{tenant}/profiles', [TenantProfileController::class, 'store'])->middleware(RequirePassword::class)->name('tenants.profiles.store');
             Route::patch('settings/tenants/{tenant}/profiles/{profile}', [TenantProfileController::class, 'update'])->middleware(RequirePassword::class)->name('tenants.profiles.update');
             Route::post('settings/tenants/{tenant}/profiles/{profile}/duplicate', [TenantProfileController::class, 'duplicate'])->middleware(RequirePassword::class)->name('tenants.profiles.duplicate');

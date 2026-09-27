@@ -64,7 +64,21 @@ export type TenantProfile = {
 
 export type PermissionOption = {
     value: string;
+    // Libelle complet (« Creer un evenement ») et libelle court dans son module (« Creer »).
     label: string;
+    action: string;
+    // Permission sans laquelle celle-ci est inutilisable (la consultation du module), ou null.
+    requires: string | null;
+};
+
+// Le profil tel que l'editeur le recoit (creation : null).
+export type ProfileEditorProfile = {
+    id: number;
+    name: string;
+    description: string | null;
+    requiresTwoFactor: boolean;
+    permissions: string[];
+    memberCount: number;
 };
 
 export type PermissionDomain = {

@@ -90,11 +90,14 @@ enum TenantPermission: string
 
             self::ReportsView, self::ReportsExport => TenantPermissionDomain::Reports,
 
-            self::TenantBranding, self::TenantLegal, self::TenantDomain,
-            self::TenantPaymentAccounts, self::TenantUnits => TenantPermissionDomain::Tenant,
+            // La marque gouverne aussi le gabarit du billet (`TicketTemplateController`).
+            self::TenantBranding => TenantPermissionDomain::Brand,
+            self::TenantLegal, self::TenantDomain => TenantPermissionDomain::Organisation,
+            self::TenantPaymentAccounts => TenantPermissionDomain::PaymentAccounts,
+            self::TenantUnits => TenantPermissionDomain::Units,
 
-            self::TeamView, self::TeamInvite, self::TeamRemove,
-            self::ProfilesManage => TenantPermissionDomain::Team,
+            self::TeamView, self::TeamInvite, self::TeamRemove => TenantPermissionDomain::Team,
+            self::ProfilesManage => TenantPermissionDomain::Profiles,
 
             self::BillingView, self::BillingManage => TenantPermissionDomain::Billing,
 
@@ -103,11 +106,62 @@ enum TenantPermission: string
     }
 
     /**
+     * Get the permission without which this one is unusable, if any : on ne modifie pas un
+     * evenement qu'on ne peut pas voir. Sert a l'editeur de profils, qui coche la consultation en
+     * meme temps qu'une action du module.
+     */
+    public function prerequisite(): ?self
+    {
+        return match ($this) {
+            self::EventsCreate, self::EventsUpdate, self::EventsDuplicate,
+            self::EventsClose, self::EventsAnnounce => self::EventsView,
+
+            self::RegistrationsExport, self::RegistrationsPurge,
+            self::RegistrationsCancel => self::RegistrationsView,
+
+            self::ProofsApprove, self::ProofsReject => self::ProofsView,
+
+            self::SeatingAssign, self::SeatingConstraints => self::SeatingView,
+
+            self::ReportsExport => self::ReportsView,
+
+            self::TeamInvite, self::TeamRemove => self::TeamView,
+
+            self::BillingManage => self::BillingView,
+
+            default => null,
+        };
+    }
+
+    /**
+     * Get the short action label shown inside its module (« Creer », « Exporter »...).
+     */
+    public function actionLabel(): string
+    {
+        return $this->translated('actions');
+    }
+
+    /**
      * Get the display label for this permission.
      */
     public function label(): string
     {
-        return __("permissions.items.{$this->value}");
+        return $this->translated('items');
+    }
+
+    /**
+     * Read this permission's line in the given group of `lang/{locale}/permissions.php`.
+     *
+     * Pas `__("permissions.items.{$this->value}")` : la valeur contient un point (`events.view`),
+     * que le traducteur lit comme un niveau d'imbrication de plus, et la cle brute s'affichait a
+     * la place du libelle. On charge le groupe, puis on lit la cle telle quelle.
+     */
+    private function translated(string $group): string
+    {
+        $lines = __("permissions.{$group}");
+        $line = is_array($lines) ? ($lines[$this->value] ?? null) : null;
+
+        return is_string($line) ? $line : $this->value;
     }
 
     /**

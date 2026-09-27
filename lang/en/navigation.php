@@ -15,4 +15,5 @@ return [
     'billing' => 'Subscription',
     'audit' => 'Audit log',
     'ticket_template' => 'Ticket template',
+    'profiles' => 'Profiles and permissions',
 ];

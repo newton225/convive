@@ -5,6 +5,7 @@ import {
     LayoutGrid,
     ScrollText,
     Settings,
+    ShieldCheck,
     Ticket,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -24,6 +25,7 @@ import { can, Permission, type PermissionValue } from '@/lib/permissions';
 import { dashboard } from '@/routes';
 import { index as auditIndex } from '@/routes/tenants/audit';
 import { show as billingShow } from '@/routes/tenants/billing';
+import { index as profilesIndex } from '@/routes/tenants/profiles';
 import { edit as ticketTemplateEdit } from '@/routes/tenants/ticket-template';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { edit as tenantEdit } from '@/routes/tenants';
@@ -59,6 +61,15 @@ export function AppSidebar() {
                                 title: t('navigation.ticket_template'),
                                 href: ticketTemplateEdit(tenant.slug),
                                 icon: Ticket,
+                            },
+                        ]
+                      : []),
+                  ...(allowed(Permission.ProfilesManage)
+                      ? [
+                            {
+                                title: t('navigation.profiles'),
+                                href: profilesIndex(tenant.slug),
+                                icon: ShieldCheck,
                             },
                         ]
                       : []),

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tenants;
 
 use App\Actions\Tenants\DeleteTenantProfile;
 use App\Actions\Tenants\SaveTenantProfile;
+use App\Enums\TenantPermission;
 use App\Enums\TenantPermissionDomain;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenants\SaveProfileRequest;
@@ -31,9 +32,27 @@ class ProfileController extends Controller
                 'slug' => $tenant->slug,
             ],
             'profiles' => $this->profilesFor($tenant),
-            'catalogue' => $this->catalogue(),
-            'heldPermissions' => $request->user()->tenantPermissionValues($tenant),
         ]);
+    }
+
+    /**
+     * Show the profile editor for a new profile : a name, then one block of actions per module.
+     */
+    public function create(Request $request, Tenant $tenant): Response
+    {
+        Gate::authorize('create', [Profile::class, $tenant]);
+
+        return $this->editor($request, $tenant, null);
+    }
+
+    /**
+     * Show the profile editor for an existing profile.
+     */
+    public function edit(Request $request, Tenant $tenant, Profile $profile): Response
+    {
+        Gate::authorize('update', [$profile, $tenant]);
+
+        return $this->editor($request, $tenant, $profile);
     }
 
     /**
@@ -118,6 +137,23 @@ class ProfileController extends Controller
         return to_route('tenants.profiles.index', $tenant);
     }
 
+    private function editor(Request $request, Tenant $tenant, ?Profile $profile): Response
+    {
+        return Inertia::render('tenants/profile-form', [
+            'tenant' => ['slug' => $tenant->slug],
+            'profile' => $profile === null ? null : [
+                'id' => $profile->id,
+                'name' => $profile->name,
+                'description' => $profile->description,
+                'requiresTwoFactor' => $profile->demandsTwoFactor(),
+                'permissions' => $profile->permissionValues(),
+                'memberCount' => $profile->members()->count(),
+            ],
+            'catalogue' => $this->catalogue(),
+            'heldPermissions' => $request->user()->tenantPermissionValues($tenant),
+        ]);
+    }
+
     /**
      * @return array<int, array<string, mixed>>
      */
@@ -152,9 +188,11 @@ class ProfileController extends Controller
         return array_map(fn (TenantPermissionDomain $domain) => [
             'value' => $domain->value,
             'label' => $domain->label(),
-            'permissions' => array_map(fn ($permission) => [
+            'permissions' => array_map(fn (TenantPermission $permission) => [
                 'value' => $permission->value,
                 'label' => $permission->label(),
+                'action' => $permission->actionLabel(),
+                'requires' => $permission->prerequisite()?->value,
             ], $domain->permissions()),
         ], TenantPermissionDomain::cases());
     }

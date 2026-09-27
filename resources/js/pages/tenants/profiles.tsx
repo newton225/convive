@@ -1,9 +1,8 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Copy, Plus, ShieldCheck, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import DeleteProfileModal from '@/components/delete-profile-modal';
 import Heading from '@/components/heading';
-import ProfileFormModal from '@/components/profile-form-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,42 +13,23 @@ import {
 } from '@/components/ui/tooltip';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { edit, index as tenantsIndex } from '@/routes/tenants';
-import { duplicate, index } from '@/routes/tenants/profiles';
-import type {
-    PermissionDomain,
-    Tenant,
-    TenantProfile,
-    Translations,
-} from '@/types';
+import {
+    create,
+    duplicate,
+    edit as editProfile,
+    index,
+} from '@/routes/tenants/profiles';
+import type { Tenant, TenantProfile, Translations } from '@/types';
 
 type Props = {
     tenant: Pick<Tenant, 'id' | 'name' | 'slug'>;
     profiles: TenantProfile[];
-    catalogue: PermissionDomain[];
-    heldPermissions: string[];
 };
 
-export default function TenantProfiles({
-    tenant,
-    profiles,
-    catalogue,
-    heldPermissions,
-}: Props) {
+export default function TenantProfiles({ tenant, profiles }: Props) {
     const { t } = useTranslation();
-    const [editing, setEditing] = useState<TenantProfile | null>(null);
-    const [formOpen, setFormOpen] = useState(false);
     const [deleting, setDeleting] = useState<TenantProfile | null>(null);
     const [deleteOpen, setDeleteOpen] = useState(false);
-
-    const openCreate = () => {
-        setEditing(null);
-        setFormOpen(true);
-    };
-
-    const openEdit = (profile: TenantProfile) => {
-        setEditing(profile);
-        setFormOpen(true);
-    };
 
     const openDelete = (profile: TenantProfile) => {
         setDeleting(profile);
@@ -70,11 +50,10 @@ export default function TenantProfiles({
                         description={t('profiles.description')}
                     />
 
-                    <Button
-                        data-test="profile-create-button"
-                        onClick={openCreate}
-                    >
-                        <Plus /> {t('profiles.actions.create')}
+                    <Button data-test="profile-create-button" asChild>
+                        <Link href={create(tenant.slug)}>
+                            <Plus /> {t('profiles.actions.create')}
+                        </Link>
                     </Button>
                 </div>
 
@@ -154,11 +133,16 @@ export default function TenantProfiles({
                                                 variant="secondary"
                                                 size="sm"
                                                 data-test="profile-edit-button"
-                                                onClick={() =>
-                                                    openEdit(profile)
-                                                }
+                                                asChild
                                             >
-                                                {t('profiles.actions.edit')}
+                                                <Link
+                                                    href={editProfile([
+                                                        tenant.slug,
+                                                        profile.id,
+                                                    ])}
+                                                >
+                                                    {t('profiles.actions.edit')}
+                                                </Link>
                                             </Button>
 
                                             <Tooltip>
@@ -190,15 +174,6 @@ export default function TenantProfiles({
                     ))}
                 </div>
             </div>
-
-            <ProfileFormModal
-                tenantSlug={tenant.slug}
-                profile={editing}
-                catalogue={catalogue}
-                heldPermissions={heldPermissions}
-                open={formOpen}
-                onOpenChange={setFormOpen}
-            />
 
             <DeleteProfileModal
                 tenantSlug={tenant.slug}

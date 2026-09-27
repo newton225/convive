@@ -2,6 +2,11 @@
 
 namespace App\Enums;
 
+/**
+ * Les modules de l'editeur de profils : un par ecran du back-office, dans l'ordre ou l'exploitant
+ * les rencontre. Simple regroupement d'affichage, jamais stocke : changer de module une permission
+ * ne modifie aucun droit.
+ */
 enum TenantPermissionDomain: string
 {
     case Events = 'events';
@@ -12,8 +17,12 @@ enum TenantPermissionDomain: string
     case Scan = 'scan';
     case Messages = 'messages';
     case Reports = 'reports';
-    case Tenant = 'tenant';
+    case Brand = 'brand';
+    case Organisation = 'organisation';
+    case PaymentAccounts = 'payment_accounts';
+    case Units = 'units';
     case Team = 'team';
+    case Profiles = 'profiles';
     case Billing = 'billing';
     case Audit = 'audit';
 

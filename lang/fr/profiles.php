@@ -12,6 +12,16 @@ return [
         'reader' => 'Consulte les inscrits et les rapports, sans rien modifier.',
     ],
 
+    'form' => [
+        'create_title' => 'Nouveau profil',
+        'edit_title' => 'Modifier le profil :name',
+        'intro' => "Donnez un nom au profil, puis cochez pour chaque module ce que ses porteurs peuvent faire. Une action grisée est une permission que vous ne détenez pas vous-même : vous ne pouvez pas l'accorder.",
+        'modules' => 'Modules et actions',
+        'all' => 'Tout',
+        'members_notice' => '{1} Ce profil est porté par 1 membre : la modification prend effet immédiatement pour lui.|[2,*] Ce profil est porté par :count membres : la modification prend effet immédiatement pour eux.',
+        'back' => 'Retour aux profils',
+    ],
+
     'fields' => [
         'name' => 'Nom du profil',
         'name_placeholder' => 'Par exemple : Accueil',

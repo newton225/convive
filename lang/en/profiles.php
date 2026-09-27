@@ -12,6 +12,16 @@ return [
         'reader' => 'Reads registrations and reports, changes nothing.',
     ],
 
+    'form' => [
+        'create_title' => 'New profile',
+        'edit_title' => 'Edit the :name profile',
+        'intro' => 'Name the profile, then tick for each module what its holders may do. A greyed-out action is a permission you do not hold yourself: you cannot grant it.',
+        'modules' => 'Modules and actions',
+        'all' => 'All',
+        'members_notice' => '{1} This profile is held by 1 member: the change applies to them immediately.|[2,*] This profile is held by :count members: the change applies to them immediately.',
+        'back' => 'Back to profiles',
+    ],
+
     'fields' => [
         'name' => 'Profile name',
         'name_placeholder' => 'For example: Front desk',

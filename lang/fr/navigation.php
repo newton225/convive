@@ -15,4 +15,5 @@ return [
     'billing' => 'Abonnement',
     'audit' => 'Journalisation',
     'ticket_template' => 'Gabarit du billet',
+    'profiles' => 'Profils et permissions',
 ];
