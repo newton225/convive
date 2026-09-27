@@ -194,6 +194,7 @@ Audit.layout = (props: {
     tenant: { slug: string };
     translations: Translations;
 }) => ({
+    wide: true,
     breadcrumbs: [
         {
             title: translate(props.translations, 'audit.title'),

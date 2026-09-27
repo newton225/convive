@@ -13,7 +13,14 @@ import { index as tenants } from '@/routes/tenants';
 import { useTranslation } from '@/hooks/use-translation';
 import type { NavItem } from '@/types';
 
-export default function SettingsLayout({ children }: PropsWithChildren) {
+type Props = PropsWithChildren<{
+    // Pages d'edition riches (apercu cote a cote, tableaux) : toute la largeur disponible. Les
+    // formulaires simples gardent une colonne etroite, plus lisible. Pose par la page via ses
+    // props de mise en page (`Page.layout`), qu'Inertia transmet a chaque layout de la pile.
+    wide?: boolean;
+}>;
+
+export default function SettingsLayout({ children, wide = false }: Props) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
     const { t } = useTranslation();
 
@@ -69,8 +76,8 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
 
                 <Separator className="my-6 lg:hidden" />
 
-                <div className="flex-1 md:max-w-2xl">
-                    <section className="max-w-xl space-y-12">
+                <div className={cn('min-w-0 flex-1', !wide && 'md:max-w-2xl')}>
+                    <section className={cn('space-y-12', !wide && 'max-w-xl')}>
                         {children}
                     </section>
                 </div>

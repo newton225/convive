@@ -136,15 +136,15 @@ export function BrandedTicket({ brand, model, elements, eventName }: Props) {
                 </div>
             ) : null}
 
-            <div className="border-ink/20 mt-5 flex items-end justify-between gap-4 border-t border-dashed pt-4">
+            <div className="border-ink/20 mt-5 flex flex-wrap items-end justify-between gap-4 border-t border-dashed pt-4">
                 <span
-                    className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--brand-primary)]/10 px-3 py-1 text-xs font-medium text-[color:var(--brand-primary)]"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--brand-primary)]/10 px-3 py-1 text-xs font-medium whitespace-nowrap text-[color:var(--brand-primary)]"
                     role="status"
                 >
                     <Check className="size-3.5" />
                     {t('ticket_template.preview.valid')}
                 </span>
-                <div className="flex items-end gap-2">
+                <div className="flex shrink-0 items-end gap-2">
                     {asset(
                         elements.stamp,
                         brand.stampUrl,

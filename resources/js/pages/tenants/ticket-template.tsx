@@ -118,7 +118,7 @@ export default function TicketTemplate({
                                     aria-label={t(
                                         'ticket_template.models.title',
                                     )}
-                                    className="grid gap-2 sm:grid-cols-3"
+                                    className="grid grid-cols-[repeat(auto-fit,minmax(8rem,1fr))] gap-2"
                                 >
                                     {Models.map((item) => (
                                         <button
@@ -130,7 +130,7 @@ export default function TicketTemplate({
                                             onClick={() => setModel(item)}
                                             data-test={`ticket-model-${item}`}
                                             className={cn(
-                                                'min-h-11 rounded-lg p-3 text-left text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60',
+                                                'min-h-11 min-w-0 rounded-lg p-3 text-left text-sm break-words transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60',
                                                 'focus-visible:ring-ring',
                                                 model === item
                                                     ? 'bg-primary text-primary-foreground'
@@ -299,6 +299,7 @@ TicketTemplate.layout = (props: {
     tenant: { slug: string };
     translations: Translations;
 }) => ({
+    wide: true,
     breadcrumbs: [
         {
             title: translate(props.translations, 'ticket_template.title'),
