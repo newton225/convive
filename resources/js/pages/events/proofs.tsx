@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/table';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
-import { formatDateTime } from '@/lib/format-date';
+import { formatDateTime, formatRelative } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { approve, index, reject } from '@/routes/tenants/events/proofs';
@@ -71,6 +71,21 @@ export default function EventProofs({
                     <p className="text-muted-foreground text-xs">
                         {row.original.phone}
                     </p>
+                    <p
+                        className="text-muted-foreground text-xs"
+                        data-test="proof-companions"
+                    >
+                        {row.original.companions.length === 0
+                            ? t('proofs.companions.none')
+                            : t('proofs.companions.list', {
+                                  names: row.original.companions
+                                      .map(
+                                          (companion) =>
+                                              `${companion.name} (${companion.unit})`,
+                                      )
+                                      .join(', '),
+                              })}
+                    </p>
                 </div>
             ),
         },
@@ -89,9 +104,16 @@ export default function EventProofs({
         {
             header: t('proofs.columns.submitted_at'),
             cell: ({ row }) =>
-                row.original.submittedAt
-                    ? formatDateTime(row.original.submittedAt, locale)
-                    : null,
+                row.original.submittedAt ? (
+                    <div>
+                        <p>
+                            {formatRelative(row.original.submittedAt, locale)}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                            {formatDateTime(row.original.submittedAt, locale)}
+                        </p>
+                    </div>
+                ) : null,
         },
         {
             header: t('proofs.columns.channel'),
@@ -143,6 +165,11 @@ export default function EventProofs({
                             {t(
                                 'proofs.signals.reference_missing_from_statement',
                             )}
+                        </Badge>
+                    ) : null}
+                    {!Object.values(row.original.signals).some(Boolean) ? (
+                        <Badge variant="outline" data-test="signal-none">
+                            {t('proofs.signals.none')}
                         </Badge>
                     ) : null}
                     {row.original.signals.statementAmountMismatch ? (

@@ -23,10 +23,16 @@ return [
     ],
 
     'signals' => [
+        'none' => 'No anomaly detected',
         'duplicate_reference' => 'Reference already used',
         'duplicate_image' => 'Capture already seen',
         'reference_missing_from_statement' => 'Reference missing from the statement',
         'statement_amount_mismatch' => 'Statement amount differs',
+    ],
+
+    'companions' => [
+        'none' => 'No companion',
+        'list' => 'Companions: :names',
     ],
 
     'actions' => [

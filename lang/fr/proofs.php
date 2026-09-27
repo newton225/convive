@@ -23,10 +23,16 @@ return [
     ],
 
     'signals' => [
+        'none' => 'Aucune anomalie détectée',
         'duplicate_reference' => 'Référence déjà utilisée',
         'duplicate_image' => 'Capture déjà vue',
         'reference_missing_from_statement' => 'Référence absente du relevé',
         'statement_amount_mismatch' => 'Montant du relevé différent',
+    ],
+
+    'companions' => [
+        'none' => 'Aucun accompagnateur',
+        'list' => 'Accompagnateurs : :names',
     ],
 
     'actions' => [

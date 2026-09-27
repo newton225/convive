@@ -12,6 +12,7 @@ export type PaymentProofRow = {
     phone: string;
     unit: string;
     partySize: number;
+    companions: { name: string; unit: string }[];
     amountDue: number;
     submittedAt: string | null;
     channelLabel: string;

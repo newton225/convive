@@ -14,6 +14,7 @@ use App\Models\Event;
 use App\Models\Registration;
 use App\Models\SeatingTable;
 use App\Models\Tenant;
+use App\Models\User;
 use App\Support\PdfLetterhead;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -46,7 +47,7 @@ class RegistrationController extends Controller
         Gate::authorize('viewAny', [Registration::class, $tenant]);
 
         $registrations = $this->filteredQuery($request, $event)
-            ->with(['unit', 'tableAssignment.seatingTable'])
+            ->with(['unit', 'tableAssignment.seatingTable', 'latestProof', 'ticket.arrival'])
             ->paginate(25)
             ->withQueryString();
 
@@ -64,6 +65,7 @@ class RegistrationController extends Controller
                 'search' => $request->string('filter.search')->toString() ?: null,
                 'status' => $request->string('filter.status')->toString() ?: null,
             ],
+            'cancellations' => $this->recentCancellations($event),
         ]);
     }
 
@@ -310,6 +312,37 @@ class RegistrationController extends Controller
             'statusLabel' => $registration->status->label(),
             'tableNumber' => $registration->tableAssignment?->seatingTable->number,
             'cancellationReason' => $registration->cancellation_reason,
+            'channelLabel' => $registration->latestProof?->channel->label(),
+            'enteredAt' => $registration->ticket?->arrival?->created_at?->toISOString(),
         ];
+    }
+
+    /**
+     * Les dernieres annulations de l'evenement, avec motif, auteur et date : le prototype les tient
+     * a part de la liste, pour qu'une annulation reste lisible sans filtrer.
+     *
+     * @return array<int, array{name: string, reason: string|null, cancelledAt: string|null, cancelledBy: string|null}>
+     */
+    private function recentCancellations(Event $event): array
+    {
+        $cancelled = Registration::where('event_id', $event->id)
+            ->where('status', RegistrationStatus::Cancelled)
+            ->latest('cancelled_at')
+            ->limit(10)
+            ->get(['name', 'cancellation_reason', 'cancelled_at', 'cancelled_by_user_id']);
+
+        // L'auteur vit dans la base centrale (`users`) : une seule requete pour toute la liste.
+        $authors = User::query()
+            ->whereIn('id', $cancelled->pluck('cancelled_by_user_id')->filter()->unique())
+            ->pluck('name', 'id');
+
+        return $cancelled->map(fn (Registration $registration) => [
+            'name' => $registration->name,
+            'reason' => $registration->cancellation_reason,
+            'cancelledAt' => $registration->cancelled_at?->toISOString(),
+            'cancelledBy' => $registration->cancelled_by_user_id !== null
+                ? $authors->get($registration->cancelled_by_user_id)
+                : null,
+        ])->all();
     }
 }

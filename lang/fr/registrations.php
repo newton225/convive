@@ -4,6 +4,20 @@ return [
     'title' => 'Base d\'inscrits',
     'description' => 'Recherche, filtres et export des inscriptions de cet événement.',
 
+    'entry' => [
+        'entered' => 'Entré à :time',
+        'not_yet' => 'Pas encore entré',
+    ],
+
+    'cancellations' => [
+        'title' => 'Annulations',
+        'empty_title' => 'Aucune inscription annulée',
+        'empty_description' => "Les annulations et remboursements apparaîtront ici avec leur motif et l'auteur de l'action.",
+        'no_reason' => 'Motif non renseigné',
+        'by' => 'Par :name, le :date',
+        'unknown_author' => 'un membre retiré',
+    ],
+
     'columns' => [
         'name' => 'Nom',
         'unit' => 'Unité',
@@ -11,6 +25,8 @@ return [
         'amount_due' => 'Montant dû',
         'status' => 'Statut',
         'table' => 'Table',
+        'channel' => 'Canal',
+        'entry' => 'Entrée',
         'actions' => 'Actions',
         'export' => [
             'name' => 'Nom',

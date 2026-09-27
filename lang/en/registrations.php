@@ -4,6 +4,20 @@ return [
     'title' => 'Registrations',
     'description' => 'Search, filter and export this event\'s registrations.',
 
+    'entry' => [
+        'entered' => 'Entered at :time',
+        'not_yet' => 'Not entered yet',
+    ],
+
+    'cancellations' => [
+        'title' => 'Cancellations',
+        'empty_title' => 'No cancelled registration',
+        'empty_description' => 'Cancellations and refunds will appear here with their reason and who did it.',
+        'no_reason' => 'No reason given',
+        'by' => 'By :name, on :date',
+        'unknown_author' => 'a removed member',
+    ],
+
     'columns' => [
         'name' => 'Name',
         'unit' => 'Unit',
@@ -11,6 +25,8 @@ return [
         'amount_due' => 'Amount due',
         'status' => 'Status',
         'table' => 'Table',
+        'channel' => 'Channel',
+        'entry' => 'Entry',
         'actions' => 'Actions',
         'export' => [
             'name' => 'Name',

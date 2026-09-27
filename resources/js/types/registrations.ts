@@ -69,6 +69,16 @@ export type RegistrationRow = {
     statusLabel: string;
     tableNumber: number | null;
     cancellationReason: string | null;
+    // Canal de la derniere preuve deposee, et heure du passage a l'entree (null tant qu'absent).
+    channelLabel: string | null;
+    enteredAt: string | null;
+};
+
+export type RegistrationCancellation = {
+    name: string;
+    reason: string | null;
+    cancelledAt: string | null;
+    cancelledBy: string | null;
 };
 
 export type RegistrationsFilters = {

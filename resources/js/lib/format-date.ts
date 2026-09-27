@@ -1,4 +1,4 @@
-import { format, type Locale } from 'date-fns';
+import { format, formatDistanceToNow, type Locale } from 'date-fns';
 import { enUS, fr } from 'date-fns/locale';
 import type { LocaleCode } from '@/types';
 
@@ -15,4 +15,12 @@ export function formatDateTime(value: string, locale: LocaleCode): string {
 
 export function formatDate(value: string, locale: LocaleCode): string {
     return format(new Date(value), 'PPP', { locale: locales[locale] });
+}
+
+// « il y a 38 minutes » : l'anciennete d'un depot se lit mieux ainsi qu'en date absolue.
+export function formatRelative(value: string, locale: LocaleCode): string {
+    return formatDistanceToNow(new Date(value), {
+        addSuffix: true,
+        locale: locales[locale],
+    });
 }

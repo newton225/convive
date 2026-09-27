@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import DataTable from '@/components/data-table';
+import { CancellationsCard } from '@/components/registrations/cancellations-card';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ import {
 } from '@/components/ui/select';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
+import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { cancel, index, purge } from '@/routes/tenants/events/registrations';
@@ -35,6 +37,7 @@ import {
     pdf,
 } from '@/routes/tenants/events/registrations/export';
 import type {
+    RegistrationCancellation,
     RegistrationRow,
     RegistrationsFilters,
     RegistrationsMeta,
@@ -49,6 +52,7 @@ type Props = {
     rows: RegistrationRow[];
     meta: RegistrationsMeta;
     filters: RegistrationsFilters;
+    cancellations: RegistrationCancellation[];
 };
 
 const StatusFilters = [
@@ -71,6 +75,7 @@ export default function EventRegistrations({
     rows,
     meta,
     filters,
+    cancellations,
 }: Props) {
     const { t, locale } = useTranslation();
     const [search, setSearch] = useState(filters.search ?? '');
@@ -175,6 +180,28 @@ export default function EventRegistrations({
             header: t('registrations.columns.table'),
             cell: ({ row }) =>
                 row.original.tableNumber ?? t('registrations.actions.no_table'),
+        },
+        {
+            header: t('registrations.columns.channel'),
+            cell: ({ row }) => row.original.channelLabel ?? '-',
+        },
+        {
+            header: t('registrations.columns.entry'),
+            cell: ({ row }) =>
+                row.original.enteredAt ? (
+                    <Badge variant="default">
+                        {t('registrations.entry.entered', {
+                            time: formatDateTime(
+                                row.original.enteredAt,
+                                locale,
+                            ),
+                        })}
+                    </Badge>
+                ) : (
+                    <span className="text-muted-foreground text-xs">
+                        {t('registrations.entry.not_yet')}
+                    </span>
+                ),
         },
         {
             header: t('registrations.columns.actions'),
@@ -333,6 +360,8 @@ export default function EventRegistrations({
                         </>
                     }
                 />
+
+                <CancellationsCard cancellations={cancellations} />
             </div>
 
             <Dialog

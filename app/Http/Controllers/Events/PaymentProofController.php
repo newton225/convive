@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\PaymentProof;
 use App\Models\Registration;
+use App\Models\RegistrationCompanion;
 use App\Models\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -137,6 +138,10 @@ class PaymentProofController extends Controller
             'phone' => $registration->phone,
             'unit' => $registration->unit->name,
             'partySize' => $registration->party_size,
+            'companions' => $registration->companions->sortBy('position')->map(fn (RegistrationCompanion $companion) => [
+                'name' => $companion->name,
+                'unit' => $companion->unit->name,
+            ])->values()->all(),
             'amountDue' => $registration->amount_due,
             'submittedAt' => $proof->created_at?->toISOString(),
             'channelLabel' => $proof->channel->label(),
