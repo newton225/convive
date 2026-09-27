@@ -160,7 +160,7 @@ export default function ProfileForm({
                     </div>
                 </div>
 
-                <section className="space-y-3">
+                <section className="space-y-3" data-error-for="permissions">
                     <h2 className="text-base font-medium">
                         {t('profiles.form.modules')}
                     </h2>

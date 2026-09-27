@@ -4,6 +4,7 @@ return [
     'personal_name' => ':name\'s organisation',
 
     'flash' => [
+        'switched' => 'You are now in ":name".',
         'created' => 'Organisation created.',
         'updated' => 'Organisation updated.',
         'deleted' => 'Organisation deleted.',

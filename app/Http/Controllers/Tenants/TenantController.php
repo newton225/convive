@@ -123,6 +123,8 @@ class TenantController extends Controller
 
         $request->user()->switchTenant($tenant);
 
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('tenants.flash.switched', ['name' => $tenant->name])]);
+
         return back();
     }
 

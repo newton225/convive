@@ -32,6 +32,8 @@ class WaitlistController extends Controller
         $event = $this->publishedEvent($token);
 
         if (! $event->isFull()) {
+            Inertia::flash('toast', ['type' => 'info', 'message' => __('guest.flash.seats_available')]);
+
             return redirect()->to($event->publicUrl());
         }
 
@@ -41,6 +43,8 @@ class WaitlistController extends Controller
             'unit_id' => (int) $request->validated('unit_id'),
             'companions' => $request->companions(),
         ]);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('guest.flash.waitlist_joined')]);
 
         return to_route('public.waitlist.show', [
             'token' => $token,
@@ -95,6 +99,8 @@ class WaitlistController extends Controller
         $result = app(FinalizeWaitlistEntry::class)->handle($entry);
 
         if ($result === null) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => __('guest.flash.waitlist_seat_taken')]);
+
             return redirect()->to($event->publicUrl());
         }
 

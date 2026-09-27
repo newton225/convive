@@ -66,6 +66,16 @@ return [
         ],
     ],
 
+    'flash' => [
+        'proof_sent' => 'Preuve envoyée. Elle va être vérifiée par l\'organisation.',
+        'proof_too_late' => "Le délai de réservation était écoulé : la preuve n'a pas été enregistrée. Vérifiez les places et relancez votre réservation.",
+        'no_seats_left' => "Il ne reste plus assez de places pour votre inscription. Vous pouvez rejoindre la liste d'attente si elle est ouverte.",
+        'hold_restarted' => 'Votre réservation est relancée : le décompte repart.',
+        'seats_available' => "Des places sont disponibles : inscrivez-vous directement, sans passer par la liste d'attente.",
+        'waitlist_joined' => "Vous êtes inscrit sur la liste d'attente. Vous serez prévenu dès qu'une place se libère.",
+        'waitlist_seat_taken' => "La place qui vous était proposée n'est plus disponible. Vous restez prévenu si une autre se libère.",
+    ],
+
     'ticket' => [
         'title' => 'Votre billet',
         'guests_title' => 'Invités',

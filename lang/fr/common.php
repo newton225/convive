@@ -48,6 +48,15 @@ return [
         'dismiss' => 'Plus tard',
     ],
 
+    'feedback' => [
+        'forbidden' => "Vous n'avez pas la permission de faire cette action. Demandez-la au Propriétaire de l'organisation.",
+        'not_found' => "Cet élément n'existe plus. Il a peut-être été supprimé entre-temps : rechargez la page.",
+        'session_expired' => 'Votre session a expiré. Rechargez la page, puis recommencez.',
+        'server_error' => "Une erreur est survenue de notre côté. Réessayez dans un instant ; si elle persiste, prévenez l'équipe Convive.",
+        'unexpected' => 'Cette action n\'a pas abouti. Réessayez dans un instant.',
+        'network_error' => "Le réseau ne répond pas. Vérifiez votre connexion, puis réessayez.",
+    ],
+
     'rate_limit' => [
         'title' => 'Un peu de patience',
         'retry_in' => '{1} Cette action a été répétée trop souvent en peu de temps. Réessayez dans 1 minute.|[2,*] Cette action a été répétée trop souvent en peu de temps. Réessayez dans :minutes minutes.',

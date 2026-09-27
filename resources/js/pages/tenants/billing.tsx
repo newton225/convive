@@ -175,7 +175,9 @@ export default function Billing({
                 </div>
 
                 {billingErrors.length > 0 ? (
-                    <AlertError errors={billingErrors} />
+                    <div data-error-for="billing">
+                        <AlertError errors={billingErrors} />
+                    </div>
                 ) : null}
 
                 {subscription?.status === 'past_due' ? (

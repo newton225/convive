@@ -415,6 +415,7 @@ class TenantTest extends TestCase
             ->post(route('tenants.switch', $tenant));
 
         $response->assertRedirect();
+        $response->assertInertiaFlash('toast', ['type' => 'success', 'message' => __('tenants.flash.switched', ['name' => $tenant->name])]);
 
         $this->assertEquals($tenant->id, $user->fresh()->current_tenant_id);
     }

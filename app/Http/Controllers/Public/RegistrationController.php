@@ -110,6 +110,8 @@ class RegistrationController extends Controller
                 return back()->withInput()->withErrors(['registration' => __('guest.registration.errors.registrations_paused')]);
             }
 
+            Inertia::flash('toast', ['type' => 'error', 'message' => __('guest.flash.no_seats_left')]);
+
             return redirect()->to($event->publicUrl());
         }
 
@@ -270,8 +272,12 @@ class RegistrationController extends Controller
         }
 
         if (! app(HoldRegistration::class)->handle($event, $registration)) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => __('guest.flash.no_seats_left')]);
+
             return redirect()->to($event->publicUrl());
         }
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('guest.flash.hold_restarted')]);
 
         return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
     }

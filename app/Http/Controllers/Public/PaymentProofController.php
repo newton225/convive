@@ -10,6 +10,7 @@ use App\Models\Event;
 use App\Models\Registration;
 use App\Models\Tenant;
 use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
 
 /**
  * Le depot de la preuve de paiement (README ecran 5 etape 2 et 3, ecran 6), etape 6 de
@@ -35,7 +36,7 @@ class PaymentProofController extends Controller
             $registration->update(['status' => RegistrationStatus::Expired]);
         }
 
-        app(SubmitPaymentProof::class)->handle(
+        $proof = app(SubmitPaymentProof::class)->handle(
             $registration,
             [
                 'payment_account_id' => (int) $request->validated('payment_account_id'),
@@ -46,6 +47,12 @@ class PaymentProofController extends Controller
             $request->file('receipt'),
             $request->validated('idempotency_key'),
         );
+
+        // Sans preuve enregistree, le decompte etait ecoule : l'invite doit le savoir, la page
+        // qu'il retrouve lui propose de relancer.
+        Inertia::flash('toast', $proof !== null
+            ? ['type' => 'success', 'message' => __('guest.flash.proof_sent')]
+            : ['type' => 'error', 'message' => __('guest.flash.proof_too_late')]);
 
         return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
     }

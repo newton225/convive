@@ -66,6 +66,16 @@ return [
         ],
     ],
 
+    'flash' => [
+        'proof_sent' => 'Proof sent. The organisation will verify it.',
+        'proof_too_late' => 'The reservation window had closed: the proof was not saved. Check availability and restart your reservation.',
+        'no_seats_left' => 'There are not enough seats left for your registration. You can join the waitlist if it is open.',
+        'hold_restarted' => 'Your reservation is back on: the countdown restarts.',
+        'seats_available' => 'Seats are available: register directly, no need for the waitlist.',
+        'waitlist_joined' => 'You are on the waitlist. You will be notified as soon as a seat frees up.',
+        'waitlist_seat_taken' => 'The seat offered to you is no longer available. You will still be notified if another frees up.',
+    ],
+
     'ticket' => [
         'title' => 'Your ticket',
         'guests_title' => 'Guests',

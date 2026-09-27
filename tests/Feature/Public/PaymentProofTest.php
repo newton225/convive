@@ -329,7 +329,10 @@ class PaymentProofTest extends TestCase
         $this->post(
             $this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}/proof"),
             $this->validPayload($account),
-        )->assertRedirect($this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}"));
+        )
+            ->assertRedirect($this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}"))
+            // Le refus se dit : sans ce message, l'invite croyait sa preuve partie.
+            ->assertInertiaFlash('toast', ['type' => 'error', 'message' => __('guest.flash.proof_too_late')]);
 
         $this->assertSame(
             RegistrationStatus::Expired,

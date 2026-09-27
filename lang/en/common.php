@@ -48,6 +48,15 @@ return [
         'dismiss' => 'Later',
     ],
 
+    'feedback' => [
+        'forbidden' => "You don't have permission to do this. Ask the organisation's Owner for it.",
+        'not_found' => 'This item no longer exists. It may have been deleted in the meantime: reload the page.',
+        'session_expired' => 'Your session has expired. Reload the page, then try again.',
+        'server_error' => 'Something went wrong on our side. Try again in a moment; if it persists, let the Convive team know.',
+        'unexpected' => 'This action did not go through. Try again in a moment.',
+        'network_error' => 'The network is not responding. Check your connection, then try again.',
+    ],
+
     'rate_limit' => [
         'title' => 'Please wait a moment',
         'retry_in' => '{1} This action was repeated too often in a short time. Try again in 1 minute.|[2,*] This action was repeated too often in a short time. Try again in :minutes minutes.',

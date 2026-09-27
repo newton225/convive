@@ -93,6 +93,7 @@ export default function PublicRegistration({
                                 <Alert
                                     variant="destructive"
                                     data-test="registration-closed"
+                                    data-error-for="registration"
                                 >
                                     <AlertCircle />
                                     <AlertDescription>
