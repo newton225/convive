@@ -49,9 +49,11 @@ class DashboardOverview
     public static function for(Event $event): array
     {
         return [
+            'eventId' => $event->id,
             'eventName' => $event->name,
             'capacity' => $event->capacity(),
             'kpis' => self::kpis($event),
+            'context' => self::context($event),
             'holdExpiry' => self::holdExpiry($event),
             'registrationsPerDay' => self::registrationsPerDay($event),
             'proofsByChannel' => self::proofsByChannel($event),
@@ -71,6 +73,33 @@ class DashboardOverview
             'toCheck' => $event->registrations()->where('status', RegistrationStatus::ProofSubmitted)->count(),
             'withoutProof' => $event->registrations()->whereIn('status', Registration::UnfinalizedStatuses)->count(),
             'seatsLeft' => $event->remainingSeats(),
+        ];
+    }
+
+    /**
+     * Ce qui donne du sens aux chiffres cles (prototype Convive.dc.html, tableau de bord) : la
+     * tendance de la semaine, l'argent deja encaisse, les preuves qui attendent depuis trop
+     * longtemps, la prochaine purge et le compte a rebours jusqu'a l'evenement.
+     *
+     * @return array{registrationsThisWeek: int, collectedAmount: int, validatedShare: int|null, waitingOver24h: int, purgeAt: string|null, daysUntilEvent: int|null}
+     */
+    private static function context(Event $event): array
+    {
+        $registrations = $event->registrations()->count();
+        $validated = $event->registrations()->where('status', RegistrationStatus::Confirmed)->count();
+
+        return [
+            'registrationsThisWeek' => $event->registrations()->where('created_at', '>=', now()->subDays(7))->count(),
+            'collectedAmount' => (int) $event->registrations()->where('status', RegistrationStatus::Confirmed)->sum('amount_due'),
+            'validatedShare' => $registrations > 0 ? (int) round(100 * $validated / $registrations) : null,
+            'waitingOver24h' => $event->registrations()
+                ->where('status', RegistrationStatus::ProofSubmitted)
+                ->whereHas('latestProof', fn ($query) => $query->where('created_at', '<', now()->subDay()))
+                ->count(),
+            'purgeAt' => $event->purge_at?->isFuture() ? $event->purge_at->toISOString() : null,
+            'daysUntilEvent' => $event->starts_at?->isFuture()
+                ? (int) now()->startOfDay()->diffInDays($event->starts_at->startOfDay())
+                : null,
         ];
     }
 

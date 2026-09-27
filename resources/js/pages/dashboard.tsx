@@ -9,13 +9,20 @@ import { RegistrationsChart } from '@/components/dashboard/registrations-chart';
 import { TableOccupancy } from '@/components/dashboard/table-occupancy';
 import Heading from '@/components/heading';
 import PendingInvitationsModal from '@/components/pending-invitations-modal';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { translate, useTranslation } from '@/hooks/use-translation';
+import { formatAmount } from '@/lib/format-currency';
+import { formatRelative } from '@/lib/format-date';
+import { can, Permission } from '@/lib/permissions';
 import { dashboard } from '@/routes';
 import { create as createEvent } from '@/routes/tenants/events';
+import { index as proofsIndex } from '@/routes/tenants/events/proofs';
 import type {
     DashboardInvitation,
     DashboardOverview,
+    LocaleCode,
+    TranslationReplacements,
     Translations,
 } from '@/types';
 
@@ -41,6 +48,45 @@ const KpiLabels: Record<(typeof Kpis)[number], string> = {
     seatsLeft: 'dashboard.kpis.seats_left',
 };
 
+// Le sous-titre de chaque chiffre cle (prototype Convive.dc.html) : tendance, argent encaisse,
+// attente trop longue, prochaine purge.
+function kpiHint(
+    kpi: (typeof Kpis)[number],
+    overview: DashboardOverview,
+    t: (key: string, replacements?: TranslationReplacements) => string,
+    locale: LocaleCode,
+): string | null {
+    const context = overview.context;
+
+    switch (kpi) {
+        case 'registrations':
+            return t('dashboard.hints.this_week', {
+                count: context.registrationsThisWeek,
+            });
+        case 'validated':
+            return context.validatedShare === null
+                ? null
+                : t('dashboard.hints.validated', {
+                      share: String(context.validatedShare),
+                      amount: formatAmount(context.collectedAmount, locale),
+                  });
+        case 'toCheck':
+            return context.waitingOver24h > 0
+                ? t('dashboard.hints.waiting', {
+                      count: context.waitingOver24h,
+                  })
+                : null;
+        case 'withoutProof':
+            return context.purgeAt
+                ? t('dashboard.hints.purge', {
+                      when: formatRelative(context.purgeAt, locale),
+                  })
+                : null;
+        default:
+            return null;
+    }
+}
+
 /**
  * README ecran 17 : le tableau de bord. Inscrits, preuves validees, preuves a verifier, sans
  * preuve, places restantes, inscriptions par jour, preuves par canal, occupation des tables,
@@ -53,8 +99,11 @@ export default function Dashboard({
     paymentAccountNotice = null,
     overview = null,
 }: Props) {
-    const { t } = useTranslation();
-    const { currentTenant } = usePage().props;
+    const { t, locale } = useTranslation();
+    const { currentTenant, tenantPermissions } = usePage().props;
+    const canCheckProofs =
+        tenantPermissions !== null &&
+        can(tenantPermissions, Permission.ProofsView);
     const [showInvitations, setShowInvitations] = useState(
         pendingInvitations.length > 0,
     );
@@ -69,14 +118,50 @@ export default function Dashboard({
             />
 
             <div className="flex flex-1 flex-col gap-6 p-4">
-                <Heading
-                    title={t('dashboard.title')}
-                    description={
-                        overview
-                            ? `${t('dashboard.event_label')} : ${overview.eventName}`
-                            : undefined
-                    }
-                />
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <Heading
+                        title={t('dashboard.title')}
+                        description={
+                            overview
+                                ? `${t('dashboard.event_label')} : ${overview.eventName}`
+                                : undefined
+                        }
+                    />
+                    {overview ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                            {overview.context.daysUntilEvent !== null ? (
+                                <Badge
+                                    variant="secondary"
+                                    data-test="dashboard-countdown"
+                                >
+                                    {t('dashboard.countdown', {
+                                        days: overview.context.daysUntilEvent,
+                                        count: overview.context.daysUntilEvent,
+                                    })}
+                                </Badge>
+                            ) : null}
+                            {canCheckProofs &&
+                            currentTenant &&
+                            overview.kpis.toCheck > 0 ? (
+                                <Button
+                                    asChild
+                                    data-test="dashboard-check-proofs"
+                                >
+                                    <Link
+                                        href={proofsIndex([
+                                            currentTenant.slug,
+                                            overview.eventId,
+                                        ])}
+                                    >
+                                        {t('dashboard.check_proofs', {
+                                            count: overview.kpis.toCheck,
+                                        })}
+                                    </Link>
+                                </Button>
+                            ) : null}
+                        </div>
+                    ) : null}
+                </div>
 
                 {paymentAccountNotice ? (
                     <p
@@ -101,6 +186,7 @@ export default function Dashboard({
                                     key={kpi}
                                     label={t(KpiLabels[kpi])}
                                     value={overview.kpis[kpi]}
+                                    hint={kpiHint(kpi, overview, t, locale)}
                                     testId={`dashboard-kpi-${kpi}`}
                                 />
                             ))}

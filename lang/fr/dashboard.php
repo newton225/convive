@@ -12,6 +12,16 @@ return [
         'seats_left' => 'Places restantes',
     ],
 
+    'countdown' => '{0} Aujourd\'hui|[1,*] J-:days',
+    'check_proofs' => 'Vérifier les preuves (:count)',
+
+    'hints' => [
+        'this_week' => '{0} Aucune cette semaine|{1} +1 cette semaine|[2,*] +:count cette semaine',
+        'validated' => ':share % du total · :amount encaissés',
+        'waiting' => '{1} dont 1 en attente depuis plus de 24 h|[2,*] dont :count en attente depuis plus de 24 h',
+        'purge' => 'purge automatique :when',
+    ],
+
     'hold_expiry' => [
         'rate' => ':rate % des réservations ont expiré sans preuve (:lapsed sur :holds).',
         'none' => 'Aucune réservation pour le moment.',

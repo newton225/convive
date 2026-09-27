@@ -37,10 +37,21 @@ export type DashboardActivity = {
     at: string;
 };
 
+export type DashboardContext = {
+    registrationsThisWeek: number;
+    collectedAmount: number;
+    validatedShare: number | null;
+    waitingOver24h: number;
+    purgeAt: string | null;
+    daysUntilEvent: number | null;
+};
+
 export type DashboardOverview = {
+    eventId: number;
     eventName: string;
     capacity: number;
     kpis: DashboardKpis;
+    context: DashboardContext;
     holdExpiry: DashboardHoldExpiry;
     registrationsPerDay: DashboardDayCount[];
     proofsByChannel: DashboardChannelCount[];

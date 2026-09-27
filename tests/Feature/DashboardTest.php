@@ -259,4 +259,39 @@ class DashboardTest extends TestCase
                 ->where('overview.holdExpiry.rate', 75),
             );
     }
+
+    public function test_l_apercu_donne_le_contexte_des_chiffres_cles(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->travelTo(now()->startOfDay()->addHours(12));
+
+        $tenant->asCurrent(function () {
+            $event = Event::factory()->open()->create([
+                'table_count' => 5,
+                'seats_per_table' => 10,
+                'starts_at' => now()->addDays(10),
+                'purge_at' => now()->addDay(),
+            ]);
+            Registration::factory()->confirmed()->create(['event_id' => $event->id, 'amount_due' => 25000]);
+            Registration::factory()->confirmed()->create(['event_id' => $event->id, 'amount_due' => 50000, 'created_at' => now()->subDays(20)]);
+
+            $waiting = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id]);
+            $proof = PaymentProof::factory()->create(['registration_id' => $waiting->id]);
+            $proof->forceFill(['created_at' => now()->subHours(30)])->save();
+        });
+
+        $this->actingAs($owner)
+            ->get(route('dashboard'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('overview.context.registrationsThisWeek', 2)
+                ->where('overview.context.collectedAmount', 75000)
+                ->where('overview.context.validatedShare', 67)
+                ->where('overview.context.waitingOver24h', 1)
+                ->where('overview.context.daysUntilEvent', 10)
+                ->where('overview.context.purgeAt', fn ($value) => is_string($value))
+                ->where('overview.eventId', fn ($value) => is_int($value)),
+            );
+    }
 }
