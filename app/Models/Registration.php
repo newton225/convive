@@ -46,6 +46,10 @@ use Illuminate\Support\Str;
  * @property string|null $cancellation_reason
  * @property int|null $cancelled_by_user_id
  * @property int $lapsed_holds_count
+ * @property string|null $phone_code_hash
+ * @property Carbon|null $phone_code_expires_at
+ * @property int $phone_code_attempts
+ * @property Carbon|null $phone_verified_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Event $event
@@ -57,6 +61,7 @@ use Illuminate\Support\Str;
     'held_until', 'hold_sequence', 'resume_token_hash', 'card_sent_at',
     'proof_reminder_j7_sent_at', 'proof_reminder_j2_sent_at', 'proof_reminder_j1_sent_at',
     'cancelled_at', 'cancellation_reason', 'cancelled_by_user_id', 'lapsed_holds_count',
+    'phone_code_hash', 'phone_code_expires_at', 'phone_code_attempts', 'phone_verified_at',
 ])]
 class Registration extends Model
 {
@@ -331,6 +336,9 @@ class Registration extends Model
             'status' => RegistrationStatus::class,
             'amount_due' => 'integer',
             'lapsed_holds_count' => 'integer',
+            'phone_code_expires_at' => 'datetime',
+            'phone_code_attempts' => 'integer',
+            'phone_verified_at' => 'datetime',
             'party_size' => 'integer',
             'held_until' => 'datetime',
             'hold_sequence' => 'integer',

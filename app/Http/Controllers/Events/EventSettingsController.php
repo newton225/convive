@@ -59,6 +59,7 @@ class EventSettingsController extends Controller
                 'proofLegibility' => $event->rule_proof_legibility,
                 'purgeOnExhaustion' => $event->rule_purge_on_exhaustion,
                 'temporaryHold' => $event->rule_temporary_hold,
+                'phoneVerification' => $event->rule_phone_verification,
             ],
             // README ecran 24 : ces trois regles s'enregistrent mais ne gouvernent encore rien
             // (voir le commentaire de classe). L'ecran l'affiche plutot que de laisser croire
@@ -83,6 +84,7 @@ class EventSettingsController extends Controller
             'rule_proof_legibility' => $request->boolean('rule_proof_legibility'),
             'rule_purge_on_exhaustion' => $request->boolean('rule_purge_on_exhaustion'),
             'rule_temporary_hold' => $request->boolean('rule_temporary_hold'),
+            'rule_phone_verification' => $request->boolean('rule_phone_verification'),
         ]);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('event_settings.flash.updated')]);

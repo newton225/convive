@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Public;
 
 use App\Actions\Registrations\CreateRegistration;
 use App\Actions\Registrations\HoldRegistration;
+use App\Actions\Registrations\PhoneVerification;
 use App\Actions\Waitlist\PromoteNextWaitlistEntry;
 use App\Enums\BrandFile;
 use App\Enums\PaymentChannel;
+use App\Enums\PhoneCodeResult;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Public\StoreRegistrationRequest;
@@ -100,6 +102,17 @@ class RegistrationController extends Controller
 
         $registration = $created['registration'];
 
+        // Verification du telephone exigee par l'evenement (SECURITY.md C3) : le brouillon ne
+        // bloque aucune place tant que le code n'est pas saisi.
+        if ($event->rule_phone_verification) {
+            app(PhoneVerification::class)->send($registration);
+
+            return to_route('public.registrations.verify.show', [
+                'token' => $token,
+                'resume' => $created['resumeToken'],
+            ]);
+        }
+
         if (! app(HoldRegistration::class)->handle($event, $registration)) {
             $registration->delete();
 
@@ -119,6 +132,96 @@ class RegistrationController extends Controller
             'token' => $token,
             'resume' => $created['resumeToken'],
         ]);
+    }
+
+    /**
+     * Show the code entry screen of the phone verification (SECURITY.md C3).
+     */
+    public function showVerification(string $token, string $resume): Response|RedirectResponse
+    {
+        $event = $this->publishedEvent($token);
+        $registration = $this->registrationForResumeToken($event, $resume);
+
+        // Deja verifiee ou deja au-dela du brouillon : rien a saisir ici.
+        if ($registration->status !== RegistrationStatus::Draft || $registration->phone_verified_at !== null) {
+            return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
+        }
+
+        $tenant = Tenant::current();
+
+        return Inertia::render('public/registration-verify', [
+            'token' => $token,
+            'resume' => $resume,
+            'event' => ['name' => $event->name],
+            'tenant' => [
+                'displayName' => $tenant->branding->display_name ?? $tenant->name,
+                'colors' => $tenant->brandingOrCreate()->colors(),
+                'logoUrl' => $tenant->branding?->brandFileUrl(BrandFile::Logo),
+            ],
+            // Seuls les deux derniers chiffres : l'invite reconnait son numero, un tiers qui
+            // tomberait sur la page n'apprend rien.
+            'maskedPhone' => '•• •• •• '.substr((string) preg_replace('/\D+/', '', $registration->phone), -2),
+            'codeMinutes' => PhoneVerification::CodeMinutes,
+        ]);
+    }
+
+    /**
+     * Check the code, then hold the seats exactly as an unverified registration would.
+     */
+    public function verify(Request $request, string $token, string $resume, PhoneVerification $verification): RedirectResponse
+    {
+        $event = $this->publishedEvent($token);
+        $registration = $this->registrationForResumeToken($event, $resume);
+
+        if ($registration->status !== RegistrationStatus::Draft) {
+            return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
+        }
+
+        $request->validate(['code' => ['required', 'string', 'regex:/^\d{6}$/']]);
+
+        $result = $verification->verify($registration, (string) $request->input('code'));
+
+        if ($result !== PhoneCodeResult::Verified) {
+            return back()->withErrors(['code' => $result->message()]);
+        }
+
+        // Les regles verifiees au formulaire se rejouent : le code a pu etre saisi longtemps
+        // apres, une autre reservation du meme numero a pu etre prise entre-temps.
+        if (! $event->acceptsRegistrations() || Registration::phoneHoldsSeats($event, $registration->phone, $registration->id)) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => __('guest.registration.errors.phone_already_active')]);
+
+            return redirect()->to($event->publicUrl());
+        }
+
+        if (! app(HoldRegistration::class)->handle($event, $registration)) {
+            $registration->delete();
+
+            Inertia::flash('toast', ['type' => 'error', 'message' => PlanLimits::for(Tenant::current())->canRegister($registration->party_size)
+                ? __('guest.flash.no_seats_left')
+                : __('guest.registration.errors.registrations_paused')]);
+
+            return redirect()->to($event->publicUrl());
+        }
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('guest.flash.phone_verified')]);
+
+        return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
+    }
+
+    /**
+     * Send a new code (the previous one stops working).
+     */
+    public function resendCode(string $token, string $resume, PhoneVerification $verification): RedirectResponse
+    {
+        $event = $this->publishedEvent($token);
+        $registration = $this->registrationForResumeToken($event, $resume);
+
+        if ($registration->status === RegistrationStatus::Draft && $registration->phone_verified_at === null) {
+            $verification->send($registration);
+            Inertia::flash('toast', ['type' => 'success', 'message' => __('guest.flash.code_resent')]);
+        }
+
+        return to_route('public.registrations.verify.show', ['token' => $token, 'resume' => $resume]);
     }
 
     /**

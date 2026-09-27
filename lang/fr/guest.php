@@ -68,6 +68,8 @@ return [
     ],
 
     'flash' => [
+        'phone_verified' => 'Numéro vérifié : votre place est réservée.',
+        'code_resent' => 'Un nouveau code vous a été envoyé sur WhatsApp.',
         'proof_sent' => 'Preuve envoyée. Elle va être vérifiée par l\'organisation.',
         'proof_too_late' => "Le délai de réservation était écoulé : la preuve n'a pas été enregistrée. Vérifiez les places et relancez votre réservation.",
         'no_seats_left' => "Il ne reste plus assez de places pour votre inscription. Vous pouvez rejoindre la liste d'attente si elle est ouverte.",
@@ -75,6 +77,20 @@ return [
         'seats_available' => "Des places sont disponibles : inscrivez-vous directement, sans passer par la liste d'attente.",
         'waitlist_joined' => "Vous êtes inscrit sur la liste d'attente. Vous serez prévenu dès qu'une place se libère.",
         'waitlist_seat_taken' => "La place qui vous était proposée n'est plus disponible. Vous restez prévenu si une autre se libère.",
+    ],
+
+    'phone_verification' => [
+        'title' => 'Vérifiez votre numéro',
+        'description' => 'Nous avons envoyé un code à 6 chiffres sur WhatsApp au :phone. Saisissez-le pour réserver votre place.',
+        'code_label' => 'Code de vérification',
+        'expires' => 'Le code expire dans :minutes minutes.',
+        'submit' => 'Vérifier et réserver',
+        'resend' => 'Renvoyer le code',
+        'errors' => [
+            'invalid' => 'Ce code ne correspond pas. Vérifiez le message WhatsApp et réessayez.',
+            'expired' => 'Ce code a expiré. Demandez-en un nouveau.',
+            'too_many_attempts' => 'Trop d\'essais. Demandez un nouveau code.',
+        ],
     ],
 
     'ticket' => [
@@ -105,6 +121,7 @@ return [
     ],
 
     'whatsapp' => [
+        'phone_code' => 'Votre code Convive : :code. Il expire dans :minutes minutes. Ne le communiquez à personne.',
         'invitation_card' => 'Bonjour :name, votre inscription à :event est confirmée. Votre billet : :link',
         'proof_reminder' => 'Bonjour :name, il manque votre preuve de paiement pour :event. Envoyez-la ici : :link',
         'ticket_reminder' => 'Bonjour :name, :event a lieu dans trois heures. Votre billet : :link',

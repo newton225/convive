@@ -24,4 +24,5 @@ export type EventRules = {
     proofLegibility: boolean;
     purgeOnExhaustion: boolean;
     temporaryHold: boolean;
+    phoneVerification: boolean;
 };

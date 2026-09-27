@@ -195,6 +195,11 @@ class AppServiceProvider extends ServiceProvider
         // Exports (Excel/CSV/PDF/listes de controle) et import de releve (table de CLAUDE.md).
         RateLimiter::for('exports', fn ($request) => Limit::perHour(5)->by($request->user()?->id));
 
+        // Renvoi du code de verification du telephone (SECURITY.md C3) : chaque envoi coute un
+        // message, 3 par tranche de 10 minutes et par inscription plus IP.
+        RateLimiter::for('phone-code', fn ($request) => Limit::perMinutes(10, 3)
+            ->by((string) $request->route('resume').'|'.$request->ip()));
+
         // Lien de reprise (table de CLAUDE.md, SECURITY.md H3) : 10 par heure, jeton plus IP.
         RateLimiter::for('resume', fn ($request) => Limit::perHour(10)
             ->by((string) $request->route('resume').'|'.$request->ip()));

@@ -44,6 +44,7 @@ class UpdateEventSettingsRequest extends FormRequest
             'rule_proof_legibility' => ['boolean'],
             'rule_purge_on_exhaustion' => ['boolean'],
             'rule_temporary_hold' => ['boolean'],
+            'rule_phone_verification' => ['boolean'],
         ];
     }
 

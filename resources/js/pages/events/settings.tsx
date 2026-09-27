@@ -46,6 +46,7 @@ const RuleKeys = [
     'proofLegibility',
     'purgeOnExhaustion',
     'temporaryHold',
+    'phoneVerification',
 ] as const;
 
 const ReminderLabels = {
@@ -62,6 +63,7 @@ const RuleLabels = {
     proofLegibility: 'event_settings.rules.proof_legibility',
     purgeOnExhaustion: 'event_settings.rules.purge_on_exhaustion',
     temporaryHold: 'event_settings.rules.temporary_hold',
+    phoneVerification: 'event_settings.rules.phone_verification',
 } as const;
 
 const ReminderFields: Record<(typeof ReminderKeys)[number], string> = {
@@ -78,6 +80,7 @@ const RuleFields: Record<(typeof RuleKeys)[number], string> = {
     proofLegibility: 'rule_proof_legibility',
     purgeOnExhaustion: 'rule_purge_on_exhaustion',
     temporaryHold: 'rule_temporary_hold',
+    phoneVerification: 'rule_phone_verification',
 };
 
 function Row({ label, value }: { label: string; value: string }) {

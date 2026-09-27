@@ -58,6 +58,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property bool $rule_proof_legibility
  * @property bool $rule_purge_on_exhaustion
  * @property bool $rule_temporary_hold
+ * @property bool $rule_phone_verification
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  * @property CarbonImmutable|null $deleted_at
@@ -70,7 +71,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
     'registration_deadline', 'purge_at', 'invitations_send_at', 'hold_duration_minutes',
     'reminder_j7_enabled', 'reminder_j2_enabled', 'reminder_j1_enabled', 'reminder_day_of_enabled',
     'rule_scheduled_send', 'rule_auto_seating', 'rule_allow_without_proof',
-    'rule_proof_legibility', 'rule_purge_on_exhaustion', 'rule_temporary_hold',
+    'rule_proof_legibility', 'rule_purge_on_exhaustion', 'rule_temporary_hold', 'rule_phone_verification',
 ])]
 #[Hidden(['qr_secret_key'])]
 class Event extends Model implements HasMedia
@@ -456,6 +457,7 @@ class Event extends Model implements HasMedia
             'rule_proof_legibility' => 'boolean',
             'rule_purge_on_exhaustion' => 'boolean',
             'rule_temporary_hold' => 'boolean',
+            'rule_phone_verification' => 'boolean',
         ];
     }
 }

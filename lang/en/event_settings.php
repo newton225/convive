@@ -48,6 +48,7 @@ return [
         'allow_without_proof' => 'Accept a registration saved without a proof',
         'proof_legibility' => 'Require a legible receipt before sending',
         'purge_on_exhaustion' => 'Purge as soon as seats run out',
+        'phone_verification' => 'Verify the phone with a code before booking (protects against automated bookings; one more step for the guest and one WhatsApp message per code)',
         'temporary_hold' => 'Hold the seat during the reservation',
         'not_enforced' => 'Saved, but does not act on the event yet.',
     ],

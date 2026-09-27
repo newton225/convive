@@ -48,6 +48,18 @@ Route::middleware([
         ->middleware('throttle:resume')
         ->name('public.registrations.retry');
 
+    // Verification du telephone par code avant la reservation (SECURITY.md C3), quand
+    // l'evenement l'exige. Renvoi du code limite a part : chaque envoi coute un message.
+    Route::get('/e/{token}/register/{resume}/verify', [PublicRegistrationController::class, 'showVerification'])
+        ->middleware('throttle:resume')
+        ->name('public.registrations.verify.show');
+    Route::post('/e/{token}/register/{resume}/verify', [PublicRegistrationController::class, 'verify'])
+        ->middleware('throttle:resume')
+        ->name('public.registrations.verify');
+    Route::post('/e/{token}/register/{resume}/verify/resend', [PublicRegistrationController::class, 'resendCode'])
+        ->middleware('throttle:phone-code')
+        ->name('public.registrations.verify.resend');
+
     // Le lien signe des envois programmes et rappels (README 2.7, etape 8) : une tache planifiee
     // ne connait plus le jeton de reprise en clair, seule son empreinte est stockee. La signature
     // se verifie dans le controleur (`Registration::notificationToken()`), pas de middleware

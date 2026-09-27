@@ -68,6 +68,8 @@ return [
     ],
 
     'flash' => [
+        'phone_verified' => 'Number verified: your seat is booked.',
+        'code_resent' => 'A new code has been sent to you on WhatsApp.',
         'proof_sent' => 'Proof sent. The organisation will verify it.',
         'proof_too_late' => 'The reservation window had closed: the proof was not saved. Check availability and restart your reservation.',
         'no_seats_left' => 'There are not enough seats left for your registration. You can join the waitlist if it is open.',
@@ -75,6 +77,20 @@ return [
         'seats_available' => 'Seats are available: register directly, no need for the waitlist.',
         'waitlist_joined' => 'You are on the waitlist. You will be notified as soon as a seat frees up.',
         'waitlist_seat_taken' => 'The seat offered to you is no longer available. You will still be notified if another frees up.',
+    ],
+
+    'phone_verification' => [
+        'title' => 'Verify your number',
+        'description' => 'We sent a 6-digit code on WhatsApp to :phone. Enter it to book your seat.',
+        'code_label' => 'Verification code',
+        'expires' => 'The code expires in :minutes minutes.',
+        'submit' => 'Verify and book',
+        'resend' => 'Resend the code',
+        'errors' => [
+            'invalid' => 'This code does not match. Check the WhatsApp message and try again.',
+            'expired' => 'This code has expired. Ask for a new one.',
+            'too_many_attempts' => 'Too many attempts. Ask for a new code.',
+        ],
     ],
 
     'ticket' => [
@@ -105,6 +121,7 @@ return [
     ],
 
     'whatsapp' => [
+        'phone_code' => 'Your Convive code: :code. It expires in :minutes minutes. Do not share it with anyone.',
         'invitation_card' => 'Hello :name, your registration for :event is confirmed. Your ticket: :link',
         'proof_reminder' => 'Hello :name, your payment proof for :event is still missing. Send it here: :link',
         'ticket_reminder' => 'Hello :name, :event starts in three hours. Your ticket: :link',

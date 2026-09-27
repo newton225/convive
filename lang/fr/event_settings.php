@@ -49,6 +49,7 @@ return [
         'proof_legibility' => 'Exiger un reçu lisible avant l\'envoi',
         'purge_on_exhaustion' => 'Purger dès que les places sont épuisées',
         'temporary_hold' => 'Retenir la place pendant la réservation',
+        'phone_verification' => "Vérifier le téléphone par un code avant de réserver (protège contre les réservations automatisées ; une étape de plus pour l'invité et un message WhatsApp par code)",
         'not_enforced' => 'Enregistrée, mais n\'agit pas encore sur le fonctionnement de l\'événement.',
     ],
 
