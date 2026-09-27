@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { TemplatePicker } from '@/components/events/template-picker';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import EventVisualField from '@/components/events/event-visual-field';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -80,6 +81,8 @@ export default function EventForm({
                         description={t('events.description')}
                     />
 
+                    <ProductTourButton tour="first_event" autoStart={!event} />
+
                     {event ? (
                         <div className="flex flex-wrap items-center gap-2">
                             <Badge variant="secondary">
@@ -92,6 +95,7 @@ export default function EventForm({
                             ) : null}
                             <Button
                                 data-test="event-publish"
+                                data-tour="event-publish"
                                 disabled={!event.isReadyToPublish}
                                 onClick={() => setConfirmingPublish(true)}
                             >
@@ -370,7 +374,10 @@ export default function EventForm({
                                     />
                                 </div>
 
-                                <fieldset className="space-y-2">
+                                <fieldset
+                                    className="space-y-2"
+                                    data-tour="event-payment-accounts"
+                                >
                                     <legend className="text-sm font-medium">
                                         {t('events.fields.payment_accounts')}
                                     </legend>
@@ -455,6 +462,7 @@ export default function EventForm({
 
                             <SubmitButton
                                 data-test="event-submit"
+                                data-tour="event-submit"
                                 processing={processing}
                             >
                                 {t('common.actions.save')}
@@ -479,7 +487,7 @@ function Step({
     children: React.ReactNode;
 }) {
     return (
-        <section className="space-y-4">
+        <section className="space-y-4" data-tour={`event-step-${step}`}>
             <div className="flex items-baseline gap-2">
                 <span className="text-muted-foreground text-sm">{step}.</span>
                 <Heading

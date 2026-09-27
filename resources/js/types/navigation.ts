@@ -11,4 +11,6 @@ export type NavItem = {
     href: NonNullable<InertiaLinkProps['href']>;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    // Repere de la visite guidee (`data-tour`), voir `lib/product-tours.ts`.
+    tourId?: string;
 };

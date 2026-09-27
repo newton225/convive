@@ -49,6 +49,7 @@ export function AppSidebar() {
             title: t('navigation.dashboard'),
             href: dashboardUrl,
             icon: LayoutGrid,
+            tourId: 'nav-dashboard',
         },
         ...(tenant
             ? [
@@ -56,6 +57,7 @@ export function AppSidebar() {
                       title: t('events.title'),
                       href: eventsIndex(tenant.slug),
                       icon: CalendarDays,
+                      tourId: 'nav-events',
                   },
                   ...(allowed(Permission.ScanPerform)
                       ? [
@@ -63,6 +65,7 @@ export function AppSidebar() {
                                 title: t('navigation.entry_control'),
                                 href: entryControl(tenant.slug),
                                 icon: ScanLine,
+                                tourId: 'nav-entry-control',
                             },
                         ]
                       : []),
@@ -106,6 +109,7 @@ export function AppSidebar() {
                       title: t('navigation.organisation'),
                       href: tenantEdit(tenant.slug),
                       icon: Settings,
+                      tourId: 'nav-organisation',
                   },
               ]
             : []),
@@ -123,7 +127,7 @@ export function AppSidebar() {
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
-                <SidebarMenu>
+                <SidebarMenu data-tour="tenant-switcher">
                     <SidebarMenuItem>
                         <TenantSwitcher />
                     </SidebarMenuItem>
@@ -134,7 +138,7 @@ export function AppSidebar() {
                 <NavMain items={mainNavItems} />
             </SidebarContent>
 
-            <SidebarFooter>
+            <SidebarFooter data-tour="user-menu">
                 <PlanUsage />
                 <NavUser />
             </SidebarFooter>

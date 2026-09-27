@@ -8,6 +8,7 @@
  * les notifications etaient alors invisibles, sans aucune erreur hors de la console.
  */
 @import 'sonner/dist/styles.css';
+@import 'driver.js/dist/driver.css';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -176,4 +177,66 @@
         --normal-text: var(--popover-foreground);
         --normal-border: var(--border);
     }
+}
+
+/*
+ * Visites guidees (driver.js) : la bulle reprend les jetons du back-office, neutre, jamais les
+ * couleurs de marque du locataire.
+ */
+.driver-popover.convive-tour {
+    background: var(--popover);
+    color: var(--popover-foreground);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 30px oklch(0 0 0 / 0.12);
+    max-width: min(360px, calc(100vw - 32px));
+}
+
+.driver-popover.convive-tour .driver-popover-title {
+    font: inherit;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.driver-popover.convive-tour .driver-popover-description,
+.driver-popover.convive-tour .driver-popover-progress-text {
+    color: var(--muted-foreground);
+    font: inherit;
+    font-size: 0.875rem;
+}
+
+.driver-popover.convive-tour .driver-popover-footer button {
+    font: inherit;
+    font-size: 0.875rem;
+    text-shadow: none;
+    border-radius: calc(var(--radius) - 2px);
+    padding: 0.4rem 0.8rem;
+    min-height: 2.25rem;
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+    border: 0;
+}
+
+.driver-popover.convive-tour .driver-popover-footer .driver-popover-next-btn {
+    background: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.driver-popover.convive-tour
+    .driver-popover-arrow-side-top.driver-popover-arrow {
+    border-top-color: var(--popover);
+}
+
+.driver-popover.convive-tour
+    .driver-popover-arrow-side-bottom.driver-popover-arrow {
+    border-bottom-color: var(--popover);
+}
+
+.driver-popover.convive-tour
+    .driver-popover-arrow-side-left.driver-popover-arrow {
+    border-left-color: var(--popover);
+}
+
+.driver-popover.convive-tour
+    .driver-popover-arrow-side-right.driver-popover-arrow {
+    border-right-color: var(--popover);
 }

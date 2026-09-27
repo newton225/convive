@@ -8,6 +8,7 @@ import { RecentActivity } from '@/components/dashboard/recent-activity';
 import { RegistrationsChart } from '@/components/dashboard/registrations-chart';
 import { TableOccupancy } from '@/components/dashboard/table-occupancy';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import PendingInvitationsModal from '@/components/pending-invitations-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -127,40 +128,47 @@ export default function Dashboard({
                                 : undefined
                         }
                     />
-                    {overview ? (
-                        <div className="flex flex-wrap items-center gap-2">
-                            {overview.context.daysUntilEvent !== null ? (
-                                <Badge
-                                    variant="secondary"
-                                    data-test="dashboard-countdown"
-                                >
-                                    {t('dashboard.countdown', {
-                                        days: overview.context.daysUntilEvent,
-                                        count: overview.context.daysUntilEvent,
-                                    })}
-                                </Badge>
-                            ) : null}
-                            {canCheckProofs &&
-                            currentTenant &&
-                            overview.kpis.toCheck > 0 ? (
-                                <Button
-                                    asChild
-                                    data-test="dashboard-check-proofs"
-                                >
-                                    <Link
-                                        href={proofsIndex([
-                                            currentTenant.slug,
-                                            overview.eventId,
-                                        ])}
+                    <div className="flex flex-wrap items-center gap-2">
+                        {currentTenant ? (
+                            <ProductTourButton tour="welcome" />
+                        ) : null}
+                        {overview ? (
+                            <div className="flex flex-wrap items-center gap-2">
+                                {overview.context.daysUntilEvent !== null ? (
+                                    <Badge
+                                        variant="secondary"
+                                        data-test="dashboard-countdown"
                                     >
-                                        {t('dashboard.check_proofs', {
-                                            count: overview.kpis.toCheck,
+                                        {t('dashboard.countdown', {
+                                            days: overview.context
+                                                .daysUntilEvent,
+                                            count: overview.context
+                                                .daysUntilEvent,
                                         })}
-                                    </Link>
-                                </Button>
-                            ) : null}
-                        </div>
-                    ) : null}
+                                    </Badge>
+                                ) : null}
+                                {canCheckProofs &&
+                                currentTenant &&
+                                overview.kpis.toCheck > 0 ? (
+                                    <Button
+                                        asChild
+                                        data-test="dashboard-check-proofs"
+                                    >
+                                        <Link
+                                            href={proofsIndex([
+                                                currentTenant.slug,
+                                                overview.eventId,
+                                            ])}
+                                        >
+                                            {t('dashboard.check_proofs', {
+                                                count: overview.kpis.toCheck,
+                                            })}
+                                        </Link>
+                                    </Button>
+                                ) : null}
+                            </div>
+                        ) : null}
+                    </div>
                 </div>
 
                 {paymentAccountNotice ? (

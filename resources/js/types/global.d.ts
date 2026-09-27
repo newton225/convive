@@ -25,6 +25,7 @@ declare module '@inertiajs/core' {
             notifications: NotificationsSummary | null;
             tenantPermissions: TenantPermissions | null;
             currentPlan: CurrentPlan | null;
+            completedTours: string[];
             [key: string]: unknown;
         };
     }

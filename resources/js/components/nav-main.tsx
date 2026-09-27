@@ -19,7 +19,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
             <SidebarGroupLabel>{t('navigation.platform')}</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
-                    <SidebarMenuItem key={item.title}>
+                    <SidebarMenuItem key={item.title} data-tour={item.tourId}>
                         <SidebarMenuButton
                             asChild
                             isActive={isCurrentUrl(item.href)}

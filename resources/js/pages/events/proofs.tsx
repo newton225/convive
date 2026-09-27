@@ -9,6 +9,7 @@ import { ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -145,7 +146,7 @@ export default function EventProofs({
         {
             header: t('proofs.columns.signals'),
             cell: ({ row }) => (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1" data-tour="proof-signals">
                     {row.original.signals.duplicateReference ? (
                         <Badge
                             variant="destructive"
@@ -199,6 +200,7 @@ export default function EventProofs({
                                 target="_blank"
                                 rel="noreferrer"
                                 data-test="proof-receipt-link"
+                                data-tour="proof-receipt"
                             >
                                 <ExternalLink />
                                 {t('proofs.actions.open_receipt')}
@@ -210,6 +212,7 @@ export default function EventProofs({
                         <Button
                             size="sm"
                             data-test="proof-approve"
+                            data-tour="proof-approve"
                             onClick={() => setApproving(row.original)}
                         >
                             {t('proofs.actions.approve')}
@@ -221,6 +224,7 @@ export default function EventProofs({
                             variant="secondary"
                             size="sm"
                             data-test="proof-reject"
+                            data-tour="proof-reject"
                             onClick={() => setRejecting(row.original)}
                         >
                             {t('proofs.actions.reject')}
@@ -242,11 +246,17 @@ export default function EventProofs({
             <Head title={t('proofs.title')} />
 
             <div className="flex flex-col space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('proofs.title')}
-                    description={event.name}
-                />
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Heading
+                        variant="small"
+                        title={t('proofs.title')}
+                        description={event.name}
+                    />
+                    <ProductTourButton
+                        tour="proofs"
+                        autoStart={rows.length > 0}
+                    />
+                </div>
 
                 {rows.length === 0 ? (
                     <div className="rounded-lg border p-6 text-center">
@@ -256,7 +266,7 @@ export default function EventProofs({
                         </p>
                     </div>
                 ) : (
-                    <div className="rounded-lg border">
+                    <div className="rounded-lg border" data-tour="proof-queue">
                         <Table>
                             <TableHeader>
                                 {table.getHeaderGroups().map((headerGroup) => (

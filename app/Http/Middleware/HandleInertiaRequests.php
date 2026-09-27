@@ -21,7 +21,7 @@ class HandleInertiaRequests extends Middleware
      *
      * @var array<int, string>
      */
-    protected const TranslationGroups = ['common', 'navigation', 'account', 'tenants', 'profiles', 'permissions', 'organisation', 'units', 'payment_accounts', 'events', 'guest', 'proofs', 'seating', 'scan', 'registrations', 'reconciliation', 'reports', 'notifications', 'billing', 'site', 'showcase', 'dashboard', 'audit', 'ticket_template', 'event_settings', 'offline'];
+    protected const TranslationGroups = ['common', 'navigation', 'account', 'tenants', 'profiles', 'permissions', 'organisation', 'units', 'payment_accounts', 'events', 'guest', 'proofs', 'seating', 'scan', 'registrations', 'reconciliation', 'reports', 'notifications', 'billing', 'site', 'showcase', 'dashboard', 'audit', 'ticket_template', 'event_settings', 'offline', 'tours'];
 
     /**
      * The root template that's loaded on the first page visit.
@@ -73,6 +73,8 @@ class HandleInertiaRequests extends Middleware
             // liens interdits du menu (chaque route revalide cote serveur).
             'tenantPermissions' => fn () => $user?->currentTenant ? $user->toTenantPermissions($user->currentTenant) : null,
             // Plan courant et son usage principal, pour le menu lateral (prototype Convive.dc.html).
+            // Les visites guidees deja terminees : une visite ne redemarre pas d'elle-meme.
+            'completedTours' => fn () => $user->completed_tours ?? [],
             'currentPlan' => fn () => $user?->currentTenant ? $this->currentPlan($user->currentTenant) : null,
         ];
     }

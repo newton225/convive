@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\ProductTourController;
 use App\Http\Controllers\ShowcaseController;
 use App\Http\Controllers\Tenants\TenantInvitationController;
 use App\Http\Middleware\EnsureTenantMembership;
@@ -32,6 +33,7 @@ Route::prefix('{current_tenant}')
 Route::middleware(['auth'])->group(function () {
     Route::post('invitations/{invitation}/accept', [TenantInvitationController::class, 'accept'])->name('invitations.accept');
     Route::delete('invitations/{invitation}', [TenantInvitationController::class, 'decline'])->name('invitations.decline');
+    Route::post('tours/{tour}/complete', [ProductTourController::class, 'complete'])->name('product-tours.complete');
 });
 
 require __DIR__.'/public.php';

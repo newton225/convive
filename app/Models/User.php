@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Concerns\HasTenants;
 use App\Enums\NotificationChannel;
 use App\Enums\NotificationType;
+use App\Enums\ProductTour;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -37,6 +38,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property array{salt: string, hash: string, iterations: int}|null $scan_pin_verifier
+ * @property array<int, string>|null $completed_tours
  * @property-read Tenant|null $currentTenant
  * @property-read Collection<int, Membership> $tenantMemberships
  * @property-read Collection<int, Tenant> $tenants
@@ -107,7 +109,22 @@ class User extends Authenticatable implements PasskeyUser
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
             'scan_pin_verifier' => 'array',
+            'completed_tours' => 'array',
         ];
+    }
+
+    /**
+     * Remember that the member has finished or dismissed a guided tour.
+     */
+    public function completeTour(ProductTour $tour): void
+    {
+        $completed = $this->completed_tours ?? [];
+
+        if (in_array($tour->value, $completed, true)) {
+            return;
+        }
+
+        $this->forceFill(['completed_tours' => [...$completed, $tour->value]])->save();
     }
 
     /**

@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser';
 import { useEffect, useRef, useState } from 'react';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SubmitButton } from '@/components/submit-button';
@@ -325,16 +326,22 @@ export default function EventScan({
             <Head title={t('scan.title')} />
 
             <div className="flex flex-col space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('scan.title')}
-                    description={event.name}
-                />
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Heading
+                        variant="small"
+                        title={t('scan.title')}
+                        description={event.name}
+                    />
+                    <ProductTourButton
+                        tour="entry_control"
+                        autoStart={!lock.locked}
+                    />
+                </div>
 
                 <InstallPrompt />
 
                 {scanPin === null ? (
-                    <Card data-test="scan-pin-setup">
+                    <Card data-test="scan-pin-setup" data-tour="scan-pin">
                         <CardHeader>
                             <CardTitle className="text-base">
                                 {t('scan.pin_setup.title')}
@@ -362,7 +369,10 @@ export default function EventScan({
                 <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
                     <Card>
                         <CardContent className="space-y-4 pt-6">
-                            <div className="bg-muted aspect-square overflow-hidden rounded-lg">
+                            <div
+                                className="bg-muted aspect-square overflow-hidden rounded-lg"
+                                data-tour="scan-viewfinder"
+                            >
                                 <video
                                     ref={videoRef}
                                     className="h-full w-full object-cover"
@@ -387,7 +397,10 @@ export default function EventScan({
                                 </p>
                             )}
 
-                            <div className="grid gap-2">
+                            <div
+                                className="grid gap-2"
+                                data-tour="scan-station"
+                            >
                                 <Label htmlFor="scan-station">
                                     {t('scan.station.label')}
                                 </Label>
@@ -405,7 +418,10 @@ export default function EventScan({
                                 />
                             </div>
 
-                            <div className="text-center">
+                            <div
+                                className="text-center"
+                                data-tour="scan-counter"
+                            >
                                 <p
                                     className="text-3xl font-semibold tabular-nums"
                                     data-test="scan-counter"
@@ -562,7 +578,7 @@ export default function EventScan({
                             />
                         ) : null}
 
-                        <Card>
+                        <Card data-tour="scan-recent">
                             <CardHeader>
                                 <CardTitle className="text-base">
                                     {t('scan.recent.title')}
