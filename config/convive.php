@@ -83,6 +83,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Proxys de confiance et sessions
+    |--------------------------------------------------------------------------
+    |
+    | `trusted_proxies` : adresses des proxys reellement places devant l'application, separees
+    | par des virgules. Vide par defaut, aucun n'est cru. `*` est refuse (SECURITY.md C3) : il
+    | rendrait `X-Forwarded-For` falsifiable et toute limite de debit par adresse IP decorative.
+    |
+    | `session_absolute_lifetime` : duree maximale d'une session depuis la connexion, en minutes,
+    | quelle que soit l'activite (SECURITY.md, « Deconnexion et sessions »).
+    |
+    */
+
+    'security' => [
+        'trusted_proxies' => (string) env('TRUSTED_PROXIES', ''),
+        'session_absolute_lifetime' => (int) env('SESSION_ABSOLUTE_LIFETIME', 720),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Surveillance des exports
     |--------------------------------------------------------------------------
     |

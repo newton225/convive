@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EndTenancy;
+use App\Http\Middleware\EnforceAbsoluteSessionLifetime;
 use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -46,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // HandleInertiaRequests, qui le partage au front, et avant tout rendu de vue.
         $middleware->web(append: [
             AuthenticateSession::class,
+            EnforceAbsoluteSessionLifetime::class,
             SetSecurityHeaders::class,
             HandleAppearance::class,
             SetLocale::class,

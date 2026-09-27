@@ -182,6 +182,10 @@ return [
         'usage_warning' => 'Each recovery code can be used once to access your account and will be removed after use. If you need more, click :action above.',
     ],
 
+    'session' => [
+        'expired' => 'For your security, your session has ended. Sign in again to continue.',
+    ],
+
     'flash' => [
         'profile_updated' => 'Profile updated.',
         'password_updated' => 'Password updated.',

@@ -34,5 +34,12 @@ jobs:
       - name: Setup Application
         run: composer setup
 
+      # SECURITY.md, « Dependances » : une faille connue dans une dependance bloque la CI.
+      - name: Audit PHP dependencies
+        run: composer audit --locked
+
+      - name: Audit JavaScript dependencies
+        run: npm audit --audit-level=high
+
       - name: Run CI Checks
         run: composer ci:check

@@ -182,6 +182,10 @@ return [
         'usage_warning' => "Chaque code de secours ne peut être utilisé qu'une fois et est retiré après usage. Pour en obtenir d'autres, cliquer sur :action ci-dessus.",
     ],
 
+    'session' => [
+        'expired' => 'Par sécurité, votre session a pris fin. Connectez-vous de nouveau pour continuer.',
+    ],
+
     'flash' => [
         'profile_updated' => 'Profil mis à jour.',
         'password_updated' => 'Mot de passe mis à jour.',

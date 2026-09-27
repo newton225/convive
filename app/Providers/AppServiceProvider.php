@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\SubscriptionBillingGateway;
 use App\Contracts\WhatsAppSender;
+use App\Http\Middleware\EnforceAbsoluteSessionLifetime;
 use App\Models\AuditEntry;
 use App\Models\ScanEvent;
 use App\Notifications\Channels\WhatsAppChannel;
@@ -18,10 +19,13 @@ use App\Support\Stripe\StripeApi;
 use App\Support\Stripe\StripeSubscriptionBillingGateway;
 use App\Support\UnconfiguredBillingGateway;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
@@ -59,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureActivityLog();
         self::configurePaymentProofDisk();
+        $this->configureSessionsAndProxies();
 
         Notification::extend('whatsapp', fn ($app) => $app->make(WhatsAppChannel::class));
     }
@@ -90,6 +95,30 @@ class AppServiceProvider extends ServiceProvider
                     ...$headers,
                 ]),
         );
+    }
+
+    /**
+     * Proxys de confiance et depart de la session (SECURITY.md C3 et « Deconnexion et sessions »).
+     *
+     * `TrustProxies::at()` ici plutot que `trustProxies()` dans `bootstrap/app.php` : la liste
+     * vient de la configuration, qui n'est pas encore chargee quand ce fichier s'execute.
+     */
+    protected function configureSessionsAndProxies(): void
+    {
+        $proxies = array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) config('convive.security.trusted_proxies')),
+        )));
+
+        // `*` n'est jamais applique, meme demande : `convive:production-check` le signale.
+        if ($proxies !== [] && ! in_array('*', $proxies, true)) {
+            TrustProxies::at($proxies);
+        }
+
+        Event::listen(Login::class, fn () => session()->put(
+            EnforceAbsoluteSessionLifetime::SessionKey,
+            now()->getTimestamp(),
+        ));
     }
 
     /**
