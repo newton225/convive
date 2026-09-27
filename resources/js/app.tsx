@@ -30,6 +30,21 @@ void createInertiaApp({
         }
     },
     strictMode: true,
+    defaults: {
+        // Inertia remonte en haut de page apres chaque envoi de formulaire. Quand le serveur
+        // renvoie la meme page (enregistrement, erreur de validation), ce saut fait perdre a
+        // l'utilisateur l'endroit ou il travaillait : on garde la position, sauf si la reponse
+        // mene ailleurs (creation d'un evenement qui ouvre sa fiche, par exemple).
+        visitOptions: (_href, options) =>
+            options.method && options.method !== 'get'
+                ? {
+                      preserveScroll: (page) =>
+                          options.preserveScroll === true ||
+                          new URL(page.url, window.location.origin).pathname ===
+                              window.location.pathname,
+                  }
+                : {},
+    },
     withApp(app) {
         return (
             <TooltipProvider delayDuration={0}>

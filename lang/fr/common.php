@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'unsaved_changes' => 'Modifications non enregistrées',
+
     'actions' => [
         'save' => 'Enregistrer',
         'cancel' => 'Annuler',
@@ -54,7 +56,7 @@ return [
         'session_expired' => 'Votre session a expiré. Rechargez la page, puis recommencez.',
         'server_error' => "Une erreur est survenue de notre côté. Réessayez dans un instant ; si elle persiste, prévenez l'équipe Convive.",
         'unexpected' => 'Cette action n\'a pas abouti. Réessayez dans un instant.',
-        'network_error' => "Le réseau ne répond pas. Vérifiez votre connexion, puis réessayez.",
+        'network_error' => 'Le réseau ne répond pas. Vérifiez votre connexion, puis réessayez.',
     ],
 
     'rate_limit' => [

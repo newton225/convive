@@ -81,10 +81,11 @@ export default function Organisation({
                         />
 
                         <Form
+                            setDefaultsOnSuccess
                             {...legalRoute.form(tenant.slug)}
                             className="space-y-6"
                         >
-                            {({ errors, processing }) => (
+                            {({ errors, processing, isDirty }) => (
                                 <>
                                     <div className="grid gap-4 sm:grid-cols-2">
                                         <Field
@@ -228,6 +229,7 @@ export default function Organisation({
                                     <SubmitButton
                                         data-test="organisation-legal-submit"
                                         processing={processing}
+                                        dirty={isDirty}
                                     >
                                         {t('common.actions.save')}
                                     </SubmitButton>
@@ -248,10 +250,11 @@ export default function Organisation({
                         />
 
                         <Form
+                            setDefaultsOnSuccess
                             {...brandRoute.form(tenant.slug)}
                             className="space-y-6"
                         >
-                            {({ errors, processing }) => (
+                            {({ errors, processing, isDirty }) => (
                                 <>
                                     <div className="grid gap-4 sm:grid-cols-2">
                                         <Field
@@ -282,6 +285,7 @@ export default function Organisation({
                                     <SubmitButton
                                         data-test="organisation-brand-submit"
                                         processing={processing}
+                                        dirty={isDirty}
                                     >
                                         {t('common.actions.save')}
                                     </SubmitButton>
@@ -322,10 +326,11 @@ export default function Organisation({
                         />
 
                         <Form
+                            setDefaultsOnSuccess
                             {...subdomainRoute.form(tenant.slug)}
                             className="space-y-6"
                         >
-                            {({ errors, processing }) => (
+                            {({ errors, processing, isDirty }) => (
                                 <>
                                     <div className="grid max-w-md gap-2">
                                         <Label htmlFor="subdomain">
@@ -349,6 +354,7 @@ export default function Organisation({
                                     <SubmitButton
                                         data-test="organisation-subdomain-submit"
                                         processing={processing}
+                                        dirty={isDirty}
                                     >
                                         {t('common.actions.save')}
                                     </SubmitButton>

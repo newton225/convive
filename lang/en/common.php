@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'unsaved_changes' => 'Unsaved changes',
+
     'actions' => [
         'save' => 'Save',
         'cancel' => 'Cancel',
