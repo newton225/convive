@@ -122,6 +122,11 @@ return [
         'description' => "L'événement \":name\" sera supprimé. Cette action est définitive.",
     ],
 
+    'confirm_publish' => [
+        'title' => "Publier l'événement ?",
+        'description' => "Le lien public s'ouvre aux inscriptions. Une fois publié, l'événement ne peut plus être supprimé (seulement clôturé) et le sous-domaine de l'organisation est figé.",
+    ],
+
     'confirm_close' => [
         'title' => "Clôturer l'événement",
         'description' => 'Les inscriptions seront fermées pour ":name". Cette action ne se défait pas.',

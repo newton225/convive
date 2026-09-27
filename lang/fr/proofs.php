@@ -33,6 +33,8 @@ return [
         'approve' => 'Valider',
         'reject' => 'Rejeter',
         'open_receipt' => 'Ouvrir le reçu',
+        'approve_confirm_title' => 'Valider cette preuve ?',
+        'approve_confirm_description' => "Vérifiez le montant et la référence sur le relevé. L'inscription sera confirmée, un billet émis et une table attribuée : cette validation ne s'annule pas.",
         'reject_confirm_title' => 'Rejeter cette preuve ?',
         'reject_confirm_description' => "L'inscrit devra déposer une nouvelle preuve ; les places qu'il occupe ne sont pas rendues immédiatement.",
     ],

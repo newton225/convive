@@ -1,6 +1,7 @@
 import { Form, Head, router } from '@inertiajs/react';
 import { AlertTriangle, Clock, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -58,6 +59,8 @@ export default function PaymentAccounts({
 }: Props) {
     const { t, locale } = useTranslation();
     const [deleting, setDeleting] = useState<PaymentAccount | null>(null);
+    const [approving, setApproving] = useState<PaymentAccount | null>(null);
+    const [approveProcessing, setApproveProcessing] = useState(false);
 
     const recentlyChanged = accounts.some((account) => account.changedRecently);
 
@@ -163,12 +166,7 @@ export default function PaymentAccounts({
                                                 size="sm"
                                                 data-test="payment-account-approve"
                                                 onClick={() =>
-                                                    router.post(
-                                                        approve([
-                                                            tenant.slug,
-                                                            account.id,
-                                                        ]).url,
-                                                    )
+                                                    setApproving(account)
                                                 }
                                             >
                                                 {t(
@@ -237,6 +235,31 @@ export default function PaymentAccounts({
                     />
                 </div>
             </div>
+
+            <ConfirmActionDialog
+                open={approving !== null}
+                onOpenChange={(open) => !open && setApproving(null)}
+                title={t('payment_accounts.confirm_approve.title')}
+                description={t('payment_accounts.confirm_approve.description', {
+                    label: approving?.label ?? '',
+                })}
+                confirmLabel={t('payment_accounts.actions.approve')}
+                processing={approveProcessing}
+                testId="payment-account-approve-confirm"
+                onConfirm={() => {
+                    if (approving) {
+                        router.post(
+                            approve([tenant.slug, approving.id]).url,
+                            {},
+                            {
+                                onStart: () => setApproveProcessing(true),
+                                onFinish: () => setApproveProcessing(false),
+                                onSuccess: () => setApproving(null),
+                            },
+                        );
+                    }
+                }}
+            />
 
             <Dialog
                 open={deleting !== null}

@@ -64,6 +64,11 @@ return [
         'account_number_required' => 'Ce canal exige un numéro de compte.',
     ],
 
+    'confirm_approve' => [
+        'title' => 'Activer ce changement maintenant ?',
+        'description' => "Le nouveau numéro du compte \":label\" s'affichera tout de suite sur les liens publics, sans attendre la fin du délai de 24 heures. Vérifiez-le auprès de la personne qui l'a demandé, par un autre canal, avant de confirmer.",
+    ],
+
     'confirm_delete' => [
         'title' => 'Supprimer le compte de versement',
         'description' => 'Le compte ":name" sera supprimé. Cette action est définitive.',

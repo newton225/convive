@@ -64,6 +64,11 @@ return [
         'account_number_required' => 'This channel requires an account number.',
     ],
 
+    'confirm_approve' => [
+        'title' => 'Activate this change now?',
+        'description' => 'The new number of the account ":label" will show on public links right away, without waiting for the 24-hour delay. Check it with the person who requested it, through another channel, before confirming.',
+    ],
+
     'confirm_delete' => [
         'title' => 'Delete payment account',
         'description' => 'The ":name" account will be deleted. This cannot be undone.',

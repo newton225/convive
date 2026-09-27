@@ -1,6 +1,7 @@
 import { Form, Head, router } from '@inertiajs/react';
 import { AlertTriangle, Megaphone, Send } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import Heading from '@/components/heading';
 import EventVisualField from '@/components/events/event-visual-field';
 import InputError from '@/components/input-error';
@@ -43,6 +44,8 @@ export default function EventForm({
     tenantColors,
 }: Props) {
     const { t } = useTranslation();
+    const [confirmingPublish, setConfirmingPublish] = useState(false);
+    const [publishing, setPublishing] = useState(false);
     const [overrideColors, setOverrideColors] = useState<boolean>(
         event?.primaryColor !== null && event?.primaryColor !== undefined,
     );
@@ -80,14 +83,34 @@ export default function EventForm({
                             <Button
                                 data-test="event-publish"
                                 disabled={!event.isReadyToPublish}
-                                onClick={() =>
-                                    router.post(
-                                        publish([tenant.slug, event.id]).url,
-                                    )
-                                }
+                                onClick={() => setConfirmingPublish(true)}
                             >
                                 <Send /> {t('events.actions.publish')}
                             </Button>
+                            <ConfirmActionDialog
+                                open={confirmingPublish}
+                                onOpenChange={setConfirmingPublish}
+                                title={t('events.confirm_publish.title')}
+                                description={t(
+                                    'events.confirm_publish.description',
+                                )}
+                                confirmLabel={t('events.actions.publish')}
+                                processing={publishing}
+                                testId="event-publish-confirm"
+                                onConfirm={() =>
+                                    router.post(
+                                        publish([tenant.slug, event.id]).url,
+                                        {},
+                                        {
+                                            onStart: () => setPublishing(true),
+                                            onFinish: () =>
+                                                setPublishing(false),
+                                            onSuccess: () =>
+                                                setConfirmingPublish(false),
+                                        },
+                                    )
+                                }
+                            />
                             {event.isPublished ? (
                                 <Button
                                     variant="outline"

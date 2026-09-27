@@ -23,6 +23,11 @@ return [
         'suspended' => 'This workspace is suspended for non-payment: events, proofs and scanning are stopped, and public registrations are closed. Pay the subscription to reopen it.',
     ],
 
+    'confirm_cancel' => [
+        'title' => 'Cancel the subscription?',
+        'description' => 'Billing stops. To get this plan back later, you will need to subscribe again.',
+    ],
+
     'subscription' => [
         'renews' => 'Next payment on :date.',
         'canceled' => 'Subscription canceled on :date.',

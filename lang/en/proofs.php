@@ -33,6 +33,8 @@ return [
         'approve' => 'Validate',
         'reject' => 'Reject',
         'open_receipt' => 'Open receipt',
+        'approve_confirm_title' => 'Validate this proof?',
+        'approve_confirm_description' => 'Check the amount and the reference on the statement. The registration will be confirmed, a ticket issued and a table assigned: this validation cannot be undone.',
         'reject_confirm_title' => 'Reject this proof?',
         'reject_confirm_description' => 'The registrant will need to submit a new proof; their seats are not released immediately.',
     ],

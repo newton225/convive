@@ -23,6 +23,11 @@ return [
         'suspended' => 'Cet espace est suspendu pour impayé : les événements, les preuves et le scan sont arrêtés, et les inscriptions publiques sont fermées. Réglez l\'abonnement pour le rouvrir.',
     ],
 
+    'confirm_cancel' => [
+        'title' => "Résilier l'abonnement ?",
+        'description' => "Le prélèvement s'arrête. Pour retrouver ce plan ensuite, il faudra souscrire de nouveau.",
+    ],
+
     'subscription' => [
         'renews' => 'Prochain prélèvement le :date.',
         'canceled' => 'Abonnement résilié le :date.',

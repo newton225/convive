@@ -11,6 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -135,6 +136,8 @@ export default function Billing({
     const { errors } = usePage().props;
     const canManage = can(permissions, Permission.BillingManage);
     const [currency, setCurrency] = useState(defaultCurrency);
+    const [confirmingCancel, setConfirmingCancel] = useState(false);
+    const [cancelling, setCancelling] = useState(false);
 
     // Gratuit (0), sur devis (aucun prix) ou prix fixe dans la devise choisie.
     const priceLabel = (item: BillingPlan) => {
@@ -271,13 +274,48 @@ export default function Billing({
                                             size="sm"
                                             data-test="billing-cancel"
                                             onClick={() =>
-                                                router.post(
-                                                    cancel(tenant.slug).url,
-                                                )
+                                                setConfirmingCancel(true)
                                             }
                                         >
                                             {t('billing.subscription.cancel')}
                                         </Button>
+                                    ) : null}
+                                    {subscription &&
+                                    !subscription.canceledAt ? (
+                                        <ConfirmActionDialog
+                                            open={confirmingCancel}
+                                            onOpenChange={setConfirmingCancel}
+                                            title={t(
+                                                'billing.confirm_cancel.title',
+                                            )}
+                                            description={t(
+                                                'billing.confirm_cancel.description',
+                                            )}
+                                            confirmLabel={t(
+                                                'billing.subscription.cancel',
+                                            )}
+                                            processing={cancelling}
+                                            destructive
+                                            testId="billing-cancel-confirm"
+                                            onConfirm={() =>
+                                                router.post(
+                                                    cancel(tenant.slug).url,
+                                                    {},
+                                                    {
+                                                        onStart: () =>
+                                                            setCancelling(true),
+                                                        onFinish: () =>
+                                                            setCancelling(
+                                                                false,
+                                                            ),
+                                                        onSuccess: () =>
+                                                            setConfirmingCancel(
+                                                                false,
+                                                            ),
+                                                    },
+                                                )
+                                            }
+                                        />
                                     ) : null}
                                 </div>
                             ) : null}

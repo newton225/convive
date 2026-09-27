@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-table';
 import { ExternalLink } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,8 @@ export default function EventProofs({
 }: Props) {
     const { t, locale } = useTranslation();
     const [rejecting, setRejecting] = useState<PaymentProofRow | null>(null);
+    const [approving, setApproving] = useState<PaymentProofRow | null>(null);
+    const [approveProcessing, setApproveProcessing] = useState(false);
 
     const canApprove = can(permissions, Permission.ProofsApprove);
     const canReject = can(permissions, Permission.ProofsReject);
@@ -175,15 +178,7 @@ export default function EventProofs({
                         <Button
                             size="sm"
                             data-test="proof-approve"
-                            onClick={() =>
-                                router.post(
-                                    approve([
-                                        tenant.slug,
-                                        event.id,
-                                        row.original.proofId,
-                                    ]).url,
-                                )
-                            }
+                            onClick={() => setApproving(row.original)}
                         >
                             {t('proofs.actions.approve')}
                         </Button>
@@ -269,6 +264,53 @@ export default function EventProofs({
                     </div>
                 )}
             </div>
+
+            <ConfirmActionDialog
+                open={approving !== null}
+                onOpenChange={(open) => !open && setApproving(null)}
+                title={t('proofs.actions.approve_confirm_title')}
+                description={t('proofs.actions.approve_confirm_description')}
+                confirmLabel={t('proofs.actions.approve')}
+                processing={approveProcessing}
+                testId="proof-approve-confirm"
+                onConfirm={() => {
+                    if (approving) {
+                        router.post(
+                            approve([tenant.slug, event.id, approving.proofId])
+                                .url,
+                            {},
+                            {
+                                onStart: () => setApproveProcessing(true),
+                                onFinish: () => setApproveProcessing(false),
+                                onSuccess: () => setApproving(null),
+                            },
+                        );
+                    }
+                }}
+            >
+                {approving ? (
+                    <dl className="bg-muted grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 rounded-lg p-3 text-sm">
+                        <dt className="text-muted-foreground">
+                            {t('proofs.columns.name')}
+                        </dt>
+                        <dd className="font-medium">{approving.name}</dd>
+                        <dt className="text-muted-foreground">
+                            {t('proofs.columns.amount_due')}
+                        </dt>
+                        <dd>{formatAmount(approving.amountDue, locale)}</dd>
+                        <dt className="text-muted-foreground">
+                            {t('proofs.columns.amount_declared')}
+                        </dt>
+                        <dd>
+                            {formatAmount(approving.amountDeclared, locale)}
+                        </dd>
+                        <dt className="text-muted-foreground">
+                            {t('proofs.columns.reference')}
+                        </dt>
+                        <dd>{approving.reference ?? '-'}</dd>
+                    </dl>
+                ) : null}
+            </ConfirmActionDialog>
 
             <Dialog
                 open={rejecting !== null}

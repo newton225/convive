@@ -122,6 +122,11 @@ return [
         'description' => 'The ":name" event will be deleted. This cannot be undone.',
     ],
 
+    'confirm_publish' => [
+        'title' => 'Publish the event?',
+        'description' => "The public link opens for registration. Once published, the event can no longer be deleted (only closed) and the organisation's subdomain is locked.",
+    ],
+
     'confirm_close' => [
         'title' => 'Close event',
         'description' => 'Registrations will be closed for ":name". This cannot be undone.',
