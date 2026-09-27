@@ -72,6 +72,23 @@ export function markSeenLocally(eventId: number, registrationId: number): void {
     write(seenKey(eventId), [...readSeen(eventId), registrationId]);
 }
 
+const revocationsKey = (eventId: number) =>
+    `convive:scan-revocations:${eventId}`;
+
+/**
+ * La liste de revocation signee (SECURITY.md C2) est gardee telle que recue, signature comprise, et
+ * reverifiee a chaque lecture : modifier le stockage local ne permet pas de la vider en silence.
+ */
+export function readStoredRevocationList(eventId: number): string | null {
+    const stored = readStored(revocationsKey(eventId));
+
+    return typeof stored === 'string' ? stored : null;
+}
+
+export function storeRevocationList(eventId: number, token: string): void {
+    write(revocationsKey(eventId), token);
+}
+
 /**
  * Efface toute la file locale et la liste des billets deja vus, pour tous les evenements. Appelee
  * a la deconnexion (SECURITY.md M8).

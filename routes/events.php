@@ -11,6 +11,7 @@ use App\Http\Controllers\Events\SeatingController;
 use App\Http\Middleware\EnsureTenantIsNotSuspended;
 use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Middleware\EnsureTwoFactorForProfile;
+use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -50,6 +51,7 @@ Route::prefix('{tenant}')
 
         // La file de verification des preuves (README ecran 18), etape 6.
         Route::get('events/{event}/proofs', [PaymentProofController::class, 'index'])->name('tenants.events.proofs.index');
+        Route::get('events/{event}/proofs/{proof}/receipt', [PaymentProofController::class, 'receipt'])->name('tenants.events.proofs.receipt');
         Route::post('events/{event}/proofs/{proof}/approve', [PaymentProofController::class, 'approve'])->name('tenants.events.proofs.approve');
         Route::post('events/{event}/proofs/{proof}/reject', [PaymentProofController::class, 'reject'])->name('tenants.events.proofs.reject');
 
@@ -65,6 +67,11 @@ Route::prefix('{tenant}')
         Route::post('events/{event}/scan/verify', [ScanController::class, 'verify'])
             ->middleware('throttle:scan')
             ->name('tenants.events.scan.verify');
+        // Rotation de la cle des billets (SECURITY.md C2) : invalide tous les QR emis, d'ou la
+        // re-authentification.
+        Route::post('events/{event}/scan/rotate-key', [ScanController::class, 'rotateKey'])
+            ->middleware(RequirePassword::class)
+            ->name('tenants.events.scan.rotate-key');
 
         // La base d'inscrits (README ecran 20), etape 9.
         Route::get('events/{event}/registrations', [RegistrationController::class, 'index'])->name('tenants.events.registrations.index');

@@ -95,13 +95,32 @@ class ScanTicket
         }
 
         if (($payload['tenant_id'] ?? null) !== Tenant::current()?->id
-            || ($payload['event_id'] ?? null) !== $event->id) {
+            || ($payload['event_id'] ?? null) !== $event->id
+            || ($payload['key_version'] ?? null) !== $event->qr_key_version
+            || $this->expired($event, $payload['not_after'] ?? null)) {
             return null;
         }
 
         return Ticket::where('registration_id', $payload['registration_id'] ?? null)
             ->where('nonce', $payload['nonce'] ?? null)
             ->first();
+    }
+
+    /**
+     * Determine whether the token's deadline has passed (SECURITY.md C2).
+     *
+     * La plus tardive des deux echeances fait foi : celle signee dans le jeton, et celle que la
+     * date actuelle de l'evenement donnerait. Un billet telecharge avant un report garde sinon
+     * l'ancienne echeance et serait refuse a la porte le nouveau jour.
+     */
+    private function expired(Event $event, mixed $notAfter): bool
+    {
+        $deadlines = array_filter([
+            is_int($notAfter) ? $notAfter : null,
+            $event->ticketValidUntil()?->getTimestamp(),
+        ]);
+
+        return $deadlines !== [] && now()->getTimestamp() > max($deadlines);
     }
 
     /**

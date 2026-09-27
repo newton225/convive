@@ -6,6 +6,7 @@
     @include('pdf.partials.styles')
 </head>
 <body>
+    @include('pdf.partials.watermark')
     @include('pdf.partials.letterhead')
 
     <h1>{{ __('reports.pdf.title') }}</h1>

@@ -47,4 +47,8 @@ return [
         'action' => 'Installer',
         'dismiss' => 'Plus tard',
     ],
+
+    'pdf' => [
+        'watermark' => 'Exporté par :name le :date',
+    ],
 ];

@@ -17,6 +17,7 @@ return [
         'registrations_purged' => '{1} 1 dossier non finalisé a été purgé pour :event.|[2,*] :count dossiers non finalisés ont été purgés pour :event.',
         'team_invitation_pending' => 'Vous êtes invité à rejoindre :tenant avec le profil :profile.',
         'ticket_refused' => 'Un billet a été refusé à l\'entrée de :event.',
+        'large_export' => ':name a exporté :count inscrits de :event (:format).',
     ],
 
     'preferences' => [
@@ -32,6 +33,7 @@ return [
             'registrations_purged' => 'Purge effectuée',
             'team_invitation_pending' => 'Invitation d\'équipe en attente',
             'ticket_refused' => 'Billet refusé à l\'entrée',
+            'large_export' => 'Export volumineux de la base d\'inscrits',
         ],
         'channels' => [
             'app' => 'Dans l\'application',

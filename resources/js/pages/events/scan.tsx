@@ -10,16 +10,27 @@ import {
     OfflineScanPanel,
     type LocalScanKind,
 } from '@/components/scan/offline-scan-panel';
+import { RotateTicketKeyCard } from '@/components/scan/rotate-ticket-key-card';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { useScanQueue, type SyncOutcome } from '@/hooks/use-scan-queue';
 import { translate, useTranslation } from '@/hooks/use-translation';
-import { hasSeenLocally, markSeenLocally } from '@/lib/scan-queue';
-import { verifyTicketOffline } from '@/lib/ticket-verifier';
+import {
+    hasSeenLocally,
+    markSeenLocally,
+    readStoredRevocationList,
+    storeRevocationList,
+} from '@/lib/scan-queue';
+import {
+    verifyRevocationList,
+    verifyTicketOffline,
+    type ExpectedEvent,
+} from '@/lib/ticket-verifier';
 import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { index, verify } from '@/routes/tenants/events/scan';
 import type {
+    ScanEventProps,
     ScanOutcome,
     ScanRecentRow,
     TenantPermissions,
@@ -29,7 +40,9 @@ import type {
 type Props = {
     tenant: { slug: string };
     tenantId: number;
-    event: { id: number; name: string; qrPublicKey: string | null };
+    event: ScanEventProps;
+    revocationList: string | null;
+    canRotateKey: boolean;
     permissions: TenantPermissions;
     recent: ScanRecentRow[];
     acceptedCount: number;
@@ -75,6 +88,8 @@ export default function EventScan({
     tenant,
     tenantId,
     event,
+    revocationList,
+    canRotateKey,
     permissions,
     recent,
     acceptedCount,
@@ -89,6 +104,28 @@ export default function EventScan({
     const canForce = can(permissions, Permission.ScanForce);
     const online = useOnlineStatus();
     const [localResult, setLocalResult] = useState<LocalScanKind | null>(null);
+    const expected: ExpectedEvent = {
+        tenantId,
+        eventId: event.id,
+        keyVersion: event.qrKeyVersion,
+        validUntil: event.ticketValidUntil,
+    };
+
+    // Garde la derniere liste de revocation authentique recue (SECURITY.md C2) : c'est elle que
+    // le scan hors ligne consultera jusqu'a la prochaine synchronisation.
+    useEffect(() => {
+        void verifyRevocationList(
+            revocationList,
+            event.qrPublicKey,
+            expected,
+        ).then((revoked) => {
+            if (revoked !== null && revocationList !== null) {
+                storeRevocationList(event.id, revocationList);
+            }
+        });
+        // `expected` est derive des props deja listees.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [revocationList, event.qrPublicKey, event.qrKeyVersion]);
 
     // Rejoue un scan de la file aupres du serveur et rend son verdict ; tout echec le laisse en file.
     const syncOne = (token: string) =>
@@ -110,7 +147,17 @@ export default function EventScan({
     const { queued, syncing, review, enqueue, sync, dismissReview } =
         useScanQueue(event.id, syncOne);
 
+    const wasOnlineRef = useRef(online);
+
     useEffect(() => {
+        if (online && !wasOnlineRef.current) {
+            // Retour du reseau : nouvelle cle et liste de revocation a jour. Visite asynchrone,
+            // pour ne pas annuler les envois de la file rejoues en meme temps.
+            router.reload({ only: ['event', 'revocationList'], async: true });
+        }
+
+        wasOnlineRef.current = online;
+
         if (online && queued > 0) {
             void sync();
         }
@@ -126,10 +173,18 @@ export default function EventScan({
             }
         }, 3000);
 
+        const revoked =
+            (await verifyRevocationList(
+                readStoredRevocationList(event.id),
+                event.qrPublicKey,
+                expected,
+            )) ?? [];
+
         const verification = await verifyTicketOffline(
             token,
             event.qrPublicKey,
-            { tenantId, eventId: event.id },
+            expected,
+            revoked,
         );
 
         if (verification.status !== 'valid') {
@@ -376,6 +431,14 @@ export default function EventScan({
                                     ) : null}
                                 </CardContent>
                             </Card>
+                        ) : null}
+
+                        {canRotateKey && event.qrPublicKey !== null ? (
+                            <RotateTicketKeyCard
+                                tenantSlug={tenant.slug}
+                                eventId={event.id}
+                                keyVersion={event.qrKeyVersion}
+                            />
                         ) : null}
 
                         <Card>

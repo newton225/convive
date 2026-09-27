@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Events;
 
 use App\Actions\Scan\ScanTicket;
+use App\Actions\Tickets\RotateTicketSigningKey;
 use App\Enums\ScanResult;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\ScanTicketRequest;
 use App\Models\Event;
 use App\Models\ScanEvent;
 use App\Models\Tenant;
+use App\Support\TicketRevocationList;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -55,6 +58,20 @@ class ScanController extends Controller
     }
 
     /**
+     * Replace the key that signs this event's tickets (SECURITY.md C2).
+     */
+    public function rotateKey(Tenant $tenant, Event $event, RotateTicketSigningKey $rotate): RedirectResponse
+    {
+        Gate::authorize('update', [$event, $tenant]);
+
+        $rotate->handle($event);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('scan.rotate_key.flash')]);
+
+        return back();
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function props(Request $request, Tenant $tenant, Event $event): array
@@ -65,7 +82,17 @@ class ScanController extends Controller
             'tenant' => ['slug' => $tenant->slug],
             // La cle publique (jamais la cle privee) permet de verifier un billet hors ligne, README
             // 2.8 : l'appareil de l'agent ne detient aucun secret de signature.
-            'event' => ['id' => $event->id, 'name' => $event->name, 'qrPublicKey' => $event->qr_public_key],
+            'event' => [
+                'id' => $event->id,
+                'name' => $event->name,
+                'qrPublicKey' => $event->qr_public_key,
+                'qrKeyVersion' => $event->qr_key_version,
+                'ticketValidUntil' => $event->ticketValidUntil()?->getTimestamp(),
+            ],
+            // Relue par l'appareil a chaque retour du reseau (SECURITY.md C2) ; null tant
+            // qu'aucun billet n'a ete emis, donc aucune cle generee.
+            'revocationList' => $event->qr_public_key !== null ? TicketRevocationList::signedFor($event) : null,
+            'canRotateKey' => Gate::allows('update', [$event, $tenant]),
             'tenantId' => $tenant->id,
             'permissions' => $request->user()->toTenantPermissions($tenant),
             'recent' => $canViewLog ? $this->recentScans($event) : [],

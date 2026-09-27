@@ -22,4 +22,6 @@
     .signature { margin-top: 28px; page-break-inside: avoid; }
     .signature img { max-height: 70px; max-width: 160px; }
     .footer { margin-top: 18px; font-size: 8px; color: #6b6560; }
+    .watermark { position: fixed; top: 45%; left: -10%; width: 120%; text-align: center; font-size: 26px; color: rgba(28, 25, 23, 0.07); transform: rotate(-28deg); z-index: 1000; }
+    .watermark-footer { position: fixed; bottom: -14px; left: 0; right: 0; text-align: center; font-size: 7px; color: #6b6560; }
 </style>

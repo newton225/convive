@@ -32,4 +32,14 @@ return [
         'title' => 'Recent passages',
         'empty' => 'No passage yet.',
     ],
+
+    'rotate_key' => [
+        'title' => 'Ticket key',
+        'body' => 'Version :version. Change the key if a scanning phone was lost or you believe it leaked.',
+        'button' => 'Change the key',
+        'confirm_title' => 'Change the ticket key?',
+        'confirm_body' => 'Every ticket already sent, downloaded or printed will stop opening the door. Each guest will have to reopen their ticket to get the new code, and each scanning phone will have to reconnect to the network.',
+        'confirm' => 'Change the key',
+        'flash' => 'Ticket key changed. Old codes are refused.',
+    ],
 ];

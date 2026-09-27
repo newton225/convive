@@ -16,6 +16,7 @@ enum NotificationType: string
     case RegistrationsPurged = 'registrations_purged';
     case TeamInvitationPending = 'team_invitation_pending';
     case TicketRefused = 'ticket_refused';
+    case LargeExport = 'large_export';
 
     /**
      * Get the permission a member must hold to be told about this type, or null when the alert is
@@ -31,6 +32,8 @@ enum NotificationType: string
             self::HoldsExpired, self::RegistrationsPurged => TenantPermission::RegistrationsView,
             self::SeatsExhausted => TenantPermission::EventsView,
             self::TicketRefused => TenantPermission::ScanLogView,
+            // SECURITY.md M3 : ceux qui surveillent le journal, le Proprietaire en tete.
+            self::LargeExport => TenantPermission::AuditView,
             self::TeamInvitationPending => null,
         };
     }

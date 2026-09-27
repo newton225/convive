@@ -378,6 +378,29 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Get the moment after which this event's tickets stop granting entry (SECURITY.md C2), or
+     * null while the event has no date.
+     */
+    public function ticketValidUntil(): ?CarbonImmutable
+    {
+        return $this->starts_at?->addHours((int) config('convive.tickets.valid_hours_after_start'));
+    }
+
+    /**
+     * Replace this event's signing key pair, invalidating every QR token signed so far
+     * (SECURITY.md C2, rotation after a suspected leak).
+     */
+    public function rotateSigningKeyPair(): void
+    {
+        $keyPair = sodium_crypto_sign_keypair();
+
+        $this->qr_public_key = base64_encode(sodium_crypto_sign_publickey($keyPair));
+        $this->qr_secret_key = base64_encode(sodium_crypto_sign_secretkey($keyPair));
+        $this->qr_key_version++;
+        $this->save();
+    }
+
+    /**
      * Scope the query to the events whose public link answers.
      *
      * @param  Builder<Event>  $query

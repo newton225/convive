@@ -13,8 +13,10 @@ use App\Models\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * La file de verification des preuves (README ecran 18), etape 6 de « Ordre de construction ».
@@ -81,6 +83,38 @@ class PaymentProofController extends Controller
     }
 
     /**
+     * Stream the receipt capture of the given proof, recording who opened it (SECURITY.md H2).
+     *
+     * Remplace l'URL signee anonyme dans la file de preuves : une URL signee copiee dans un
+     * message reste utilisable par n'importe qui jusqu'a son expiration, et son usage ne peut pas
+     * etre attribue. Ici chaque ouverture exige une session membre autorisee et laisse une trace.
+     */
+    public function receipt(Tenant $tenant, Event $event, PaymentProof $proof): StreamedResponse
+    {
+        Gate::authorize('view', [$proof, $tenant]);
+        $this->ensureBelongsToEvent($proof, $event);
+
+        $media = $proof->getFirstMedia(PaymentProof::ReceiptCollection);
+        abort_if($media === null, 404);
+
+        activity()
+            ->performedOn($proof)
+            ->event('viewed')
+            ->log('payment_proof.receipt_viewed');
+
+        return Storage::disk($media->disk)->download(
+            $media->getPathRelativeToRoot(),
+            'recu-'.$proof->id.'.'.$media->extension,
+            [
+                'Cache-Control' => 'no-store, private',
+                'Referrer-Policy' => 'no-referrer',
+                'X-Content-Type-Options' => 'nosniff',
+                'Content-Security-Policy' => 'sandbox',
+            ],
+        );
+    }
+
+    /**
      * A proof resolved by route binding must belong to this event : a mismatched URL (event A,
      * proof of event B) is a 404, not a silent action on the wrong event.
      */
@@ -109,7 +143,9 @@ class PaymentProofController extends Controller
             'reference' => $proof->reference,
             'amountDeclared' => $proof->amount_declared,
             'paymentAccountLabel' => $proof->paymentAccount->label,
-            'receiptUrl' => $proof->receiptUrl(),
+            'receiptUrl' => $proof->hasMedia(PaymentProof::ReceiptCollection)
+                ? route('tenants.events.proofs.receipt', [Tenant::current(), $registration->event_id, $proof], absolute: false)
+                : null,
             'signals' => [
                 'duplicateReference' => $proof->hasDuplicateReference(),
                 'duplicateImage' => $proof->hasDuplicateImage(),

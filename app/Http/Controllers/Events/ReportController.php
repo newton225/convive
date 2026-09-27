@@ -42,15 +42,23 @@ class ReportController extends Controller
      * Export the post-event report to a PDF document, with the organisation's letterhead, stamp
      * and signature.
      */
-    public function exportPdf(Tenant $tenant, Event $event, GenerateEventReport $generate): PdfBuilder
+    public function exportPdf(Request $request, Tenant $tenant, Event $event, GenerateEventReport $generate): PdfBuilder
     {
         Gate::authorize('export', [EventReport::class, $tenant]);
+
+        // SECURITY.md M3 : un export legitime reste une fuite possible, il laisse une trace.
+        activity()
+            ->performedOn($event)
+            ->event('exported')
+            ->withProperties(['format' => 'pdf'])
+            ->log('report.exported');
 
         return Pdf::view('pdf.report', [
             'letterhead' => PdfLetterhead::for($tenant),
             'event' => ['name' => $event->name, 'startsAt' => $event->starts_at],
             'report' => $generate->handle($event),
             'generatedAt' => now(),
+            'watermark' => ['name' => $request->user()->name, 'at' => now()],
         ])
             ->format('a4')
             ->download("rapport-{$event->id}.pdf");

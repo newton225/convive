@@ -91,14 +91,16 @@ class Ticket extends Model
      */
     public function signedToken(): string
     {
-        $keyPair = $this->registration->event->ensureSigningKeyPair();
+        $event = $this->registration->event;
+        $keyPair = $event->ensureSigningKeyPair();
 
         return TicketToken::sign([
             'tenant_id' => Tenant::current()?->id,
             'event_id' => $this->registration->event_id,
             'registration_id' => $this->registration_id,
             'nonce' => $this->nonce,
-            'key_version' => $this->key_version,
+            'key_version' => $keyPair['version'],
+            'not_after' => $event->ticketValidUntil()?->getTimestamp(),
         ], $keyPair['secret']);
     }
 

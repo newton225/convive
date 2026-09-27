@@ -70,4 +70,33 @@ return [
 
     'public_domain' => env('CONVIVE_PUBLIC_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Validite des billets
+    |--------------------------------------------------------------------------
+    |
+    | Echeance portee par le jeton QR (`not_after`, SECURITY.md C2) : le debut de l'evenement
+    | plus ce nombre d'heures. Un jeton copie ou photographie cesse d'ouvrir la porte meme sur un
+    | appareil hors ligne qui n'aurait jamais appris la cloture.
+    |
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Surveillance des exports
+    |--------------------------------------------------------------------------
+    |
+    | Au dela de ce nombre de lignes, un export de la base d'inscrits previent ceux qui
+    | surveillent le journal (SECURITY.md M3) : un export autorise reste une fuite possible.
+    |
+    */
+
+    'exports' => [
+        'alert_rows' => (int) env('CONVIVE_EXPORT_ALERT_ROWS', 200),
+    ],
+
+    'tickets' => [
+        'valid_hours_after_start' => (int) env('CONVIVE_TICKET_VALID_HOURS_AFTER_START', 24),
+    ],
+
 ];

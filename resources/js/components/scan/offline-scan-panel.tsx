@@ -8,6 +8,9 @@ export type LocalScanKind =
     | 'already_local'
     | 'forged'
     | 'wrong_event'
+    | 'outdated'
+    | 'expired'
+    | 'revoked'
     | 'unsupported'
     | 'no_key';
 
@@ -26,6 +29,9 @@ const Labels: Record<LocalScanKind, string> = {
     already_local: 'offline.scan.already_local',
     forged: 'offline.scan.forged',
     wrong_event: 'offline.scan.wrong_event',
+    outdated: 'offline.scan.outdated',
+    expired: 'offline.scan.expired',
+    revoked: 'offline.scan.revoked',
     unsupported: 'offline.scan.unsupported',
     no_key: 'offline.scan.no_key',
 };

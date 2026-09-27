@@ -22,3 +22,12 @@ export type ScanRecentRow = {
     name: string | null;
     scannedAt: string | null;
 };
+
+export type ScanEventProps = {
+    id: number;
+    name: string;
+    qrPublicKey: string | null;
+    qrKeyVersion: number;
+    // Echeance des billets en secondes depuis l'epoque (SECURITY.md C2), null sans date.
+    ticketValidUntil: number | null;
+};

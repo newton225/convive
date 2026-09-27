@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Events;
 
+use App\Actions\Notifications\SendAlert;
 use App\Actions\Registrations\CancelRegistration;
 use App\Actions\Registrations\PurgeRegistrations;
+use App\Enums\NotificationType;
 use App\Enums\RegistrationStatus;
 use App\Exports\RegistrationsExport;
 use App\Http\Controllers\Controller;
@@ -13,6 +15,7 @@ use App\Models\Registration;
 use App\Models\SeatingTable;
 use App\Models\Tenant;
 use App\Support\PdfLetterhead;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -151,6 +154,7 @@ class RegistrationController extends Controller
                 'tableNumber' => $registration->tableAssignment?->seatingTable->number,
             ])->all(),
             'generatedAt' => now(),
+            'watermark' => $this->watermark($request),
         ])
             ->format('a4')
             ->landscape()
@@ -164,7 +168,7 @@ class RegistrationController extends Controller
      * inscriptions confirmees et placees de l'evenement. Une inscription non placee n'y figure
      * pas, il n'y a rien a cocher a l'entree tant qu'elle n'a pas de table.
      */
-    public function exportChecklists(Tenant $tenant, Event $event): PdfBuilder
+    public function exportChecklists(Request $request, Tenant $tenant, Event $event): PdfBuilder
     {
         Gate::authorize('export', [Registration::class, $tenant]);
 
@@ -195,11 +199,14 @@ class RegistrationController extends Controller
             ->values()
             ->all();
 
+        $this->journalExport($request, $event, 'checklists', (int) collect($tables)->sum(fn (array $table) => count($table['registrations'])));
+
         return Pdf::view('pdf.checklists', [
             'letterhead' => PdfLetterhead::for($tenant),
             'event' => ['name' => $event->name, 'startsAt' => $event->starts_at],
             'tables' => $tables,
             'generatedAt' => now(),
+            'watermark' => $this->watermark($request),
         ])
             ->format('a4')
             ->download("listes-de-controle-{$event->id}.pdf");
@@ -221,6 +228,26 @@ class RegistrationController extends Controller
                 'filters' => $request->query('filter', []),
             ])
             ->log('registrations.exported');
+
+        if ($rows >= (int) config('convive.exports.alert_rows')) {
+            app(SendAlert::class)->toTenantMembers(
+                NotificationType::LargeExport,
+                ['name' => $request->user()->name, 'count' => $rows, 'event' => $event->name, 'format' => $format],
+                route('tenants.audit.index', Tenant::current(), absolute: false),
+                except: $request->user(),
+            );
+        }
+    }
+
+    /**
+     * Identity stamped across every page of an exported PDF (SECURITY.md M3) : a printed or
+     * forwarded copy still says who extracted it, and when.
+     *
+     * @return array{name: string, at: CarbonInterface}
+     */
+    private function watermark(Request $request): array
+    {
+        return ['name' => $request->user()->name, 'at' => now()];
     }
 
     /**

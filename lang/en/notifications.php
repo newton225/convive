@@ -17,6 +17,7 @@ return [
         'registrations_purged' => '{1} 1 unfinished registration was purged for :event.|[2,*] :count unfinished registrations were purged for :event.',
         'team_invitation_pending' => 'You are invited to join :tenant with the :profile profile.',
         'ticket_refused' => 'A ticket was refused at the entrance of :event.',
+        'large_export' => ':name exported :count registrations of :event (:format).',
     ],
 
     'preferences' => [
@@ -32,6 +33,7 @@ return [
             'registrations_purged' => 'Purge done',
             'team_invitation_pending' => 'Pending team invitation',
             'ticket_refused' => 'Ticket refused at the entrance',
+            'large_export' => 'Large export of the registration base',
         ],
         'channels' => [
             'app' => 'In the app',
