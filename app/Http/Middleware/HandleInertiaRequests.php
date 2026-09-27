@@ -111,6 +111,7 @@ class HandleInertiaRequests extends Middleware
 
                 return [
                     'id' => $alert->id,
+                    'type' => $type?->value,
                     'title' => $type?->message($alert->data['params'] ?? []) ?? '',
                     'read' => $alert->read_at !== null,
                     'tenantName' => $alert->data['tenant_name'] ?? null,

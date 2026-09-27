@@ -1,5 +1,7 @@
 export type NotificationAlert = {
     id: string;
+    // Valeur de `App\Enums\NotificationType`, null pour un type retire depuis l'envoi.
+    type: string | null;
     title: string;
     read: boolean;
     tenantName: string | null;
