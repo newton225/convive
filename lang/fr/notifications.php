@@ -20,6 +20,7 @@ return [
         'team_invitation_pending' => 'Vous êtes invité à rejoindre :tenant avec le profil :profile.',
         'ticket_refused' => 'Un billet a été refusé à l\'entrée de :event.',
         'large_export' => ':name a exporté :count inscrits de :event (:format).',
+        'message_quota_reached' => 'Le quota d\'envois du plan :plan est atteint (:count messages ce mois-ci) : les cartes et rappels aux invités reprendront le mois prochain, ou dès un changement de plan.',
     ],
 
     'preferences' => [
@@ -38,6 +39,7 @@ return [
             'team_invitation_pending' => 'Invitation d\'équipe en attente',
             'ticket_refused' => 'Billet refusé à l\'entrée',
             'large_export' => 'Export volumineux de la base d\'inscrits',
+            'message_quota_reached' => 'Quota d\'envois atteint',
         ],
         'channels' => [
             'app' => 'Dans l\'application',

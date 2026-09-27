@@ -26,6 +26,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property int|null $max_active_events
  * @property int|null $max_registrations
  * @property int|null $max_members
+ * @property int|null $max_messages_per_month
  * @property bool $has_reconciliation
  * @property bool $has_reports
  * @property bool $has_custom_domain
@@ -35,7 +36,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property Carbon|null $updated_at
  */
 #[Fillable([
-    'code', 'name', 'monthly_price', 'monthly_price_eur', 'monthly_price_usd', 'max_active_events', 'max_registrations', 'max_members',
+    'code', 'name', 'monthly_price', 'monthly_price_eur', 'monthly_price_usd', 'max_active_events', 'max_registrations', 'max_members', 'max_messages_per_month',
     'has_reconciliation', 'has_reports', 'has_custom_domain', 'has_sso', 'position',
 ])]
 class Plan extends Model
@@ -95,6 +96,7 @@ class Plan extends Model
             'max_active_events' => 'integer',
             'max_registrations' => 'integer',
             'max_members' => 'integer',
+            'max_messages_per_month' => 'integer',
             'has_reconciliation' => 'boolean',
             'has_reports' => 'boolean',
             'has_custom_domain' => 'boolean',

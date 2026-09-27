@@ -48,6 +48,7 @@ return [
         'events' => 'Événements actifs',
         'registrations' => 'Inscrits',
         'members' => 'Membres et invitations',
+        'messages' => 'Messages aux invités ce mois-ci',
         'of' => ':used sur :max',
         'unlimited' => ':used (illimité)',
     ],

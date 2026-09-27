@@ -4,6 +4,7 @@ namespace App\Actions\Tickets;
 
 use App\Models\Ticket;
 use App\Notifications\Registrations\TicketReminder;
+use App\Support\GuestMessageQuota;
 use Illuminate\Support\Facades\Notification;
 
 /**
@@ -28,11 +29,17 @@ class SendTicketReminder
             return false;
         }
 
+        // Quota d'envois du plan (SECURITY.md H5) : un message refuse n'est pas marque envoye.
+        if (! GuestMessageQuota::allows()) {
+            return false;
+        }
+
         Notification::route('whatsapp', $registration->phone)
             ->route('mail', $registration->email)
             ->notify(new TicketReminder($registration, $link));
 
         $ticket->update(['reminder_sent_at' => now()]);
+        GuestMessageQuota::record();
 
         return true;
     }

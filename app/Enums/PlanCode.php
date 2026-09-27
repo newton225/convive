@@ -16,6 +16,9 @@ namespace App\Enums;
  * centimes (6900 = 69,00). L'euro suit la parite fixe du franc CFA (655,957) ; le dollar reste a
  * confirmer par le proprietaire.
  *
+ * Messages aux invites (`max_messages_per_month`, SECURITY.md H5) : aucun plafond pour l'instant
+ * (decision du 2026-09-27), la mecanique est prete dans `PlanLimits`.
+ *
  * Domaine personnalise et SSO : colonnes conservees pour le jour ou ils seront construits, mais
  * annonces nulle part tant qu'ils n'existent pas (decision du 2026-09-27).
  */
@@ -34,7 +37,7 @@ enum PlanCode: string
     }
 
     /**
-     * @return array{name: string, monthly_price: int|null, monthly_price_eur: int|null, monthly_price_usd: int|null, max_active_events: int|null, max_registrations: int|null, max_members: int|null, has_reconciliation: bool, has_reports: bool, has_custom_domain: bool, has_sso: bool, position: int}
+     * @return array{name: string, monthly_price: int|null, monthly_price_eur: int|null, monthly_price_usd: int|null, max_active_events: int|null, max_registrations: int|null, max_members: int|null, max_messages_per_month: int|null, has_reconciliation: bool, has_reports: bool, has_custom_domain: bool, has_sso: bool, position: int}
      */
     public function definition(): array
     {
@@ -47,6 +50,7 @@ enum PlanCode: string
                 'max_active_events' => 1,
                 'max_registrations' => 200,
                 'max_members' => 2,
+                'max_messages_per_month' => null,
                 'has_reconciliation' => false,
                 'has_reports' => false,
                 'has_custom_domain' => false,
@@ -61,6 +65,7 @@ enum PlanCode: string
                 'max_active_events' => 5,
                 'max_registrations' => 1000,
                 'max_members' => 10,
+                'max_messages_per_month' => null,
                 'has_reconciliation' => true,
                 'has_reports' => true,
                 'has_custom_domain' => false,
@@ -75,6 +80,7 @@ enum PlanCode: string
                 'max_active_events' => null,
                 'max_registrations' => null,
                 'max_members' => null,
+                'max_messages_per_month' => null,
                 'has_reconciliation' => true,
                 'has_reports' => true,
                 'has_custom_domain' => false,

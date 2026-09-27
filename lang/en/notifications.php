@@ -20,6 +20,7 @@ return [
         'team_invitation_pending' => 'You are invited to join :tenant with the :profile profile.',
         'ticket_refused' => 'A ticket was refused at the entrance of :event.',
         'large_export' => ':name exported :count registrations of :event (:format).',
+        'message_quota_reached' => 'The :plan plan sending quota is reached (:count messages this month): cards and reminders to guests will resume next month, or as soon as the plan changes.',
     ],
 
     'preferences' => [
@@ -38,6 +39,7 @@ return [
             'team_invitation_pending' => 'Pending team invitation',
             'ticket_refused' => 'Ticket refused at the entrance',
             'large_export' => 'Large export of the registration base',
+            'message_quota_reached' => 'Sending quota reached',
         ],
         'channels' => [
             'app' => 'In the app',

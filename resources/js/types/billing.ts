@@ -32,6 +32,8 @@ export type BillingUsage = {
     events: BillingQuota;
     registrations: BillingQuota;
     members: BillingQuota;
+    // Messages envoyes aux invites ce mois-ci (cartes et rappels).
+    messages: BillingQuota;
 };
 
 export type BillingInvoice = {

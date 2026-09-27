@@ -5,6 +5,7 @@ namespace App\Actions\Tickets;
 use App\Enums\ReminderCheckpoint;
 use App\Models\Registration;
 use App\Notifications\Registrations\ProofReminder;
+use App\Support\GuestMessageQuota;
 use Illuminate\Support\Facades\Notification;
 
 /**
@@ -32,11 +33,17 @@ class SendProofReminder
             return false;
         }
 
+        // Quota d'envois du plan (SECURITY.md H5) : un message refuse n'est pas marque envoye.
+        if (! GuestMessageQuota::allows()) {
+            return false;
+        }
+
         Notification::route('whatsapp', $registration->phone)
             ->route('mail', $registration->email)
             ->notify(new ProofReminder($registration, $link));
 
         $registration->update([$checkpoint->column() => now()]);
+        GuestMessageQuota::record();
 
         return true;
     }

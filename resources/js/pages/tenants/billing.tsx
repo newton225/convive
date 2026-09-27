@@ -56,7 +56,7 @@ type Props = {
     salesContactEmail: string;
 };
 
-const QuotaKeys = ['events', 'registrations', 'members'] as const;
+const QuotaKeys = ['events', 'registrations', 'members', 'messages'] as const;
 
 /**
  * Une jauge de quota. Le pourcentage est aussi ecrit en toutes lettres : l'etat ne repose pas sur

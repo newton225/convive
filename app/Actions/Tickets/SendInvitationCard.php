@@ -5,6 +5,7 @@ namespace App\Actions\Tickets;
 use App\Enums\RegistrationStatus;
 use App\Models\Registration;
 use App\Notifications\Registrations\InvitationCard;
+use App\Support\GuestMessageQuota;
 use Illuminate\Support\Facades\Notification;
 
 /**
@@ -34,11 +35,17 @@ class SendInvitationCard
             return false;
         }
 
+        // Quota d'envois du plan (SECURITY.md H5) : un message refuse n'est pas marque envoye.
+        if (! GuestMessageQuota::allows()) {
+            return false;
+        }
+
         Notification::route('whatsapp', $registration->phone)
             ->route('mail', $registration->email)
             ->notify(new InvitationCard($registration, $link));
 
         $registration->update(['card_sent_at' => now()]);
+        GuestMessageQuota::record();
 
         return true;
     }

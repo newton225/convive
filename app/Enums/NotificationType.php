@@ -19,6 +19,7 @@ enum NotificationType: string
     case TeamInvitationPending = 'team_invitation_pending';
     case TicketRefused = 'ticket_refused';
     case LargeExport = 'large_export';
+    case MessageQuotaReached = 'message_quota_reached';
 
     /**
      * Get the permission a member must hold to be told about this type, or null when the alert is
@@ -37,6 +38,7 @@ enum NotificationType: string
             self::TicketRefused => TenantPermission::ScanLogView,
             // SECURITY.md M3 : ceux qui surveillent le journal, le Proprietaire en tete.
             self::LargeExport => TenantPermission::AuditView,
+            self::MessageQuotaReached => TenantPermission::BillingView,
             self::TeamInvitationPending => null,
         };
     }

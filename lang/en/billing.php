@@ -47,6 +47,7 @@ return [
         'title' => 'Usage',
         'events' => 'Active events',
         'registrations' => 'Registered guests',
+        'messages' => 'Messages to guests this month',
         'members' => 'Members and invitations',
         'of' => ':used of :max',
         'unlimited' => ':used (unlimited)',

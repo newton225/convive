@@ -6,6 +6,7 @@ use App\Enums\EventStatus;
 use App\Enums\PlanFeature;
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
+use App\Models\MessageUsage;
 use App\Models\Registration;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Builder;
@@ -96,6 +97,22 @@ class PlanLimits
     }
 
     /**
+     * Get how many messages were sent to guests this month (cards and reminders).
+     */
+    public function messagesThisMonth(): int
+    {
+        return (int) $this->tenant->run(fn () => MessageUsage::where('month', now()->format('Y-m'))->value('count'));
+    }
+
+    /**
+     * Determine whether one more guest message fits in this month's quota.
+     */
+    public function canSendMessage(): bool
+    {
+        return $this->hasRoom($this->tenant->plan()->max_messages_per_month, $this->messagesThisMonth(), 1);
+    }
+
+    /**
      * Get the plan's ceilings next to what is used, for the subscription screen.
      *
      * @return array<string, array{used: int, max: int|null}>
@@ -108,6 +125,7 @@ class PlanLimits
             'events' => ['used' => $this->activeEvents(), 'max' => $plan->max_active_events],
             'registrations' => ['used' => $this->registrations(), 'max' => $plan->max_registrations],
             'members' => ['used' => $this->members(), 'max' => $plan->max_members],
+            'messages' => ['used' => $this->messagesThisMonth(), 'max' => $plan->max_messages_per_month],
         ];
     }
 
