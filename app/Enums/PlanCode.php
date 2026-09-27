@@ -10,9 +10,14 @@ namespace App\Enums;
  *
  * Un plafond `null` veut dire illimite.
  *
- * Les prix mensuels sont des VALEURS PROVISOIRES : le README ne les fixe pas. Ils restent a
- * arreter par le proprietaire du produit avant toute mise en vente. Francs CFA sans decimale ; euro
- * et dollar en centimes (3800 = 38,00), l'euro etant la parite fixe du franc CFA (655,957).
+ * Prix mensuels arretes par le proprietaire du produit le 2026-09-27, repris du prototype
+ * (Convive.dc.html) : Essentiel gratuit sans limite de duree tant que la politique ne change pas,
+ * Association 45 000 F CFA, Institution sur devis. Francs CFA sans decimale ; euro et dollar en
+ * centimes (6900 = 69,00). L'euro suit la parite fixe du franc CFA (655,957) ; le dollar reste a
+ * confirmer par le proprietaire.
+ *
+ * Domaine personnalise et SSO : colonnes conservees pour le jour ou ils seront construits, mais
+ * annonces nulle part tant qu'ils n'existent pas (decision du 2026-09-27).
  */
 enum PlanCode: string
 {
@@ -50,9 +55,9 @@ enum PlanCode: string
             ],
             self::Association => [
                 'name' => 'Association',
-                'monthly_price' => 25000,
-                'monthly_price_eur' => 3800,
-                'monthly_price_usd' => 4200,
+                'monthly_price' => 45000,
+                'monthly_price_eur' => 6900,
+                'monthly_price_usd' => 7900,
                 'max_active_events' => 5,
                 'max_registrations' => 1000,
                 'max_members' => 10,
@@ -72,8 +77,8 @@ enum PlanCode: string
                 'max_members' => null,
                 'has_reconciliation' => true,
                 'has_reports' => true,
-                'has_custom_domain' => true,
-                'has_sso' => true,
+                'has_custom_domain' => false,
+                'has_sso' => false,
                 'position' => 3,
             ],
         };

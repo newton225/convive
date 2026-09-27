@@ -65,7 +65,7 @@ class StripeGatewayTest extends TestCase
                     && $session['client_reference_id'] === (string) $this->tenant->id
                     && $line['quantity'] === 1
                     && $line['price_data']['currency'] === 'eur'
-                    && $line['price_data']['unit_amount'] === 3800
+                    && $line['price_data']['unit_amount'] === 6900
                     && $line['price_data']['recurring'] === ['interval' => 'month']
                     && $session['metadata'] === ['tenant_id' => (string) $this->tenant->id, 'plan_code' => 'association', 'currency' => 'EUR']
                     && $session['subscription_data']['metadata'] === $session['metadata']
@@ -83,7 +83,7 @@ class StripeGatewayTest extends TestCase
         $gateway = $this->gateway(function (MockInterface $stripe) {
             $stripe->shouldReceive('createCustomer')->andReturn('cus_123');
             $stripe->shouldReceive('createCheckoutSession')->once()->with(Mockery::on(fn (array $session) => $session['line_items'][0]['price_data']['currency'] === 'xof'
-                && $session['line_items'][0]['price_data']['unit_amount'] === 25000))->andReturn('https://checkout.example/session');
+                && $session['line_items'][0]['price_data']['unit_amount'] === 45000))->andReturn('https://checkout.example/session');
         });
 
         $gateway->checkoutUrl($this->tenant, $plan, BillingCurrency::Xof);
@@ -96,7 +96,7 @@ class StripeGatewayTest extends TestCase
         $gateway = $this->gateway(function (MockInterface $stripe) {
             $stripe->shouldReceive('createCustomer')->andReturn('cus_123');
             $stripe->shouldReceive('createCheckoutSession')->once()->with(Mockery::on(fn (array $session) => $session['line_items'][0]['price_data']['currency'] === 'usd'
-                && $session['line_items'][0]['price_data']['unit_amount'] === 4200))->andReturn('https://checkout.example/session');
+                && $session['line_items'][0]['price_data']['unit_amount'] === 7900))->andReturn('https://checkout.example/session');
         });
 
         $gateway->checkoutUrl($this->tenant, $plan, BillingCurrency::Usd);
@@ -181,9 +181,9 @@ class StripeGatewayTest extends TestCase
     {
         $plan = Plan::ensure(PlanCode::Association);
 
-        $this->assertSame(25000, $plan->priceIn(BillingCurrency::Xof));
-        $this->assertSame(3800, $plan->priceIn(BillingCurrency::Eur));
-        $this->assertSame(4200, $plan->priceIn(BillingCurrency::Usd));
+        $this->assertSame(45000, $plan->priceIn(BillingCurrency::Xof));
+        $this->assertSame(6900, $plan->priceIn(BillingCurrency::Eur));
+        $this->assertSame(7900, $plan->priceIn(BillingCurrency::Usd));
         $this->assertNull(Plan::ensure(PlanCode::Institution)->priceIn(BillingCurrency::Eur));
         $this->assertSame(0, Plan::ensure(PlanCode::Essential)->priceIn(BillingCurrency::Usd));
     }

@@ -54,9 +54,9 @@ class BillingCurrencyTest extends TestCase
                 ->where('currencies', ['XOF', 'EUR', 'USD'])
                 ->where('defaultCurrency', 'XOF')
                 ->where('plans.1.code', 'association')
-                ->where('plans.1.prices.XOF', 25000)
-                ->where('plans.1.prices.EUR', 3800)
-                ->where('plans.1.prices.USD', 4200)
+                ->where('plans.1.prices.XOF', 45000)
+                ->where('plans.1.prices.EUR', 6900)
+                ->where('plans.1.prices.USD', 7900)
                 ->where('plans.2.prices.EUR', null),
             );
     }
