@@ -40,6 +40,8 @@ class ScanTicketRequest extends FormRequest
         return [
             'token' => ['required', 'string'],
             'force' => ['nullable', 'boolean'],
+            // Poste de controle choisi sur l'appareil (« Entree principale »), consigne au journal.
+            'station' => ['nullable', 'string', 'max:60'],
         ];
     }
 

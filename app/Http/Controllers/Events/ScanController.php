@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Events;
 use App\Actions\Scan\ScanTicket;
 use App\Actions\Tickets\RotateTicketSigningKey;
 use App\Enums\EventStatus;
+use App\Enums\RegistrationStatus;
 use App\Enums\ScanResult;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\ScanTicketRequest;
 use App\Models\Event;
+use App\Models\Registration;
 use App\Models\ScanEvent;
 use App\Models\Tenant;
 use App\Support\TicketRevocationList;
@@ -44,7 +46,13 @@ class ScanController extends Controller
      */
     public function verify(ScanTicketRequest $request, Tenant $tenant, Event $event, ScanTicket $scan): Response
     {
-        $outcome = $scan->handle($event, $request->validated('token'), $request->user(), $request->boolean('force'));
+        $outcome = $scan->handle(
+            $event,
+            $request->validated('token'),
+            $request->user(),
+            $request->boolean('force'),
+            $request->validated('station'),
+        );
 
         return Inertia::render('events/scan', [
             ...$this->props($request, $tenant, $event),
@@ -102,6 +110,10 @@ class ScanController extends Controller
             'acceptedCount' => ScanEvent::where('event_id', $event->id)
                 ->where('result', ScanResult::Accepted)
                 ->count(),
+            // Les inscriptions attendues a l'entree : celles dont le billet peut ouvrir la porte.
+            'expectedCount' => Registration::where('event_id', $event->id)
+                ->where('status', RegistrationStatus::Confirmed)
+                ->count(),
         ];
     }
 
@@ -119,6 +131,7 @@ class ScanController extends Controller
                 'id' => $scan->id,
                 'result' => $scan->result->value,
                 'forced' => $scan->forced,
+                'station' => $scan->station,
                 'name' => $scan->ticket?->registration?->name,
                 'scannedAt' => $scan->created_at?->toISOString(),
             ])

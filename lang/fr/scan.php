@@ -22,10 +22,18 @@ return [
         'first_scanned_by' => 'Par :name',
         'force' => "Forcer l'entrée",
         'forced_badge' => 'Entrée forcée',
+        'refused_help' => "Signature inconnue ou paiement non confirmé. Orientez l'invité vers l'accueil.",
+        'next' => 'Scanner suivant',
     ],
 
     'counter' => [
-        'label' => 'Entrées validées',
+        'label' => 'Entrées validées sur les inscriptions attendues',
+        'value' => ':entered / :expected',
+    ],
+
+    'station' => [
+        'label' => 'Poste de contrôle',
+        'placeholder' => 'Par exemple : Entrée principale',
     ],
 
     'recent' => [

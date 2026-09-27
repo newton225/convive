@@ -21,6 +21,7 @@ export type ScanRecentRow = {
     forced: boolean;
     name: string | null;
     scannedAt: string | null;
+    station: string | null;
 };
 
 export type ScanEventProps = {

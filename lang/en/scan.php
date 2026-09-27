@@ -22,10 +22,18 @@ return [
         'first_scanned_by' => 'By :name',
         'force' => 'Force entry',
         'forced_badge' => 'Forced entry',
+        'refused_help' => 'Unknown signature or unconfirmed payment. Send the guest to the welcome desk.',
+        'next' => 'Scan next',
     ],
 
     'counter' => [
-        'label' => 'Entries granted',
+        'label' => 'Entries granted out of expected registrations',
+        'value' => ':entered / :expected',
+    ],
+
+    'station' => [
+        'label' => 'Checkpoint',
+        'placeholder' => 'For example: Main entrance',
     ],
 
     'recent' => [

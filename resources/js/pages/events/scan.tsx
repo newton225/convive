@@ -3,8 +3,11 @@ import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser';
 import { useEffect, useRef, useState } from 'react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { SubmitButton } from '@/components/submit-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { InstallPrompt } from '@/components/install-prompt';
 import {
     OfflineScanPanel,
@@ -27,6 +30,7 @@ import {
     type ExpectedEvent,
 } from '@/lib/ticket-verifier';
 import { formatDateTime } from '@/lib/format-date';
+import { readStation, writeStation } from '@/lib/scan-station';
 import { can, Permission } from '@/lib/permissions';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { index, verify } from '@/routes/tenants/events/scan';
@@ -47,6 +51,7 @@ type Props = {
     permissions: TenantPermissions;
     recent: ScanRecentRow[];
     acceptedCount: number;
+    expectedCount: number;
     result?: ScanOutcome;
 };
 
@@ -94,6 +99,7 @@ export default function EventScan({
     permissions,
     recent,
     acceptedCount,
+    expectedCount,
     result,
 }: Props) {
     const { t, locale } = useTranslation();
@@ -102,6 +108,9 @@ export default function EventScan({
     const lastTokenRef = useRef<string | null>(null);
     const [cameraError, setCameraError] = useState(false);
     const [pending, setPending] = useState(false);
+    const [station, setStation] = useState(readStation);
+    // Le resultat reste affiche jusqu'a « Scanner suivant » (prototype) ou jusqu'au scan suivant.
+    const [resultDismissed, setResultDismissed] = useState(false);
     const canForce = can(permissions, Permission.ScanForce);
     const online = useOnlineStatus();
     const [localResult, setLocalResult] = useState<LocalScanKind | null>(null);
@@ -133,7 +142,7 @@ export default function EventScan({
         new Promise<SyncOutcome>((resolve) => {
             router.post(
                 verify([tenant.slug, event.id]).url,
-                { token, force: false },
+                { token, force: false, station },
                 {
                     preserveScroll: true,
                     preserveState: true,
@@ -228,11 +237,12 @@ export default function EventScan({
 
         router.post(
             verify([tenant.slug, event.id]).url,
-            { token, force },
+            { token, force, station },
             {
                 preserveScroll: true,
                 preserveState: true,
                 only: ['result', 'recent', 'acceptedCount'],
+                onSuccess: () => setResultDismissed(false),
                 onFinish: () => {
                     setPending(false);
                     // Laisse la meme presentation valoir « deja scanne » pendant un court
@@ -323,12 +333,33 @@ export default function EventScan({
                                 </p>
                             )}
 
+                            <div className="grid gap-2">
+                                <Label htmlFor="scan-station">
+                                    {t('scan.station.label')}
+                                </Label>
+                                <Input
+                                    id="scan-station"
+                                    name="station"
+                                    value={station}
+                                    maxLength={60}
+                                    placeholder={t('scan.station.placeholder')}
+                                    onChange={(changeEvent) => {
+                                        setStation(changeEvent.target.value);
+                                        writeStation(changeEvent.target.value);
+                                    }}
+                                    data-test="scan-station"
+                                />
+                            </div>
+
                             <div className="text-center">
                                 <p
                                     className="text-3xl font-semibold tabular-nums"
                                     data-test="scan-counter"
                                 >
-                                    {acceptedCount}
+                                    {t('scan.counter.value', {
+                                        entered: acceptedCount,
+                                        expected: expectedCount,
+                                    })}
                                 </p>
                                 <p className="text-muted-foreground text-xs">
                                     {t('scan.counter.label')}
@@ -348,7 +379,7 @@ export default function EventScan({
                             onDismissReview={dismissReview}
                         />
 
-                        {result ? (
+                        {result && !resultDismissed ? (
                             <Card
                                 data-test="scan-result"
                                 data-result={result.result}
@@ -436,6 +467,24 @@ export default function EventScan({
                                             ) : null}
                                         </div>
                                     ) : null}
+
+                                    {result.result === 'refused' ? (
+                                        <p className="text-muted-foreground text-sm">
+                                            {t('scan.result.refused_help')}
+                                        </p>
+                                    ) : null}
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        data-test="scan-next"
+                                        onClick={() => {
+                                            setResultDismissed(true);
+                                            lastTokenRef.current = null;
+                                        }}
+                                    >
+                                        {t('scan.result.next')}
+                                    </Button>
                                 </CardContent>
                             </Card>
                         ) : null}
@@ -467,7 +516,14 @@ export default function EventScan({
                                                 className="flex items-center justify-between gap-2 py-2 text-sm"
                                                 data-test="scan-recent-row"
                                             >
-                                                <span>{row.name ?? '—'}</span>
+                                                <span>
+                                                    {row.name ?? '-'}
+                                                    {row.station ? (
+                                                        <span className="text-muted-foreground block text-xs">
+                                                            {row.station}
+                                                        </span>
+                                                    ) : null}
+                                                </span>
                                                 <Badge
                                                     variant={
                                                         row.result ===

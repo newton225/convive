@@ -26,10 +26,11 @@ use Illuminate\Support\Carbon;
  * @property bool $forced
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property string|null $station
  * @property-read Event $event
  * @property-read Ticket|null $ticket
  */
-#[Fillable(['event_id', 'ticket_id', 'performed_by_user_id', 'result', 'forced'])]
+#[Fillable(['event_id', 'ticket_id', 'performed_by_user_id', 'result', 'forced', 'station'])]
 class ScanEvent extends Model
 {
     /** @use HasFactory<ScanEventFactory> */

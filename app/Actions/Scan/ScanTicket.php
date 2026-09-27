@@ -44,12 +44,12 @@ class ScanTicket
      *     firstScannedBy: string|null,
      * }
      */
-    public function handle(Event $event, string $token, User $actor, bool $force = false): array
+    public function handle(Event $event, string $token, User $actor, bool $force = false, ?string $station = null): array
     {
         $ticket = $this->resolveTicket($event, $token);
 
         if ($ticket === null || ! $this->ticketIsUsable($event, $ticket)) {
-            $this->journal($event, null, $actor, ScanResult::Refused, false);
+            $this->journal($event, null, $actor, ScanResult::Refused, false, $station);
 
             return $this->outcome(ScanResult::Refused, false, null, null, null);
         }
@@ -60,13 +60,13 @@ class ScanTicket
                 'performed_by_user_id' => $actor->id,
             ]);
 
-            $this->journal($event, $ticket, $actor, ScanResult::Accepted, false);
+            $this->journal($event, $ticket, $actor, ScanResult::Accepted, false, $station);
 
             return $this->outcome(ScanResult::Accepted, false, $ticket->registration, null, null);
         } catch (QueryException) {
             $arrival = $ticket->arrival()->first();
 
-            $this->journal($event, $ticket, $actor, ScanResult::AlreadyScanned, $force);
+            $this->journal($event, $ticket, $actor, ScanResult::AlreadyScanned, $force, $station);
 
             return $this->outcome(
                 ScanResult::AlreadyScanned,
@@ -133,7 +133,7 @@ class ScanTicket
             && $ticket->registration->status === RegistrationStatus::Confirmed;
     }
 
-    private function journal(Event $event, ?Ticket $ticket, User $actor, ScanResult $result, bool $forced): void
+    private function journal(Event $event, ?Ticket $ticket, User $actor, ScanResult $result, bool $forced, ?string $station): void
     {
         ScanEvent::create([
             'event_id' => $event->id,
@@ -141,6 +141,7 @@ class ScanTicket
             'performed_by_user_id' => $actor->id,
             'result' => $result,
             'forced' => $forced,
+            'station' => $station,
         ]);
 
         if ($result === ScanResult::Refused) {
