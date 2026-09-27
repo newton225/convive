@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             TenantSeeder::class,
             TeamSeeder::class,
             EventSeeder::class,
+            EventVisualSeeder::class,
             RegistrationSeeder::class,
             PaymentProofSeeder::class,
         ]);
