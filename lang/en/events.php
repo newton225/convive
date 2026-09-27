@@ -80,6 +80,33 @@ return [
         'reconciliation' => 'Reconciliation',
     ],
 
+    'card' => [
+        'fill_label' => 'Filled',
+        'fill_value' => ':occupied / :capacity seats',
+        'collected' => 'Collected',
+        'proofs_to_check' => '{1} 1 proof to check|[2,*] :count proofs to check',
+        'draft_hint' => 'Draft: finish the details, then publish the link to open registrations.',
+        'continue' => 'Continue preparing',
+        'check_proofs' => '{1} Check the proof|[2,*] Check the :count proofs',
+        'open_scan' => 'Open the scanner',
+        'view_report' => 'View the report',
+        'open' => 'Open the event',
+        'more_actions' => 'More actions for :name',
+        'group_follow' => 'Follow-up',
+        'group_day' => 'On the day',
+        'group_event' => 'Event',
+        'link_copied' => 'Public link copied.',
+        'link_copy_failed' => 'Could not copy the link: open the event to get it.',
+    ],
+
+    'filters' => [
+        'label' => 'Filter events',
+        'active' => 'Ongoing and upcoming',
+        'closed' => 'Closed',
+        'all' => 'All',
+        'empty' => 'No event in this category.',
+    ],
+
     'badges' => [
         'published' => 'Link handed out',
         'not_ready' => 'Not publishable yet',

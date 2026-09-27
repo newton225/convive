@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Events;
 
 use App\Actions\Events\SaveEvent;
+use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\SaveEventRequest;
 use App\Http\Requests\Events\SaveEventVisualRequest;
@@ -28,7 +29,14 @@ class EventController extends Controller
         return Inertia::render('events/index', [
             'tenant' => $this->tenantPayload($tenant),
             'events' => Event::ordered()->with('paymentAccounts')->get()
-                ->map(fn (Event $event) => $this->summary($event)),
+                ->map(fn (Event $event) => [
+                    ...$this->summary($event),
+                    // README ecran 12 : de quoi juger d'un coup d'oeil ou agir, sans ouvrir l'evenement.
+                    'visualUrl' => $event->visualUrl(),
+                    'occupiedSeats' => $event->occupiedSeats(),
+                    'collectedAmount' => (int) $event->registrations()->where('status', RegistrationStatus::Confirmed)->sum('amount_due'),
+                    'proofsToCheck' => $event->registrations()->where('status', RegistrationStatus::ProofSubmitted)->count(),
+                ]),
             'permissions' => $request->user()->toTenantPermissions($tenant),
         ]);
     }

@@ -22,6 +22,14 @@ export type EventSummary = {
     isAnnounced: boolean;
 };
 
+// Une carte de « Mes evenements » (README ecran 12).
+export type EventListItem = EventSummary & {
+    visualUrl: string | null;
+    occupiedSeats: number;
+    collectedAmount: number;
+    proofsToCheck: number;
+};
+
 export type EventDetails = EventSummary & {
     venueAddress: string | null;
     primaryColor: string | null;

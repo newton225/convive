@@ -80,6 +80,33 @@ return [
         'reconciliation' => 'Rapprochement',
     ],
 
+    'card' => [
+        'fill_label' => 'Remplissage',
+        'fill_value' => ':occupied / :capacity places',
+        'collected' => 'Montant collecté',
+        'proofs_to_check' => '{1} 1 preuve à vérifier|[2,*] :count preuves à vérifier',
+        'draft_hint' => 'Brouillon : terminez la fiche puis publiez le lien pour ouvrir les inscriptions.',
+        'continue' => 'Continuer la préparation',
+        'check_proofs' => '{1} Vérifier la preuve|[2,*] Vérifier les :count preuves',
+        'open_scan' => 'Ouvrir le scan',
+        'view_report' => 'Voir le rapport',
+        'open' => "Ouvrir l'événement",
+        'more_actions' => 'Autres actions pour :name',
+        'group_follow' => 'Suivi',
+        'group_day' => 'Jour J',
+        'group_event' => 'Événement',
+        'link_copied' => 'Lien public copié.',
+        'link_copy_failed' => "Impossible de copier le lien : ouvrez l'événement pour le récupérer.",
+    ],
+
+    'filters' => [
+        'label' => 'Filtrer les événements',
+        'active' => 'En cours et à venir',
+        'closed' => 'Terminés',
+        'all' => 'Tous',
+        'empty' => 'Aucun événement dans cette catégorie.',
+    ],
+
     'badges' => [
         'published' => 'Lien distribué',
         'not_ready' => 'Pas encore publiable',
