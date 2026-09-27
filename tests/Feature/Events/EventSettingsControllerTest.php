@@ -60,6 +60,27 @@ class EventSettingsControllerTest extends TestCase
             );
     }
 
+    public function test_l_identite_visuelle_montre_les_couleurs_et_le_visuel_propres_a_l_evenement(): void
+    {
+        $this->tenant->asCurrent(fn () => $this->event->update(['primary_color' => '#123456']));
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.settings.edit', [$this->tenant, $this->event]))
+            ->assertInertia(fn ($page) => $page
+                ->where('colors.primary', '#123456')
+                ->where('colors.secondary', $this->tenant->brandingOrCreate()->colors()['secondary'])
+                ->where('colorsOverridden', true)
+                ->where('event.visualUrl', null),
+            );
+    }
+
+    public function test_sans_couleurs_propres_l_evenement_reprend_la_marque_de_l_organisation(): void
+    {
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.settings.edit', [$this->tenant, $this->event]))
+            ->assertInertia(fn ($page) => $page->where('colorsOverridden', false));
+    }
+
     public function test_un_membre_avec_la_permission_enregistre_les_reglages(): void
     {
         $this->actingAs($this->owner)

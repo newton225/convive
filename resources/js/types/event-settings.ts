@@ -8,6 +8,8 @@ export type EventSettingsEvent = {
     purgeAt: string | null;
     invitationsSendAt: string | null;
     holdDurationMinutes: number;
+    // Visuel propre a l'evenement (URL signee), null tant qu'aucun n'est depose.
+    visualUrl: string | null;
 };
 
 export type EventReminders = {

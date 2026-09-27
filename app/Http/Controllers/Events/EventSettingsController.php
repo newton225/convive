@@ -43,8 +43,12 @@ class EventSettingsController extends Controller
                 'purgeAt' => $event->purge_at?->toISOString(),
                 'invitationsSendAt' => $event->invitations_send_at?->toISOString(),
                 'holdDurationMinutes' => $event->hold_duration_minutes,
+                'visualUrl' => $event->visualUrl(),
             ],
-            'colors' => $tenant->brandingOrCreate()->colors(),
+            // Les couleurs que verront les invites de cet evenement : les siennes s'il en a, sinon
+            // celles de la marque de l'organisation.
+            'colors' => $event->colors(),
+            'colorsOverridden' => $event->primary_color !== null || $event->secondary_color !== null,
             'permissions' => $request->user()->toTenantPermissions($tenant),
             'reminders' => [
                 'd7' => $event->reminder_j7_enabled,

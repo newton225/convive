@@ -6,10 +6,15 @@ return [
 
     'identity' => [
         'title' => 'Identité visuelle',
-        'description' => 'Les couleurs viennent de la marque de l\'organisation.',
+        'description' => 'Le visuel et les couleurs que verront les invités de cet événement.',
         'primary' => 'Couleur principale',
         'secondary' => 'Couleur secondaire',
-        'edit' => 'Modifier la marque',
+        'edit' => "Modifier la marque de l'organisation",
+        'edit_event_visual' => 'Modifier le visuel et les couleurs',
+        'visual_alt' => 'Visuel de :name',
+        'no_visual' => "Aucun visuel : le bandeau de l'organisation est utilisé",
+        'own_colors' => 'Cet événement a ses propres couleurs.',
+        'brand_colors' => "Cet événement reprend les couleurs de la marque de l'organisation.",
     ],
 
     'seating' => [

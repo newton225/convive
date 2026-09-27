@@ -6,10 +6,15 @@ return [
 
     'identity' => [
         'title' => 'Visual identity',
-        'description' => 'Colours come from the organisation\'s brand.',
+        'description' => 'The visual and colours guests will see for this event.',
         'primary' => 'Primary colour',
         'secondary' => 'Secondary colour',
-        'edit' => 'Edit the brand',
+        'edit' => "Edit the organisation's brand",
+        'edit_event_visual' => 'Edit visual and colours',
+        'visual_alt' => 'Visual of :name',
+        'no_visual' => "No visual: the organisation's banner is used",
+        'own_colors' => 'This event has its own colours.',
+        'brand_colors' => "This event uses the organisation's brand colours.",
     ],
 
     'seating' => [

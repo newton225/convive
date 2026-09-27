@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/react';
+import { documentCspNonce } from '@/lib/csp-nonce';
 
 type Props = {
     selector: string;
@@ -15,10 +16,11 @@ type Props = {
  */
 export function NonceStyle({ selector, declarations }: Props) {
     const { cspNonce } = usePage().props;
+    const nonce = documentCspNonce(cspNonce);
 
     const body = Object.entries(declarations)
         .map(([property, value]) => `${property}: ${value};`)
         .join(' ');
 
-    return <style nonce={cspNonce}>{`${selector} { ${body} }`}</style>;
+    return <style nonce={nonce}>{`${selector} { ${body} }`}</style>;
 }

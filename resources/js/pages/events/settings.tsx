@@ -31,6 +31,7 @@ type Props = {
     tenant: { slug: string };
     event: EventSettingsEvent;
     colors: { primary: string; secondary: string };
+    colorsOverridden: boolean;
     permissions: TenantPermissions;
     reminders: EventReminders;
     rules: EventRules;
@@ -120,6 +121,7 @@ export default function EventSettings({
     tenant,
     event,
     colors,
+    colorsOverridden,
     permissions,
     reminders: initialReminders,
     rules: initialRules,
@@ -182,6 +184,27 @@ export default function EventSettings({
                     title={t('event_settings.identity.title')}
                     description={t('event_settings.identity.description')}
                 >
+                    <div className="mb-3 flex items-center gap-3">
+                        {event.visualUrl ? (
+                            <img
+                                src={event.visualUrl}
+                                alt={t('event_settings.identity.visual_alt', {
+                                    name: event.name,
+                                })}
+                                className="aspect-video w-40 rounded-md object-cover"
+                                data-test="event-settings-visual"
+                            />
+                        ) : (
+                            <div className="bg-muted text-muted-foreground flex aspect-video w-40 items-center justify-center rounded-md p-2 text-center text-xs">
+                                {t('event_settings.identity.no_visual')}
+                            </div>
+                        )}
+                        <p className="text-muted-foreground text-sm">
+                            {colorsOverridden
+                                ? t('event_settings.identity.own_colors')
+                                : t('event_settings.identity.brand_colors')}
+                        </p>
+                    </div>
                     <dl>
                         <div className="flex items-center justify-between gap-2 py-1.5 text-sm">
                             <dt className="text-muted-foreground">
@@ -202,16 +225,27 @@ export default function EventSettings({
                             </dd>
                         </div>
                     </dl>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-3"
-                        asChild
-                    >
-                        <Link href={organisationEdit(tenant.slug)}>
-                            {t('event_settings.identity.edit')}
-                        </Link>
-                    </Button>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {canEditEvent ? (
+                            <Button variant="outline" size="sm" asChild>
+                                <Link
+                                    href={eventEdit([tenant.slug, event.id])}
+                                    data-test="event-settings-edit-visual"
+                                >
+                                    {t(
+                                        'event_settings.identity.edit_event_visual',
+                                    )}
+                                </Link>
+                            </Button>
+                        ) : null}
+                        {!colorsOverridden ? (
+                            <Button variant="ghost" size="sm" asChild>
+                                <Link href={organisationEdit(tenant.slug)}>
+                                    {t('event_settings.identity.edit')}
+                                </Link>
+                            </Button>
+                        ) : null}
+                    </div>
                 </SettingsSection>
 
                 <SettingsSection
