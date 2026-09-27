@@ -42,6 +42,8 @@ return [
     |
     */
 
+    'public_domain' => env('CONVIVE_PUBLIC_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost'),
+
     /*
     |--------------------------------------------------------------------------
     | Application des quotas de plan
@@ -68,19 +70,6 @@ return [
         'sales_contact_email' => env('CONVIVE_SALES_CONTACT_EMAIL', 'institution@convive.com'),
     ],
 
-    'public_domain' => env('CONVIVE_PUBLIC_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Validite des billets
-    |--------------------------------------------------------------------------
-    |
-    | Echeance portee par le jeton QR (`not_after`, SECURITY.md C2) : le debut de l'evenement
-    | plus ce nombre d'heures. Un jeton copie ou photographie cesse d'ouvrir la porte meme sur un
-    | appareil hors ligne qui n'aurait jamais appris la cloture.
-    |
-    */
-
     /*
     |--------------------------------------------------------------------------
     | Proxys de confiance et sessions
@@ -102,6 +91,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Alertes d'anticipation
+    |--------------------------------------------------------------------------
+    |
+    | Part de la capacite sous laquelle l'equipe est prevenue qu'il reste peu de places.
+    |
+    */
+
+    'alerts' => [
+        'seats_low_ratio' => (float) env('CONVIVE_SEATS_LOW_RATIO', 0.25),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Surveillance des exports
     |--------------------------------------------------------------------------
     |
@@ -113,6 +115,17 @@ return [
     'exports' => [
         'alert_rows' => (int) env('CONVIVE_EXPORT_ALERT_ROWS', 200),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validite des billets
+    |--------------------------------------------------------------------------
+    |
+    | Echeance portee par le jeton QR (`not_after`, SECURITY.md C2) : le debut de l'evenement
+    | plus ce nombre d'heures. Un jeton copie ou photographie cesse d'ouvrir la porte meme sur un
+    | appareil hors ligne qui n'aurait jamais appris la cloture.
+    |
+    */
 
     'tickets' => [
         'valid_hours_after_start' => (int) env('CONVIVE_TICKET_VALID_HOURS_AFTER_START', 24),

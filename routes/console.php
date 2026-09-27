@@ -2,6 +2,7 @@
 
 use App\Actions\Audit\PurgeAuditLog;
 use App\Actions\Billing\ProcessOverdueSubscriptions;
+use App\Actions\Notifications\NotifyUpcomingPurge;
 use App\Actions\Registrations\ExpireHolds;
 use App\Actions\Registrations\PurgeRegistrations;
 use App\Actions\Tenants\SavePaymentAccount;
@@ -83,6 +84,20 @@ Schedule::call(function (PromoteNextWaitlistEntry $promote) {
         });
     }));
 })->everyMinute()->description('Expire unanswered waitlist invites and advance the queue');
+
+/*
+ * Alerte d'anticipation (prototype Convive.dc.html) : la purge approche, il reste un jour pour
+ * relancer les invites sans preuve.
+ */
+Schedule::call(function (NotifyUpcomingPurge $notify) {
+    Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(
+        fn () => Event::query()
+            ->whereNull('purge_notice_sent_at')
+            ->whereNotNull('purge_at')
+            ->whereBetween('purge_at', [now(), now()->addHours(NotifyUpcomingPurge::NoticeHours)])
+            ->each(fn (Event $event) => $notify->handle($event)),
+    ));
+})->hourly()->description('Warn the team a day before an automatic purge');
 
 /*
  * Purge automatique (README 2.4), premier declencheur : a l'echeance planifiee de l'evenement,

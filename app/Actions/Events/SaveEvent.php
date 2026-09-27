@@ -191,12 +191,18 @@ class SaveEvent
     public function duplicate(Event $event): Event
     {
         return DB::transaction(function () use ($event) {
+            // Rien de ce qui appartient a la vie de l'original : ni son adresse publique, ni son
+            // annonce en vitrine, ni sa cle de signature des billets (SECURITY.md C2), ni ses
+            // alertes deja envoyees (la copie doit pouvoir prevenir a son tour).
             $copy = $event->replicate([
-                'public_token', 'published_at', 'created_at', 'updated_at', 'deleted_at',
+                'public_token', 'published_at', 'announced_at', 'created_at', 'updated_at', 'deleted_at',
+                'qr_public_key', 'qr_secret_key',
+                'seats_low_alerted_at', 'purge_notice_sent_at',
             ]);
 
             $copy->name = __('events.duplicate_name', ['name' => $event->name]);
             $copy->status = EventStatus::Draft;
+            $copy->qr_key_version = 1;
             $copy->save();
 
             $copy->paymentAccounts()->sync($event->paymentAccounts()->pluck('payment_accounts.id')->all());

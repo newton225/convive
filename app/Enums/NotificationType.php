@@ -13,6 +13,8 @@ enum NotificationType: string
     case HoldsExpired = 'holds_expired';
     case ProofRejected = 'proof_rejected';
     case SeatsExhausted = 'seats_exhausted';
+    case SeatsLow = 'seats_low';
+    case PurgeScheduled = 'purge_scheduled';
     case RegistrationsPurged = 'registrations_purged';
     case TeamInvitationPending = 'team_invitation_pending';
     case TicketRefused = 'ticket_refused';
@@ -30,7 +32,8 @@ enum NotificationType: string
         return match ($this) {
             self::ProofReceived, self::ProofRejected => TenantPermission::ProofsView,
             self::HoldsExpired, self::RegistrationsPurged => TenantPermission::RegistrationsView,
-            self::SeatsExhausted => TenantPermission::EventsView,
+            self::SeatsExhausted, self::SeatsLow => TenantPermission::EventsView,
+            self::PurgeScheduled => TenantPermission::RegistrationsView,
             self::TicketRefused => TenantPermission::ScanLogView,
             // SECURITY.md M3 : ceux qui surveillent le journal, le Proprietaire en tete.
             self::LargeExport => TenantPermission::AuditView,

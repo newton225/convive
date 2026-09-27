@@ -87,12 +87,38 @@ class HoldRegistration
                 // Hors du `try` : une erreur d'envoi de l'alerte ne doit jamais etre prise pour
                 // une collision de sequence et relancer une reservation deja reussie.
                 $this->alertIfSeatsExhausted($event);
+                $this->alertIfSeatsLow($event);
 
                 return $held;
             }
 
             return false;
         });
+    }
+
+    /**
+     * Tell the team once when the stock drops under the low-seats threshold (« Il reste 68
+     * places », prototype Convive.dc.html), before it runs out. Une seule fois par evenement
+     * (`seats_low_alerted_at`) : chaque reservation suivante ne doit pas refaire sonner la cloche.
+     */
+    private function alertIfSeatsLow(Event $event): void
+    {
+        $capacity = $event->capacity();
+        $remaining = $event->remainingSeats();
+
+        if ($event->seats_low_alerted_at !== null || $capacity === 0 || $remaining === 0
+            || $remaining > $capacity * (float) config('convive.alerts.seats_low_ratio')) {
+            return;
+        }
+
+        $event->seats_low_alerted_at = now();
+        $event->save();
+
+        app(SendAlert::class)->toTenantMembers(
+            NotificationType::SeatsLow,
+            ['event' => $event->name, 'count' => $remaining],
+            route('tenants.events.registrations.index', [Tenant::current(), $event], absolute: false),
+        );
     }
 
     /**

@@ -38,6 +38,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property int $companion_limit
  * @property CarbonImmutable|null $registration_deadline
  * @property CarbonImmutable|null $purge_at
+ * @property CarbonImmutable|null $seats_low_alerted_at
+ * @property CarbonImmutable|null $purge_notice_sent_at
  * @property CarbonImmutable|null $invitations_send_at
  * @property int $hold_duration_minutes
  * @property string|null $public_token
@@ -432,6 +434,8 @@ class Event extends Model implements HasMedia
             'starts_at' => 'datetime',
             'registration_deadline' => 'datetime',
             'purge_at' => 'datetime',
+            'seats_low_alerted_at' => 'datetime',
+            'purge_notice_sent_at' => 'datetime',
             'invitations_send_at' => 'datetime',
             'published_at' => 'datetime',
             'announced_at' => 'datetime',

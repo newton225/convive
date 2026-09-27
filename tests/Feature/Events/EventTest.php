@@ -315,6 +315,32 @@ class EventTest extends TestCase
         $this->assertSame(EventStatus::Draft, $copy->status);
     }
 
+    public function test_la_duplication_ne_reprend_ni_l_annonce_ni_la_cle_des_billets_ni_les_alertes(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(function () {
+            $event = Event::factory()->published()->create();
+            $event->ensureSigningKeyPair();
+            $event->announced_at = now();
+            $event->seats_low_alerted_at = now();
+            $event->purge_notice_sent_at = now();
+            $event->save();
+
+            return $event;
+        });
+
+        $this->actingAs($owner)->post(route('tenants.events.duplicate', [$tenant, $event]));
+
+        $copy = $tenant->asCurrent(fn () => Event::whereKeyNot($event->id)->latest('id')->firstOrFail());
+
+        $this->assertNull($copy->announced_at);
+        $this->assertNull($copy->qr_public_key);
+        $this->assertSame(1, $copy->qr_key_version);
+        $this->assertNull($copy->seats_low_alerted_at);
+        $this->assertNull($copy->purge_notice_sent_at);
+    }
+
     public function test_la_cloture_ferme_les_inscriptions(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
