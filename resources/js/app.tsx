@@ -5,6 +5,7 @@ import { initializeTheme } from '@/hooks/use-appearance';
 import { registerServiceWorker } from '@/lib/register-service-worker';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
+import PageLayout from '@/layouts/page-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Convive';
@@ -22,11 +23,13 @@ void createInertiaApp({
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
+            // Reglages personnels : leur propre sous-menu (profil, securite, organisations...).
             case name.startsWith('settings/'):
-            case name.startsWith('tenants/'):
+            case name === 'tenants/index':
                 return [AppLayout, SettingsLayout];
+            // Evenements et organisation : le menu de gauche suffit, pas de sous-menu.
             default:
-                return AppLayout;
+                return [AppLayout, PageLayout];
         }
     },
     strictMode: true,

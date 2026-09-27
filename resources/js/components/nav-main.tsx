@@ -7,16 +7,26 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useCurrentUrl } from '@/hooks/use-current-url';
-import { useTranslation } from '@/hooks/use-translation';
 import type { NavItem } from '@/types';
 
-export function NavMain({ items }: { items: NavItem[] }) {
-    const { t } = useTranslation();
+export function NavMain({
+    items,
+    label,
+    tourId,
+}: {
+    items: NavItem[];
+    label: string;
+    tourId?: string;
+}) {
     const { isCurrentUrl } = useCurrentUrl();
 
+    if (items.length === 0) {
+        return null;
+    }
+
     return (
-        <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>{t('navigation.platform')}</SidebarGroupLabel>
+        <SidebarGroup className="px-2 py-0" data-tour={tourId}>
+            <SidebarGroupLabel>{label}</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title} data-tour={item.tourId}>

@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/select';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { can, Permission } from '@/lib/permissions';
-import { edit, index as tenantsIndex } from '@/routes/tenants';
 import {
     branding as brandRoute,
     edit as organisationEdit,
@@ -432,15 +431,8 @@ Organisation.layout = (props: {
     tenant: { name: string; slug: string };
     translations: Translations;
 }) => ({
+    narrow: true,
     breadcrumbs: [
-        {
-            title: translate(props.translations, 'tenants.index.title'),
-            href: tenantsIndex(),
-        },
-        {
-            title: props.tenant.name,
-            href: edit(props.tenant.slug),
-        },
         {
             title: translate(props.translations, 'organisation.title'),
             href: organisationEdit(props.tenant.slug),

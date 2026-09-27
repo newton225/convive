@@ -3,6 +3,12 @@
 return [
     'platform' => 'Platform',
     'dashboard' => 'Dashboard',
+    'group_operations' => 'Operations',
+    'group_organisation' => 'Organisation',
+    'team' => 'Team',
+    'brand' => 'Workspace and brand',
+    'payment_accounts' => 'Payout accounts',
+    'units' => 'Units',
     'settings' => 'Settings',
     'profile' => 'Profile',
     'security' => 'Security',

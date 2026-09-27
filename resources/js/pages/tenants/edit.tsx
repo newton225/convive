@@ -1,15 +1,5 @@
-import { Form, Head, Link, router } from '@inertiajs/react';
-import {
-    Building2,
-    ChevronDown,
-    CreditCard,
-    Layers,
-    Mail,
-    ShieldCheck,
-    UserPlus,
-    Wallet,
-    X,
-} from 'lucide-react';
+import { Form, Head, router } from '@inertiajs/react';
+import { ChevronDown, Mail, UserPlus, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import CancelInvitationModal from '@/components/cancel-invitation-modal';
 import DeleteTenantModal from '@/components/delete-tenant-modal';
@@ -36,13 +26,8 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useInitials } from '@/hooks/use-initials';
-import { edit, index, update } from '@/routes/tenants';
-import { show as billingShow } from '@/routes/tenants/billing';
+import { edit, update } from '@/routes/tenants';
 import { update as updateMember } from '@/routes/tenants/members';
-import { edit as organisationEdit } from '@/routes/tenants/organisation';
-import { index as profilesIndex } from '@/routes/tenants/profiles';
-import { index as paymentAccountsIndex } from '@/routes/tenants/payment-accounts';
-import { index as unitsIndex } from '@/routes/tenants/units';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { can, Permission } from '@/lib/permissions';
 import type {
@@ -180,66 +165,6 @@ export default function TenantEdit({
                         />
 
                         <div className="flex items-center gap-2">
-                            {can(permissions, Permission.TenantLegal) ||
-                            can(permissions, Permission.TenantBranding) ||
-                            can(permissions, Permission.TenantDomain) ? (
-                                <Button variant="secondary" asChild>
-                                    <Link
-                                        href={organisationEdit(tenant.slug)}
-                                        data-test="organisation-link"
-                                    >
-                                        <Building2 /> {t('organisation.title')}
-                                    </Link>
-                                </Button>
-                            ) : null}
-
-                            {can(
-                                permissions,
-                                Permission.TenantPaymentAccounts,
-                            ) ? (
-                                <Button variant="secondary" asChild>
-                                    <Link
-                                        href={paymentAccountsIndex(tenant.slug)}
-                                        data-test="payment-accounts-link"
-                                    >
-                                        <Wallet /> {t('payment_accounts.title')}
-                                    </Link>
-                                </Button>
-                            ) : null}
-
-                            {can(permissions, Permission.TenantUnits) ? (
-                                <Button variant="secondary" asChild>
-                                    <Link
-                                        href={unitsIndex(tenant.slug)}
-                                        data-test="units-link"
-                                    >
-                                        <Layers /> {t('units.title')}
-                                    </Link>
-                                </Button>
-                            ) : null}
-
-                            {can(permissions, Permission.BillingView) ? (
-                                <Button variant="secondary" asChild>
-                                    <Link
-                                        href={billingShow(tenant.slug)}
-                                        data-test="billing-link"
-                                    >
-                                        <CreditCard /> {t('billing.title')}
-                                    </Link>
-                                </Button>
-                            ) : null}
-
-                            {can(permissions, Permission.ProfilesManage) ? (
-                                <Button variant="secondary" asChild>
-                                    <Link
-                                        href={profilesIndex(tenant.slug)}
-                                        data-test="manage-profiles-link"
-                                    >
-                                        <ShieldCheck /> {t('profiles.title')}
-                                    </Link>
-                                </Button>
-                            ) : null}
-
                             {can(permissions, Permission.TeamInvite) ? (
                                 <Button
                                     data-test="invite-member-button"
@@ -485,13 +410,10 @@ TenantEdit.layout = (props: {
     tenant: { name: string; slug: string };
     translations: Translations;
 }) => ({
+    narrow: true,
     breadcrumbs: [
         {
-            title: translate(props.translations, 'tenants.index.title'),
-            href: index(),
-        },
-        {
-            title: props.tenant.name,
+            title: translate(props.translations, 'navigation.team'),
             href: edit(props.tenant.slug),
         },
     ],

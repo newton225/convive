@@ -30,8 +30,8 @@ return [
             'body' => 'On the night, the host opens this shortcut on their phone and scans tickets.',
         ],
         'organisation' => [
-            'title' => 'Organisation settings',
-            'body' => 'Legal identity, colours, payout accounts, units and team. Fill them in before publishing your first event.',
+            'title' => 'Organisation',
+            'body' => 'Legal identity and brand, payout accounts, units, team, subscription: everything about your organisation lives here. Fill them in before publishing your first event.',
         ],
         'notifications' => [
             'title' => 'Alerts',

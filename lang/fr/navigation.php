@@ -3,6 +3,12 @@
 return [
     'platform' => 'Plateforme',
     'dashboard' => 'Tableau de bord',
+    'group_operations' => 'Pilotage',
+    'group_organisation' => 'Organisation',
+    'team' => 'Équipe',
+    'brand' => 'Espace et marque',
+    'payment_accounts' => 'Comptes de versement',
+    'units' => 'Unités',
     'settings' => 'Réglages',
     'profile' => 'Profil',
     'security' => 'Sécurité',

@@ -13,7 +13,6 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { translate, useTranslation } from '@/hooks/use-translation';
-import { edit, index as tenantsIndex } from '@/routes/tenants';
 import {
     create,
     duplicate,
@@ -200,14 +199,6 @@ TenantProfiles.layout = (props: {
 }) => ({
     wide: true,
     breadcrumbs: [
-        {
-            title: translate(props.translations, 'tenants.index.title'),
-            href: tenantsIndex(),
-        },
-        {
-            title: props.tenant.name,
-            href: edit(props.tenant.slug),
-        },
         {
             title: translate(props.translations, 'profiles.title'),
             href: index(props.tenant.slug),

@@ -28,7 +28,6 @@ import {
 } from '@/components/ui/select';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
-import { edit, index as tenantsIndex } from '@/routes/tenants';
 import {
     approve,
     cancel,
@@ -438,15 +437,8 @@ PaymentAccounts.layout = (props: {
     tenant: Pick<Tenant, 'name' | 'slug'>;
     translations: Translations;
 }) => ({
+    narrow: true,
     breadcrumbs: [
-        {
-            title: translate(props.translations, 'tenants.index.title'),
-            href: tenantsIndex(),
-        },
-        {
-            title: props.tenant.name,
-            href: edit(props.tenant.slug),
-        },
         {
             title: translate(props.translations, 'payment_accounts.title'),
             href: index(props.tenant.slug),

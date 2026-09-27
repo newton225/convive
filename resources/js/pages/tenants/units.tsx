@@ -19,7 +19,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { translate, useTranslation } from '@/hooks/use-translation';
-import { edit, index as tenantsIndex } from '@/routes/tenants';
 import { destroy, index, store, update } from '@/routes/tenants/units';
 import type { Tenant, TenantUnit, Translations } from '@/types';
 
@@ -197,15 +196,8 @@ Units.layout = (props: {
     tenant: Pick<Tenant, 'name' | 'slug'>;
     translations: Translations;
 }) => ({
+    narrow: true,
     breadcrumbs: [
-        {
-            title: translate(props.translations, 'tenants.index.title'),
-            href: tenantsIndex(),
-        },
-        {
-            title: props.tenant.name,
-            href: edit(props.tenant.slug),
-        },
         {
             title: translate(props.translations, 'units.title'),
             href: index(props.tenant.slug),

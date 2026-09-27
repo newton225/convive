@@ -118,7 +118,7 @@ export default function Dashboard({
                 onOpenChange={setShowInvitations}
             />
 
-            <div className="flex flex-1 flex-col gap-6 p-4">
+            <div className="flex flex-1 flex-col gap-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <Heading
                         title={t('dashboard.title')}

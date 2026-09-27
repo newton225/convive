@@ -30,8 +30,8 @@ return [
             'body' => "Le soir venu, l'hôtesse ouvre ce raccourci sur son téléphone et scanne les billets.",
         ],
         'organisation' => [
-            'title' => "Réglages de l'organisation",
-            'body' => 'Identité légale, couleurs, comptes de versement, unités et équipe. Complétez-les avant de publier votre premier événement.',
+            'title' => 'Organisation',
+            'body' => 'Identité légale et marque, comptes de versement, unités, équipe, abonnement : tout ce qui concerne votre organisation est rangé ici. Complétez-les avant de publier votre premier événement.',
         ],
         'notifications' => [
             'title' => 'Alertes',
