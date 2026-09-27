@@ -48,6 +48,12 @@ return [
         'dismiss' => 'Later',
     ],
 
+    'rate_limit' => [
+        'title' => 'Please wait a moment',
+        'retry_in' => '{1} This action was repeated too often in a short time. Try again in 1 minute.|[2,*] This action was repeated too often in a short time. Try again in :minutes minutes.',
+        'back' => 'Back to home',
+    ],
+
     'pdf' => [
         'watermark' => 'Exported by :name on :date',
     ],

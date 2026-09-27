@@ -48,6 +48,12 @@ return [
         'dismiss' => 'Plus tard',
     ],
 
+    'rate_limit' => [
+        'title' => 'Un peu de patience',
+        'retry_in' => '{1} Cette action a été répétée trop souvent en peu de temps. Réessayez dans 1 minute.|[2,*] Cette action a été répétée trop souvent en peu de temps. Réessayez dans :minutes minutes.',
+        'back' => "Revenir à l'accueil",
+    ],
+
     'pdf' => [
         'watermark' => 'Exporté par :name le :date',
     ],

@@ -8,9 +8,11 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetSecurityHeaders;
 use App\Http\Middleware\SetTenantUrlDefaults;
+use App\Http\Responses\RateLimitedResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -88,4 +90,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // laisser deviner ce qui existe ou non.
         $exceptions->render(fn (TenantCouldNotBeIdentifiedException $e) => abort(404));
         $exceptions->render(fn (NotASubdomainException $e) => abort(404));
+
+        // Limite de debit atteinte : un message qui dit quand reessayer, jamais une page 429 nue
+        // (CLAUDE.md, « Limitation de debit »).
+        $exceptions->render(fn (ThrottleRequestsException $e, Request $request) => RateLimitedResponse::for($request, $e));
     })->create();
