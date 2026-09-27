@@ -28,6 +28,7 @@ export type ScanEventProps = {
     name: string;
     qrPublicKey: string | null;
     qrKeyVersion: number;
+    closed: boolean;
     // Echeance des billets en secondes depuis l'epoque (SECURITY.md C2), null sans date.
     ticketValidUntil: number | null;
 };

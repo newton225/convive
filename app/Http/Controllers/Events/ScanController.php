@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Events;
 
 use App\Actions\Scan\ScanTicket;
 use App\Actions\Tickets\RotateTicketSigningKey;
+use App\Enums\EventStatus;
 use App\Enums\ScanResult;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\ScanTicketRequest;
@@ -87,6 +88,8 @@ class ScanController extends Controller
                 'name' => $event->name,
                 'qrPublicKey' => $event->qr_public_key,
                 'qrKeyVersion' => $event->qr_key_version,
+                // L'appareil efface sa file locale d'un evenement clos (SECURITY.md M8).
+                'closed' => $event->status === EventStatus::Closed,
                 'ticketValidUntil' => $event->ticketValidUntil()?->getTimestamp(),
             ],
             // Relue par l'appareil a chaque retour du reseau (SECURITY.md C2) ; null tant

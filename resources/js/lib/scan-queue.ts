@@ -90,6 +90,21 @@ export function storeRevocationList(eventId: number, token: string): void {
 }
 
 /**
+ * Efface la file locale, les billets deja vus et la liste de revocation d'un evenement. Appelee
+ * des que l'evenement est clos (SECURITY.md M8) : noms et numeros de table n'ont plus a rester sur
+ * l'appareil, et le serveur refuserait de toute facon les passages encore en file.
+ */
+export function clearEventScanStorage(eventId: number): void {
+    try {
+        [queueKey(eventId), seenKey(eventId), revocationsKey(eventId)].forEach(
+            (key) => localStorage.removeItem(key),
+        );
+    } catch {
+        // Stockage indisponible : rien a effacer.
+    }
+}
+
+/**
  * Efface toute la file locale et la liste des billets deja vus, pour tous les evenements. Appelee
  * a la deconnexion (SECURITY.md M8).
  */

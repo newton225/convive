@@ -6,6 +6,7 @@ use App\Actions\Scan\ScanTicket;
 use App\Actions\Seating\AssignTable;
 use App\Actions\Tenants\CreateTenant;
 use App\Actions\Tickets\IssueTicket;
+use App\Enums\EventStatus;
 use App\Enums\RegistrationStatus;
 use App\Enums\ScanResult;
 use App\Enums\TenantPermission;
@@ -212,5 +213,21 @@ class TicketTokenLifecycleTest extends TestCase
                 ->where('event.qrKeyVersion', 1)
                 ->where('event.ticketValidUntil', $event->ticketValidUntil()->getTimestamp())
                 ->has('revocationList'));
+    }
+
+    public function test_la_page_de_scan_signale_un_evenement_clos_pour_que_l_appareil_efface_sa_file(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event] = $this->confirmedTicket($tenant);
+
+        $tenant->asCurrent(function () use ($event) {
+            $event->status = EventStatus::Closed;
+            $event->save();
+        });
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.scan.index', [$tenant, $event]))
+            ->assertInertia(fn ($page) => $page->where('event.closed', true));
     }
 }

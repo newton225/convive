@@ -15,6 +15,7 @@ import { useOnlineStatus } from '@/hooks/use-online-status';
 import { useScanQueue, type SyncOutcome } from '@/hooks/use-scan-queue';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import {
+    clearEventScanStorage,
     hasSeenLocally,
     markSeenLocally,
     readStoredRevocationList,
@@ -146,6 +147,12 @@ export default function EventScan({
 
     const { queued, syncing, review, enqueue, sync, dismissReview } =
         useScanQueue(event.id, syncOne);
+
+    useEffect(() => {
+        if (event.closed) {
+            clearEventScanStorage(event.id);
+        }
+    }, [event.closed, event.id]);
 
     const wasOnlineRef = useRef(online);
 
