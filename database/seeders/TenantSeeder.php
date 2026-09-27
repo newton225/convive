@@ -3,7 +3,12 @@
 namespace Database\Seeders;
 
 use App\Actions\Tenants\CreateTenant;
+use App\Enums\BillingCurrency;
 use App\Enums\LegalForm;
+use App\Enums\PlanCode;
+use App\Enums\SubscriptionStatus;
+use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -43,6 +48,15 @@ class TenantSeeder extends Seeder
         if ($tenant->subdomain === null) {
             $tenant->update(['subdomain' => 'convive']);
         }
+
+        // Plan Association : l'organisation de demonstration porte plusieurs evenements actifs,
+        // au-dela du plafond d'Essentiel (1). Abonnement actif fictif, sans client Stripe.
+        Subscription::firstOrCreate(['tenant_id' => $tenant->id], [
+            'plan_id' => Plan::ensure(PlanCode::Association)->id,
+            'status' => SubscriptionStatus::Active,
+            'currency' => BillingCurrency::Xof->value,
+            'current_period_ends_at' => now()->addMonth(),
+        ]);
 
         $admin->switchTenant($tenant);
     }
