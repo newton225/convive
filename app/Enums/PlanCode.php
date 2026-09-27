@@ -13,8 +13,8 @@ namespace App\Enums;
  * Prix mensuels arretes par le proprietaire du produit le 2026-09-27, repris du prototype
  * (Convive.dc.html) : Essentiel gratuit sans limite de duree tant que la politique ne change pas,
  * Association 45 000 F CFA, Institution sur devis. Francs CFA sans decimale ; euro et dollar en
- * centimes (6900 = 69,00). L'euro suit la parite fixe du franc CFA (655,957) ; le dollar reste a
- * confirmer par le proprietaire.
+ * centimes (6900 = 69,00) : 69 EUR (parite fixe du franc CFA, 655,957) et 79 USD, confirmes par le
+ * proprietaire le 2026-09-27.
  *
  * Messages aux invites (`max_messages_per_month`, SECURITY.md H5) : aucun plafond pour l'instant
  * (decision du 2026-09-27), la mecanique est prete dans `PlanLimits`.
