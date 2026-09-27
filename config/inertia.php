@@ -16,7 +16,10 @@ return [
     */
 
     'ssr' => [
-        'enabled' => true,
+        // Coupe en local : avec le serveur Vite de developpement, chaque chargement complet de page
+        // appelle son rendu serveur (`/__inertia_ssr`), qui a deja bloque une page trente secondes.
+        // `INERTIA_SSR_ENABLED=true` le rallume pour le mettre au point.
+        'enabled' => (bool) env('INERTIA_SSR_ENABLED', env('APP_ENV') !== 'local'),
         'url' => 'http://127.0.0.1:13714',
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
 
