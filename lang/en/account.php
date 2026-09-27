@@ -113,6 +113,22 @@ return [
         'description' => 'Use a long, unique password to keep your account secure',
     ],
 
+    'devices' => [
+        'title' => 'Connected devices',
+        'description' => "The browsers where your account is signed in. If you don't recognise one, sign it out and change your password.",
+        'current' => 'This device',
+        'unknown_browser' => 'Unknown browser',
+        'unknown_platform' => 'unknown system',
+        'last_active' => 'Last active: :time',
+        'empty' => 'The device list is not available with this session storage.',
+        'trigger' => 'Sign out other devices',
+        'confirm_title' => 'Sign out other devices?',
+        'confirm_description' => 'Every session open elsewhere will be closed. Enter your password to confirm.',
+        'password_label' => 'Password',
+        'confirm' => 'Sign out',
+        'flash' => 'Other devices have been signed out.',
+    ],
+
     'appearance' => [
         'head' => 'Appearance settings',
         'title' => 'Appearance',

@@ -1,6 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
 import { useRef } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
+import ConnectedDevices from '@/components/connected-devices';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -12,11 +13,12 @@ import ManagePasskeys from '@/components/manage-passkeys';
 import type { Props as ManageTwoFactorProps } from '@/components/manage-two-factor';
 import ManageTwoFactor from '@/components/manage-two-factor';
 import { translate, useTranslation } from '@/hooks/use-translation';
-import type { Translations } from '@/types';
+import type { ConnectedDevice, Translations } from '@/types';
 
 // oxfmt-ignore
 type Props = {
     passwordRules: string;
+    devices: ConnectedDevice[];
 } & ManagePasskeysProps &
     ManageTwoFactorProps;
 
@@ -145,6 +147,8 @@ export default function Security(props: Props) {
                 canManagePasskeys={props.canManagePasskeys}
                 passkeys={props.passkeys}
             />
+
+            <ConnectedDevices devices={props.devices} />
         </>
     );
 }

@@ -113,6 +113,22 @@ return [
         'description' => 'Utilisez un mot de passe long et unique pour protéger votre compte',
     ],
 
+    'devices' => [
+        'title' => 'Appareils connectés',
+        'description' => "Les navigateurs où votre compte est ouvert. Si vous n'en reconnaissez pas un, déconnectez-le et changez votre mot de passe.",
+        'current' => 'Cet appareil',
+        'unknown_browser' => 'Navigateur inconnu',
+        'unknown_platform' => 'système inconnu',
+        'last_active' => 'Dernière activité : :time',
+        'empty' => 'La liste des appareils n\'est pas disponible avec ce mode de stockage des sessions.',
+        'trigger' => 'Déconnecter les autres appareils',
+        'confirm_title' => 'Déconnecter les autres appareils ?',
+        'confirm_description' => 'Toutes vos sessions ouvertes ailleurs seront fermées. Saisissez votre mot de passe pour confirmer.',
+        'password_label' => 'Mot de passe',
+        'confirm' => 'Déconnecter',
+        'flash' => 'Les autres appareils ont été déconnectés.',
+    ],
+
     'appearance' => [
         'head' => 'Réglages d\'apparence',
         'title' => 'Apparence',

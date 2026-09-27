@@ -39,6 +39,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('throttle:6,1')
         ->name('user-password.update');
 
+    // Appareils connectes (SECURITY.md, « Deconnexion et sessions ») : fermer les autres sessions.
+    Route::delete('settings/sessions/others', [SecurityController::class, 'destroyOtherSessions'])
+        ->middleware('throttle:6,1')
+        ->name('other-sessions.destroy');
+
     // Rejeu du second facteur juste avant une action sensible (comptes de versement,
     // SECURITY.md C1), pose par `EnsureRecentTwoFactorConfirmation`. Hors du prefixe de
     // l'organisation, comme `security.edit` : une reconfirmation ne depend d'aucun locataire.

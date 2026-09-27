@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Settings\CloseOtherSessionsRequest;
 use App\Http\Requests\Settings\PasswordUpdateRequest;
 use App\Http\Requests\Settings\TwoFactorAuthenticationRequest;
+use App\Support\ConnectedDevices;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
@@ -39,6 +41,7 @@ class SecurityController extends Controller
                     ->all()
                 : [],
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
+            'devices' => ConnectedDevices::for($request->user(), $request->session()->getId()),
         ];
 
         if (Features::canManageTwoFactorAuthentication()) {
@@ -65,6 +68,26 @@ class SecurityController extends Controller
         Auth::logoutOtherDevices((string) $request->password);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('account.flash.password_updated')]);
+
+        return back();
+    }
+
+    /**
+     * Close every other session of the user (SECURITY.md, « Deconnexion et sessions »).
+     */
+    public function destroyOtherSessions(CloseOtherSessionsRequest $request): RedirectResponse
+    {
+        Auth::logoutOtherDevices((string) $request->validated('password'));
+
+        $closed = ConnectedDevices::closeOthers($request->user(), $request->session()->getId());
+
+        activity()
+            ->causedBy($request->user())
+            ->event('deleted')
+            ->withProperties(['count' => $closed])
+            ->log('account.other_sessions_closed');
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('account.devices.flash')]);
 
         return back();
     }

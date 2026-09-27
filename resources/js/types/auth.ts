@@ -31,3 +31,14 @@ export type TwoFactorSetupData = {
 export type TwoFactorSecretKey = {
     secretKey: string;
 };
+
+// Une session ouverte du membre (SECURITY.md, « Deconnexion et sessions »). Jamais l'identifiant
+// de session : c'est lui qui ouvre le compte.
+export type ConnectedDevice = {
+    browser: string | null;
+    platform: string | null;
+    mobile: boolean;
+    ipAddress: string | null;
+    lastActiveAt: string;
+    isCurrent: boolean;
+};
