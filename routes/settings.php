@@ -112,8 +112,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('settings/tenants/{tenant}/billing/payment-method', [BillingController::class, 'paymentMethod'])->middleware(RequirePassword::class)->name('tenants.billing.payment-method');
             Route::post('settings/tenants/{tenant}/billing/cancel', [BillingController::class, 'cancel'])->middleware(RequirePassword::class)->name('tenants.billing.cancel');
 
-            // Journalisation (README ecran 23) et gabarit du billet (ecran 15) : ecrans construits avant
-            // leur serveur, voir leurs controleurs (PROVISOIRE).
+            // Journalisation (README ecran 23) et gabarit du billet (ecran 15).
             Route::get('settings/tenants/{tenant}/audit', [AuditLogController::class, 'index'])->name('tenants.audit.index');
             Route::get('settings/tenants/{tenant}/ticket-template', [TicketTemplateController::class, 'edit'])->name('tenants.ticket-template.edit');
             Route::patch('settings/tenants/{tenant}/ticket-template', [TicketTemplateController::class, 'update'])->name('tenants.ticket-template.update');

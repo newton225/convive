@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { AlertCircle } from 'lucide-react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import { OfflineBanner } from '@/components/offline-banner';
 import { useRef, useState } from 'react';
@@ -9,6 +10,7 @@ import {
 } from '@/components/registration-fields';
 import LocaleSwitcher from '@/components/locale-switcher';
 import { SubmitButton } from '@/components/submit-button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/hooks/use-translation';
@@ -87,6 +89,18 @@ export default function PublicRegistration({
                 >
                     {({ errors, processing }) => (
                         <>
+                            {errors.registration ? (
+                                <Alert
+                                    variant="destructive"
+                                    data-test="registration-closed"
+                                >
+                                    <AlertCircle />
+                                    <AlertDescription>
+                                        {errors.registration}
+                                    </AlertDescription>
+                                </Alert>
+                            ) : null}
+
                             <Card>
                                 <CardContent className="space-y-4 pt-6">
                                     <Field

@@ -16,6 +16,7 @@ use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\Ticket;
 use App\Models\Unit;
+use App\Support\PlanLimits;
 use App\Support\TicketQrCode;
 use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
@@ -101,6 +102,13 @@ class RegistrationController extends Controller
 
         if (! app(HoldRegistration::class)->handle($event, $registration)) {
             $registration->delete();
+
+            // Le plafond d'inscrits du plan de l'organisation (README section 3) refuse la
+            // reservation comme un evenement complet ; l'invite, qui voit encore des places sur la
+            // page de l'evenement, doit savoir pourquoi, sans jargon d'abonnement.
+            if (! PlanLimits::for(Tenant::current())->canRegister($registration->party_size)) {
+                return back()->withInput()->withErrors(['registration' => __('guest.registration.errors.registrations_paused')]);
+            }
 
             return redirect($event->publicUrl());
         }
