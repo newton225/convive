@@ -5,6 +5,7 @@ return [
         'features' => 'Features',
         'steps' => 'How it works',
         'pricing' => 'Pricing',
+        'showcase' => 'Featured events',
         'login' => 'Log in',
         'register' => 'Create my workspace',
         'dashboard' => 'My workspace',

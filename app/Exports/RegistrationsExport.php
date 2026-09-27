@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Registration;
+use App\Support\SpreadsheetSafe;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -59,16 +60,18 @@ class RegistrationsExport implements FromQuery, WithHeadings, WithMapping
      */
     public function map(mixed $row): array
     {
+        // Texte libre saisi par l'invite ou l'equipe : neutralise contre l'injection de formules
+        // (SECURITY.md M2). Le telephone n'y passe pas, voir `SpreadsheetSafe`.
         return [
-            $row->name,
+            SpreadsheetSafe::cell($row->name),
             $row->phone,
-            $row->email,
-            $row->unit->name,
+            SpreadsheetSafe::cell($row->email),
+            SpreadsheetSafe::cell($row->unit->name),
             $row->party_size,
             $row->amount_due,
             $row->status->label(),
             $row->tableAssignment?->seatingTable->number,
-            $row->cancellation_reason,
+            SpreadsheetSafe::cell($row->cancellation_reason),
         ];
     }
 }

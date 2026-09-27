@@ -5,6 +5,7 @@ return [
         'features' => 'Fonctionnalités',
         'steps' => 'Comment ça marche',
         'pricing' => 'Tarifs',
+        'showcase' => 'Évènements à la une',
         'login' => 'Connexion',
         'register' => 'Créer mon espace',
         'dashboard' => 'Mon espace',

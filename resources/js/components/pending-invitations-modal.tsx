@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import TenantInvitationController from '@/actions/App/Http/Controllers/Tenants/TenantInvitationController';
-import { Button } from '@/components/ui/button';
+import { SubmitButton } from '@/components/submit-button';
 import {
     Dialog,
     DialogContent,
@@ -24,19 +24,24 @@ export default function PendingInvitationsModal({
     onOpenChange,
 }: Props) {
     const { t } = useTranslation();
-    const [processingCode, setProcessingCode] = useState<string | null>(null);
+    const [processing, setProcessing] = useState<{
+        code: string;
+        action: 'accept' | 'decline';
+    } | null>(null);
 
     const acceptInvitation = (invitation: DashboardInvitation) => {
         router.visit(TenantInvitationController.accept(invitation), {
-            onStart: () => setProcessingCode(invitation.code),
-            onFinish: () => setProcessingCode(null),
+            onStart: () =>
+                setProcessing({ code: invitation.code, action: 'accept' }),
+            onFinish: () => setProcessing(null),
         });
     };
 
     const declineInvitation = (invitation: DashboardInvitation) => {
         router.visit(TenantInvitationController.decline(invitation), {
-            onStart: () => setProcessingCode(invitation.code),
-            onFinish: () => setProcessingCode(null),
+            onStart: () =>
+                setProcessing({ code: invitation.code, action: 'decline' }),
+            onFinish: () => setProcessing(null),
             onSuccess: () => {
                 if (invitations.length === 1) {
                     onOpenChange(false);
@@ -76,28 +81,38 @@ export default function PendingInvitationsModal({
                             </div>
 
                             <div className="mt-4 flex justify-end gap-2">
-                                <Button
+                                <SubmitButton
+                                    type="button"
                                     variant="secondary"
                                     data-test="pending-invitation-decline"
+                                    processing={
+                                        processing?.code === invitation.code &&
+                                        processing.action === 'decline'
+                                    }
                                     disabled={
-                                        processingCode === invitation.code
+                                        processing?.code === invitation.code
                                     }
                                     onClick={() =>
                                         declineInvitation(invitation)
                                     }
                                 >
                                     {t('common.actions.decline')}
-                                </Button>
+                                </SubmitButton>
 
-                                <Button
+                                <SubmitButton
+                                    type="button"
                                     data-test="pending-invitation-accept"
+                                    processing={
+                                        processing?.code === invitation.code &&
+                                        processing.action === 'accept'
+                                    }
                                     disabled={
-                                        processingCode === invitation.code
+                                        processing?.code === invitation.code
                                     }
                                     onClick={() => acceptInvitation(invitation)}
                                 >
                                     {t('common.actions.accept')}
-                                </Button>
+                                </SubmitButton>
                             </div>
                         </div>
                     ))}

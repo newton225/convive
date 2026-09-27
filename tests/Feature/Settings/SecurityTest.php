@@ -13,6 +13,8 @@ class SecurityTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected bool $confirmsPasswordOnActingAs = false;
+
     public function test_security_page_is_displayed()
     {
         $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());

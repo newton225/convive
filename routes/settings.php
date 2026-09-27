@@ -4,6 +4,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Settings\NotificationPreferenceController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
+use App\Http\Controllers\Settings\TwoFactorReconfirmationController;
 use App\Http\Controllers\Tenants\AuditLogController;
 use App\Http\Controllers\Tenants\BillingController;
 use App\Http\Controllers\Tenants\OrganisationController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Tenants\TenantInvitationController;
 use App\Http\Controllers\Tenants\TenantMemberController;
 use App\Http\Controllers\Tenants\TicketTemplateController;
 use App\Http\Controllers\Tenants\UnitController;
+use App\Http\Middleware\EnsureRecentTwoFactorConfirmation;
 use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Middleware\EnsureTwoFactorForProfile;
 use Illuminate\Auth\Middleware\RequirePassword;
@@ -36,6 +38,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('settings/password', [SecurityController::class, 'update'])
         ->middleware('throttle:6,1')
         ->name('user-password.update');
+
+    // Rejeu du second facteur juste avant une action sensible (comptes de versement,
+    // SECURITY.md C1), pose par `EnsureRecentTwoFactorConfirmation`. Hors du prefixe de
+    // l'organisation, comme `security.edit` : une reconfirmation ne depend d'aucun locataire.
+    Route::get('settings/confirm-two-factor', [TwoFactorReconfirmationController::class, 'show'])
+        ->name('two-factor.reconfirm.show');
+    Route::post('settings/confirm-two-factor', [TwoFactorReconfirmationController::class, 'store'])
+        ->middleware('throttle:two-factor-reconfirm')
+        ->name('two-factor.reconfirm.store');
 
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
 
@@ -64,16 +75,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::patch('settings/tenants/{tenant}', [TenantController::class, 'update'])->name('tenants.update');
             Route::delete('settings/tenants/{tenant}', [TenantController::class, 'destroy'])->name('tenants.destroy');
 
-            Route::patch('settings/tenants/{tenant}/members/{member}', [TenantMemberController::class, 'update'])->name('tenants.members.update');
-            Route::delete('settings/tenants/{tenant}/members/{member}', [TenantMemberController::class, 'destroy'])->name('tenants.members.destroy');
+            Route::patch('settings/tenants/{tenant}/members/{member}', [TenantMemberController::class, 'update'])->middleware(RequirePassword::class)->name('tenants.members.update');
+            Route::delete('settings/tenants/{tenant}/members/{member}', [TenantMemberController::class, 'destroy'])->middleware(RequirePassword::class)->name('tenants.members.destroy');
 
             Route::post('settings/tenants/{tenant}/invitations', [TenantInvitationController::class, 'store'])->name('tenants.invitations.store');
             Route::delete('settings/tenants/{tenant}/invitations/{invitation}', [TenantInvitationController::class, 'destroy'])->name('tenants.invitations.destroy');
 
             Route::get('settings/tenants/{tenant}/organisation', [OrganisationController::class, 'edit'])->name('tenants.organisation.edit');
-            Route::patch('settings/tenants/{tenant}/organisation/legal', [OrganisationController::class, 'updateLegalIdentity'])->name('tenants.organisation.legal');
+            Route::patch('settings/tenants/{tenant}/organisation/legal', [OrganisationController::class, 'updateLegalIdentity'])->middleware(RequirePassword::class)->name('tenants.organisation.legal');
             Route::patch('settings/tenants/{tenant}/organisation/brand', [OrganisationController::class, 'updateBrand'])->name('tenants.organisation.branding');
-            Route::patch('settings/tenants/{tenant}/organisation/subdomain', [OrganisationController::class, 'updateSubdomain'])->name('tenants.organisation.subdomain');
+            Route::patch('settings/tenants/{tenant}/organisation/subdomain', [OrganisationController::class, 'updateSubdomain'])->middleware(RequirePassword::class)->name('tenants.organisation.subdomain');
             Route::post('settings/tenants/{tenant}/organisation/files/{file}', [OrganisationController::class, 'storeFile'])->name('tenants.organisation.files.store');
             Route::delete('settings/tenants/{tenant}/organisation/files/{file}', [OrganisationController::class, 'destroyFile'])->name('tenants.organisation.files.destroy');
 
@@ -81,19 +92,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // versement, independamment de la session en cours (SECURITY.md C1).
             Route::middleware(RequirePassword::class)->group(function () {
                 Route::get('settings/tenants/{tenant}/payment-accounts', [PaymentAccountController::class, 'index'])->name('tenants.payment-accounts.index');
-                Route::post('settings/tenants/{tenant}/payment-accounts', [PaymentAccountController::class, 'store'])->name('tenants.payment-accounts.store');
-                Route::patch('settings/tenants/{tenant}/payment-accounts/{payment_account}', [PaymentAccountController::class, 'update'])->name('tenants.payment-accounts.update');
-                Route::post('settings/tenants/{tenant}/payment-accounts/{payment_account}/approve', [PaymentAccountController::class, 'approve'])->name('tenants.payment-accounts.approve');
-                Route::post('settings/tenants/{tenant}/payment-accounts/{payment_account}/cancel', [PaymentAccountController::class, 'cancel'])->name('tenants.payment-accounts.cancel');
-                Route::delete('settings/tenants/{tenant}/payment-accounts/{payment_account}', [PaymentAccountController::class, 'destroy'])->name('tenants.payment-accounts.destroy');
+
+                // Le second facteur rejoue en plus du mot de passe, mais seulement sur les
+                // routes qui modifient effectivement quelque chose : « juste avant la
+                // modification » (CLAUDE.md), pas sur la simple lecture de l'ecran.
+                Route::middleware(EnsureRecentTwoFactorConfirmation::class)->group(function () {
+                    Route::post('settings/tenants/{tenant}/payment-accounts', [PaymentAccountController::class, 'store'])->name('tenants.payment-accounts.store');
+                    Route::patch('settings/tenants/{tenant}/payment-accounts/{payment_account}', [PaymentAccountController::class, 'update'])->name('tenants.payment-accounts.update');
+                    Route::post('settings/tenants/{tenant}/payment-accounts/{payment_account}/approve', [PaymentAccountController::class, 'approve'])->name('tenants.payment-accounts.approve');
+                    Route::post('settings/tenants/{tenant}/payment-accounts/{payment_account}/cancel', [PaymentAccountController::class, 'cancel'])->name('tenants.payment-accounts.cancel');
+                    Route::delete('settings/tenants/{tenant}/payment-accounts/{payment_account}', [PaymentAccountController::class, 'destroy'])->name('tenants.payment-accounts.destroy');
+                });
             });
 
             // L'abonnement (README ecran 16), etape 10 : reste hors de `EnsureTenantIsNotSuspended`,
             // une organisation suspendue regularise par cet ecran.
             Route::get('settings/tenants/{tenant}/billing', [BillingController::class, 'show'])->name('tenants.billing.show');
-            Route::post('settings/tenants/{tenant}/billing/checkout/{plan}', [BillingController::class, 'checkout'])->name('tenants.billing.checkout');
-            Route::post('settings/tenants/{tenant}/billing/payment-method', [BillingController::class, 'paymentMethod'])->name('tenants.billing.payment-method');
-            Route::post('settings/tenants/{tenant}/billing/cancel', [BillingController::class, 'cancel'])->name('tenants.billing.cancel');
+            Route::post('settings/tenants/{tenant}/billing/checkout/{plan}', [BillingController::class, 'checkout'])->middleware(RequirePassword::class)->name('tenants.billing.checkout');
+            Route::post('settings/tenants/{tenant}/billing/payment-method', [BillingController::class, 'paymentMethod'])->middleware(RequirePassword::class)->name('tenants.billing.payment-method');
+            Route::post('settings/tenants/{tenant}/billing/cancel', [BillingController::class, 'cancel'])->middleware(RequirePassword::class)->name('tenants.billing.cancel');
 
             // Journalisation (README ecran 23) et gabarit du billet (ecran 15) : ecrans construits avant
             // leur serveur, voir leurs controleurs (PROVISOIRE).
@@ -107,10 +124,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('settings/tenants/{tenant}/units/{unit}', [UnitController::class, 'destroy'])->name('tenants.units.destroy');
 
             Route::get('settings/tenants/{tenant}/profiles', [TenantProfileController::class, 'index'])->name('tenants.profiles.index');
-            Route::post('settings/tenants/{tenant}/profiles', [TenantProfileController::class, 'store'])->name('tenants.profiles.store');
-            Route::patch('settings/tenants/{tenant}/profiles/{profile}', [TenantProfileController::class, 'update'])->name('tenants.profiles.update');
-            Route::post('settings/tenants/{tenant}/profiles/{profile}/duplicate', [TenantProfileController::class, 'duplicate'])->name('tenants.profiles.duplicate');
-            Route::delete('settings/tenants/{tenant}/profiles/{profile}', [TenantProfileController::class, 'destroy'])->name('tenants.profiles.destroy');
+            Route::post('settings/tenants/{tenant}/profiles', [TenantProfileController::class, 'store'])->middleware(RequirePassword::class)->name('tenants.profiles.store');
+            Route::patch('settings/tenants/{tenant}/profiles/{profile}', [TenantProfileController::class, 'update'])->middleware(RequirePassword::class)->name('tenants.profiles.update');
+            Route::post('settings/tenants/{tenant}/profiles/{profile}/duplicate', [TenantProfileController::class, 'duplicate'])->middleware(RequirePassword::class)->name('tenants.profiles.duplicate');
+            Route::delete('settings/tenants/{tenant}/profiles/{profile}', [TenantProfileController::class, 'destroy'])->middleware(RequirePassword::class)->name('tenants.profiles.destroy');
         });
     });
 });

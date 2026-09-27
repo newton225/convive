@@ -7,8 +7,10 @@ use Illuminate\Database\Seeder;
 /**
  * Orchestre les donnees de demonstration. Idempotent : le rejouer ne duplique rien.
  *
- * Les seeders d'unites, de plans, d'evenements, d'inscriptions et de preuves decrits dans
- * CLAUDE.md arriveront avec leurs modeles, aux etapes 3 a 6.
+ * Pas de seeder d'unites separe : `TenantSeeder` cree l'organisation via `CreateTenant`, qui
+ * seme deja ses unites de depart (`App\Actions\Tenants\CreateStarterUnits`), comme a l'ouverture
+ * de n'importe quel espace (CLAUDE.md, « Unites »). Un `UnitSeeder` a part dupliquerait ce que
+ * l'application fait deja toute seule.
  *
  * Pas de `WithoutModelEvents` ici : les modeles du projet s'appuient sur leurs evenements
  * Eloquent, notamment `Tenant::creating` qui fabrique le slug. Les faire taire pendant le
@@ -30,6 +32,9 @@ class DatabaseSeeder extends Seeder
             PlanSeeder::class,
             TenantSeeder::class,
             TeamSeeder::class,
+            EventSeeder::class,
+            RegistrationSeeder::class,
+            PaymentProofSeeder::class,
         ]);
     }
 }

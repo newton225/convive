@@ -7,6 +7,7 @@ use App\Models\Profile;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\ScopedSqliteDatabaseManager;
+use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Fortify\Features;
 
@@ -50,6 +51,27 @@ abstract class TestCase extends BaseTestCase
                 @unlink($path);
             }
         }
+    }
+
+    /**
+     * Les routes sensibles (identite legale, profils, abonnement, membres, comptes de versement)
+     * redemandent le mot de passe (SECURITY.md H8 et M5). Par defaut, un test agit comme un
+     * membre qui vient de le confirmer, exactement comme `PaymentAccountTest::actingAsConfirmed()`.
+     * Une classe qui teste cette exigence elle-meme passe ce drapeau a `false`.
+     */
+    protected bool $confirmsPasswordOnActingAs = true;
+
+    public function actingAs(UserContract $user, $guard = null)
+    {
+        parent::actingAs($user, $guard);
+
+        if ($this->confirmsPasswordOnActingAs) {
+            // `now()` et non `time()` : apres un voyage dans le temps, une confirmation datee de
+            // l'horloge reelle serait consideree comme perimee.
+            $this->session(['auth.password_confirmed_at' => now()->getTimestamp()]);
+        }
+
+        return $this;
     }
 
     protected function skipUnlessFortifyHas(string $feature, ?string $message = null): void

@@ -71,3 +71,17 @@ export function hasSeenLocally(
 export function markSeenLocally(eventId: number, registrationId: number): void {
     write(seenKey(eventId), [...readSeen(eventId), registrationId]);
 }
+
+/**
+ * Efface toute la file locale et la liste des billets deja vus, pour tous les evenements. Appelee
+ * a la deconnexion (SECURITY.md M8).
+ */
+export function clearScanStorage(): void {
+    try {
+        Object.keys(localStorage)
+            .filter((key) => key.startsWith('convive:scan-'))
+            .forEach((key) => localStorage.removeItem(key));
+    } catch {
+        // Stockage indisponible : rien a effacer.
+    }
+}

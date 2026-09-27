@@ -18,6 +18,7 @@ trait ProfileValidationRules
         return [
             'name' => $this->nameRules(),
             'email' => $this->emailRules($userId),
+            'phone' => $this->phoneRules(),
         ];
     }
 
@@ -47,5 +48,18 @@ trait ProfileValidationRules
                 ? Rule::unique(User::class)
                 : Rule::unique(User::class)->ignore($userId),
         ];
+    }
+
+    /**
+     * Get the validation rules used to validate user phone numbers.
+     *
+     * Facultatif : sert uniquement a router l'alerte WhatsApp d'un changement de compte de
+     * versement (CLAUDE.md, « Comptes de versement »), jamais une condition d'inscription.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function phoneRules(): array
+    {
+        return ['nullable', 'string', 'max:32', 'regex:/^\+?[0-9 ().-]{8,32}$/'];
     }
 }

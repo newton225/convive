@@ -648,4 +648,85 @@ class RegistrationTest extends TestCase
 
         $this->get($url)->assertStatus(429);
     }
+
+    public function test_le_lien_de_reprise_est_limite_a_dix_consultations_par_heure(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+
+        $this->post($this->registrationFormUrl($tenant, $event), $this->validPayload($tenant));
+
+        $registration = $tenant->asCurrent(fn () => Registration::firstOrFail());
+        $resume = 'jeton-inconnu-mais-stable';
+        $url = $this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}");
+
+        // Le limiteur compte par jeton et adresse, que le jeton soit valide ou non : deviner un
+        // jeton est precisement ce qu'il faut ralentir (SECURITY.md H3).
+        for ($i = 0; $i < 10; $i++) {
+            $this->get($url)->assertNotFound();
+        }
+
+        $this->get($url)->assertStatus(429);
+        $this->assertNotNull($registration);
+    }
+
+    public function test_un_numero_ne_peut_avoir_qu_une_reservation_active_par_evenement(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $url = $this->registrationFormUrl($tenant, $event);
+
+        $this->post($url, $this->validPayload($tenant))->assertRedirect();
+
+        // Meme numero, ecrit autrement : les chiffres seuls comptent.
+        $this->post($url, [...$this->validPayload($tenant), 'name' => 'Autre nom', 'phone' => '+22507071234 56'])
+            ->assertSessionHasErrors('phone');
+
+        $this->assertSame(1, $tenant->asCurrent(fn () => Registration::count()));
+    }
+
+    public function test_un_numero_dont_la_reservation_a_expire_peut_s_inscrire_de_nouveau(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $url = $this->registrationFormUrl($tenant, $event);
+
+        $this->post($url, $this->validPayload($tenant))->assertRedirect();
+        $tenant->asCurrent(fn () => Registration::query()->update(['held_until' => now()->subMinute()]));
+
+        $this->post($url, $this->validPayload($tenant))->assertSessionHasNoErrors();
+
+        $this->assertSame(2, $tenant->asCurrent(fn () => Registration::count()));
+    }
+
+    public function test_un_meme_numero_peut_s_inscrire_a_deux_evenements_differents(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $first = $this->publishedEvent($tenant);
+        $second = $this->publishedEvent($tenant);
+
+        $this->post($this->registrationFormUrl($tenant, $first), $this->validPayload($tenant))->assertRedirect();
+        $this->post($this->registrationFormUrl($tenant, $second), $this->validPayload($tenant))->assertSessionHasNoErrors();
+
+        $this->assertSame(2, $tenant->asCurrent(fn () => Registration::count()));
+    }
+
+    public function test_la_creation_de_reservations_est_plafonnee_par_adresse_ip(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant, ['table_count' => 50, 'seats_per_table' => 10]);
+        $url = $this->registrationFormUrl($tenant, $event);
+
+        // Numeros differents : seul le plafond par IP peut arreter ce script.
+        for ($i = 0; $i < 5; $i++) {
+            $this->post($url, [...$this->validPayload($tenant), 'phone' => '+225 07 07 00 00 0'.$i])->assertRedirect();
+        }
+
+        $this->post($url, [...$this->validPayload($tenant), 'phone' => '+225 07 07 00 00 99'])->assertStatus(429);
+    }
 }

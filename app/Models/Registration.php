@@ -252,6 +252,31 @@ class Registration extends Model
     }
 
     /**
+     * Determine whether another registration of the event still holds seats for this phone
+     * number : reservation en cours ou preuve en attente de verification (SECURITY.md C3, « une
+     * seule reservation active par numero de telephone et par evenement »).
+     *
+     * Compare les chiffres seuls : `+225 07 07` et `+22507 07` designent le meme telephone. Le
+     * nombre de reservations actives d'un evenement est borne par sa capacite, la comparaison en
+     * PHP reste donc petite.
+     */
+    public static function phoneHoldsSeats(Event $event, string $phone, ?int $exceptId = null): bool
+    {
+        $digits = preg_replace('/\D+/', '', $phone);
+
+        return self::query()
+            ->where('event_id', $event->id)
+            ->when($exceptId !== null, fn (Builder $query) => $query->whereKeyNot($exceptId))
+            ->where(function (Builder $query) {
+                $query->where('status', RegistrationStatus::ProofSubmitted)
+                    ->orWhere(fn (Builder $held) => $held->where('status', RegistrationStatus::Held)
+                        ->where('held_until', '>', now()));
+            })
+            ->pluck('phone')
+            ->contains(fn (string $other) => preg_replace('/\D+/', '', $other) === $digits);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

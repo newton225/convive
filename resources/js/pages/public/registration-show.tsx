@@ -1,4 +1,5 @@
 import { Form, Head, router } from '@inertiajs/react';
+import { BrandColorStyle } from '@/components/brand-color-style';
 import { ResumeLinkCard } from '@/components/public/resume-link-card';
 import { RegistrationRecap } from '@/components/public/registration-recap';
 import { OfflineBanner } from '@/components/offline-banner';
@@ -74,16 +75,9 @@ export default function PublicRegistrationShow({
         channels.find((channel) => channel.value === selectedChannel)
             ?.hasAccountNumber ?? true;
 
-    const brandStyle = {
-        '--brand-primary': tenant.colors.primary,
-        '--brand-secondary': tenant.colors.secondary,
-    } as React.CSSProperties;
-
     return (
-        <div
-            style={brandStyle}
-            className="bg-background flex min-h-screen flex-col items-center p-4"
-        >
+        <div className="bg-background flex min-h-screen flex-col items-center p-4">
+            <BrandColorStyle colors={tenant.colors} />
             <Head title={t('guest.registration.title')} />
             <OfflineBanner />
 
@@ -308,13 +302,12 @@ export default function PublicRegistrationShow({
                                     )}
                                 </p>
                                 <p
-                                    className="text-3xl font-semibold tabular-nums"
+                                    className={cn(
+                                        'text-3xl font-semibold tabular-nums',
+                                        isUrgent &&
+                                            'text-[oklch(0.55_0.2_25)]',
+                                    )}
                                     data-test="registration-countdown"
-                                    style={
-                                        isUrgent
-                                            ? { color: 'oklch(0.55 0.2 25)' }
-                                            : undefined
-                                    }
                                 >
                                     {formatCountdown(remainingSeconds)}
                                 </p>

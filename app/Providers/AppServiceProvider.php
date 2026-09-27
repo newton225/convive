@@ -17,11 +17,13 @@ use App\Support\Stripe\StripeSubscriptionBillingGateway;
 use App\Support\UnconfiguredBillingGateway;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Spatie\Activitylog\Models\Activity;
@@ -55,8 +57,38 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureActivityLog();
+        self::configurePaymentProofDisk();
 
         Notification::extend('whatsapp', fn ($app) => $app->make(WhatsAppChannel::class));
+    }
+
+    /**
+     * Force le disque des preuves de paiement a se servir en piece jointe (SECURITY.md H1) :
+     * `Illuminate\Filesystem\ServeFile` sert un disque local en affichage direct par defaut, ce
+     * qui convient a un logo de marque mais jamais a une capture d'ecran deposee par un invite
+     * inconnu. Point d'extension officiel (`serveUsing()`), pas une reecriture de la route de
+     * service generee par `serve => true`.
+     *
+     * Statique et publique, pas `protected` comme les autres `configure*()` d'ici : instancier
+     * ce provider via le conteneur pour rappeler la methode (`app(AppServiceProvider::class)`)
+     * echoue, son constructeur attend l'instance `Application` que Laravel lui passe a l'amorcage,
+     * pas une resolue a la volee. Les tests qui isolent ce disque sur une racine temporaire
+     * doivent pouvoir reposer ce comportement une fois le disque oublie
+     * (`Storage::forgetDisk()`), voir `Tests\Feature\Public\PaymentProofTest`.
+     */
+    public static function configurePaymentProofDisk(): void
+    {
+        Storage::disk('payment_proofs')->serveUsing(
+            fn (Request $request, string $path, array $headers) => Storage::disk('payment_proofs')
+                // `no-referrer` (SECURITY.md H2) : l'URL signee d'un recu ne doit jamais partir
+                // dans l'en-tete `Referer` d'une page tierce. La route de service generee par
+                // `serve => true` ne passe pas par `SetSecurityHeaders` (groupe `web`).
+                ->download($path, headers: [
+                    'X-Content-Type-Options' => 'nosniff',
+                    'Referrer-Policy' => 'no-referrer',
+                    ...$headers,
+                ]),
+        );
     }
 
     /**
@@ -125,6 +157,32 @@ class AppServiceProvider extends ServiceProvider
 
         // Exports (Excel/CSV/PDF/listes de controle) et import de releve (table de CLAUDE.md).
         RateLimiter::for('exports', fn ($request) => Limit::perHour(5)->by($request->user()?->id));
+
+        // Lien de reprise (table de CLAUDE.md, SECURITY.md H3) : 10 par heure, jeton plus IP.
+        RateLimiter::for('resume', fn ($request) => Limit::perHour(10)
+            ->by((string) $request->route('resume').'|'.$request->ip()));
+
+        // Creation de reservation par le lien public (SECURITY.md C3) : une reservation bloque des
+        // places pendant sa duree, un script qui en cree en boucle epuise l'evenement. Plafond
+        // par adresse IP, et plus large par sous-reseau /24 (IPv4) pour les rotations d'adresse
+        // voisines. Fenetre de dix minutes, la duree d'une reservation par defaut.
+        RateLimiter::for('registration', function ($request) {
+            $ip = (string) $request->ip();
+            $subnet = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+                ? implode('.', array_slice(explode('.', $ip), 0, 3)).'.0/24'
+                : $ip;
+
+            return [
+                Limit::perMinutes(10, 5)->by('registration:ip:'.$ip),
+                Limit::perMinutes(10, 20)->by('registration:subnet:'.$subnet),
+            ];
+        });
+
+        // Rejeu du second facteur avant une action sensible (comptes de versement,
+        // SECURITY.md C1). Cle session utilisateur (table de CLAUDE.md), pas `login.id` :
+        // contrairement au limiteur `two-factor` de Fortify, l'utilisateur est deja authentifie.
+        RateLimiter::for('two-factor-reconfirm', fn ($request) => Limit::perMinute(5)
+            ->by($request->user()?->id ?: $request->session()->getId()));
     }
 
     /**

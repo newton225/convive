@@ -54,7 +54,11 @@ class BillingControllerTest extends TestCase
                 ->has('plans', 3)
                 ->where('plans.0.code', 'essential')
                 ->where('plans.0.current', true)
-                ->where('subscription', null),
+                ->where('subscription', null)
+                ->where(
+                    'salesContactEmail',
+                    config('convive.billing.sales_contact_email'),
+                ),
             );
     }
 

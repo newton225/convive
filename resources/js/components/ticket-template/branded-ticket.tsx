@@ -1,5 +1,6 @@
 import { Check, ImageOff } from 'lucide-react';
-import type { CSSProperties } from 'react';
+import { useId } from 'react';
+import { BrandColorStyle } from '@/components/brand-color-style';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import type { TicketBrand, TicketElements, TicketModel } from '@/types';
@@ -19,11 +20,10 @@ type Props = {
  */
 export function BrandedTicket({ brand, model, elements, eventName }: Props) {
     const { t } = useTranslation();
-
-    const style = {
-        '--brand-primary': brand.colors.primary,
-        '--brand-secondary': brand.colors.secondary,
-    } as CSSProperties;
+    // Selecteur scope, pas `:root` : ce billet s'affiche imbrique dans une page de back-office
+    // (ecran 15), qui doit rester neutre (CLAUDE.md). `useId()` porte deja des deux-points,
+    // invalides dans un selecteur de classe brut : on les retire.
+    const scopeClass = `brand-ticket-${useId().replace(/:/g, '')}`;
 
     const asset = (
         enabled: boolean,
@@ -50,8 +50,8 @@ export function BrandedTicket({ brand, model, elements, eventName }: Props) {
 
     return (
         <article
-            style={style}
             className={cn(
+                scopeClass,
                 'text-ink w-full max-w-sm bg-white p-6',
                 model === 'classic' &&
                     'rounded-xl border-2 border-[color:var(--brand-primary)] text-center',
@@ -61,6 +61,10 @@ export function BrandedTicket({ brand, model, elements, eventName }: Props) {
             data-test="branded-ticket"
             data-model={model}
         >
+            <BrandColorStyle
+                colors={brand.colors}
+                selector={`.${scopeClass}`}
+            />
             <div
                 className={cn(
                     'flex items-center gap-3',

@@ -29,6 +29,9 @@ return [
     ],
 
     'registration' => [
+        'errors' => [
+            'phone_already_active' => 'Une réservation est déjà en cours pour ce numéro. Terminez-la, ou attendez la fin de son délai avant d\'en créer une autre.',
+        ],
         'title' => 'Votre inscription',
         'fields' => [
             'name' => 'Nom complet',

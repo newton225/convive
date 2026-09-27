@@ -4,6 +4,7 @@ return [
     'fields' => [
         'name' => 'Full name',
         'email' => 'Email address',
+        'phone' => 'Phone',
         'password' => 'Password',
         'password_confirmation' => 'Confirm password',
         'current_password' => 'Current password',
@@ -14,6 +15,7 @@ return [
     'placeholders' => [
         'name' => 'Full name',
         'email' => 'email@example.com',
+        'phone' => '+225 07 00 00 00 00',
         'password' => 'Password',
         'password_confirmation' => 'Confirm password',
         'current_password' => 'Current password',
@@ -84,6 +86,14 @@ return [
         'use_recovery' => 'use a recovery code',
         'use_code' => 'use an authentication code',
         'required_by_profile' => 'Your profile in this organisation requires two-factor authentication. Turn it on to regain access.',
+        'invalid_code' => 'This code is invalid or has expired.',
+    ],
+
+    'two_factor_reconfirm' => [
+        'head' => 'Confirm with your two-factor code',
+        'title' => 'Confirm your identity',
+        'description' => 'This action touches a payment account: re-enter the code from your authenticator app to continue.',
+        'submit' => 'Confirm',
     ],
 
     'settings_description' => 'Manage your profile and account settings',
@@ -91,6 +101,7 @@ return [
     'profile' => [
         'email_unverified' => 'Your email address is unverified.',
         'resend_link' => 'Click here to re-send the verification email.',
+        'phone_help' => 'Optional: only used to alert you over WhatsApp when a payment account changes.',
         'head' => 'Profile settings',
         'title' => 'Profile',
         'description' => 'Update your name and email address',

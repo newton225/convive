@@ -1,5 +1,5 @@
 import { Form, Head, router } from '@inertiajs/react';
-import { AlertTriangle, Send } from 'lucide-react';
+import { AlertTriangle, Megaphone, Send } from 'lucide-react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
 import EventVisualField from '@/components/events/event-visual-field';
@@ -11,7 +11,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { translate, useTranslation } from '@/hooks/use-translation';
-import { edit, index, publish, store, update } from '@/routes/tenants/events';
+import {
+    announce,
+    edit,
+    index,
+    publish,
+    store,
+    update,
+} from '@/routes/tenants/events';
+import { withdraw as withdrawAnnouncement } from '@/routes/tenants/events/announce';
 import type {
     EventDetails,
     EventPaymentAccountOption,
@@ -60,10 +68,15 @@ export default function EventForm({
                     />
 
                     {event ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             <Badge variant="secondary">
                                 {event.statusLabel}
                             </Badge>
+                            {event.isAnnounced ? (
+                                <Badge variant="outline">
+                                    {t('events.badges.announced')}
+                                </Badge>
+                            ) : null}
                             <Button
                                 data-test="event-publish"
                                 disabled={!event.isReadyToPublish}
@@ -75,6 +88,38 @@ export default function EventForm({
                             >
                                 <Send /> {t('events.actions.publish')}
                             </Button>
+                            {event.isPublished ? (
+                                <Button
+                                    variant="outline"
+                                    data-test={
+                                        event.isAnnounced
+                                            ? 'event-withdraw-announcement'
+                                            : 'event-announce'
+                                    }
+                                    onClick={() =>
+                                        event.isAnnounced
+                                            ? router.delete(
+                                                  withdrawAnnouncement([
+                                                      tenant.slug,
+                                                      event.id,
+                                                  ]).url,
+                                              )
+                                            : router.post(
+                                                  announce([
+                                                      tenant.slug,
+                                                      event.id,
+                                                  ]).url,
+                                              )
+                                    }
+                                >
+                                    <Megaphone />
+                                    {t(
+                                        event.isAnnounced
+                                            ? 'events.actions.withdraw_announcement'
+                                            : 'events.actions.announce',
+                                    )}
+                                </Button>
+                            ) : null}
                         </div>
                     ) : null}
                 </div>
@@ -92,6 +137,19 @@ export default function EventForm({
                 {event?.isPublished ? (
                     <p className="text-muted-foreground text-sm">
                         {t('events.publishing.frozen_subdomain')}
+                    </p>
+                ) : null}
+
+                {event?.isPublished ? (
+                    <p
+                        className="text-muted-foreground text-sm"
+                        data-test="event-announcing-description"
+                    >
+                        {t(
+                            event.isAnnounced
+                                ? 'events.announcing.announced'
+                                : 'events.announcing.description',
+                        )}
                     </p>
                 ) : null}
 

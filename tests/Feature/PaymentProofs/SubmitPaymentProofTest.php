@@ -12,6 +12,7 @@ use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
@@ -25,23 +26,37 @@ class SubmitPaymentProofTest extends TestCase
 
     private string $mediaRoot;
 
+    private string $proofsRoot;
+
     /**
      * Meme isolation que `Tests\Feature\Tenants\BrandFileTest` : une racine temporaire plutot
-     * que `Storage::fake()`, qui perdrait `serve => true`.
+     * que `Storage::fake()`, qui perdrait `serve => true`. `payment_proofs` en plus de
+     * `tenant_media` depuis SECURITY.md H1 : les preuves ne vivent plus sur le meme disque que
+     * les fichiers de marque.
      */
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->mediaRoot = storage_path('framework/testing/tenant-media-'.Str::random(8));
+        $this->proofsRoot = storage_path('framework/testing/payment-proofs-'.Str::random(8));
 
-        config(['filesystems.disks.tenant_media.root' => $this->mediaRoot]);
+        config([
+            'filesystems.disks.tenant_media.root' => $this->mediaRoot,
+            'filesystems.disks.payment_proofs.root' => $this->proofsRoot,
+        ]);
         Storage::forgetDisk('tenant_media');
+        Storage::forgetDisk('payment_proofs');
+
+        // `forgetDisk()` jette l'instance sur laquelle `AppServiceProvider::boot()` avait pose
+        // `serveUsing()` (piece jointe, SECURITY.md H1) : la reposer sur la nouvelle instance.
+        AppServiceProvider::configurePaymentProofDisk();
     }
 
     protected function tearDown(): void
     {
         File::deleteDirectory($this->mediaRoot);
+        File::deleteDirectory($this->proofsRoot);
 
         parent::tearDown();
     }
@@ -313,7 +328,9 @@ class SubmitPaymentProofTest extends TestCase
         // La resolution du chemin, elle, ne doit pas dependre d'une tenancy encore active
         // (voir `TenantMediaPathGenerator`) : une page qui affiche l'URL d'un recu peut le
         // faire apres la fin de la requete qui l'a resolu.
-        $this->assertSame('tenant_media', $media->disk);
+        // Disque distinct de `tenant_media` (SECURITY.md H1) : une capture deposee par un
+        // invite inconnu ne partage pas l'espace des fichiers de marque du locataire.
+        $this->assertSame('payment_proofs', $media->disk);
         $this->assertFileDoesNotExist(public_path($media->getPathRelativeToRoot()));
     }
 

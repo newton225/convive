@@ -60,6 +60,9 @@ class BillingController extends Controller
                 'canceledAt' => $subscription->canceled_at?->toISOString(),
             ],
             'usage' => PlanLimits::for($tenant)->usage(),
+            // PROVISOIRE : adresse par defaut tant que le proprietaire n'en a pas fourni une
+            // reelle (CLAUDE.md, `config('convive.billing.sales_contact_email')`).
+            'salesContactEmail' => config('convive.billing.sales_contact_email'),
             'plans' => collect(PlanCode::cases())
                 ->map(fn (PlanCode $code) => $this->plan(Plan::ensure($code), $current))
                 ->all(),

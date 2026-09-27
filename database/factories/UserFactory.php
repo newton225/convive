@@ -19,6 +19,14 @@ class UserFactory extends Factory
     protected static ?string $password;
 
     /**
+     * Secret TOTP valide (base32) porte par `withTwoFactor()`, publique pour que les tests qui
+     * doivent soumettre un code reel (rejeu du second facteur, SECURITY.md C1) puissent le
+     * calculer avec le meme moteur que l'application (`Google2FA::getCurrentOtp()`), plutot
+     * qu'une chaine arbitraire qu'aucun generateur n'accepterait.
+     */
+    public const TwoFactorSecret = 'R23UBO7TJJLL72RL';
+
+    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
@@ -67,7 +75,7 @@ class UserFactory extends Factory
     public function withTwoFactor(): static
     {
         return $this->state(fn (array $attributes) => [
-            'two_factor_secret' => encrypt('secret'),
+            'two_factor_secret' => encrypt(self::TwoFactorSecret),
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
         ]);

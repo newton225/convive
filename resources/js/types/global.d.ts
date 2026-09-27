@@ -16,6 +16,7 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             sidebarOpen: boolean;
+            cspNonce: string;
             locale: LocaleCode;
             supportedLocales: SupportedLocales;
             translations: Translations;

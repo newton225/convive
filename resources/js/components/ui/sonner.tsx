@@ -8,19 +8,11 @@ function Toaster({ ...props }: ToasterProps) {
     useFlashToast();
 
     return (
-        <Sonner
-            theme={appearance}
-            className="toaster group"
-            position="bottom-right"
-            style={
-                {
-                    '--normal-bg': 'var(--popover)',
-                    '--normal-text': 'var(--popover-foreground)',
-                    '--normal-border': 'var(--border)',
-                } as React.CSSProperties
-            }
-            {...props}
-        />
+        // --normal-bg, --normal-text et --normal-border sont posees en CSS statique
+        // (resources/css/app.css, selecteur .toaster) plutot qu'en style inline : une CSP
+        // sans unsafe-inline (SECURITY.md H7) ne peut proteger que les balises
+        // <style>/<script>, jamais un attribut style, et ces valeurs sont des constantes.
+        <Sonner theme={appearance} className="toaster group" position="bottom-right" {...props} />
     );
 }
 

@@ -62,6 +62,24 @@ return [
             'report' => false,
         ],
 
+        /*
+         * Preuves de paiement deposees par les invites (SECURITY.md H1) : disque distinct de
+         * `tenant_media`, jamais melange aux fichiers de marque. Un vrai domaine separe reste a
+         * batir (DNS, certificat) ; en attendant, `PaymentProofServiceProvider` force ce disque
+         * a servir en piece jointe (`Content-Disposition: attachment`, `X-Content-Type-Options:
+         * nosniff`), jamais en affichage direct dans l'onglet du navigateur sur le domaine
+         * principal. La CSP `sandbox` vient deja de `Illuminate\Filesystem\ServeFile`, sans rien
+         * a ecrire ici.
+         */
+        'payment_proofs' => [
+            'driver' => 'local',
+            'root' => storage_path('app/payment-proofs'),
+            'url' => rtrim((string) env('APP_URL', 'http://localhost'), '/').'/payment-proofs',
+            'serve' => true,
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

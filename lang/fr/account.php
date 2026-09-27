@@ -4,6 +4,7 @@ return [
     'fields' => [
         'name' => 'Nom complet',
         'email' => 'Adresse email',
+        'phone' => 'Téléphone',
         'password' => 'Mot de passe',
         'password_confirmation' => 'Confirmer le mot de passe',
         'current_password' => 'Mot de passe actuel',
@@ -14,6 +15,7 @@ return [
     'placeholders' => [
         'name' => 'Nom complet',
         'email' => 'email@exemple.com',
+        'phone' => '+225 07 00 00 00 00',
         'password' => 'Mot de passe',
         'password_confirmation' => 'Confirmer le mot de passe',
         'current_password' => 'Mot de passe actuel',
@@ -84,6 +86,14 @@ return [
         'use_recovery' => 'utiliser un code de secours',
         'use_code' => 'utiliser un code d\'authentification',
         'required_by_profile' => "Votre profil dans cette organisation exige l'authentification à deux facteurs. Activez-la pour retrouver l'accès.",
+        'invalid_code' => 'Ce code est invalide ou a expiré.',
+    ],
+
+    'two_factor_reconfirm' => [
+        'head' => 'Confirmer avec le code à deux facteurs',
+        'title' => 'Confirmer votre identité',
+        'description' => 'Cette action touche un compte de versement : ressaisissez le code de votre application d\'authentification pour continuer.',
+        'submit' => 'Confirmer',
     ],
 
     'settings_description' => 'Gérez votre profil et les réglages de votre compte',
@@ -94,6 +104,7 @@ return [
         'description' => 'Modifiez votre nom et votre adresse email',
         'email_unverified' => 'Votre adresse email n\'est pas vérifiée.',
         'resend_link' => 'Cliquez ici pour renvoyer l\'email de vérification.',
+        'phone_help' => 'Facultatif : sert uniquement à vous alerter par WhatsApp en cas de changement sur un compte de versement.',
     ],
 
     'security' => [

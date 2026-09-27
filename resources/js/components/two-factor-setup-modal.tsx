@@ -24,6 +24,7 @@ import { useClipboard } from '@/hooks/use-clipboard';
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
 import { confirm } from '@/routes/two-factor';
 import { useTranslation } from '@/hooks/use-translation';
+import { cn } from '@/lib/utils';
 
 function GridScanIcon() {
     return (
@@ -79,18 +80,18 @@ function TwoFactorSetupStep({
                         <div className="border-border mx-auto aspect-square w-64 rounded-lg border">
                             <div className="z-10 flex h-full w-full items-center justify-center p-5">
                                 {qrCodeSvg ? (
-                                    <div
-                                        className="aspect-square w-full rounded-lg bg-white p-2 [&_svg]:size-full"
-                                        dangerouslySetInnerHTML={{
-                                            __html: qrCodeSvg,
-                                        }}
-                                        style={{
-                                            filter:
-                                                resolvedAppearance === 'dark'
-                                                    ? 'invert(1) brightness(1.5)'
-                                                    : undefined,
-                                        }}
-                                    />
+                                    <div className="aspect-square w-full rounded-lg bg-white p-2">
+                                        <img
+                                            src={`data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(qrCodeSvg)))}`}
+                                            alt=""
+                                            className={cn(
+                                                'size-full',
+                                                resolvedAppearance ===
+                                                    'dark' &&
+                                                    'invert brightness-150',
+                                            )}
+                                        />
+                                    </div>
                                 ) : (
                                     <Spinner />
                                 )}

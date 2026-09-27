@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
+import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -73,14 +74,16 @@ export default function DeleteProfileModal({
                         </Button>
                     </DialogClose>
 
-                    <Button
+                    <SubmitButton
+                        type="button"
                         variant="destructive"
                         data-test="profile-delete-confirm"
-                        disabled={processing || carried}
+                        processing={processing}
+                        disabled={carried}
                         onClick={deleteProfile}
                     >
                         {t('profiles.actions.delete')}
-                    </Button>
+                    </SubmitButton>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

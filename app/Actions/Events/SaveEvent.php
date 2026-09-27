@@ -4,6 +4,8 @@ namespace App\Actions\Events;
 
 use App\Enums\EventStatus;
 use App\Models\Event;
+use App\Models\ShowcaseEvent;
+use App\Models\Tenant;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -46,8 +48,88 @@ class SaveEvent
                 ]))
                 ->log($creating ? 'event.created' : 'event.updated');
 
+            // La vitrine ne relit jamais la base du locataire (CLAUDE.md, « Annonce sur le
+            // site produit ») : sa copie centrale doit rester a jour par elle-meme des que le
+            // nom ou la date changent sur un evenement deja annonce.
+            if ($event->isAnnounced()) {
+                $this->syncShowcase($event);
+            }
+
             return $event;
         });
+    }
+
+    /**
+     * Announce the event on the product site's showcase (opt-in, CLAUDE.md « Annonce sur le
+     * site produit ») : un second geste, volontaire, jamais automatique a la publication.
+     */
+    public function announce(Event $event): Event
+    {
+        return DB::transaction(function () use ($event) {
+            $event->announced_at = now();
+            $event->save();
+
+            $this->syncShowcase($event);
+
+            activity()
+                ->performedOn($event)
+                ->event('updated')
+                ->withProperties(['attributes' => ['announced_at' => $event->announced_at->toISOString()]])
+                ->log('event.announced');
+
+            return $event;
+        });
+    }
+
+    /**
+     * Withdraw the event from the showcase.
+     *
+     * Toujours possible, y compris apres publication et independamment de la cloture :
+     * l'organisateur garde la main sur sa visibilite a tout moment.
+     */
+    public function withdraw(Event $event): Event
+    {
+        return DB::transaction(function () use ($event) {
+            $event->announced_at = null;
+            $event->save();
+
+            ShowcaseEvent::where('tenant_id', Tenant::current()?->id)
+                ->where('event_id', $event->id)
+                ->delete();
+
+            activity()
+                ->performedOn($event)
+                ->event('updated')
+                ->log('event.announcement_withdrawn');
+
+            return $event;
+        });
+    }
+
+    /**
+     * Keep the central showcase row in sync with this event's current display data.
+     */
+    private function syncShowcase(Event $event): void
+    {
+        $tenant = Tenant::current();
+
+        if ($tenant === null || $event->announced_at === null) {
+            return;
+        }
+
+        ShowcaseEvent::updateOrCreate(
+            ['tenant_id' => $tenant->id, 'event_id' => $event->id],
+            [
+                'name' => $event->name,
+                // `branding` existe forcement ici : `announce()` exige un evenement deja
+                // publie, ce qui exige lui-meme `Tenant::isReadyToPublish()`, qui n'est vrai
+                // que si `branding` existe et est complete.
+                'organisation_name' => $tenant->branding->display_name ?? $tenant->name,
+                'starts_at' => $event->starts_at,
+                'public_url' => $event->publicUrl(),
+                'announced_at' => $event->announced_at,
+            ],
+        );
     }
 
     /**

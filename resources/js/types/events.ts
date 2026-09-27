@@ -19,6 +19,7 @@ export type EventSummary = {
     isPublished: boolean;
     isReadyToPublish: boolean;
     publicUrl: string | null;
+    isAnnounced: boolean;
 };
 
 export type EventDetails = EventSummary & {

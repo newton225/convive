@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\SetSecurityHeaders;
 use App\Http\Middleware\SetTenantUrlDefaults;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -13,6 +14,7 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Session\Middleware\AuthenticateSession;
 use Stancl\Tenancy\Contracts\TenantCouldNotBeIdentifiedException;
 use Stancl\Tenancy\Exceptions\NotASubdomainException;
 
@@ -38,7 +40,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // Stripe ne porte pas de jeton CSRF : sa signature est verifiee par le paquet.
         $middleware->validateCsrfTokens(except: ['webhooks/stripe']);
 
+        // AuthenticateSession invalide la session d'un appareil des que le mot de passe a change
+        // ailleurs (`Auth::logoutOtherDevices()`, voir `SecurityController::update()`).
+        // SetSecurityHeaders genere le nonce CSP de la requete : elle doit s'executer avant
+        // HandleInertiaRequests, qui le partage au front, et avant tout rendu de vue.
         $middleware->web(append: [
+            AuthenticateSession::class,
+            SetSecurityHeaders::class,
             HandleAppearance::class,
             SetLocale::class,
             HandleInertiaRequests::class,

@@ -36,13 +36,32 @@ class PaymentAccountChanged extends Notification implements ShouldQueue
     /**
      * Get the notification's delivery channels.
      *
-     * WhatsApp est prevu par le README, derriere une interface dediee qui n'existe pas encore.
+     * WhatsApp derriere `App\Contracts\WhatsAppSender` (CLAUDE.md, « Envois programmes et
+     * rappels ») : palliatif journalise tant qu'aucun identifiant Business API n'est fourni,
+     * jamais un envoi ad hoc depuis l'Action. Toujours tente : `routeNotificationForWhatsapp()`
+     * renvoie `null` sans numero renseigne, et le canal saute simplement l'envoi, comme `mail`
+     * le fait deja pour une inscription sans email.
      *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'whatsapp'];
+    }
+
+    /**
+     * Get the WhatsApp representation of the notification.
+     *
+     * Message court, sans mise en forme : c'est ce que porte le contrat `WhatsAppSender`.
+     */
+    public function toWhatsApp(object $notifiable): string
+    {
+        return __('payment_accounts.whatsapp.alert', [
+            'tenant' => $this->tenant->name,
+            'label' => $this->account->label,
+            'before' => $this->before['account_number'] ?? __('payment_accounts.mail.none'),
+            'after' => $this->account->pending_account_number ?? __('payment_accounts.mail.none'),
+        ]);
     }
 
     /**

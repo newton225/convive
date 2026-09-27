@@ -26,6 +26,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { translate, useTranslation } from '@/hooks/use-translation';
+import { formatDateTime } from '@/lib/format-date';
 import { edit, index as tenantsIndex } from '@/routes/tenants';
 import {
     approve,
@@ -55,7 +56,7 @@ export default function PaymentAccounts({
     channels,
     activationDelayHours,
 }: Props) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const [deleting, setDeleting] = useState<PaymentAccount | null>(null);
 
     const recentlyChanged = accounts.some((account) => account.changedRecently);
@@ -147,10 +148,11 @@ export default function PaymentAccounts({
                                         {t(
                                             'payment_accounts.pending.activates_at',
                                             {
-                                                date: new Date(
+                                                date: formatDateTime(
                                                     account.pending
                                                         .activatesAt ?? '',
-                                                ).toLocaleString(),
+                                                    locale,
+                                                ),
                                             },
                                         )}
                                     </p>

@@ -102,6 +102,8 @@ class RegistrationController extends Controller
     {
         Gate::authorize('export', [Registration::class, $tenant]);
 
+        $this->journalExport($request, $event, 'xlsx', $this->exportQuery($request, $event)->count());
+
         return Excel::download(
             new RegistrationsExport($this->exportQuery($request, $event)),
             "inscrits-{$event->id}.xlsx",
@@ -114,6 +116,8 @@ class RegistrationController extends Controller
     public function exportCsv(Request $request, Tenant $tenant, Event $event): BinaryFileResponse
     {
         Gate::authorize('export', [Registration::class, $tenant]);
+
+        $this->journalExport($request, $event, 'csv', $this->exportQuery($request, $event)->count());
 
         return Excel::download(
             new RegistrationsExport($this->exportQuery($request, $event)),
@@ -131,6 +135,8 @@ class RegistrationController extends Controller
         Gate::authorize('export', [Registration::class, $tenant]);
 
         $registrations = $this->exportQuery($request, $event)->orderBy('id')->get();
+
+        $this->journalExport($request, $event, 'pdf', $registrations->count());
 
         return Pdf::view('pdf.registrations', [
             'letterhead' => PdfLetterhead::for($tenant),
@@ -197,6 +203,24 @@ class RegistrationController extends Controller
         ])
             ->format('a4')
             ->download("listes-de-controle-{$event->id}.pdf");
+    }
+
+    /**
+     * Journalise un export de la base d'inscrits (SECURITY.md M3) : qui a extrait combien de
+     * lignes, avec quels filtres. Un export autorise n'est pas une intrusion, mais c'est une
+     * fuite possible, et l'entree est le seul moyen de la reconstituer.
+     */
+    private function journalExport(Request $request, Event $event, string $format, int $rows): void
+    {
+        activity()
+            ->performedOn($event)
+            ->event('exported')
+            ->withProperties([
+                'format' => $format,
+                'rows' => $rows,
+                'filters' => $request->query('filter', []),
+            ])
+            ->log('registrations.exported');
     }
 
     /**

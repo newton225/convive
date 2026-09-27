@@ -22,6 +22,7 @@ return [
         'events.update' => 'Update an event',
         'events.duplicate' => 'Duplicate an event',
         'events.close' => 'Close an event',
+        'events.announce' => 'Announce an event on the showcase',
         'registrations.view' => 'View registrations',
         'registrations.export' => 'Export registrations',
         'registrations.purge' => 'Purge unfinished registrations',

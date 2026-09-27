@@ -78,4 +78,8 @@ return [
         'none' => 'none',
         'outro' => 'If you did not request this, cancel it immediately and review who has access to your organisation.',
     ],
+
+    'whatsapp' => [
+        'alert' => 'Convive: the payment account ":label" of :tenant has changed. Previous number: :before. New: :after. If you did not request this, cancel it immediately.',
+    ],
 ];

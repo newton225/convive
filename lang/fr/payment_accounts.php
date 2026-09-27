@@ -78,4 +78,8 @@ return [
         'none' => 'aucun',
         'outro' => "Si vous n'êtes pas à l'origine de cette demande, annulez-la immédiatement et vérifiez les accès de votre organisation.",
     ],
+
+    'whatsapp' => [
+        'alert' => 'Convive : le compte de versement ":label" de :tenant a changé. Ancien numéro : :before. Nouveau : :after. Si vous n\'êtes pas à l\'origine de cette demande, annulez-la immédiatement.',
+    ],
 ];

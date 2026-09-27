@@ -8,9 +8,11 @@ use App\Enums\PaymentChannel;
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
 use App\Models\PaymentAccount;
+use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
@@ -24,23 +26,38 @@ class PaymentProofTest extends TestCase
 
     private string $mediaRoot;
 
+    private string $proofsRoot;
+
     /**
      * Meme isolation que `Tests\Feature\Tenants\BrandFileTest` : une racine temporaire plutot
-     * que `Storage::fake()`, qui perdrait `serve => true`.
+     * que `Storage::fake()`, qui perdrait `serve => true`. `payment_proofs` en plus de
+     * `tenant_media` depuis SECURITY.md H1 : les preuves ne vivent plus sur le meme disque que
+     * les fichiers de marque.
      */
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->mediaRoot = storage_path('framework/testing/tenant-media-'.Str::random(8));
+        $this->proofsRoot = storage_path('framework/testing/payment-proofs-'.Str::random(8));
 
-        config(['filesystems.disks.tenant_media.root' => $this->mediaRoot]);
+        config([
+            'filesystems.disks.tenant_media.root' => $this->mediaRoot,
+            'filesystems.disks.payment_proofs.root' => $this->proofsRoot,
+        ]);
         Storage::forgetDisk('tenant_media');
+        Storage::forgetDisk('payment_proofs');
+
+        // `forgetDisk()` jette l'instance sur laquelle `AppServiceProvider::boot()` avait pose
+        // `serveUsing()` (piece jointe, SECURITY.md H1) : la reposer sur la nouvelle instance,
+        // sinon les tests d'en-tetes de cette classe passeraient pour la mauvaise raison.
+        AppServiceProvider::configurePaymentProofDisk();
     }
 
     protected function tearDown(): void
     {
         File::deleteDirectory($this->mediaRoot);
+        File::deleteDirectory($this->proofsRoot);
 
         parent::tearDown();
     }
@@ -146,6 +163,33 @@ class PaymentProofTest extends TestCase
             RegistrationStatus::ProofSubmitted,
             $tenant->asCurrent(fn () => $registration->fresh())->status,
         );
+    }
+
+    public function test_le_recu_se_sert_en_piece_jointe_jamais_en_affichage_direct(): void
+    {
+        // SECURITY.md H1 : une capture deposee par un invite inconnu ne s'ouvre jamais dans
+        // l'onglet du navigateur sur le domaine principal, quel que soit son contenu reel.
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $account = $tenant->asCurrent(fn () => PaymentAccount::first());
+        ['resume' => $resume] = $this->heldRegistration($tenant, $event);
+
+        $this->post(
+            $this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}/proof"),
+            $this->validPayload($account),
+        );
+
+        $receiptUrl = $tenant->asCurrent(fn () => PaymentProof::firstOrFail()->receiptUrl());
+
+        $this->assertNotNull($receiptUrl);
+        $this->assertStringContainsString('/payment-proofs/', $receiptUrl);
+
+        $this->get($receiptUrl)
+            ->assertOk()
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Referrer-Policy', 'no-referrer')
+            ->assertDownload();
     }
 
     public function test_la_page_de_reservation_affiche_la_preuve_recue(): void

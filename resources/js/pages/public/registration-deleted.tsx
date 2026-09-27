@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { Trash2 } from 'lucide-react';
-import type { CSSProperties } from 'react';
+import { BrandColorStyle } from '@/components/brand-color-style';
 import LocaleSwitcher from '@/components/locale-switcher';
 import { OfflineBanner } from '@/components/offline-banner';
 import { Button } from '@/components/ui/button';
@@ -32,16 +32,9 @@ type Props = {
 export default function RegistrationDeleted({ token, event, tenant }: Props) {
     const { t } = useTranslation();
 
-    const brandStyle = {
-        '--brand-primary': tenant.colors.primary,
-        '--brand-secondary': tenant.colors.secondary,
-    } as CSSProperties;
-
     return (
-        <div
-            style={brandStyle}
-            className="bg-background flex min-h-screen flex-col"
-        >
+        <div className="bg-background flex min-h-screen flex-col">
+            <BrandColorStyle colors={tenant.colors} />
             <Head title={t('guest.deleted.title')} />
             <OfflineBanner />
 

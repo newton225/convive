@@ -1,3 +1,5 @@
+import { useId } from 'react';
+import { NonceStyle } from '@/components/nonce-style';
 import { useTranslation } from '@/hooks/use-translation';
 
 const Tables = [
@@ -38,18 +40,31 @@ export function SeatingPreview() {
                             </span>
                         </div>
                         <div className="bg-background h-1.5 overflow-hidden rounded-full">
-                            <div
-                                className={
-                                    table.seated === 10
-                                        ? 'bg-foreground h-full'
-                                        : 'bg-primary h-full'
-                                }
-                                style={{ width: `${table.seated * 10}%` }}
+                            <SeatingFill
+                                ratio={table.seated * 10}
+                                full={table.seated === 10}
                             />
                         </div>
                     </li>
                 ))}
             </ul>
+        </div>
+    );
+}
+
+function SeatingFill({ ratio, full }: { ratio: number; full: boolean }) {
+    // Largeur calculee a l'execution : posee via une balise <style> nonce'e et scopee, pas
+    // l'attribut `style` (voir NonceStyle).
+    const scopeClass = `seating-fill-${useId().replace(/:/g, '')}`;
+
+    return (
+        <div
+            className={`${scopeClass} h-full ${full ? 'bg-foreground' : 'bg-primary'}`}
+        >
+            <NonceStyle
+                selector={`.${scopeClass}`}
+                declarations={{ width: `${ratio}%` }}
+            />
         </div>
     );
 }

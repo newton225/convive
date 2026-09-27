@@ -66,6 +66,8 @@ return [
         'create' => 'Nouvel événement',
         'edit' => "Modifier l'événement",
         'publish' => 'Publier le lien public',
+        'announce' => 'Annoncer sur la vitrine',
+        'withdraw_announcement' => 'Retirer de la vitrine',
         'close' => "Clôturer l'événement",
         'duplicate' => 'Dupliquer',
         'delete' => "Supprimer l'événement",
@@ -81,6 +83,7 @@ return [
     'badges' => [
         'published' => 'Lien distribué',
         'not_ready' => 'Pas encore publiable',
+        'announced' => 'Sur la vitrine',
     ],
 
     'publishing' => [
@@ -89,10 +92,17 @@ return [
         'frozen_subdomain' => "Une fois le lien distribué, le sous-domaine de l'organisation ne peut plus changer.",
     ],
 
+    'announcing' => [
+        'description' => "Faites apparaître cet événement dans la vitrine du site produit, pour toucher un public qui n'a jamais reçu le lien.",
+        'announced' => 'Cet événement apparaît sur la vitrine du site produit.',
+    ],
+
     'flash' => [
         'created' => 'Événement créé.',
         'updated' => 'Événement mis à jour.',
         'published' => 'Lien public distribué.',
+        'announced' => 'Événement annoncé sur la vitrine.',
+        'announcement_withdrawn' => 'Événement retiré de la vitrine.',
         'closed' => 'Événement clôturé.',
         'duplicated' => 'Événement dupliqué.',
         'deleted' => 'Événement supprimé.',
@@ -104,6 +114,7 @@ return [
         'deadline_after_event' => "La date limite des inscriptions ne peut pas être postérieure à l'événement.",
         'unknown_payment_account' => "Un des comptes de versement retenus n'appartient pas à cette organisation.",
         'not_ready_to_publish' => 'Cet événement ne peut pas encore être publié : identité légale, capacité, date et compte de versement visible sont requis.',
+        'not_published_yet' => "Cet événement doit d'abord être publié avant de pouvoir apparaître sur la vitrine.",
     ],
 
     'confirm_delete' => [

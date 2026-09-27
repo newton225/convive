@@ -2,10 +2,12 @@
 
 namespace App\Notifications\Registrations;
 
+use App\Mail\GuestNotificationMail;
 use App\Models\Registration;
+use App\Support\GuestNotificationBranding;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Mail\Mailable;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -39,23 +41,32 @@ class InvitationCard extends Notification implements ShouldQueue
         return $channels;
     }
 
-    public function toMail(mixed $notifiable): MailMessage
+    public function toMail(mixed $notifiable): Mailable
     {
         $registration = $this->registration;
         $tableNumber = $registration->tableAssignment?->seatingTable->number;
+        $colors = $registration->event->colors();
 
-        $message = (new MailMessage)
-            ->subject(__('guest.mail.invitation_card.subject', ['event' => $registration->event->name]))
-            ->line(__('guest.mail.invitation_card.intro', [
+        $lines = [
+            __('guest.mail.invitation_card.intro', [
                 'name' => $registration->name,
                 'event' => $registration->event->name,
-            ]));
+            ]),
+        ];
 
         if ($tableNumber !== null) {
-            $message->line(__('guest.mail.invitation_card.table', ['number' => $tableNumber]));
+            $lines[] = __('guest.mail.invitation_card.table', ['number' => $tableNumber]);
         }
 
-        return $message->action(__('guest.mail.invitation_card.action'), $this->link);
+        return (new GuestNotificationMail(
+            organisationName: GuestNotificationBranding::organisationName(),
+            primaryColor: $colors['primary'],
+            secondaryColor: $colors['secondary'],
+            subjectLine: __('guest.mail.invitation_card.subject', ['event' => $registration->event->name]),
+            lines: $lines,
+            actionText: __('guest.mail.invitation_card.action'),
+            actionUrl: $this->link,
+        ))->to($notifiable->routeNotificationFor('mail', $this));
     }
 
     public function toWhatsApp(mixed $notifiable): string

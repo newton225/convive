@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\ShowcaseController;
 use App\Http\Controllers\Tenants\TenantInvitationController;
 use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Middleware\EnsureTwoFactorForProfile;
@@ -10,6 +11,10 @@ use Illuminate\Support\Facades\Route;
 
 // Reservee aux visiteurs : un membre connecte est renvoye vers son espace (voir `bootstrap/app.php`).
 Route::get('/', HomeController::class)->middleware('guest')->name('home');
+
+// Vitrine des evenements a la une (CLAUDE.md, « Annonce sur le site produit ») : accessible a
+// tous, connecte ou non, contrairement a la page d'accueil marketing.
+Route::get('evenements-a-la-une', ShowcaseController::class)->name('showcase.index');
 
 Route::put('locale', [LocaleController::class, 'update'])->name('locale.update');
 

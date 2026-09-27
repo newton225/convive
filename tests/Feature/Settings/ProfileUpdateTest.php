@@ -43,6 +43,49 @@ class ProfileUpdateTest extends TestCase
         $this->assertNull($user->email_verified_at);
     }
 
+    public function test_le_numero_de_telephone_facultatif_peut_etre_enregistre()
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => '+225 07 00 00 00 01',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('+225 07 00 00 00 01', $user->fresh()->phone);
+    }
+
+    public function test_le_numero_de_telephone_reste_facultatif()
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => '',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull($user->fresh()->phone);
+    }
+
+    public function test_un_numero_de_telephone_mal_forme_est_refuse()
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => 'pas un numero',
+            ])
+            ->assertSessionHasErrors('phone');
+    }
+
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged()
     {
         $user = User::factory()->create();

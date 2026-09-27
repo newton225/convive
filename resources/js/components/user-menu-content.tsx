@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
+import { clearScanStorage } from '@/lib/scan-queue';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
@@ -22,6 +23,9 @@ export function UserMenuContent({ user }: Props) {
     const handleLogout = () => {
         cleanup();
         router.flushAll();
+        // La file de scan hors ligne (jetons de billets) ne survit pas a la deconnexion : un
+        // telephone partage ou perdu ne doit rien exposer (SECURITY.md M8).
+        clearScanStorage();
     };
 
     return (

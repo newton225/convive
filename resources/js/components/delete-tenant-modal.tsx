@@ -1,6 +1,7 @@
 import { Form } from '@inertiajs/react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';
+import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -97,14 +98,14 @@ export default function DeleteTenantModal({
                                     </Button>
                                 </DialogClose>
 
-                                <Button
+                                <SubmitButton
                                     variant="destructive"
-                                    type="submit"
                                     data-test="delete-tenant-confirm"
-                                    disabled={!canDeleteTenant || processing}
+                                    processing={processing}
+                                    disabled={!canDeleteTenant}
                                 >
                                     {t('tenants.actions.delete')}
-                                </Button>
+                                </SubmitButton>
                             </DialogFooter>
                         </>
                     )}

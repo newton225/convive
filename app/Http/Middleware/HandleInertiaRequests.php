@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\Locale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Vite;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -18,7 +19,7 @@ class HandleInertiaRequests extends Middleware
      *
      * @var array<int, string>
      */
-    protected const TranslationGroups = ['common', 'navigation', 'account', 'tenants', 'profiles', 'permissions', 'organisation', 'units', 'payment_accounts', 'events', 'guest', 'proofs', 'seating', 'scan', 'registrations', 'reconciliation', 'reports', 'notifications', 'billing', 'site', 'dashboard', 'audit', 'ticket_template', 'event_settings', 'offline'];
+    protected const TranslationGroups = ['common', 'navigation', 'account', 'tenants', 'profiles', 'permissions', 'organisation', 'units', 'payment_accounts', 'events', 'guest', 'proofs', 'seating', 'scan', 'registrations', 'reconciliation', 'reports', 'notifications', 'billing', 'site', 'showcase', 'dashboard', 'audit', 'ticket_template', 'event_settings', 'offline'];
 
     /**
      * The root template that's loaded on the first page visit.
@@ -57,6 +58,9 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            // Genere par SetSecurityHeaders, qui s'execute avant ce middleware : lecture seule
+            // ici (Vite::cspNonce()), jamais Vite::useCspNonce() qui en tirerait un second.
+            'cspNonce' => Vite::cspNonce(),
             'locale' => app()->getLocale(),
             'supportedLocales' => Locale::supported(),
             'translations' => fn () => $this->translations(),

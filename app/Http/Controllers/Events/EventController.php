@@ -134,6 +134,40 @@ class EventController extends Controller
     }
 
     /**
+     * Announce the event on the product site's showcase (opt-in, CLAUDE.md « Annonce sur le
+     * site produit »).
+     */
+    public function announce(Tenant $tenant, Event $event, SaveEvent $save): RedirectResponse
+    {
+        Gate::authorize('announce', [$event, $tenant]);
+
+        // Aucun lien public a montrer sur la vitrine tant que l'evenement n'en a pas un.
+        if (! $event->isPublished()) {
+            return back()->withErrors(['event' => __('events.errors.not_published_yet')]);
+        }
+
+        $save->announce($event);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('events.flash.announced')]);
+
+        return to_route('tenants.events.edit', [$tenant, $event]);
+    }
+
+    /**
+     * Withdraw the event from the showcase.
+     */
+    public function withdrawAnnouncement(Tenant $tenant, Event $event, SaveEvent $save): RedirectResponse
+    {
+        Gate::authorize('announce', [$event, $tenant]);
+
+        $save->withdraw($event);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('events.flash.announcement_withdrawn')]);
+
+        return to_route('tenants.events.edit', [$tenant, $event]);
+    }
+
+    /**
      * Store the event's visual (README ecran 13).
      */
     public function storeVisual(SaveEventVisualRequest $request, Tenant $tenant, Event $event, SaveEvent $save): RedirectResponse
@@ -224,6 +258,7 @@ class EventController extends Controller
             'isPublished' => $event->isPublished(),
             'isReadyToPublish' => $event->isReadyToPublish(),
             'publicUrl' => $event->publicUrl(),
+            'isAnnounced' => $event->isAnnounced(),
         ];
     }
 

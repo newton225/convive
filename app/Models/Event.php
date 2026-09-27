@@ -42,6 +42,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property int $hold_duration_minutes
  * @property string|null $public_token
  * @property CarbonImmutable|null $published_at
+ * @property CarbonImmutable|null $announced_at
  * @property string|null $qr_public_key
  * @property string|null $qr_secret_key
  * @property int $qr_key_version
@@ -319,6 +320,19 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Determine whether this event is announced on the product site's showcase (CLAUDE.md,
+     * « Annonce sur le site produit »).
+     *
+     * Independant de la cloture : retirer l'annonce reste possible a tout moment, y compris
+     * apres publication, et cloturer un evenement ne le retire pas de la vitrine tout seul.
+     * L'organisateur garde la main sur sa visibilite.
+     */
+    public function isAnnounced(): bool
+    {
+        return $this->announced_at !== null;
+    }
+
+    /**
      * Give the event its public token, once.
      *
      * Le jeton ne tourne pas : il est l'adresse de l'evenement pour tous ceux qui l'ont recue.
@@ -397,6 +411,7 @@ class Event extends Model implements HasMedia
             'purge_at' => 'datetime',
             'invitations_send_at' => 'datetime',
             'published_at' => 'datetime',
+            'announced_at' => 'datetime',
             'table_count' => 'integer',
             'seats_per_table' => 'integer',
             'price_per_person' => 'integer',

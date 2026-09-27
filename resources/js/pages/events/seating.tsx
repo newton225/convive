@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/select';
 import { useTranslation, translate } from '@/hooks/use-translation';
 import { can, Permission } from '@/lib/permissions';
+import { unitColorClass } from '@/lib/unit-colors';
+import { cn } from '@/lib/utils';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { assign, index } from '@/routes/tenants/events/seating';
 import {
@@ -39,6 +41,17 @@ type Props = {
     units: SeatingUnitOption[];
     constraints: SeatingConstraintRow[];
 };
+
+/**
+ * Regroupe les occupants par unite (README ecran 21) : trier par unite plutot que de les
+ * laisser dans leur ordre d'attribution rend le regroupement visible d'un coup d'oeil, la
+ * couleur (`unitColorClass`) faisant le reste.
+ */
+function sortedByUnit(
+    occupants: SeatingRegistrationRow[],
+): SeatingRegistrationRow[] {
+    return [...occupants].sort((a, b) => a.unit.localeCompare(b.unit));
+}
 
 /**
  * README ecran 21 : le plan de salle, etape 6 de « Ordre de construction ». L'attribution
@@ -116,7 +129,18 @@ export default function EventSeating({
                                             </span>
                                         </CardTitle>
                                         {table.reservedUnit ? (
-                                            <Badge variant="secondary">
+                                            <Badge
+                                                variant="secondary"
+                                                className="w-fit gap-1.5"
+                                            >
+                                                <span
+                                                    className={cn(
+                                                        'size-2 rounded-full',
+                                                        unitColorClass(
+                                                            table.reservedUnit,
+                                                        ),
+                                                    )}
+                                                />
                                                 {t(
                                                     'seating.tables.reserved_for',
                                                     {
@@ -127,44 +151,62 @@ export default function EventSeating({
                                         ) : null}
                                     </CardHeader>
                                     <CardContent className="space-y-2">
-                                        {table.occupants.map((occupant) => (
-                                            <div
-                                                key={occupant.id}
-                                                className="flex items-center justify-between gap-2 text-sm"
-                                                data-test="seating-occupant"
-                                            >
-                                                <div>
-                                                    <p className="font-medium">
-                                                        {occupant.name}
-                                                    </p>
-                                                    <p className="text-muted-foreground text-xs">
-                                                        {occupant.unit} ·{' '}
-                                                        {occupant.partySize}
-                                                    </p>
+                                        {/* Regroupees par unite (README ecran 21) : la meme
+                                        couleur d'un coup d'oeil, plutot qu'un simple libelle
+                                        au fil des occupants dans leur ordre d'attribution. */}
+                                        {sortedByUnit(table.occupants).map(
+                                            (occupant) => (
+                                                <div
+                                                    key={occupant.id}
+                                                    className="flex items-center justify-between gap-2 text-sm"
+                                                    data-test="seating-occupant"
+                                                >
+                                                    <div className="flex items-start gap-2">
+                                                        <span
+                                                            className={cn(
+                                                                'mt-1.5 size-2 shrink-0 rounded-full',
+                                                                unitColorClass(
+                                                                    occupant.unit,
+                                                                ),
+                                                            )}
+                                                        />
+                                                        <div>
+                                                            <p className="font-medium">
+                                                                {occupant.name}
+                                                            </p>
+                                                            <p className="text-muted-foreground text-xs">
+                                                                {occupant.unit}{' '}
+                                                                ·{' '}
+                                                                {
+                                                                    occupant.partySize
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    {canAssign ? (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            disabled={
+                                                                pending ===
+                                                                occupant.id
+                                                            }
+                                                            data-test="seating-remove"
+                                                            onClick={() =>
+                                                                moveTo(
+                                                                    occupant.id,
+                                                                    null,
+                                                                )
+                                                            }
+                                                        >
+                                                            {t(
+                                                                'seating.actions.remove',
+                                                            )}
+                                                        </Button>
+                                                    ) : null}
                                                 </div>
-                                                {canAssign ? (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        disabled={
-                                                            pending ===
-                                                            occupant.id
-                                                        }
-                                                        data-test="seating-remove"
-                                                        onClick={() =>
-                                                            moveTo(
-                                                                occupant.id,
-                                                                null,
-                                                            )
-                                                        }
-                                                    >
-                                                        {t(
-                                                            'seating.actions.remove',
-                                                        )}
-                                                    </Button>
-                                                ) : null}
-                                            </div>
-                                        ))}
+                                            ),
+                                        )}
                                     </CardContent>
                                 </Card>
                             ))}

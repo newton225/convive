@@ -35,6 +35,11 @@ Route::prefix('{tenant}')
         Route::patch('events/{event}', [EventController::class, 'update'])->name('tenants.events.update');
         Route::post('events/{event}/publish', [EventController::class, 'publish'])->name('tenants.events.publish');
         Route::post('events/{event}/close', [EventController::class, 'close'])->name('tenants.events.close');
+
+        // Vitrine du site produit (CLAUDE.md, « Annonce sur le site produit »), opt-in, distinct
+        // de la publication.
+        Route::post('events/{event}/announce', [EventController::class, 'announce'])->name('tenants.events.announce');
+        Route::delete('events/{event}/announce', [EventController::class, 'withdrawAnnouncement'])->name('tenants.events.announce.withdraw');
         Route::post('events/{event}/duplicate', [EventController::class, 'duplicate'])->name('tenants.events.duplicate');
         Route::delete('events/{event}', [EventController::class, 'destroy'])->name('tenants.events.destroy');
 

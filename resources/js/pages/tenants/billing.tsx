@@ -1,7 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import AlertError from '@/components/alert-error';
 import Heading from '@/components/heading';
+import { NonceStyle } from '@/components/nonce-style';
 import { Badge } from '@/components/ui/badge';
 import {
     Select,
@@ -51,6 +52,7 @@ type Props = {
     usage: BillingUsage;
     plans: BillingPlan[];
     invoices: BillingInvoice[];
+    salesContactEmail: string;
 };
 
 const QuotaKeys = ['events', 'registrations', 'members'] as const;
@@ -88,16 +90,26 @@ function QuotaGauge({ label, quota }: { label: string; quota: BillingQuota }) {
                     aria-valuemax={quota.max}
                     aria-label={label}
                 >
-                    <div
-                        className={
-                            ratio >= 100
-                                ? 'bg-destructive h-full'
-                                : 'bg-primary h-full'
-                        }
-                        style={{ width: `${ratio}%` }}
-                    />
+                    <QuotaGaugeFill ratio={ratio} />
                 </div>
             ) : null}
+        </div>
+    );
+}
+
+function QuotaGaugeFill({ ratio }: { ratio: number }) {
+    // Largeur calculee a l'execution : posee via une balise <style> nonce'e et scopee, pas
+    // l'attribut `style` (voir NonceStyle).
+    const scopeClass = `quota-gauge-fill-${useId().replace(/:/g, '')}`;
+
+    return (
+        <div
+            className={`${scopeClass} h-full ${ratio >= 100 ? 'bg-destructive' : 'bg-primary'}`}
+        >
+            <NonceStyle
+                selector={`.${scopeClass}`}
+                declarations={{ width: `${ratio}%` }}
+            />
         </div>
     );
 }
@@ -117,6 +129,7 @@ export default function Billing({
     usage,
     plans,
     invoices,
+    salesContactEmail,
 }: Props) {
     const { t, locale } = useTranslation();
     const { errors } = usePage().props;
@@ -385,24 +398,40 @@ export default function Billing({
                                             <li>{t('billing.plans.sso')}</li>
                                         ) : null}
                                     </ul>
-                                    {canManage &&
-                                    !item.current &&
-                                    item.prices[currency] ? (
-                                        <Button
-                                            size="sm"
-                                            data-test={`billing-choose-${item.code}`}
-                                            onClick={() =>
-                                                router.post(
-                                                    checkout([
-                                                        tenant.slug,
-                                                        item.code,
-                                                    ]).url,
-                                                    { currency },
-                                                )
-                                            }
-                                        >
-                                            {t('billing.plans.choose')}
-                                        </Button>
+                                    {canManage && !item.current ? (
+                                        item.prices[currency] ? (
+                                            <Button
+                                                size="sm"
+                                                data-test={`billing-choose-${item.code}`}
+                                                onClick={() =>
+                                                    router.post(
+                                                        checkout([
+                                                            tenant.slug,
+                                                            item.code,
+                                                        ]).url,
+                                                        { currency },
+                                                    )
+                                                }
+                                            >
+                                                {t('billing.plans.choose')}
+                                            </Button>
+                                        ) : (
+                                            // Plan sur devis (README section 3) : rien a
+                                            // souscrire en ligne, un lien de contact remplace
+                                            // le bouton plutot que de ne rien afficher.
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                asChild
+                                                data-test={`billing-contact-${item.code}`}
+                                            >
+                                                <a
+                                                    href={`mailto:${salesContactEmail}`}
+                                                >
+                                                    {t('billing.plans.contact')}
+                                                </a>
+                                            </Button>
+                                        )
                                     ) : null}
                                 </CardContent>
                             </Card>

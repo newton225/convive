@@ -22,6 +22,7 @@ return [
         'events.update' => 'Modifier un événement',
         'events.duplicate' => 'Dupliquer un événement',
         'events.close' => 'Clôturer un événement',
+        'events.announce' => 'Annoncer un événement sur la vitrine',
         'registrations.view' => 'Consulter la base d\'inscrits',
         'registrations.export' => 'Exporter les inscrits',
         'registrations.purge' => 'Purger les inscriptions non finalisées',

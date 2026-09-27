@@ -12,6 +12,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Maatwebsite\Excel\Facades\Excel;
+use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
 class RegistrationControllerTest extends TestCase
@@ -285,6 +286,30 @@ class RegistrationControllerTest extends TestCase
             ->assertOk();
 
         Excel::assertDownloaded("inscrits-{$event->id}.csv");
+    }
+
+    public function test_un_export_est_journalise_avec_le_nombre_de_lignes_et_les_filtres(): void
+    {
+        Excel::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $tenant->asCurrent(fn () => Registration::factory()->count(2)->confirmed()->create(['event_id' => $event->id]));
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.registrations.export.csv', [$tenant, $event]).'?filter[status]=confirmed')
+            ->assertOk();
+
+        // SECURITY.md M3 : l'export est autorise, ce n'est pas une intrusion, mais c'est une
+        // fuite possible : l'entree dit qui, combien de lignes, avec quels filtres.
+        $entry = $tenant->asCurrent(fn () => Activity::where('description', 'registrations.exported')->latest('id')->first());
+
+        $this->assertNotNull($entry);
+        $this->assertSame($owner->id, $entry->causer_id);
+        $this->assertSame('csv', $entry->properties['format']);
+        $this->assertSame(2, $entry->properties['rows']);
+        $this->assertSame(['status' => 'confirmed'], $entry->properties['filters']);
     }
 
     public function test_les_exports_sont_limites_en_debit(): void

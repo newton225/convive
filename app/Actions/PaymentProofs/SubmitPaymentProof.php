@@ -12,6 +12,7 @@ use App\Support\PerceptualHash;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Image\Enums\ImageDriver;
 use Spatie\Image\Image;
 
 /**
@@ -91,12 +92,19 @@ class SubmitPaymentProof
      * « Fichiers deposes » ; SECURITY.md H1) : une capture d'ecran porte rarement des donnees
      * sensibles dans ses metadonnees, mais le reencodage reste ce qui detruit un polyglotte
      * image plus script, quel que soit le contenu declare.
+     *
+     * Moteur GD force explicitement (SECURITY.md H1, « delegue Ghostscript ») : GD ne s'appuie
+     * jamais sur ImageMagick ni sur son delegue Ghostscript, la faille classique de conversion
+     * d'image. Explicite plutot que laisse au hasard de l'extension `imagick` presente ou non
+     * sur le serveur : Spatie\Image choisirait Imagick des qu'elle est installee.
      */
     private function reencode(UploadedFile $upload): string
     {
         $destination = tempnam(sys_get_temp_dir(), 'proof').'.'.$this->extension($upload);
 
-        Image::load($upload->getRealPath())->save($destination);
+        Image::useImageDriver(ImageDriver::Gd)
+            ->loadFile($upload->getRealPath())
+            ->save($destination);
 
         return $destination;
     }

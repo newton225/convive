@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { BrandColorStyle } from '@/components/brand-color-style';
 import { OfflineBanner } from '@/components/offline-banner';
 import { useRef, useState } from 'react';
 import LocaleSwitcher from '@/components/locale-switcher';
@@ -36,16 +37,9 @@ export default function PublicWaitlistJoin({
     const [companionIds, setCompanionIds] = useState<number[]>([]);
     const nextId = useRef(0);
 
-    const brandStyle = {
-        '--brand-primary': tenant.colors.primary,
-        '--brand-secondary': tenant.colors.secondary,
-    } as React.CSSProperties;
-
     return (
-        <div
-            style={brandStyle}
-            className="bg-background flex min-h-screen flex-col"
-        >
+        <div className="bg-background flex min-h-screen flex-col">
+            <BrandColorStyle colors={tenant.colors} />
             <Head title={t('guest.waitlist.title')} />
             <OfflineBanner />
 
@@ -67,10 +61,7 @@ export default function PublicWaitlistJoin({
 
             <main className="mx-auto w-full max-w-lg flex-1 space-y-6 p-4">
                 <div className="space-y-1">
-                    <h1
-                        className="text-2xl font-semibold"
-                        style={{ color: 'var(--brand-primary)' }}
-                    >
+                    <h1 className="text-2xl font-semibold text-[color:var(--brand-primary)]">
                         {t('guest.waitlist.title')}
                     </h1>
                     <p className="text-muted-foreground text-sm">

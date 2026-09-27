@@ -148,4 +148,25 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    /*
+     * Variables posees ici plutot qu'en attribut style inline sur les composants shadcn/ui
+     * (sidebar, sonner) : une CSP sans unsafe-inline (SECURITY.md H7) ne peut proteger que les
+     * balises <style>/<script> via un nonce, jamais un attribut style, et ces valeurs sont des
+     * constantes, jamais calculees a l'execution.
+     */
+    [data-slot='sidebar-wrapper'] {
+        --sidebar-width: 16rem;
+        --sidebar-width-icon: 3rem;
+    }
+
+    [data-slot='sidebar'][data-mobile='true'] {
+        --sidebar-width: 18rem;
+    }
+
+    .toaster {
+        --normal-bg: var(--popover);
+        --normal-text: var(--popover-foreground);
+        --normal-border: var(--border);
+    }
 }

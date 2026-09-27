@@ -57,6 +57,19 @@ class EventPolicy
     }
 
     /**
+     * Determine whether the user can announce (or withdraw) the event on the product site's
+     * showcase.
+     *
+     * Permission dediee, distincte de `events.update` (CLAUDE.md, « Annonce sur le site
+     * produit ») : annoncer publiquement une organisation est une decision de visibilite, pas
+     * une simple modification de fiche.
+     */
+    public function announce(User $user, Event $event, Tenant $tenant): bool
+    {
+        return $user->hasTenantPermission($tenant, TenantPermission::EventsAnnounce);
+    }
+
+    /**
      * Determine whether the user can delete the event.
      *
      * Un evenement publie ne se supprime pas : des invites en detiennent l'adresse. Il se

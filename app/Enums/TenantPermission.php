@@ -15,6 +15,7 @@ enum TenantPermission: string
     case EventsUpdate = 'events.update';
     case EventsDuplicate = 'events.duplicate';
     case EventsClose = 'events.close';
+    case EventsAnnounce = 'events.announce';
 
     case RegistrationsView = 'registrations.view';
     case RegistrationsExport = 'registrations.export';
@@ -66,7 +67,8 @@ enum TenantPermission: string
     {
         return match ($this) {
             self::EventsView, self::EventsCreate, self::EventsUpdate,
-            self::EventsDuplicate, self::EventsClose => TenantPermissionDomain::Events,
+            self::EventsDuplicate, self::EventsClose,
+            self::EventsAnnounce => TenantPermissionDomain::Events,
 
             self::RegistrationsView, self::RegistrationsExport,
             self::RegistrationsPurge, self::RegistrationsCancel => TenantPermissionDomain::Registrations,

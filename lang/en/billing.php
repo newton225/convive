@@ -57,6 +57,7 @@ return [
         'custom_domain' => 'Custom domain',
         'sso' => 'Single sign-on (SSO)',
         'choose' => 'Choose this plan',
+        'contact' => 'Contact us',
     ],
 
     'invoices' => [

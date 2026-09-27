@@ -29,6 +29,9 @@ return [
     ],
 
     'registration' => [
+        'errors' => [
+            'phone_already_active' => 'A reservation is already in progress for this number. Finish it, or wait for its time limit to end before creating another.',
+        ],
         'title' => 'Your registration',
         'fields' => [
             'name' => 'Full name',

@@ -93,6 +93,33 @@ export default function Profile({
                                 />
                             </div>
 
+                            <div className="grid gap-2">
+                                <Label htmlFor="phone">
+                                    {t('account.fields.phone')}
+                                </Label>
+
+                                <Input
+                                    id="phone"
+                                    type="tel"
+                                    className="mt-1 block w-full"
+                                    defaultValue={auth.user.phone ?? ''}
+                                    name="phone"
+                                    autoComplete="tel"
+                                    placeholder={t(
+                                        'account.placeholders.phone',
+                                    )}
+                                />
+
+                                <p className="text-muted-foreground text-sm">
+                                    {t('account.profile.phone_help')}
+                                </p>
+
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.phone}
+                                />
+                            </div>
+
                             {mustVerifyEmail &&
                                 auth.user.email_verified_at === null && (
                                     <div>

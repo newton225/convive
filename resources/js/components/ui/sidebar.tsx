@@ -4,6 +4,7 @@ import { cva } from "class-variance-authority"
 import { PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react"
 import * as React from "react"
 
+import { NonceStyle } from "@/components/nonce-style"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -25,9 +26,10 @@ import { cn } from "@/lib/utils"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
-const SIDEBAR_WIDTH = "16rem"
-const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "3rem"
+// --sidebar-width, --sidebar-width-icon et la largeur mobile sont posees en CSS statique
+// (resources/css/app.css) plutot qu'en style inline : une CSP sans unsafe-inline (SECURITY.md
+// H7) ne peut proteger que les balises <style>/<script>, jamais un attribut style, et ces
+// largeurs sont des constantes, pas des valeurs calculees a l'execution.
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContext = {
@@ -56,7 +58,6 @@ function SidebarProvider({
   open: openProp,
   onOpenChange: setOpenProp,
   className,
-  style,
   children,
   ...props
 }: React.ComponentProps<"div"> & {
@@ -128,13 +129,6 @@ function SidebarProvider({
     <SidebarContext.Provider value={contextValue}>
       <div
         data-slot="sidebar-wrapper"
-        style={
-          {
-            "--sidebar-width": SIDEBAR_WIDTH,
-            "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-            ...style,
-          } as React.CSSProperties
-        }
         className={cn(
           "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
           className
@@ -188,11 +182,6 @@ function Sidebar({
           data-slot="sidebar"
           data-mobile="true"
           className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
-          }
           side={side}
         >
           <div className="flex h-full w-full flex-col">{children}</div>
@@ -601,12 +590,14 @@ function SidebarMenuSkeleton({
 }) {
 
   // wrapping in useState to ensure the width is stable across renders
-  // also ensures we have a stable reference to the style object
-  const [skeletonStyle] = React.useState(() => (
-      {
-        "--skeleton-width": `${Math.floor(Math.random() * 40) + 50}%` // Random width between 50 to 90%.
-    } as React.CSSProperties
-  ))
+  // also ensures we have a stable reference to the random value
+  const [skeletonWidth] = React.useState(
+    () => `${Math.floor(Math.random() * 40) + 50}%` // Random width between 50 to 90%.
+  )
+  // Une balise <style> nonce'e, pas un attribut style : la largeur est aleatoire par
+  // instance, donc pas exprimable en CSS statique comme les autres variables de ce fichier
+  // (SECURITY.md H7).
+  const skeletonTextId = React.useId()
 
   return (
     <div
@@ -621,10 +612,14 @@ function SidebarMenuSkeleton({
           data-sidebar="menu-skeleton-icon"
         />
       )}
+      <NonceStyle
+        selector={`#${CSS.escape(skeletonTextId)}`}
+        declarations={{ "--skeleton-width": skeletonWidth }}
+      />
       <Skeleton
+        id={skeletonTextId}
         className="h-4 max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"
-        style={skeletonStyle}
       />
     </div>
   )

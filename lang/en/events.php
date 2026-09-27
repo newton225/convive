@@ -66,6 +66,8 @@ return [
         'create' => 'New event',
         'edit' => 'Edit event',
         'publish' => 'Hand out the public link',
+        'announce' => 'Announce on the showcase',
+        'withdraw_announcement' => 'Withdraw from showcase',
         'close' => 'Close the event',
         'duplicate' => 'Duplicate',
         'delete' => 'Delete event',
@@ -81,6 +83,7 @@ return [
     'badges' => [
         'published' => 'Link handed out',
         'not_ready' => 'Not publishable yet',
+        'announced' => 'On the showcase',
     ],
 
     'publishing' => [
@@ -89,10 +92,17 @@ return [
         'frozen_subdomain' => 'Once the link is handed out, the subdomain of the organisation can no longer change.',
     ],
 
+    'announcing' => [
+        'description' => 'Make this event appear on the product site showcase, to reach an audience that never received the link.',
+        'announced' => 'This event appears on the product site showcase.',
+    ],
+
     'flash' => [
         'created' => 'Event created.',
         'updated' => 'Event updated.',
         'published' => 'Public link handed out.',
+        'announced' => 'Event announced on the showcase.',
+        'announcement_withdrawn' => 'Event withdrawn from the showcase.',
         'closed' => 'Event closed.',
         'duplicated' => 'Event duplicated.',
         'deleted' => 'Event deleted.',
@@ -104,6 +114,7 @@ return [
         'deadline_after_event' => 'The registration deadline cannot be later than the event itself.',
         'unknown_payment_account' => 'One of the selected payment accounts does not belong to this organisation.',
         'not_ready_to_publish' => 'This event cannot be published yet: legal identity, capacity, date and a visible payment account are required.',
+        'not_published_yet' => 'This event must be published first before it can appear on the showcase.',
     ],
 
     'confirm_delete' => [

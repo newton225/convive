@@ -1,4 +1,6 @@
+import { useId } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { NonceStyle } from '@/components/nonce-style';
 import { useTranslation } from '@/hooks/use-translation';
 import type { DashboardTableOccupancy } from '@/types';
 
@@ -41,15 +43,12 @@ export function TableOccupancy({ tables }: Props) {
                                     number: table.number,
                                 })}
                             >
-                                <div
-                                    className={
-                                        table.seated >= table.capacity
-                                            ? 'bg-foreground h-full'
-                                            : 'bg-primary h-full'
-                                    }
-                                    style={{
-                                        width: `${Math.min(100, (table.seated / table.capacity) * 100)}%`,
-                                    }}
+                                <OccupancyFill
+                                    ratio={Math.min(
+                                        100,
+                                        (table.seated / table.capacity) * 100,
+                                    )}
+                                    full={table.seated >= table.capacity}
                                 />
                             </div>
                             <p className="text-muted-foreground text-xs tabular-nums">
@@ -63,5 +62,22 @@ export function TableOccupancy({ tables }: Props) {
                 </ul>
             </CardContent>
         </Card>
+    );
+}
+
+function OccupancyFill({ ratio, full }: { ratio: number; full: boolean }) {
+    // Largeur calculee a l'execution : posee via une balise <style> nonce'e et scopee, pas
+    // l'attribut `style` (voir NonceStyle).
+    const scopeClass = `occupancy-fill-${useId().replace(/:/g, '')}`;
+
+    return (
+        <div
+            className={`${scopeClass} h-full ${full ? 'bg-foreground' : 'bg-primary'}`}
+        >
+            <NonceStyle
+                selector={`.${scopeClass}`}
+                declarations={{ width: `${ratio}%` }}
+            />
+        </div>
     );
 }

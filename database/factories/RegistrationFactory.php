@@ -116,6 +116,17 @@ class RegistrationFactory extends Factory
     }
 
     /**
+     * Indicate that a submitted proof was rejected, and the guest may resubmit.
+     */
+    public function proofRejected(): static
+    {
+        return $this->state(fn () => [
+            'status' => RegistrationStatus::ProofRejected,
+            'held_until' => now()->addMinutes(10),
+        ]);
+    }
+
+    /**
      * Indicate that the organisation cancelled this registration (etape 9).
      */
     public function cancelled(): static

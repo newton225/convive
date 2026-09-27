@@ -80,6 +80,10 @@ class RegistrationController extends Controller
             return redirect($event->publicUrl());
         }
 
+        if (Registration::phoneHoldsSeats($event, (string) $request->validated('phone'))) {
+            return back()->withInput()->withErrors(['phone' => __('guest.registration.errors.phone_already_active')]);
+        }
+
         $created = app(CreateRegistration::class)->handle($event, [
             'name' => $request->validated('name'),
             'phone' => $request->validated('phone'),
@@ -235,6 +239,15 @@ class RegistrationController extends Controller
 
         if ($registration->holdHasExpired()) {
             $registration->update(['status' => RegistrationStatus::Expired]);
+        }
+
+        // Relancer une reservation expiree ne doit pas contourner « une reservation active par
+        // numero » (SECURITY.md C3) : une autre inscription du meme telephone peut avoir ete prise
+        // entre-temps.
+        if (Registration::phoneHoldsSeats($event, $registration->phone, $registration->id)) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => __('guest.registration.errors.phone_already_active')]);
+
+            return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
         }
 
         if (! app(HoldRegistration::class)->handle($event, $registration)) {

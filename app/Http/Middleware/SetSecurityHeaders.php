@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Vite;
+use Symfony\Component\HttpFoundation\Response;
+
+/**
+ * En-tetes de securite (SECURITY.md H7) : CSP a nonces sans `unsafe-inline`, plus HSTS,
+ * X-Content-Type-Options, X-Frame-Options, Referrer-Policy et une Permissions-Policy
+ * restrictive.
+ *
+ * Le nonce vient de `Vite::useCspNonce()`, point d'extension officiel du framework pour ce cas
+ * precis (CLAUDE.md, « Respecter les bonnes pratiques de chaque outil ») : chaque balise
+ * script/style/preload posee par `@vite(...)` le porte automatiquement. Genere une seule fois
+ * ici, avant que la vue ne s'affiche ; tout le reste (props partagees Inertia, `app.blade.php`)
+ * lit `Vite::cspNonce()`, jamais `useCspNonce()` a nouveau, qui en tirerait un second different.
+ */
+class SetSecurityHeaders
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  Closure(Request): (Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        $nonce = Vite::useCspNonce();
+
+        $response = $next($request);
+
+        $response->headers->set('Content-Security-Policy', $this->csp($nonce));
+        $response->headers->set('X-Content-Type-Options', 'nosniff');
+        $response->headers->set('X-Frame-Options', 'DENY');
+        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        $response->headers->set('Permissions-Policy', $this->permissionsPolicy());
+
+        // HSTS n'a de sens que sur une reponse deja servie en HTTPS : l'emettre sur du HTTP nu
+        // n'a aucun effet (les navigateurs l'ignorent par specification), mais l'omettre en local
+        // evite un en-tete trompeur dans les outils de developpement.
+        if ($request->secure()) {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        }
+
+        return $response;
+    }
+
+    /**
+     * Build the Content-Security-Policy header value.
+     */
+    private function csp(string $nonce): string
+    {
+        // Le serveur de developpement Vite sert le JS, le CSS et les polices depuis une autre
+        // origine en local (voir vite.config.ts, `server.host`) : `:*` couvre le port qu'il
+        // choisit (il derive du port par defaut quand celui-ci est deja pris) sans avoir a le
+        // figer ni a le deviner ici. Absent en production, ou tout vient du meme domaine.
+        $devOrigin = app()->environment('local')
+            ? 'http://127.0.0.1:* ws://127.0.0.1:*'
+            : '';
+
+        $directives = [
+            "default-src 'self'",
+            trim("script-src 'self' 'nonce-{$nonce}' {$devOrigin}"),
+            trim("style-src 'self' 'nonce-{$nonce}' {$devOrigin}"),
+            trim("font-src 'self' {$devOrigin}"),
+            "img-src 'self' data:",
+            trim("connect-src 'self' {$devOrigin}"),
+            "worker-src 'self'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'none'",
+        ];
+
+        return implode('; ', $directives);
+    }
+
+    /**
+     * Build the Permissions-Policy header value.
+     *
+     * La camera reste ouverte, meme origine seulement : l'ecran de scan (README ecran 26) en a
+     * besoin pour lire un billet. Tout le reste, sans usage dans le produit, est ferme.
+     */
+    private function permissionsPolicy(): string
+    {
+        return implode(', ', [
+            'camera=(self)',
+            'microphone=()',
+            'geolocation=()',
+            'payment=()',
+            'usb=()',
+        ]);
+    }
+}

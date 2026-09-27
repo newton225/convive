@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
@@ -25,6 +26,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property int $id
  * @property string $name
  * @property string $email
+ * @property string|null $phone
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $two_factor_secret
@@ -38,7 +40,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property-read Collection<int, Membership> $tenantMemberships
  * @property-read Collection<int, Tenant> $tenants
  */
-#[Fillable(['name', 'email', 'password', 'current_tenant_id'])]
+#[Fillable(['name', 'email', 'phone', 'password', 'current_tenant_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
@@ -79,6 +81,17 @@ class User extends Authenticatable implements PasskeyUser
     {
         return $this->notificationPreferences()->where('type', $type->value)->first()->channel
             ?? NotificationChannel::default();
+    }
+
+    /**
+     * Route a WhatsApp notification, canal enregistre par `AppServiceProvider`
+     * (`App\Notifications\Channels\WhatsAppChannel`). `null` quand le membre n'a jamais
+     * renseigne de numero (README ecran 25, facultatif) : la notification saute simplement ce
+     * canal, comme `route('mail', null)` le fait deja pour une inscription sans email.
+     */
+    public function routeNotificationForWhatsapp(?Notification $notification = null): ?string
+    {
+        return $this->phone;
     }
 
     /**

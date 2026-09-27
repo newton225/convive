@@ -4,6 +4,7 @@ import LocaleSwitcher from '@/components/locale-switcher';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
 import { login, register } from '@/routes';
+import { index as showcaseIndex } from '@/routes/showcase';
 import { ThemeSwitcher } from './theme-switcher';
 
 /**
@@ -51,6 +52,13 @@ export function SiteHeader() {
                     <a href="#pricing" className="hover:text-white">
                         {t('site.nav.pricing')}
                     </a>
+                    <Link
+                        href={showcaseIndex()}
+                        className="hover:text-white"
+                        data-test="site-nav-showcase"
+                    >
+                        {t('site.nav.showcase')}
+                    </Link>
                 </nav>
 
                 <div className="flex items-center gap-1 sm:gap-2 [&_button]:text-white">

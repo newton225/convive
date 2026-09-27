@@ -10,15 +10,19 @@ use App\Models\Profile;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\Tenants\PaymentAccountChanged;
+use Database\Factories\UserFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\TestResponse;
+use PragmaRX\Google2FA\Google2FA;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
 class PaymentAccountTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected bool $confirmsPasswordOnActingAs = false;
 
     protected function setUp(): void
     {
@@ -39,14 +43,20 @@ class PaymentAccountTest extends TestCase
 
     /**
      * La re-authentification est exigee sur toutes ces routes : en test, on la considere
-     * fraiche, exactement comme un membre qui vient de saisir son mot de passe.
+     * fraiche, exactement comme un membre qui vient de saisir son mot de passe et de rejouer
+     * son code a deux facteurs (SECURITY.md C1). `$user` doit porter la 2FA
+     * (`User::factory()->withTwoFactor()`), sinon `EnsureRecentTwoFactorConfirmation` renverrait
+     * vers l'ecran de securite plutot que d'accepter cette confirmation.
      */
     private function actingAsConfirmed(User $user): static
     {
         $this->actingAs($user);
         // `now()` et non `time()` : apres un voyage dans le temps, la confirmation datee
         // de l'horloge reelle serait consideree comme perimee.
-        $this->session(['auth.password_confirmed_at' => now()->getTimestamp()]);
+        $this->session([
+            'auth.password_confirmed_at' => now()->getTimestamp(),
+            'auth.two_factor_confirmed_at' => now()->getTimestamp(),
+        ]);
 
         return $this;
     }
@@ -289,6 +299,32 @@ class PaymentAccountTest extends TestCase
         });
     }
 
+    public function test_l_alerte_est_aussi_tentee_par_whatsapp(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->createAccount($tenant, $owner);
+
+        // Toujours tentee : `routeNotificationForWhatsapp()` saute simplement l'envoi sans
+        // numero, comme `mail` le fait deja pour une inscription sans email.
+        Notification::assertSentTo($owner, PaymentAccountChanged::class, function (PaymentAccountChanged $notification) use ($owner) {
+            return in_array('whatsapp', $notification->via($owner), true)
+                && str_contains($notification->toWhatsApp($owner), $notification->account->label);
+        });
+    }
+
+    public function test_un_membre_sans_telephone_ne_route_pas_l_alerte_whatsapp(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+
+        $this->assertNull($owner->routeNotificationForWhatsapp());
+
+        $owner->phone = '+225 07 00 00 00 01';
+
+        $this->assertSame('+225 07 00 00 00 01', $owner->routeNotificationForWhatsapp());
+    }
+
     public function test_un_changement_reste_signale_pendant_sept_jours(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
@@ -331,6 +367,71 @@ class PaymentAccountTest extends TestCase
         $this->actingAs($owner)
             ->get(route('tenants.payment-accounts.index', $tenant))
             ->assertRedirect(route('password.confirm'));
+    }
+
+    public function test_le_rejeu_du_second_facteur_est_exige_sur_une_modification(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        // Mot de passe reconfirme, mais aucun code a deux facteurs rejoue : la lecture passe,
+        // la modification non (CLAUDE.md, « juste avant la modification »).
+        $this->actingAs($owner);
+        $this->session(['auth.password_confirmed_at' => now()->getTimestamp()]);
+
+        $this->get(route('tenants.payment-accounts.index', $tenant))->assertOk();
+
+        $this->post(route('tenants.payment-accounts.store', $tenant), $this->payload())
+            ->assertRedirect(route('two-factor.reconfirm.show'));
+    }
+
+    public function test_un_code_a_deux_facteurs_valide_debloque_la_modification(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner);
+        $this->session(['auth.password_confirmed_at' => now()->getTimestamp()]);
+
+        $code = app(Google2FA::class)->getCurrentOtp(UserFactory::TwoFactorSecret);
+
+        $this->post(route('two-factor.reconfirm.store'), ['code' => $code])
+            ->assertRedirect();
+
+        $this->post(route('tenants.payment-accounts.store', $tenant), $this->payload())
+            ->assertRedirect(route('tenants.payment-accounts.index', $tenant));
+    }
+
+    public function test_un_code_a_deux_facteurs_invalide_est_refuse(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+
+        $this->actingAs($owner);
+
+        $this->post(route('two-factor.reconfirm.store'), ['code' => '000000'])
+            ->assertSessionHasErrors('code');
+
+        $this->assertNull(session('auth.two_factor_confirmed_at'));
+    }
+
+    public function test_un_membre_sans_2fa_est_renvoye_l_activer(): void
+    {
+        // Un profil personnalise, qui n'exige pas la 2FA lui-meme (a l'inverse de Proprietaire
+        // et Tresorier), pour isoler ce garde de celui, deja teste ailleurs, d'
+        // `EnsureTwoFactorForProfile`. Sans double authentification, aucun code n'existe a
+        // rejouer : le renvoyer vers l'ecran de securite plutot que de le bloquer sans
+        // explication.
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $member = User::factory()->create();
+        $this->joinWithPermissions($tenant, $member, [TenantPermission::TenantPaymentAccounts]);
+
+        $this->actingAs($member);
+        $this->session(['auth.password_confirmed_at' => now()->getTimestamp()]);
+
+        $this->post(route('tenants.payment-accounts.store', $tenant), $this->payload())
+            ->assertRedirect(route('security.edit'));
     }
 
     public function test_un_locataire_tiers_recoit_404(): void

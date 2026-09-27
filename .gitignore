@@ -40,6 +40,11 @@ yarn-error.log
 /storage/app/tenant-media/*
 !/storage/app/tenant-media/.gitignore
 
+# Preuves de paiement (SECURITY.md H1) : disque distinct de tenant-media depuis cette meme
+# raison, jamais melange aux fichiers de marque du locataire.
+/storage/app/payment-proofs/*
+!/storage/app/payment-proofs/.gitignore
+
 # Stockage isole par locataire (FilesystemTenancyBootstrapper, CLAUDE.md « Multi-locataire ») :
 # un dossier `storage/tenant{id}/` par organisation, cree localement pendant les tests, jamais a
 # committer, meme raison que `/storage/framework`.

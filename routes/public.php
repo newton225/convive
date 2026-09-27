@@ -39,10 +39,13 @@ Route::middleware([
     Route::get('/e/{token}/register', [PublicRegistrationController::class, 'create'])
         ->name('public.registrations.create');
     Route::post('/e/{token}/register', [PublicRegistrationController::class, 'store'])
+        ->middleware('throttle:registration')
         ->name('public.registrations.store');
     Route::get('/e/{token}/register/{resume}', [PublicRegistrationController::class, 'show'])
+        ->middleware('throttle:resume')
         ->name('public.registrations.show');
     Route::post('/e/{token}/register/{resume}/retry', [PublicRegistrationController::class, 'retry'])
+        ->middleware('throttle:resume')
         ->name('public.registrations.retry');
 
     // Le lien signe des envois programmes et rappels (README 2.7, etape 8) : une tache planifiee
@@ -68,7 +71,9 @@ Route::middleware([
     Route::post('/e/{token}/waitlist', [PublicWaitlistController::class, 'store'])
         ->name('public.waitlist.store');
     Route::get('/e/{token}/waitlist/{resume}', [PublicWaitlistController::class, 'show'])
+        ->middleware('throttle:resume')
         ->name('public.waitlist.show');
     Route::post('/e/{token}/waitlist/{resume}/finalize', [PublicWaitlistController::class, 'finalize'])
+        ->middleware('throttle:resume')
         ->name('public.waitlist.finalize');
 });

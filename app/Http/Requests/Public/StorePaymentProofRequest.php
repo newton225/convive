@@ -47,7 +47,10 @@ class StorePaymentProofRequest extends FormRequest
                 'image',
                 'mimes:jpeg,png,webp',
                 'max:5120',
-                'dimensions:min_width=100,min_height=100',
+                // Plafond haut, pas seulement un plancher (SECURITY.md H1, « limites de pixels
+                // imposees ») : un fichier de quelques kilo-octets peut declarer des dimensions
+                // demesurees et epuiser la memoire au reencodage GD sans jamais depasser 5 Mo.
+                'dimensions:min_width=100,min_height=100,max_width=8000,max_height=8000',
             ],
             'idempotency_key' => ['required', 'uuid'],
         ];

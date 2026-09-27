@@ -2,10 +2,12 @@
 
 namespace App\Notifications\Registrations;
 
+use App\Mail\GuestNotificationMail;
 use App\Models\Registration;
+use App\Support\GuestNotificationBranding;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Mail\Mailable;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -37,15 +39,24 @@ class ProofReminder extends Notification implements ShouldQueue
         return $channels;
     }
 
-    public function toMail(mixed $notifiable): MailMessage
+    public function toMail(mixed $notifiable): Mailable
     {
-        return (new MailMessage)
-            ->subject(__('guest.mail.proof_reminder.subject', ['event' => $this->registration->event->name]))
-            ->line(__('guest.mail.proof_reminder.intro', [
-                'name' => $this->registration->name,
-                'event' => $this->registration->event->name,
-            ]))
-            ->action(__('guest.mail.proof_reminder.action'), $this->link);
+        $colors = $this->registration->event->colors();
+
+        return (new GuestNotificationMail(
+            organisationName: GuestNotificationBranding::organisationName(),
+            primaryColor: $colors['primary'],
+            secondaryColor: $colors['secondary'],
+            subjectLine: __('guest.mail.proof_reminder.subject', ['event' => $this->registration->event->name]),
+            lines: [
+                __('guest.mail.proof_reminder.intro', [
+                    'name' => $this->registration->name,
+                    'event' => $this->registration->event->name,
+                ]),
+            ],
+            actionText: __('guest.mail.proof_reminder.action'),
+            actionUrl: $this->link,
+        ))->to($notifiable->routeNotificationFor('mail', $this));
     }
 
     public function toWhatsApp(mixed $notifiable): string

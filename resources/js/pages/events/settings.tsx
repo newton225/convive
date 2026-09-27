@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import Heading from '@/components/heading';
+import { NonceStyle } from '@/components/nonce-style';
 import { CheckboxRow } from '@/components/settings/checkbox-row';
 import { SettingsSection } from '@/components/settings/settings-section';
 import { SubmitButton } from '@/components/submit-button';
@@ -88,6 +89,24 @@ function Row({ label, value }: { label: string; value: string }) {
     );
 }
 
+function ColorSwatch({ color }: { color: string }) {
+    // Couleur calculee a l'execution : posee via une balise <style> nonce'e et scopee, pas
+    // l'attribut `style` (voir NonceStyle).
+    const scopeClass = `color-swatch-${useId().replace(/:/g, '')}`;
+
+    return (
+        <span
+            className={`${scopeClass} size-5 rounded border`}
+            aria-hidden="true"
+        >
+            <NonceStyle
+                selector={`.${scopeClass}`}
+                declarations={{ background: color }}
+            />
+        </span>
+    );
+}
+
 /**
  * README ecran 24 : les reglages d'un evenement. Identite visuelle, places, echeances, rappels,
  * regles. Trois regles s'enregistrent sans encore rien gouverner (`unenforcedRules`, voir
@@ -163,11 +182,7 @@ export default function EventSettings({
                                 {t('event_settings.identity.primary')}
                             </dt>
                             <dd className="flex items-center gap-2 font-mono text-xs">
-                                <span
-                                    className="size-5 rounded border"
-                                    style={{ background: colors.primary }}
-                                    aria-hidden="true"
-                                />
+                                <ColorSwatch color={colors.primary} />
                                 {colors.primary}
                             </dd>
                         </div>
@@ -176,11 +191,7 @@ export default function EventSettings({
                                 {t('event_settings.identity.secondary')}
                             </dt>
                             <dd className="flex items-center gap-2 font-mono text-xs">
-                                <span
-                                    className="size-5 rounded border"
-                                    style={{ background: colors.secondary }}
-                                    aria-hidden="true"
-                                />
+                                <ColorSwatch color={colors.secondary} />
                                 {colors.secondary}
                             </dd>
                         </div>

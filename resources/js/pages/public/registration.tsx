@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { BrandColorStyle } from '@/components/brand-color-style';
 import { OfflineBanner } from '@/components/offline-banner';
 import { useRef, useState } from 'react';
 import {
@@ -47,16 +48,9 @@ export default function PublicRegistration({
 
     const total = event.pricePerPerson * (1 + companionIds.length);
 
-    const brandStyle = {
-        '--brand-primary': tenant.colors.primary,
-        '--brand-secondary': tenant.colors.secondary,
-    } as React.CSSProperties;
-
     return (
-        <div
-            style={brandStyle}
-            className="bg-background flex min-h-screen flex-col"
-        >
+        <div className="bg-background flex min-h-screen flex-col">
+            <BrandColorStyle colors={tenant.colors} />
             <Head title={t('guest.registration.title')} />
             <OfflineBanner />
 
@@ -78,10 +72,7 @@ export default function PublicRegistration({
 
             <main className="mx-auto w-full max-w-lg flex-1 space-y-6 p-4">
                 <div className="space-y-1">
-                    <h1
-                        className="text-2xl font-semibold"
-                        style={{ color: 'var(--brand-primary)' }}
-                    >
+                    <h1 className="text-2xl font-semibold text-[color:var(--brand-primary)]">
                         {t('guest.registration.title')}
                     </h1>
                     <p className="text-muted-foreground text-sm">
@@ -186,10 +177,7 @@ export default function PublicRegistration({
                                         {t('guest.registration.total.label')}
                                     </span>
                                     <span
-                                        className="text-2xl font-semibold"
-                                        style={{
-                                            color: 'var(--brand-primary)',
-                                        }}
+                                        className="text-2xl font-semibold text-[color:var(--brand-primary)]"
                                         data-test="registration-total"
                                     >
                                         {formatAmount(total, locale)}

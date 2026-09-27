@@ -14,6 +14,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { translate, useTranslation } from '@/hooks/use-translation';
+import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
 import { close, create, duplicate, edit, index } from '@/routes/tenants/events';
 import { index as proofsIndex } from '@/routes/tenants/events/proofs';
@@ -37,7 +38,7 @@ type Props = {
 };
 
 export default function EventsIndex({ tenant, events, permissions }: Props) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const [closing, setClosing] = useState<EventSummary | null>(null);
 
     return (
@@ -102,9 +103,7 @@ export default function EventsIndex({ tenant, events, permissions }: Props) {
 
                                 <p className="text-muted-foreground text-sm">
                                     {event.startsAt
-                                        ? new Date(
-                                              event.startsAt,
-                                          ).toLocaleString()
+                                        ? formatDateTime(event.startsAt, locale)
                                         : t('events.summary.no_date')}
                                     {event.venue ? ` · ${event.venue}` : ''}
                                     {' · '}

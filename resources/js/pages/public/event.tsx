@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { BrandColorStyle } from '@/components/brand-color-style';
 import { InstallPrompt } from '@/components/install-prompt';
 import { OfflineBanner } from '@/components/offline-banner';
 import { Calendar, MapPin, Users } from 'lucide-react';
@@ -40,18 +41,11 @@ type Props = {
 export default function PublicEvent({ event, tenant, token }: Props) {
     const { t, locale } = useTranslation();
 
-    const brandStyle = {
-        '--brand-primary': event.colors.primary,
-        '--brand-secondary': event.colors.secondary,
-    } as React.CSSProperties;
-
     const bannerUrl = event.visualUrl ?? tenant.bannerUrl;
 
     return (
-        <div
-            style={brandStyle}
-            className="bg-background flex min-h-screen flex-col"
-        >
+        <div className="bg-background flex min-h-screen flex-col">
+            <BrandColorStyle colors={event.colors} />
             <Head title={event.name} />
             <OfflineBanner />
 
@@ -83,10 +77,7 @@ export default function PublicEvent({ event, tenant, token }: Props) {
                 <InstallPrompt />
 
                 <div className="space-y-1">
-                    <h1
-                        className="text-2xl font-semibold"
-                        style={{ color: 'var(--brand-primary)' }}
-                    >
+                    <h1 className="text-2xl font-semibold text-[color:var(--brand-primary)]">
                         {event.name}
                     </h1>
                     {event.subtitle ? (
@@ -135,10 +126,7 @@ export default function PublicEvent({ event, tenant, token }: Props) {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p
-                            className="text-2xl font-semibold"
-                            style={{ color: 'var(--brand-primary)' }}
-                        >
+                        <p className="text-2xl font-semibold text-[color:var(--brand-primary)]">
                             {formatAmount(event.pricePerPerson, locale)}
                         </p>
                     </CardContent>

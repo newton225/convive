@@ -69,7 +69,12 @@ class PaymentProof extends Model implements HasMedia
      */
     public function registerMediaCollections(): void
     {
+        // Disque distinct de `tenant_media` (SECURITY.md H1) : une capture deposee par un
+        // invite inconnu ne partage pas le meme espace que les fichiers de marque du
+        // locataire, et se sert en piece jointe plutot qu'en affichage direct
+        // (`AppServiceProvider::configurePaymentProofDisk()`).
         $this->addMediaCollection(self::ReceiptCollection)
+            ->useDisk('payment_proofs')
             ->singleFile()
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
     }
