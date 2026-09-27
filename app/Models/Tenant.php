@@ -141,7 +141,7 @@ class Tenant extends Model implements TenantWithDatabase
      *
      * @template TReturn
      *
-     * @param  callable(): TReturn  $callback
+     * @param  callable(self): TReturn  $callback
      * @return TReturn
      */
     public function asCurrent(callable $callback): mixed
@@ -158,7 +158,7 @@ class Tenant extends Model implements TenantWithDatabase
      *
      * @template TReturn
      *
-     * @param  callable(): TReturn  $callback
+     * @param  callable(self): TReturn  $callback
      * @return TReturn
      */
     public function run(callable $callback): mixed

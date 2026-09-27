@@ -29,8 +29,8 @@ class SyncTenantPermissionsCommand extends Command
                 $tenant->run(fn () => $sync->handle());
                 $this->components->task("Organisation {$tenant->id}");
             } catch (TenantDatabaseDoesNotExistException) {
-                // `run()` n'a pas de `finally` : sans `end()`, l'initialisation interrompue laisse
-                // la tenancy a moitie posee et fausse toutes les organisations suivantes.
+                // L'echec survient dans `initialize()`, avant le `finally` de `Tenant::run()` : sans
+                // `end()`, la tenancy reste a moitie posee et fausse les organisations suivantes.
                 tenancy()->end();
 
                 // Un enregistrement sans base est une organisation cassee, a signaler, pas une

@@ -116,7 +116,7 @@ class SeatingController extends Controller
         MoveRegistrationToTable $move,
     ): RedirectResponse {
         $tableId = $request->validated('seating_table_id');
-        $table = $tableId !== null ? SeatingTable::findOrFail($tableId) : null;
+        $table = $tableId !== null ? SeatingTable::query()->whereKey($tableId)->firstOrFail() : null;
 
         $move->handle($registration, $table, $request->user());
 

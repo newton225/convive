@@ -32,7 +32,7 @@ class WaitlistController extends Controller
         $event = $this->publishedEvent($token);
 
         if (! $event->isFull()) {
-            return redirect($event->publicUrl());
+            return redirect()->to($event->publicUrl());
         }
 
         $joined = app(JoinWaitlist::class)->handle($event, [
@@ -95,7 +95,7 @@ class WaitlistController extends Controller
         $result = app(FinalizeWaitlistEntry::class)->handle($entry);
 
         if ($result === null) {
-            return redirect($event->publicUrl());
+            return redirect()->to($event->publicUrl());
         }
 
         return to_route('public.registrations.show', [
@@ -112,7 +112,7 @@ class WaitlistController extends Controller
         $event = $this->publishedEvent($token);
 
         if (! $event->isFull()) {
-            return redirect($event->publicUrl());
+            return redirect()->to($event->publicUrl());
         }
 
         $tenant = Tenant::current();

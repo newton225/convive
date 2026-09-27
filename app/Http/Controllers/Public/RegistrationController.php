@@ -42,7 +42,7 @@ class RegistrationController extends Controller
         $event = $this->publishedEvent($token);
 
         if (! $event->acceptsRegistrations()) {
-            return redirect($event->publicUrl());
+            return redirect()->to($event->publicUrl());
         }
 
         $tenant = Tenant::current();
@@ -79,7 +79,7 @@ class RegistrationController extends Controller
         $event = $this->publishedEvent($token);
 
         if (! $event->acceptsRegistrations()) {
-            return redirect($event->publicUrl());
+            return redirect()->to($event->publicUrl());
         }
 
         if (Registration::phoneHoldsSeats($event, (string) $request->validated('phone'))) {
@@ -110,7 +110,7 @@ class RegistrationController extends Controller
                 return back()->withInput()->withErrors(['registration' => __('guest.registration.errors.registrations_paused')]);
             }
 
-            return redirect($event->publicUrl());
+            return redirect()->to($event->publicUrl());
         }
 
         return to_route('public.registrations.show', [
@@ -270,7 +270,7 @@ class RegistrationController extends Controller
         }
 
         if (! app(HoldRegistration::class)->handle($event, $registration)) {
-            return redirect($event->publicUrl());
+            return redirect()->to($event->publicUrl());
         }
 
         return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);

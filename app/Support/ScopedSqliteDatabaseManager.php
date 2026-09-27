@@ -61,6 +61,10 @@ class ScopedSqliteDatabaseManager extends SQLiteDatabaseManager
         return file_exists(static::directory().DIRECTORY_SEPARATOR.$name);
     }
 
+    /**
+     * @param  array<string, mixed>  $baseConfig
+     * @return array<string, mixed>
+     */
     public function makeConnectionConfig(array $baseConfig, string $databaseName): array
     {
         $baseConfig['database'] = static::directory().DIRECTORY_SEPARATOR.$databaseName;

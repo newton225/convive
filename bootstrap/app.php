@@ -33,7 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // connexion, voir `RedirectsToCurrentTenant`). Pour revoir la vitrine, il se deconnecte.
         $middleware->redirectUsersTo(function (Request $request) {
             $user = $request->user();
-            $tenant = $user?->currentTenant ?? $user?->personalTenant();
+            $tenant = $user->currentTenant ?? $user?->personalTenant();
 
             return $tenant ? "/{$tenant->slug}/dashboard" : '/settings/tenants';
         });

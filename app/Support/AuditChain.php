@@ -32,7 +32,9 @@ final class AuditChain
         self::$lock = Cache::lock('audit-chain:'.$entry->getConnectionName(), 10);
         self::$lock->block(5);
 
-        $entry->created_at ??= now();
+        if ($entry->created_at === null) {
+            $entry->setCreatedAt($entry->freshTimestamp());
+        }
         $entry->previous_hash = AuditEntry::query()->latest('id')->value('hash');
         $entry->hash = self::hashFor($entry);
     }

@@ -26,6 +26,9 @@ class FinalizeWaitlistEntry
         $created = app(CreateRegistration::class)->handle($event, [
             'name' => $entry->name,
             'phone' => $entry->phone,
+            // La liste d'attente ne recueille pas d'email (README ecran 4, email facultatif) : la
+            // carte et les rappels partiront par WhatsApp seulement.
+            'email' => null,
             'unit_id' => $entry->unit_id,
             'companions' => $entry->companions,
         ]);

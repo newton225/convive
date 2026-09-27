@@ -12,6 +12,7 @@ use App\Support\PerceptualHash;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Spatie\Image\Enums\ImageDriver;
 use Spatie\Image\Image;
 
@@ -47,7 +48,13 @@ class SubmitPaymentProof
         }
 
         $reencodedPath = $this->reencode($receipt);
-        $perceptualHash = PerceptualHash::forImageContents(file_get_contents($reencodedPath));
+        $reencodedContents = file_get_contents($reencodedPath);
+
+        if ($reencodedContents === false) {
+            throw new RuntimeException('Capture reencodee illisible.');
+        }
+
+        $perceptualHash = PerceptualHash::forImageContents($reencodedContents);
 
         try {
             $proof = DB::transaction(function () use ($registration, $data, $reencodedPath, $perceptualHash, $idempotencyKey, $receipt) {

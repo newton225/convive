@@ -70,7 +70,7 @@ trait HasTenants
                 ->where('model_id', $this->getKey())
                 ->value('profile_id');
 
-            return $profileId ? Profile::find($profileId) : null;
+            return $profileId ? Profile::query()->whereKey($profileId)->first() : null;
         });
     }
 

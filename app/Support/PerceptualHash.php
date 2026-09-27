@@ -45,6 +45,11 @@ class PerceptualHash
             for ($y = 0; $y < self::GridSize; $y++) {
                 for ($x = 0; $x < self::GridSize; $x++) {
                     $rgb = imagecolorat($grid, $x, $y);
+
+                    if ($rgb === false) {
+                        throw new RuntimeException('Pixel illisible pour le calcul de l\'empreinte perceptuelle.');
+                    }
+
                     $colors = imagecolorsforindex($grid, $rgb);
                     $luminances[] = (int) round(
                         0.299 * $colors['red'] + 0.587 * $colors['green'] + 0.114 * $colors['blue'],
@@ -64,7 +69,7 @@ class PerceptualHash
             // n'etant garantis presents sur l'hebergement (voir CLAUDE.md, « Paquets »).
             $hex = '';
             foreach (str_split($bits, 4) as $nibble) {
-                $hex .= dechex(bindec($nibble));
+                $hex .= base_convert($nibble, 2, 16);
             }
 
             return $hex;

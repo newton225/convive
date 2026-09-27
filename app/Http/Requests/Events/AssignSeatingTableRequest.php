@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Events;
 
+use App\Models\Event;
 use App\Models\Registration;
 use App\Models\SeatingTable;
 use App\Models\Tenant;
@@ -28,7 +29,7 @@ class AssignSeatingTableRequest extends FormRequest
         $registration = $this->route('registration');
 
         abort_unless(
-            $registration instanceof Registration && $registration->event_id === $this->route('event')->id,
+            $registration instanceof Registration && $registration->event_id === $this->event()->id,
             404,
         );
 
@@ -50,9 +51,18 @@ class AssignSeatingTableRequest extends FormRequest
             'seating_table_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('seating_tables', 'id')->where('event_id', $this->route('event')->id),
+                Rule::exists('seating_tables', 'id')->where('event_id', $this->event()->id),
             ],
         ];
+    }
+
+    private function event(): Event
+    {
+        $event = $this->route('event');
+
+        abort_if(! $event instanceof Event, 404);
+
+        return $event;
     }
 
     private function tenant(): Tenant

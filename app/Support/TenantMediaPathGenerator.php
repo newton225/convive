@@ -29,8 +29,8 @@ class TenantMediaPathGenerator implements PathGenerator
         // peut avoir ete purgee si la tenancy s'est terminee entre le depot et la lecture de
         // l'URL (par exemple une page qui affiche un recu apres la fin de la requete qui l'a
         // resolu) : `tenant('id')` n'a alors besoin d'aucune requete.
-        $tenantId = $media->model_type === TenantBranding::class
-            ? $media->model->tenant_id
+        $tenantId = $media->model_type === TenantBranding::class && ($branding = $media->model) instanceof TenantBranding
+            ? $branding->tenant_id
             : tenant('id');
 
         return "tenants/{$tenantId}/{$media->collection_name}/{$media->getKey()}/";

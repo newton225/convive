@@ -16,9 +16,8 @@ class GuestNotificationBranding
     {
         $tenant = Tenant::current();
 
-        // `Tenant::current()` est declare `?self` : PHPStan infere ici un type non nullable a
-        // partir du corps de la methode et signale l'operateur `?->` comme superflu, mais le
-        // contrat de la methode reste nullable (aucune tenancy active), donc la garde reste.
-        return $tenant?->branding?->display_name ?? $tenant?->name ?? (string) config('app.name');
+        // `??` couvre deja une organisation ou une marque absentes (aucune tenancy active) : il
+        // n'evalue pas la suite d'une chaine de proprietes dont un maillon est nul.
+        return $tenant->branding->display_name ?? $tenant->name ?? (string) config('app.name');
     }
 }
