@@ -2,6 +2,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 import { ChannelsChart } from '@/components/dashboard/channels-chart';
+import { GettingStartedCard } from '@/components/dashboard/getting-started-card';
 import { HoldExpiryCard } from '@/components/dashboard/hold-expiry-card';
 import { KpiCard } from '@/components/dashboard/kpi-card';
 import { RecentActivity } from '@/components/dashboard/recent-activity';
@@ -22,6 +23,7 @@ import { index as proofsIndex } from '@/routes/tenants/events/proofs';
 import type {
     DashboardInvitation,
     DashboardOverview,
+    GettingStarted,
     LocaleCode,
     TranslationReplacements,
     Translations,
@@ -31,6 +33,7 @@ type Props = {
     pendingInvitations?: DashboardInvitation[];
     paymentAccountNotice?: { changed: boolean; days: number } | null;
     overview?: DashboardOverview | null;
+    gettingStarted?: GettingStarted | null;
 };
 
 const Kpis = [
@@ -99,6 +102,7 @@ export default function Dashboard({
     pendingInvitations = [],
     paymentAccountNotice = null,
     overview = null,
+    gettingStarted = null,
 }: Props) {
     const { t, locale } = useTranslation();
     const { currentTenant, tenantPermissions } = usePage().props;
@@ -183,6 +187,13 @@ export default function Dashboard({
                     </p>
                 ) : null}
 
+                {gettingStarted && currentTenant ? (
+                    <GettingStartedCard
+                        tenantSlug={currentTenant.slug}
+                        gettingStarted={gettingStarted}
+                    />
+                ) : null}
+
                 {overview ? (
                     <>
                         <div
@@ -216,7 +227,7 @@ export default function Dashboard({
                             />
                         </div>
                     </>
-                ) : (
+                ) : gettingStarted ? null : (
                     <div
                         className="bg-card space-y-3 rounded-xl p-6 text-center"
                         data-test="dashboard-empty"

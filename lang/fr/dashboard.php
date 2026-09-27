@@ -53,6 +53,40 @@ return [
         ],
     ],
 
+    'getting_started' => [
+        'title' => 'Premiers pas',
+        'description' => 'Cinq étapes pour ouvrir les inscriptions de votre premier événement.',
+        'progress' => ':done sur :total',
+        'done' => 'Fait',
+        'steps' => [
+            'identity' => [
+                'title' => "Compléter l'identité de l'organisation",
+                'hint' => 'Raison sociale, forme juridique, numéros, adresse et sous-domaine : ils figurent sur les reçus et les billets.',
+                'action' => 'Compléter',
+            ],
+            'payment_account' => [
+                'title' => 'Ajouter un compte de versement',
+                'hint' => "C'est là que vos invités verseront leur participation (actif 24 h après sa création).",
+                'action' => 'Ajouter',
+            ],
+            'event' => [
+                'title' => 'Créer un événement',
+                'hint' => 'Nom, date, lieu, places et tarif : il reste en brouillon tant que vous ne publiez pas.',
+                'action' => 'Créer',
+            ],
+            'publish' => [
+                'title' => 'Publier le lien public',
+                'hint' => "Depuis la fiche de l'événement, puis copiez le lien pour l'envoyer à vos invités.",
+                'action' => 'Voir mes événements',
+            ],
+            'team' => [
+                'title' => 'Inviter votre équipe',
+                'hint' => "Trésorier pour les preuves, hôtesse pour l'entrée : chacun avec son profil.",
+                'action' => 'Inviter',
+            ],
+        ],
+    ],
+
     'empty' => [
         'title' => 'Aucun événement pour le moment',
         'description' => 'Créez votre premier événement pour voir vos chiffres ici.',

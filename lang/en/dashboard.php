@@ -53,6 +53,40 @@ return [
         ],
     ],
 
+    'getting_started' => [
+        'title' => 'Getting started',
+        'description' => 'Five steps to open registrations for your first event.',
+        'progress' => ':done of :total',
+        'done' => 'Done',
+        'steps' => [
+            'identity' => [
+                'title' => "Complete your organisation's identity",
+                'hint' => 'Legal name, legal form, numbers, address and subdomain: they appear on receipts and tickets.',
+                'action' => 'Complete',
+            ],
+            'payment_account' => [
+                'title' => 'Add a payout account',
+                'hint' => 'This is where guests will send their contribution (active 24 hours after creation).',
+                'action' => 'Add',
+            ],
+            'event' => [
+                'title' => 'Create an event',
+                'hint' => 'Name, date, venue, seats and price: it stays a draft until you publish.',
+                'action' => 'Create',
+            ],
+            'publish' => [
+                'title' => 'Publish the public link',
+                'hint' => "From the event's page, then copy the link to send it to your guests.",
+                'action' => 'See my events',
+            ],
+            'team' => [
+                'title' => 'Invite your team',
+                'hint' => 'A treasurer for proofs, a host for the entrance: each with their own profile.',
+                'action' => 'Invite',
+            ],
+        ],
+    ],
+
     'empty' => [
         'title' => 'No event yet',
         'description' => 'Create your first event to see your figures here.',

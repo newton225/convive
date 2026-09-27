@@ -6,6 +6,7 @@ use App\Enums\TenantPermission;
 use App\Models\PaymentAccount;
 use App\Models\TenantInvitation;
 use App\Support\DashboardOverview;
+use App\Support\GettingStarted;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -40,6 +41,9 @@ class DashboardController extends Controller
             'pendingInvitations' => $pendingInvitations,
             'paymentAccountNotice' => $this->paymentAccountNotice($request),
             'overview' => $event ? DashboardOverview::for($event) : null,
+            'gettingStarted' => $request->user()->currentTenant
+                ? GettingStarted::for($request->user()->currentTenant, $request->user())
+                : null,
         ]);
     }
 

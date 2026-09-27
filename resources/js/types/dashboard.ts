@@ -58,3 +58,16 @@ export type DashboardOverview = {
     tableOccupancy: DashboardTableOccupancy[];
     recentActivity: DashboardActivity[];
 };
+
+// La carte « Premiers pas » (`App\Support\GettingStarted`), null une fois tout fait.
+export type GettingStartedStepKey =
+    | 'identity'
+    | 'payment_account'
+    | 'event'
+    | 'publish'
+    | 'team';
+
+export type GettingStarted = {
+    steps: { key: GettingStartedStepKey; done: boolean }[];
+    completed: number;
+};
