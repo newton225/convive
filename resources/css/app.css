@@ -2,6 +2,13 @@
 
 @import 'tw-animate-css';
 
+/*
+ * Styles des notifications (sonner), servis avec la feuille de l'application. Sonner les injecte
+ * sinon dans une balise <style> non signee, que la CSP sans unsafe-inline (SECURITY.md H7) bloque :
+ * les notifications etaient alors invisibles, sans aucune erreur hors de la console.
+ */
+@import 'sonner/dist/styles.css';
+
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
