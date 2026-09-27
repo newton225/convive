@@ -12,6 +12,14 @@ return [
         'reader' => 'Consulte les inscrits et les rapports, sans rien modifier.',
     ],
 
+    'matrix' => [
+        'title' => 'Comparer les profils',
+        'description' => 'Ce que chaque profil peut faire, module par module. Pour modifier un profil, ouvrez-le.',
+        'permission' => 'Module et action',
+        'yes' => 'Autorisé',
+        'no' => 'Non autorisé',
+    ],
+
     'form' => [
         'create_title' => 'Nouveau profil',
         'edit_title' => 'Modifier le profil :name',

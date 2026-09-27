@@ -3,6 +3,7 @@ import { Copy, Plus, ShieldCheck, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import DeleteProfileModal from '@/components/delete-profile-modal';
 import Heading from '@/components/heading';
+import { PermissionMatrix } from '@/components/profiles/permission-matrix';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,14 +20,20 @@ import {
     edit as editProfile,
     index,
 } from '@/routes/tenants/profiles';
-import type { Tenant, TenantProfile, Translations } from '@/types';
+import type {
+    PermissionDomain,
+    Tenant,
+    TenantProfile,
+    Translations,
+} from '@/types';
 
 type Props = {
     tenant: Pick<Tenant, 'id' | 'name' | 'slug'>;
     profiles: TenantProfile[];
+    catalogue: PermissionDomain[];
 };
 
-export default function TenantProfiles({ tenant, profiles }: Props) {
+export default function TenantProfiles({ tenant, profiles, catalogue }: Props) {
     const { t } = useTranslation();
     const [deleting, setDeleting] = useState<TenantProfile | null>(null);
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -173,6 +180,8 @@ export default function TenantProfiles({ tenant, profiles }: Props) {
                         </div>
                     ))}
                 </div>
+
+                <PermissionMatrix profiles={profiles} catalogue={catalogue} />
             </div>
 
             <DeleteProfileModal
@@ -189,6 +198,7 @@ TenantProfiles.layout = (props: {
     tenant: Pick<Tenant, 'name' | 'slug'>;
     translations: Translations;
 }) => ({
+    wide: true,
     breadcrumbs: [
         {
             title: translate(props.translations, 'tenants.index.title'),

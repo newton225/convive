@@ -32,6 +32,8 @@ class ProfileController extends Controller
                 'slug' => $tenant->slug,
             ],
             'profiles' => $this->profilesFor($tenant),
+            // Pour la vue comparative profils x permissions (prototype Convive.dc.html).
+            'catalogue' => $this->catalogue(),
         ]);
     }
 

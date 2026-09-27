@@ -12,6 +12,14 @@ return [
         'reader' => 'Reads registrations and reports, changes nothing.',
     ],
 
+    'matrix' => [
+        'title' => 'Compare profiles',
+        'description' => 'What each profile can do, module by module. To change a profile, open it.',
+        'permission' => 'Module and action',
+        'yes' => 'Allowed',
+        'no' => 'Not allowed',
+    ],
+
     'form' => [
         'create_title' => 'New profile',
         'edit_title' => 'Edit the :name profile',

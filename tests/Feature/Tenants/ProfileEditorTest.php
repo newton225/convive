@@ -92,4 +92,13 @@ class ProfileEditorTest extends TestCase
             ->get(route('tenants.profiles.create', $this->tenant))
             ->assertNotFound();
     }
+
+    public function test_la_liste_des_profils_fournit_le_catalogue_pour_la_vue_comparative(): void
+    {
+        $this->actingAs($this->owner)
+            ->get(route('tenants.profiles.index', $this->tenant))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('catalogue.0.value', 'events')
+                ->has('profiles', 4));
+    }
 }
