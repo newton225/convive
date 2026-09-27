@@ -241,3 +241,12 @@ Schedule::call(function () {
     $report('central');
     Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(fn () => $report('tenant:'.$tenant->id)));
 })->daily()->description('Verify the audit log hash chains');
+
+/*
+ * Filet de securite du catalogue de permissions (CLAUDE.md, « Profils et permissions ») : la
+ * commande se joue a chaque deploiement, apres `tenants:migrate` ; ce passage quotidien rattrape
+ * un deploiement ou elle aurait ete oubliee.
+ */
+Schedule::command('tenants:sync-permissions')
+    ->daily()
+    ->description('Bring every organisation up to the permission catalogue');
