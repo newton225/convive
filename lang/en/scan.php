@@ -27,8 +27,8 @@ return [
     ],
 
     'counter' => [
-        'label' => 'Entries granted out of expected registrations',
-        'value' => ':entered / :expected',
+        'label' => 'tickets already scanned at the door',
+        'value' => ':entered of :expected',
     ],
 
     'station' => [

@@ -27,8 +27,8 @@ return [
     ],
 
     'counter' => [
-        'label' => 'Entrées validées sur les inscriptions attendues',
-        'value' => ':entered / :expected',
+        'label' => "billets déjà scannés à l'entrée",
+        'value' => ':entered sur :expected',
     ],
 
     'station' => [
