@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             TeamSeeder::class,
             EventSeeder::class,
             EventVisualSeeder::class,
+            ShowcaseSeeder::class,
             RegistrationSeeder::class,
             PaymentProofSeeder::class,
         ]);

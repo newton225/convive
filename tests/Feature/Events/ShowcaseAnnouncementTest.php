@@ -12,6 +12,7 @@ use App\Models\ShowcaseEvent;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 /**
@@ -187,6 +188,26 @@ class ShowcaseAnnouncementTest extends TestCase
         $showcased = ShowcaseEvent::where('tenant_id', $tenant->id)->where('event_id', $event->id)->firstOrFail();
 
         $this->assertSame('Nouveau nom de la soiree', $showcased->name);
+    }
+
+    public function test_la_vitrine_montre_le_visuel_de_l_evenement_annonce(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+
+        $this->actingAs($owner)->post(route('tenants.events.announce', [$tenant, $event]));
+        $this->actingAs($owner)->post(route('tenants.events.visual.store', [$tenant, $event]), [
+            'file' => UploadedFile::fake()->image('visuel.png', 800, 400),
+        ]);
+
+        $this->get(route('showcase.index'))
+            ->assertInertia(fn ($page) => $page->whereType('events.0.visualUrl', 'string'));
+
+        $this->actingAs($owner)->delete(route('tenants.events.visual.destroy', [$tenant, $event]));
+
+        $this->get(route('showcase.index'))
+            ->assertInertia(fn ($page) => $page->where('events.0.visualUrl', null));
     }
 
     public function test_sans_la_permission_dediee_impossible_d_annoncer(): void

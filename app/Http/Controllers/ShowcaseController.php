@@ -26,6 +26,7 @@ class ShowcaseController extends Controller
                     'organisationName' => $event->organisation_name,
                     'startsAt' => $event->starts_at?->toISOString(),
                     'publicUrl' => $event->public_url,
+                    'visualUrl' => $event->visualUrl(),
                 ])
                 ->all(),
         ]);

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Stancl\Tenancy\Database\Concerns\CentralConnection;
 
 /**
@@ -24,12 +25,13 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property string $organisation_name
  * @property Carbon|null $starts_at
  * @property string $public_url
+ * @property string|null $visual_path
  * @property Carbon $announced_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Tenant $tenant
  */
-#[Fillable(['tenant_id', 'event_id', 'name', 'organisation_name', 'starts_at', 'public_url', 'announced_at'])]
+#[Fillable(['tenant_id', 'event_id', 'name', 'organisation_name', 'starts_at', 'public_url', 'announced_at', 'visual_path'])]
 class ShowcaseEvent extends Model
 {
     /** @use HasFactory<ShowcaseEventFactory> */
@@ -45,6 +47,19 @@ class ShowcaseEvent extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    /**
+     * Get a fresh signed, expiring URL for the event's visual, or null when it has none.
+     *
+     * Signee a chaque affichage depuis le chemin garde en base centrale : le disque
+     * `tenant_media` n'est pas propre a un locataire, aucune tenancy n'est a ouvrir.
+     */
+    public function visualUrl(int $minutes = 30): ?string
+    {
+        return $this->visual_path === null
+            ? null
+            : Storage::disk('tenant_media')->temporaryUrl($this->visual_path, now()->addMinutes($minutes));
     }
 
     /**

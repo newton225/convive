@@ -12,6 +12,7 @@ type ShowcaseEvent = {
     organisationName: string;
     startsAt: string | null;
     publicUrl: string;
+    visualUrl: string | null;
 };
 
 type Props = {
@@ -59,7 +60,24 @@ export default function Showcase({ events }: Props) {
                             <Card
                                 key={event.publicUrl}
                                 data-test="showcase-card"
+                                className="overflow-hidden pt-0"
                             >
+                                {event.visualUrl ? (
+                                    <img
+                                        src={event.visualUrl}
+                                        alt=""
+                                        className="aspect-video w-full object-cover"
+                                        loading="lazy"
+                                        data-test="showcase-visual"
+                                    />
+                                ) : (
+                                    <div
+                                        className="bg-muted flex aspect-video w-full items-center justify-center"
+                                        aria-hidden="true"
+                                    >
+                                        <CalendarDays className="text-muted-foreground size-10" />
+                                    </div>
+                                )}
                                 <CardHeader>
                                     <CardTitle className="text-lg">
                                         {event.name}

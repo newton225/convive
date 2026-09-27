@@ -128,6 +128,7 @@ class SaveEvent
                 'starts_at' => $event->starts_at,
                 'public_url' => $event->publicUrl(),
                 'announced_at' => $event->announced_at,
+                'visual_path' => $event->getFirstMedia(Event::VisualCollection)?->getPathRelativeToRoot(),
             ],
         );
     }
@@ -264,6 +265,10 @@ class SaveEvent
             ->event('updated')
             ->log('event.visual_updated');
 
+        if ($event->isAnnounced()) {
+            $this->syncShowcase($event->refresh());
+        }
+
         return $event;
     }
 
@@ -278,6 +283,10 @@ class SaveEvent
             ->performedOn($event)
             ->event('updated')
             ->log('event.visual_deleted');
+
+        if ($event->isAnnounced()) {
+            $this->syncShowcase($event->refresh());
+        }
 
         return $event;
     }
