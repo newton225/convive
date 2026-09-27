@@ -225,13 +225,23 @@ export default function EventScan({
             return;
         }
 
-        if (hasSeenLocally(event.id, verification.registrationId)) {
+        if (
+            hasSeenLocally(
+                event.id,
+                verification.registrationId,
+                verification.holder,
+            )
+        ) {
             setLocalResult('already_local');
 
             return;
         }
 
-        markSeenLocally(event.id, verification.registrationId);
+        markSeenLocally(
+            event.id,
+            verification.registrationId,
+            verification.holder,
+        );
         enqueue(token);
         setLocalResult('verified');
     }
@@ -448,9 +458,20 @@ export default function EventScan({
                                                 {result.registration.name}
                                             </p>
                                             <p className="text-muted-foreground text-sm">
-                                                {result.registration.unit} ·{' '}
-                                                {result.registration.partySize}
+                                                {result.registration.unit}
                                             </p>
+                                            {result.registration.guestOf ? (
+                                                <p
+                                                    className="text-muted-foreground text-sm"
+                                                    data-test="scan-result-guest-of"
+                                                >
+                                                    {t('scan.result.guest_of', {
+                                                        name: result
+                                                            .registration
+                                                            .guestOf,
+                                                    })}
+                                                </p>
+                                            ) : null}
                                             <p className="text-sm">
                                                 {result.registration
                                                     .tableNumber !== null

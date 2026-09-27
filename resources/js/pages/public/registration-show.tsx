@@ -5,6 +5,7 @@ import { RegistrationRecap } from '@/components/public/registration-recap';
 import { OfflineBanner } from '@/components/offline-banner';
 import { useState } from 'react';
 import { CopyButton } from '@/components/copy-button';
+import { CompanionTicketPassCard } from '@/components/public/companion-ticket-pass-card';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -247,6 +248,34 @@ export default function PublicRegistrationShow({
                                               )
                                             : null}
                                     </div>
+                                    {registration.ticket.passes.length > 0 ? (
+                                        <div
+                                            className="space-y-3 border-t border-dashed pt-4 text-left"
+                                            data-test="ticket-passes"
+                                        >
+                                            <div className="space-y-1">
+                                                <p className="text-muted-foreground text-xs font-medium uppercase">
+                                                    {t(
+                                                        'guest.ticket.passes_title',
+                                                    )}
+                                                </p>
+                                                <p className="text-muted-foreground text-sm">
+                                                    {t(
+                                                        'guest.ticket.passes_description',
+                                                    )}
+                                                </p>
+                                            </div>
+                                            {registration.ticket.passes.map(
+                                                (pass) => (
+                                                    <CompanionTicketPassCard
+                                                        key={pass.id}
+                                                        pass={pass}
+                                                        eventName={event.name}
+                                                    />
+                                                ),
+                                            )}
+                                        </div>
+                                    ) : null}
                                     {registration.ticket.scheduledSendAt ? (
                                         <p className="text-muted-foreground text-sm">
                                             {t('guest.ticket.scheduled_send', {

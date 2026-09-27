@@ -10,9 +10,9 @@ use App\Enums\ScanResult;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\ScanTicketRequest;
 use App\Models\Event;
-use App\Models\Registration;
 use App\Models\ScanEvent;
 use App\Models\Tenant;
+use App\Models\Ticket;
 use App\Support\TicketRevocationList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -113,9 +113,11 @@ class ScanController extends Controller
             'acceptedCount' => ScanEvent::where('event_id', $event->id)
                 ->where('result', ScanResult::Accepted)
                 ->count(),
-            // Les inscriptions attendues a l'entree : celles dont le billet peut ouvrir la porte.
-            'expectedCount' => Registration::where('event_id', $event->id)
-                ->where('status', RegistrationStatus::Confirmed)
+            // Les personnes attendues a l'entree : un billet par personne (README 2.8), ceux des
+            // inscriptions confirmees, les seuls qui peuvent ouvrir la porte.
+            'expectedCount' => Ticket::whereHas('registration', fn ($query) => $query
+                ->where('event_id', $event->id)
+                ->where('status', RegistrationStatus::Confirmed))
                 ->count(),
         ];
     }
@@ -126,7 +128,7 @@ class ScanController extends Controller
     private function recentScans(Event $event): array
     {
         return ScanEvent::where('event_id', $event->id)
-            ->with('ticket.registration')
+            ->with('ticket.registration', 'ticket.holderUnit')
             ->latest('id')
             ->limit(20)
             ->get()
@@ -135,7 +137,7 @@ class ScanController extends Controller
                 'result' => $scan->result->value,
                 'forced' => $scan->forced,
                 'station' => $scan->station,
-                'name' => $scan->ticket?->registration?->name,
+                'name' => $scan->ticket?->holderName(),
                 'scannedAt' => $scan->created_at?->toISOString(),
             ])
             ->all();

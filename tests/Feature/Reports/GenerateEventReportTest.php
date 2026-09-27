@@ -49,9 +49,10 @@ class GenerateEventReportTest extends TestCase
     }
 
     /**
-     * Cree une inscription confirmee avec son billet, scanne ou non.
+     * Cree une inscription confirmee avec un billet par personne (README 2.8), dont les `$arrivedCount`
+     * premiers sont scannes ; `$arrived` vrai scanne tout le groupe.
      */
-    private function confirmed(string $unit, int $partySize, int $amountDue, bool $arrived, ?Event $event = null): Registration
+    private function confirmed(string $unit, int $partySize, int $amountDue, bool $arrived, ?Event $event = null, ?int $arrivedCount = null): Registration
     {
         $event ??= $this->event;
 
@@ -62,12 +63,16 @@ class GenerateEventReportTest extends TestCase
             'amount_due' => $amountDue,
         ]);
 
-        $ticket = Ticket::factory()->create(['registration_id' => $registration->id]);
+        $arrivedCount ??= $arrived ? $partySize : 0;
 
-        if ($arrived) {
-            // `performed_by_user_id` explicite : `User::factory()` creerait une organisation
-            // personnelle sous la tenancy de ce locataire.
-            TicketArrival::factory()->create(['ticket_id' => $ticket->id, 'performed_by_user_id' => $this->agentId]);
+        for ($position = 0; $position < $partySize; $position++) {
+            $ticket = Ticket::factory()->create(['registration_id' => $registration->id, 'holder_position' => $position]);
+
+            if ($position < $arrivedCount) {
+                // `performed_by_user_id` explicite : `User::factory()` creerait une organisation
+                // personnelle sous la tenancy de ce locataire.
+                TicketArrival::factory()->create(['ticket_id' => $ticket->id, 'performed_by_user_id' => $this->agentId]);
+            }
         }
 
         return $registration;
@@ -107,6 +112,19 @@ class GenerateEventReportTest extends TestCase
         $this->assertSame(2, $report['presentRegistrations']);
         $this->assertSame(5, $report['presentSeats']);
         $this->assertSame(1, $report['absentRegistrations']);
+        $this->assertSame(1, $report['absentSeats']);
+    }
+
+    public function test_une_arrivee_partielle_compte_les_seules_personnes_entrees(): void
+    {
+        // L'invite et un accompagnateur sont entres, le troisieme n'est jamais venu.
+        $this->tenant->asCurrent(fn () => $this->confirmed('ELIAKIM', 3, 30000, false, arrivedCount: 2));
+
+        $report = $this->report();
+
+        $this->assertSame(1, $report['presentRegistrations']);
+        $this->assertSame(2, $report['presentSeats']);
+        $this->assertSame(0, $report['absentRegistrations']);
         $this->assertSame(1, $report['absentSeats']);
     }
 

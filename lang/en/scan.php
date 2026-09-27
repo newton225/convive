@@ -18,6 +18,7 @@ return [
     'result' => [
         'table' => 'Table :number',
         'no_table' => 'Not seated',
+        'guest_of' => 'Guest of :name',
         'first_scanned_at' => 'First passage: :time',
         'first_scanned_by' => 'By :name',
         'force' => 'Force entry',

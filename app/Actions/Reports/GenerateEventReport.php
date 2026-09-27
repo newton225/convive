@@ -7,6 +7,7 @@ use App\Enums\ScanResult;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\ScanEvent;
+use App\Models\Ticket;
 use Illuminate\Support\Collection;
 
 /**
@@ -42,23 +43,36 @@ class GenerateEventReport
     {
         $confirmed = Registration::where('event_id', $event->id)
             ->where('status', RegistrationStatus::Confirmed)
-            ->with(['unit', 'ticket.arrival'])
+            ->with(['unit', 'tickets.arrival'])
             ->get();
 
-        $present = $confirmed->filter(fn (Registration $registration) => $registration->ticket?->arrival !== null);
+        // Un billet par personne (README 2.8) : une inscription est presente des qu'une personne
+        // du groupe est entree, et les places presentes comptent les personnes reellement entrees,
+        // pas la taille du groupe.
+        $present = $confirmed->filter(fn (Registration $registration) => $this->arrivals($registration) > 0);
         $absent = $confirmed->diff($present);
+        $confirmedSeats = (int) $confirmed->sum('party_size');
+        $presentSeats = (int) $present->sum(fn (Registration $registration) => $this->arrivals($registration));
 
         return [
             'confirmedRegistrations' => $confirmed->count(),
-            'confirmedSeats' => (int) $confirmed->sum('party_size'),
+            'confirmedSeats' => $confirmedSeats,
             'presentRegistrations' => $present->count(),
-            'presentSeats' => (int) $present->sum('party_size'),
+            'presentSeats' => $presentSeats,
             'absentRegistrations' => $absent->count(),
-            'absentSeats' => (int) $absent->sum('party_size'),
+            'absentSeats' => max(0, $confirmedSeats - $presentSeats),
             'collectedAmount' => (int) $confirmed->sum('amount_due'),
             'averageScanIntervalSeconds' => $this->averageScanIntervalSeconds($event),
             'units' => $this->byUnit($confirmed, $present),
         ];
+    }
+
+    /**
+     * Count the people of the registration's group who have entered.
+     */
+    private function arrivals(Registration $registration): int
+    {
+        return $registration->tickets->filter(fn (Ticket $ticket) => $ticket->arrival !== null)->count();
     }
 
     /**
@@ -102,7 +116,7 @@ class GenerateEventReport
                     'unit' => $unit->name,
                     'confirmedRegistrations' => $registrations->count(),
                     'presentRegistrations' => $presentHere->count(),
-                    'presentSeats' => (int) $presentHere->sum('party_size'),
+                    'presentSeats' => (int) $presentHere->sum(fn (Registration $registration) => $this->arrivals($registration)),
                     'collectedAmount' => (int) $registrations->sum('amount_due'),
                 ];
             })

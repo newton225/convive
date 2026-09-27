@@ -47,7 +47,7 @@ class RegistrationController extends Controller
         Gate::authorize('viewAny', [Registration::class, $tenant]);
 
         $registrations = $this->filteredQuery($request, $event)
-            ->with(['unit', 'tableAssignment.seatingTable', 'latestProof', 'ticket.arrival'])
+            ->with(['unit', 'tableAssignment.seatingTable', 'latestProof', 'tickets.arrival'])
             ->paginate(25)
             ->withQueryString();
 
@@ -302,6 +302,8 @@ class RegistrationController extends Controller
      */
     private function row(Registration $registration): array
     {
+        $arrivals = $registration->tickets->pluck('arrival')->filter();
+
         return [
             'id' => $registration->id,
             'reference' => $registration->reference,
@@ -315,7 +317,10 @@ class RegistrationController extends Controller
             'tableNumber' => $registration->tableAssignment?->seatingTable->number,
             'cancellationReason' => $registration->cancellation_reason,
             'channelLabel' => $registration->latestProof?->channel->label(),
-            'enteredAt' => $registration->ticket?->arrival?->created_at?->toISOString(),
+            // Un billet par personne (README 2.8, ecran 20) : combien du groupe sont entres, et quand
+            // le premier a passe la porte.
+            'enteredCount' => $arrivals->count(),
+            'enteredAt' => $arrivals->min('created_at')?->toISOString(),
         ];
     }
 

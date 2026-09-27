@@ -18,6 +18,7 @@ class TicketFactory extends Factory
     {
         return [
             'registration_id' => Registration::factory()->confirmed(),
+            'holder_position' => Ticket::GuestPosition,
             'nonce' => Ticket::generateNonce(),
             'key_version' => 1,
             'issued_at' => now(),

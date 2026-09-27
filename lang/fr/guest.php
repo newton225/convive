@@ -99,6 +99,16 @@ return [
         'table' => 'Table :number',
         'no_table' => 'Table à venir',
         'scheduled_send' => 'Votre carte vous sera envoyée par WhatsApp (et par email si vous en avez renseigné un) le :date.',
+        'passes_title' => 'Billets des accompagnateurs',
+        'passes_description' => 'Chaque personne entre avec son propre billet. Transmettez le sien à un accompagnateur qui arrivera sans vous.',
+        'pass_alt' => 'Billet de :name',
+        'share_whatsapp' => 'Envoyer par WhatsApp',
+        'copy_link' => 'Copier le lien',
+        'share_message' => 'Votre billet pour :event : :url',
+        'share_unavailable' => 'Présentez ce code depuis votre téléphone : le lien individuel sera disponible quand l\'organisation aura choisi son adresse.',
+        'guest_of' => 'Accompagnateur de :name',
+        'single_title' => 'Billet de :name',
+        'single_notice' => 'Ce billet fait entrer une seule personne et ne sert qu\'une fois. Présentez-le à l\'entrée.',
     ],
 
     'mail' => [

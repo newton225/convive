@@ -18,6 +18,7 @@ return [
     'result' => [
         'table' => 'Table :number',
         'no_table' => 'Non placée',
+        'guest_of' => 'Accompagnateur de :name',
         'first_scanned_at' => 'Premier passage : :time',
         'first_scanned_by' => 'Par :name',
         'force' => "Forcer l'entrée",

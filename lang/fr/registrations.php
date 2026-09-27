@@ -6,6 +6,7 @@ return [
 
     'entry' => [
         'entered' => 'Entré à :time',
+        'group' => ':count sur :total entrés, dès :time',
         'not_yet' => 'Pas encore entré',
     ],
 

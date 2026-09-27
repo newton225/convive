@@ -49,27 +49,48 @@ export function writeQueue(eventId: number, queue: QueuedScan[]): void {
     write(queueKey(eventId), queue);
 }
 
-function readSeen(eventId: number): number[] {
+const seenEntry = (registrationId: number, holder: number) =>
+    `${registrationId}:${holder}`;
+
+function readSeen(eventId: number): string[] {
     const stored = readStored(seenKey(eventId));
 
-    return Array.isArray(stored)
-        ? stored.filter((id): id is number => typeof id === 'number')
-        : [];
+    if (!Array.isArray(stored)) {
+        return [];
+    }
+
+    // Un nombre seul vient d'avant le billet par personne : il designait le billet de l'invite.
+    return stored.flatMap((entry) =>
+        typeof entry === 'string'
+            ? [entry]
+            : typeof entry === 'number'
+              ? [seenEntry(entry, 0)]
+              : [],
+    );
 }
 
 /**
- * Les inscriptions deja acceptees hors ligne sur cet appareil : deux scans du meme billet hors
- * ligne doivent etre signales, le serveur ne peut pas encore le faire.
+ * Les billets deja acceptes hors ligne sur cet appareil : deux scans du meme billet hors ligne
+ * doivent etre signales, le serveur ne peut pas encore le faire. Un billet par personne (README
+ * 2.8) : la cle porte le titulaire, un accompagnateur arrive seul n'empeche pas l'invite d'entrer.
  */
 export function hasSeenLocally(
     eventId: number,
     registrationId: number,
+    holder: number,
 ): boolean {
-    return readSeen(eventId).includes(registrationId);
+    return readSeen(eventId).includes(seenEntry(registrationId, holder));
 }
 
-export function markSeenLocally(eventId: number, registrationId: number): void {
-    write(seenKey(eventId), [...readSeen(eventId), registrationId]);
+export function markSeenLocally(
+    eventId: number,
+    registrationId: number,
+    holder: number,
+): void {
+    write(seenKey(eventId), [
+        ...readSeen(eventId),
+        seenEntry(registrationId, holder),
+    ]);
 }
 
 const revocationsKey = (eventId: number) =>

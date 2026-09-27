@@ -194,13 +194,28 @@ export default function EventRegistrations({
             header: t('registrations.columns.entry'),
             cell: ({ row }) =>
                 row.original.enteredAt ? (
-                    <Badge variant="default">
-                        {t('registrations.entry.entered', {
-                            time: formatDateTime(
-                                row.original.enteredAt,
-                                locale,
-                            ),
-                        })}
+                    <Badge
+                        variant={
+                            row.original.enteredCount < row.original.partySize
+                                ? 'secondary'
+                                : 'default'
+                        }
+                    >
+                        {row.original.partySize > 1
+                            ? t('registrations.entry.group', {
+                                  count: row.original.enteredCount,
+                                  total: row.original.partySize,
+                                  time: formatDateTime(
+                                      row.original.enteredAt,
+                                      locale,
+                                  ),
+                              })
+                            : t('registrations.entry.entered', {
+                                  time: formatDateTime(
+                                      row.original.enteredAt,
+                                      locale,
+                                  ),
+                              })}
                     </Badge>
                 ) : (
                     <span className="text-muted-foreground text-xs">

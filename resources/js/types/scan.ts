@@ -4,6 +4,8 @@ export type ScanRegistrationSummary = {
     name: string;
     unit: string;
     partySize: number;
+    // Nom de l'invite quand le billet est celui d'un accompagnateur (README 2.8).
+    guestOf: string | null;
     tableNumber: number | null;
 };
 

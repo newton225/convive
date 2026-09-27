@@ -8,7 +8,6 @@ use App\Enums\NotificationType;
 use App\Enums\RegistrationStatus;
 use App\Enums\ScanResult;
 use App\Models\Event;
-use App\Models\Registration;
 use App\Models\ScanEvent;
 use App\Models\Tenant;
 use App\Models\Ticket;
@@ -39,7 +38,7 @@ class ScanTicket
      * @return array{
      *     result: ScanResult,
      *     forced: bool,
-     *     registration: array{name: string, unit: string, partySize: int, tableNumber: int|null}|null,
+     *     registration: array{name: string, unit: string, partySize: int, guestOf: string|null, tableNumber: int|null}|null,
      *     firstScannedAt: CarbonInterface|null,
      *     firstScannedBy: string|null,
      * }
@@ -62,7 +61,7 @@ class ScanTicket
 
             $this->journal($event, $ticket, $actor, ScanResult::Accepted, false, $station);
 
-            return $this->outcome(ScanResult::Accepted, false, $ticket->registration, null, null);
+            return $this->outcome(ScanResult::Accepted, false, $ticket, null, null);
         } catch (QueryException) {
             $arrival = $ticket->arrival()->first();
 
@@ -71,7 +70,7 @@ class ScanTicket
             return $this->outcome(
                 ScanResult::AlreadyScanned,
                 $force,
-                $force ? $ticket->registration : null,
+                $force ? $ticket : null,
                 $arrival?->created_at,
                 $arrival !== null ? User::find($arrival->performed_by_user_id)?->name : null,
             );
@@ -158,7 +157,7 @@ class ScanTicket
      * @return array{
      *     result: ScanResult,
      *     forced: bool,
-     *     registration: array{name: string, unit: string, partySize: int, tableNumber: int|null}|null,
+     *     registration: array{name: string, unit: string, partySize: int, guestOf: string|null, tableNumber: int|null}|null,
      *     firstScannedAt: CarbonInterface|null,
      *     firstScannedBy: string|null,
      * }
@@ -166,18 +165,21 @@ class ScanTicket
     private function outcome(
         ScanResult $result,
         bool $forced,
-        ?Registration $registration,
+        ?Ticket $ticket,
         ?CarbonInterface $firstScannedAt,
         ?string $firstScannedBy,
     ): array {
         return [
             'result' => $result,
             'forced' => $forced,
-            'registration' => $registration === null ? null : [
-                'name' => $registration->name,
-                'unit' => $registration->unit->name,
-                'partySize' => $registration->party_size,
-                'tableNumber' => $registration->tableAssignment?->seatingTable->number,
+            // Un billet fait entrer une seule personne (README 2.8, un billet par personne) : le nom
+            // et l'unite sont ceux de son titulaire, `guestOf` nomme l'invite d'un accompagnateur.
+            'registration' => $ticket === null ? null : [
+                'name' => $ticket->holderName(),
+                'unit' => $ticket->holderUnitName(),
+                'partySize' => 1,
+                'guestOf' => $ticket->isCompanion() ? $ticket->registration->name : null,
+                'tableNumber' => $ticket->registration->tableAssignment?->seatingTable->number,
             ],
             'firstScannedAt' => $firstScannedAt,
             'firstScannedBy' => $firstScannedBy,

@@ -11,7 +11,7 @@
  */
 
 export type TicketVerification =
-    | { status: 'valid'; registrationId: number }
+    | { status: 'valid'; registrationId: number; holder: number }
     | { status: 'forged' }
     | { status: 'wrong_event' }
     | { status: 'outdated' }
@@ -33,6 +33,9 @@ type TicketPayload = {
     tenant_id: number;
     event_id: number;
     registration_id: number;
+    // Position du titulaire dans le groupe (README 2.8, un billet par personne) : absente des
+    // billets emis avant, qui valent pour l'invite principal.
+    holder?: number;
     key_version: number;
     not_after: number | null;
 };
@@ -65,6 +68,7 @@ const isTicketPayload = (value: unknown): value is TicketPayload =>
     typeof value.tenant_id === 'number' &&
     typeof value.event_id === 'number' &&
     typeof value.registration_id === 'number' &&
+    (value.holder === undefined || typeof value.holder === 'number') &&
     typeof value.key_version === 'number' &&
     (value.not_after === null || typeof value.not_after === 'number');
 
@@ -202,5 +206,9 @@ export async function verifyTicketOffline(
         return { status: 'revoked' };
     }
 
-    return { status: 'valid', registrationId: payload.registration_id };
+    return {
+        status: 'valid',
+        registrationId: payload.registration_id,
+        holder: payload.holder ?? 0,
+    };
 }

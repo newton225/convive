@@ -4,6 +4,7 @@ use App\Http\Controllers\Public\EventController as PublicEventController;
 use App\Http\Controllers\Public\PaymentProofController as PublicPaymentProofController;
 use App\Http\Controllers\Public\RegistrationController as PublicRegistrationController;
 use App\Http\Controllers\Public\RegistrationDeletedController as PublicRegistrationDeletedController;
+use App\Http\Controllers\Public\TicketController as PublicTicketController;
 use App\Http\Controllers\Public\WaitlistController as PublicWaitlistController;
 use App\Http\Middleware\EndTenancy;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +69,12 @@ Route::middleware([
     // locataire (meme raison que `Event::publicUrl()`).
     Route::get('/e/{token}/register/{registration}/link', [PublicRegistrationController::class, 'link'])
         ->name('public.registrations.link');
+
+    // Le lien individuel d'un billet (README 2.8, un billet par personne), transmis par l'invite
+    // a un accompagnateur. Signature HMAC verifiee dans le controleur, pour la meme raison que le
+    // lien signe ci-dessus.
+    Route::get('/e/{token}/ticket/{ticket}', [PublicTicketController::class, 'show'])
+        ->name('public.tickets.show');
 
     // Le depot de la preuve (README ecran 5 etape 2 et 3, ecran 6), etape 6. Cle de debit
     // propre a cette route (CLAUDE.md, table des limiteurs) : 5 par heure, plus stricte que le

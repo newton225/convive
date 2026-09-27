@@ -22,15 +22,19 @@ use Illuminate\Support\Str;
  * @property int $registration_id
  * @property string $nonce
  * @property int $key_version
+ * @property int $holder_position
+ * @property string|null $holder_name
+ * @property int|null $holder_unit_id
  * @property Carbon $issued_at
  * @property Carbon|null $reminder_sent_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Registration $registration
+ * @property-read Unit|null $holderUnit
  * @property-read TicketArrival|null $arrival
  * @property-read Collection<int, ScanEvent> $scanEvents
  */
-#[Fillable(['registration_id', 'nonce', 'key_version', 'issued_at', 'reminder_sent_at'])]
+#[Fillable(['registration_id', 'nonce', 'key_version', 'issued_at', 'reminder_sent_at', 'holder_position', 'holder_name', 'holder_unit_id'])]
 class Ticket extends Model
 {
     /** @use HasFactory<TicketFactory> */
@@ -60,6 +64,78 @@ class Ticket extends Model
     public function registration(): BelongsTo
     {
         return $this->belongsTo(Registration::class);
+    }
+
+    /**
+     * Position de l'invite principal : ses accompagnateurs suivent, 1, 2... (README 2.8, un billet
+     * par personne).
+     */
+    public const GuestPosition = 0;
+
+    /**
+     * Get the unit of the companion holding this ticket (null for the main guest).
+     *
+     * @return BelongsTo<Unit, $this>
+     */
+    public function holderUnit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class, 'holder_unit_id');
+    }
+
+    public function isCompanion(): bool
+    {
+        return $this->holder_position !== self::GuestPosition;
+    }
+
+    /**
+     * Get the name of the person this ticket admits.
+     */
+    public function holderName(): string
+    {
+        return $this->holder_name ?? $this->registration->name;
+    }
+
+    /**
+     * Get the unit of the person this ticket admits.
+     */
+    public function holderUnitName(): string
+    {
+        return $this->holderUnit->name ?? $this->registration->unit->name;
+    }
+
+    /**
+     * Signature of this ticket's individual link : HMAC recalculable, jamais stocke, comme
+     * `Registration::notificationToken()`. Le lien montre un QR, donc permet d'entrer : il ne doit
+     * pas pouvoir se deviner.
+     */
+    public function shareSignature(): string
+    {
+        return hash_hmac('sha256', 'ticket:'.$this->id, (string) config('app.key'));
+    }
+
+    /**
+     * Get the absolute URL of this ticket alone, the one the guest forwards to a companion, or
+     * null when the tenant or the event have nothing to build one from.
+     *
+     * Construction manuelle, comme `Registration::signedResumeUrl()` : l'hote vient du
+     * sous-domaine de l'organisation, pas de la requete courante.
+     */
+    public function shareUrl(): ?string
+    {
+        $event = $this->registration->event;
+        $tenant = Tenant::current();
+
+        if ($event->public_token === null || $tenant?->subdomain === null) {
+            return null;
+        }
+
+        $appUrl = parse_url((string) config('app.url'));
+        $scheme = $appUrl['scheme'] ?? 'http';
+        $port = isset($appUrl['port']) ? ':'.$appUrl['port'] : '';
+        $domain = $tenant->subdomain.'.'.config('convive.public_domain');
+
+        return "{$scheme}://{$domain}{$port}/e/{$event->public_token}/ticket/{$this->id}"
+            .'?signature='.$this->shareSignature();
     }
 
     /**
@@ -99,6 +175,9 @@ class Ticket extends Model
             'event_id' => $this->registration->event_id,
             'registration_id' => $this->registration_id,
             'nonce' => $this->nonce,
+            // Qui ce billet fait entrer dans le groupe (README 2.8) : l'appareil hors ligne ne
+            // marque ainsi « deja vu » que cette personne, pas tout le groupe.
+            'holder' => $this->holder_position,
             'key_version' => $keyPair['version'],
             'not_after' => $event->ticketValidUntil()?->getTimestamp(),
         ], $keyPair['secret']);
@@ -113,6 +192,7 @@ class Ticket extends Model
     {
         return [
             'key_version' => 'integer',
+            'holder_position' => 'integer',
             'issued_at' => 'datetime',
             'reminder_sent_at' => 'datetime',
         ];

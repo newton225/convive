@@ -99,6 +99,16 @@ return [
         'table' => 'Table :number',
         'no_table' => 'Table to be assigned',
         'scheduled_send' => 'Your card will be sent by WhatsApp (and by email if you provided one) on :date.',
+        'passes_title' => 'Companion tickets',
+        'passes_description' => 'Everyone enters with their own ticket. Send one to a companion who will arrive without you.',
+        'pass_alt' => 'Ticket for :name',
+        'share_whatsapp' => 'Send by WhatsApp',
+        'copy_link' => 'Copy link',
+        'share_message' => 'Your ticket for :event: :url',
+        'share_unavailable' => 'Show this code from your phone: the individual link will be available once the organisation has chosen its address.',
+        'guest_of' => 'Guest of :name',
+        'single_title' => 'Ticket for :name',
+        'single_notice' => 'This ticket admits one person and can only be used once. Show it at the entrance.',
     ],
 
     'mail' => [

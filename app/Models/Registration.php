@@ -232,13 +232,24 @@ class Registration extends Model
     }
 
     /**
-     * Get the ticket issued for this registration once it is confirmed (README 2.8).
+     * Get the main guest's ticket, issued once the registration is confirmed (README 2.8).
      *
      * @return HasOne<Ticket, $this>
      */
     public function ticket(): HasOne
     {
-        return $this->hasOne(Ticket::class);
+        return $this->hasOne(Ticket::class)->where('holder_position', Ticket::GuestPosition);
+    }
+
+    /**
+     * Get every ticket of the group : the main guest's, then one per companion (README 2.8, un
+     * billet par personne).
+     *
+     * @return HasMany<Ticket, $this>
+     */
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class)->orderBy('holder_position');
     }
 
     /**

@@ -39,13 +39,33 @@ export type TicketSummaryBrand = {
     signatureUrl: string | null;
 };
 
+// Le billet d'un accompagnateur (README 2.8, un billet par personne), avec son lien individuel :
+// null quand l'organisation n'a pas encore de sous-domaine pour le construire.
+export type CompanionTicketPass = {
+    id: number;
+    name: string;
+    unit: string;
+    qrImage: string;
+    shareUrl: string | null;
+};
+
 export type TicketSummary = {
     qrImage: string;
+    passes: CompanionTicketPass[];
     tableNumber: number | null;
     scheduledSendAt: string | null;
     model: TicketModel;
     elements: TicketElements;
     brand: TicketSummaryBrand;
+};
+
+// Le lien individuel d'un billet (`Public\TicketController`).
+export type PublicTicketPass = {
+    name: string;
+    unit: string;
+    guestOf: string | null;
+    qrImage: string;
+    tableNumber: number | null;
 };
 
 export type RegistrationShow = {
@@ -74,6 +94,7 @@ export type RegistrationRow = {
     cancellationReason: string | null;
     // Canal de la derniere preuve deposee, et heure du passage a l'entree (null tant qu'absent).
     channelLabel: string | null;
+    enteredCount: number;
     enteredAt: string | null;
 };
 

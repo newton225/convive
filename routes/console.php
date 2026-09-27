@@ -203,7 +203,9 @@ Schedule::call(function (SendProofReminder $send) {
 /*
  * Rappel jour J moins 3 heures aux billets valides (README 2.7), etape 8. Plus frequent que les
  * rappels de preuve : une fenetre de trois heures tolere moins de retard qu'une fenetre de
- * plusieurs jours avant de declencher une premiere verification.
+ * plusieurs jours avant de declencher une premiere verification. Le seul billet de l'invite : ses
+ * accompagnateurs ont chacun le leur (README 2.8), mais le message part au meme telephone, un seul
+ * suffit.
  */
 Schedule::call(function (SendTicketReminder $send) {
     Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(
@@ -213,6 +215,7 @@ Schedule::call(function (SendTicketReminder $send) {
             ->whereBetween('starts_at', [now(), now()->addHours(3)])
             ->each(fn (Event $event) => Ticket::query()
                 ->whereHas('registration', fn ($query) => $query->where('event_id', $event->id))
+                ->where('holder_position', Ticket::GuestPosition)
                 ->whereNull('reminder_sent_at')
                 ->each(fn (Ticket $ticket) => $send->handle($ticket))),
     ));

@@ -409,7 +409,11 @@ class RegistrationController extends Controller
      */
     private function ticketSummary(Registration $registration, Event $event, Tenant $tenant): ?array
     {
-        $ticket = Ticket::where('registration_id', $registration->id)->first();
+        $tickets = Ticket::where('registration_id', $registration->id)
+            ->with('holderUnit', 'registration.unit', 'registration.event')
+            ->orderBy('holder_position')
+            ->get();
+        $ticket = $tickets->firstWhere('holder_position', Ticket::GuestPosition);
 
         if ($ticket === null) {
             return null;
@@ -422,6 +426,19 @@ class RegistrationController extends Controller
 
         return [
             'qrImage' => TicketQrCode::dataUri($ticket->signedToken()),
+            // Un billet par accompagnateur (README 2.8, ecran 7), avec son lien individuel : l'invite
+            // le transmet a qui arrivera sans lui.
+            'passes' => $tickets
+                ->filter(fn (Ticket $pass) => $pass->isCompanion())
+                ->map(fn (Ticket $pass) => [
+                    'id' => $pass->id,
+                    'name' => $pass->holderName(),
+                    'unit' => $pass->holderUnitName(),
+                    'qrImage' => TicketQrCode::dataUri($pass->signedToken()),
+                    'shareUrl' => $pass->shareUrl(),
+                ])
+                ->values()
+                ->all(),
             'tableNumber' => $registration->tableAssignment?->seatingTable->number,
             'scheduledSendAt' => $event->invitations_send_at?->toISOString(),
             'model' => $branding->ticket_model->value,
