@@ -423,14 +423,29 @@ requetes qui les touchent, et les memes regles qu'avant : Policy qui verifie l'a
 
 ### Etat de la migration
 
-**Ceci est la decision d'architecture retenue ; le code n'est pas encore migre.** Les mentions
-de `tenant_id` sur une table metier, de `App\Concerns\BelongsToTenant`,
-`App\Support\TenantContext`, `App\Http\Middleware\ResolveCurrentTenant` et
-`scopeBindings()` ailleurs dans ce document decrivent le mecanisme provisoire actuellement en
-place, ecrit avant cette decision. Il disparait avec la migration : `stancl/tenancy` prend en
-charge ce que ces classes maison faisaient a la main. Ne pas les etendre pour de nouvelles
-tables metier ; toute nouvelle table qui appartient a un locataire va directement dans
-`database/migrations/tenant/`, sans colonne `tenant_id`.
+**Migration terminee.** `App\Models\Tenant` implemente `TenantWithDatabase` : chaque
+organisation a sa propre base (`tenant{id}.sqlite` aujourd'hui). Le mecanisme provisoire ecrit
+avant cette decision (`App\Concerns\BelongsToTenant`, `App\Support\TenantContext`,
+`App\Http\Middleware\ResolveCurrentTenant`, scope global et `tenant_id` sur les tables metier) a
+ete retire du code. Les mentions qui en subsistent ailleurs dans ce document decrivent cet ancien
+etat et ne font plus foi : c'est cette section qui l'emporte.
+
+Ce qui est en place :
+
+- **Back-office** : `App\Http\Middleware\EnsureTenantMembership` resout l'organisation par le
+  segment `{tenant}` de l'URL, verifie l'appartenance (404 sinon), puis initialise la tenancy.
+  Elle passe avant `SubstituteBindings` (`bootstrap/app.php`), pour que `{event}`, `{unit}`,
+  `{profile}`... se resolvent deja dans la base du locataire. Pas de `scopeBindings()` sur ces
+  sous-modeles : ils vivent dans une autre base physique.
+- **Liens publics** : `InitializeTenancyBySubdomain` et `PreventAccessFromCentralDomains`
+  (`routes/public.php`), plus `App\Http\Middleware\EndTenancy` pour revenir a la base centrale en
+  fin de requete.
+- **Taches planifiees et commandes** : elles bouclent sur les organisations et posent le contexte
+  a chaque tour (`$tenant->run()` ou son alias `asCurrent()`).
+- **Nouvelle table metier** : directement dans `database/migrations/tenant/`, sans colonne
+  `tenant_id`. **Deploiement** : `php artisan tenants:migrate` puis
+  `php artisan tenants:sync-permissions`, sans quoi une organisation deja ouverte garde un schema
+  ou un catalogue de permissions en retard.
 
 ### Nommage du locataire
 
