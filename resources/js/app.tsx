@@ -15,6 +15,7 @@ void createInertiaApp({
     layout: (name) => {
         switch (true) {
             case name === 'welcome':
+            case name === 'showcase':
             // Le parcours invite (README ecrans 3 a 11) n'est jamais authentifie : l'envelopper
             // dans `AppLayout` par defaut plantait au rendu (`UserInfo` lit `user.avatar` sur un
             // `auth.user` qui vaut `null` pour un visiteur anonyme), page blanche silencieuse,
