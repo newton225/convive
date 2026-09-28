@@ -13,13 +13,14 @@ Convive est un SaaS multi-locataire (multi-tenant) qui permet à une organisatio
 (association, église, unité, entreprise) de gérer les inscriptions à un événement payant à
 places limitées.
 
-Trois publics :
+Quatre publics :
 
-| Public              | Accès                       | Ce qu'il fait                                                                                                                          |
-| ------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **Invité**          | lien public, sans compte    | s'inscrit, déclare ses accompagnateurs, transfère l'argent hors plateforme, dépose sa preuve de paiement, reçoit sa carte d'invitation |
-| **Organisation**    | back-office authentifié     | crée les événements, vérifie les preuves, gère le plan de salle, exporte, consulte les rapports                                        |
-| **Agent d'accueil** | back-office, rôle restreint | scanne les QR des billets à l'entrée                                                                                                   |
+| Public                         | Accès                                                      | Ce qu'il fait                                                                                                                                                   |
+| ------------------------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Invité**                     | lien public, sans compte                                   | s'inscrit, déclare ses accompagnateurs, transfère l'argent hors plateforme, dépose sa preuve de paiement, reçoit sa carte d'invitation                          |
+| **Organisation**               | back-office authentifié                                    | crée les événements, vérifie les preuves, gère le plan de salle, exporte, consulte les rapports                                                                 |
+| **Agent d'accueil**            | back-office, rôle restreint                                | scanne les QR des billets à l'entrée                                                                                                                            |
+| **Éditeur** (l'équipe Convive) | console d'exploitation, comptes distincts, domaine central | suit les organisations et leur abonnement, applique plans et quotas, suspend ou réactive, surveille la santé technique, assure le support sur autorisation (§3) |
 
 **Contrainte structurante : aucun encaissement dans l'application.**
 L'invité verse sur un compte Mobile Money / bancaire appartenant à l'organisation, puis
@@ -255,6 +256,66 @@ l'ouverture d'un espace, garde-fous contre l'élévation de privilèges, journal
 `spatie/laravel-activitylog`, et écran de gestion des profils. Les règles précises sont dans
 `CLAUDE.md`, section « Profils et permissions ».
 
+### Console d'exploitation (l'éditeur)
+
+Décision du propriétaire du projet (2026-09-28). L'éditeur gère le SaaS depuis une console qui
+lui est propre, séparée du back-office des organisations. Elle administre **des organisations
+clientes, pas leurs événements**.
+
+**Accès**
+
+- **Comptes éditeur distincts des comptes d'organisation.** Un compte éditeur n'ouvre aucun
+  espace d'organisation ; un compte d'organisation n'ouvre pas la console.
+- **2FA obligatoire pour tout compte éditeur, sans exception de profil ni d'environnement**, y
+  compris en local : le seeder fournit un secret TOTP de développement connu.
+- **Domaine dédié** sur le domaine central (`admin.<domaine>`). Ses routes sont inaccessibles
+  depuis un sous-domaine d'organisation, et inversement.
+- **Profils éditeur** sur un catalogue de permissions fermé, distinct de celui des
+  organisations : Fondateur (tout), Support (lecture des organisations, accès de support),
+  Comptabilité (facturation, plans, suspensions).
+
+**Ce que l'éditeur voit : des métadonnées, jamais le contenu**
+
+- Par défaut, pour chaque organisation : nom affiché, plan, état de l'abonnement, date
+  d'ouverture, quotas consommés (événements actifs, inscrits, membres), dernière activité.
+- **Ni les inscrits, ni les preuves, ni les montants collectés, ni les numéros de versement.**
+  L'isolation des données est la promesse centrale du produit, elle vaut aussi face à
+  l'éditeur.
+- Les compteurs vivent dans une table centrale tenue à jour à l'écriture par l'organisation.
+  La console ne parcourt jamais les bases des organisations à chaque affichage (même principe
+  que la vitrine).
+
+**Accès de support**
+
+- L'éditeur ne lit le contenu d'une organisation que si **un Propriétaire de cette
+  organisation lui a ouvert un accès de support** depuis son propre back-office (écran 25).
+- Accès limité à **24 heures au plus**, révocable à tout moment, en **lecture seule**,
+  nominatif (un compte éditeur précis).
+- Tant qu'il est ouvert, l'organisation voit un bandeau permanent.
+- Chaque page consultée est journalisée **dans le journal de l'organisation**, qu'elle peut
+  relire, et dans le journal central.
+
+**Actions sur une organisation**
+
+- **Changer de plan.** Une montée prend effet immédiatement. Une descente prend effet à la fin
+  de la période payée, et elle est refusée tant que la consommation dépasse les quotas du plan
+  visé ; le message dit lesquels.
+- **Offrir ou prolonger une période d'essai**, avec une date de fin.
+- **Suspendre et réactiver.** Suspension automatique à J+10 d'impayé (voir Facturation plus
+  haut), ou manuelle avec un motif obligatoire. Une organisation suspendue a son back-office en
+  lecture seule (exports toujours possibles) et ses liens publics fermés aux nouvelles
+  inscriptions, avec un message neutre. **Les billets déjà émis restent valides au scan** : un
+  impayé de l'organisation ne refoule pas ses invités à l'entrée.
+- **Supprimer une organisation**, uniquement à sa demande écrite. Suppression annulable pendant
+  **30 jours**, puis effacement de sa base et de ses fichiers. Le journal central garde la trace
+  de l'opération, sans les données.
+- **Retirer une annonce de la vitrine** jugée abusive, avec un motif transmis à l'organisation.
+
+**Journal central**
+
+Toute action de la console est journalisée : acteur, organisation concernée, avant et après,
+adresse IP. Conservation 24 mois, comme le journal des organisations.
+
 ---
 
 ## 4. Écrans à livrer
@@ -314,13 +375,32 @@ l'ouverture d'un espace, garde-fous contre l'élévation de privilèges, journal
     (envoi programmé, attribution automatique, inscription sans preuve, lisibilité de la preuve,
     purge à l'épuisement, réservation temporaire).
 25. **Profil & équipe** — profil, 2FA, matrice de permissions, préférences de notification par
-    type d'alerte (appli / email / les deux), membres et invitations.
+    type d'alerte (appli / email / les deux), membres et invitations, **accès du support** :
+    ouvrir un accès à l'équipe Convive (compte concerné, durée de 24 h au plus), le révoquer,
+    relire ce qui a été consulté.
 
 ### Agent d'accueil (mobile)
 
 26. **Scan** — viseur, compteur de personnes entrées sur les attendues, trois résultats : valide
     (nom de la personne, unité, table, « accompagnateur de … » le cas échéant), déjà scanné
     (heure et agent du premier passage, forçage possible), refusé ; hors ligne ; derniers passages.
+
+### Console d'exploitation (éditeur)
+
+27. **Organisations** : liste avec recherche et filtres (plan, essai, impayé, suspendue),
+    quotas consommés, dernière activité.
+28. **Fiche organisation** : identité, plan, historique d'abonnement, factures, consommation,
+    accès de support en cours, journal des actions de l'éditeur ; changer de plan, prolonger
+    l'essai, suspendre ou réactiver, programmer la suppression.
+29. **Recouvrement** : impayés, relances envoyées, suspensions à venir (J+10), paiements en
+    échec.
+30. **Plans** : prix et quotas d'Essentiel, Association, Institution. Une modification ne
+    touche pas les abonnements en cours avant leur renouvellement.
+31. **Santé technique** : organisations dont la base est absente ou pas à jour des migrations,
+    tâches planifiées en retard, files bloquées, sauvegardes.
+32. **Vitrine** : annonces publiées, retrait avec motif.
+33. **Journal central** : actions de la console et opérations sur les organisations.
+34. **Équipe éditeur** : comptes éditeur, profils, 2FA, invitations.
 
 ---
 
@@ -453,6 +533,8 @@ Table, SeatAssignment, SeatingConstraint
 Ticket (jeton QR), ScanEvent
 StatementImport, StatementLine, ReconciliationMatch
 Notification, NotificationPreference, AuditLog
+PlatformUser, PlatformProfile, PlatformAuditLog
+TenantUsage (compteurs centraux), SupportAccessGrant, TenantSuspension
 ```
 
 ---
@@ -516,7 +598,10 @@ lourde a rejouer. Elle est faite avant de reprendre la construction du produit.
 7. Billet, jeton QR, scan, journal des passages.
 8. Envois programmés et rappels.
 9. Exports, rapports, rapprochement CSV.
-10. Notifications, abonnement et facturation.
+10. Notifications, abonnement et facturation. Avec elle, les trois morceaux de la console
+    d'exploitation dont elle dépend : catalogue des plans (écran 30), compteurs de quotas
+    (`TenantUsage`) et suspension.
+11. Console d'exploitation : le reste des écrans 27 à 34, et l'accès du support (écran 25).
 
 ### Tests indispensables
 
@@ -526,3 +611,9 @@ lourde a rejouer. Elle est faite avant de reprendre la construction du produit.
 - Purge à l'échéance et à l'épuisement : places rendues, journal écrit.
 - Scan d'un billet déjà utilisé : signalé, forçage tracé.
 - Requête d'un tenant sur les données d'un autre : impossible.
+- Un compte éditeur sans accès de support ouvert ne lit aucune donnée d'organisation : 404.
+- Un accès de support expiré ou révoqué ne donne plus rien ; chaque consultation faite pendant
+  l'accès figure au journal de l'organisation.
+- Un compte d'organisation n'atteint aucune route de la console, et inversement.
+- Une organisation suspendue ne prend plus d'inscription, ses billets déjà émis passent au scan.
+- Une descente de plan au-delà des quotas consommés est refusée.
