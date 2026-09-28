@@ -166,6 +166,17 @@
     }
 
     /*
+     * Defilement doux vers les sections de la page d'accueil (menu de l'en-tete). Limite a cette
+     * page : ailleurs, Inertia remonte en haut ou restaure la position apres une navigation, et
+     * ce saut doit rester instantane. Coupe pour qui demande moins de mouvement.
+     */
+    @media (prefers-reduced-motion: no-preference) {
+        html:has([data-smooth-scroll]) {
+            scroll-behavior: smooth;
+        }
+    }
+
+    /*
      * Variables posees ici plutot qu'en attribut style inline sur les composants shadcn/ui
      * (sidebar, sonner) : une CSP sans unsafe-inline (SECURITY.md H7) ne peut proteger que les
      * balises <style>/<script> via un nonce, jamais un attribut style, et ces valeurs sont des

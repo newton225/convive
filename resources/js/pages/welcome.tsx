@@ -29,7 +29,7 @@ export default function Welcome({ plans, defaultCurrency }: Props) {
 
             <SiteHeader />
 
-            <main>
+            <main data-smooth-scroll>
                 <SiteHero />
                 <SiteFigures />
                 <SiteFeatures />
