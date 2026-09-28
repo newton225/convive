@@ -131,4 +131,23 @@ return [
         'valid_hours_after_start' => (int) env('CONVIVE_TICKET_VALID_HOURS_AFTER_START', 24),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Console d'exploitation
+    |--------------------------------------------------------------------------
+    |
+    | PROVISOIRE : le README (section 3, « Console d'exploitation ») veut des comptes editeur
+    | distincts, avec 2FA obligatoire et un domaine dedie. Tant qu'ils n'existent pas, la console
+    | s'ouvre aux adresses listees ici, separees par des virgules. Le compte de developpement y
+    | figure en local seulement. Remplace, pas complete, quand les comptes editeur arrivent.
+    |
+    */
+
+    'console' => [
+        'operators' => array_filter(array_map(
+            fn (string $email) => strtolower(trim($email)),
+            explode(',', (string) env('CONVIVE_CONSOLE_OPERATORS', env('APP_ENV') === 'local' ? 'admin@convive.com' : '')),
+        )),
+    ],
+
 ];

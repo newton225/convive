@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\Locale;
 use App\Support\PlanLimits;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Vite;
 use Inertia\Middleware;
@@ -21,7 +22,7 @@ class HandleInertiaRequests extends Middleware
      *
      * @var array<int, string>
      */
-    protected const TranslationGroups = ['common', 'navigation', 'account', 'tenants', 'profiles', 'permissions', 'organisation', 'units', 'payment_accounts', 'events', 'guest', 'proofs', 'seating', 'scan', 'registrations', 'reconciliation', 'reports', 'notifications', 'billing', 'site', 'showcase', 'dashboard', 'audit', 'ticket_template', 'event_settings', 'offline', 'tours'];
+    protected const TranslationGroups = ['common', 'navigation', 'account', 'tenants', 'profiles', 'permissions', 'organisation', 'units', 'payment_accounts', 'events', 'guest', 'proofs', 'seating', 'scan', 'registrations', 'reconciliation', 'reports', 'notifications', 'billing', 'site', 'showcase', 'dashboard', 'audit', 'ticket_template', 'event_settings', 'offline', 'tours', 'console'];
 
     /**
      * The root template that's loaded on the first page visit.
@@ -76,6 +77,8 @@ class HandleInertiaRequests extends Middleware
             // Les visites guidees deja terminees : une visite ne redemarre pas d'elle-meme.
             'completedTours' => fn () => $user->completed_tours ?? [],
             'currentPlan' => fn () => $user?->currentTenant ? $this->currentPlan($user->currentTenant) : null,
+            // Sert uniquement a afficher le lien vers la console ; ses routes revalident.
+            'canAccessConsole' => fn () => $user !== null && Gate::forUser($user)->allows('console.access'),
         ];
     }
 

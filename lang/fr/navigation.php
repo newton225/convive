@@ -23,4 +23,5 @@ return [
     'entry_control' => "Contrôle à l'entrée",
     'ticket_template' => 'Gabarit du billet',
     'profiles' => 'Profils et permissions',
+    'console' => 'Console d\'exploitation',
 ];

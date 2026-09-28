@@ -23,4 +23,5 @@ return [
     'entry_control' => 'Entry control',
     'ticket_template' => 'Ticket template',
     'profiles' => 'Profiles and permissions',
+    'console' => 'Operations console',
 ];

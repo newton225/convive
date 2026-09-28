@@ -5,6 +5,7 @@ import { initializeTheme } from '@/hooks/use-appearance';
 import { registerServiceWorker } from '@/lib/register-service-worker';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
+import ConsoleLayout from '@/layouts/console-layout';
 import PageLayout from '@/layouts/page-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
@@ -24,6 +25,9 @@ void createInertiaApp({
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
+            // Console d'exploitation de l'editeur : son propre menu, pas celui d'une organisation.
+            case name.startsWith('console/'):
+                return [ConsoleLayout, PageLayout];
             // Reglages personnels : leur propre sous-menu (profil, securite, organisations...).
             case name.startsWith('settings/'):
             case name === 'tenants/index':

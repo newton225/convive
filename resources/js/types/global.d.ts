@@ -26,6 +26,7 @@ declare module '@inertiajs/core' {
             tenantPermissions: TenantPermissions | null;
             currentPlan: CurrentPlan | null;
             completedTours: string[];
+            canAccessConsole: boolean;
             [key: string]: unknown;
         };
     }

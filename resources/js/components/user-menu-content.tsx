@@ -1,5 +1,5 @@
-import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { LogOut, Settings, ShieldEllipsis } from 'lucide-react';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -8,8 +8,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
+import { useTranslation } from '@/hooks/use-translation';
 import { clearScanStorage } from '@/lib/scan-queue';
 import { logout } from '@/routes';
+import { index as consoleOrganisations } from '@/routes/console/organisations';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
 
@@ -19,6 +21,8 @@ type Props = {
 
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
+    const { t } = useTranslation();
+    const { canAccessConsole } = usePage().props;
 
     const handleLogout = () => {
         cleanup();
@@ -45,9 +49,22 @@ export function UserMenuContent({ user }: Props) {
                         onClick={cleanup}
                     >
                         <Settings className="mr-2" />
-                        Settings
+                        {t('navigation.settings')}
                     </Link>
                 </DropdownMenuItem>
+                {canAccessConsole && (
+                    <DropdownMenuItem asChild>
+                        <Link
+                            className="block w-full cursor-pointer"
+                            href={consoleOrganisations()}
+                            onClick={cleanup}
+                            data-test="console-link"
+                        >
+                            <ShieldEllipsis className="mr-2" />
+                            {t('navigation.console')}
+                        </Link>
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
@@ -59,7 +76,7 @@ export function UserMenuContent({ user }: Props) {
                     data-test="logout-button"
                 >
                     <LogOut className="mr-2" />
-                    Log out
+                    {t('navigation.logout')}
                 </Link>
             </DropdownMenuItem>
         </>

@@ -39,3 +39,4 @@ Route::middleware(['auth'])->group(function () {
 require __DIR__.'/public.php';
 require __DIR__.'/events.php';
 require __DIR__.'/settings.php';
+require __DIR__.'/platform.php';

@@ -7,6 +7,7 @@ use App\Contracts\WhatsAppSender;
 use App\Http\Middleware\EnforceAbsoluteSessionLifetime;
 use App\Models\AuditEntry;
 use App\Models\ScanEvent;
+use App\Models\User;
 use App\Notifications\Channels\WhatsAppChannel;
 use App\Policies\AuditPolicy;
 use App\Policies\ReportPolicy;
@@ -236,5 +237,13 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ScanEvent::class, ScanPolicy::class);
         Gate::policy(EventReport::class, ReportPolicy::class);
         Gate::policy(AuditTrail::class, AuditPolicy::class);
+
+        // PROVISOIRE : la console d'exploitation (README section 3) s'ouvre aux adresses de
+        // `convive.console.operators` tant que les comptes editeur distincts n'existent pas.
+        Gate::define('console.access', fn (User $user) => in_array(
+            strtolower($user->email),
+            config('convive.console.operators'),
+            true,
+        ));
     }
 }
