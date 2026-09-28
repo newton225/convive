@@ -20,7 +20,7 @@ export function UserInfo({
                 {showAvatar ? (
                     <AvatarImage src={user.avatar} alt={user.name} />
                 ) : null}
-                <AvatarFallback className="rounded-lg text-black dark:text-white">
+                <AvatarFallback className="text-foreground rounded-lg">
                     {getInitials(user.name)}
                 </AvatarFallback>
             </Avatar>

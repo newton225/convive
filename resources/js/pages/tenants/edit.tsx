@@ -351,8 +351,8 @@ export default function TenantEdit({
                             title={t('tenants.delete.title')}
                             description={t('tenants.delete.description')}
                         />
-                        <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
-                            <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
+                        <div className="border-destructive/20 bg-destructive/5 space-y-4 rounded-lg border p-4">
+                            <div className="text-destructive relative space-y-0.5">
                                 <p className="font-medium">
                                     {t('tenants.delete.warning_title')}
                                 </p>

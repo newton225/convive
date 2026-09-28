@@ -131,7 +131,7 @@ export default function Profile({
                                             <Link
                                                 href={send()}
                                                 as="button"
-                                                className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                                                className="text-foreground decoration-muted-foreground/40 underline underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current!"
                                             >
                                                 {t(
                                                     'account.profile.resend_link',
@@ -141,7 +141,7 @@ export default function Profile({
 
                                         {status ===
                                             'verification-link-sent' && (
-                                            <div className="mt-2 text-sm font-medium text-green-600">
+                                            <div className="mt-2 text-sm font-medium text-green-700 dark:text-green-400">
                                                 {t('account.verify_email.sent')}
                                             </div>
                                         )}
