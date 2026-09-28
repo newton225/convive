@@ -24,4 +24,5 @@ return [
     'ticket_template' => 'Gabarit du billet',
     'profiles' => 'Profils et permissions',
     'console' => 'Console d\'exploitation',
+    'support_access' => 'Accès du support',
 ];

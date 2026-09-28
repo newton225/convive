@@ -5,6 +5,7 @@ import {
     CreditCard,
     Layers,
     LayoutGrid,
+    LifeBuoy,
     ScanLine,
     ScrollText,
     ShieldCheck,
@@ -33,6 +34,7 @@ import { show as billingShow } from '@/routes/tenants/billing';
 import { edit as organisationEdit } from '@/routes/tenants/organisation';
 import { index as paymentAccountsIndex } from '@/routes/tenants/payment-accounts';
 import { index as profilesIndex } from '@/routes/tenants/profiles';
+import { show as supportAccessShow } from '@/routes/tenants/support-access';
 import { edit as ticketTemplateEdit } from '@/routes/tenants/ticket-template';
 import { index as unitsIndex } from '@/routes/tenants/units';
 import { index as eventsIndex } from '@/routes/tenants/events';
@@ -109,6 +111,12 @@ export function AppSidebar() {
                   href: tenantEdit(tenant.slug),
                   icon: Users,
               },
+              // Reserve au Proprietaire, pas a une permission du catalogue (`TenantPolicy`).
+              ...only(tenant.isOwner === true, {
+                  title: t('navigation.support_access'),
+                  href: supportAccessShow(tenant.slug),
+                  icon: LifeBuoy,
+              }),
               ...only(allowed(Permission.ProfilesManage), {
                   title: t('navigation.profiles'),
                   href: profilesIndex(tenant.slug),

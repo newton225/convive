@@ -65,6 +65,18 @@ class TenantPolicy
     }
 
     /**
+     * Determine whether the user can open or revoke a support access for the Convive team.
+     *
+     * Reserve au Proprietaire (README section 3, « Acces de support »), pas a une permission du
+     * catalogue : ouvrir le contenu de l'organisation a l'editeur engage l'organisation entiere,
+     * et un profil compose ne doit pas pouvoir s'en voir confier le droit.
+     */
+    public function manageSupportAccess(User $user, Tenant $tenant): bool
+    {
+        return $user->ownsTenant($tenant);
+    }
+
+    /**
      * Determine whether the user can leave the tenant.
      */
     public function leave(User $user, Tenant $tenant): bool

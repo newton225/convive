@@ -22,7 +22,7 @@ class HandleInertiaRequests extends Middleware
      *
      * @var array<int, string>
      */
-    protected const TranslationGroups = ['common', 'navigation', 'account', 'tenants', 'profiles', 'permissions', 'organisation', 'units', 'payment_accounts', 'events', 'guest', 'proofs', 'seating', 'scan', 'registrations', 'reconciliation', 'reports', 'notifications', 'billing', 'site', 'showcase', 'dashboard', 'audit', 'ticket_template', 'event_settings', 'offline', 'tours', 'console'];
+    protected const TranslationGroups = ['common', 'navigation', 'account', 'tenants', 'profiles', 'permissions', 'organisation', 'units', 'payment_accounts', 'events', 'guest', 'proofs', 'seating', 'scan', 'registrations', 'reconciliation', 'reports', 'notifications', 'billing', 'site', 'showcase', 'dashboard', 'audit', 'ticket_template', 'event_settings', 'offline', 'tours', 'console', 'support_access'];
 
     /**
      * The root template that's loaded on the first page visit.

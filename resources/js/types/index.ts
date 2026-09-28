@@ -15,6 +15,7 @@ export type * from './reports';
 export type * from './scan';
 export type * from './seating';
 export type * from './site';
+export type * from './support-access';
 export type * from './ticket-template';
 export type * from './tenants';
 export type * from './waitlist';

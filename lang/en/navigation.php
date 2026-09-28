@@ -24,4 +24,5 @@ return [
     'ticket_template' => 'Ticket template',
     'profiles' => 'Profiles and permissions',
     'console' => 'Operations console',
+    'support_access' => 'Support access',
 ];

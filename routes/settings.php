@@ -10,6 +10,7 @@ use App\Http\Controllers\Tenants\BillingController;
 use App\Http\Controllers\Tenants\OrganisationController;
 use App\Http\Controllers\Tenants\PaymentAccountController;
 use App\Http\Controllers\Tenants\ProfileController as TenantProfileController;
+use App\Http\Controllers\Tenants\SupportAccessController;
 use App\Http\Controllers\Tenants\TenantController;
 use App\Http\Controllers\Tenants\TenantInvitationController;
 use App\Http\Controllers\Tenants\TenantMemberController;
@@ -122,6 +123,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('settings/tenants/{tenant}/billing/checkout/{plan}', [BillingController::class, 'checkout'])->middleware(RequirePassword::class)->name('tenants.billing.checkout');
             Route::post('settings/tenants/{tenant}/billing/payment-method', [BillingController::class, 'paymentMethod'])->middleware(RequirePassword::class)->name('tenants.billing.payment-method');
             Route::post('settings/tenants/{tenant}/billing/cancel', [BillingController::class, 'cancel'])->middleware(RequirePassword::class)->name('tenants.billing.cancel');
+
+            // Acces du support (README ecran 25) : reserve au Proprietaire, voir `TenantPolicy`.
+            Route::get('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'show'])->name('tenants.support-access.show');
 
             // Journalisation (README ecran 23) et gabarit du billet (ecran 15).
             Route::get('settings/tenants/{tenant}/audit', [AuditLogController::class, 'index'])->name('tenants.audit.index');
