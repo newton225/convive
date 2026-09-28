@@ -26,12 +26,41 @@ class PaymentAccountFactory extends Factory
         return [
             'label' => $channel->label().' principal',
             'channel' => $channel,
-            'account_number' => '+225 07 '.fake()->numerify('## ## ## ##'),
+            'account_number' => self::mobileNumber($channel),
             'holder_name' => fake()->name(),
             'instructions' => 'Mettez votre nom en motif du transfert.',
             'is_active' => true,
             'position' => fake()->numberBetween(0, 5),
         ];
+    }
+
+    /**
+     * Indicate that the account is on the given network, with a number that looks like one.
+     */
+    public function onChannel(PaymentChannel $channel): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'label' => $channel->label().' principal',
+            'channel' => $channel,
+            'account_number' => self::mobileNumber($channel),
+        ]);
+    }
+
+    /**
+     * Build a credible Ivorian mobile number for the channel.
+     *
+     * Prefixes des operateurs en Cote d'Ivoire : Orange 07, MTN 05, Moov 01. Wave n'est pas un
+     * operateur, il s'appuie sur le numero de l'abonne, quel que soit son reseau.
+     */
+    private static function mobileNumber(PaymentChannel $channel): string
+    {
+        $prefix = match ($channel) {
+            PaymentChannel::MtnMoney => '05',
+            PaymentChannel::MoovMoney => '01',
+            default => '07',
+        };
+
+        return "+225 {$prefix} ".fake()->numerify('## ## ## ##');
     }
 
     /**

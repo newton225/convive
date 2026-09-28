@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\EventStatus;
+use App\Enums\PaymentChannel;
 use App\Models\Event;
 use App\Models\PaymentAccount;
 use App\Models\Tenant;
@@ -116,20 +117,28 @@ class EventSeeder extends Seeder
     }
 
     /**
-     * Reuse whatever payment accounts this tenant already has rather than creating new ones on
-     * every replay ; only fabricate a starter pair when there are none at all.
+     * Make sure the tenant offers one account per mobile network, so the demo shows what a
+     * guest actually chooses between. Only the missing networks are created: a replay, or an
+     * account the operator added by hand, is left as it is.
      *
      * @return array<int, int>
      */
     private function paymentAccounts(): array
     {
-        $existing = PaymentAccount::query()->pluck('id');
+        $networks = [
+            PaymentChannel::Wave,
+            PaymentChannel::OrangeMoney,
+            PaymentChannel::MtnMoney,
+            PaymentChannel::MoovMoney,
+        ];
 
-        if ($existing->isNotEmpty()) {
-            return $existing->all();
+        foreach ($networks as $position => $channel) {
+            if (! PaymentAccount::where('channel', $channel)->exists()) {
+                PaymentAccount::factory()->onChannel($channel)->create(['position' => $position]);
+            }
         }
 
-        return PaymentAccount::factory()->count(2)->create()->pluck('id')->all();
+        return PaymentAccount::query()->pluck('id')->all();
     }
 
     /**

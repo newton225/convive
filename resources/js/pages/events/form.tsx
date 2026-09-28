@@ -396,6 +396,11 @@ export default function EventForm({
                                                     account.id,
                                                 )}
                                             />
+                                            {account.channelLabel && (
+                                                <Badge variant="secondary">
+                                                    {account.channelLabel}
+                                                </Badge>
+                                            )}
                                             <span>
                                                 {account.label}
                                                 {account.accountNumber
