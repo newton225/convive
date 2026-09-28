@@ -3,7 +3,7 @@ import AppLogoIcon from '@/components/app-logo-icon';
 import LocaleSwitcher from '@/components/locale-switcher';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
-import { login, register } from '@/routes';
+import { home, login, register } from '@/routes';
 import { index as showcaseIndex } from '@/routes/showcase';
 import { ThemeSwitcher } from './theme-switcher';
 
@@ -43,13 +43,24 @@ export function SiteHeader() {
                     className="hidden items-center gap-6 text-sm text-white/75 md:flex"
                     aria-label={name}
                 >
-                    <a href="#features" className="hover:text-white">
+                    {/* Sections de la page d'accueil : l'en-tete sert aussi la vitrine, une ancre
+                        nue y resterait sur place. */}
+                    <a
+                        href={`${home().url}#features`}
+                        className="hover:text-white"
+                    >
                         {t('site.nav.features')}
                     </a>
-                    <a href="#steps" className="hover:text-white">
+                    <a
+                        href={`${home().url}#steps`}
+                        className="hover:text-white"
+                    >
                         {t('site.nav.steps')}
                     </a>
-                    <a href="#pricing" className="hover:text-white">
+                    <a
+                        href={`${home().url}#pricing`}
+                        className="hover:text-white"
+                    >
                         {t('site.nav.pricing')}
                     </a>
                     <Link
