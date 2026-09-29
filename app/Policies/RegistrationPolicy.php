@@ -52,4 +52,13 @@ class RegistrationPolicy
     {
         return $user->hasTenantPermission($tenant, TenantPermission::RegistrationsCancel);
     }
+
+    /**
+     * Determine whether the user can decide what happens to the payment of a cancelled
+     * registration (README 2.11).
+     */
+    public function refund(User $user, Registration $registration, Tenant $tenant): bool
+    {
+        return $user->hasTenantPermission($tenant, TenantPermission::RegistrationsRefund);
+    }
 }

@@ -15,6 +15,9 @@ return [
     'countdown' => '{0} Aujourd\'hui|[1,*] J-:days',
     'check_proofs' => 'Vérifier les preuves (:count)',
 
+    'refunds_due' => '{1} 1 inscription annulée attend son remboursement : :amount à rendre.|[2,*] :count inscriptions annulées attendent leur remboursement : :amount à rendre.',
+    'refunds_due_action' => 'Voir les annulations',
+
     'hints' => [
         'this_week' => '{0} Aucune cette semaine|{1} +1 cette semaine|[2,*] +:count cette semaine',
         'validated' => ':share % du total · :amount encaissés',

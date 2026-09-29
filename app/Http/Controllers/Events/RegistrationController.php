@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Events;
 use App\Actions\Notifications\SendAlert;
 use App\Actions\Registrations\CancelRegistration;
 use App\Actions\Registrations\PurgeRegistrations;
+use App\Actions\Registrations\RecordRefund;
 use App\Enums\NotificationType;
+use App\Enums\PaymentChannel;
+use App\Enums\RefundStatus;
 use App\Enums\RegistrationStatus;
 use App\Exports\RegistrationsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\CancelRegistrationRequest;
+use App\Http\Requests\Events\RecordRefundRequest;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\SeatingTable;
@@ -17,6 +21,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Support\PdfLetterhead;
 use Carbon\CarbonInterface;
+use DomainException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -67,6 +72,12 @@ class RegistrationController extends Controller
                 'sort' => $request->string('sort')->toString() ?: null,
             ],
             'cancellations' => $this->recentCancellations($event),
+            // Moyens proposes pour un remboursement (README 2.11) : les memes canaux que les
+            // versements, l'argent repart par ou il est venu ou par un autre moyen connu.
+            'refundChannels' => array_map(fn (PaymentChannel $channel) => [
+                'value' => $channel->value,
+                'label' => $channel->label(),
+            ], PaymentChannel::cases()),
         ]);
     }
 
@@ -76,9 +87,26 @@ class RegistrationController extends Controller
      */
     public function cancel(CancelRegistrationRequest $request, Tenant $tenant, Event $event, Registration $registration, CancelRegistration $cancel): RedirectResponse
     {
-        $cancel->handle($registration, $request->validated('reason'), $request->user());
+        $cancel->handle($registration, $request->validated('reason'), $request->user(), $request->refundDecision());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('registrations.flash.cancelled')]);
+
+        return to_route('tenants.events.registrations.index', [$tenant, $event]);
+    }
+
+    /**
+     * Mark a cancelled registration's payment as refunded, once the money has left (README 2.11).
+     */
+    public function refund(RecordRefundRequest $request, Tenant $tenant, Event $event, Registration $registration, RecordRefund $record): RedirectResponse
+    {
+        try {
+            $record->handle($registration, $request->refundDecision(), $request->user());
+        } catch (DomainException) {
+            // Deja rembourse, conserve, ou plus a rembourser depuis l'ouverture de la fenetre.
+            return back()->withErrors(['refund' => __('registrations.refund.errors.not_due')]);
+        }
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('registrations.flash.refunded')]);
 
         return to_route('tenants.events.registrations.index', [$tenant, $event]);
     }
@@ -329,15 +357,25 @@ class RegistrationController extends Controller
      * Les dernieres annulations de l'evenement, avec motif, auteur et date : le prototype les tient
      * a part de la liste, pour qu'une annulation reste lisible sans filtrer.
      *
-     * @return array<int, array{name: string, reason: string|null, cancelledAt: string|null, cancelledBy: string|null}>
+     * Toutes les annulations encore « a rembourser » y figurent, en tete, meme anciennes (README
+     * 2.11) : une somme due ne doit pas sortir de la vue parce que dix annulations plus recentes
+     * l'ont poussee hors de la liste.
+     *
+     * @return array<int, array<string, mixed>>
      */
     private function recentCancellations(Event $event): array
     {
         $cancelled = Registration::where('event_id', $event->id)
             ->where('status', RegistrationStatus::Cancelled)
+            ->where('refund_status', RefundStatus::Due)
             ->latest('cancelled_at')
-            ->limit(10)
-            ->get(['name', 'cancellation_reason', 'cancelled_at', 'cancelled_by_user_id']);
+            ->get()
+            ->concat(Registration::where('event_id', $event->id)
+                ->where('status', RegistrationStatus::Cancelled)
+                ->where(fn ($query) => $query->whereNull('refund_status')->orWhere('refund_status', '!=', RefundStatus::Due))
+                ->latest('cancelled_at')
+                ->limit(10)
+                ->get());
 
         // L'auteur vit dans la base centrale (`users`) : une seule requete pour toute la liste.
         $authors = User::query()
@@ -345,12 +383,24 @@ class RegistrationController extends Controller
             ->pluck('name', 'id');
 
         return $cancelled->map(fn (Registration $registration) => [
+            'id' => $registration->id,
             'name' => $registration->name,
+            'reference' => $registration->reference,
+            'phone' => $registration->phone,
             'reason' => $registration->cancellation_reason,
             'cancelledAt' => $registration->cancelled_at?->toISOString(),
             'cancelledBy' => $registration->cancelled_by_user_id !== null
                 ? $authors->get($registration->cancelled_by_user_id)
                 : null,
-        ])->all();
+            'amountPaid' => $registration->refund_status !== null ? $registration->amount_due : null,
+            'refundStatus' => $registration->refund_status?->value,
+            'refundStatusLabel' => $registration->refund_status?->label(),
+            'refundChannelLabel' => $registration->refund_channel?->label(),
+            'refundedOn' => $registration->refunded_on?->toDateString(),
+            'refundFee' => $registration->refund_fee,
+            'netRefund' => $registration->netRefund(),
+            'refundReference' => $registration->refund_reference,
+            'refundKeptReason' => $registration->refund_kept_reason,
+        ])->values()->all();
     }
 }

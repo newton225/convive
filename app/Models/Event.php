@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EventStatus;
+use App\Enums\RefundStatus;
 use App\Enums\RegistrationStatus;
 use Carbon\CarbonImmutable;
 use Database\Factories\EventFactory;
@@ -237,17 +238,50 @@ class Event extends Model implements HasMedia
     }
 
     /**
-     * Get the amount collected so far, in francs CFA : the sum due by confirmed registrations.
+     * Get the amount collected so far, in francs CFA : every validated proof, cancelled
+     * registrations included (README 2.11).
      *
      * Une inscription n'est confirmee qu'apres validation de sa preuve : c'est ce que
      * l'organisation a effectivement verifie avoir recu (README 1, aucun encaissement dans
-     * l'application).
+     * l'application). Une annulation ne fait pas disparaitre l'argent recu : il reste encaisse,
+     * et ce qui en est rendu se lit dans `paymentTotals()`. Le sort du paiement n'est pose que sur
+     * une inscription annulee apres validation, d'ou le critere.
      */
     public function collectedAmount(): int
     {
         return (int) $this->registrations()
-            ->where('status', RegistrationStatus::Confirmed)
+            ->where(fn ($query) => $query
+                ->where('status', RegistrationStatus::Confirmed)
+                ->orWhereNotNull('refund_status'))
             ->sum('amount_due');
+    }
+
+    /**
+     * Get what happened to the money of this event (README 2.11), in francs CFA.
+     *
+     * « Rembourse » compte tout ce qui est sorti du compte pour une inscription remboursee, frais
+     * compris : l'invite a recu le montant paye moins les frais, l'operateur a preleve les frais.
+     * Le net est donc ce qui reste reellement a l'organisation.
+     *
+     * @return array{collected: int, refunded: int, fees: int, due: int, net: int}
+     */
+    public function paymentTotals(): array
+    {
+        $refunds = $this->registrations()
+            ->whereNotNull('refund_status')
+            ->get(['refund_status', 'amount_due', 'refund_fee']);
+
+        $refunded = $refunds->where('refund_status', RefundStatus::Refunded);
+        $collected = $this->collectedAmount();
+        $refundedAmount = (int) $refunded->sum('amount_due');
+
+        return [
+            'collected' => $collected,
+            'refunded' => $refundedAmount,
+            'fees' => (int) $refunded->sum('refund_fee'),
+            'due' => (int) $refunds->where('refund_status', RefundStatus::Due)->sum('amount_due'),
+            'net' => $collected - $refundedAmount,
+        ];
     }
 
     /**

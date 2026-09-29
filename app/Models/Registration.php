@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentChannel;
+use App\Enums\RefundStatus;
 use App\Enums\RegistrationStatus;
 use App\Support\PhoneNumber;
 use Carbon\CarbonInterface;
@@ -46,6 +48,14 @@ use Illuminate\Support\Str;
  * @property Carbon|null $cancelled_at
  * @property string|null $cancellation_reason
  * @property int|null $cancelled_by_user_id
+ * @property RefundStatus|null $refund_status
+ * @property PaymentChannel|null $refund_channel
+ * @property Carbon|null $refunded_on
+ * @property string|null $refund_reference
+ * @property int|null $refund_fee
+ * @property string|null $refund_kept_reason
+ * @property Carbon|null $refund_recorded_at
+ * @property int|null $refund_recorded_by_user_id
  * @property int $lapsed_holds_count
  * @property string|null $phone_code_hash
  * @property Carbon|null $phone_code_expires_at
@@ -62,6 +72,8 @@ use Illuminate\Support\Str;
     'held_until', 'hold_sequence', 'resume_token_hash', 'card_sent_at',
     'proof_reminder_j7_sent_at', 'proof_reminder_j2_sent_at', 'proof_reminder_j1_sent_at',
     'cancelled_at', 'cancellation_reason', 'cancelled_by_user_id', 'lapsed_holds_count',
+    'refund_status', 'refund_channel', 'refunded_on', 'refund_reference', 'refund_fee',
+    'refund_kept_reason', 'refund_recorded_at', 'refund_recorded_by_user_id',
     'phone_code_hash', 'phone_code_expires_at', 'phone_code_attempts', 'phone_verified_at',
 ])]
 class Registration extends Model
@@ -334,6 +346,28 @@ class Registration extends Model
     }
 
     /**
+     * Determine whether this registration brought money in : validated, and not free. C'est la
+     * seule qui, annulee, a un paiement dont il faut fixer le sort (README 2.11).
+     */
+    public function hasCollectedPayment(): bool
+    {
+        return $this->status === RegistrationStatus::Confirmed && $this->amount_due > 0;
+    }
+
+    /**
+     * Get the amount actually sent back to the guest : the amount paid minus the transaction fees
+     * the operator charged on the refund (README 2.11), or null when nothing was refunded.
+     */
+    public function netRefund(): ?int
+    {
+        if ($this->refund_status !== RefundStatus::Refunded) {
+            return null;
+        }
+
+        return $this->amount_due - ($this->refund_fee ?? 0);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -355,6 +389,11 @@ class Registration extends Model
             'proof_reminder_j2_sent_at' => 'datetime',
             'proof_reminder_j1_sent_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'refund_status' => RefundStatus::class,
+            'refund_channel' => PaymentChannel::class,
+            'refunded_on' => 'date',
+            'refund_fee' => 'integer',
+            'refund_recorded_at' => 'datetime',
         ];
     }
 }

@@ -35,6 +35,7 @@ enum AuditLogType: string
 
     case RegistrationsPurged = 'registrations.purged';
     case RegistrationsCancelled = 'registrations.cancelled';
+    case RegistrationsRefunded = 'registrations.refunded';
 
     case ReconciliationResolved = 'reconciliation.resolved';
     case ReconciliationImported = 'reconciliation.imported';

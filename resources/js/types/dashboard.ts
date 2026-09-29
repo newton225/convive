@@ -57,6 +57,8 @@ export type DashboardOverview = {
     proofsByChannel: DashboardChannelCount[];
     tableOccupancy: DashboardTableOccupancy[];
     recentActivity: DashboardActivity[];
+    // Annulations dont le paiement reste a rendre (README 2.11), null s'il n'y en a aucune.
+    refundsDue: { count: number; amount: number } | null;
 };
 
 // La carte « Premiers pas » (`App\Support\GettingStarted`), null une fois tout fait.

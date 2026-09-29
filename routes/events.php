@@ -82,6 +82,8 @@ Route::prefix('{tenant}')
         // La base d'inscrits (README ecran 20), etape 9.
         Route::get('events/{event}/registrations', [RegistrationController::class, 'index'])->name('tenants.events.registrations.index');
         Route::post('events/{event}/registrations/{registration}/cancel', [RegistrationController::class, 'cancel'])->name('tenants.events.registrations.cancel');
+        // Sort du paiement d'une inscription annulee (README 2.11).
+        Route::post('events/{event}/registrations/{registration}/refund', [RegistrationController::class, 'refund'])->name('tenants.events.registrations.refund');
         Route::post('events/{event}/registrations/purge', [RegistrationController::class, 'purge'])->name('tenants.events.registrations.purge');
         Route::get('events/{event}/registrations/export/excel', [RegistrationController::class, 'exportExcel'])
             ->middleware('throttle:exports')

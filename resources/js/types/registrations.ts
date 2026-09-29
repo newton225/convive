@@ -98,11 +98,32 @@ export type RegistrationRow = {
     enteredAt: string | null;
 };
 
+// Sort du paiement d'une inscription annulee (README 2.11), `App\Enums\RefundStatus`.
+export type RefundStatus = 'due' | 'refunded' | 'kept';
+
+export type RefundChannelOption = {
+    value: string;
+    label: string;
+};
+
 export type RegistrationCancellation = {
+    id: number;
     name: string;
+    reference: string | null;
+    phone: string;
     reason: string | null;
     cancelledAt: string | null;
     cancelledBy: string | null;
+    // Nuls tant que l'inscription n'avait rien encaisse au moment de l'annulation.
+    amountPaid: number | null;
+    refundStatus: RefundStatus | null;
+    refundStatusLabel: string | null;
+    refundChannelLabel: string | null;
+    refundedOn: string | null;
+    refundFee: number | null;
+    netRefund: number | null;
+    refundReference: string | null;
+    refundKeptReason: string | null;
 };
 
 export type RegistrationsFilters = {

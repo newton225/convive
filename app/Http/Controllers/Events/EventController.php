@@ -35,7 +35,7 @@ class EventController extends Controller
                     // README ecran 12 : de quoi juger d'un coup d'oeil ou agir, sans ouvrir l'evenement.
                     'visualUrl' => $event->visualUrl(),
                     'occupiedSeats' => $event->occupiedSeats(),
-                    'collectedAmount' => (int) $event->registrations()->where('status', RegistrationStatus::Confirmed)->sum('amount_due'),
+                    'collectedAmount' => $event->collectedAmount(),
                     'proofsToCheck' => $event->registrations()->where('status', RegistrationStatus::ProofSubmitted)->count(),
                 ]),
             'permissions' => $request->user()->toTenantPermissions($tenant),

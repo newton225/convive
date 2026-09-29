@@ -35,6 +35,10 @@ class GenerateEventReport
      *     absentRegistrations: int,
      *     absentSeats: int,
      *     collectedAmount: int,
+     *     refundedAmount: int,
+     *     refundFees: int,
+     *     refundsDueAmount: int,
+     *     netAmount: int,
      *     averageScanIntervalSeconds: int|null,
      *     units: array<int, array{unit: string, confirmedRegistrations: int, presentRegistrations: int, presentSeats: int, collectedAmount: int}>
      * }
@@ -52,6 +56,7 @@ class GenerateEventReport
         $present = $confirmed->filter(fn (Registration $registration) => $this->arrivals($registration) > 0);
         $absent = $confirmed->diff($present);
         $confirmedSeats = (int) $confirmed->sum('party_size');
+        $totals = $event->paymentTotals();
         $presentSeats = (int) $present->sum(fn (Registration $registration) => $this->arrivals($registration));
 
         return [
@@ -61,7 +66,12 @@ class GenerateEventReport
             'presentSeats' => $presentSeats,
             'absentRegistrations' => $absent->count(),
             'absentSeats' => max(0, $confirmedSeats - $presentSeats),
-            'collectedAmount' => (int) $confirmed->sum('amount_due'),
+            // README 2.11 : encaisse (annulations comprises), rembourse, frais, a rembourser, net.
+            'collectedAmount' => $totals['collected'],
+            'refundedAmount' => $totals['refunded'],
+            'refundFees' => $totals['fees'],
+            'refundsDueAmount' => $totals['due'],
+            'netAmount' => $totals['net'],
             'averageScanIntervalSeconds' => $this->averageScanIntervalSeconds($event),
             'units' => $this->byUnit($confirmed, $present),
         ];

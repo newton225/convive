@@ -44,6 +44,8 @@ DRAFT ──▶ HELD ──▶ PROOF_SUBMITTED ──▶ CONFIRMED
   │         │              └──▶ PROOF_REJECTED ──▶ (retour HELD)
   │         └──▶ EXPIRED (décompte écoulé)
   └──▶ DELETED (purge)
+
+Tout état sauf DELETED ──▶ CANCELLED (annulation par l'organisation)
 ```
 
 - `DRAFT` — formulaire rempli, aucune place consommée fermement.
@@ -55,6 +57,10 @@ DRAFT ──▶ HELD ──▶ PROOF_SUBMITTED ──▶ CONFIRMED
 - `EXPIRED` — décompte écoulé sans preuve : les places retournent au stock. L'envoi de preuve
   doit être **refusé** dans cet état ; l'invité doit relancer une réservation.
 - `DELETED` — purgée (voir 2.4).
+- `CANCELLED` : annulée par l'organisation, à tout stade, avec un motif. C'est une décision de
+  l'organisation, distincte de `EXPIRED` et de `PROOF_REJECTED` qui sont des échecs du parcours
+  invité : elle n'est jamais purgée. La place et la table sont libérées aussitôt, le billet
+  devient invalide. Le sort du paiement d'une inscription validée est traité en 2.11.
 
 ### 2.2 Priorité et disponibilité
 
@@ -145,6 +151,39 @@ aux billets validés.
 Import CSV des relevés Mobile Money / bancaires (colonnes : date, référence, émetteur,
 montant). Rapprochement automatique par référence puis par montant + nom approchant.
 Quatre issues : rapprochée, montant divergent, nom approchant, sans inscription.
+
+### 2.11 Paiement d'une inscription annulée
+
+L'organisation peut annuler une inscription à tout stade, y compris `CONFIRMED`. L'application
+ne rembourse jamais elle-même : elle ne déplace pas d'argent, elle garde la trace de ce qu'il
+devient.
+
+- **Sans paiement validé** (réservation, preuve en attente ou rejetée) : l'annulation ne porte
+  que le motif, aucun paiement n'est à traiter.
+- **Inscription validée** : l'annulation fixe le sort du paiement, parmi trois choix.
+  - **À rembourser**, choix présélectionné : l'organisation doit la somme, qui reste visible
+    tant qu'elle n'est pas remboursée.
+  - **Remboursé** : moyen, date, référence de transaction si elle existe, et frais de
+    transaction.
+  - **Conservé** : motif obligatoire (annulation hors délai, don...).
+- **Tout ou rien** : on rembourse l'intégralité du montant payé, **moins les frais de
+  transaction du remboursement**, à la charge de l'invité. Les frais sont saisis tels que
+  l'opérateur les a prélevés, jamais calculés par un taux. Ils ne peuvent pas atteindre le
+  montant payé. Le remboursement partiel pour d'autres raisons (retenue, pénalité) n'est pas
+  prévu à ce stade.
+- **Marquer comme remboursé** : une annulation « À rembourser » passe à « Remboursé » quand
+  l'argent est parti. C'est le seul changement possible après coup, et l'inscription reste
+  annulée.
+- **Permission dédiée** pour fixer ou modifier le sort d'un paiement, distincte de
+  l'annulation.
+- **Journal** : chaque choix, avec l'auteur, la date, le montant remboursé et les frais.
+- **Totaux** de l'événement (rapport, tableau de bord) : encaissé (toutes les preuves
+  validées, y compris celles des inscriptions annulées), remboursé, frais imputés, à
+  rembourser, et net (encaissé moins remboursé). Tant qu'il reste des sommes à rembourser, le
+  tableau de bord le signale.
+- **L'invité est prévenu** de l'annulation (WhatsApp, et email s'il en a donné un) : le motif,
+  et le sort de son paiement (remboursement en cours, remboursé le … par … avec le montant
+  net, ou non remboursable avec le motif).
 
 ---
 
@@ -417,7 +456,7 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 ## 5. Notifications
 
 Événements notifiables : preuve reçue, réservation expirée, preuve rejetée, places épuisées,
-purge effectuée, invitation d'équipe en attente, billet refusé à l'entrée.
+purge effectuée, invitation d'équipe en attente, billet refusé à l'entrée, inscription annulée.
 Canaux configurables par type : in-app, email, ou les deux. Cloche avec compteur de non-lus,
 clic → écran concerné, « tout marquer comme lu ».
 

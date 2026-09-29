@@ -15,6 +15,9 @@ return [
     'countdown' => '{0} Today|[1,*] D-:days',
     'check_proofs' => 'Check proofs (:count)',
 
+    'refunds_due' => '{1} 1 cancelled registration is awaiting its refund: :amount to return.|[2,*] :count cancelled registrations are awaiting their refund: :amount to return.',
+    'refunds_due_action' => 'See cancellations',
+
     'hints' => [
         'this_week' => '{0} None this week|{1} +1 this week|[2,*] +:count this week',
         'validated' => ':share% of total · :amount collected',

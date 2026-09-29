@@ -155,6 +155,14 @@ return [
             'intro' => 'Bonjour :name, :event a lieu dans trois heures. Gardez votre billet à portée de main.',
             'action' => 'Voir mon billet',
         ],
+        'registration_cancelled' => [
+            'subject' => 'Votre inscription à :event est annulée',
+            'intro' => 'Bonjour :name, votre inscription à :event a été annulée par l\'organisation. Motif : :reason',
+        ],
+        'refund_sent' => [
+            'subject' => 'Votre remboursement pour :event',
+            'intro' => 'Bonjour :name, votre remboursement pour :event est parti.',
+        ],
     ],
 
     'whatsapp' => [
@@ -162,6 +170,14 @@ return [
         'invitation_card' => 'Bonjour :name, votre inscription à :event est confirmée. Votre billet : :link',
         'proof_reminder' => 'Bonjour :name, il manque votre preuve de paiement pour :event. Envoyez-la ici : :link',
         'ticket_reminder' => 'Bonjour :name, :event a lieu dans trois heures. Votre billet : :link',
+        'registration_cancelled' => 'Bonjour :name, votre inscription à :event a été annulée par l\'organisation. Motif : :reason.',
+        'refund_sent' => 'Bonjour :name, votre remboursement pour :event est parti.',
+    ],
+
+    'refund' => [
+        'due' => 'Votre paiement de :amount vous sera remboursé : l\'organisation vous préviendra dès que ce sera fait.',
+        'refunded' => 'Vous avez reçu :amount le :date par :channel (frais de transaction de :fee déduits).',
+        'kept' => 'Votre paiement n\'est pas remboursé. Motif : :reason',
     ],
 
     'proof' => [

@@ -21,6 +21,9 @@ enum TenantPermission: string
     case RegistrationsExport = 'registrations.export';
     case RegistrationsPurge = 'registrations.purge';
     case RegistrationsCancel = 'registrations.cancel';
+    // Sort du paiement d'une inscription annulee (README 2.11) : une decision d'argent,
+    // distincte de l'annulation elle-meme.
+    case RegistrationsRefund = 'registrations.refund';
 
     case ProofsView = 'proofs.view';
     case ProofsApprove = 'proofs.approve';
@@ -71,7 +74,8 @@ enum TenantPermission: string
             self::EventsAnnounce => TenantPermissionDomain::Events,
 
             self::RegistrationsView, self::RegistrationsExport,
-            self::RegistrationsPurge, self::RegistrationsCancel => TenantPermissionDomain::Registrations,
+            self::RegistrationsPurge, self::RegistrationsCancel,
+            self::RegistrationsRefund => TenantPermissionDomain::Registrations,
 
             self::ProofsView, self::ProofsApprove,
             self::ProofsReject => TenantPermissionDomain::Proofs,
@@ -117,7 +121,7 @@ enum TenantPermission: string
             self::EventsClose, self::EventsAnnounce => self::EventsView,
 
             self::RegistrationsExport, self::RegistrationsPurge,
-            self::RegistrationsCancel => self::RegistrationsView,
+            self::RegistrationsCancel, self::RegistrationsRefund => self::RegistrationsView,
 
             self::ProofsApprove, self::ProofsReject => self::ProofsView,
 

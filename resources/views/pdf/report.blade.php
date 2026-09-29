@@ -37,6 +37,27 @@
             <td>
                 <div class="muted">{{ __('reports.cards.collected') }}</div>
                 <div class="value">{{ \App\Support\Money::format($report['collectedAmount']) }}</div>
+                <div class="muted">{{ __('reports.cards.collected_detail') }}</div>
+            </td>
+        </tr>
+    </table>
+
+    {{-- README 2.11 : ce que devient l'argent des inscriptions annulees. --}}
+    <table class="cards" style="margin-top: 12px;">
+        <tr>
+            <td>
+                <div class="muted">{{ __('reports.cards.refunded') }}</div>
+                <div class="value">{{ \App\Support\Money::format($report['refundedAmount']) }}</div>
+                <div class="muted">{{ trans_choice('reports.cards.refund_fees', $report['refundFees'], ['amount' => \App\Support\Money::format($report['refundFees'])]) }}</div>
+            </td>
+            <td>
+                <div class="muted">{{ __('reports.cards.refunds_due') }}</div>
+                <div class="value">{{ \App\Support\Money::format($report['refundsDueAmount']) }}</div>
+            </td>
+            <td>
+                <div class="muted">{{ __('reports.cards.net') }}</div>
+                <div class="value">{{ \App\Support\Money::format($report['netAmount']) }}</div>
+                <div class="muted">{{ __('reports.cards.net_detail') }}</div>
             </td>
         </tr>
     </table>

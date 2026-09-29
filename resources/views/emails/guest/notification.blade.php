@@ -27,15 +27,17 @@
                                 <p style="margin:0 0 16px 0; color:#1b1917; font-size:15px; line-height:1.5;">{{ $line }}</p>
                             @endforeach
 
-                            <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:8px;">
-                                <tr>
-                                    <td style="border-radius:6px; background-color:{{ $secondaryColor }};">
-                                        <a href="{{ $actionUrl }}" style="display:inline-block; padding:12px 24px; color:{{ $secondaryTextColor }}; font-size:15px; font-weight:bold; text-decoration:none;">
-                                            {{ $actionText }}
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
+                            @if ($actionUrl !== null && $actionText !== null)
+                                <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:8px;">
+                                    <tr>
+                                        <td style="border-radius:6px; background-color:{{ $secondaryColor }};">
+                                            <a href="{{ $actionUrl }}" style="display:inline-block; padding:12px 24px; color:{{ $secondaryTextColor }}; font-size:15px; font-weight:bold; text-decoration:none;">
+                                                {{ $actionText }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            @endif
                         </td>
                     </tr>
                     <tr>

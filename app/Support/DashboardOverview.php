@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\RefundStatus;
 use App\Enums\RegistrationStatus;
 use App\Enums\ScanResult;
 use App\Models\Event;
@@ -59,6 +60,7 @@ class DashboardOverview
             'proofsByChannel' => self::proofsByChannel($event),
             'tableOccupancy' => self::tableOccupancy($event),
             'recentActivity' => self::recentActivity($event),
+            'refundsDue' => self::refundsDue($event),
         ];
     }
 
@@ -90,7 +92,7 @@ class DashboardOverview
 
         return [
             'registrationsThisWeek' => $event->registrations()->where('created_at', '>=', now()->subDays(7))->count(),
-            'collectedAmount' => (int) $event->registrations()->where('status', RegistrationStatus::Confirmed)->sum('amount_due'),
+            'collectedAmount' => $event->collectedAmount(),
             'validatedShare' => $registrations > 0 ? (int) round(100 * $validated / $registrations) : null,
             'waitingOver24h' => $event->registrations()
                 ->where('status', RegistrationStatus::ProofSubmitted)
@@ -100,6 +102,23 @@ class DashboardOverview
             'daysUntilEvent' => $event->starts_at?->isFuture()
                 ? (int) now()->startOfDay()->diffInDays($event->starts_at->startOfDay())
                 : null,
+        ];
+    }
+
+    /**
+     * Cancelled registrations whose payment is still owed back to the guest (README 2.11) : le
+     * tableau de bord le signale tant qu'il en reste, sinon rien.
+     *
+     * @return array{count: int, amount: int}|null
+     */
+    private static function refundsDue(Event $event): ?array
+    {
+        $due = $event->registrations()->where('refund_status', RefundStatus::Due);
+        $count = $due->count();
+
+        return $count === 0 ? null : [
+            'count' => $count,
+            'amount' => (int) $due->sum('amount_due'),
         ];
     }
 

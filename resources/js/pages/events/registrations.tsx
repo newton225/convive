@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import DataTable from '@/components/data-table';
+import { CancelRegistrationDialog } from '@/components/registrations/cancel-registration-dialog';
 import { CancellationsCard } from '@/components/registrations/cancellations-card';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +17,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -30,7 +30,7 @@ import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
 import { sortingFromParam, sortingToParam } from '@/lib/server-sorting';
 import { index as eventsIndex } from '@/routes/tenants/events';
-import { cancel, index, purge } from '@/routes/tenants/events/registrations';
+import { index, purge } from '@/routes/tenants/events/registrations';
 import {
     checklists,
     csv,
@@ -38,6 +38,7 @@ import {
     pdf,
 } from '@/routes/tenants/events/registrations/export';
 import type {
+    RefundChannelOption,
     RegistrationCancellation,
     RegistrationRow,
     RegistrationsFilters,
@@ -54,6 +55,7 @@ type Props = {
     meta: RegistrationsMeta;
     filters: RegistrationsFilters;
     cancellations: RegistrationCancellation[];
+    refundChannels: RefundChannelOption[];
 };
 
 const StatusFilters = [
@@ -77,14 +79,15 @@ export default function EventRegistrations({
     meta,
     filters,
     cancellations,
+    refundChannels,
 }: Props) {
     const { t, locale } = useTranslation();
     const [search, setSearch] = useState(filters.search ?? '');
     const [cancelling, setCancelling] = useState<RegistrationRow | null>(null);
-    const [reason, setReason] = useState('');
     const [purging, setPurging] = useState(false);
 
     const canCancel = can(permissions, Permission.RegistrationsCancel);
+    const canRefund = can(permissions, Permission.RegistrationsRefund);
     const canPurge = can(permissions, Permission.RegistrationsPurge);
     const canExport = can(permissions, Permission.RegistrationsExport);
 
@@ -247,10 +250,7 @@ export default function EventRegistrations({
                         variant="secondary"
                         size="sm"
                         data-test="registration-cancel"
-                        onClick={() => {
-                            setCancelling(row.original);
-                            setReason('');
-                        }}
+                        onClick={() => setCancelling(row.original)}
                     >
                         {t('registrations.actions.cancel')}
                     </Button>
@@ -401,70 +401,25 @@ export default function EventRegistrations({
                     }
                 />
 
-                <CancellationsCard cancellations={cancellations} />
+                <CancellationsCard
+                    tenantSlug={tenant.slug}
+                    eventId={event.id}
+                    cancellations={cancellations}
+                    canRefund={canRefund}
+                    refundChannels={refundChannels}
+                />
             </div>
 
-            <Dialog
-                open={cancelling !== null}
-                onOpenChange={(open) => !open && setCancelling(null)}
-            >
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>
-                            {t('registrations.modals.cancel.title')}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {t('registrations.modals.cancel.description', {
-                                name: cancelling?.name ?? '',
-                            })}
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="cancel-reason">
-                            {t('registrations.modals.cancel.reason_label')}
-                        </Label>
-                        <Input
-                            id="cancel-reason"
-                            value={reason}
-                            onChange={(event) => setReason(event.target.value)}
-                            data-test="registration-cancel-reason"
-                        />
-                    </div>
-
-                    <DialogFooter className="gap-2">
-                        <DialogClose asChild>
-                            <Button variant="secondary">
-                                {t('common.actions.cancel')}
-                            </Button>
-                        </DialogClose>
-
-                        <Button
-                            variant="destructive"
-                            disabled={reason.trim() === ''}
-                            data-test="registration-cancel-confirm"
-                            onClick={() => {
-                                if (cancelling) {
-                                    router.post(
-                                        cancel([
-                                            tenant.slug,
-                                            event.id,
-                                            cancelling.id,
-                                        ]).url,
-                                        { reason },
-                                        {
-                                            onSuccess: () =>
-                                                setCancelling(null),
-                                        },
-                                    );
-                                }
-                            }}
-                        >
-                            {t('registrations.modals.cancel.submit')}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {cancelling ? (
+                <CancelRegistrationDialog
+                    tenantSlug={tenant.slug}
+                    eventId={event.id}
+                    registration={cancelling}
+                    canRefund={canRefund}
+                    refundChannels={refundChannels}
+                    onClose={() => setCancelling(null)}
+                />
+            ) : null}
 
             <Dialog open={purging} onOpenChange={setPurging}>
                 <DialogContent>

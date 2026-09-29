@@ -13,7 +13,7 @@ return [
     'cancellations' => [
         'title' => 'Cancellations',
         'empty_title' => 'No cancelled registration',
-        'empty_description' => 'Cancellations and refunds will appear here with their reason and who did it.',
+        'empty_description' => 'Cancellations will appear here with their reason, who did it and what happened to the payment.',
         'no_reason' => 'No reason given',
         'by' => 'By :name, on :date',
         'unknown_author' => 'a removed member',
@@ -72,6 +72,11 @@ return [
         'no_table' => 'None',
     ],
 
+    'confirm' => [
+        'reference' => 'Registration',
+        'phone' => 'Phone',
+    ],
+
     'modals' => [
         'cancel' => [
             'title' => 'Cancel this registration',
@@ -86,7 +91,51 @@ return [
         ],
     ],
 
+    'refund' => [
+        'title' => 'Payment',
+        'question' => 'What happens to the :amount payment?',
+        'no_permission' => 'The :amount payment will be marked "to refund". An authorised member will then decide what happens to it.',
+        'statuses' => [
+            'due' => 'To refund',
+            'refunded' => 'Refunded',
+            'kept' => 'Kept',
+        ],
+        'hints' => [
+            'due' => 'The organisation owes this amount. It stays flagged until it is refunded.',
+            'refunded' => 'The money has already gone back to the guest.',
+            'kept' => 'The organisation keeps this amount, for a reason to state.',
+        ],
+        'fields' => [
+            'channel' => 'Refund method',
+            'channel_placeholder' => 'Choose the method',
+            'refunded_on' => 'Refund date',
+            'fee' => 'Transaction fees charged (CFA francs)',
+            'fee_help' => 'The exact amount the operator charged. The guest bears them: they are deducted from what the guest receives.',
+            'reference' => 'Transaction reference (optional)',
+            'kept_reason' => 'Reason',
+            'kept_reason_placeholder' => 'For example: late cancellation, donation to the association',
+        ],
+        'net' => 'The guest receives :net (:amount minus :fee in fees).',
+        'amount_paid' => 'Amount paid',
+        'mark_refunded' => 'Mark as refunded',
+        'mark_title' => 'Record the refund',
+        'mark_description' => 'Do this once the money has gone to :name. The registration stays cancelled; the guest is notified.',
+        'submit' => 'Record the refund',
+        'summary' => [
+            'due' => ':amount to refund',
+            'refunded' => ':net refunded on :date by :channel (:fee in fees)',
+            'kept' => ':amount kept: :reason',
+        ],
+        'errors' => [
+            'fee_too_high' => 'Fees must stay below the amount paid: otherwise nothing would be refunded.',
+            'future_date' => 'The refund date cannot be in the future: record it once the money has gone.',
+            'kept_reason_required' => 'Say why the organisation keeps this payment.',
+            'not_due' => 'This payment is no longer to refund: it has already been handled.',
+        ],
+    ],
+
     'flash' => [
+        'refunded' => 'Refund recorded. The guest has been notified.',
         'cancelled' => 'Registration cancelled.',
         'purged' => '{0} No record to purge.|{1} 1 record purged.|[2,*] :count records purged.',
     ],

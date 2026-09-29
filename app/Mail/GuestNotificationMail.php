@@ -37,6 +37,9 @@ class GuestNotificationMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     /**
+     * Sans action (annulation, remboursement), le message n'affiche aucun bouton : il informe,
+     * il n'y a rien a faire de plus.
+     *
      * @param  array<int, string>  $lines
      */
     public function __construct(
@@ -45,8 +48,8 @@ class GuestNotificationMail extends Mailable implements ShouldQueue
         public string $secondaryColor,
         public string $subjectLine,
         public array $lines,
-        public string $actionText,
-        public string $actionUrl,
+        public ?string $actionText = null,
+        public ?string $actionUrl = null,
     ) {
         //
     }

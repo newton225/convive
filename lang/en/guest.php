@@ -155,6 +155,14 @@ return [
             'intro' => 'Hello :name, :event starts in three hours. Keep your ticket handy.',
             'action' => 'View my ticket',
         ],
+        'registration_cancelled' => [
+            'subject' => 'Your registration for :event is cancelled',
+            'intro' => 'Hello :name, your registration for :event was cancelled by the organisation. Reason: :reason',
+        ],
+        'refund_sent' => [
+            'subject' => 'Your refund for :event',
+            'intro' => 'Hello :name, your refund for :event has been sent.',
+        ],
     ],
 
     'whatsapp' => [
@@ -162,6 +170,14 @@ return [
         'invitation_card' => 'Hello :name, your registration for :event is confirmed. Your ticket: :link',
         'proof_reminder' => 'Hello :name, your payment proof for :event is still missing. Send it here: :link',
         'ticket_reminder' => 'Hello :name, :event starts in three hours. Your ticket: :link',
+        'registration_cancelled' => 'Hello :name, your registration for :event was cancelled by the organisation. Reason: :reason.',
+        'refund_sent' => 'Hello :name, your refund for :event has been sent.',
+    ],
+
+    'refund' => [
+        'due' => 'Your :amount payment will be refunded: the organisation will let you know once it is done.',
+        'refunded' => 'You received :amount on :date by :channel (transaction fees of :fee deducted).',
+        'kept' => 'Your payment is not refunded. Reason: :reason',
     ],
 
     'proof' => [

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\RefundStatus;
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
 use App\Models\Registration;
@@ -135,6 +136,17 @@ class RegistrationFactory extends Factory
             'status' => RegistrationStatus::Cancelled,
             'cancellation_reason' => 'Motif de test.',
             'cancelled_at' => now(),
+        ]);
+    }
+
+    /**
+     * Indicate that a paid registration was cancelled and its payment is still owed back to the
+     * guest (README 2.11).
+     */
+    public function refundDue(): static
+    {
+        return $this->cancelled()->state(fn () => [
+            'refund_status' => RefundStatus::Due,
         ]);
     }
 }

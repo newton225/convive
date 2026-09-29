@@ -13,7 +13,7 @@ return [
     'cancellations' => [
         'title' => 'Annulations',
         'empty_title' => 'Aucune inscription annulée',
-        'empty_description' => "Les annulations et remboursements apparaîtront ici avec leur motif et l'auteur de l'action.",
+        'empty_description' => "Les annulations apparaîtront ici avec leur motif, l'auteur de l'action et le sort du paiement.",
         'no_reason' => 'Motif non renseigné',
         'by' => 'Par :name, le :date',
         'unknown_author' => 'un membre retiré',
@@ -72,6 +72,11 @@ return [
         'no_table' => 'Aucune',
     ],
 
+    'confirm' => [
+        'reference' => 'Dossier',
+        'phone' => 'Téléphone',
+    ],
+
     'modals' => [
         'cancel' => [
             'title' => 'Annuler cette inscription',
@@ -86,7 +91,51 @@ return [
         ],
     ],
 
+    'refund' => [
+        'title' => 'Paiement',
+        'question' => 'Que devient le paiement de :amount ?',
+        'no_permission' => 'Le paiement de :amount sera noté « à rembourser ». Un membre autorisé décidera ensuite de son sort.',
+        'statuses' => [
+            'due' => 'À rembourser',
+            'refunded' => 'Remboursé',
+            'kept' => 'Conservé',
+        ],
+        'hints' => [
+            'due' => "L'organisation doit cette somme. Elle reste signalée jusqu'au remboursement.",
+            'refunded' => "L'argent est déjà reparti vers l'invité.",
+            'kept' => "L'organisation garde cette somme, pour un motif à préciser.",
+        ],
+        'fields' => [
+            'channel' => 'Moyen du remboursement',
+            'channel_placeholder' => 'Choisir le moyen',
+            'refunded_on' => 'Date du remboursement',
+            'fee' => 'Frais de transaction prélevés (F CFA)',
+            'fee_help' => "Le montant exact prélevé par l'opérateur. Ils sont à la charge de l'invité et déduits de ce qu'il reçoit.",
+            'reference' => 'Référence de la transaction (facultatif)',
+            'kept_reason' => 'Motif',
+            'kept_reason_placeholder' => 'Par exemple : annulation hors délai, don à l\'association',
+        ],
+        'net' => "L'invité reçoit :net (:amount moins :fee de frais).",
+        'amount_paid' => 'Montant payé',
+        'mark_refunded' => 'Marquer comme remboursé',
+        'mark_title' => 'Marquer le remboursement',
+        'mark_description' => "À faire une fois l'argent parti vers :name. L'inscription reste annulée ; l'invité est prévenu.",
+        'submit' => 'Enregistrer le remboursement',
+        'summary' => [
+            'due' => ':amount à rembourser',
+            'refunded' => ':net remboursés le :date par :channel (:fee de frais)',
+            'kept' => ':amount conservés : :reason',
+        ],
+        'errors' => [
+            'fee_too_high' => 'Les frais doivent rester inférieurs au montant payé : sinon, rien ne serait remboursé.',
+            'future_date' => "La date du remboursement ne peut pas être dans le futur : il se marque une fois l'argent parti.",
+            'kept_reason_required' => 'Indiquez pourquoi l\'organisation garde ce paiement.',
+            'not_due' => "Ce paiement n'est plus à rembourser : il a déjà été traité.",
+        ],
+    ],
+
     'flash' => [
+        'refunded' => 'Remboursement enregistré. L\'invité est prévenu.',
         'cancelled' => 'Inscription annulée.',
         'purged' => '{0} Aucun dossier à purger.|{1} 1 dossier purgé.|[2,*] :count dossiers purgés.',
     ],

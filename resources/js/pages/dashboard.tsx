@@ -20,6 +20,7 @@ import { can, Permission } from '@/lib/permissions';
 import { dashboard } from '@/routes';
 import { create as createEvent } from '@/routes/tenants/events';
 import { index as proofsIndex } from '@/routes/tenants/events/proofs';
+import { index as registrationsIndex } from '@/routes/tenants/events/registrations';
 import type {
     DashboardInvitation,
     DashboardOverview,
@@ -109,6 +110,9 @@ export default function Dashboard({
     const canCheckProofs =
         tenantPermissions !== null &&
         can(tenantPermissions, Permission.ProofsView);
+    const canSeeRegistrations =
+        tenantPermissions !== null &&
+        can(tenantPermissions, Permission.RegistrationsView);
     const [showInvitations, setShowInvitations] = useState(
         pendingInvitations.length > 0,
     );
@@ -185,6 +189,37 @@ export default function Dashboard({
                             days: paymentAccountNotice.days,
                         })}
                     </p>
+                ) : null}
+
+                {/* README 2.11 : signale tant qu'une somme reste a rendre. */}
+                {overview?.refundsDue ? (
+                    <div
+                        className="bg-card flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl p-3 text-sm"
+                        data-test="dashboard-refunds-due"
+                    >
+                        <AlertTriangle className="text-destructive h-4 w-4 shrink-0" />
+                        <span className="font-medium">
+                            {t('dashboard.refunds_due', {
+                                count: overview.refundsDue.count,
+                                amount: formatAmount(
+                                    overview.refundsDue.amount,
+                                    locale,
+                                ),
+                            })}
+                        </span>
+                        {canSeeRegistrations && currentTenant ? (
+                            <Button asChild variant="outline" size="sm">
+                                <Link
+                                    href={registrationsIndex([
+                                        currentTenant.slug,
+                                        overview.eventId,
+                                    ])}
+                                >
+                                    {t('dashboard.refunds_due_action')}
+                                </Link>
+                            </Button>
+                        ) : null}
+                    </div>
                 ) : null}
 
                 {gettingStarted && currentTenant ? (

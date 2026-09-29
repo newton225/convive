@@ -3,6 +3,7 @@
 namespace Tests\Feature\Events;
 
 use App\Actions\Tenants\CreateTenant;
+use App\Enums\RefundStatus;
 use App\Enums\RegistrationStatus;
 use App\Enums\TenantPermission;
 use App\Exports\RegistrationsExport;
@@ -364,5 +365,199 @@ class RegistrationControllerTest extends TestCase
         $this->actingAs($owner)
             ->get(route('tenants.events.registrations.export.excel', [$tenant, $event]))
             ->assertTooManyRequests();
+    }
+
+    public function test_sans_la_permission_de_remboursement_l_annulation_ne_fixe_que_a_rembourser(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create(['event_id' => $event->id, 'amount_due' => 60000]));
+
+        $member = User::factory()->withTwoFactor()->create();
+        $this->joinWithPermissions($tenant, $member, [TenantPermission::RegistrationsView, TenantPermission::RegistrationsCancel]);
+
+        $this->actingAs($member)
+            ->post(route('tenants.events.registrations.cancel', [$tenant, $event, $registration]), [
+                'reason' => 'Motif.',
+                'refund' => ['status' => 'kept', 'kept_reason' => 'Don.'],
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($member)
+            ->post(route('tenants.events.registrations.cancel', [$tenant, $event, $registration]), ['reason' => 'Motif.'])
+            ->assertRedirect();
+
+        $this->assertSame(RefundStatus::Due, $tenant->asCurrent(fn () => $registration->fresh())->refund_status);
+    }
+
+    public function test_avec_la_permission_de_remboursement_l_annulation_fixe_le_sort_du_paiement(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create(['event_id' => $event->id, 'amount_due' => 60000]));
+
+        $member = User::factory()->withTwoFactor()->create();
+        $this->joinWithPermissions($tenant, $member, [
+            TenantPermission::RegistrationsView,
+            TenantPermission::RegistrationsCancel,
+            TenantPermission::RegistrationsRefund,
+        ]);
+
+        $this->actingAs($member)
+            ->post(route('tenants.events.registrations.cancel', [$tenant, $event, $registration]), [
+                'reason' => 'Motif.',
+                'refund' => [
+                    'status' => 'refunded',
+                    'channel' => 'wave',
+                    'refunded_on' => '2026-09-28',
+                    'fee' => 600,
+                    'reference' => 'WAVE-123',
+                ],
+            ])
+            ->assertRedirect();
+
+        $fresh = $tenant->asCurrent(fn () => $registration->fresh());
+        $this->assertSame(RefundStatus::Refunded, $fresh->refund_status);
+        $this->assertSame(600, $fresh->refund_fee);
+    }
+
+    public function test_un_paiement_conserve_exige_un_motif(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create(['event_id' => $event->id, 'amount_due' => 60000]));
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.registrations.cancel', [$tenant, $event, $registration]), [
+                'reason' => 'Motif.',
+                'refund' => ['status' => 'kept', 'kept_reason' => ''],
+            ])
+            ->assertSessionHasErrors('refund.kept_reason');
+    }
+
+    public function test_un_remboursement_exige_moyen_date_et_frais(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create(['event_id' => $event->id, 'amount_due' => 60000]));
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.registrations.cancel', [$tenant, $event, $registration]), [
+                'reason' => 'Motif.',
+                'refund' => ['status' => 'refunded'],
+            ])
+            ->assertSessionHasErrors(['refund.channel', 'refund.refunded_on', 'refund.fee']);
+    }
+
+    public function test_des_frais_atteignant_le_montant_paye_sont_refuses_a_la_validation(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create(['event_id' => $event->id, 'amount_due' => 20000]));
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.registrations.cancel', [$tenant, $event, $registration]), [
+                'reason' => 'Motif.',
+                'refund' => ['status' => 'refunded', 'channel' => 'wave', 'refunded_on' => '2026-09-28', 'fee' => 20000],
+            ])
+            ->assertSessionHasErrors('refund.fee');
+    }
+
+    public function test_une_date_de_remboursement_future_est_refusee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create(['event_id' => $event->id, 'amount_due' => 60000]));
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.registrations.cancel', [$tenant, $event, $registration]), [
+                'reason' => 'Motif.',
+                'refund' => ['status' => 'refunded', 'channel' => 'wave', 'refunded_on' => now()->addDay()->toDateString(), 'fee' => 0],
+            ])
+            ->assertSessionHasErrors('refund.refunded_on');
+    }
+
+    public function test_un_membre_avec_la_permission_marque_un_remboursement(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->refundDue()->create(['event_id' => $event->id, 'amount_due' => 60000]));
+
+        $member = User::factory()->withTwoFactor()->create();
+        $this->joinWithPermissions($tenant, $member, [TenantPermission::RegistrationsView, TenantPermission::RegistrationsRefund]);
+
+        $this->actingAs($member)
+            ->post(route('tenants.events.registrations.refund', [$tenant, $event, $registration]), [
+                'channel' => 'orange_money',
+                'refunded_on' => '2026-09-29',
+                'fee' => 500,
+            ])
+            ->assertRedirect(route('tenants.events.registrations.index', [$tenant, $event]));
+
+        $this->assertSame(RefundStatus::Refunded, $tenant->asCurrent(fn () => $registration->fresh())->refund_status);
+    }
+
+    public function test_un_membre_sans_la_permission_ne_marque_pas_de_remboursement(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->refundDue()->create(['event_id' => $event->id, 'amount_due' => 60000]));
+
+        $member = User::factory()->withTwoFactor()->create();
+        $this->joinWithPermissions($tenant, $member, [TenantPermission::RegistrationsView, TenantPermission::RegistrationsCancel]);
+
+        $this->actingAs($member)
+            ->post(route('tenants.events.registrations.refund', [$tenant, $event, $registration]), [
+                'channel' => 'wave',
+                'refunded_on' => '2026-09-29',
+                'fee' => 0,
+            ])
+            ->assertForbidden();
+    }
+
+    public function test_un_locataire_tiers_recoit_404_sur_le_remboursement(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->refundDue()->create(['event_id' => $event->id, 'amount_due' => 60000]));
+
+        $stranger = User::factory()->withTwoFactor()->create();
+
+        $this->actingAs($stranger)
+            ->post(route('tenants.events.registrations.refund', [$tenant, $event, $registration]), [
+                'channel' => 'wave',
+                'refunded_on' => '2026-09-29',
+                'fee' => 0,
+            ])
+            ->assertNotFound();
+    }
+
+    public function test_une_annulation_qui_n_est_plus_a_rembourser_ne_se_marque_pas_remboursee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->cancelled()->create([
+            'event_id' => $event->id,
+            'refund_status' => RefundStatus::Kept,
+            'refund_kept_reason' => 'Don.',
+        ]));
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.registrations.refund', [$tenant, $event, $registration]), [
+                'channel' => 'wave',
+                'refunded_on' => '2026-09-29',
+                'fee' => 0,
+            ])
+            ->assertSessionHasErrors('refund');
     }
 }

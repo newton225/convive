@@ -70,6 +70,7 @@ class CreateStarterProfiles
             TenantPermission::EventsView,
             TenantPermission::RegistrationsView,
             TenantPermission::RegistrationsExport,
+            TenantPermission::RegistrationsRefund,
             TenantPermission::ProofsView,
             TenantPermission::ProofsApprove,
             TenantPermission::ProofsReject,

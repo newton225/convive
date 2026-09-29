@@ -60,7 +60,29 @@ export default function EventReportPage({
             key: 'collected',
             label: t('reports.cards.collected'),
             value: formatAmount(report.collectedAmount, locale),
+            detail: t('reports.cards.collected_detail'),
+        },
+        // README 2.11 : ce que devient l'argent des inscriptions annulees.
+        {
+            key: 'refunded',
+            label: t('reports.cards.refunded'),
+            value: formatAmount(report.refundedAmount, locale),
+            detail: t('reports.cards.refund_fees', {
+                count: report.refundFees,
+                amount: formatAmount(report.refundFees, locale),
+            }),
+        },
+        {
+            key: 'refunds-due',
+            label: t('reports.cards.refunds_due'),
+            value: formatAmount(report.refundsDueAmount, locale),
             detail: null,
+        },
+        {
+            key: 'net',
+            label: t('reports.cards.net'),
+            value: formatAmount(report.netAmount, locale),
+            detail: t('reports.cards.net_detail'),
         },
     ];
 
