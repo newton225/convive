@@ -28,7 +28,7 @@ export function EventHowItWorks() {
                             delay={index * 0.08}
                             className="bg-card flex items-start gap-4 rounded-2xl p-4"
                         >
-                            <span className="brand-fill flex size-10 shrink-0 items-center justify-center rounded-xl text-white">
+                            <span className="brand-fill flex size-10 shrink-0 items-center justify-center rounded-xl">
                                 <step.icon className="size-5" />
                             </span>
                             <span>

@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Support\ReadableTextColor;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -62,7 +63,9 @@ class GuestNotificationMail extends Mailable implements ShouldQueue
             with: [
                 'organisationName' => $this->organisationName,
                 'primaryColor' => $this->primaryColor,
+                'primaryTextColor' => ReadableTextColor::on($this->primaryColor),
                 'secondaryColor' => $this->secondaryColor,
+                'secondaryTextColor' => ReadableTextColor::on($this->secondaryColor),
                 'lines' => $this->lines,
                 'actionText' => $this->actionText,
                 'actionUrl' => $this->actionUrl,

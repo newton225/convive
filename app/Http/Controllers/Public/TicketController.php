@@ -56,7 +56,7 @@ class TicketController extends Controller
             ],
             'tenant' => [
                 'displayName' => $branding->display_name ?? $tenant->name,
-                'colors' => $branding->colors(),
+                'colors' => $event->colors(),
                 'logoUrl' => $branding->brandFileUrl(BrandFile::Logo),
             ],
             'ticket' => [

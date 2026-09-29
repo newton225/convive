@@ -4,18 +4,29 @@ import { EaseOut } from '@/lib/motion';
 
 type Props = {
     capacity: number;
-    remainingSeats: number;
+    // Null quand l'organisateur masque le nombre de places (le defaut).
+    remainingSeats: number | null;
     isFull: boolean;
 };
 
 /**
  * Les places restantes (README ecran 3), ecrites en toutes lettres, avec une jauge des places
  * prises aux couleurs de l'organisation. La jauge n'est qu'un renfort : elle se remplit a
- * l'affichage par une echelle horizontale, jamais par la largeur.
+ * l'affichage par une echelle horizontale, jamais par la largeur. Places masquees par
+ * l'organisateur : rien ne s'affiche, sauf « Complet », que l'invite doit toujours savoir.
  */
 export function SeatsMeter({ capacity, remainingSeats, isFull }: Props) {
     const { t } = useTranslation();
     const reduceMotion = useReducedMotion() === true;
+
+    if (remainingSeats === null) {
+        return isFull ? (
+            <p className="font-semibold" data-test="seats-full">
+                {t('guest.event.seats.full')}
+            </p>
+        ) : null;
+    }
+
     const taken = Math.max(0, capacity - remainingSeats);
     const ratio = capacity > 0 ? Math.min(1, taken / capacity) : 0;
 

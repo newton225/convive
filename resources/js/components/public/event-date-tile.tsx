@@ -21,7 +21,7 @@ export function EventDateTile({ startsAt }: { startsAt: string | null }) {
     return (
         <div className="flex items-center gap-4">
             <div className="bg-card flex size-16 shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl text-center">
-                <span className="brand-fill w-full py-0.5 text-[0.65rem] font-semibold tracking-wide text-white uppercase">
+                <span className="brand-fill w-full py-0.5 text-[0.65rem] font-semibold tracking-wide uppercase">
                     {parts.month}
                 </span>
                 <span className="flex-1 pt-0.5 text-2xl leading-none font-semibold tabular-nums">

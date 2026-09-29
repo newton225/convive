@@ -1,4 +1,5 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
+import LocaleSwitcher from '@/components/locale-switcher';
 import { NotificationBell } from '@/components/notification-bell';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
@@ -14,8 +15,11 @@ export function AppSidebarHeader({
                 <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
-            <div className="ml-auto" data-tour="notifications">
-                <NotificationBell />
+            <div className="ml-auto flex items-center gap-1">
+                <LocaleSwitcher />
+                <div data-tour="notifications">
+                    <NotificationBell />
+                </div>
             </div>
         </header>
     );

@@ -38,7 +38,7 @@ class RegistrationDeletedController extends Controller
             'tenant' => [
                 'name' => $tenant->name,
                 'displayName' => $tenant->branding->display_name ?? $tenant->name,
-                'colors' => $tenant->brandingOrCreate()->colors(),
+                'colors' => $event->colors(),
                 'logoUrl' => $tenant->branding?->brandFileUrl(BrandFile::Logo),
             ],
         ]);

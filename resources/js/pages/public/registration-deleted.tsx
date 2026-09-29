@@ -72,7 +72,7 @@ export default function RegistrationDeleted({ token, event, tenant }: Props) {
                         <div className="flex flex-col gap-2">
                             {event.acceptsRegistrations ? (
                                 <Button
-                                    className="min-h-11 bg-[color:var(--brand-primary)] text-white hover:bg-[color:var(--brand-primary)]/90"
+                                    className="brand-fill min-h-11 hover:opacity-90"
                                     asChild
                                 >
                                     <Link

@@ -18,7 +18,7 @@
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px; background-color:#ffffff; border-radius:8px; overflow:hidden;">
                     <tr>
                         <td style="background-color:{{ $primaryColor }}; padding:24px 32px;">
-                            <span style="color:#ffffff; font-size:18px; font-weight:bold;">{{ $organisationName }}</span>
+                            <span style="color:{{ $primaryTextColor }}; font-size:18px; font-weight:bold;">{{ $organisationName }}</span>
                         </td>
                     </tr>
                     <tr>
@@ -30,7 +30,7 @@
                             <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:8px;">
                                 <tr>
                                     <td style="border-radius:6px; background-color:{{ $secondaryColor }};">
-                                        <a href="{{ $actionUrl }}" style="display:inline-block; padding:12px 24px; color:#1b1917; font-size:15px; font-weight:bold; text-decoration:none;">
+                                        <a href="{{ $actionUrl }}" style="display:inline-block; padding:12px 24px; color:{{ $secondaryTextColor }}; font-size:15px; font-weight:bold; text-decoration:none;">
                                             {{ $actionText }}
                                         </a>
                                     </td>

@@ -32,7 +32,7 @@ export function EventRegistrationState({
             <Button
                 asChild
                 size="lg"
-                className="brand-fill group h-auto min-h-12 w-full rounded-full py-2 leading-tight whitespace-normal text-white hover:opacity-90"
+                className="brand-fill group h-auto min-h-12 w-full rounded-full py-2 leading-tight whitespace-normal hover:opacity-90"
             >
                 <Link
                     href={create(token)}

@@ -7,7 +7,6 @@ use App\Actions\Registrations\HoldRegistration;
 use App\Actions\Registrations\PhoneVerification;
 use App\Actions\Waitlist\PromoteNextWaitlistEntry;
 use App\Enums\BrandFile;
-use App\Enums\PaymentChannel;
 use App\Enums\PhoneCodeResult;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
@@ -20,6 +19,7 @@ use App\Models\Ticket;
 use App\Models\Unit;
 use App\Support\PlanLimits;
 use App\Support\TicketQrCode;
+use App\Support\VisitorCountry;
 use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -51,15 +51,16 @@ class RegistrationController extends Controller
 
         return Inertia::render('public/registration', [
             'token' => $token,
+            'defaultCountry' => VisitorCountry::from(request()),
             'event' => [
                 'name' => $event->name,
                 'pricePerPerson' => $event->price_per_person,
                 'companionLimit' => $event->companion_limit,
-                'remainingSeats' => $event->remainingSeats(),
+                'remainingSeats' => $event->publicRemainingSeats(),
             ],
             'tenant' => [
                 'displayName' => $tenant->branding->display_name ?? $tenant->name,
-                'colors' => $tenant->brandingOrCreate()->colors(),
+                'colors' => $event->colors(),
                 'logoUrl' => $tenant->branding?->brandFileUrl(BrandFile::Logo),
             ],
             'units' => Unit::active()->ordered()->get()->map(fn (Unit $unit) => [
@@ -155,7 +156,7 @@ class RegistrationController extends Controller
             'event' => ['name' => $event->name],
             'tenant' => [
                 'displayName' => $tenant->branding->display_name ?? $tenant->name,
-                'colors' => $tenant->brandingOrCreate()->colors(),
+                'colors' => $event->colors(),
                 'logoUrl' => $tenant->branding?->brandFileUrl(BrandFile::Logo),
             ],
             // Seuls les deux derniers chiffres : l'invite reconnait son numero, un tiers qui
@@ -291,11 +292,14 @@ class RegistrationController extends Controller
                 // Pour le recapitulatif avant relance (README ecran 9) : le nombre de places
                 // encore libres au moment ou l'invite regarde, informatif seulement. La relance
                 // elle-meme revalide le stock (`HoldRegistration`), c'est elle qui tranche.
-                'remainingSeats' => $event->remainingSeats(),
+                // Places masquees par l'organisateur (le defaut) : seulement s'il en reste assez
+                // pour ce groupe, jamais le chiffre.
+                'remainingSeats' => $event->publicRemainingSeats(),
+                'hasEnoughSeats' => $event->remainingSeats() >= $registration->party_size,
             ],
             'tenant' => [
                 'displayName' => $tenant->branding->display_name ?? $tenant->name,
-                'colors' => $tenant->brandingOrCreate()->colors(),
+                'colors' => $event->colors(),
                 'logoUrl' => $tenant->branding?->brandFileUrl(BrandFile::Logo),
             ],
             'registration' => [
@@ -320,18 +324,13 @@ class RegistrationController extends Controller
                     'id' => $account->id,
                     'label' => $account->label,
                     'channelLabel' => $account->channel?->label(),
+                    // Le canal de la preuve est celui du compte choisi, un pour un (decision du
+                    // 2026-09-29) : c'est lui qui dit si une reference de transaction est attendue.
+                    'requiresReference' => $account->channel?->hasAccountNumber() ?? true,
                     'accountNumber' => $account->account_number,
                     'holderName' => $account->holder_name,
                     'instructions' => $account->instructions,
                 ]),
-            // Le canal declare par l'invite (README ecran 5 etape 2) est independant du canal
-            // du compte choisi : un compte Wave peut avoir ete approche via un agent qui a
-            // lui-meme reverse en especes, par exemple.
-            'channels' => collect(PaymentChannel::cases())->map(fn (PaymentChannel $channel) => [
-                'value' => $channel->value,
-                'label' => $channel->label(),
-                'hasAccountNumber' => $channel->hasAccountNumber(),
-            ]),
         ]);
     }
 

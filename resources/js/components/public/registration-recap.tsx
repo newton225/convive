@@ -8,7 +8,9 @@ type Props = {
         RegistrationShow,
         'name' | 'unit' | 'amountDue' | 'companions'
     >;
-    remainingSeats: number;
+    // Null quand l'organisateur masque le nombre de places (le defaut).
+    remainingSeats: number | null;
+    hasEnoughSeats: boolean;
 };
 
 /**
@@ -17,9 +19,12 @@ type Props = {
  * « verifier les places et relancer » : il voit ce qu'il a declare et si une place a des chances
  * de rester. Le nombre de places est informatif seulement, la relance revalide le stock.
  */
-export function RegistrationRecap({ registration, remainingSeats }: Props) {
+export function RegistrationRecap({
+    registration,
+    remainingSeats,
+    hasEnoughSeats,
+}: Props) {
     const { t, locale } = useTranslation();
-    const partySize = 1 + registration.companions.length;
 
     return (
         <Card data-test="registration-recap">
@@ -65,16 +70,22 @@ export function RegistrationRecap({ registration, remainingSeats }: Props) {
 
                 <p
                     className={
-                        remainingSeats >= partySize
+                        hasEnoughSeats
                             ? 'text-sm'
                             : 'text-destructive text-sm font-medium'
                     }
                     data-test="recap-seats"
-                    role={remainingSeats < partySize ? 'alert' : undefined}
+                    role={hasEnoughSeats ? undefined : 'alert'}
                 >
-                    {t('guest.registration.show.seats_available', {
-                        count: remainingSeats,
-                    })}
+                    {remainingSeats !== null
+                        ? t('guest.registration.show.seats_available', {
+                              count: remainingSeats,
+                          })
+                        : t(
+                              hasEnoughSeats
+                                  ? 'guest.registration.show.seats_enough'
+                                  : 'guest.registration.show.seats_not_enough',
+                          )}
                 </p>
             </CardContent>
         </Card>

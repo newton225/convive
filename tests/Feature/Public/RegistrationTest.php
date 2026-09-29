@@ -348,13 +348,59 @@ class RegistrationTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant, ['table_count' => 5, 'seats_per_table' => 10, 'rule_show_remaining_seats' => true]);
+
+        $payload = $this->validPayload($tenant);
+        $response = $this->post($this->registrationFormUrl($tenant, $event), $payload);
+
+        $this->get($response->headers->get('Location'))
+            ->assertInertia(fn ($page) => $page
+                ->where('event.remainingSeats', 49)
+                ->where('event.hasEnoughSeats', true),
+            );
+    }
+
+    public function test_le_formulaire_preselectionne_le_pays_du_visiteur_annonce_par_cloudflare(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+
+        $this->withHeader('CF-IPCountry', 'FR')
+            ->get($this->registrationFormUrl($tenant, $event))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('defaultCountry', 'FR'));
+    }
+
+    public function test_sans_cloudflare_le_formulaire_preselectionne_la_cote_d_ivoire(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+
+        $this->get($this->registrationFormUrl($tenant, $event))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('defaultCountry', 'CI'));
+    }
+
+    /**
+     * Places masquees (le defaut) : le recapitulatif dit seulement s'il reste assez de places
+     * pour le groupe de l'invite, sans le chiffre.
+     */
+    public function test_places_masquees_la_reservation_dit_seulement_s_il_reste_assez_de_places(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
         $event = $this->publishedEvent($tenant, ['table_count' => 5, 'seats_per_table' => 10]);
 
         $payload = $this->validPayload($tenant);
         $response = $this->post($this->registrationFormUrl($tenant, $event), $payload);
 
         $this->get($response->headers->get('Location'))
-            ->assertInertia(fn ($page) => $page->where('event.remainingSeats', 49));
+            ->assertInertia(fn ($page) => $page
+                ->where('event.remainingSeats', null)
+                ->where('event.hasEnoughSeats', true),
+            );
     }
 
     public function test_le_jeton_de_reprise_n_est_pas_l_identifiant_sequentiel_de_l_inscription(): void

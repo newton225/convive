@@ -1,4 +1,6 @@
+import { motion, useReducedMotion } from 'framer-motion';
 import { Minus, Plus } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { HelpTip } from '@/components/help-tip';
 import InputError from '@/components/input-error';
 import { LabelWithHelp } from '@/components/label-with-help';
@@ -14,6 +16,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useTranslation } from '@/hooks/use-translation';
+import { Duration, EaseOut } from '@/lib/motion';
 import type { PublicUnitOption } from '@/types';
 
 /**
@@ -91,24 +94,60 @@ export function CompanionFields({
 }) {
     const { t } = useTranslation();
     const atLimit = companionIds.length >= companionLimit;
+    const reduceMotion = useReducedMotion() === true;
+    // Seul un bloc ajoute d'un clic s'anime : ceux presents au chargement (retour apres une
+    // erreur de validation) apparaissent tels quels. Aucune animation au retrait : un bloc qui
+    // s'efface resterait un instant dans le formulaire avec son ancien indice de champ.
+    const mounted = useRef(false);
+
+    useEffect(() => {
+        mounted.current = true;
+    }, []);
+
+    const animateEntry = mounted.current && !reduceMotion;
 
     return (
         <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between gap-2">
                 <CardTitle className="flex items-center gap-1.5 text-base">
                     {t('guest.registration.companions.title')}
                     <HelpTip subject={t('guest.registration.companions.title')}>
                         {t('guest.registration.help.companions')}
                     </HelpTip>
                 </CardTitle>
+                {companionLimit > 0 ? (
+                    <p
+                        className="text-muted-foreground text-sm tabular-nums"
+                        aria-live="polite"
+                        data-test="companion-count"
+                    >
+                        {t('guest.registration.companions.count', {
+                            count: companionIds.length,
+                            max: companionLimit,
+                        })}
+                    </p>
+                ) : null}
             </CardHeader>
             <CardContent className="space-y-4">
                 {companionIds.map((id, index) => (
-                    <div
+                    <motion.div
                         key={id}
+                        layout={reduceMotion ? false : 'position'}
+                        initial={
+                            animateEntry
+                                ? { opacity: 0, y: -12, scale: 0.98 }
+                                : false
+                        }
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: Duration.quick, ease: EaseOut }}
                         className="space-y-2 rounded-lg border p-3"
                         data-test="companion-row"
                     >
+                        <p className="text-sm font-medium">
+                            {t('guest.registration.companions.item', {
+                                number: index + 1,
+                            })}
+                        </p>
                         <div className="flex items-start gap-2">
                             <div className="flex-1 space-y-2">
                                 <Label
@@ -138,7 +177,8 @@ export function CompanionFields({
                                 variant="ghost"
                                 size="icon"
                                 aria-label={t(
-                                    'guest.registration.companions.remove',
+                                    'guest.registration.companions.remove_item',
+                                    { number: index + 1 },
                                 )}
                                 data-test="companion-remove"
                                 onClick={() => onRemove(id)}
@@ -155,18 +195,23 @@ export function CompanionFields({
                         <InputError
                             message={errors[`companions.${index}.unit_id`]}
                         />
-                    </div>
+                    </motion.div>
                 ))}
 
-                <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={atLimit}
-                    data-test="companion-add"
-                    onClick={onAdd}
+                <motion.div
+                    layout={reduceMotion ? false : 'position'}
+                    transition={{ duration: Duration.quick, ease: EaseOut }}
                 >
-                    <Plus /> {t('guest.registration.companions.add')}
-                </Button>
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        disabled={atLimit}
+                        data-test="companion-add"
+                        onClick={onAdd}
+                    >
+                        <Plus /> {t('guest.registration.companions.add')}
+                    </Button>
+                </motion.div>
 
                 {atLimit ? (
                     <p className="text-muted-foreground text-sm">

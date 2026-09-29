@@ -392,8 +392,26 @@
         );
 }
 
+/*
+ * Le texte pose sur la couleur principale suit sa clarte : fonce sur une couleur claire (vert vif,
+ * or), blanc sur une couleur foncee (bordeaux, bleu nuit). L'organisation choisit sa couleur
+ * librement, un texte toujours blanc devenait illisible. Seuil de clarte OKLCH, meme intention que
+ * `App\Support\ReadableTextColor` pour les emails. Un navigateur sans couleur relative garde le
+ * blanc : le repli passe par `@supports`, deux declarations `color` successives etant fusionnees
+ * par le minifieur, qui ne garde que la seconde.
+ */
 .brand-fill {
     background-color: var(--brand-primary);
+    color: #ffffff;
+}
+
+@supports (color: oklch(from red l c h)) {
+    .brand-fill {
+        /* Clarte 0.2 : l'encre du projet ; 1 : blanc. Bascule vers 0.59, la ou les deux contrastent autant. */
+        color: oklch(
+            from var(--brand-primary) clamp(0.2, (0.59 - l) * 1000, 1) 0 0
+        );
+    }
 }
 
 /*

@@ -73,7 +73,12 @@ return [
     |
     */
 
-    'connection' => env('SESSION_CONNECTION'),
+    // Toujours la base centrale, jamais `database.default` : sur le lien public, la tenancy
+    // bascule la connexion par defaut vers la base du locataire, et la session de l'invite y
+    // etait ecrite. `PUT /locale` (sans tenancy) la cherchait ensuite dans la base centrale, ne
+    // la trouvait pas et repondait 419 : la langue ne changeait jamais sur le parcours invite.
+    // A revoir si le pilote passe a `redis`, dont les connexions portent d'autres noms.
+    'connection' => env('SESSION_CONNECTION', 'central'),
 
     /*
     |--------------------------------------------------------------------------

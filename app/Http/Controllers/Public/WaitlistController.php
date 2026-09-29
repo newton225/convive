@@ -13,6 +13,7 @@ use App\Models\Event;
 use App\Models\Tenant;
 use App\Models\Unit;
 use App\Models\WaitlistEntry;
+use App\Support\VisitorCountry;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -125,13 +126,14 @@ class WaitlistController extends Controller
 
         return Inertia::render('public/waitlist-join', [
             'token' => $token,
+            'defaultCountry' => VisitorCountry::from(request()),
             'event' => [
                 'name' => $event->name,
                 'companionLimit' => $event->companion_limit,
             ],
             'tenant' => [
                 'displayName' => $tenant->branding->display_name ?? $tenant->name,
-                'colors' => $tenant->brandingOrCreate()->colors(),
+                'colors' => $event->colors(),
                 'logoUrl' => $tenant->branding?->brandFileUrl(BrandFile::Logo),
             ],
             'units' => Unit::active()->ordered()->get()->map(fn (Unit $unit) => [
