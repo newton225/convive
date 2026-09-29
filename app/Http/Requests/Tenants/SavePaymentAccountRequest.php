@@ -40,7 +40,7 @@ class SavePaymentAccountRequest extends FormRequest
             return;
         }
 
-        if ($normalized = PhoneNumber::normalize($this->input('account_number'))) {
+        if ($normalized = PhoneNumber::normalizeIvorian($this->input('account_number'))) {
             $this->merge(['account_number' => PhoneNumber::format($normalized)]);
         }
     }
@@ -96,7 +96,7 @@ class SavePaymentAccountRequest extends FormRequest
                     return;
                 }
 
-                $normalized = PhoneNumber::normalize($this->input('account_number'));
+                $normalized = PhoneNumber::normalizeIvorian($this->input('account_number'));
 
                 if ($normalized === null) {
                     $validator->errors()->add('account_number', __('payment_accounts.errors.number_invalid'));

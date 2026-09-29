@@ -7,9 +7,10 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
- * Un numero de telephone ivoirien, quelle que soit son ecriture (voir `PhoneNumber`).
+ * Le telephone d'un invite : tout pays, quelle que soit son ecriture, un numero sans indicatif etant
+ * lu comme ivoirien (voir `PhoneNumber::normalize`).
  */
-class IvorianPhoneNumber implements ValidationRule
+class GuestPhoneNumber implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

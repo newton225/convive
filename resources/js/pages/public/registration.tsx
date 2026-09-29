@@ -1,7 +1,9 @@
 import { Form, Head } from '@inertiajs/react';
 import { AlertCircle } from 'lucide-react';
 import { BrandColorStyle } from '@/components/brand-color-style';
+import type { Country } from 'react-phone-number-input';
 import { OfflineBanner } from '@/components/offline-banner';
+import { PhoneField } from '@/components/phone/phone-field';
 import { useRef, useState } from 'react';
 import {
     CompanionFields,
@@ -27,6 +29,7 @@ type Props = {
     tenant: PublicRegistrationTenant;
     units: PublicUnitOption[];
     token: string;
+    defaultCountry: Country;
 };
 
 /**
@@ -43,6 +46,7 @@ export default function PublicRegistration({
     tenant,
     units,
     token,
+    defaultCountry,
 }: Props) {
     const { t, locale } = useTranslation();
     const [companionIds, setCompanionIds] = useState<number[]>([]);
@@ -129,12 +133,12 @@ export default function PublicRegistration({
                                             'guest.registration.help.phone',
                                         )}
                                     >
-                                        <Input
+                                        <PhoneField
                                             id="phone"
                                             name="phone"
-                                            type="tel"
+                                            defaultCountry={defaultCountry}
                                             required
-                                            data-test="registration-phone"
+                                            testId="registration-phone"
                                         />
                                     </Field>
 

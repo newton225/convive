@@ -115,7 +115,7 @@ class HoldBackoffTest extends TestCase
         ));
     }
 
-    public function test_un_numero_qui_n_est_pas_ivoirien_est_refuse(): void
+    public function test_un_numero_invalide_est_refuse(): void
     {
         // Le message lui-meme, pas seulement la presence d'une erreur : une cle de traduction
         // absente s'afficherait telle quelle a l'invite. En anglais, la langue que le client de
@@ -123,9 +123,19 @@ class HoldBackoffTest extends TestCase
         $message = __('guest.registration.errors.phone_invalid', [], 'en');
         $this->assertNotSame('guest.registration.errors.phone_invalid', $message);
 
-        $this->register(phone: '+221 77 123 45 67')->assertSessionHasErrors(['phone' => $message]);
+        // Un 06 francais sans son indicatif : sans +33, il est lu comme ivoirien, et invalide.
+        $this->register(phone: '06 12 34 56 78')->assertSessionHasErrors(['phone' => $message]);
 
         $this->assertSame(0, $this->tenant->asCurrent(fn () => Registration::count()));
+    }
+
+    public function test_un_invite_peut_s_inscrire_avec_un_numero_etranger(): void
+    {
+        $this->register(phone: '+33 6 12 34 56 78')->assertSessionHasNoErrors()->assertRedirect();
+
+        $this->assertSame('+33612345678', $this->tenant->asCurrent(
+            fn () => Registration::latest('id')->value('phone'),
+        ));
     }
 
     public function test_deux_reservations_expirees_imposent_une_attente(): void

@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Public;
 
 use App\Models\Event;
-use App\Rules\IvorianPhoneNumber;
+use App\Rules\GuestPhoneNumber;
 use App\Support\PhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -45,7 +45,7 @@ class StoreWaitlistEntryRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:32', new IvorianPhoneNumber],
+            'phone' => ['required', 'string', 'max:32', new GuestPhoneNumber],
             'unit_id' => ['required', 'integer', $activeUnit],
 
             'companions' => ['array', 'max:'.$this->event()->companion_limit],

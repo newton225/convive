@@ -1,6 +1,8 @@
 import { Form, Head } from '@inertiajs/react';
 import { BrandColorStyle } from '@/components/brand-color-style';
+import type { Country } from 'react-phone-number-input';
 import { OfflineBanner } from '@/components/offline-banner';
+import { PhoneField } from '@/components/phone/phone-field';
 import { useRef, useState } from 'react';
 import LocaleSwitcher from '@/components/locale-switcher';
 import {
@@ -20,6 +22,7 @@ type Props = {
     tenant: PublicRegistrationTenant;
     units: PublicUnitOption[];
     token: string;
+    defaultCountry: Country;
 };
 
 /**
@@ -32,6 +35,7 @@ export default function PublicWaitlistJoin({
     tenant,
     units,
     token,
+    defaultCountry,
 }: Props) {
     const { t } = useTranslation();
     const [companionIds, setCompanionIds] = useState<number[]>([]);
@@ -104,12 +108,12 @@ export default function PublicWaitlistJoin({
                                             'guest.registration.help.phone',
                                         )}
                                     >
-                                        <Input
+                                        <PhoneField
                                             id="phone"
                                             name="phone"
-                                            type="tel"
+                                            defaultCountry={defaultCountry}
                                             required
-                                            data-test="waitlist-phone"
+                                            testId="waitlist-phone"
                                         />
                                     </Field>
 
