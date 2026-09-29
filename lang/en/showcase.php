@@ -8,6 +8,7 @@ return [
     'search_placeholder' => 'Search an event or an organisation',
     'empty' => 'No featured events yet.',
     'no_match' => 'No event matches your search.',
+    'results' => '{0} No event|{1} 1 event|[2,*] :count events',
     'organiser' => [
         'title' => 'Organising an event?',
         'body' => 'Publish your link, then choose to feature it here.',

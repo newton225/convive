@@ -1,5 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, CalendarDays } from 'lucide-react';
+import type { Ref } from 'react';
+import { FadeInImage } from '@/components/fade-in-image';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatDateParts } from '@/lib/format-date';
 import { EaseOut } from '@/lib/motion';
@@ -10,6 +12,9 @@ type Props = {
     event: ShowcaseEvent;
     index: number;
     featured?: boolean;
+    // Transmise par `AnimatePresence` en mode `popLayout`, qui mesure la carte sortante pour la
+    // retirer de la grille des le debut de son effacement.
+    ref?: Ref<HTMLAnchorElement>;
 };
 
 /**
@@ -21,26 +26,31 @@ type Props = {
  * mise en avant : une affiche, visuel en plein cadre et texte pose dessus sur un voile sombre, a
  * la hauteur des deux cartes voisines sur grand ecran.
  */
-export function ShowcaseCard({ event, index, featured = false }: Props) {
+export function ShowcaseCard({ event, index, featured = false, ref }: Props) {
     const { t, locale } = useTranslation();
     const reduceMotion = useReducedMotion() === true;
     const date = event.startsAt
         ? formatDateParts(event.startsAt, locale)
         : null;
 
-    const visual = event.visualUrl ? (
-        <img
-            src={event.visualUrl}
-            alt=""
-            loading="lazy"
-            className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            data-test="showcase-visual"
-        />
-    ) : (
+    // Le meme fond sert d'evenement sans visuel et de repli si le visuel ne se charge pas.
+    const placeholder = (
         <div className="bg-ink absolute inset-0" aria-hidden="true">
             <div className="site-glow absolute inset-0 opacity-70" />
             <CalendarDays className="absolute top-1/2 left-1/2 size-10 -translate-x-1/2 -translate-y-1/2 text-white/50" />
         </div>
+    );
+
+    const visual = event.visualUrl ? (
+        <FadeInImage
+            src={event.visualUrl}
+            alt=""
+            fallback={placeholder}
+            className="group-hover:scale-105"
+            data-test="showcase-visual"
+        />
+    ) : (
+        placeholder
     );
 
     const dateTile = date ? (
@@ -67,16 +77,31 @@ export function ShowcaseCard({ event, index, featured = false }: Props) {
 
     return (
         <motion.a
+            ref={ref}
             href={event.publicUrl}
             target="_blank"
             rel="noopener noreferrer"
+            // Recherche : les cartes restantes glissent vers leur nouvelle place (position
+            // seulement, jamais d'etirement qui deformerait le visuel), celles qui ne
+            // correspondent plus s'effacent en se resserrant, les nouvelles montent en cascade.
+            layout={reduceMotion ? false : 'position'}
             initial={reduceMotion ? false : { opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
+            exit={
+                reduceMotion
+                    ? undefined
+                    : {
+                          opacity: 0,
+                          scale: 0.94,
+                          transition: { duration: 0.22, ease: 'easeIn' },
+                      }
+            }
             viewport={{ once: true, margin: '-60px' }}
             transition={{
                 duration: 0.5,
-                delay: (index % 3) * 0.08,
+                delay: (index % 6) * 0.06,
                 ease: EaseOut,
+                layout: { duration: 0.45, ease: EaseOut },
             }}
             className={cn(
                 'group bg-card focus-visible:ring-ring relative flex flex-col overflow-hidden rounded-3xl outline-none focus-visible:ring-2',

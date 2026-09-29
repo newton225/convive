@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { CalendarDays, ImageOff, MapPin } from 'lucide-react';
 import { EventActionsMenu } from '@/components/events/event-actions-menu';
 import { EventFillBar } from '@/components/events/event-fill-bar';
+import { FadeInImage } from '@/components/fade-in-image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
@@ -82,12 +83,17 @@ export function EventCard({ tenantSlug, event, permissions, onClose }: Props) {
         >
             <Link href={edit(target).url} tabIndex={-1} aria-hidden="true">
                 {event.visualUrl ? (
-                    <img
-                        src={event.visualUrl}
-                        alt=""
-                        className="aspect-[5/2] w-full object-cover"
-                        loading="lazy"
-                    />
+                    <div className="relative aspect-[5/2] w-full overflow-hidden">
+                        <FadeInImage
+                            src={event.visualUrl}
+                            alt=""
+                            fallback={
+                                <div className="text-muted-foreground flex size-full items-center justify-center">
+                                    <ImageOff className="size-6" />
+                                </div>
+                            }
+                        />
+                    </div>
                 ) : (
                     <div className="bg-muted text-muted-foreground flex aspect-[5/2] w-full items-center justify-center">
                         <ImageOff className="size-6" />

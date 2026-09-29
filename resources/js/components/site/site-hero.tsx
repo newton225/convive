@@ -91,7 +91,9 @@ export function SiteHero() {
                         {t('site.hero.badge')}
                     </motion.p>
 
-                    <h1 className="mt-6 text-4xl leading-[1.04] font-semibold tracking-tight sm:text-5xl lg:text-[4.1rem]">
+                    {/* Une phrase par ligne sur grand ecran : la colonne de texte fait un peu plus
+                        de la moitie de la page, au-dela de 2.75rem chaque phrase se coupait en deux. */}
+                    <h1 className="mt-6 text-[2rem] leading-[1.08] font-semibold tracking-tight sm:text-5xl lg:text-[2.75rem]">
                         {TitleLines.map((line, index) => (
                             <motion.span
                                 key={line}

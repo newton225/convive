@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, CalendarSearch, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { ShowcaseCard } from '@/components/showcase/showcase-card';
@@ -116,25 +116,78 @@ export default function Showcase({ events }: Props) {
                             {t('showcase.empty')}
                         </p>
                     </Reveal>
-                ) : visible.length === 0 ? (
-                    <p className="text-muted-foreground py-10 text-center">
-                        {t('showcase.no_match')}
-                    </p>
                 ) : (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {visible.map((event, index) => (
-                            <ShowcaseCard
-                                key={event.publicUrl}
-                                event={event}
-                                index={index}
-                                featured={
-                                    index === 0 &&
-                                    search === '' &&
-                                    visible.length > 2
-                                }
-                            />
-                        ))}
-                    </div>
+                    <>
+                        {/* Annonce le nombre de resultats aux lecteurs d'ecran a chaque frappe :
+                            la grille change sans que le focus bouge. */}
+                        <p
+                            className="text-muted-foreground mb-4 text-sm"
+                            aria-live="polite"
+                        >
+                            {t('showcase.results', { count: visible.length })}
+                        </p>
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {/* `popLayout` : les cartes qui ne correspondent plus quittent la grille
+                                des le debut de leur effacement, les restantes glissent aussitot a
+                                leur nouvelle place, en un seul mouvement. */}
+                            <AnimatePresence initial={false} mode="popLayout">
+                                {visible.map((event, index) => {
+                                    const featured =
+                                        index === 0 &&
+                                        search === '' &&
+                                        visible.length > 2;
+
+                                    return (
+                                        // Le format entre dans la cle : passer de l'affiche a
+                                        // la carte ordinaire se fait en fondu enchaine, pas en
+                                        // etirant le visuel.
+                                        <ShowcaseCard
+                                            key={`${event.publicUrl}-${featured ? 'featured' : 'card'}`}
+                                            event={event}
+                                            index={index}
+                                            featured={featured}
+                                        />
+                                    );
+                                })}
+                            </AnimatePresence>
+                        </div>
+
+                        <AnimatePresence>
+                            {visible.length === 0 ? (
+                                <motion.div
+                                    key="no-match"
+                                    initial={
+                                        reduceMotion
+                                            ? false
+                                            : { opacity: 0, y: 12 }
+                                    }
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={
+                                        reduceMotion
+                                            ? undefined
+                                            : {
+                                                  opacity: 0,
+                                                  transition: {
+                                                      duration: 0.15,
+                                                  },
+                                              }
+                                    }
+                                    transition={{
+                                        duration: Duration.quick,
+                                        delay: 0.15,
+                                        ease: EaseOut,
+                                    }}
+                                    className="flex flex-col items-center gap-3 py-12 text-center"
+                                >
+                                    <CalendarSearch className="text-muted-foreground size-10" />
+                                    <p className="text-muted-foreground">
+                                        {t('showcase.no_match')}
+                                    </p>
+                                </motion.div>
+                            ) : null}
+                        </AnimatePresence>
+                    </>
                 )}
 
                 <Reveal className="bg-card mt-16 flex flex-col items-start gap-4 rounded-3xl p-8 sm:flex-row sm:items-center sm:justify-between">

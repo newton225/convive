@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion';
+import { FadeInImage } from '@/components/fade-in-image';
 import { useTranslation } from '@/hooks/use-translation';
 import { Duration, EaseOut } from '@/lib/motion';
 import type { PublicEvent, PublicTenant } from '@/types';
@@ -31,14 +32,19 @@ export function EventHero({ event, tenant }: Props) {
     return (
         <section className="relative isolate flex min-h-[52svh] items-end overflow-hidden text-white md:min-h-[26rem]">
             {visualUrl ? (
-                <motion.img
-                    src={visualUrl}
-                    alt=""
-                    className="absolute inset-0 -z-20 size-full object-cover"
-                    initial={reduceMotion ? false : { scale: 1.08 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 1.4, ease: EaseOut }}
-                />
+                // Le visuel se pose en fondu une fois charge, sur le degrade de la marque qui
+                // tient le cadre pendant le telechargement (et le remplace s'il echoue).
+                <div className="absolute inset-0 -z-20">
+                    <FadeInImage
+                        src={visualUrl}
+                        alt=""
+                        loading="eager"
+                        loadingClassName="brand-hero-fallback"
+                        fallback={
+                            <div className="brand-hero-fallback absolute inset-0" />
+                        }
+                    />
+                </div>
             ) : (
                 <div
                     className="brand-hero-fallback absolute inset-0 -z-20"

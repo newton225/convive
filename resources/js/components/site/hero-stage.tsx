@@ -82,7 +82,7 @@ export function HeroStage() {
 
             <motion.div
                 {...appear(2.2, { x: 16 })}
-                className="bg-ink/80 absolute top-1/3 -right-2 z-0 hidden items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-xs text-white backdrop-blur-md sm:flex lg:-right-12"
+                className="bg-ink/80 absolute top-5 right-0 z-20 hidden items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-xs whitespace-nowrap text-white backdrop-blur-md sm:flex lg:-right-6"
             >
                 <ScanLine className="size-3.5" />
                 {t('site.hero.stage.scan')}

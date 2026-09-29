@@ -8,6 +8,7 @@ return [
     'search_placeholder' => 'Rechercher un évènement ou une organisation',
     'empty' => "Aucun évènement à la une pour l'instant.",
     'no_match' => 'Aucun évènement ne correspond à votre recherche.',
+    'results' => '{0} Aucun évènement|{1} 1 évènement|[2,*] :count évènements',
     'organiser' => [
         'title' => 'Vous organisez un évènement ?',
         'body' => 'Publiez votre lien, puis choisissez de le faire apparaître ici.',
