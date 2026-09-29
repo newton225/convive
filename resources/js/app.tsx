@@ -43,6 +43,12 @@ void createInertiaApp({
         // renvoie la meme page (enregistrement, erreur de validation), ce saut fait perdre a
         // l'utilisateur l'endroit ou il travaillait : on garde la position, sauf si la reponse
         // mene ailleurs (creation d'un evenement qui ouvre sa fiche, par exemple).
+        //
+        // Une navigation vers une autre page passe par une transition de vue du navigateur
+        // (fondu court, voir `::view-transition` dans app.css) : le changement se lit comme un
+        // passage, pas comme un clignotement. Pas sur une visite qui garde l'etat de la page
+        // (recherche, filtre, pagination) : le contenu change sur place, un fondu a chaque
+        // frappe generait. Inertia s'en passe seul quand le navigateur ne la connait pas.
         visitOptions: (_href, options) =>
             options.method && options.method !== 'get'
                 ? {
@@ -51,7 +57,7 @@ void createInertiaApp({
                           new URL(page.url, window.location.origin).pathname ===
                               window.location.pathname,
                   }
-                : {},
+                : { viewTransition: options.preserveState !== true },
     },
     withApp(app) {
         return (

@@ -259,3 +259,50 @@
     .driver-popover-arrow-side-right.driver-popover-arrow {
     border-right-color: var(--popover);
 }
+
+/*
+ * Transitions entre les pages (Inertia `viewTransition`, voir app.tsx). La zone de contenu du
+ * back-office porte son propre nom : elle glisse et se fond pendant que le menu, identique d'une
+ * page a l'autre, ne bouge pas. Ailleurs (vitrine, parcours invite), la page entiere se fond.
+ * Opacite et translation seulement, moins d'un tiers de seconde. Aucun mouvement pour qui en
+ * demande moins.
+ */
+@media (prefers-reduced-motion: no-preference) {
+    [data-slot='sidebar-inset'] {
+        view-transition-name: page-content;
+    }
+
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation-duration: 200ms;
+    }
+
+    ::view-transition-old(page-content) {
+        animation: 140ms ease-in both page-leave;
+    }
+
+    ::view-transition-new(page-content) {
+        animation: 280ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both page-enter;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
+}
+
+@keyframes page-leave {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes page-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
