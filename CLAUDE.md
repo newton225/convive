@@ -749,6 +749,26 @@ parfaitement authentiques. Les controles sont ceux de `SECURITY.md` C1, aucun n'
 **Non encore fait** : le second facteur TOTP rejoue juste avant la modification (seul le mot de
 passe est redemande), l'alerte WhatsApp, et le bandeau sur le tableau de bord.
 
+### Numeros de telephone : Cote d'Ivoire seule
+
+Decision du proprietaire du projet (2026-09-29) : le produit ne sert que des numeros ivoiriens,
+pour les invites comme pour les comptes de versement. `App\Support\PhoneNumber` en est la seule
+source de verite.
+
+- **Forme unique** `+225` suivi des 10 chiffres (plan de numerotation de 2021), quelle que soit
+  l'ecriture saisie (`07 07...`, `+225 07...`, `00225...`, `(+225)...`). Le telephone d'un invite
+  est enregistre sous cette forme (`prepareForValidation` des Form Requests publics), et c'est elle
+  qu'on envoie a WhatsApp. Sans elle, le meme telephone passait pour deux numeros et l'attente
+  apres des reservations expirees se contournait en ajoutant ou retirant l'indicatif (SECURITY.md
+  C3).
+- **Comparaison** toujours par `PhoneNumber::same()`, jamais sur la chaine brute : les lignes
+  enregistrees avant cette regle gardent leur ecriture d'origine.
+- **Comptes de versement** : le prefixe doit correspondre au reseau du canal, declare sur
+  `PaymentChannel::mobilePrefixes()` (Orange 07, MTN 05, Moov 01, Wave tout mobile). Un « 05 » sous
+  Orange Money enverrait l'argent vers un numero MTN. Le numero est enregistre par paires
+  (`+225 07 07 12 34 56`). Virement et especes gardent leur saisie libre.
+- Servir un autre pays est une decision produit, pas un ajout de prefixe : a redemander.
+
 ---
 
 ## Unites

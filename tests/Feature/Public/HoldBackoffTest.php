@@ -71,7 +71,7 @@ class HoldBackoffTest extends TestCase
         ]));
     }
 
-    private function register(): TestResponse
+    private function register(string $phone = self::Phone): TestResponse
     {
         $appUrl = parse_url((string) config('app.url'));
         $port = isset($appUrl['port']) ? ':'.$appUrl['port'] : '';
@@ -80,7 +80,7 @@ class HoldBackoffTest extends TestCase
 
         return $this->post($url, [
             'name' => 'Aya Kouassi',
-            'phone' => self::Phone,
+            'phone' => $phone,
             'unit_id' => $this->tenant->asCurrent(fn () => Unit::where('name', 'QODESH')->value('id')),
             'companions' => [],
         ]);
@@ -91,6 +91,41 @@ class HoldBackoffTest extends TestCase
         $this->expiredRegistration();
 
         $this->assertNull($this->tenant->asCurrent(fn () => Registration::phoneBackoffUntil($this->event, self::Phone)));
+    }
+
+    public function test_le_meme_numero_avec_ou_sans_indicatif_est_reconnu(): void
+    {
+        // SECURITY.md C3 : l'attente ne se contourne pas en ajoutant ou retirant l'indicatif.
+        // Les lignes deja enregistrees avant la normalisation gardent leur ecriture d'origine,
+        // la comparaison doit donc normaliser les deux cotes.
+        $this->expiredRegistration();
+        $this->expiredRegistration('07 07 12 34 56');
+
+        $until = $this->tenant->asCurrent(fn () => Registration::phoneBackoffUntil($this->event, '0707123456'));
+
+        $this->assertNotNull($until);
+    }
+
+    public function test_une_reservation_enregistre_le_numero_sous_sa_forme_unique(): void
+    {
+        $this->register()->assertRedirect();
+
+        $this->assertSame('+2250707123456', $this->tenant->asCurrent(
+            fn () => Registration::latest('id')->value('phone'),
+        ));
+    }
+
+    public function test_un_numero_qui_n_est_pas_ivoirien_est_refuse(): void
+    {
+        // Le message lui-meme, pas seulement la presence d'une erreur : une cle de traduction
+        // absente s'afficherait telle quelle a l'invite. En anglais, la langue que le client de
+        // test annonce par defaut (`Accept-Language: en-us`).
+        $message = __('guest.registration.errors.phone_invalid', [], 'en');
+        $this->assertNotSame('guest.registration.errors.phone_invalid', $message);
+
+        $this->register(phone: '+221 77 123 45 67')->assertSessionHasErrors(['phone' => $message]);
+
+        $this->assertSame(0, $this->tenant->asCurrent(fn () => Registration::count()));
     }
 
     public function test_deux_reservations_expirees_imposent_une_attente(): void

@@ -89,7 +89,8 @@ class PhoneVerificationTest extends TestCase
         Notification::assertSentOnDemand(PhoneVerificationCode::class, function (PhoneVerificationCode $notification, array $channels, AnonymousNotifiable $notifiable) use (&$code) {
             $code = $notification->code;
 
-            return $notifiable->routeNotificationFor('whatsapp') === '+225 07 07 12 34 56';
+            // Le numero sous sa forme unique (`PhoneNumber`), celle qu'attend l'API WhatsApp.
+            return $notifiable->routeNotificationFor('whatsapp') === '+2250707123456';
         });
 
         return (string) $code;

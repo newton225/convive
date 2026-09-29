@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Public;
 
 use App\Models\Event;
+use App\Rules\IvorianPhoneNumber;
+use App\Support\PhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -21,6 +23,18 @@ class StoreRegistrationRequest extends FormRequest
     }
 
     /**
+     * Ramene le telephone a sa forme unique avant validation : c'est elle qui est enregistree et
+     * comparee (une seule reservation active par numero, attente apres expirations, SECURITY.md
+     * C3). Un numero qui n'est pas ivoirien reste tel quel, et la regle le refuse.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($normalized = PhoneNumber::normalize($this->input('phone'))) {
+            $this->merge(['phone' => $normalized]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
@@ -34,7 +48,7 @@ class StoreRegistrationRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:32', 'regex:/^\+?[0-9 ().-]{8,32}$/'],
+            'phone' => ['required', 'string', 'max:32', new IvorianPhoneNumber],
             // Facultatif (README 2.5) : WhatsApp, deja garanti par le telephone, reste le canal
             // systematique de la carte d'invitation (2.7), l'email s'y ajoute quand fourni.
             'email' => ['nullable', 'string', 'email', 'max:255'],

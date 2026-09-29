@@ -40,6 +40,7 @@ return [
 
     'registration' => [
         'errors' => [
+            'phone_invalid' => 'Enter a 10-digit Ivorian number, for example 07 07 12 34 56.',
             'phone_already_active' => 'A reservation is already in progress for this number. Finish it, or wait for its time limit to end before creating another.',
             'registrations_paused' => 'Online registration is temporarily paused for this event. Contact the organiser to book your seat.',
             'phone_backoff' => '{1} Several reservations expired for this number without a payment proof. Try again in 1 minute.|[2,*] Several reservations expired for this number without a payment proof. Try again in :minutes minutes.',

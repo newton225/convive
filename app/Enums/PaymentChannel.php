@@ -34,6 +34,26 @@ enum PaymentChannel: string
     }
 
     /**
+     * Get the number prefixes this mobile money channel accepts, or `null` when the channel is
+     * not a mobile network (bank transfer, cash) and its number follows no telephone format.
+     *
+     * Numeros ivoiriens (decision du 2026-09-29) : Orange 07, MTN 05, Moov 01. Wave n'est pas un
+     * operateur, il s'appuie sur le numero de l'abonne, quel que soit son reseau mobile.
+     *
+     * @return array<int, string>|null
+     */
+    public function mobilePrefixes(): ?array
+    {
+        return match ($this) {
+            self::OrangeMoney => ['07'],
+            self::MtnMoney => ['05'],
+            self::MoovMoney => ['01'],
+            self::Wave => ['01', '05', '07'],
+            self::BankTransfer, self::Cash => null,
+        };
+    }
+
+    /**
      * @return array<int, string>
      */
     public static function values(): array

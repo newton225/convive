@@ -70,6 +70,8 @@ return [
 
     'errors' => [
         'account_number_required' => 'Ce canal exige un numéro de compte.',
+        'number_invalid' => 'Saisissez un numéro ivoirien à 10 chiffres, par exemple 07 07 12 34 56.',
+        'number_network' => 'Un numéro :channel commence par :prefixes. Vérifiez le numéro ou le canal choisi.',
     ],
 
     'confirm_approve' => [

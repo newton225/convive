@@ -5,6 +5,7 @@ namespace App\Http\Requests\Tenants;
 use App\Enums\PaymentChannel;
 use App\Models\PaymentAccount;
 use App\Models\Tenant;
+use App\Support\PhoneNumber;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -25,6 +26,23 @@ class SavePaymentAccountRequest extends FormRequest
         return $account instanceof PaymentAccount
             ? Gate::allows('update', [$account, $tenant])
             : Gate::allows('create', [PaymentAccount::class, $tenant]);
+    }
+
+    /**
+     * Ramene le numero d'un compte mobile money a sa forme unique, affichee par paires
+     * (`+225 07 07 12 34 56`) : c'est elle que l'invite copie, et elle que la demande de
+     * changement compare a l'ancienne. Un numero qui n'est pas ivoirien reste tel quel, et
+     * `after()` le refuse. Virement et especes gardent leur saisie : un RIB n'est pas un telephone.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (PaymentChannel::tryFrom((string) $this->input('channel'))?->mobilePrefixes() === null) {
+            return;
+        }
+
+        if ($normalized = PhoneNumber::normalize($this->input('account_number'))) {
+            $this->merge(['account_number' => PhoneNumber::format($normalized)]);
+        }
     }
 
     /**
@@ -66,6 +84,27 @@ class SavePaymentAccountRequest extends FormRequest
                         'account_number',
                         __('payment_accounts.errors.account_number_required'),
                     );
+
+                    return;
+                }
+
+                // Un numero mobile money ivoirien, du reseau du canal (decision du 2026-09-29) :
+                // un « 05 » sous Orange Money enverrait l'argent des invites vers un numero MTN.
+                $prefixes = $channel?->mobilePrefixes();
+
+                if ($prefixes === null || blank($this->input('account_number'))) {
+                    return;
+                }
+
+                $normalized = PhoneNumber::normalize($this->input('account_number'));
+
+                if ($normalized === null) {
+                    $validator->errors()->add('account_number', __('payment_accounts.errors.number_invalid'));
+                } elseif (! in_array(PhoneNumber::prefix($normalized), $prefixes, true)) {
+                    $validator->errors()->add('account_number', __('payment_accounts.errors.number_network', [
+                        'channel' => $channel->label(),
+                        'prefixes' => implode(', ', $prefixes),
+                    ]));
                 }
             },
         ];

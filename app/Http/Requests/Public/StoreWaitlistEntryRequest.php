@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Public;
 
 use App\Models\Event;
+use App\Rules\IvorianPhoneNumber;
+use App\Support\PhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -20,6 +22,16 @@ class StoreWaitlistEntryRequest extends FormRequest
     }
 
     /**
+     * Meme forme unique du telephone que l'inscription (voir `StoreRegistrationRequest`).
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($normalized = PhoneNumber::normalize($this->input('phone'))) {
+            $this->merge(['phone' => $normalized]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * Memes regles que `StoreRegistrationRequest` : la liste d'attente collecte les memes
@@ -33,7 +45,7 @@ class StoreWaitlistEntryRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:32', 'regex:/^\+?[0-9 ().-]{8,32}$/'],
+            'phone' => ['required', 'string', 'max:32', new IvorianPhoneNumber],
             'unit_id' => ['required', 'integer', $activeUnit],
 
             'companions' => ['array', 'max:'.$this->event()->companion_limit],

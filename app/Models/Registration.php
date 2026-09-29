@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RegistrationStatus;
+use App\Support\PhoneNumber;
 use Carbon\CarbonInterface;
 use Database\Factories\RegistrationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -275,14 +276,12 @@ class Registration extends Model
      * number : reservation en cours ou preuve en attente de verification (SECURITY.md C3, « une
      * seule reservation active par numero de telephone et par evenement »).
      *
-     * Compare les chiffres seuls : `+225 07 07` et `+22507 07` designent le meme telephone. Le
-     * nombre de reservations actives d'un evenement est borne par sa capacite, la comparaison en
-     * PHP reste donc petite.
+     * Compare les numeros sous leur forme unique (`PhoneNumber::same`) : `+225 07 07...` et
+     * `07 07...` designent le meme telephone. Le nombre de reservations actives d'un evenement est
+     * borne par sa capacite, la comparaison en PHP reste donc petite.
      */
     public static function phoneHoldsSeats(Event $event, string $phone, ?int $exceptId = null): bool
     {
-        $digits = preg_replace('/\D+/', '', $phone);
-
         return self::query()
             ->where('event_id', $event->id)
             ->when($exceptId !== null, fn (Builder $query) => $query->whereKeyNot($exceptId))
@@ -292,7 +291,7 @@ class Registration extends Model
                         ->where('held_until', '>', now()));
             })
             ->pluck('phone')
-            ->contains(fn (string $other) => preg_replace('/\D+/', '', $other) === $digits);
+            ->contains(fn (string $other) => PhoneNumber::same($other, $phone));
     }
 
     /**
@@ -313,12 +312,10 @@ class Registration extends Model
      */
     public static function phoneBackoffUntil(Event $event, string $phone): ?CarbonInterface
     {
-        $digits = preg_replace('/\D+/', '', $phone);
-
         $samePhone = self::query()
             ->where('event_id', $event->id)
             ->get(['id', 'phone', 'status', 'held_until', 'lapsed_holds_count'])
-            ->filter(fn (self $registration) => preg_replace('/\D+/', '', $registration->phone) === $digits);
+            ->filter(fn (self $registration) => PhoneNumber::same($registration->phone, $phone));
 
         $lapsed = $samePhone->filter(fn (self $registration) => $registration->status === RegistrationStatus::Expired
             || $registration->holdHasExpired());

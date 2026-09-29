@@ -572,4 +572,87 @@ class PaymentAccountTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page->where('paymentAccountNotice', null));
     }
+
+    /**
+     * Numero demande pour un nouveau compte : il n'a pas encore de valeur vivante, la demande
+     * porte dans `pending_account_number`.
+     */
+    private function requestedNumber(Tenant $tenant): ?string
+    {
+        return $tenant->asCurrent(fn () => PaymentAccount::latest('id')->value('pending_account_number'));
+    }
+
+    public function test_un_numero_orange_doit_commencer_par_07(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAsConfirmed($owner)
+            ->post(route('tenants.payment-accounts.store', $tenant), $this->payload([
+                'channel' => PaymentChannel::OrangeMoney->value,
+                'account_number' => '+225 05 05 11 22 33',
+            ]))
+            ->assertSessionHasErrors('account_number');
+
+        $this->assertSame(0, $tenant->asCurrent(fn () => PaymentAccount::count()));
+    }
+
+    public function test_wave_accepte_un_numero_de_tout_reseau_mobile(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAsConfirmed($owner)
+            ->post(route('tenants.payment-accounts.store', $tenant), $this->payload([
+                'channel' => PaymentChannel::Wave->value,
+                'account_number' => '05 05 11 22 33',
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('+225 05 05 11 22 33', $this->requestedNumber($tenant));
+    }
+
+    public function test_le_numero_est_enregistre_sous_une_forme_unique(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAsConfirmed($owner)
+            ->post(route('tenants.payment-accounts.store', $tenant), $this->payload([
+                'channel' => PaymentChannel::MoovMoney->value,
+                'account_number' => '00225 0101020304',
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('+225 01 01 02 03 04', $this->requestedNumber($tenant));
+    }
+
+    public function test_un_numero_d_un_autre_pays_est_refuse(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAsConfirmed($owner)
+            ->post(route('tenants.payment-accounts.store', $tenant), $this->payload([
+                'channel' => PaymentChannel::Wave->value,
+                'account_number' => '+221 77 123 45 67',
+            ]))
+            ->assertSessionHasErrors('account_number');
+    }
+
+    public function test_un_virement_garde_son_numero_de_compte_tel_quel(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        // Un RIB n'est pas un telephone : aucun format de reseau mobile ne s'y applique.
+        $this->actingAsConfirmed($owner)
+            ->post(route('tenants.payment-accounts.store', $tenant), $this->payload([
+                'channel' => PaymentChannel::BankTransfer->value,
+                'account_number' => 'CI008 01234 012345678901 23',
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('CI008 01234 012345678901 23', $this->requestedNumber($tenant));
+    }
 }
