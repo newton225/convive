@@ -93,7 +93,9 @@ class HomeTest extends TestCase
 
     public function test_la_vitrine_est_en_francais_par_defaut(): void
     {
-        $this->get('/')->assertInertia(fn ($page) => $page
+        // Une langue explicite et non servie : sans en-tete, `Request::create()` de Symfony en pose
+        // un par defaut (`en-us`), et le test simulerait sans le dire un navigateur anglophone.
+        $this->withHeader('Accept-Language', 'de-DE,de;q=0.9')->get('/')->assertInertia(fn ($page) => $page
             ->where('locale', 'fr')
             ->where('translations.site.nav.pricing', 'Tarifs'),
         );

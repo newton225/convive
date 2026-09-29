@@ -96,13 +96,15 @@ class ConnectedDevicesTest extends TestCase
     public function test_un_mauvais_mot_de_passe_ne_ferme_aucune_session(): void
     {
         $user = User::factory()->create();
-        $this->openSession($user, self::IphoneSafari);
+        $otherDevice = $this->openSession($user, self::IphoneSafari);
 
         $this->actingAs($user)
             ->delete(route('other-sessions.destroy'), ['password' => 'mauvais-mot-de-passe'])
             ->assertSessionHasErrors('password');
 
-        $this->assertSame(1, $this->sessions()->where('user_id', $user->id)->count());
+        // La session de la requete elle-meme est aussi ecrite en base (pilote `database`) : on
+        // verifie celle de l'autre appareil, pas un total qui l'inclurait.
+        $this->assertTrue($this->sessions()->where('id', $otherDevice)->exists());
     }
 
     public function test_un_visiteur_non_connecte_est_renvoye_vers_la_connexion(): void

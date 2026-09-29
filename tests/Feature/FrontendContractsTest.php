@@ -11,9 +11,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Les contrats serveur vers client que l'interface complete a ajoutes : le tableau de bord
- * (README ecran 17), la cle publique de verification du scan hors ligne (README 2.8) et les
- * permissions partagees qui masquent les liens interdits du menu.
+ * Les contrats serveur vers client que l'interface complete a ajoutes : la cle publique de
+ * verification du scan hors ligne (README 2.8) et les permissions partagees qui masquent les
+ * liens interdits du menu. Le tableau de bord (README ecran 17) a quitte son jeu d'exemple pour
+ * les vraies donnees : ses contrats sont dans `DashboardTest`.
  */
 class FrontendContractsTest extends TestCase
 {
@@ -30,36 +31,6 @@ class FrontendContractsTest extends TestCase
         $this->owner = User::factory()->withTwoFactor()->create();
         $this->tenant = app(CreateTenant::class)->handle($this->owner, 'Association Convive');
         $this->owner->switchTenant($this->tenant);
-    }
-
-    public function test_le_tableau_de_bord_porte_un_apercu_d_exemple_annonce_comme_tel(): void
-    {
-        $this->actingAs($this->owner->fresh())
-            ->get(route('dashboard', $this->tenant))
-            ->assertOk()
-            ->assertInertia(fn ($page) => $page
-                ->component('dashboard')
-                ->where('overview.isSample', true)
-                ->has('overview.kpis', fn ($kpis) => $kpis->hasAll(['registrations', 'validated', 'toCheck', 'withoutProof', 'seatsLeft']))
-                ->has('overview.registrationsPerDay', 14)
-                ->has('overview.proofsByChannel')
-                ->has('overview.tableOccupancy')
-                ->has('overview.recentActivity'),
-            );
-    }
-
-    public function test_les_chiffres_d_exemple_du_tableau_de_bord_sont_coherents_entre_eux(): void
-    {
-        $this->actingAs($this->owner->fresh())
-            ->get(route('dashboard', $this->tenant))
-            ->assertInertia(fn ($page) => $page
-                ->where('overview.kpis', function ($kpis) {
-                    $kpis = collect($kpis);
-
-                    return $kpis['registrations'] === $kpis['validated'] + $kpis['toCheck'] + $kpis['withoutProof'];
-                })
-                ->where('overview.registrationsPerDay', fn ($days) => collect($days)->sum('count') === 142),
-            );
     }
 
     public function test_l_ecran_de_scan_donne_la_cle_publique_jamais_la_cle_privee(): void

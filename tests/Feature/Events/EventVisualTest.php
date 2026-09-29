@@ -157,9 +157,11 @@ class EventVisualTest extends TestCase
             'file' => UploadedFile::fake()->image('visuel.png'),
         ]);
 
-        $media = $tenant->asCurrent(fn () => $event->fresh()->getFirstMedia(Event::VisualCollection));
+        // Le chemin d'un media de la base du locataire se calcule dans son contexte, comme lors du
+        // depot : hors tenancy, `TenantMediaPathGenerator` ne sait pas a quelle organisation il est.
+        $path = $tenant->asCurrent(fn () => $event->fresh()->getFirstMedia(Event::VisualCollection)->getPathRelativeToRoot());
 
-        $this->assertStringStartsWith("tenants/{$tenant->id}/visual/", $media->getPathRelativeToRoot());
+        $this->assertStringStartsWith("tenants/{$tenant->id}/visual/", $path);
     }
 
     public function test_le_proprietaire_supprime_le_visuel(): void

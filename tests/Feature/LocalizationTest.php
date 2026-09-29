@@ -67,9 +67,11 @@ class LocalizationTest extends TestCase
     {
         $user = User::factory()->create();
 
+        // La vitrine plutot que l'accueil : l'accueil est reserve aux visiteurs et renvoie un
+        // membre connecte vers son espace.
         $this->actingAs($user)
             ->withHeader('Accept-Language', 'en-GB,en;q=0.9')
-            ->get('/')
+            ->get(route('showcase.index'))
             ->assertOk();
 
         $this->assertSame('fr', App::getLocale());
@@ -79,7 +81,7 @@ class LocalizationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->get('/?lang=en')->assertOk();
+        $this->actingAs($user)->get(route('showcase.index', ['lang' => 'en']))->assertOk();
 
         $this->assertSame('en', App::getLocale());
     }

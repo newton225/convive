@@ -39,6 +39,9 @@ class MessageQuotaTest extends TestCase
 
         $this->owner = User::factory()->withTwoFactor()->create();
         $this->tenant = app(CreateTenant::class)->handle($this->owner, 'Association Convive');
+        // Un evenement publie suppose un sous-domaine : sans lui, la carte n'a pas de lien a
+        // porter et `SendInvitationCard` refuse l'envoi avant meme de consulter le quota.
+        $this->tenant->update(['subdomain' => 'convive-ci']);
     }
 
     private function confirmedRegistration(): Registration

@@ -42,6 +42,22 @@ class AuditLogTest extends TestCase
         return $member;
     }
 
+    /**
+     * Cree un evenement comme l'application le fait, par `SaveEvent`, qui ecrit l'entree
+     * `event.created`. Une simple factory ne journalise rien : le modele n'a pas de trait de
+     * journalisation automatique, ce sont les actions qui ecrivent au journal.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    private function createEvent(Tenant $tenant, array $attributes = []): Event
+    {
+        return $tenant->asCurrent(fn () => app(SaveEvent::class)->handle(
+            null,
+            Event::factory()->make($attributes)->getAttributes(),
+            [],
+        ));
+    }
+
     public function test_un_membre_avec_la_permission_voit_le_journal(): void
     {
         $this->tenant->asCurrent(function () {
@@ -65,7 +81,9 @@ class AuditLogTest extends TestCase
 
     public function test_l_entree_porte_l_acteur_et_l_adresse_ip_de_la_requete(): void
     {
-        $this->tenant->asCurrent(fn () => Event::factory()->create());
+        // Connecte avant l'action : c'est lui qui cree l'evenement, donc l'acteur du journal.
+        $this->actingAs($this->owner);
+        $this->createEvent($this->tenant);
 
         $this->actingAs($this->owner)
             ->get(route('tenants.audit.index', $this->tenant))
@@ -89,9 +107,7 @@ class AuditLogTest extends TestCase
 
     public function test_le_filtre_de_type_ne_montre_que_ce_type(): void
     {
-        $this->tenant->asCurrent(function () {
-            Event::factory()->create();
-        });
+        $this->createEvent($this->tenant);
 
         $this->actingAs($this->owner)
             ->get(route('tenants.audit.index', $this->tenant).'?filter[type]=event.created')
@@ -132,9 +148,9 @@ class AuditLogTest extends TestCase
     {
         $otherOwner = User::factory()->withTwoFactor()->create();
         $other = app(CreateTenant::class)->handle($otherOwner, 'Autre Association');
-        $other->asCurrent(fn () => Event::factory()->create(['name' => 'Evenement etranger']));
+        $this->createEvent($other, ['name' => 'Evenement etranger']);
 
-        $this->tenant->asCurrent(fn () => Event::factory()->create(['name' => 'Notre evenement']));
+        $this->createEvent($this->tenant, ['name' => 'Notre evenement']);
 
         $entries = $this->tenant->asCurrent(fn () => Activity::count());
 

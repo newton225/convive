@@ -326,10 +326,16 @@ class Tenant extends Model implements TenantWithDatabase
 
     /**
      * Get the tenant's branding, creating an empty one on first access.
+     *
+     * Relue apres creation : les valeurs par defaut des colonnes (`ticket_model`, elements du
+     * billet...) sont posees par la base, et le modele tout juste insere ne les connait pas. Sans
+     * cette relecture, le gabarit du billet d'un espace neuf levait une erreur 500.
      */
     public function brandingOrCreate(): TenantBranding
     {
-        return $this->branding()->firstOrCreate([]);
+        $branding = $this->branding()->firstOrCreate([]);
+
+        return $branding->wasRecentlyCreated ? $branding->refresh() : $branding;
     }
 
     /**

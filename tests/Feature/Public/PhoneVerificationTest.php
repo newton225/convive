@@ -104,8 +104,11 @@ class PhoneVerificationTest extends TestCase
     {
         Notification::fake();
 
-        $event = $this->tenant->asCurrent(fn () => Event::factory()->published()->create());
-        $this->assertFalse($event->fresh()->rule_phone_verification);
+        // Relu en base dans le contexte du locataire : hors tenancy, la connexion `tenant` n'existe
+        // plus et `fresh()` echouerait. La valeur par defaut est celle de la colonne.
+        $this->assertFalse($this->tenant->asCurrent(
+            fn () => Event::factory()->published()->create()->fresh()->rule_phone_verification,
+        ));
 
         $this->register($this->event(false));
 

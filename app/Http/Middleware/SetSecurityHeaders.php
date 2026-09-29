@@ -31,11 +31,22 @@ class SetSecurityHeaders
 
         $response = $next($request);
 
-        $response->headers->set('Content-Security-Policy', $this->csp($nonce));
-        $response->headers->set('X-Content-Type-Options', 'nosniff');
-        $response->headers->set('X-Frame-Options', 'DENY');
-        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        $response->headers->set('Permissions-Policy', $this->permissionsPolicy());
+        // Des valeurs par defaut, jamais un ecrasement : une route qui pose une politique plus
+        // stricte la garde. Le telechargement d'un recu (SECURITY.md H2) envoie `no-referrer` et
+        // une CSP `sandbox` ; les remplacer ici laissait fuir son URL signee dans le Referer.
+        $defaults = [
+            'Content-Security-Policy' => $this->csp($nonce),
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'DENY',
+            'Referrer-Policy' => 'strict-origin-when-cross-origin',
+            'Permissions-Policy' => $this->permissionsPolicy(),
+        ];
+
+        foreach ($defaults as $header => $value) {
+            if (! $response->headers->has($header)) {
+                $response->headers->set($header, $value);
+            }
+        }
 
         // HSTS n'a de sens que sur une reponse deja servie en HTTPS : l'emettre sur du HTTP nu
         // n'a aucun effet (les navigateurs l'ignorent par specification), mais l'omettre en local

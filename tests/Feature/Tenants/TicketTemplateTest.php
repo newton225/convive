@@ -117,6 +117,21 @@ class TicketTemplateTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_le_gabarit_s_ouvre_pour_une_organisation_qui_n_a_jamais_enregistre_sa_marque(): void
+    {
+        // Reproduit une erreur 500 : la fiche de marque creee a la volee ne portait pas les
+        // valeurs par defaut de ses colonnes (`ticket_model`), posees par la base et jamais relues.
+        $this->assertNull($this->tenant->branding()->first());
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.ticket-template.edit', $this->tenant))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('model', TicketModel::Classic->value)
+                ->where('elements.logo', true),
+            );
+    }
+
     public function test_le_gabarit_ne_liste_pas_les_evenements_d_une_autre_organisation(): void
     {
         $otherOwner = User::factory()->withTwoFactor()->create();
@@ -125,6 +140,7 @@ class TicketTemplateTest extends TestCase
 
         $this->actingAs($this->owner)
             ->get(route('tenants.ticket-template.edit', $this->tenant))
+            ->assertOk()
             ->assertInertia(fn ($page) => $page->has('events', 0));
     }
 }

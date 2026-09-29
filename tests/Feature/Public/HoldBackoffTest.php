@@ -96,7 +96,8 @@ class HoldBackoffTest extends TestCase
     public function test_deux_reservations_expirees_imposent_une_attente(): void
     {
         $this->expiredRegistration();
-        $this->expiredRegistration('07 07 12 34 56 (+225)');
+        // Le meme numero, autrement ecrit : l'indicatif entre parentheses.
+        $this->expiredRegistration('(+225) 07 07 12 34 56');
 
         $until = $this->tenant->asCurrent(fn () => Registration::phoneBackoffUntil($this->event, self::Phone));
 

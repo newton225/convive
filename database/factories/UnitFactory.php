@@ -13,12 +13,16 @@ class UnitFactory extends Factory
     /**
      * Define the model's default state.
      *
+     * Jamais un nom des unites de depart (`Unit::Starters`) : l'ouverture d'un espace les cree
+     * deja, et le nom est unique dans une organisation. Une unite fabriquee dans un espace ouvert
+     * normalement entrait en collision avec l'une d'elles.
+     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->randomElement(Unit::Starters),
+            'name' => mb_strtoupper(fake()->unique()->lexify('Unite ?????')),
             'position' => fake()->numberBetween(0, 10),
             'is_active' => true,
         ];

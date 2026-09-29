@@ -54,7 +54,10 @@ class SecurityHeadersTest extends TestCase
 
     public function test_hsts_present_sur_une_requete_securisee()
     {
-        $response = $this->withServerVariables(['HTTPS' => 'on'])->get(route('login'));
+        // Une URL en `https://` : c'est son schema qui rend la requete securisee. Une variable
+        // `HTTPS` ne suffit pas, le client de test prefixe tout chemin par `app.url` (`http://`)
+        // et Symfony recalcule alors le schema a partir de l'URL.
+        $response = $this->get(preg_replace('#^http://#', 'https://', route('login')));
 
         $response->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }

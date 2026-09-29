@@ -95,6 +95,8 @@ class ReceiptAccessTest extends TestCase
         $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         $this->assertSame('no-referrer', $response->headers->get('Referrer-Policy'));
         $this->assertSame('nosniff', $response->headers->get('X-Content-Type-Options'));
+        // La CSP propre au recu survit a celle de toute l'application, posee apres coup.
+        $this->assertSame('sandbox', $response->headers->get('Content-Security-Policy'));
     }
 
     public function test_chaque_consultation_d_un_recu_est_journalisee_avec_l_acteur(): void

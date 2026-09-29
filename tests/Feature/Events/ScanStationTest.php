@@ -38,7 +38,10 @@ class ScanStationTest extends TestCase
         [$this->event, $this->token] = $this->tenant->asCurrent(function () {
             $event = Event::factory()->open()->create();
             $registration = Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 1]);
-            Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 1]);
+            // Une inscription confirmee a toujours ses billets : l'ecran compte les personnes
+            // attendues par billet emis (README 2.8, un billet par personne), pas par inscription.
+            $other = Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 1]);
+            app(IssueTicket::class)->handle($other);
             Registration::factory()->held()->create(['event_id' => $event->id]);
 
             return [$event, app(IssueTicket::class)->handle($registration)->signedToken()];

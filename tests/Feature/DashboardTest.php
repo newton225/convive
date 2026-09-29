@@ -232,8 +232,11 @@ class DashboardTest extends TestCase
         $other = $this->tenantOwnedBy($otherOwner, 'Autre Association');
         $other->asCurrent(fn () => Event::factory()->open()->create(['name' => 'Evenement etranger']));
 
+        // Organisation explicite : creer « Autre Association » a bascule la valeur par defaut de
+        // `current_tenant` dans les URL (`switchTenant`) vers celle-ci, et `route('dashboard')`
+        // nu viserait l'espace d'un autre (404, a juste titre).
         $this->actingAs($owner)
-            ->get(route('dashboard'))
+            ->get(route('dashboard', ['current_tenant' => $tenant->slug]))
             ->assertInertia(fn (Assert $page) => $page->where('overview.eventName', 'Notre evenement'));
     }
 

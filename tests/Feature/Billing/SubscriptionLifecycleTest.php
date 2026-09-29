@@ -132,9 +132,9 @@ class SubscriptionLifecycleTest extends TestCase
         $subscription = $this->subscription('pastDue', 3);
 
         $manager = User::factory()->withTwoFactor()->create();
-        $this->joinWithPermissions($this->tenant, $manager, [TenantPermission::BillingManage]);
+        $this->joinWithPermissions($this->tenant, $manager, [TenantPermission::BillingManage], 'Gestion');
         $reader = User::factory()->withTwoFactor()->create();
-        $this->joinWithPermissions($this->tenant, $reader, [TenantPermission::EventsView]);
+        $this->joinWithPermissions($this->tenant, $reader, [TenantPermission::EventsView], 'Lecteur');
 
         $result = app(ProcessOverdueSubscriptions::class)->handle();
 

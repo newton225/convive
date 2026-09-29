@@ -36,7 +36,9 @@ class SendAlertTest extends TestCase
     private function memberWith(Tenant $tenant, array $permissions): User
     {
         $member = User::factory()->withTwoFactor()->create();
-        $this->joinWithPermissions($tenant, $member, $permissions);
+        // Un profil par membre, au nom distinct : deux profils ne portent pas le meme nom dans
+        // une organisation.
+        $this->joinWithPermissions($tenant, $member, $permissions, 'Profil '.$member->id);
 
         return $member;
     }

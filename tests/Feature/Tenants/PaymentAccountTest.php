@@ -5,6 +5,7 @@ namespace Tests\Feature\Tenants;
 use App\Actions\Tenants\CreateTenant;
 use App\Enums\PaymentChannel;
 use App\Enums\TenantPermission;
+use App\Http\Middleware\EnforceAbsoluteSessionLifetime;
 use App\Models\PaymentAccount;
 use App\Models\Profile;
 use App\Models\Tenant;
@@ -53,9 +54,14 @@ class PaymentAccountTest extends TestCase
         $this->actingAs($user);
         // `now()` et non `time()` : apres un voyage dans le temps, la confirmation datee
         // de l'horloge reelle serait consideree comme perimee.
+        //
+        // Une session fraiche, aussi : ces tests sautent 25 heures entre deux requetes, et une
+        // session ouverte avant le saut depasse sa duree de vie absolue (12 h,
+        // `EnforceAbsoluteSessionLifetime`). Le lendemain, le membre s'est reconnecte.
         $this->session([
             'auth.password_confirmed_at' => now()->getTimestamp(),
             'auth.two_factor_confirmed_at' => now()->getTimestamp(),
+            EnforceAbsoluteSessionLifetime::SessionKey => now()->getTimestamp(),
         ]);
 
         return $this;
