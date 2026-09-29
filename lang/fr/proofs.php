@@ -61,6 +61,11 @@ return [
         'single_expand' => 'Une seule ligne ouverte à la fois',
     ],
 
+    'confirm' => [
+        'registration' => 'Dossier',
+        'phone' => 'Téléphone',
+    ],
+
     'companions' => [
         'none' => 'Aucun accompagnateur',
         'count' => '{0} Aucun accompagnateur|{1} 1 accompagnateur|[2,*] :count accompagnateurs',

@@ -13,10 +13,11 @@ import {
     type Updater,
 } from '@tanstack/react-table';
 import { ChevronRight, ExternalLink, MessageSquareText } from 'lucide-react';
-import { Fragment, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { formatPhoneNumberIntl } from 'react-phone-number-input';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { DataTableSortHeader } from '@/components/data-table-sort-header';
+import { ProofConfirmSummary } from '@/components/proofs/proof-confirm-summary';
 import { ProofDetails } from '@/components/proofs/proof-details';
 import { ProofsToolbar } from '@/components/proofs/proofs-toolbar';
 import Heading from '@/components/heading';
@@ -394,6 +395,18 @@ export default function EventProofs({
     // (`spatie/laravel-query-builder`) ne se justifient qu'au-dela de quelques milliers (CLAUDE.md).
     // Lignes depliables : le detail d'une preuve s'ouvre sous sa ligne plutot que d'allonger toutes
     // les lignes. Par defaut, les plus anciennes en tete : une file se traite dans l'ordre d'arrivee.
+    // Poses par la barre d'outils ; appliques par le `filterFn` de chaque colonne. La reference
+    // doit rester stable d'un rendu a l'autre : un tableau neuf a chaque rendu fait recalculer le
+    // filtrage par TanStack, qui remet alors la pagination a zero, d'ou un nouveau rendu, et la
+    // page se figeait en boucle au premier tri ou a la premiere frappe dans la recherche.
+    const columnFilters = useMemo(
+        () => [
+            { id: 'name', value: search },
+            { id: 'signals', value: signalFilter },
+        ],
+        [search, signalFilter],
+    );
+
     const table = useReactTable({
         data: rows,
         columns,
@@ -401,11 +414,7 @@ export default function EventProofs({
         state: {
             expanded,
             sorting,
-            // Poses par la barre d'outils ; appliques par le `filterFn` de chaque colonne.
-            columnFilters: [
-                { id: 'name', value: search },
-                { id: 'signals', value: signalFilter },
-            ],
+            columnFilters,
         },
         onExpandedChange: changeExpanded,
         onSortingChange: setSorting,
@@ -630,33 +639,7 @@ export default function EventProofs({
                 }}
             >
                 {approving ? (
-                    <dl className="bg-muted grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 rounded-lg p-3 text-sm">
-                        <dt className="text-muted-foreground">
-                            {t('proofs.columns.name')}
-                        </dt>
-                        <dd className="font-medium">{approving.name}</dd>
-                        <dt className="text-muted-foreground">
-                            {t('proofs.columns.amount_due')}
-                        </dt>
-                        <dd>{formatAmount(approving.amountDue, locale)}</dd>
-                        <dt className="text-muted-foreground">
-                            {t('proofs.columns.reference')}
-                        </dt>
-                        <dd>{approving.reference ?? '-'}</dd>
-                        {approving.guestNote ? (
-                            <>
-                                <dt className="text-muted-foreground">
-                                    {t('proofs.columns.guest_note')}
-                                </dt>
-                                <dd
-                                    className="break-words whitespace-pre-line"
-                                    data-test="approve-guest-note"
-                                >
-                                    {approving.guestNote}
-                                </dd>
-                            </>
-                        ) : null}
-                    </dl>
+                    <ProofConfirmSummary proof={approving} testId="approve" />
                 ) : null}
             </ConfirmActionDialog>
 
@@ -674,19 +657,12 @@ export default function EventProofs({
                         </DialogDescription>
                     </DialogHeader>
 
-                    {/* Lue avant de rejeter aussi : elle explique souvent l'ecart qui fait douter. */}
-                    {rejecting?.guestNote ? (
-                        <div className="bg-muted space-y-1 rounded-lg p-3 text-sm">
-                            <p className="text-muted-foreground">
-                                {t('proofs.columns.guest_note')}
-                            </p>
-                            <p
-                                className="break-words whitespace-pre-line"
-                                data-test="reject-guest-note"
-                            >
-                                {rejecting.guestNote}
-                            </p>
-                        </div>
+                    {/* La precision de l'invite y figure aussi : elle explique souvent l'ecart qui fait douter. */}
+                    {rejecting ? (
+                        <ProofConfirmSummary
+                            proof={rejecting}
+                            testId="reject"
+                        />
                     ) : null}
 
                     <DialogFooter className="gap-2">

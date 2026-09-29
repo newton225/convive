@@ -61,6 +61,11 @@ return [
         'single_expand' => 'Only one row open at a time',
     ],
 
+    'confirm' => [
+        'registration' => 'Registration',
+        'phone' => 'Phone',
+    ],
+
     'companions' => [
         'none' => 'No companion',
         'count' => '{0} No companion|{1} 1 companion|[2,*] :count companions',

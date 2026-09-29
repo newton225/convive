@@ -14,6 +14,12 @@ type Props<TData> = {
  * du tri, et le libelle accessible le dit aussi, la forme seule ne suffisant pas.
  */
 export function DataTableSortHeader<TData>({ column, label }: Props<TData>) {
+    // TanStack Table garde le meme objet `column` d'un rendu a l'autre et change son etat en
+    // interne : le React Compiler memoiserait `getIsSorted()` sur cette reference stable, et la
+    // fleche resterait figee apres un tri serveur. Le compilateur ecarte deja de lui-meme les
+    // composants qui appellent `useReactTable`, pas celui-ci qui ne recoit que la colonne.
+    'use no memo';
+
     const { t } = useTranslation();
     const sorted = column.getIsSorted();
     // L'action du prochain clic depend de la configuration du tableau (tri retirable ou non) :
