@@ -21,7 +21,7 @@ return [
 
     'sections' => [
         'identity' => 'Name, date and venue of the event.',
-        'seating' => 'Capacity is tables × seats per table: the room plan is what counts.',
+        'seating' => 'Capacity is the sum of the seats of every table: the room plan is what counts.',
         'deadlines' => 'Deadline, purge, hold duration and invitation sending.',
     ],
 
@@ -46,11 +46,22 @@ return [
         'invitations_send_at' => 'Invitation sending',
         'hold_duration_minutes' => 'Hold duration (minutes)',
         'payment_accounts' => 'Payment accounts offered',
+        'table_groups' => 'Tables in the room',
+    ],
+
+    'table_groups' => [
+        'tables' => 'tables of',
+        'seats' => 'seats',
+        'add' => 'Add tables of another size',
+        'remove' => 'Remove this group of tables',
+        'total' => '{0} No seat yet|{1} :tables table, 1 seat in total|[2,*] :tables tables, :count seats in total',
+        'empty' => 'No table yet: add a group to set the capacity.',
     ],
 
     'help' => [
-        'table_count' => 'The event capacity is worked out for you: number of tables times seats per table. On the day, the seating plan is what counts.',
-        'seats_per_table' => 'Every table has the same number of seats. A guest and their companions always sit at the same table.',
+        'primary_color' => 'The dominant colour of this event’s guest journey: the “Register” button, date, seat gauge, steps and email header. It applies from the public link through to the ticket.',
+        'secondary_color' => 'A quieter supporting colour: the action button in emails sent to guests, and the glow of the banner when the event has no visual.',
+        'table_groups' => 'Describe the room in groups of tables of the same size, for example 3 tables of 12 then 20 tables of 8. The event capacity is the sum of the seats of every table, and a given table can then be adjusted in the seating plan. A guest and their companions always sit at the same table.',
         'price_per_person' => 'Amount in CFA francs, with no decimals. Each companion pays this price too: the guest pays the price times the number of people registered.',
         'companion_limit' => 'Maximum number of people a guest can register with them (10 at most). Each one takes a seat and gets their own ticket.',
         'payment_accounts' => 'The accounts your guests pay into. You create them under Organisation, Payment accounts. A new or changed account only shows after a 24-hour security delay.',
@@ -171,7 +182,27 @@ return [
 
     'confirm_publish' => [
         'title' => 'Publish the event?',
-        'description' => "The public link opens for registration. Once published, the event can no longer be deleted (only closed) and the organisation's subdomain is locked.",
+        'description' => 'Review what guests will see: once the link is handed out, a mistake is harder to fix.',
+        'summary' => 'What guests will see',
+        'capacity' => 'Capacity',
+        'seats' => '{0} No seats|{1} 1 seat|[2,*] :count seats',
+        'not_set' => 'Not set',
+        'saved_values' => 'Saved values. If you changed the form, save it first.',
+        'consequences' => 'What can no longer change',
+        'consequence_link' => 'The public link opens for registration and stays the same for good.',
+        'consequence_subdomain' => "The organisation's subdomain is locked.",
+        'consequence_delete' => 'The event can no longer be deleted, only closed.',
+        'acknowledge' => 'I have checked this information and want to open registration.',
+    ],
+
+    'confirm_announce' => [
+        'title' => 'Announce on the showcase?',
+        'description' => '":name" will appear among the featured events on the Convive site, visible to every visitor, with its registration link. You can withdraw it at any time.',
+    ],
+
+    'confirm_withdraw_announcement' => [
+        'title' => 'Withdraw from the showcase?',
+        'description' => '":name" will disappear from the featured events on the Convive site. The public link stays valid and registration continues for those who already have it.',
     ],
 
     'confirm_close' => [

@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
+import { TableCapacityControl } from '@/components/seating/table-capacity-control';
 import { SubmitButton } from '@/components/submit-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -71,6 +72,9 @@ export default function EventSeating({
     const { t } = useTranslation();
     const [pending, setPending] = useState<number | null>(null);
     const canAssign = can(permissions, Permission.SeatingAssign);
+    // Changer la taille d'une table change la capacite de l'evenement : c'est la modification de
+    // l'evenement qui l'autorise, pas le placement (voir `SeatingTablePolicy::resize`).
+    const canResize = can(permissions, Permission.EventsUpdate);
 
     const options = tables.map((table) => ({
         value: String(table.id),
@@ -116,7 +120,7 @@ export default function EventSeating({
                                     <CardHeader>
                                         <CardTitle className="flex items-center justify-between text-base">
                                             <span>#{table.number}</span>
-                                            <span className="text-muted-foreground text-xs font-normal">
+                                            <span className="text-muted-foreground flex items-center gap-1 text-xs font-normal">
                                                 {t('seating.tables.seats', {
                                                     used: String(
                                                         table.capacity -
@@ -126,6 +130,19 @@ export default function EventSeating({
                                                         table.capacity,
                                                     ),
                                                 })}
+                                                {canResize ? (
+                                                    <TableCapacityControl
+                                                        tenantSlug={tenant.slug}
+                                                        eventId={event.id}
+                                                        tableId={table.id}
+                                                        tableNumber={
+                                                            table.number
+                                                        }
+                                                        capacity={
+                                                            table.capacity
+                                                        }
+                                                    />
+                                                ) : null}
                                             </span>
                                         </CardTitle>
                                         {table.reservedUnit ? (

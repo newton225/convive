@@ -1,13 +1,16 @@
-import { Form, Head, router } from '@inertiajs/react';
-import { AlertTriangle, Megaphone, Send } from 'lucide-react';
+import { Form, Head } from '@inertiajs/react';
+import { AlertTriangle, Send } from 'lucide-react';
 import { useState } from 'react';
-import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
+import { CopyButton } from '@/components/copy-button';
+import { AnnouncementButton } from '@/components/events/announcement-button';
 import { TemplatePicker } from '@/components/events/template-picker';
 import Heading from '@/components/heading';
+import { TableGroupsField } from '@/components/events/table-groups-field';
 import { HelpTip } from '@/components/help-tip';
 import { LabelWithHelp } from '@/components/label-with-help';
 import { ProductTourButton } from '@/components/product-tour-button';
 import EventVisualField from '@/components/events/event-visual-field';
+import { PublishEventDialog } from '@/components/events/publish-event-dialog';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { SubmitButton } from '@/components/submit-button';
@@ -15,15 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { translate, useTranslation } from '@/hooks/use-translation';
-import {
-    announce,
-    edit,
-    index,
-    publish,
-    store,
-    update,
-} from '@/routes/tenants/events';
-import { withdraw as withdrawAnnouncement } from '@/routes/tenants/events/announce';
+import { edit, index, store, update } from '@/routes/tenants/events';
 import type {
     EventDetails,
     EventPaymentAccountOption,
@@ -55,7 +50,6 @@ export default function EventForm({
 }: Props) {
     const { t } = useTranslation();
     const [confirmingPublish, setConfirmingPublish] = useState(false);
-    const [publishing, setPublishing] = useState(false);
     // Valeurs de depart des champs : l'evenement edite, sinon le modele choisi a la creation.
     const prefill = event ?? template;
     const [overrideColors, setOverrideColors] = useState<boolean>(
@@ -94,69 +88,53 @@ export default function EventForm({
                                     {t('events.badges.announced')}
                                 </Badge>
                             ) : null}
-                            <Button
-                                data-test="event-publish"
-                                data-tour="event-publish"
-                                disabled={!event.isReadyToPublish}
-                                onClick={() => setConfirmingPublish(true)}
-                            >
-                                <Send /> {t('events.actions.publish')}
-                            </Button>
-                            <ConfirmActionDialog
-                                open={confirmingPublish}
-                                onOpenChange={setConfirmingPublish}
-                                title={t('events.confirm_publish.title')}
-                                description={t(
-                                    'events.confirm_publish.description',
-                                )}
-                                confirmLabel={t('events.actions.publish')}
-                                processing={publishing}
-                                testId="event-publish-confirm"
-                                onConfirm={() =>
-                                    router.post(
-                                        publish([tenant.slug, event.id]).url,
-                                        {},
-                                        {
-                                            onStart: () => setPublishing(true),
-                                            onFinish: () =>
-                                                setPublishing(false),
-                                            onSuccess: () =>
-                                                setConfirmingPublish(false),
-                                        },
-                                    )
-                                }
-                            />
+                            {/* Une fois publie, il n'y a plus rien a publier : le bouton laisse
+                                place au lien lui-meme, seul geste encore utile. */}
                             {event.isPublished ? (
-                                <Button
-                                    variant="outline"
-                                    data-test={
-                                        event.isAnnounced
-                                            ? 'event-withdraw-announcement'
-                                            : 'event-announce'
-                                    }
-                                    onClick={() =>
-                                        event.isAnnounced
-                                            ? router.delete(
-                                                  withdrawAnnouncement([
-                                                      tenant.slug,
-                                                      event.id,
-                                                  ]).url,
-                                              )
-                                            : router.post(
-                                                  announce([
-                                                      tenant.slug,
-                                                      event.id,
-                                                  ]).url,
-                                              )
-                                    }
-                                >
-                                    <Megaphone />
-                                    {t(
-                                        event.isAnnounced
-                                            ? 'events.actions.withdraw_announcement'
-                                            : 'events.actions.announce',
-                                    )}
-                                </Button>
+                                <>
+                                    <Badge
+                                        data-test="event-published"
+                                        data-tour="event-publish"
+                                    >
+                                        {t('events.badges.published')}
+                                    </Badge>
+                                    {event.publicUrl ? (
+                                        <CopyButton
+                                            value={event.publicUrl}
+                                            label={t(
+                                                'events.actions.copy_link',
+                                            )}
+                                            size="default"
+                                            testId="event-copy-link"
+                                        />
+                                    ) : null}
+                                </>
+                            ) : (
+                                <>
+                                    <Button
+                                        data-test="event-publish"
+                                        data-tour="event-publish"
+                                        disabled={!event.isReadyToPublish}
+                                        onClick={() =>
+                                            setConfirmingPublish(true)
+                                        }
+                                    >
+                                        <Send /> {t('events.actions.publish')}
+                                    </Button>
+                                    <PublishEventDialog
+                                        open={confirmingPublish}
+                                        onOpenChange={setConfirmingPublish}
+                                        tenantSlug={tenant.slug}
+                                        event={event}
+                                        paymentAccounts={paymentAccounts}
+                                    />
+                                </>
+                            )}
+                            {event.isPublished ? (
+                                <AnnouncementButton
+                                    tenantSlug={tenant.slug}
+                                    event={event}
+                                />
                             ) : null}
                         </div>
                     ) : null}
@@ -289,6 +267,9 @@ export default function EventForm({
                                                     tenantColors.primary
                                                 }
                                                 error={errors.primary_color}
+                                                help={t(
+                                                    'events.help.primary_color',
+                                                )}
                                             />
                                             <Field
                                                 name="secondary_color"
@@ -301,6 +282,9 @@ export default function EventForm({
                                                     tenantColors.secondary
                                                 }
                                                 error={errors.secondary_color}
+                                                help={t(
+                                                    'events.help.secondary_color',
+                                                )}
                                             />
                                         </div>
                                     ) : (
@@ -330,29 +314,12 @@ export default function EventForm({
                                 title={t('events.steps.seating')}
                                 description={t('events.sections.seating')}
                             >
+                                <TableGroupsField
+                                    defaultGroups={prefill?.tableGroups ?? []}
+                                    errors={errors}
+                                />
+
                                 <div className="grid gap-4 sm:grid-cols-2">
-                                    <Field
-                                        name="table_count"
-                                        type="number"
-                                        label={t('events.fields.table_count')}
-                                        defaultValue={String(
-                                            prefill?.tableCount ?? 0,
-                                        )}
-                                        error={errors.table_count}
-                                        help={t('events.help.table_count')}
-                                    />
-                                    <Field
-                                        name="seats_per_table"
-                                        type="number"
-                                        label={t(
-                                            'events.fields.seats_per_table',
-                                        )}
-                                        defaultValue={String(
-                                            prefill?.seatsPerTable ?? 0,
-                                        )}
-                                        error={errors.seats_per_table}
-                                        help={t('events.help.seats_per_table')}
-                                    />
                                     <Field
                                         name="price_per_person"
                                         type="number"

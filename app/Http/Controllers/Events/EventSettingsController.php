@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Events;
 
 use App\Actions\Events\SaveEvent;
+use App\Actions\Seating\SyncSeatingTables;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\UpdateEventSettingsRequest;
 use App\Models\Event;
@@ -36,8 +37,10 @@ class EventSettingsController extends Controller
             'event' => [
                 'id' => $event->id,
                 'name' => $event->name,
-                'tableCount' => $event->table_count,
-                'seatsPerTable' => $event->seats_per_table,
+                // Les tables n'ont pas toutes la meme taille (decision du 2026-09-29) : la salle
+                // se lit en groupes, et le nombre de tables est celui du plan reel.
+                'tableGroups' => $groups = SyncSeatingTables::groupsOf($event),
+                'tableCount' => array_sum(array_column($groups, 'count')),
                 'capacity' => $event->capacity(),
                 'registrationDeadline' => $event->registration_deadline?->toISOString(),
                 'purgeAt' => $event->purge_at?->toISOString(),
@@ -64,6 +67,7 @@ class EventSettingsController extends Controller
                 'purgeOnExhaustion' => $event->rule_purge_on_exhaustion,
                 'temporaryHold' => $event->rule_temporary_hold,
                 'phoneVerification' => $event->rule_phone_verification,
+                'showRemainingSeats' => $event->rule_show_remaining_seats,
             ],
             // README ecran 24 : ces trois regles s'enregistrent mais ne gouvernent encore rien
             // (voir le commentaire de classe). L'ecran l'affiche plutot que de laisser croire
@@ -89,6 +93,7 @@ class EventSettingsController extends Controller
             'rule_purge_on_exhaustion' => $request->boolean('rule_purge_on_exhaustion'),
             'rule_temporary_hold' => $request->boolean('rule_temporary_hold'),
             'rule_phone_verification' => $request->boolean('rule_phone_verification'),
+            'rule_show_remaining_seats' => $request->boolean('rule_show_remaining_seats'),
         ]);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('event_settings.flash.updated')]);

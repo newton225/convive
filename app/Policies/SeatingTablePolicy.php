@@ -27,4 +27,15 @@ class SeatingTablePolicy
     {
         return $user->hasTenantPermission($tenant, TenantPermission::SeatingAssign);
     }
+
+    /**
+     * Determine whether the user can change how many seats a table has.
+     *
+     * La modification de l'evenement, pas le placement : changer la taille d'une table change la
+     * capacite de l'evenement, donc ce que le lien public offre aux invites.
+     */
+    public function resize(User $user, Tenant $tenant): bool
+    {
+        return $user->hasTenantPermission($tenant, TenantPermission::EventsUpdate);
+    }
 }

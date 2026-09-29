@@ -43,6 +43,16 @@ return [
 
     'errors' => [
         'table_full' => "Cette table n'a plus assez de places libres pour ce groupe.",
+        'table_occupied' => '{1} La table :number accueille déjà 1 personne : déplacez-la avant de retirer la table.|[2,*] La table :number accueille déjà :count personnes : déplacez-les avant de retirer la table.',
+        'table_too_small' => '{1} La table :number accueille déjà 1 personne : elle ne peut pas avoir moins de places.|[2,*] La table :number accueille déjà :count personnes : elle ne peut pas avoir moins de places.',
+        'below_taken' => "Il resterait :capacity places pour :taken déjà prises ou réservées : l'événement ne peut pas descendre sous ce nombre.",
+    ],
+
+    'capacity' => [
+        'label' => 'Places',
+        'edit' => 'Modifier le nombre de places',
+        'save' => 'Enregistrer',
+        'flash' => 'La table :number compte désormais :count places.',
     ],
 
     'flash' => [

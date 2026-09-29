@@ -43,6 +43,16 @@ return [
 
     'errors' => [
         'table_full' => 'This table no longer has enough free seats for this party.',
+        'table_occupied' => '{1} Table :number already seats 1 person: move them before removing the table.|[2,*] Table :number already seats :count people: move them before removing the table.',
+        'table_too_small' => '{1} Table :number already seats 1 person: it cannot have fewer seats.|[2,*] Table :number already seats :count people: it cannot have fewer seats.',
+        'below_taken' => 'Only :capacity seats would remain for :taken already taken or held: the event cannot go below that number.',
+    ],
+
+    'capacity' => [
+        'label' => 'Seats',
+        'edit' => 'Change the number of seats',
+        'save' => 'Save',
+        'flash' => 'Table :number now has :count seats.',
     ],
 
     'flash' => [

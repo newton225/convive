@@ -21,6 +21,8 @@ type Props = {
     onConfirm: () => void;
     processing?: boolean;
     destructive?: boolean;
+    // Garde le bouton d'action inactif tant qu'une condition n'est pas remplie (case cochee).
+    confirmDisabled?: boolean;
     testId?: string;
     children?: ReactNode;
 };
@@ -41,6 +43,7 @@ export function ConfirmActionDialog({
     onConfirm,
     processing = false,
     destructive = false,
+    confirmDisabled = false,
     testId,
     children,
 }: Props) {
@@ -67,6 +70,7 @@ export function ConfirmActionDialog({
                         type="button"
                         variant={destructive ? 'destructive' : 'default'}
                         processing={processing}
+                        disabled={confirmDisabled}
                         data-test={testId}
                         onClick={onConfirm}
                     >

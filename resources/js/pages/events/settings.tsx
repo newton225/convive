@@ -48,6 +48,7 @@ const RuleKeys = [
     'purgeOnExhaustion',
     'temporaryHold',
     'phoneVerification',
+    'showRemainingSeats',
 ] as const;
 
 const ReminderLabels = {
@@ -65,6 +66,7 @@ const RuleLabels = {
     purgeOnExhaustion: 'event_settings.rules.purge_on_exhaustion',
     temporaryHold: 'event_settings.rules.temporary_hold',
     phoneVerification: 'event_settings.rules.phone_verification',
+    showRemainingSeats: 'event_settings.rules.show_remaining_seats',
 } as const;
 
 // Seules les regles appliquees ont une aide : expliquer une regle qui n'agit pas encore, dont le
@@ -74,6 +76,7 @@ const RuleHelp: Partial<Record<keyof typeof RuleLabels, string>> = {
     autoSeating: 'event_settings.rules_help.auto_seating',
     purgeOnExhaustion: 'event_settings.rules_help.purge_on_exhaustion',
     phoneVerification: 'event_settings.rules_help.phone_verification',
+    showRemainingSeats: 'event_settings.rules_help.show_remaining_seats',
 };
 
 const ReminderFields: Record<(typeof ReminderKeys)[number], string> = {
@@ -91,6 +94,7 @@ const RuleFields: Record<(typeof RuleKeys)[number], string> = {
     purgeOnExhaustion: 'rule_purge_on_exhaustion',
     temporaryHold: 'rule_temporary_hold',
     phoneVerification: 'rule_phone_verification',
+    showRemainingSeats: 'rule_show_remaining_seats',
 };
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -273,8 +277,13 @@ export default function EventSettings({
                             value={String(event.tableCount)}
                         />
                         <Row
-                            label={t('event_settings.seating.per_table')}
-                            value={String(event.seatsPerTable)}
+                            label={t('event_settings.seating.layout')}
+                            value={event.tableGroups
+                                .map(
+                                    (group) =>
+                                        `${group.count} × ${group.seats}`,
+                                )
+                                .join(', ')}
                         />
                         <Row
                             label={t('event_settings.seating.capacity')}

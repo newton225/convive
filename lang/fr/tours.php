@@ -54,7 +54,7 @@ return [
         ],
         'seating' => [
             'title' => '2. Places et tarif',
-            'body' => 'La capacité vaut le nombre de tables fois les places par table : le plan de salle fait foi le jour J.',
+            'body' => 'Décrivez la salle par groupes de tables de même taille : la capacité est la somme de leurs places, et le plan de salle fait foi le jour J.',
         ],
         'payment_accounts' => [
             'title' => 'Comptes de versement',

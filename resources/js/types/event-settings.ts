@@ -1,8 +1,10 @@
+import type { EventTableGroup } from './events';
+
 export type EventSettingsEvent = {
     id: number;
     name: string;
     tableCount: number;
-    seatsPerTable: number;
+    tableGroups: EventTableGroup[];
     capacity: number;
     registrationDeadline: string | null;
     purgeAt: string | null;
@@ -27,4 +29,5 @@ export type EventRules = {
     purgeOnExhaustion: boolean;
     temporaryHold: boolean;
     phoneVerification: boolean;
+    showRemainingSeats: boolean;
 };

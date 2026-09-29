@@ -60,6 +60,9 @@ Route::prefix('{tenant}')
         // l'attribution automatique jouee a la validation d'une preuve.
         Route::get('events/{event}/seating', [SeatingController::class, 'index'])->name('tenants.events.seating.index');
         Route::post('events/{event}/seating/{registration}/assign', [SeatingController::class, 'assign'])->name('tenants.events.seating.assign');
+        // Capacite d'une table precise : les tables n'ont pas toutes la meme taille (decision du
+        // 2026-09-29).
+        Route::patch('events/{event}/seating/tables/{table}', [SeatingController::class, 'updateTable'])->name('tenants.events.seating.tables.update');
         Route::post('events/{event}/seating/constraints', [SeatingController::class, 'storeConstraint'])->name('tenants.events.seating.constraints.store');
         Route::delete('events/{event}/seating/constraints/{constraint}', [SeatingController::class, 'destroyConstraint'])->name('tenants.events.seating.constraints.destroy');
 

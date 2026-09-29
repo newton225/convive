@@ -8,6 +8,7 @@ use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\AssignSeatingTableRequest;
 use App\Http\Requests\Events\StoreUnitSeparationRuleRequest;
+use App\Http\Requests\Events\UpdateSeatingTableRequest;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\RegistrationTableAssignment;
@@ -124,6 +125,36 @@ class SeatingController extends Controller
             'type' => 'success',
             'message' => __($table !== null ? 'seating.flash.moved' : 'seating.flash.removed'),
         ]);
+
+        return to_route('tenants.events.seating.index', [$tenant, $event]);
+    }
+
+    /**
+     * Change how many seats one table has (decision du 2026-09-29 : les tables n'ont pas toutes
+     * la meme taille). Les garde-fous sont dans `UpdateSeatingTableRequest`.
+     */
+    public function updateTable(UpdateSeatingTableRequest $request, Tenant $tenant, Event $event, SeatingTable $table): RedirectResponse
+    {
+        // `SeatingTable` vit dans la base du locataire, mais peut appartenir a un autre de ses
+        // evenements : meme reponse qu'un objet introuvable.
+        abort_if($table->event_id !== $event->id, 404);
+
+        $before = $table->capacity;
+        $table->update(['capacity' => $request->integer('capacity')]);
+
+        activity()
+            ->performedOn($event)
+            ->event('updated')
+            ->withProperties([
+                'old' => ['table' => $table->number, 'capacity' => $before],
+                'attributes' => ['table' => $table->number, 'capacity' => $table->capacity],
+            ])
+            ->log('seating.table_resized');
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('seating.capacity.flash', [
+            'number' => $table->number,
+            'count' => $table->capacity,
+        ])]);
 
         return to_route('tenants.events.seating.index', [$tenant, $event]);
     }

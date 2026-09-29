@@ -54,7 +54,7 @@ return [
         ],
         'seating' => [
             'title' => '2. Seats and price',
-            'body' => 'Capacity is the number of tables times seats per table: the seating plan is what counts on the day.',
+            'body' => 'Describe the room in groups of tables of the same size: capacity is the sum of their seats, and the seating plan is what counts on the day.',
         ],
         'payment_accounts' => [
             'title' => 'Payout accounts',

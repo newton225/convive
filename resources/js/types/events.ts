@@ -37,6 +37,7 @@ export type EventDetails = EventSummary & {
     visualUrl: string | null;
     tableCount: number;
     seatsPerTable: number;
+    tableGroups: EventTableGroup[];
     companionLimit: number;
     registrationDeadline: string | null;
     purgeAt: string | null;
@@ -64,6 +65,7 @@ export type EventTemplate = {
     secondaryColor: string | null;
     tableCount: number;
     seatsPerTable: number;
+    tableGroups: EventTableGroup[];
     pricePerPerson: number;
     companionLimit: number;
     holdDurationMinutes: number;
@@ -84,7 +86,9 @@ export type PublicEvent = {
     venue: string | null;
     venueAddress: string | null;
     capacity: number;
-    remainingSeats: number;
+    // Null quand l'organisateur masque le nombre de places (le defaut) : seul « Complet » se voit.
+    showRemainingSeats: boolean;
+    remainingSeats: number | null;
     isFull: boolean;
     pricePerPerson: number;
     companionLimit: number;
@@ -101,4 +105,11 @@ export type PublicTenant = {
     colors: { primary: string; secondary: string };
     logoUrl: string | null;
     bannerUrl: string | null;
+};
+
+// Un groupe de tables de meme taille (« 3 tables de 12 ») : la salle se decrit ainsi, les tables
+// n'ayant pas toutes le meme nombre de places (decision du 2026-09-29).
+export type EventTableGroup = {
+    count: number;
+    seats: number;
 };

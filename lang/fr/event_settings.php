@@ -19,9 +19,9 @@ return [
 
     'seating' => [
         'title' => 'Places',
-        'description' => 'La capacité est déduite du plan de salle : tables multipliées par places par table.',
+        'description' => 'La capacité est déduite du plan de salle : la somme des places de toutes les tables.',
         'tables' => 'Tables',
-        'per_table' => 'Places par table',
+        'layout' => 'Composition (tables × places)',
         'capacity' => 'Capacité totale',
         'open' => 'Ouvrir le plan de salle',
     ],
@@ -55,6 +55,7 @@ return [
         'purge_on_exhaustion' => 'Purger dès que les places sont épuisées',
         'temporary_hold' => 'Retenir la place pendant la réservation',
         'phone_verification' => 'Vérifier le téléphone par un code avant de réserver',
+        'show_remaining_seats' => 'Afficher le nombre de places restantes aux invités',
         'not_enforced' => 'Enregistrée, mais n\'agit pas encore sur le fonctionnement de l\'événement.',
     ],
 
@@ -63,6 +64,7 @@ return [
         'auto_seating' => "À chaque preuve validée, l'invité et ses accompagnateurs reçoivent une table, dans l'ordre des validations et en regroupant les unités. Vous pouvez toujours déplacer quelqu'un à la main.",
         'purge_on_exhaustion' => "Dès que les inscriptions validées remplissent toutes les places, les dossiers non finalisés sont supprimés sans attendre la date de purge : ils n'avaient plus aucune chance d'obtenir une place.",
         'phone_verification' => "L'invité reçoit un code par WhatsApp et doit le saisir avant de réserver. Cela empêche un robot de bloquer toutes les places, au prix d'une étape de plus pour l'invité et d'un message envoyé par code.",
+        'show_remaining_seats' => "Cochée, le lien public montre combien de places restent et la jauge des places prises. Décochée, les invités ne voient aucun chiffre : seulement « Complet » quand il n'y a plus de place.",
     ],
 
     'flash' => [

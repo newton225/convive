@@ -59,6 +59,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property bool $rule_purge_on_exhaustion
  * @property bool $rule_temporary_hold
  * @property bool $rule_phone_verification
+ * @property bool $rule_show_remaining_seats
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  * @property CarbonImmutable|null $deleted_at
@@ -72,6 +73,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
     'reminder_j7_enabled', 'reminder_j2_enabled', 'reminder_j1_enabled', 'reminder_day_of_enabled',
     'rule_scheduled_send', 'rule_auto_seating', 'rule_allow_without_proof',
     'rule_proof_legibility', 'rule_purge_on_exhaustion', 'rule_temporary_hold', 'rule_phone_verification',
+    'rule_show_remaining_seats',
 ])]
 #[Hidden(['qr_secret_key'])]
 class Event extends Model implements HasMedia
@@ -178,13 +180,27 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * @return HasMany<SeatingTable, $this>
+     */
+    public function seatingTables(): HasMany
+    {
+        return $this->hasMany(SeatingTable::class);
+    }
+
+    /**
      * Get the total number of seats, derived from the room plan.
      *
-     * La capacite ne se saisit pas : c'est le plan de salle qui fait foi le jour J.
+     * La capacite ne se saisit pas : c'est le plan de salle qui fait foi le jour J. Les tables
+     * n'ont pas toutes le meme nombre de places (decision du 2026-09-29) : on additionne celles de
+     * chaque table. Un evenement dont les tables n'ont pas encore ete creees (enregistre avant
+     * cette regle) garde l'ancien calcul, tables x places par table, jusqu'a sa prochaine
+     * sauvegarde.
      */
     public function capacity(): int
     {
-        return $this->table_count * $this->seats_per_table;
+        $seats = $this->exists ? (int) $this->seatingTables()->sum('capacity') : 0;
+
+        return $seats > 0 ? $seats : $this->table_count * $this->seats_per_table;
     }
 
     /**
@@ -242,6 +258,16 @@ class Event extends Model implements HasMedia
     public function remainingSeats(): int
     {
         return max(0, $this->capacity() - $this->occupiedSeats());
+    }
+
+    /**
+     * Le nombre de places restantes tel qu'un invite peut le voir : null quand l'organisateur a
+     * choisi de le taire (le defaut). Ne jamais envoyer `remainingSeats()` a une page publique sans
+     * passer par ici : masquer seulement a l'ecran laisserait le chiffre lisible dans la page.
+     */
+    public function publicRemainingSeats(): ?int
+    {
+        return $this->rule_show_remaining_seats ? $this->remainingSeats() : null;
     }
 
     /**
@@ -474,6 +500,7 @@ class Event extends Model implements HasMedia
             'rule_purge_on_exhaustion' => 'boolean',
             'rule_temporary_hold' => 'boolean',
             'rule_phone_verification' => 'boolean',
+            'rule_show_remaining_seats' => 'boolean',
         ];
     }
 }

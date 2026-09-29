@@ -42,6 +42,7 @@ enum AuditLogType: string
     case SeatingConstraintCreated = 'seating.constraint_created';
     case SeatingConstraintDeleted = 'seating.constraint_deleted';
     case SeatingMoved = 'seating.moved';
+    case SeatingTableResized = 'seating.table_resized';
 
     case ProfileCreated = 'profile.created';
     case ProfileUpdated = 'profile.updated';

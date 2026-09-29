@@ -45,6 +45,7 @@ class UpdateEventSettingsRequest extends FormRequest
             'rule_purge_on_exhaustion' => ['boolean'],
             'rule_temporary_hold' => ['boolean'],
             'rule_phone_verification' => ['boolean'],
+            'rule_show_remaining_seats' => ['boolean'],
         ];
     }
 

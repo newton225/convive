@@ -2,8 +2,10 @@
 
 namespace App\Actions\Events;
 
+use App\Actions\Seating\SyncSeatingTables;
 use App\Enums\EventStatus;
 use App\Models\Event;
+use App\Models\SeatingTable;
 use App\Models\ShowcaseEvent;
 use App\Models\Tenant;
 use Illuminate\Http\UploadedFile;
@@ -23,10 +25,12 @@ class SaveEvent
      *
      * @param  array<string, mixed>  $attributes
      * @param  array<int, int>  $paymentAccountIds
+     * @param  array<int, int>|null  $tablePlan  capacite de chaque table par numero, `null` pour
+     *                                           laisser le plan de salle tel quel
      */
-    public function handle(?Event $event, array $attributes, array $paymentAccountIds): Event
+    public function handle(?Event $event, array $attributes, array $paymentAccountIds, ?array $tablePlan = null): Event
     {
-        return DB::transaction(function () use ($event, $attributes, $paymentAccountIds) {
+        return DB::transaction(function () use ($event, $attributes, $paymentAccountIds, $tablePlan) {
             $creating = $event === null;
 
             $event ??= new Event;
@@ -38,6 +42,13 @@ class SaveEvent
 
             $event->paymentAccounts()->sync($paymentAccountIds);
             $event->load('paymentAccounts');
+
+            // Les tables existent des l'enregistrement : c'est leur capacite, table par table, qui
+            // fait celle de l'evenement (decision du 2026-09-29). Les conflits avec des invites
+            // deja places ont ete refuses par `SaveEventRequest`.
+            if ($tablePlan !== null) {
+                app(SyncSeatingTables::class)->handle($event, $tablePlan);
+            }
 
             activity()
                 ->performedOn($event)
@@ -207,6 +218,16 @@ class SaveEvent
             $copy->save();
 
             $copy->paymentAccounts()->sync($event->paymentAccounts()->pluck('payment_accounts.id')->all());
+
+            // Le plan de salle fait partie de la configuration : memes tables, memes capacites,
+            // memes reservations d'unite. Jamais les invites places, qui sont ceux de l'original.
+            SeatingTable::where('event_id', $event->id)->orderBy('number')->get()
+                ->each(fn (SeatingTable $table) => SeatingTable::create([
+                    'event_id' => $copy->id,
+                    'number' => $table->number,
+                    'capacity' => $table->capacity,
+                    'reserved_unit_id' => $table->reserved_unit_id,
+                ]));
 
             activity()
                 ->performedOn($copy)

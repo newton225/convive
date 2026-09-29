@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Events;
 
 use App\Actions\Events\SaveEvent;
+use App\Actions\Seating\SyncSeatingTables;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\SaveEventRequest;
@@ -67,7 +68,7 @@ class EventController extends Controller
      */
     public function store(SaveEventRequest $request, Tenant $tenant, SaveEvent $save): RedirectResponse
     {
-        $event = $save->handle(null, $this->attributes($request), $this->accountIds($request));
+        $event = $save->handle(null, $this->attributes($request), $this->accountIds($request), $request->tablePlan());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('events.flash.created')]);
 
@@ -98,7 +99,7 @@ class EventController extends Controller
      */
     public function update(SaveEventRequest $request, Tenant $tenant, Event $event, SaveEvent $save): RedirectResponse
     {
-        $save->handle($event, $this->attributes($request), $this->accountIds($request));
+        $save->handle($event, $this->attributes($request), $this->accountIds($request), $request->tablePlan());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('events.flash.updated')]);
 
@@ -284,6 +285,8 @@ class EventController extends Controller
             'visualUrl' => $event->visualUrl(),
             'tableCount' => $event->table_count,
             'seatsPerTable' => $event->seats_per_table,
+            // La salle telle que le formulaire la decrit : groupes de tables de meme taille.
+            'tableGroups' => SyncSeatingTables::groupsOf($event),
             'companionLimit' => $event->companion_limit,
             'registrationDeadline' => $event->registration_deadline?->toDateTimeLocalString(),
             'purgeAt' => $event->purge_at?->toDateTimeLocalString(),
@@ -341,6 +344,7 @@ class EventController extends Controller
             'secondaryColor' => $source->secondary_color,
             'tableCount' => $source->table_count,
             'seatsPerTable' => $source->seats_per_table,
+            'tableGroups' => SyncSeatingTables::groupsOf($source),
             'pricePerPerson' => $source->price_per_person,
             'companionLimit' => $source->companion_limit,
             'holdDurationMinutes' => $source->hold_duration_minutes,
@@ -371,7 +375,17 @@ class EventController extends Controller
      */
     private function attributes(SaveEventRequest $request): array
     {
+        $plan = $request->tablePlan();
+
+        // `table_count` et `seats_per_table` sont en sursis (CLAUDE.md, « Evenements ») : remplis
+        // a titre indicatif a partir du plan, ils ne font plus la capacite des qu'il y a des tables.
+        $tables = $plan === null ? [] : [
+            'table_count' => count($plan),
+            'seats_per_table' => $plan === [] ? 0 : max($plan),
+        ];
+
         return [
+            ...$tables,
             'name' => $request->validated('name'),
             'subtitle' => $request->validated('subtitle'),
             'starts_at' => $request->validated('starts_at'),
@@ -379,8 +393,6 @@ class EventController extends Controller
             'venue_address' => $request->validated('venue_address'),
             'primary_color' => $request->validated('primary_color'),
             'secondary_color' => $request->validated('secondary_color'),
-            'table_count' => $request->validated('table_count') ?? 0,
-            'seats_per_table' => $request->validated('seats_per_table') ?? 0,
             'price_per_person' => $request->validated('price_per_person') ?? 0,
             'companion_limit' => $request->validated('companion_limit') ?? Event::MaximumCompanionLimit,
             'registration_deadline' => $request->validated('registration_deadline'),

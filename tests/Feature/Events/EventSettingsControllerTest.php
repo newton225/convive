@@ -105,6 +105,19 @@ class EventSettingsControllerTest extends TestCase
         $this->assertTrue($event->rule_auto_seating);
     }
 
+    public function test_les_places_restantes_sont_masquees_par_defaut_et_s_affichent_sur_demande(): void
+    {
+        $this->assertFalse($this->tenant->asCurrent(fn () => $this->event->fresh()->rule_show_remaining_seats));
+
+        $this->actingAs($this->owner)
+            ->patch(route('tenants.events.settings.update', [$this->tenant, $this->event]), [
+                'rule_show_remaining_seats' => true,
+            ])
+            ->assertRedirect();
+
+        $this->assertTrue($this->tenant->asCurrent(fn () => $this->event->fresh()->rule_show_remaining_seats));
+    }
+
     public function test_une_case_decochee_absente_de_la_requete_vaut_faux(): void
     {
         // Une case a cocher HTML decochee n'envoie aucune valeur : le controleur doit lire

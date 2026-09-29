@@ -175,7 +175,7 @@ class EventTest extends TestCase
             ->assertInertia(fn ($page) => $page->where('event.acceptsRegistrations', false));
     }
 
-    public function test_les_places_restantes_et_le_tarif_sont_exposes(): void
+    public function test_les_places_restantes_et_le_tarif_sont_exposes_quand_l_organisateur_l_a_choisi(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
@@ -183,6 +183,7 @@ class EventTest extends TestCase
             'table_count' => 5,
             'seats_per_table' => 4,
             'price_per_person' => 25000,
+            'rule_show_remaining_seats' => true,
         ]);
 
         $this->get($this->publicUrl($tenant, $event))
@@ -192,6 +193,37 @@ class EventTest extends TestCase
                 ->where('event.capacity', 20)
                 ->where('event.isFull', false)
                 ->where('event.pricePerPerson', 25000),
+            );
+    }
+
+    public function test_par_defaut_le_nombre_de_places_restantes_n_est_pas_envoye(): void
+    {
+        // Masquer a l'ecran ne suffit pas : le chiffre resterait lisible dans les donnees de la
+        // page. Le serveur ne l'envoie pas du tout.
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant, ['table_count' => 5, 'seats_per_table' => 4]);
+
+        $this->get($this->publicUrl($tenant, $event))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('event.showRemainingSeats', false)
+                ->where('event.remainingSeats', null)
+                ->where('event.isFull', false),
+            );
+    }
+
+    public function test_un_evenement_complet_reste_signale_meme_places_masquees(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant, ['table_count' => 0, 'seats_per_table' => 0]);
+
+        $this->get($this->publicUrl($tenant, $event))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('event.remainingSeats', null)
+                ->where('event.isFull', true),
             );
     }
 

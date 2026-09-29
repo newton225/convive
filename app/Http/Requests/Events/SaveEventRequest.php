@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Events;
 
+use App\Actions\Seating\SyncSeatingTables;
 use App\Models\Event;
 use App\Models\PaymentAccount;
 use App\Models\Tenant;
@@ -51,6 +52,12 @@ class SaveEventRequest extends FormRequest
             'primary_color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'secondary_color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
 
+            // La salle en groupes de tables de tailles differentes (decision du 2026-09-29).
+            // L'ancien format, un seul nombre de tables et de places, reste accepte et devient
+            // un groupe unique (voir `tablePlan()`).
+            'table_groups' => ['sometimes', 'nullable', 'array', 'max:20'],
+            'table_groups.*.count' => ['required', 'integer', 'min:1', 'max:500'],
+            'table_groups.*.seats' => ['required', 'integer', 'min:1', 'max:100'],
             'table_count' => ['nullable', 'integer', 'min:0', 'max:2000'],
             'seats_per_table' => ['nullable', 'integer', 'min:0', 'max:100'],
             'price_per_person' => ['nullable', 'integer', 'min:0', 'max:100000000'],
@@ -82,8 +89,72 @@ class SaveEventRequest extends FormRequest
             function (Validator $validator): void {
                 $this->rejectDeadlineAfterTheEvent($validator);
                 $this->rejectPaymentAccountsOfAnotherTenant($validator);
+                $this->rejectTablePlanThatUnseatsGuests($validator);
             },
         ];
+    }
+
+    /**
+     * Get the room plan submitted, as the capacity of each table by number, or null when the
+     * request says nothing about the tables (the plan is then left as it is).
+     *
+     * @return array<int, int>|null
+     */
+    public function tablePlan(): ?array
+    {
+        if ($this->has('table_groups')) {
+            /** @var array<int, array{count: int|string, seats: int|string}> $groups */
+            $groups = (array) $this->input('table_groups', []);
+
+            return SyncSeatingTables::plan(array_map(fn (array $group) => [
+                'count' => (int) $group['count'],
+                'seats' => (int) $group['seats'],
+            ], array_values($groups)));
+        }
+
+        if ($this->has('table_count')) {
+            $count = $this->integer('table_count');
+            $seats = $this->integer('seats_per_table');
+
+            return $count > 0 && $seats > 0
+                ? SyncSeatingTables::plan([['count' => $count, 'seats' => $seats]])
+                : [];
+        }
+
+        return null;
+    }
+
+    /**
+     * Un invite deja place ne perd jamais sa chaise, et un evenement publie ne descend pas sous
+     * les places deja prises ou reservees (README 2.2).
+     */
+    private function rejectTablePlanThatUnseatsGuests(Validator $validator): void
+    {
+        $event = $this->route('event');
+
+        if (! $event instanceof Event || $validator->errors()->hasAny(['table_groups', 'table_groups.*.count', 'table_groups.*.seats'])) {
+            return;
+        }
+
+        $plan = $this->tablePlan();
+
+        if ($plan === null) {
+            return;
+        }
+
+        foreach (app(SyncSeatingTables::class)->conflicts($event, $plan) as $message) {
+            $validator->errors()->add('table_groups', $message);
+        }
+
+        $capacity = array_sum($plan);
+        $taken = $event->occupiedSeats();
+
+        if ($event->isPublished() && $capacity < $taken) {
+            $validator->errors()->add('table_groups', __('seating.errors.below_taken', [
+                'capacity' => $capacity,
+                'taken' => $taken,
+            ]));
+        }
     }
 
     /**
@@ -149,6 +220,9 @@ class SaveEventRequest extends FormRequest
             'venue' => __('events.fields.venue'),
             'table_count' => __('events.fields.table_count'),
             'seats_per_table' => __('events.fields.seats_per_table'),
+            'table_groups' => __('events.fields.table_groups'),
+            'table_groups.*.count' => __('events.fields.table_count'),
+            'table_groups.*.seats' => __('events.fields.seats_per_table'),
             'price_per_person' => __('events.fields.price_per_person'),
             'companion_limit' => __('events.fields.companion_limit'),
             'registration_deadline' => __('events.fields.registration_deadline'),
