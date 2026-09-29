@@ -24,3 +24,19 @@ export function formatRelative(value: string, locale: LocaleCode): string {
         locale: locales[locale],
     });
 }
+
+// Les morceaux d'une date pour une vignette de calendrier : « 14 », « nov. », « samedi », « 19:00 ».
+export function formatDateParts(
+    value: string,
+    locale: LocaleCode,
+): { day: string; month: string; weekday: string; time: string } {
+    const date = new Date(value);
+    const options = { locale: locales[locale] };
+
+    return {
+        day: format(date, 'd', options),
+        month: format(date, 'MMM', options),
+        weekday: format(date, 'EEEE', options),
+        time: format(date, 'p', options),
+    };
+}

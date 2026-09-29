@@ -373,3 +373,25 @@
         transparent 60%
     );
 }
+
+/*
+ * Parcours invite : fond du bandeau d'un evenement sans visuel, aux couleurs de marque de
+ * l'organisation (variables posees par BrandColorStyle). Jamais utilise dans le back-office.
+ */
+.brand-hero-fallback {
+    background:
+        radial-gradient(
+            90% 70% at 85% 10%,
+            var(--brand-secondary) 0%,
+            transparent 60%
+        ),
+        linear-gradient(
+            150deg,
+            var(--brand-primary) 0%,
+            oklch(0.17 0.006 60) 100%
+        );
+}
+
+.brand-fill {
+    background-color: var(--brand-primary);
+}

@@ -1,47 +1,51 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
+import { CalendarClock, MapPin, Users } from 'lucide-react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import { InstallPrompt } from '@/components/install-prompt';
-import { OfflineBanner } from '@/components/offline-banner';
-import { Calendar, MapPin, Users } from 'lucide-react';
 import LocaleSwitcher from '@/components/locale-switcher';
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { OfflineBanner } from '@/components/offline-banner';
+import { EventDateTile } from '@/components/public/event-date-tile';
+import { EventHero } from '@/components/public/event-hero';
+import { EventHowItWorks } from '@/components/public/event-how-it-works';
+import { EventRegistrationState } from '@/components/public/event-registration-state';
+import { SeatsMeter } from '@/components/public/seats-meter';
+import { Reveal } from '@/components/site/reveal';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
-import { create } from '@/routes/public/registrations';
-import { create as createWaitlistEntry } from '@/routes/public/waitlist';
-import type { PublicEvent, PublicTenant } from '@/types';
+import type { PublicEvent as PublicEventData, PublicTenant } from '@/types';
 
 type Props = {
-    event: PublicEvent;
+    event: PublicEventData;
     tenant: PublicTenant;
     token: string;
 };
 
 /**
- * README ecran 3, en lecture seule : visuel, date, heure, capacite, tarif, places restantes,
- * date limite. Pas de mise en page d'authentification ici : c'est la premiere surface non
- * authentifiee du produit, mobile d'abord.
+ * README ecran 3, en lecture seule : visuel, date, heure, lieu, tarif, places restantes, date
+ * limite. Premiere surface non authentifiee du produit, mobile d'abord : sur telephone, le
+ * contenu remonte sur le visuel et l'inscription reste a portee de pouce dans une barre fixee en
+ * bas ; sur grand ecran, une carte d'inscription reste visible pendant le defilement.
  *
  * Les couleurs de marque du locataire s'appliquent uniquement au parcours invite (CLAUDE.md) :
- * elles arrivent deja validees par une expression reguliere hexadecimale stricte cote serveur,
- * elles peuvent donc entrer sans risque dans une variable CSS.
- *
+ * elles arrivent deja validees par une expression reguliere hexadecimale stricte cote serveur.
  * `event.colors` prime sur `tenant.colors` (README ecran 13) : `Event::colors()` retombe deja
- * sur celles de l'organisation quand l'evenement n'en definit pas, ce composant n'a pas a
- * choisir entre les deux lui-meme.
+ * sur celles de l'organisation.
  */
 export default function PublicEvent({ event, tenant, token }: Props) {
     const { t, locale } = useTranslation();
+    const hasAction = event.acceptsRegistrations || event.isFull;
 
-    const bannerUrl = event.visualUrl ?? tenant.bannerUrl;
+    const price = (
+        <p>
+            <span className="text-3xl font-semibold tracking-tight tabular-nums">
+                {formatAmount(event.pricePerPerson, locale)}
+            </span>{' '}
+            <span className="text-muted-foreground text-sm">
+                {t('guest.event.per_person')}
+            </span>
+        </p>
+    );
 
     return (
         <div className="bg-background flex min-h-screen flex-col">
@@ -49,165 +53,120 @@ export default function PublicEvent({ event, tenant, token }: Props) {
             <Head title={event.name} />
             <OfflineBanner />
 
-            <header className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-2">
-                    {tenant.logoUrl ? (
-                        <img
-                            src={tenant.logoUrl}
-                            alt={tenant.displayName}
-                            className="h-8 w-8 rounded object-contain"
-                        />
-                    ) : null}
-                    <span className="text-sm font-medium">
-                        {tenant.displayName}
-                    </span>
-                </div>
+            <div className="absolute top-0 right-0 z-30 p-3 [&_button]:text-white">
                 <LocaleSwitcher />
-            </header>
-
-            {bannerUrl ? (
-                <img
-                    src={bannerUrl}
-                    alt=""
-                    className="h-40 w-full object-cover sm:h-56"
-                />
-            ) : null}
-
-            <main className="mx-auto w-full max-w-lg flex-1 space-y-6 p-4">
-                <InstallPrompt />
-
-                <div className="space-y-1">
-                    <h1 className="text-2xl font-semibold text-[color:var(--brand-primary)]">
-                        {event.name}
-                    </h1>
-                    {event.subtitle ? (
-                        <p className="text-muted-foreground">
-                            {event.subtitle}
-                        </p>
-                    ) : null}
-                </div>
-
-                <Card>
-                    <CardContent className="space-y-4 pt-6">
-                        <InfoRow icon={Calendar}>
-                            {event.startsAt
-                                ? formatDateTime(event.startsAt, locale)
-                                : t('guest.event.no_date')}
-                        </InfoRow>
-
-                        {event.venue ? (
-                            <InfoRow icon={MapPin}>
-                                {event.venue}
-                                {event.venueAddress
-                                    ? `, ${event.venueAddress}`
-                                    : ''}
-                            </InfoRow>
-                        ) : null}
-
-                        <InfoRow icon={Users}>
-                            {event.isFull
-                                ? t('guest.event.seats.full')
-                                : t('guest.event.seats.remaining', {
-                                      count: event.remainingSeats,
-                                  })}
-                        </InfoRow>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-base">
-                            {t('guest.event.price_per_person')}
-                        </CardTitle>
-                        <CardDescription>
-                            {t('guest.event.companion_limit', {
-                                count: event.companionLimit,
-                            })}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-2xl font-semibold text-[color:var(--brand-primary)]">
-                            {formatAmount(event.pricePerPerson, locale)}
-                        </p>
-                    </CardContent>
-                </Card>
-
-                {event.registrationDeadline ? (
-                    <p className="text-muted-foreground text-center text-sm">
-                        {t('guest.event.deadline.label')} :{' '}
-                        {formatDateTime(event.registrationDeadline, locale)}
-                    </p>
-                ) : null}
-
-                <RegistrationState event={event} token={token} />
-            </main>
-        </div>
-    );
-}
-
-function InfoRow({
-    icon: Icon,
-    children,
-}: {
-    icon: typeof Calendar;
-    children: React.ReactNode;
-}) {
-    return (
-        <div className="flex items-start gap-3 text-sm">
-            <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[var(--brand-primary)]" />
-            <span>{children}</span>
-        </div>
-    );
-}
-
-function RegistrationState({
-    event,
-    token,
-}: {
-    event: PublicEvent;
-    token: string;
-}) {
-    const { t } = useTranslation();
-
-    if (event.acceptsRegistrations) {
-        return (
-            <Button asChild className="w-full">
-                <Link href={create(token)} data-test="register-link">
-                    {t('guest.event.register')}
-                </Link>
-            </Button>
-        );
-    }
-
-    if (event.isFull) {
-        return (
-            <div className="space-y-3 text-center">
-                <p className="text-sm font-medium">
-                    {t('guest.event.seats.full')}
-                </p>
-                <Button asChild variant="secondary" className="w-full">
-                    <Link
-                        href={createWaitlistEntry(token)}
-                        data-test="waitlist-link"
-                    >
-                        {t('guest.waitlist.join')}
-                    </Link>
-                </Button>
             </div>
-        );
-    }
 
-    if (event.registrationDeadlineHasPassed) {
-        return (
-            <p className="text-muted-foreground text-center text-sm">
-                {t('guest.event.deadline.passed')}
-            </p>
-        );
-    }
+            <EventHero event={event} tenant={tenant} />
 
-    return (
-        <p className="text-muted-foreground text-center text-sm">
-            {t('guest.event.registration_closed')}
-        </p>
+            <main
+                className={`bg-background relative z-10 -mt-6 flex-1 rounded-t-3xl md:mt-0 md:rounded-none ${hasAction ? 'pb-32 md:pb-16' : 'pb-16'}`}
+            >
+                <div className="mx-auto grid w-full max-w-5xl gap-8 px-5 pt-8 md:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] md:gap-10 md:pt-10">
+                    <div className="space-y-8">
+                        <InstallPrompt />
+
+                        <Reveal className="grid gap-5 sm:grid-cols-2">
+                            <EventDateTile startsAt={event.startsAt} />
+                            {event.venue ? (
+                                <div className="flex items-center gap-4">
+                                    <span className="bg-card flex size-16 shrink-0 items-center justify-center rounded-2xl">
+                                        <MapPin className="size-6 text-[var(--brand-primary)]" />
+                                    </span>
+                                    <div>
+                                        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                                            {t('guest.event.venue')}
+                                        </p>
+                                        <p className="font-medium">
+                                            {event.venue}
+                                        </p>
+                                        {event.venueAddress ? (
+                                            <p className="text-muted-foreground text-sm">
+                                                {event.venueAddress}
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                </div>
+                            ) : null}
+                        </Reveal>
+
+                        <Reveal
+                            delay={0.05}
+                            className="bg-card space-y-4 rounded-3xl p-5"
+                        >
+                            <SeatsMeter
+                                capacity={event.capacity}
+                                remainingSeats={event.remainingSeats}
+                                isFull={event.isFull}
+                            />
+                            <div className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                                <span className="inline-flex items-center gap-2">
+                                    <Users className="size-4" />
+                                    {t('guest.event.companion_limit', {
+                                        count: event.companionLimit,
+                                    })}
+                                </span>
+                                {event.registrationDeadline ? (
+                                    <span className="inline-flex items-center gap-2">
+                                        <CalendarClock className="size-4" />
+                                        {t('guest.event.deadline.label')} :{' '}
+                                        {formatDateTime(
+                                            event.registrationDeadline,
+                                            locale,
+                                        )}
+                                    </span>
+                                ) : null}
+                            </div>
+                        </Reveal>
+
+                        <EventHowItWorks />
+                    </div>
+
+                    {/* Sur telephone, la barre fixee en bas porte deja le tarif et l'action :
+                        la carte n'y reste que pour dire pourquoi les inscriptions sont closes. */}
+                    <aside
+                        className={`md:sticky md:top-6 md:block md:self-start ${hasAction ? 'hidden' : ''}`}
+                    >
+                        <Reveal
+                            delay={0.1}
+                            className="bg-card space-y-5 rounded-3xl p-6"
+                        >
+                            <div>
+                                <p className="text-muted-foreground text-sm">
+                                    {t('guest.event.price_per_person')}
+                                </p>
+                                {price}
+                            </div>
+                            <EventRegistrationState
+                                event={event}
+                                token={token}
+                            />
+                        </Reveal>
+                    </aside>
+                </div>
+            </main>
+
+            {hasAction ? (
+                <div className="bg-background/85 fixed inset-x-0 bottom-0 z-40 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden">
+                    <div className="mx-auto flex max-w-lg items-center gap-3">
+                        <div className="shrink-0">
+                            <p className="text-lg leading-tight font-semibold tabular-nums">
+                                {formatAmount(event.pricePerPerson, locale)}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                                {t('guest.event.per_person')}
+                            </p>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <EventRegistrationState
+                                event={event}
+                                token={token}
+                                compact
+                            />
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+        </div>
     );
 }

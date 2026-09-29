@@ -17,6 +17,16 @@ return [
         ],
         'register' => 'Register',
         'registration_closed' => 'Registrations are closed for this event.',
+        'hosted_by' => 'Hosted by :name',
+        'when' => 'Date',
+        'per_person' => 'per person',
+        'seats_taken' => ':taken of :capacity seats taken',
+        'how' => [
+            'title' => 'How it works',
+            'form' => ['title' => 'Your details', 'body' => 'Name, phone, unit and companions. The amount is worked out for you.'],
+            'pay' => ['title' => 'Your payment', 'body' => "You pay into the organiser's account, then upload the proof."],
+            'ticket' => ['title' => 'Your ticket', 'body' => 'It reaches you as soon as your proof is approved.'],
+        ],
         'payment_accounts' => [
             'title' => 'Payment accounts',
             'reference_hint' => 'Put ":name" as the transfer reference.',

@@ -17,6 +17,16 @@ return [
         ],
         'register' => "S'inscrire",
         'registration_closed' => 'Les inscriptions sont closes pour cet événement.',
+        'hosted_by' => 'Organisé par :name',
+        'when' => 'Date',
+        'per_person' => 'par personne',
+        'seats_taken' => ':taken places prises sur :capacity',
+        'how' => [
+            'title' => 'Comment ça se passe',
+            'form' => ['title' => 'Votre fiche', 'body' => 'Nom, téléphone, unité et accompagnateurs. Le montant se calcule seul.'],
+            'pay' => ['title' => 'Votre paiement', 'body' => "Vous versez sur le compte de l'organisateur, puis déposez la preuve."],
+            'ticket' => ['title' => 'Votre billet', 'body' => 'Il vous parvient dès que votre preuve est validée.'],
+        ],
         'payment_accounts' => [
             'title' => 'Comptes de versement',
             'reference_hint' => 'Indiquez « :name » en motif du transfert.',
