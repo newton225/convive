@@ -29,7 +29,7 @@ class SubmitPaymentProof
     /**
      * Attempt to record a payment proof for the given registration.
      *
-     * @param  array{payment_account_id: int, channel: string, reference: ?string, amount_declared: int}  $data
+     * @param  array{payment_account_id: int, channel: string, reference: ?string, guest_note: ?string}  $data
      * @return PaymentProof|null null quand la soumission est refusee : l'appelant decide de la
      *                           reponse (l'etat de l'inscription, deja a jour, la reflete).
      */
@@ -63,7 +63,7 @@ class SubmitPaymentProof
                     'payment_account_id' => $data['payment_account_id'],
                     'channel' => $data['channel'],
                     'reference' => $data['reference'],
-                    'amount_declared' => $data['amount_declared'],
+                    'guest_note' => $data['guest_note'],
                     'perceptual_hash' => $perceptualHash,
                     'idempotency_key' => $idempotencyKey,
                 ]);

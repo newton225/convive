@@ -26,7 +26,7 @@ class PaymentProofFactory extends Factory
             'payment_account_id' => PaymentAccount::factory(),
             'channel' => PaymentChannel::Wave,
             'reference' => strtoupper(fake()->bothify('??########')),
-            'amount_declared' => fake()->numberBetween(5000, 50000),
+            'guest_note' => null,
             'perceptual_hash' => null,
             'idempotency_key' => (string) Str::uuid(),
         ];

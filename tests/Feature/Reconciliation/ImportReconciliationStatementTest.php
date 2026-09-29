@@ -59,7 +59,6 @@ class ImportReconciliationStatementTest extends TestCase
 
         return PaymentProof::factory()->withReference($reference)->create([
             'registration_id' => $registration->id,
-            'amount_declared' => $amount,
         ]);
     }
 

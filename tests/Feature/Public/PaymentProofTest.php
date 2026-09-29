@@ -138,9 +138,7 @@ class PaymentProofTest extends TestCase
     {
         return [
             'payment_account_id' => $account->id,
-            'channel' => PaymentChannel::Wave->value,
             'reference' => 'WAVE-'.fake()->numerify('########'),
-            'amount_declared' => 15000,
             'idempotency_key' => (string) Str::uuid(),
             'receipt' => UploadedFile::fake()->image('recu.jpg', 200, 200),
         ];
@@ -266,20 +264,77 @@ class PaymentProofTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
+        // Le compte « Especes » pilote la regle (`PaymentChannel::hasAccountNumber()`) : le canal
+        // est celui du compte choisi, un pour un (decision du proprietaire du projet, 2026-09-29).
+        $tenant->asCurrent(fn () => PaymentAccount::factory()->onChannel(PaymentChannel::Cash)->create());
         $event = $this->publishedEvent($tenant);
-        $account = $tenant->asCurrent(fn () => PaymentAccount::first());
+        $cash = $tenant->asCurrent(fn () => PaymentAccount::where('channel', PaymentChannel::Cash)->firstOrFail());
         ['resume' => $resume] = $this->heldRegistration($tenant, $event);
 
-        // Le canal declare par l'invite pilote la regle (`PaymentChannel::hasAccountNumber()`),
-        // independamment du canal du compte choisi : deux champs distincts (README ecran 5).
-        $payload = $this->validPayload($account);
-        $payload['channel'] = PaymentChannel::Cash->value;
+        $payload = $this->validPayload($cash);
         unset($payload['reference']);
 
         $this->post(
             $this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}/proof"),
             $payload,
         )->assertSessionDoesntHaveErrors('reference');
+    }
+
+    public function test_la_precision_de_l_invite_est_facultative_et_enregistree(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $account = $tenant->asCurrent(fn () => PaymentAccount::first());
+        ['resume' => $resume] = $this->heldRegistration($tenant, $event);
+
+        $payload = [...$this->validPayload($account), 'guest_note' => '  Paye en deux fois, second envoi demain.  '];
+
+        $this->post(
+            $this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}/proof"),
+            $payload,
+        )->assertSessionHasNoErrors();
+
+        $this->assertSame(
+            'Paye en deux fois, second envoi demain.',
+            $tenant->asCurrent(fn () => PaymentProof::firstOrFail()->guest_note),
+        );
+    }
+
+    public function test_une_precision_trop_longue_est_refusee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $account = $tenant->asCurrent(fn () => PaymentAccount::first());
+        ['resume' => $resume] = $this->heldRegistration($tenant, $event);
+
+        $payload = [...$this->validPayload($account), 'guest_note' => str_repeat('a', 501)];
+
+        $this->post(
+            $this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}/proof"),
+            $payload,
+        )->assertSessionHasErrors('guest_note');
+    }
+
+    public function test_le_canal_enregistre_est_celui_du_compte_choisi(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $account = $tenant->asCurrent(fn () => PaymentAccount::first());
+        ['resume' => $resume] = $this->heldRegistration($tenant, $event);
+
+        // Un canal envoye malgre tout par la requete est ignore : c'est le compte qui decide.
+        $other = collect(PaymentChannel::cases())->first(fn (PaymentChannel $channel) => $channel !== $account->channel);
+        $payload = [...$this->validPayload($account), 'channel' => $other->value];
+
+        $this->post(
+            $this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}/proof"),
+            $payload,
+        )->assertSessionHasNoErrors();
+
+        $this->assertSame($account->channel, $tenant->asCurrent(fn () => PaymentProof::firstOrFail()->channel));
     }
 
     public function test_le_recu_doit_etre_une_image(): void

@@ -74,7 +74,7 @@ class ReceiptAccessTest extends TestCase
                 'payment_account_id' => $account->id,
                 'channel' => PaymentChannel::Wave->value,
                 'reference' => 'WAVE-12345678',
-                'amount_declared' => 15000,
+                'guest_note' => null,
             ], UploadedFile::fake()->image('recu.jpg'), (string) Str::uuid());
 
             return [$event, $proof];

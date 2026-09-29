@@ -148,7 +148,7 @@ class PaymentProofController extends Controller
             'submittedAt' => $proof->created_at?->toISOString(),
             'channelLabel' => $proof->channel->label(),
             'reference' => $proof->reference,
-            'amountDeclared' => $proof->amount_declared,
+            'guestNote' => $proof->guest_note,
             'paymentAccountLabel' => $proof->paymentAccount->label,
             'receiptUrl' => $proof->hasMedia(PaymentProof::ReceiptCollection)
                 ? route('tenants.events.proofs.receipt', [Tenant::current(), $registration->event_id, $proof], absolute: false)
@@ -158,6 +158,8 @@ class PaymentProofController extends Controller
                 'duplicateImage' => $proof->hasDuplicateImage(),
                 'referenceMissingFromStatement' => $proof->referenceMissingFromStatement(),
                 'statementAmountMismatch' => $proof->hasStatementAmountMismatch(),
+                // Pas un soupcon : une information que le tresorier doit lire avant de valider.
+                'guestNote' => filled($proof->guest_note),
             ],
         ];
     }

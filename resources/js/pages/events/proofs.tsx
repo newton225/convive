@@ -2,16 +2,32 @@ import { Head, router } from '@inertiajs/react';
 import {
     flexRender,
     getCoreRowModel,
+    getExpandedRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
     useReactTable,
     type ColumnDef,
+    type ExpandedState,
+    type SortingState,
+    type Updater,
 } from '@tanstack/react-table';
-import { ExternalLink } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronRight, ExternalLink, MessageSquareText } from 'lucide-react';
+import { Fragment, useState } from 'react';
+import { formatPhoneNumberIntl } from 'react-phone-number-input';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
+import { DataTableSortHeader } from '@/components/data-table-sort-header';
+import { ProofDetails } from '@/components/proofs/proof-details';
+import { ProofsToolbar } from '@/components/proofs/proofs-toolbar';
 import Heading from '@/components/heading';
 import { ProductTourButton } from '@/components/product-tour-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
     Dialog,
     DialogClose,
@@ -29,10 +45,13 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useLocalPreference } from '@/hooks/use-local-preference';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime, formatRelative } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
+import type { ProofSignalFilter } from '@/lib/proof-filters';
+import { proofMatchesSearch, proofMatchesSignal } from '@/lib/proof-filters';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { approve, index, reject } from '@/routes/tenants/events/proofs';
 import type { PaymentProofRow, TenantPermissions, Translations } from '@/types';
@@ -59,13 +78,92 @@ export default function EventProofs({
     const [rejecting, setRejecting] = useState<PaymentProofRow | null>(null);
     const [approving, setApproving] = useState<PaymentProofRow | null>(null);
     const [approveProcessing, setApproveProcessing] = useState(false);
+    const [expanded, setExpanded] = useState<ExpandedState>({});
+    const [sorting, setSorting] = useState<SortingState>([
+        { id: 'submittedAt', desc: false },
+    ]);
+    const [search, setSearch] = useState('');
+    const [signalFilter, setSignalFilter] = useState<ProofSignalFilter>('all');
+    const [singleExpand, setSingleExpand] = useLocalPreference(
+        'proofs.single-expand',
+        false,
+    );
+
+    // Une seule ligne ouverte a la fois, si le tresorier l'a choisi : ouvrir une ligne referme
+    // les autres. Sinon, TanStack Table garde toutes les lignes ouvertes.
+    const changeExpanded = (updater: Updater<ExpandedState>) =>
+        setExpanded((previous) => {
+            const next =
+                typeof updater === 'function' ? updater(previous) : updater;
+
+            if (!singleExpand || next === true) {
+                return next;
+            }
+
+            const opened = Object.keys(next).filter(
+                (id) => next[id] && !(previous !== true && previous[id]),
+            );
+
+            return opened.length > 0
+                ? { [opened[opened.length - 1]]: true }
+                : next;
+        });
+
+    const toggleSingleExpand = (checked: boolean) => {
+        setSingleExpand(checked);
+
+        // En passant a une seule ligne, on repart d'un tableau replie plutot que de choisir
+        // arbitrairement laquelle des lignes deja ouvertes garder.
+        if (checked) {
+            setExpanded({});
+        }
+    };
 
     const canApprove = can(permissions, Permission.ProofsApprove);
     const canReject = can(permissions, Permission.ProofsReject);
 
     const columns: ColumnDef<PaymentProofRow>[] = [
         {
-            header: t('proofs.columns.name'),
+            id: 'expand',
+            enableSorting: false,
+            header: () => (
+                <span className="sr-only">{t('proofs.details.column')}</span>
+            ),
+            cell: ({ row }) => (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    aria-expanded={row.getIsExpanded()}
+                    aria-label={t(
+                        row.getIsExpanded()
+                            ? 'proofs.details.hide'
+                            : 'proofs.details.show',
+                        { name: row.original.name },
+                    )}
+                    data-test="proof-expand"
+                    onClick={row.getToggleExpandedHandler()}
+                >
+                    <ChevronRight
+                        className={`transition-transform duration-200 ${row.getIsExpanded() ? 'rotate-90' : ''}`}
+                    />
+                </Button>
+            ),
+        },
+        {
+            // La recherche passe par le filtre de cette colonne, mais porte sur toute la preuve
+            // (`proofMatchesSearch`) : reference, telephone, unite, accompagnateurs.
+            id: 'name',
+            accessorKey: 'name',
+            filterFn: (row, _columnId, value: string) =>
+                proofMatchesSearch(row.original, value),
+            header: ({ column }) => (
+                <DataTableSortHeader
+                    column={column}
+                    label={t('proofs.columns.name')}
+                />
+            ),
             cell: ({ row }) => (
                 <div>
                     <p className="font-medium">{row.original.name}</p>
@@ -74,41 +172,60 @@ export default function EventProofs({
                             {row.original.registrationReference}
                         </p>
                     ) : null}
-                    <p className="text-muted-foreground text-xs">
-                        {row.original.phone}
+                    <p className="text-muted-foreground text-xs tabular-nums">
+                        {formatPhoneNumberIntl(row.original.phone) ||
+                            row.original.phone}
                     </p>
                     <p
                         className="text-muted-foreground text-xs"
-                        data-test="proof-companions"
+                        data-test="proof-companion-count"
                     >
-                        {row.original.companions.length === 0
-                            ? t('proofs.companions.none')
-                            : t('proofs.companions.list', {
-                                  names: row.original.companions
-                                      .map(
-                                          (companion) =>
-                                              `${companion.name} (${companion.unit})`,
-                                      )
-                                      .join(', '),
-                              })}
+                        {t('proofs.companions.count', {
+                            count: row.original.companions.length,
+                        })}
                     </p>
                 </div>
             ),
         },
         {
-            header: t('proofs.columns.unit'),
             accessorKey: 'unit',
+            header: ({ column }) => (
+                <DataTableSortHeader
+                    column={column}
+                    label={t('proofs.columns.unit')}
+                />
+            ),
         },
         {
-            header: t('proofs.columns.party_size'),
             accessorKey: 'partySize',
+            header: ({ column }) => (
+                <DataTableSortHeader
+                    column={column}
+                    label={t('proofs.columns.party_size')}
+                />
+            ),
         },
         {
-            header: t('proofs.columns.amount_due'),
+            accessorKey: 'amountDue',
+            header: ({ column }) => (
+                <DataTableSortHeader
+                    column={column}
+                    label={t('proofs.columns.amount_due')}
+                />
+            ),
             cell: ({ row }) => formatAmount(row.original.amountDue, locale),
         },
         {
-            header: t('proofs.columns.submitted_at'),
+            accessorKey: 'submittedAt',
+            // Chaine ISO 8601 : l'ordre alphabetique est l'ordre chronologique.
+            sortingFn: 'alphanumeric',
+            sortUndefined: 'last',
+            header: ({ column }) => (
+                <DataTableSortHeader
+                    column={column}
+                    label={t('proofs.columns.submitted_at')}
+                />
+            ),
             cell: ({ row }) =>
                 row.original.submittedAt ? (
                     <div>
@@ -122,31 +239,39 @@ export default function EventProofs({
                 ) : null,
         },
         {
-            header: t('proofs.columns.channel'),
+            // Le canal decoule du compte choisi (decision du 2026-09-29) : une seule colonne
+            // plutot que deux qui repetaient la meme information.
+            id: 'payment',
+            enableSorting: false,
+            header: t('proofs.columns.payment'),
             cell: ({ row }) => (
                 <div>
-                    <p>{row.original.channelLabel}</p>
-                    {row.original.reference ? (
-                        <p className="text-muted-foreground font-mono text-xs">
-                            {row.original.reference}
-                        </p>
-                    ) : null}
+                    <p>{row.original.paymentAccountLabel}</p>
+                    <p className="text-muted-foreground text-xs">
+                        {row.original.channelLabel}
+                        {row.original.reference ? (
+                            <>
+                                {' · '}
+                                <span className="font-mono">
+                                    {row.original.reference}
+                                </span>
+                            </>
+                        ) : null}
+                    </p>
                 </div>
             ),
         },
         {
-            header: t('proofs.columns.amount_declared'),
-            cell: ({ row }) =>
-                formatAmount(row.original.amountDeclared, locale),
-        },
-        {
-            header: t('proofs.columns.payment_account'),
-            accessorKey: 'paymentAccountLabel',
-        },
-        {
+            id: 'signals',
+            enableSorting: false,
+            filterFn: (row, _columnId, value: ProofSignalFilter) =>
+                proofMatchesSignal(row.original, value),
             header: t('proofs.columns.signals'),
             cell: ({ row }) => (
-                <div className="flex flex-wrap gap-1" data-tour="proof-signals">
+                <div
+                    className="flex flex-col items-start gap-1.5"
+                    data-tour="proof-signals"
+                >
                     {row.original.signals.duplicateReference ? (
                         <Badge
                             variant="destructive"
@@ -173,11 +298,6 @@ export default function EventProofs({
                             )}
                         </Badge>
                     ) : null}
-                    {!Object.values(row.original.signals).some(Boolean) ? (
-                        <Badge variant="outline" data-test="signal-none">
-                            {t('proofs.signals.none')}
-                        </Badge>
-                    ) : null}
                     {row.original.signals.statementAmountMismatch ? (
                         <Badge
                             variant="destructive"
@@ -186,43 +306,65 @@ export default function EventProofs({
                             {t('proofs.signals.statement_amount_mismatch')}
                         </Badge>
                     ) : null}
+                    {row.original.guestNote ? (
+                        <Badge
+                            variant="secondary"
+                            data-test="signal-guest-note"
+                        >
+                            <MessageSquareText />
+                            {t('proofs.signals.guest_note')}
+                        </Badge>
+                    ) : null}
+                    {!Object.values(row.original.signals).some(Boolean) ? (
+                        <Badge variant="outline" data-test="signal-none">
+                            {t('proofs.signals.none')}
+                        </Badge>
+                    ) : null}
                 </div>
             ),
         },
         {
+            id: 'actions',
+            enableSorting: false,
             header: t('proofs.columns.actions'),
             cell: ({ row }) => (
-                <div className="flex flex-wrap items-center gap-2">
+                // Boutons compacts : le back-office est plus dense que le parcours invite (CLAUDE.md,
+                // « Design »), et trois actions tiennent ainsi sur une ligne sans elargir le tableau.
+                <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
                     {row.original.receiptUrl ? (
-                        <Button variant="ghost" size="sm" asChild>
-                            <a
-                                href={row.original.receiptUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                data-test="proof-receipt-link"
-                                data-tour="proof-receipt"
-                            >
-                                <ExternalLink />
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-7 [&_svg]:size-3.5"
+                                    asChild
+                                >
+                                    <a
+                                        href={row.original.receiptUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        aria-label={t(
+                                            'proofs.actions.open_receipt',
+                                        )}
+                                        data-test="proof-receipt-link"
+                                        data-tour="proof-receipt"
+                                    >
+                                        <ExternalLink />
+                                    </a>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
                                 {t('proofs.actions.open_receipt')}
-                            </a>
-                        </Button>
-                    ) : null}
-
-                    {canApprove ? (
-                        <Button
-                            size="sm"
-                            data-test="proof-approve"
-                            data-tour="proof-approve"
-                            onClick={() => setApproving(row.original)}
-                        >
-                            {t('proofs.actions.approve')}
-                        </Button>
+                            </TooltipContent>
+                        </Tooltip>
                     ) : null}
 
                     {canReject ? (
                         <Button
                             variant="secondary"
                             size="sm"
+                            className="h-7 px-2.5 text-xs"
                             data-test="proof-reject"
                             data-tour="proof-reject"
                             onClick={() => setRejecting(row.original)}
@@ -230,16 +372,59 @@ export default function EventProofs({
                             {t('proofs.actions.reject')}
                         </Button>
                     ) : null}
+
+                    {canApprove ? (
+                        <Button
+                            size="sm"
+                            className="h-7 px-2.5 text-xs"
+                            data-test="proof-approve"
+                            data-tour="proof-approve"
+                            onClick={() => setApproving(row.original)}
+                        >
+                            {t('proofs.actions.approve')}
+                        </Button>
+                    ) : null}
                 </div>
             ),
         },
     ];
 
+    // Tout vient de TanStack Table, cote navigateur : la file ne porte que les preuves en attente
+    // d'un evenement, quelques centaines au plus, deja toutes chargees. Pagination et tri serveur
+    // (`spatie/laravel-query-builder`) ne se justifient qu'au-dela de quelques milliers (CLAUDE.md).
+    // Lignes depliables : le detail d'une preuve s'ouvre sous sa ligne plutot que d'allonger toutes
+    // les lignes. Par defaut, les plus anciennes en tete : une file se traite dans l'ordre d'arrivee.
     const table = useReactTable({
         data: rows,
         columns,
+        getRowId: (row) => String(row.proofId),
+        state: {
+            expanded,
+            sorting,
+            // Poses par la barre d'outils ; appliques par le `filterFn` de chaque colonne.
+            columnFilters: [
+                { id: 'name', value: search },
+                { id: 'signals', value: signalFilter },
+            ],
+        },
+        onExpandedChange: changeExpanded,
+        onSortingChange: setSorting,
+        getRowCanExpand: () => true,
         getCoreRowModel: getCoreRowModel(),
+        getExpandedRowModel: getExpandedRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        initialState: { pagination: { pageSize: 25 } },
     });
+
+    const filteredCount = table.getFilteredRowModel().rows.length;
+    const { pageIndex } = table.getState().pagination;
+
+    const resetFilters = () => {
+        setSearch('');
+        setSignalFilter('all');
+    };
 
     return (
         <>
@@ -266,43 +451,157 @@ export default function EventProofs({
                         </p>
                     </div>
                 ) : (
-                    <div className="rounded-lg border" data-tour="proof-queue">
-                        <Table>
-                            <TableHeader>
-                                {table.getHeaderGroups().map((headerGroup) => (
-                                    <TableRow key={headerGroup.id}>
-                                        {headerGroup.headers.map((header) => (
-                                            <TableHead key={header.id}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                          header.column
-                                                              .columnDef.header,
-                                                          header.getContext(),
-                                                      )}
-                                            </TableHead>
+                    <div className="space-y-3">
+                        <ProofsToolbar
+                            search={search}
+                            onSearchChange={setSearch}
+                            signalFilter={signalFilter}
+                            onSignalFilterChange={setSignalFilter}
+                            singleExpand={singleExpand}
+                            onSingleExpandChange={toggleSingleExpand}
+                            count={filteredCount}
+                        />
+                        {filteredCount === 0 ? (
+                            <div
+                                className="rounded-lg border p-6 text-center"
+                                data-test="proofs-no-match"
+                            >
+                                <p className="font-medium">
+                                    {t('proofs.no_match.title')}
+                                </p>
+                                <p className="text-muted-foreground text-sm">
+                                    {t('proofs.no_match.description')}
+                                </p>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-3"
+                                    onClick={resetFilters}
+                                >
+                                    {t('proofs.no_match.reset')}
+                                </Button>
+                            </div>
+                        ) : (
+                            <div
+                                className="rounded-lg border"
+                                data-tour="proof-queue"
+                            >
+                                <Table>
+                                    <TableHeader>
+                                        {table
+                                            .getHeaderGroups()
+                                            .map((headerGroup) => (
+                                                <TableRow key={headerGroup.id}>
+                                                    {headerGroup.headers.map(
+                                                        (header) => (
+                                                            <TableHead
+                                                                key={header.id}
+                                                                aria-sort={
+                                                                    header.column.getIsSorted() ===
+                                                                    'asc'
+                                                                        ? 'ascending'
+                                                                        : header.column.getIsSorted() ===
+                                                                            'desc'
+                                                                          ? 'descending'
+                                                                          : undefined
+                                                                }
+                                                            >
+                                                                {header.isPlaceholder
+                                                                    ? null
+                                                                    : flexRender(
+                                                                          header
+                                                                              .column
+                                                                              .columnDef
+                                                                              .header,
+                                                                          header.getContext(),
+                                                                      )}
+                                                            </TableHead>
+                                                        ),
+                                                    )}
+                                                </TableRow>
+                                            ))}
+                                    </TableHeader>
+                                    <TableBody>
+                                        {table.getRowModel().rows.map((row) => (
+                                            <Fragment key={row.id}>
+                                                <TableRow
+                                                    data-test="proof-row"
+                                                    data-state={
+                                                        row.getIsExpanded()
+                                                            ? 'selected'
+                                                            : undefined
+                                                    }
+                                                >
+                                                    {row
+                                                        .getVisibleCells()
+                                                        .map((cell) => (
+                                                            <TableCell
+                                                                key={cell.id}
+                                                            >
+                                                                {flexRender(
+                                                                    cell.column
+                                                                        .columnDef
+                                                                        .cell,
+                                                                    cell.getContext(),
+                                                                )}
+                                                            </TableCell>
+                                                        ))}
+                                                </TableRow>
+                                                {row.getIsExpanded() ? (
+                                                    <TableRow className="hover:bg-transparent">
+                                                        <TableCell
+                                                            colSpan={
+                                                                row.getVisibleCells()
+                                                                    .length
+                                                            }
+                                                            className="bg-muted/40 whitespace-normal"
+                                                        >
+                                                            <ProofDetails
+                                                                proof={
+                                                                    row.original
+                                                                }
+                                                            />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : null}
+                                            </Fragment>
                                         ))}
-                                    </TableRow>
-                                ))}
-                            </TableHeader>
-                            <TableBody>
-                                {table.getRowModel().rows.map((row) => (
-                                    <TableRow
-                                        key={row.id}
-                                        data-test="proof-row"
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        )}
+
+                        {table.getPageCount() > 1 ? (
+                            <div
+                                className="flex items-center justify-between"
+                                data-test="proofs-pagination"
+                            >
+                                <p className="text-muted-foreground text-sm">
+                                    {t('common.pagination.page_of', {
+                                        current: String(pageIndex + 1),
+                                        last: String(table.getPageCount()),
+                                    })}
+                                </p>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={!table.getCanPreviousPage()}
+                                        onClick={() => table.previousPage()}
                                     >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext(),
-                                                )}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                        {t('common.pagination.previous')}
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={!table.getCanNextPage()}
+                                        onClick={() => table.nextPage()}
+                                    >
+                                        {t('common.pagination.next')}
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                 )}
             </div>
@@ -341,15 +640,22 @@ export default function EventProofs({
                         </dt>
                         <dd>{formatAmount(approving.amountDue, locale)}</dd>
                         <dt className="text-muted-foreground">
-                            {t('proofs.columns.amount_declared')}
-                        </dt>
-                        <dd>
-                            {formatAmount(approving.amountDeclared, locale)}
-                        </dd>
-                        <dt className="text-muted-foreground">
                             {t('proofs.columns.reference')}
                         </dt>
                         <dd>{approving.reference ?? '-'}</dd>
+                        {approving.guestNote ? (
+                            <>
+                                <dt className="text-muted-foreground">
+                                    {t('proofs.columns.guest_note')}
+                                </dt>
+                                <dd
+                                    className="break-words whitespace-pre-line"
+                                    data-test="approve-guest-note"
+                                >
+                                    {approving.guestNote}
+                                </dd>
+                            </>
+                        ) : null}
                     </dl>
                 ) : null}
             </ConfirmActionDialog>
@@ -367,6 +673,21 @@ export default function EventProofs({
                             {t('proofs.actions.reject_confirm_description')}
                         </DialogDescription>
                     </DialogHeader>
+
+                    {/* Lue avant de rejeter aussi : elle explique souvent l'ecart qui fait douter. */}
+                    {rejecting?.guestNote ? (
+                        <div className="bg-muted space-y-1 rounded-lg p-3 text-sm">
+                            <p className="text-muted-foreground">
+                                {t('proofs.columns.guest_note')}
+                            </p>
+                            <p
+                                className="break-words whitespace-pre-line"
+                                data-test="reject-guest-note"
+                            >
+                                {rejecting.guestNote}
+                            </p>
+                        </div>
+                    ) : null}
 
                     <DialogFooter className="gap-2">
                         <DialogClose asChild>

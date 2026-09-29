@@ -10,7 +10,8 @@ use Illuminate\Support\Str;
 
 /**
  * Le rapprochement automatique d'une ligne de releve avec les preuves d'un evenement (README
- * 2.10) : par reference d'abord, puis par montant egal et nom approchant.
+ * 2.10) : par reference d'abord, puis par montant egal et nom approchant. Le montant compare est
+ * celui que l'inscription doit : l'invite ne declare plus de montant (decision du 2026-09-29).
  *
  * Fonction pure sur les preuves candidates recues : ne lit jamais la base. Exclure les preuves
  * deja consommees par une ligne precedente du meme import est le role de l'Action appelante
@@ -50,7 +51,7 @@ class ReconciliationMatcher
                 $proof = $byReference->first();
 
                 return [
-                    'outcome' => $proof->amount_declared === $line->amount
+                    'outcome' => $proof->registration->amount_due === $line->amount
                         ? ReconciliationOutcome::Matched
                         : ReconciliationOutcome::AmountMismatch,
                     'proof' => $proof,
@@ -62,7 +63,7 @@ class ReconciliationMatcher
         $bestScore = 0.0;
 
         foreach ($candidateProofs as $proof) {
-            if ($proof->amount_declared !== $line->amount) {
+            if ($proof->registration->amount_due !== $line->amount) {
                 continue;
             }
 

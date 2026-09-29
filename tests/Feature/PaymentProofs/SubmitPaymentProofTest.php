@@ -126,7 +126,7 @@ class SubmitPaymentProofTest extends TestCase
 
     /**
      * @param  array<string, mixed>  $overrides
-     * @return array{payment_account_id: int, channel: string, reference: ?string, amount_declared: int}
+     * @return array{payment_account_id: int, channel: string, reference: ?string, guest_note: ?string}
      */
     private function proofData(PaymentAccount $account, array $overrides = []): array
     {
@@ -134,7 +134,7 @@ class SubmitPaymentProofTest extends TestCase
             'payment_account_id' => $account->id,
             'channel' => PaymentChannel::Wave->value,
             'reference' => 'WAVE-'.fake()->numerify('########'),
-            'amount_declared' => 15000,
+            'guest_note' => null,
             ...$overrides,
         ];
     }

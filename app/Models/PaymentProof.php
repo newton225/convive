@@ -24,7 +24,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property int $payment_account_id
  * @property PaymentChannel $channel
  * @property string|null $reference
- * @property int $amount_declared
+ * @property string|null $guest_note
  * @property string|null $perceptual_hash
  * @property string $idempotency_key
  * @property Carbon|null $created_at
@@ -32,7 +32,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read Registration $registration
  * @property-read PaymentAccount $paymentAccount
  */
-#[Fillable(['registration_id', 'payment_account_id', 'channel', 'reference', 'amount_declared', 'perceptual_hash', 'idempotency_key'])]
+#[Fillable(['registration_id', 'payment_account_id', 'channel', 'reference', 'guest_note', 'perceptual_hash', 'idempotency_key'])]
 class PaymentProof extends Model implements HasMedia
 {
     /** @use HasFactory<PaymentProofFactory> */
@@ -146,7 +146,8 @@ class PaymentProof extends Model implements HasMedia
 
     /**
      * Determine whether the statement line carrying this proof's reference shows another amount
-     * than the one declared (README 2.9). Sans ligne portant cette reference, c'est
+     * than the one the registration owes (README 2.9). L'invite ne declare plus de montant
+     * (decision du 2026-09-29) : le releve se compare a ce qui est du, pas a ce qui a ete tape. Sans ligne portant cette reference, c'est
      * `referenceMissingFromStatement()` qui signale, pas celui-ci.
      */
     public function hasStatementAmountMismatch(): bool
@@ -157,7 +158,7 @@ class PaymentProof extends Model implements HasMedia
 
         $amounts = $this->statementLinesWithSameReference()->get()->pluck('amount');
 
-        return $amounts->isNotEmpty() && ! $amounts->contains($this->amount_declared);
+        return $amounts->isNotEmpty() && ! $amounts->contains($this->registration->amount_due);
     }
 
     /**
@@ -221,7 +222,6 @@ class PaymentProof extends Model implements HasMedia
     {
         return [
             'channel' => PaymentChannel::class,
-            'amount_declared' => 'integer',
         ];
     }
 }

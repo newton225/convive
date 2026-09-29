@@ -83,7 +83,7 @@ class NotificationTriggersTest extends TestCase
 
             app(SubmitPaymentProof::class)->handle(
                 $registration,
-                ['payment_account_id' => $account->id, 'channel' => 'wave', 'reference' => 'WV0001', 'amount_declared' => 15000],
+                ['payment_account_id' => $account->id, 'channel' => 'wave', 'reference' => 'WV0001', 'guest_note' => null],
                 UploadedFile::fake()->image('recu.png', 120, 120),
                 (string) Str::uuid(),
             );
@@ -100,7 +100,7 @@ class NotificationTriggersTest extends TestCase
             $registration = Registration::factory()->held()->create(['event_id' => $this->event->id]);
             $account = PaymentAccount::factory()->create();
             $key = (string) Str::uuid();
-            $data = ['payment_account_id' => $account->id, 'channel' => 'wave', 'reference' => 'WV0001', 'amount_declared' => 15000];
+            $data = ['payment_account_id' => $account->id, 'channel' => 'wave', 'reference' => 'WV0001', 'guest_note' => null];
 
             app(SubmitPaymentProof::class)->handle($registration, $data, UploadedFile::fake()->image('recu.png', 120, 120), $key);
             app(SubmitPaymentProof::class)->handle($registration, $data, UploadedFile::fake()->image('recu.png', 120, 120), $key);

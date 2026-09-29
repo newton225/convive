@@ -13,7 +13,7 @@ use Database\Factories\PaymentProofFactory;
 use Illuminate\Database\Seeder;
 
 /**
- * Preuves saines et preuves douteuses (README 2.9) : reference dupliquee, montant divergent,
+ * Preuves saines et preuves douteuses (README 2.9) : reference dupliquee, precision de l'invite,
  * capture deja vue. S'appuie sur l'evenement ouvert de `EventSeeder` et ses inscriptions en
  * attente de verification (`RegistrationSeeder::seedOpenEvent()`).
  */
@@ -43,7 +43,7 @@ class PaymentProofSeeder extends Seeder
 
             $this->healthyProofs($event, $account);
             $this->duplicateReference($event, $account);
-            $this->amountMismatch($event, $account);
+            $this->guestNote($event, $account);
             $this->duplicateCapture($event, $account);
         });
     }
@@ -82,16 +82,14 @@ class PaymentProofSeeder extends Seeder
     }
 
     /**
-     * Un montant declare inferieur a ce que l'inscription doit (README 2.9).
+     * Une precision laissee par l'invite, que le tresorier doit lire avant de valider.
      */
-    private function amountMismatch(Event $event, PaymentAccount $account): void
+    private function guestNote(Event $event, PaymentAccount $account): void
     {
-        $registration = $this->pendingRegistration($event);
-
         PaymentProof::factory()->create([
-            'registration_id' => $registration->id,
+            'registration_id' => $this->pendingRegistration($event)->id,
             'payment_account_id' => $account->id,
-            'amount_declared' => max(0, $registration->amount_due - 5000),
+            'guest_note' => 'Paye en deux fois : le reste part demain depuis le numero de mon epoux.',
         ]);
     }
 
@@ -117,7 +115,6 @@ class PaymentProofSeeder extends Seeder
         $factory->create([
             'registration_id' => $registration->id,
             'payment_account_id' => $account->id,
-            'amount_declared' => $registration->amount_due,
         ]);
     }
 

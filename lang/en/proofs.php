@@ -8,6 +8,26 @@ return [
         'description' => 'Every proof submitted for this event has been processed.',
     ],
 
+    'toolbar' => [
+        'search' => 'Search',
+        'search_placeholder' => 'Name, reference, phone, unit, companion',
+        'filter_label' => 'Filter by signal',
+        'count' => '{0} No proof|{1} 1 proof|[2,*] :count proofs',
+    ],
+
+    'filters' => [
+        'all' => 'All proofs',
+        'anomaly' => 'With an anomaly',
+        'clean' => 'Without anomaly',
+        'note' => 'With a guest note',
+    ],
+
+    'no_match' => [
+        'title' => 'No proof matches',
+        'description' => 'Change the search or the filter to see other proofs.',
+        'reset' => 'Clear the search and filter',
+    ],
+
     'columns' => [
         'name' => 'Registrant',
         'unit' => 'Unit',
@@ -16,8 +36,9 @@ return [
         'submitted_at' => 'Submitted on',
         'channel' => 'Channel',
         'reference' => 'Reference',
-        'amount_declared' => 'Amount sent',
+        'guest_note' => 'Guest’s note',
         'payment_account' => 'Account targeted',
+        'payment' => 'Payment',
         'signals' => 'Signals',
         'actions' => 'Actions',
     ],
@@ -28,11 +49,21 @@ return [
         'duplicate_image' => 'Capture already seen',
         'reference_missing_from_statement' => 'Reference missing from the statement',
         'statement_amount_mismatch' => 'Statement amount differs',
+        'guest_note' => 'Guest’s note',
+    ],
+
+    'details' => [
+        'column' => 'Details',
+        'show' => 'Show details for :name',
+        'hide' => 'Hide details for :name',
+        'companions' => 'Companions',
+        'no_note' => 'No note.',
+        'single_expand' => 'Only one row open at a time',
     ],
 
     'companions' => [
         'none' => 'No companion',
-        'list' => 'Companions: :names',
+        'count' => '{0} No companion|{1} 1 companion|[2,*] :count companions',
     ],
 
     'actions' => [

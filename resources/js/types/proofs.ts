@@ -3,6 +3,8 @@ export type PaymentProofSignals = {
     duplicateImage: boolean;
     referenceMissingFromStatement: boolean;
     statementAmountMismatch: boolean;
+    // L'invite a laisse une precision : une information a lire, pas un soupcon.
+    guestNote: boolean;
 };
 
 export type PaymentProofRow = {
@@ -18,7 +20,7 @@ export type PaymentProofRow = {
     submittedAt: string | null;
     channelLabel: string;
     reference: string | null;
-    amountDeclared: number;
+    guestNote: string | null;
     paymentAccountLabel: string;
     receiptUrl: string | null;
     signals: PaymentProofSignals;

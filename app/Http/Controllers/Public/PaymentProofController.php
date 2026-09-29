@@ -40,9 +40,9 @@ class PaymentProofController extends Controller
             $registration,
             [
                 'payment_account_id' => (int) $request->validated('payment_account_id'),
-                'channel' => $request->validated('channel'),
+                'channel' => $request->channel()->value,
                 'reference' => $request->validated('reference'),
-                'amount_declared' => (int) $request->validated('amount_declared'),
+                'guest_note' => $request->validated('guest_note'),
             ],
             $request->file('receipt'),
             $request->validated('idempotency_key'),

@@ -4,8 +4,10 @@ namespace App\Http\Requests\Public;
 
 use App\Enums\PaymentChannel;
 use App\Models\Event;
+use App\Models\PaymentAccount;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 class StorePaymentProofRequest extends FormRequest
@@ -28,20 +30,22 @@ class StorePaymentProofRequest extends FormRequest
      */
     public function rules(): array
     {
-        $channel = PaymentChannel::tryFrom((string) $this->input('channel'));
-
         // Seuls les comptes offerts sur ce lien public sont acceptables : verifier l'existence
         // brute laisserait passer un compte d'un autre evenement, voire (avant reencodage de
         // l'identifiant) d'un autre locataire.
-        $publicAccountIds = $this->event()->paymentAccounts()->publiclyVisible()->pluck('payment_accounts.id');
+        $publicAccountIds = $this->publicAccounts()->pluck('id');
+
+        // Le canal est celui du compte choisi, un pour un (decision du proprietaire du projet,
+        // 2026-09-29) : l'invite ne le declare plus. Aucune reference pour un compte en especes
+        // (`PaymentChannel::hasAccountNumber()`) : aucune transaction n'existe alors a declarer.
+        $channel = $this->paymentAccount()?->channel;
 
         return [
             'payment_account_id' => ['required', 'integer', Rule::in($publicAccountIds)],
-            'channel' => ['required', Rule::in(PaymentChannel::values())],
-            // Nulle uniquement pour un versement en especes (`PaymentChannel::hasAccountNumber()`) :
-            // aucune reference de transaction n'existe alors a declarer.
             'reference' => [$channel?->hasAccountNumber() ?? true ? 'required' : 'nullable', 'string', 'max:255'],
-            'amount_declared' => ['required', 'integer', 'min:1'],
+            // Une precision libre de l'invite (paiement en deux fois, envoi par un proche...) :
+            // facultative, elle allume un signal dans la file des preuves quand elle est remplie.
+            'guest_note' => ['nullable', 'string', 'max:500'],
             'receipt' => [
                 'required',
                 'image',
@@ -65,9 +69,8 @@ class StorePaymentProofRequest extends FormRequest
     {
         return [
             'payment_account_id' => __('guest.proof.fields.payment_account'),
-            'channel' => __('guest.proof.fields.channel'),
             'reference' => __('guest.proof.fields.reference'),
-            'amount_declared' => __('guest.proof.fields.amount_declared'),
+            'guest_note' => __('guest.proof.fields.guest_note'),
             'receipt' => __('guest.proof.fields.receipt'),
         ];
     }
@@ -81,5 +84,31 @@ class StorePaymentProofRequest extends FormRequest
     public function event(): Event
     {
         return once(fn () => Event::where('public_token', $this->route('token'))->firstOrFail());
+    }
+
+    /**
+     * The payment account the guest chose, among those offered on this public link, if valid.
+     */
+    public function paymentAccount(): ?PaymentAccount
+    {
+        return $this->publicAccounts()->firstWhere('id', (int) $this->input('payment_account_id'));
+    }
+
+    /**
+     * The channel of the chosen account, once the request has passed validation.
+     */
+    public function channel(): PaymentChannel
+    {
+        // Un compte visible sur le lien a forcement un canal vivant (`publiclyVisible`), et la
+        // validation n'accepte que ces comptes-la : l'absence ici serait un bogue, pas une saisie.
+        return $this->paymentAccount()->channel ?? throw new \LogicException('Compte de versement sans canal apres validation.');
+    }
+
+    /**
+     * @return Collection<int, PaymentAccount>
+     */
+    private function publicAccounts(): Collection
+    {
+        return once(fn () => $this->event()->paymentAccounts()->publiclyVisible()->get());
     }
 }

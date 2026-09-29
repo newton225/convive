@@ -16,7 +16,7 @@ use Tests\TestCase;
 /**
  * Les deux derniers signaux de preuve douteuse de README 2.9, possibles depuis qu'un releve peut
  * etre importe (etape 9) : reference absente du releve, montant du releve different du montant
- * declare.
+ * du de l'inscription (l'invite ne declare plus de montant, decision du 2026-09-29).
  *
  * Sans releve importe pour l'evenement, aucun des deux signaux ne s'allume : l'absence d'un
  * releve n'est pas la preuve qu'une reference manque.
@@ -37,14 +37,16 @@ class StatementSignalsTest extends TestCase
         $this->event = $this->tenant->asCurrent(fn () => Event::factory()->open()->create());
     }
 
-    private function proof(?string $reference, int $amountDeclared, ?Event $event = null): PaymentProof
+    private function proof(?string $reference, int $amountDue, ?Event $event = null): PaymentProof
     {
-        $registration = Registration::factory()->proofSubmitted()->create(['event_id' => ($event ?? $this->event)->id]);
+        $registration = Registration::factory()->proofSubmitted()->create([
+            'event_id' => ($event ?? $this->event)->id,
+            'amount_due' => $amountDue,
+        ]);
 
         return PaymentProof::factory()->create([
             'registration_id' => $registration->id,
             'reference' => $reference,
-            'amount_declared' => $amountDeclared,
         ]);
     }
 
@@ -100,7 +102,7 @@ class StatementSignalsTest extends TestCase
         });
     }
 
-    public function test_un_montant_de_releve_different_du_montant_declare_allume_le_signal(): void
+    public function test_un_montant_de_releve_different_du_montant_du_allume_le_signal(): void
     {
         $this->tenant->asCurrent(function () {
             $this->statementLine('WV0001', 9000);
@@ -110,7 +112,7 @@ class StatementSignalsTest extends TestCase
         });
     }
 
-    public function test_un_montant_de_releve_egal_au_montant_declare_n_allume_pas_le_signal(): void
+    public function test_un_montant_de_releve_egal_au_montant_du_n_allume_pas_le_signal(): void
     {
         $this->tenant->asCurrent(function () {
             $this->statementLine('WV0001', 15000);
@@ -143,11 +145,10 @@ class StatementSignalsTest extends TestCase
             $import = StatementImport::factory()->create(['event_id' => $event->id]);
             StatementLine::factory()->create(['statement_import_id' => $import->id, 'reference' => 'WV9999', 'amount' => 1000]);
 
-            $registration = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id]);
+            $registration = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id, 'amount_due' => 15000]);
             PaymentProof::factory()->create([
                 'registration_id' => $registration->id,
                 'reference' => 'WV0001',
-                'amount_declared' => 15000,
             ]);
         });
 
@@ -156,7 +157,31 @@ class StatementSignalsTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->where('rows.0.signals.referenceMissingFromStatement', true)
-                ->where('rows.0.signals.statementAmountMismatch', false),
+                ->where('rows.0.signals.statementAmountMismatch', false)
+                ->where('rows.0.signals.guestNote', false),
+            );
+    }
+
+    public function test_une_precision_laissee_par_l_invite_allume_un_signal_et_se_lit_dans_la_file(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = app(CreateTenant::class)->handle($owner, 'Autre Association');
+        $event = $tenant->asCurrent(fn () => Event::factory()->open()->create());
+
+        $tenant->asCurrent(function () use ($event) {
+            $registration = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id]);
+            PaymentProof::factory()->create([
+                'registration_id' => $registration->id,
+                'guest_note' => 'Envoye par ma soeur, depuis son numero.',
+            ]);
+        });
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.proofs.index', [$tenant, $event]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('rows.0.signals.guestNote', true)
+                ->where('rows.0.guestNote', 'Envoye par ma soeur, depuis son numero.'),
             );
     }
 }

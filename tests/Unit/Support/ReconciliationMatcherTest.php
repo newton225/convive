@@ -28,11 +28,15 @@ class ReconciliationMatcherTest extends TestCase
         ]);
     }
 
-    private function proof(int $id, ?string $reference, int $amountDeclared, string $registrantName): PaymentProof
+    /**
+     * Le montant compare a la ligne du releve est le montant du de l'inscription : l'invite ne
+     * declare plus de montant (decision du proprietaire du projet, 2026-09-29).
+     */
+    private function proof(int $id, ?string $reference, int $amountDue, string $registrantName): PaymentProof
     {
-        $proof = new PaymentProof(['reference' => $reference, 'amount_declared' => $amountDeclared]);
+        $proof = new PaymentProof(['reference' => $reference]);
         $proof->forceFill(['id' => $id]);
-        $proof->setRelation('registration', new Registration(['name' => $registrantName]));
+        $proof->setRelation('registration', new Registration(['name' => $registrantName, 'amount_due' => $amountDue]));
 
         return $proof;
     }

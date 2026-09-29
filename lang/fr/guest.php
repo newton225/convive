@@ -40,7 +40,7 @@ return [
 
     'registration' => [
         'errors' => [
-            'phone_invalid' => 'Saisissez un numéro ivoirien à 10 chiffres, par exemple 07 07 12 34 56.',
+            'phone_invalid' => 'Saisissez un numéro valide : 07 07 12 34 56 pour la Côte d’Ivoire, ou avec l’indicatif du pays pour un numéro étranger, par exemple +33 6 12 34 56 78.',
             'phone_already_active' => 'Une réservation est déjà en cours pour ce numéro. Terminez-la, ou attendez la fin de son délai avant d\'en créer une autre.',
             'registrations_paused' => "Les inscriptions en ligne sont momentanément suspendues pour cet événement. Contactez l'organisateur pour réserver votre place.",
             'phone_backoff' => '{1} Plusieurs réservations ont expiré pour ce numéro sans preuve de paiement. Réessayez dans 1 minute.|[2,*] Plusieurs réservations ont expiré pour ce numéro sans preuve de paiement. Réessayez dans :minutes minutes.',
@@ -56,14 +56,23 @@ return [
             'companion_name' => 'Nom de l\'accompagnateur',
         ],
         'help' => [
-            'phone' => 'Il sert à vous envoyer votre carte d’invitation et vos rappels par WhatsApp. Une seule réservation à la fois par numéro.',
+            'phone' => 'Il sert à vous envoyer votre carte d’invitation et vos rappels par WhatsApp. Numéro étranger : ajoutez l’indicatif du pays (+33, +1…). Une seule réservation à la fois par numéro.',
             'unit' => 'Elle sert à placer les membres d’une même unité aux mêmes tables. Si aucune ne vous correspond, choisissez « Aucune ».',
             'companions' => 'Les personnes qui viennent avec vous. Chacune occupe une place, paie le tarif et reçoit son propre billet, que vous pourrez lui transmettre.',
+        ],
+        'phone_country' => [
+            'label' => 'Choisir le pays du numéro',
+            'selected' => 'Pays du numéro : :country (+:code). Changer de pays',
+            'search' => 'Rechercher un pays ou un indicatif',
+            'empty' => 'Aucun pays ne correspond.',
         ],
         'companions' => [
             'title' => 'Accompagnateurs',
             'add' => 'Ajouter un accompagnateur',
             'remove' => 'Retirer',
+            'remove_item' => "Retirer l'accompagnateur :number",
+            'item' => 'Accompagnateur :number',
+            'count' => ':count sur :max',
             'limit_reached' => '{1} 1 accompagnateur au maximum pour cet événement.|[2,*] :count accompagnateurs au maximum pour cet événement.',
         ],
         'total' => [
@@ -78,6 +87,8 @@ return [
             'proof_rejected' => "Votre preuve n'a pas pu être validée. Merci d'en envoyer une nouvelle.",
             'recap_title' => 'Récapitulatif',
             'seats_available' => '{0} Aucune place restante pour le moment|{1} 1 place restante|[2,*] :count places restantes',
+            'seats_enough' => 'Des places sont encore disponibles pour votre groupe.',
+            'seats_not_enough' => 'Il ne reste plus assez de places pour votre groupe pour le moment.',
             'cancelled_title' => 'Cette inscription a été annulée.',
             'cancelled_description' => "L'organisation a annulé cette inscription. Contactez-la si vous pensez qu'il s'agit d'une erreur.",
         ],
@@ -158,14 +169,14 @@ return [
         'fields' => [
             'payment_account' => 'Compte de versement utilisé',
             'payment_account_placeholder' => 'Choisir le compte utilisé',
-            'channel' => 'Canal utilisé',
-            'channel_placeholder' => 'Choisir le canal',
             'reference' => 'Référence de la transaction',
-            'amount_declared' => 'Montant versé',
+            'guest_note' => 'Une précision sur ce paiement ? (facultatif)',
+            'guest_note_placeholder' => 'Par exemple : payé en deux fois, envoyé depuis le numéro d’un proche…',
             'receipt' => 'Capture du reçu',
         ],
         'help' => [
             'reference' => 'Le code de la transaction, indiqué dans le message de confirmation de Wave, Orange Money, MTN ou Moov, ou sur votre reçu bancaire. Il permet à l’organisateur de retrouver votre paiement.',
+            'guest_note' => 'Tout ce que l’organisateur doit savoir pour retrouver votre paiement : montant différent, paiement en plusieurs fois, envoi par une autre personne. Il le lira avant de valider.',
         ],
         'submit' => 'Envoyer ma preuve',
     ],

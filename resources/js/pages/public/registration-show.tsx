@@ -11,6 +11,7 @@ import { LabelWithHelp } from '@/components/label-with-help';
 import { SubmitButton } from '@/components/submit-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -28,17 +29,19 @@ import { retry } from '@/routes/public/registrations';
 import { store as storeProof } from '@/routes/public/registrations/proof';
 import type {
     PublicPaymentAccount,
-    PublicPaymentChannel,
     PublicRegistrationTenant,
     RegistrationShow,
 } from '@/types';
 
 type Props = {
-    event: { name: string; remainingSeats: number };
+    event: {
+        name: string;
+        remainingSeats: number | null;
+        hasEnoughSeats: boolean;
+    };
     tenant: PublicRegistrationTenant;
     registration: RegistrationShow;
     paymentAccounts: PublicPaymentAccount[];
-    channels: PublicPaymentChannel[];
     token: string;
     // Absent quand la page est atteinte par le lien signe des envois programmes plutot que par
     // le jeton de reprise de l'invite (voir `RegistrationController::render()`) : relancer une
@@ -58,7 +61,6 @@ export default function PublicRegistrationShow({
     tenant,
     registration,
     paymentAccounts,
-    channels,
     token,
     resume,
 }: Props) {
@@ -71,11 +73,13 @@ export default function PublicRegistrationShow({
     const isCancelled = registration.status === 'cancelled';
     const isUrgent = !isExpired && remainingSeconds <= 120;
     const [idempotencyKey] = useState(() => crypto.randomUUID());
-    const [selectedChannel, setSelectedChannel] = useState<string>('');
+    const [selectedAccountId, setSelectedAccountId] = useState<string>('');
     const [retrying, setRetrying] = useState(false);
-    const channelRequiresReference =
-        channels.find((channel) => channel.value === selectedChannel)
-            ?.hasAccountNumber ?? true;
+    // Le canal de la preuve est celui du compte choisi : un compte en especes n'a pas de reference.
+    const accountRequiresReference =
+        paymentAccounts.find(
+            (account) => String(account.id) === selectedAccountId,
+        )?.requiresReference ?? true;
 
     return (
         <div className="bg-background flex min-h-screen flex-col items-center p-4">
@@ -154,6 +158,7 @@ export default function PublicRegistrationShow({
                         <RegistrationRecap
                             registration={registration}
                             remainingSeats={event.remainingSeats}
+                            hasEnoughSeats={event.hasEnoughSeats}
                         />
                     </>
                 ) : registration.status === 'proof_submitted' ? (
@@ -450,7 +455,12 @@ export default function PublicRegistrationShow({
                                                         'guest.proof.fields.payment_account',
                                                     )}
                                                 </Label>
-                                                <Select name="payment_account_id">
+                                                <Select
+                                                    name="payment_account_id"
+                                                    onValueChange={
+                                                        setSelectedAccountId
+                                                    }
+                                                >
                                                     <SelectTrigger
                                                         id="payment_account_id"
                                                         className="w-full"
@@ -488,54 +498,7 @@ export default function PublicRegistrationShow({
                                                 />
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <Label htmlFor="channel">
-                                                    {t(
-                                                        'guest.proof.fields.channel',
-                                                    )}
-                                                </Label>
-                                                <Select
-                                                    name="channel"
-                                                    onValueChange={
-                                                        setSelectedChannel
-                                                    }
-                                                >
-                                                    <SelectTrigger
-                                                        id="channel"
-                                                        className="w-full"
-                                                        data-test="proof-channel"
-                                                    >
-                                                        <SelectValue
-                                                            placeholder={t(
-                                                                'guest.proof.fields.channel_placeholder',
-                                                            )}
-                                                        />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {channels.map(
-                                                            (channel) => (
-                                                                <SelectItem
-                                                                    key={
-                                                                        channel.value
-                                                                    }
-                                                                    value={
-                                                                        channel.value
-                                                                    }
-                                                                >
-                                                                    {
-                                                                        channel.label
-                                                                    }
-                                                                </SelectItem>
-                                                            ),
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                                <InputError
-                                                    message={errors.channel}
-                                                />
-                                            </div>
-
-                                            {channelRequiresReference ? (
+                                            {accountRequiresReference ? (
                                                 <div className="space-y-2">
                                                     <LabelWithHelp
                                                         htmlFor="reference"
@@ -561,26 +524,27 @@ export default function PublicRegistrationShow({
                                             ) : null}
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="amount_declared">
-                                                    {t(
-                                                        'guest.proof.fields.amount_declared',
+                                                <LabelWithHelp
+                                                    htmlFor="guest_note"
+                                                    label={t(
+                                                        'guest.proof.fields.guest_note',
                                                     )}
-                                                </Label>
-                                                <Input
-                                                    id="amount_declared"
-                                                    name="amount_declared"
-                                                    type="number"
-                                                    min={1}
-                                                    defaultValue={
-                                                        registration.amountDue
-                                                    }
-                                                    required
-                                                    data-test="proof-amount"
+                                                    help={t(
+                                                        'guest.proof.help.guest_note',
+                                                    )}
+                                                />
+                                                <Textarea
+                                                    id="guest_note"
+                                                    name="guest_note"
+                                                    maxLength={500}
+                                                    rows={3}
+                                                    placeholder={t(
+                                                        'guest.proof.fields.guest_note_placeholder',
+                                                    )}
+                                                    data-test="proof-guest-note"
                                                 />
                                                 <InputError
-                                                    message={
-                                                        errors.amount_declared
-                                                    }
+                                                    message={errors.guest_note}
                                                 />
                                             </div>
 

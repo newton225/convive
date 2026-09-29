@@ -8,6 +8,26 @@ return [
         'description' => 'Toutes les preuves déposées pour cet événement ont été traitées.',
     ],
 
+    'toolbar' => [
+        'search' => 'Rechercher',
+        'search_placeholder' => 'Nom, référence, téléphone, unité, accompagnateur',
+        'filter_label' => 'Filtrer par signal',
+        'count' => '{0} Aucune preuve|{1} 1 preuve|[2,*] :count preuves',
+    ],
+
+    'filters' => [
+        'all' => 'Toutes les preuves',
+        'anomaly' => 'Avec une anomalie',
+        'clean' => 'Sans anomalie',
+        'note' => 'Avec une précision de l’invité',
+    ],
+
+    'no_match' => [
+        'title' => 'Aucune preuve ne correspond',
+        'description' => 'Modifiez la recherche ou le filtre pour voir d’autres preuves.',
+        'reset' => 'Effacer la recherche et le filtre',
+    ],
+
     'columns' => [
         'name' => 'Inscrit',
         'unit' => 'Unité',
@@ -16,8 +36,9 @@ return [
         'submitted_at' => 'Déposée le',
         'channel' => 'Canal',
         'reference' => 'Référence',
-        'amount_declared' => 'Montant versé',
+        'guest_note' => 'Précision de l’invité',
         'payment_account' => 'Compte visé',
+        'payment' => 'Paiement',
         'signals' => 'Signaux',
         'actions' => 'Actions',
     ],
@@ -28,11 +49,21 @@ return [
         'duplicate_image' => 'Capture déjà vue',
         'reference_missing_from_statement' => 'Référence absente du relevé',
         'statement_amount_mismatch' => 'Montant du relevé différent',
+        'guest_note' => 'Précision de l’invité',
+    ],
+
+    'details' => [
+        'column' => 'Détail',
+        'show' => 'Afficher le détail de :name',
+        'hide' => 'Masquer le détail de :name',
+        'companions' => 'Accompagnateurs',
+        'no_note' => 'Aucune précision.',
+        'single_expand' => 'Une seule ligne ouverte à la fois',
     ],
 
     'companions' => [
         'none' => 'Aucun accompagnateur',
-        'list' => 'Accompagnateurs : :names',
+        'count' => '{0} Aucun accompagnateur|{1} 1 accompagnateur|[2,*] :count accompagnateurs',
     ],
 
     'actions' => [

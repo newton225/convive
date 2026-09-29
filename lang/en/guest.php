@@ -40,7 +40,7 @@ return [
 
     'registration' => [
         'errors' => [
-            'phone_invalid' => 'Enter a 10-digit Ivorian number, for example 07 07 12 34 56.',
+            'phone_invalid' => 'Enter a valid number: 07 07 12 34 56 for Côte d’Ivoire, or with the country code for a foreign number, for example +33 6 12 34 56 78.',
             'phone_already_active' => 'A reservation is already in progress for this number. Finish it, or wait for its time limit to end before creating another.',
             'registrations_paused' => 'Online registration is temporarily paused for this event. Contact the organiser to book your seat.',
             'phone_backoff' => '{1} Several reservations expired for this number without a payment proof. Try again in 1 minute.|[2,*] Several reservations expired for this number without a payment proof. Try again in :minutes minutes.',
@@ -56,14 +56,23 @@ return [
             'companion_name' => "Companion's name",
         ],
         'help' => [
-            'phone' => 'It is used to send your invitation card and reminders by WhatsApp. One reservation at a time per number.',
+            'phone' => 'It is used to send your invitation card and reminders by WhatsApp. Foreign number: add the country code (+33, +1…). One reservation at a time per number.',
             'unit' => 'It is used to seat members of the same unit at the same tables. If none fits you, choose "None".',
             'companions' => 'The people coming with you. Each one takes a seat, pays the price and gets their own ticket, which you can pass on to them.',
+        ],
+        'phone_country' => [
+            'label' => 'Choose the country of the number',
+            'selected' => 'Country of the number: :country (+:code). Change country',
+            'search' => 'Search a country or a dialling code',
+            'empty' => 'No country matches.',
         ],
         'companions' => [
             'title' => 'Companions',
             'add' => 'Add a companion',
             'remove' => 'Remove',
+            'remove_item' => 'Remove companion :number',
+            'item' => 'Companion :number',
+            'count' => ':count of :max',
             'limit_reached' => '{1} 1 companion maximum for this event.|[2,*] :count companions maximum for this event.',
         ],
         'total' => [
@@ -78,6 +87,8 @@ return [
             'proof_rejected' => 'Your proof could not be validated. Please send a new one.',
             'recap_title' => 'Summary',
             'seats_available' => '{0} No seat left right now|{1} 1 seat left|[2,*] :count seats left',
+            'seats_enough' => 'Seats are still available for your group.',
+            'seats_not_enough' => 'There are not enough seats left for your group right now.',
             'cancelled_title' => 'This registration has been cancelled.',
             'cancelled_description' => 'The organisation cancelled this registration. Contact them if you believe this is a mistake.',
         ],
@@ -158,14 +169,14 @@ return [
         'fields' => [
             'payment_account' => 'Account you paid into',
             'payment_account_placeholder' => 'Choose the account you used',
-            'channel' => 'Channel used',
-            'channel_placeholder' => 'Choose the channel',
             'reference' => 'Transaction reference',
-            'amount_declared' => 'Amount sent',
+            'guest_note' => 'Anything to add about this payment? (optional)',
+            'guest_note_placeholder' => 'For example: paid in two instalments, sent from a relative’s number…',
             'receipt' => 'Receipt capture',
         ],
         'help' => [
             'reference' => 'The transaction code, shown in the confirmation message from Wave, Orange Money, MTN or Moov, or on your bank receipt. It lets the organiser find your payment.',
+            'guest_note' => 'Anything the organiser needs to find your payment: a different amount, several instalments, sent by someone else. They will read it before approving.',
         ],
         'submit' => 'Send my proof',
     ],
