@@ -255,8 +255,8 @@ Seeders a fournir :
   termine, dont un evenement complet pour eprouver la liste d'attente.
 - `RegistrationSeeder` : inscriptions reparties sur tous les statuts, avec accompagnateurs et
   unites, tables attribuees pour les inscriptions confirmees.
-- `PaymentProofSeeder` : preuves saines et preuves douteuses, reference dupliquee, montant
-  divergent, capture deja vue.
+- `PaymentProofSeeder` : preuves saines et preuves douteuses, reference dupliquee, precision
+  laissee par l'invite, capture deja vue.
 - `TeamSeeder` : un membre par role, Proprietaire, Tresorier, Hotesse, Lecture.
 
 ### Compte principal de developpement
@@ -610,9 +610,19 @@ change.
 
 ## Evenements
 
-- **La capacite est derivee**, jamais saisie : `nombre de tables x places par table`. Une
-  capacite stockee a part finirait par diverger du plan de salle, et c'est le plan de salle qui
-  fait foi le jour J.
+- **La capacite est derivee**, jamais saisie : la somme des places des tables du plan de salle
+  (`seating_tables.capacity`). Une capacite stockee a part finirait par diverger du plan de salle,
+  et c'est le plan de salle qui fait foi le jour J.
+- **Les tables n'ont pas toutes le meme nombre de places** (decision du 2026-09-29). Le formulaire
+  decrit la salle en groupes (« 3 tables de 12, 20 tables de 8 ») ; `SyncSeatingTables` cree les
+  tables des l'enregistrement, numerotees groupe apres groupe, et le plan de salle ajuste une
+  table precise. Jamais une table sous le nombre de personnes deja placees, jamais une table
+  occupee supprimee, jamais une capacite totale sous les places deja prises d'un evenement publie.
+- **`table_count` et `seats_per_table` sont en sursis.** Ils ne servent plus que de repli pour un
+  evenement dont les tables n'ont pas encore ete creees (`Event::capacity()`), et restent remplis
+  a titre indicatif. A supprimer, avec l'accord du proprietaire du projet deja donne, une fois
+  toutes les organisations passees au nouveau plan (migration de donnees qui cree les tables
+  manquantes).
 - **« Complet » n'est pas un statut stocke** mais un etat calcule. Un statut stocke devrait
   etre mis a jour par quelqu'un, et ce quelqu'un se tromperait au pire moment. Les statuts
   reellement stockes sont brouillon, ouvert, en cours, termine.
@@ -758,25 +768,34 @@ commerciale le recoit a son tour et rend `SiteAnalytics` ; une page du back-offi
 invite, jamais (leurs adresses portent des organisations, des jetons et des signatures). Test :
 `tests/Feature/AnalyticsTest.php`.
 
-### Numeros de telephone : Cote d'Ivoire seule
+### Numeros de telephone : invites de tout pays, comptes de versement ivoiriens
 
-Decision du proprietaire du projet (2026-09-29) : le produit ne sert que des numeros ivoiriens,
-pour les invites comme pour les comptes de versement. `App\Support\PhoneNumber` en est la seule
-source de verite.
+Decisions du proprietaire du projet (2026-09-29) : d'abord Cote d'Ivoire seule, puis, le meme jour,
+les invites de tout pays. Le telephone d'un invite ne sert qu'a le joindre (WhatsApp, code,
+rappels) : le paiement passe par une preuve deposee, jamais par ce numero. Seuls les comptes de
+versement restent ivoiriens. `App\Support\PhoneNumber` en est la seule source de verite, adossee a
+`propaganistas/laravel-phone` (libphonenumber) pour les numeros etrangers.
 
-- **Forme unique** `+225` suivi des 10 chiffres (plan de numerotation de 2021), quelle que soit
-  l'ecriture saisie (`07 07...`, `+225 07...`, `00225...`, `(+225)...`). Le telephone d'un invite
-  est enregistre sous cette forme (`prepareForValidation` des Form Requests publics), et c'est elle
-  qu'on envoie a WhatsApp. Sans elle, le meme telephone passait pour deux numeros et l'attente
-  apres des reservations expirees se contournait en ajoutant ou retirant l'indicatif (SECURITY.md
-  C3).
+- **Forme unique** E.164 (`+`, indicatif, numero), quelle que soit l'ecriture saisie (`07 07...`,
+  `+225 07...`, `00225...`, `(+225)...`, `+33 6...`, `0033 6...`). Un numero sans indicatif est lu
+  comme ivoirien : un numero etranger doit porter le sien. Le telephone d'un invite est enregistre
+  sous cette forme (`PhoneNumber::normalize()` dans `prepareForValidation` des Form Requests
+  publics, regle `GuestPhoneNumber`), et c'est elle qu'on envoie a WhatsApp. Sans elle, le meme
+  telephone passait pour deux numeros et l'attente apres des reservations expirees se contournait
+  en ajoutant ou retirant l'indicatif (SECURITY.md C3).
+- **Saisie** : `PhoneField` (`react-phone-number-input`, liste des pays en shadcn Popover et
+  Command, drapeaux SVG embarques, compatibles avec la CSP). Le pays preselectionne vient de
+  `App\Support\VisitorCountry` : l'en-tete `CF-IPCountry` de Cloudflare, la Cote d'Ivoire a
+  defaut. Un champ cache envoie la forme E.164 ; le serveur revalide quoi qu'il arrive.
 - **Comparaison** toujours par `PhoneNumber::same()`, jamais sur la chaine brute : les lignes
   enregistrees avant cette regle gardent leur ecriture d'origine.
-- **Comptes de versement** : le prefixe doit correspondre au reseau du canal, declare sur
+- **Comptes de versement** : ivoiriens seulement (`PhoneNumber::normalizeIvorian()`), et le
+  prefixe doit correspondre au reseau du canal, declare sur
   `PaymentChannel::mobilePrefixes()` (Orange 07, MTN 05, Moov 01, Wave tout mobile). Un « 05 » sous
   Orange Money enverrait l'argent vers un numero MTN. Le numero est enregistre par paires
   (`+225 07 07 12 34 56`). Virement et especes gardent leur saisie libre.
-- Servir un autre pays est une decision produit, pas un ajout de prefixe : a redemander.
+- Ouvrir les comptes de versement a un autre pays est une decision produit, pas un ajout de
+  prefixe : a redemander.
 
 ---
 

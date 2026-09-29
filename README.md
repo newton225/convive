@@ -24,7 +24,8 @@ Quatre publics :
 
 **Contrainte structurante : aucun encaissement dans l'application.**
 L'invité verse sur un compte Mobile Money / bancaire appartenant à l'organisation, puis
-déclare canal + référence de transaction + capture du reçu. L'organisation valide ou rejette.
+choisit le compte versé (dont découle le canal) + référence de transaction + capture du reçu,
+avec une précision facultative. L'organisation valide ou rejette.
 Il n'y a **aucune** intégration de passerelle de paiement pour les participations.
 (Seul l'abonnement SaaS de l'organisation est, lui, réellement prélevé.)
 
@@ -136,7 +137,8 @@ aux billets validés.
 - empreinte perceptuelle de l'image déjà vue sur une autre inscription ;
 - référence de transaction déjà utilisée ;
 - référence absente du relevé importé ;
-- montant du relevé ≠ montant déclaré.
+- montant du relevé ≠ montant dû ;
+- précision laissée par l'invité (information à lire, pas une anomalie).
 
 ### 2.10 Rapprochement du relevé
 
@@ -328,13 +330,16 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 
 ### Invité (PWA, bilingue FR/EN, mobile d'abord)
 
-3. **Lien d'inscription** — visuel, date, heure, capacité, tarif, places restantes, date limite.
+3. **Lien d'inscription** — visuel, date, heure, capacité, tarif, places restantes (si
+   l'organisateur choisit de les afficher, masquées par défaut ; « Complet » toujours signalé),
+   date limite.
 4. **Fiche** — nom, téléphone, email (facultatif), unité, compteur d'accompagnateurs (0–10) avec
    nom + unité chacun, total recalculé en direct. L'email facultatif : WhatsApp (le téléphone
    est déjà recueilli) reste le canal systématique de la carte d'invitation (2.7), l'email s'y
    ajoute quand l'invité l'a renseigné.
 5. **Paiement en trois étapes** — (1) comptes de versement avec bouton copier et consigne de
-   mettre son nom en motif du transfert ; (2) canal, référence, capture du reçu ;
+   mettre son nom en motif du transfert ; (2) compte versé, référence, capture du reçu,
+   précision facultative ;
    (3) envoi avant la fin du décompte. Décompte visible, alerte sous 2 min, blocage de l'envoi
    à expiration, bouton « vérifier les places et relancer ».
 6. **Preuve reçue** — en attente de vérification.
@@ -342,7 +347,8 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
    numéro de table, QR ; bouton d'envoi par WhatsApp du billet de chaque accompagnateur ; mention
    d'envoi programmé.
 8. **Inscription enregistrée sans preuve** — lien de reprise (copier / se l'envoyer), échéance.
-9. **Reprendre mon inscription** — récapitulatif, places encore libres, vérification avant de continuer.
+9. **Reprendre mon inscription** — récapitulatif, s'il reste assez de places pour le groupe
+   (avec le nombre si l'organisateur l'affiche), vérification avant de continuer.
 10. **Complet** — état complet + liste d'attente (position, lien de 6 h).
 11. **Inscription supprimée** — après purge ou épuisement des places.
 
@@ -351,23 +357,27 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 12. **Mes événements** — cartes avec statut, remplissage, montant collecté, preuves en attente ;
     créer, dupliquer, partir d'un modèle.
 13. **Nouvel événement** — assistant 3 étapes : identité (nom, sous-titre, date, heure, lieu,
-    visuel, couleurs) / places & tarif (tables, places par table, tarif, plafond
-    d'accompagnateurs, comptes de versement) / échéances (date limite, purge, envoi programmé,
-    durée de réservation).
+    visuel, couleurs) / places & tarif (groupes de tables, par exemple « 3 tables de 12 » et
+    « 20 tables de 8 », tarif, plafond d'accompagnateurs, comptes de versement) / échéances
+    (date limite, purge, envoi programmé, durée de réservation). La capacité est la somme des
+    places de toutes les tables (décision du 2026-09-29 : les tables n'ont pas toutes le même
+    nombre de places).
 14. **Espace & marque** — le formulaire d'organisation décrit en §3.
 15. **Gabarit du billet** — modèles, éléments activables (logo, cachet, signature, liste des
     accompagnateurs), aperçu, impression des listes de contrôle par table.
 16. **Abonnement** — consommation des quotas, plans, moyen de paiement, recouvrement, factures.
 17. **Tableau de bord** — inscrits, preuves validées, preuves à vérifier, sans preuve, places
     restantes, inscriptions par jour, preuves par canal, occupation des tables, activité récente.
-18. **Preuves à vérifier** — file avec reçu, montant, canal, référence, unités, signaux
+18. **Preuves à vérifier** — file avec reçu, montant dû, canal, référence, précision de
+    l'invité, unités, signaux
     d'anomalie, valider / rejeter / ouvrir le reçu.
 19. **Rapprochement** — import CSV, statistiques, table des lignes avec action par ligne.
 20. **Base d'inscrits** — recherche, filtres (tous / validées / à vérifier / sans preuve /
     annulés), table, pagination, personnes entrées par inscription, exports Excel / PDF / CSV /
     listes de contrôle, états vides.
 21. **Plan de salle** — grille de tables, panneau de table avec occupants, regroupement par
-    unité, contraintes, déplacement manuel.
+    unité, contraintes, déplacement manuel, capacité ajustable table par table (jamais sous le
+    nombre de personnes déjà placées).
 22. **Rapports post-événement** — présence et absents comptés par personne, recettes, durée
     moyenne de contrôle, présence et recettes par unité, export PDF.
 23. **Journalisation** — date, type, message, acteur, IP ; conservation 24 mois.
