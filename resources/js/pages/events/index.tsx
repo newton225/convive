@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { EventCard } from '@/components/events/event-card';
+import { ConfirmSummary } from '@/components/confirm-summary';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -15,6 +16,8 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { translate, useTranslation } from '@/hooks/use-translation';
+import { formatAmount } from '@/lib/format-currency';
+import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
 import { close, create, index } from '@/routes/tenants/events';
 import type {
@@ -36,7 +39,7 @@ type Props = {
 };
 
 export default function EventsIndex({ tenant, events, permissions }: Props) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const [filter, setFilter] = useState<EventFilter>('active');
     const matches = (event: EventListItem, value: EventFilter) =>
         value === 'all' ||
@@ -145,6 +148,56 @@ export default function EventsIndex({ tenant, events, permissions }: Props) {
                             })}
                         </DialogDescription>
                     </DialogHeader>
+
+                    {closing ? (
+                        <ConfirmSummary
+                            testId="event-close-summary"
+                            items={[
+                                {
+                                    label: t('events.fields.name'),
+                                    value: closing.name,
+                                    emphasis: true,
+                                },
+                                {
+                                    label: t('events.fields.starts_at'),
+                                    value: closing.startsAt
+                                        ? formatDateTime(
+                                              closing.startsAt,
+                                              locale,
+                                          )
+                                        : null,
+                                    hidden: closing.startsAt === null,
+                                },
+                                {
+                                    label: t('events.card.fill_label'),
+                                    value: t('events.card.fill_value', {
+                                        occupied: closing.occupiedSeats,
+                                        capacity: closing.capacity,
+                                    }),
+                                },
+                                {
+                                    label: t('events.card.collected'),
+                                    value: formatAmount(
+                                        closing.collectedAmount,
+                                        locale,
+                                    ),
+                                    emphasis: true,
+                                },
+                                {
+                                    // Cloturer avec des preuves en attente laisse sans reponse des
+                                    // invites qui ont verse : a voir avant de confirmer.
+                                    label: t(
+                                        'events.confirm_close.pending_proofs',
+                                    ),
+                                    value: t('events.card.proofs_to_check', {
+                                        count: closing.proofsToCheck,
+                                    }),
+                                    warning: true,
+                                    hidden: closing.proofsToCheck === 0,
+                                },
+                            ]}
+                        />
+                    ) : null}
 
                     <DialogFooter className="gap-2">
                         <DialogClose asChild>

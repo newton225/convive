@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
+import { ConfirmSummary } from '@/components/confirm-summary';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +15,7 @@ import {
 import { destroy as destroyInvitation } from '@/routes/tenants/invitations';
 import type { Tenant, TenantInvitation } from '@/types';
 import { useTranslation } from '@/hooks/use-translation';
+import { formatDateTime } from '@/lib/format-date';
 
 type Props = {
     tenant: Tenant;
@@ -28,7 +30,7 @@ export default function CancelInvitationModal({
     open,
     onOpenChange,
 }: Props) {
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const [processing, setProcessing] = useState(false);
 
     const cancelInvitation = () => {
@@ -56,6 +58,31 @@ export default function CancelInvitationModal({
                         })}
                     </DialogDescription>
                 </DialogHeader>
+
+                {invitation ? (
+                    <ConfirmSummary
+                        testId="cancel-invitation-summary"
+                        items={[
+                            {
+                                label: t('tenants.confirm.email'),
+                                value: invitation.email,
+                                mono: true,
+                                emphasis: true,
+                            },
+                            {
+                                label: t('tenants.confirm.profile'),
+                                value: invitation.profileName,
+                            },
+                            {
+                                label: t('tenants.confirm.sent_at'),
+                                value: formatDateTime(
+                                    invitation.created_at,
+                                    locale,
+                                ),
+                            },
+                        ]}
+                    />
+                ) : null}
 
                 <DialogFooter className="gap-2">
                     <DialogClose asChild>

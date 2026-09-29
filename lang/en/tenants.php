@@ -85,6 +85,13 @@ return [
         'warning_body' => 'This cannot be undone: the members and invitations of this organisation will be deleted.',
     ],
 
+    'confirm' => [
+        'name' => 'Name',
+        'email' => 'Email address',
+        'profile' => 'Profile',
+        'sent_at' => 'Sent on',
+    ],
+
     'modals' => [
         'create' => [
             'title' => 'Create an organisation',

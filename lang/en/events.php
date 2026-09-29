@@ -208,6 +208,7 @@ return [
     'confirm_close' => [
         'title' => 'Close event',
         'description' => 'Registrations will be closed for ":name". This cannot be undone.',
+        'pending_proofs' => 'Pending proofs',
     ],
 
     'settings' => [

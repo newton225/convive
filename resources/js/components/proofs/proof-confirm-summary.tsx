@@ -1,4 +1,5 @@
 import { formatPhoneNumberIntl } from 'react-phone-number-input';
+import { ConfirmSummary } from '@/components/confirm-summary';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
@@ -37,90 +38,62 @@ export function ProofConfirmSummary({ proof, testId }: Props) {
     ).map(([, key]) => t(key));
 
     return (
-        <dl
-            className="bg-muted grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 rounded-lg p-3 text-sm"
-            data-test={`${testId}-summary`}
-        >
-            <dt className="text-muted-foreground">
-                {t('proofs.columns.name')}
-            </dt>
-            <dd className="font-medium">{proof.name}</dd>
-
-            {proof.registrationReference ? (
-                <>
-                    <dt className="text-muted-foreground">
-                        {t('proofs.confirm.registration')}
-                    </dt>
-                    <dd className="font-mono">{proof.registrationReference}</dd>
-                </>
-            ) : null}
-
-            <dt className="text-muted-foreground">
-                {t('proofs.confirm.phone')}
-            </dt>
-            <dd className="tabular-nums">
-                {formatPhoneNumberIntl(proof.phone) || proof.phone}
-            </dd>
-
-            <dt className="text-muted-foreground">
-                {t('proofs.columns.party_size')}
-            </dt>
-            <dd>
-                {proof.partySize} ({proof.unit})
-            </dd>
-
-            <dt className="text-muted-foreground">
-                {t('proofs.columns.amount_due')}
-            </dt>
-            <dd className="font-medium">
-                {formatAmount(proof.amountDue, locale)}
-            </dd>
-
-            <dt className="text-muted-foreground">
-                {t('proofs.columns.payment_account')}
-            </dt>
-            <dd>
-                {proof.paymentAccountLabel} ({proof.channelLabel})
-            </dd>
-
-            <dt className="text-muted-foreground">
-                {t('proofs.columns.reference')}
-            </dt>
-            <dd className="font-mono break-all">{proof.reference ?? '-'}</dd>
-
-            {proof.submittedAt ? (
-                <>
-                    <dt className="text-muted-foreground">
-                        {t('proofs.columns.submitted_at')}
-                    </dt>
-                    <dd>{formatDateTime(proof.submittedAt, locale)}</dd>
-                </>
-            ) : null}
-
-            {anomalies.length > 0 ? (
-                <>
-                    <dt className="text-muted-foreground">
-                        {t('proofs.columns.signals')}
-                    </dt>
-                    <dd className="text-destructive font-medium">
-                        {anomalies.join(', ')}
-                    </dd>
-                </>
-            ) : null}
-
-            {proof.guestNote ? (
-                <>
-                    <dt className="text-muted-foreground">
-                        {t('proofs.columns.guest_note')}
-                    </dt>
-                    <dd
-                        className="break-words whitespace-pre-line"
-                        data-test={`${testId}-guest-note`}
-                    >
-                        {proof.guestNote}
-                    </dd>
-                </>
-            ) : null}
-        </dl>
+        <ConfirmSummary
+            testId={`${testId}-summary`}
+            items={[
+                {
+                    label: t('proofs.columns.name'),
+                    value: proof.name,
+                    emphasis: true,
+                },
+                {
+                    label: t('proofs.confirm.registration'),
+                    value: proof.registrationReference,
+                    mono: true,
+                    hidden: proof.registrationReference === null,
+                },
+                {
+                    label: t('proofs.confirm.phone'),
+                    value: formatPhoneNumberIntl(proof.phone) || proof.phone,
+                },
+                {
+                    label: t('proofs.columns.party_size'),
+                    value: `${proof.partySize} (${proof.unit})`,
+                },
+                {
+                    label: t('proofs.columns.amount_due'),
+                    value: formatAmount(proof.amountDue, locale),
+                    emphasis: true,
+                },
+                {
+                    label: t('proofs.columns.payment_account'),
+                    value: `${proof.paymentAccountLabel} (${proof.channelLabel})`,
+                },
+                {
+                    label: t('proofs.columns.reference'),
+                    value: proof.reference ?? '-',
+                    mono: true,
+                },
+                {
+                    label: t('proofs.columns.submitted_at'),
+                    value: proof.submittedAt
+                        ? formatDateTime(proof.submittedAt, locale)
+                        : null,
+                    hidden: proof.submittedAt === null,
+                },
+                {
+                    label: t('proofs.columns.signals'),
+                    value: anomalies.join(', '),
+                    warning: true,
+                    hidden: anomalies.length === 0,
+                },
+                {
+                    label: t('proofs.columns.guest_note'),
+                    value: proof.guestNote,
+                    hidden: proof.guestNote === null,
+                    testId: `${testId}-guest-note`,
+                },
+            ]}
+        />
     );
 }

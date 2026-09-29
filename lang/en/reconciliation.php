@@ -58,6 +58,8 @@ return [
             'registration_label' => 'Registration',
             'none' => 'No registration matches',
             'submit' => 'Save',
+            'amount_matches' => 'Amount due by this registration: :amount, same as the statement.',
+            'amount_differs' => 'Amount due by this registration: :amount, different from the statement amount.',
         ],
     ],
 

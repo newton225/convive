@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
+import { ConfirmSummary } from '@/components/confirm-summary';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import {
@@ -56,6 +57,29 @@ export default function RemoveMemberModal({
                         })}
                     </DialogDescription>
                 </DialogHeader>
+
+                {member ? (
+                    <ConfirmSummary
+                        testId="remove-member-summary"
+                        items={[
+                            {
+                                label: t('tenants.confirm.name'),
+                                value: member.name,
+                                emphasis: true,
+                            },
+                            {
+                                label: t('tenants.confirm.email'),
+                                value: member.email,
+                                mono: true,
+                            },
+                            {
+                                label: t('tenants.confirm.profile'),
+                                value: member.profileName,
+                                hidden: member.profileName === null,
+                            },
+                        ]}
+                    />
+                ) : null}
 
                 <DialogFooter className="gap-2">
                     <DialogClose asChild>

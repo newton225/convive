@@ -70,6 +70,14 @@ return [
         'last_owner' => 'The organisation must keep at least one active Owner.',
     ],
 
+    'confirm' => [
+        'name' => 'Profile',
+        'description' => 'Description',
+        'permissions' => 'Permissions',
+        'permissions_count' => '{0} No permission|{1} 1 permission|[2,*] :count permissions',
+        'members' => 'Members',
+    ],
+
     'confirm_delete' => [
         'title' => 'Delete profile',
         'description' => 'The ":name" profile will be deleted. This cannot be undone.',

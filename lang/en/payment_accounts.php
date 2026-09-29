@@ -79,6 +79,14 @@ return [
         'description' => 'The new number of the account ":label" will show on public links right away, without waiting for the 24-hour delay. Check it with the person who requested it, through another channel, before confirming.',
     ],
 
+    'confirm' => [
+        'current' => 'Currently',
+        'new' => 'After approval',
+        'requested_by' => 'Requested by',
+        'activates_at' => 'Scheduled for',
+        'visibility' => 'Visibility',
+    ],
+
     'confirm_delete' => [
         'title' => 'Delete payment account',
         'description' => 'The ":name" account will be deleted. This cannot be undone.',

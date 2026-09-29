@@ -2,6 +2,7 @@ import { Form, Head, router } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { ConfirmSummary } from '@/components/confirm-summary';
 import DataTable from '@/components/data-table';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -229,6 +230,10 @@ export default function EventReconciliation({
         },
     ];
 
+    const chosenRegistration =
+        registrationOptions.find((option) => String(option.id) === choice) ??
+        null;
+
     return (
         <>
             <Head title={t('reconciliation.title')} />
@@ -427,6 +432,42 @@ export default function EventReconciliation({
                         </DialogDescription>
                     </DialogHeader>
 
+                    {resolving ? (
+                        <ConfirmSummary
+                            testId="reconciliation-resolve-summary"
+                            items={[
+                                {
+                                    label: t('reconciliation.columns.date'),
+                                    value: resolving.occurredOn,
+                                },
+                                {
+                                    label: t('reconciliation.columns.issuer'),
+                                    value: resolving.issuer,
+                                    emphasis: true,
+                                },
+                                {
+                                    label: t(
+                                        'reconciliation.columns.reference',
+                                    ),
+                                    value: resolving.reference ?? '-',
+                                    mono: true,
+                                },
+                                {
+                                    label: t('reconciliation.columns.amount'),
+                                    value: formatAmount(
+                                        resolving.amount,
+                                        locale,
+                                    ),
+                                    emphasis: true,
+                                },
+                                {
+                                    label: t('reconciliation.columns.outcome'),
+                                    value: resolving.outcomeLabel,
+                                },
+                            ]}
+                        />
+                    ) : null}
+
                     <div className="space-y-2">
                         <Label>
                             {t(
@@ -453,6 +494,31 @@ export default function EventReconciliation({
                                 ))}
                             </SelectContent>
                         </Select>
+                        {/* L'ecart de montant se voit avant d'enregistrer, pas apres. */}
+                        {resolving && chosenRegistration ? (
+                            <p
+                                className={
+                                    chosenRegistration.amountDue ===
+                                    resolving.amount
+                                        ? 'text-muted-foreground text-sm'
+                                        : 'text-destructive text-sm font-medium'
+                                }
+                                data-test="reconciliation-resolve-amount"
+                            >
+                                {t(
+                                    chosenRegistration.amountDue ===
+                                        resolving.amount
+                                        ? 'reconciliation.modals.resolve.amount_matches'
+                                        : 'reconciliation.modals.resolve.amount_differs',
+                                    {
+                                        amount: formatAmount(
+                                            chosenRegistration.amountDue,
+                                            locale,
+                                        ),
+                                    },
+                                )}
+                            </p>
+                        ) : null}
                     </div>
 
                     <DialogFooter className="gap-2">

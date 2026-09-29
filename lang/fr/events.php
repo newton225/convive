@@ -208,6 +208,7 @@ return [
     'confirm_close' => [
         'title' => "Clôturer l'événement",
         'description' => 'Les inscriptions seront fermées pour ":name". Cette action ne se défait pas.',
+        'pending_proofs' => 'Preuves en attente',
     ],
 
     'settings' => [

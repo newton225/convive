@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
+import { ConfirmSummary } from '@/components/confirm-summary';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import {
@@ -60,6 +61,35 @@ export default function DeleteProfileModal({
                         })}
                     </DialogDescription>
                 </DialogHeader>
+
+                {profile ? (
+                    <ConfirmSummary
+                        testId="profile-delete-summary"
+                        items={[
+                            {
+                                label: t('profiles.confirm.name'),
+                                value: profile.name,
+                                emphasis: true,
+                            },
+                            {
+                                label: t('profiles.confirm.description'),
+                                value: profile.description,
+                                hidden: !profile.description,
+                            },
+                            {
+                                label: t('profiles.confirm.permissions'),
+                                value: t('profiles.confirm.permissions_count', {
+                                    count: profile.permissions.length,
+                                }),
+                            },
+                            {
+                                label: t('profiles.confirm.members'),
+                                value: profile.memberCount,
+                                warning: carried,
+                            },
+                        ]}
+                    />
+                ) : null}
 
                 <p className="text-muted-foreground text-sm">
                     {t('profiles.confirm_delete.members', {

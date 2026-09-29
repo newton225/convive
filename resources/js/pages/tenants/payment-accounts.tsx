@@ -2,6 +2,7 @@ import { Form, Head, router } from '@inertiajs/react';
 import { AlertTriangle, Clock, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
+import { ConfirmSummary } from '@/components/confirm-summary';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { LabelWithHelp } from '@/components/label-with-help';
@@ -258,7 +259,60 @@ export default function PaymentAccounts({
                         );
                     }
                 }}
-            />
+            >
+                {approving?.pending ? (
+                    <ConfirmSummary
+                        testId="payment-account-approve-summary"
+                        items={[
+                            {
+                                label: t('payment_accounts.fields.label'),
+                                value: approving.label,
+                                emphasis: true,
+                            },
+                            {
+                                label: t('payment_accounts.confirm.current'),
+                                value: accountLine(
+                                    approving.channelLabel,
+                                    approving.accountNumber,
+                                    approving.holderName,
+                                ),
+                                mono: true,
+                            },
+                            {
+                                // Ce qui s'affichera aux invites des la confirmation : a comparer
+                                // avec ce que la personne a annonce par un autre canal.
+                                label: t('payment_accounts.confirm.new'),
+                                value: accountLine(
+                                    approving.pending.channelLabel,
+                                    approving.pending.accountNumber,
+                                    approving.pending.holderName,
+                                ),
+                                mono: true,
+                                warning: true,
+                            },
+                            {
+                                label: t(
+                                    'payment_accounts.confirm.requested_by',
+                                ),
+                                value: approving.pending.requestedBy,
+                                hidden: approving.pending.requestedBy === null,
+                            },
+                            {
+                                label: t(
+                                    'payment_accounts.confirm.activates_at',
+                                ),
+                                value: approving.pending.activatesAt
+                                    ? formatDateTime(
+                                          approving.pending.activatesAt,
+                                          locale,
+                                      )
+                                    : null,
+                                hidden: approving.pending.activatesAt === null,
+                            },
+                        ]}
+                    />
+                ) : null}
+            </ConfirmActionDialog>
 
             <Dialog
                 open={deleting !== null}
@@ -275,6 +329,41 @@ export default function PaymentAccounts({
                             })}
                         </DialogDescription>
                     </DialogHeader>
+
+                    {deleting ? (
+                        <ConfirmSummary
+                            testId="payment-account-delete-summary"
+                            items={[
+                                {
+                                    label: t('payment_accounts.fields.label'),
+                                    value: deleting.label,
+                                    emphasis: true,
+                                },
+                                {
+                                    label: t(
+                                        'payment_accounts.confirm.current',
+                                    ),
+                                    value: accountLine(
+                                        deleting.channelLabel,
+                                        deleting.accountNumber,
+                                        deleting.holderName,
+                                    ),
+                                    mono: true,
+                                },
+                                {
+                                    label: t(
+                                        'payment_accounts.confirm.visibility',
+                                    ),
+                                    value: t(
+                                        deleting.isPubliclyVisible
+                                            ? 'payment_accounts.badges.visible'
+                                            : 'payment_accounts.badges.hidden',
+                                    ),
+                                    warning: deleting.isPubliclyVisible,
+                                },
+                            ]}
+                        />
+                    ) : null}
 
                     <DialogFooter className="gap-2">
                         <DialogClose asChild>
@@ -302,6 +391,15 @@ export default function PaymentAccounts({
             </Dialog>
         </>
     );
+}
+
+// Canal, numero et titulaire sur une ligne, dans l'ordre ou l'invite les lit au moment de verser.
+function accountLine(
+    channel: string | null,
+    number: string | null,
+    holder: string | null,
+): string {
+    return [channel, number, holder].filter(Boolean).join(' · ') || '-';
 }
 
 function AccountForm({

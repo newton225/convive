@@ -70,6 +70,14 @@ return [
         'last_owner' => 'L\'organisation doit conserver au moins un Propriétaire actif.',
     ],
 
+    'confirm' => [
+        'name' => 'Profil',
+        'description' => 'Description',
+        'permissions' => 'Permissions',
+        'permissions_count' => '{0} Aucune permission|{1} 1 permission|[2,*] :count permissions',
+        'members' => 'Membres',
+    ],
+
     'confirm_delete' => [
         'title' => 'Supprimer le profil',
         'description' => 'Le profil ":name" sera supprimé. Cette action est définitive.',

@@ -79,6 +79,14 @@ return [
         'description' => "Le nouveau numéro du compte \":label\" s'affichera tout de suite sur les liens publics, sans attendre la fin du délai de 24 heures. Vérifiez-le auprès de la personne qui l'a demandé, par un autre canal, avant de confirmer.",
     ],
 
+    'confirm' => [
+        'current' => 'Actuellement',
+        'new' => 'Après validation',
+        'requested_by' => 'Demandée par',
+        'activates_at' => 'Prévue le',
+        'visibility' => 'Visibilité',
+    ],
+
     'confirm_delete' => [
         'title' => 'Supprimer le compte de versement',
         'description' => 'Le compte ":name" sera supprimé. Cette action est définitive.',

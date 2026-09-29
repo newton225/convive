@@ -85,6 +85,13 @@ return [
         'warning_body' => 'Cette action est définitive : les membres et les invitations de cette organisation seront supprimés.',
     ],
 
+    'confirm' => [
+        'name' => 'Nom',
+        'email' => 'Adresse email',
+        'profile' => 'Profil',
+        'sent_at' => 'Envoyée le',
+    ],
+
     'modals' => [
         'create' => [
             'title' => 'Créer une organisation',

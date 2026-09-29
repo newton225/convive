@@ -58,6 +58,8 @@ return [
             'registration_label' => 'Inscription',
             'none' => 'Aucune inscription ne correspond',
             'submit' => 'Enregistrer',
+            'amount_matches' => 'Montant dû par cette inscription : :amount, identique au relevé.',
+            'amount_differs' => 'Montant dû par cette inscription : :amount, différent du montant du relevé.',
         ],
     ],
 
