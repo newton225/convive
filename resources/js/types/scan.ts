@@ -15,6 +15,18 @@ export type ScanOutcome = {
     registration: ScanRegistrationSummary | null;
     firstScannedAt: string | null;
     firstScannedBy: string | null;
+    // Vrai billet d'un autre evenement de l'organisation le meme jour : ou l'invite est attendu.
+    otherEvent?: ScanOtherEvent | null;
+};
+
+export type ScanOtherEvent = {
+    name: string;
+    venue: string | null;
+    startsAt: string | null;
+};
+
+export type ScanSameDayEvent = ScanOtherEvent & {
+    id: number;
 };
 
 export type ScanRecentRow = {
@@ -29,6 +41,8 @@ export type ScanRecentRow = {
 export type ScanEventProps = {
     id: number;
     name: string;
+    venue: string | null;
+    startsAt: string | null;
     qrPublicKey: string | null;
     qrKeyVersion: number;
     closed: boolean;

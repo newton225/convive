@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\ScanEvent;
 use App\Models\Tenant;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,13 +19,15 @@ use Inertia\Response;
  */
 class EntryControlController extends Controller
 {
-    public function __invoke(Tenant $tenant): Response|RedirectResponse
+    public function __invoke(Request $request, Tenant $tenant): Response|RedirectResponse
     {
         Gate::authorize('viewAny', [ScanEvent::class, $tenant]);
 
         $events = Event::query()->checkInToday()->orderBy('starts_at')->get();
 
-        if ($events->count() === 1) {
+        // `?choose=1` : l'agent a demande a changer d'evenement depuis l'ecran de scan, on lui
+        // montre la liste meme s'il n'y en a qu'un.
+        if ($events->count() === 1 && ! $request->boolean('choose')) {
             return redirect()->route('tenants.events.scan.index', [$tenant, $events->first()]);
         }
 

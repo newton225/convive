@@ -22,6 +22,8 @@ return [
         'empty_description' => 'Entry control opens on the day of a published event. For another day, go through the event list.',
         'open' => 'Open scanner',
         'all_events' => 'See all events',
+        'others_today' => 'Other checks today: :events',
+        'change' => 'Change event',
     ],
     'result' => [
         'table' => 'Table :number',
@@ -32,6 +34,7 @@ return [
         'force' => 'Force entry',
         'forced_badge' => 'Forced entry',
         'refused_help' => 'Unknown signature or unconfirmed payment. Send the guest to the welcome desk.',
+        'other_event' => 'Valid ticket, but for another event: ":name", :place. Tell the guest where they are expected.',
         'next' => 'Scan next',
     ],
 

@@ -62,6 +62,7 @@ class ScanController extends Controller
                 'registration' => $outcome['registration'],
                 'firstScannedAt' => $outcome['firstScannedAt']?->toISOString(),
                 'firstScannedBy' => $outcome['firstScannedBy'],
+                'otherEvent' => $outcome['otherEvent'],
             ],
         ]);
     }
@@ -94,6 +95,10 @@ class ScanController extends Controller
             'event' => [
                 'id' => $event->id,
                 'name' => $event->name,
+                // Deux evenements le meme jour portent souvent le meme nom : le lieu et l'heure
+                // disent a l'agent sur quel controle il se trouve (README ecran 26).
+                'venue' => $event->venue,
+                'startsAt' => $event->starts_at?->toISOString(),
                 'qrPublicKey' => $event->qr_public_key,
                 'qrKeyVersion' => $event->qr_key_version,
                 // L'appareil efface sa file locale d'un evenement clos (SECURITY.md M8).
@@ -109,6 +114,19 @@ class ScanController extends Controller
             'scanPin' => $request->user()->scan_pin_verifier,
             'tenantId' => $tenant->id,
             'permissions' => $request->user()->toTenantPermissions($tenant),
+            // Les autres controles du jour : l'ecran propose d'en changer, et le dit, quand l'agent
+            // pourrait s'etre trompe de lieu.
+            'otherEventsToday' => Event::query()->checkInToday()
+                ->whereKeyNot($event->id)
+                ->orderBy('starts_at')
+                ->get()
+                ->map(fn (Event $other) => [
+                    'id' => $other->id,
+                    'name' => $other->name,
+                    'venue' => $other->venue,
+                    'startsAt' => $other->starts_at?->toISOString(),
+                ])
+                ->all(),
             'recent' => $canViewLog ? $this->recentScans($event) : [],
             'acceptedCount' => ScanEvent::where('event_id', $event->id)
                 ->where('result', ScanResult::Accepted)

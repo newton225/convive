@@ -15,6 +15,7 @@ import {
     type LocalScanKind,
 } from '@/components/scan/offline-scan-panel';
 import { RotateTicketKeyCard } from '@/components/scan/rotate-ticket-key-card';
+import { ScanEventBanner } from '@/components/scan/scan-event-banner';
 import { ScanLockOverlay } from '@/components/scan/scan-lock-overlay';
 import { ScanPinForm } from '@/components/scan/scan-pin-form';
 import { useOnlineStatus } from '@/hooks/use-online-status';
@@ -33,6 +34,7 @@ import {
     verifyTicketOffline,
     type ExpectedEvent,
 } from '@/lib/ticket-verifier';
+import { rememberEntryControl } from '@/lib/entry-control-memory';
 import { formatDateTime } from '@/lib/format-date';
 import type { ScanPinVerifier } from '@/lib/scan-pin';
 import { readStation, writeStation } from '@/lib/scan-station';
@@ -43,6 +45,7 @@ import type {
     ScanEventProps,
     ScanOutcome,
     ScanRecentRow,
+    ScanSameDayEvent,
     TenantPermissions,
     Translations,
 } from '@/types';
@@ -58,6 +61,7 @@ type Props = {
     recent: ScanRecentRow[];
     acceptedCount: number;
     expectedCount: number;
+    otherEventsToday: ScanSameDayEvent[];
     result?: ScanOutcome;
 };
 
@@ -107,9 +111,16 @@ export default function EventScan({
     recent,
     acceptedCount,
     expectedCount,
+    otherEventsToday,
     result,
 }: Props) {
     const { t, locale } = useTranslation();
+
+    // Ouvrir ce scan, c'est avoir choisi son controle du jour : le raccourci du menu y ramenera
+    // ce telephone jusqu'au soir (README ecran 26, deux evenements le meme jour).
+    useEffect(() => {
+        rememberEntryControl(tenant.slug, event.id);
+    }, [tenant.slug, event.id]);
     const videoRef = useRef<HTMLVideoElement>(null);
     const controlsRef = useRef<IScannerControls | null>(null);
     const lastTokenRef = useRef<string | null>(null);
@@ -285,38 +296,65 @@ export default function EventScan({
         );
     }
 
+    // La camera s'ouvre de facon asynchrone : on ne recoit de quoi l'arreter qu'une fois qu'elle a
+    // repondu. Si l'ecran est quitte avant (React monte deux fois en developpement, l'agent peut
+    // repartir vite), le nettoyage ne trouvait rien a arreter et la camera restait allumee, voyant
+    // compris, apres le depart de la page. Deux garde-fous : une camera qui repond trop tard est
+    // coupee aussitot, et au depart toutes les pistes du flux video sont arretees.
     useEffect(() => {
         let cancelled = false;
         const reader = new BrowserQRCodeReader();
+        const video = videoRef.current;
+
+        const stopTracks = () => {
+            const stream = video?.srcObject;
+
+            if (stream instanceof MediaStream) {
+                stream.getTracks().forEach((track) => track.stop());
+            }
+
+            if (video) {
+                video.srcObject = null;
+            }
+        };
 
         reader
-            .decodeFromVideoDevice(
-                undefined,
-                videoRef.current ?? undefined,
-                (decoded) => {
-                    if (cancelled || !decoded || scanBlockedRef.current) {
-                        return;
-                    }
+            .decodeFromVideoDevice(undefined, video ?? undefined, (decoded) => {
+                if (cancelled || !decoded || scanBlockedRef.current) {
+                    return;
+                }
 
-                    registerActivityRef.current();
+                registerActivityRef.current();
 
-                    const text = decoded.getText();
+                const text = decoded.getText();
 
-                    if (text === lastTokenRef.current) {
-                        return;
-                    }
+                if (text === lastTokenRef.current) {
+                    return;
+                }
 
-                    handleToken(text);
-                },
-            )
+                handleToken(text);
+            })
             .then((controls) => {
+                if (cancelled) {
+                    controls.stop();
+                    stopTracks();
+
+                    return;
+                }
+
                 controlsRef.current = controls;
             })
-            .catch(() => setCameraError(true));
+            .catch(() => {
+                if (!cancelled) {
+                    setCameraError(true);
+                }
+            });
 
         return () => {
             cancelled = true;
             controlsRef.current?.stop();
+            controlsRef.current = null;
+            stopTracks();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -327,16 +365,18 @@ export default function EventScan({
 
             <div className="flex flex-col space-y-6">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Heading
-                        variant="small"
-                        title={t('scan.title')}
-                        description={event.name}
-                    />
+                    <Heading variant="small" title={t('scan.title')} />
                     <ProductTourButton
                         tour="entry_control"
                         autoStart={!lock.locked}
                     />
                 </div>
+
+                <ScanEventBanner
+                    tenantSlug={tenant.slug}
+                    event={event}
+                    otherEventsToday={otherEventsToday}
+                />
 
                 <InstallPrompt />
 
@@ -550,9 +590,37 @@ export default function EventScan({
                                     ) : null}
 
                                     {result.result === 'refused' ? (
-                                        <p className="text-muted-foreground text-sm">
-                                            {t('scan.result.refused_help')}
-                                        </p>
+                                        result.otherEvent ? (
+                                            // Vrai billet d'un autre controle du jour : l'agent
+                                            // oriente l'invite, ce n'est pas une fraude.
+                                            <p
+                                                className="text-sm font-medium"
+                                                data-test="scan-other-event"
+                                            >
+                                                {t('scan.result.other_event', {
+                                                    name: result.otherEvent
+                                                        .name,
+                                                    place: [
+                                                        result.otherEvent.venue,
+                                                        result.otherEvent
+                                                            .startsAt
+                                                            ? formatDateTime(
+                                                                  result
+                                                                      .otherEvent
+                                                                      .startsAt,
+                                                                  locale,
+                                                              )
+                                                            : null,
+                                                    ]
+                                                        .filter(Boolean)
+                                                        .join(', '),
+                                                })}
+                                            </p>
+                                        ) : (
+                                            <p className="text-muted-foreground text-sm">
+                                                {t('scan.result.refused_help')}
+                                            </p>
+                                        )
                                     ) : null}
 
                                     <Button

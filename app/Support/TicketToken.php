@@ -73,6 +73,22 @@ class TicketToken
         return is_array($payload) ? $payload : null;
     }
 
+    /**
+     * Read the event id a token claims, WITHOUT verifying its signature.
+     *
+     * Sert seulement a choisir la cle publique avec laquelle verifier le jeton ensuite, quand il
+     * ne vient pas de l'evenement scanne (deux evenements le meme jour, README ecran 26). Rien ne
+     * doit jamais se fier a cette valeur seule : un jeton forge peut y ecrire n'importe quoi.
+     */
+    public static function claimedEventId(string $token): ?int
+    {
+        $json = self::base64UrlDecode(explode('.', $token)[0]);
+        $payload = $json === null ? null : json_decode($json, true);
+        $eventId = is_array($payload) ? ($payload['event_id'] ?? null) : null;
+
+        return is_int($eventId) ? $eventId : null;
+    }
+
     private static function base64UrlEncode(string $bytes): string
     {
         return rtrim(strtr(base64_encode($bytes), '+/', '-_'), '=');

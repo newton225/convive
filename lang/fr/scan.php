@@ -22,6 +22,8 @@ return [
         'empty_description' => "Le contrôle s'ouvre le jour d'un événement publié. Pour un autre jour, passez par la liste des événements.",
         'open' => 'Ouvrir le scan',
         'all_events' => 'Voir tous les événements',
+        'others_today' => "Autres contrôles aujourd'hui : :events",
+        'change' => "Changer d'événement",
     ],
     'result' => [
         'table' => 'Table :number',
@@ -32,6 +34,7 @@ return [
         'force' => "Forcer l'entrée",
         'forced_badge' => 'Entrée forcée',
         'refused_help' => "Signature inconnue ou paiement non confirmé. Orientez l'invité vers l'accueil.",
+        'other_event' => "Billet valide, mais pour un autre événement : « :name », :place. Indiquez à l'invité où il est attendu.",
         'next' => 'Scanner suivant',
     ],
 

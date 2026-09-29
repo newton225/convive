@@ -1,9 +1,14 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ScanLine } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { translate, useTranslation } from '@/hooks/use-translation';
+import {
+    forgetEntryControl,
+    recallEntryControl,
+} from '@/lib/entry-control-memory';
 import { formatDateTime } from '@/lib/format-date';
 import { entryControl } from '@/routes/tenants';
 import { index as eventsIndex } from '@/routes/tenants/events';
@@ -29,6 +34,33 @@ type Props = {
  */
 export default function EntryControl({ tenant, events }: Props) {
     const { t, locale } = useTranslation();
+
+    // Deux evenements le meme jour (README ecran 26) : ce telephone retourne au controle qu'il a
+    // choisi aujourd'hui, sans reafficher la liste. `?choose=1` (« Changer d'evenement », depuis
+    // le scan) oublie ce choix et montre la liste.
+    const [rememberedId] = useState<number | null>(() => {
+        if (new URLSearchParams(window.location.search).has('choose')) {
+            forgetEntryControl(tenant.slug);
+
+            return null;
+        }
+
+        const id = recallEntryControl(tenant.slug);
+
+        return events.some((event) => event.id === id) ? id : null;
+    });
+
+    useEffect(() => {
+        if (rememberedId !== null) {
+            router.visit(scanIndex([tenant.slug, rememberedId]), {
+                replace: true,
+            });
+        }
+    }, [rememberedId, tenant.slug]);
+
+    if (rememberedId !== null) {
+        return <Head title={t('scan.entry_control.title')} />;
+    }
 
     return (
         <>

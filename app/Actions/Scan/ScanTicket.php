@@ -41,13 +41,25 @@ class ScanTicket
      *     registration: array{name: string, unit: string, partySize: int, guestOf: string|null, tableNumber: int|null}|null,
      *     firstScannedAt: CarbonInterface|null,
      *     firstScannedBy: string|null,
+     *     otherEvent: array{name: string, venue: string|null, startsAt: string|null}|null,
      * }
      */
     public function handle(Event $event, string $token, User $actor, bool $force = false, ?string $station = null): array
     {
         $ticket = $this->resolveTicket($event, $token);
 
-        if ($ticket === null || ! $this->ticketIsUsable($event, $ticket)) {
+        if ($ticket === null) {
+            // Deux evenements le meme jour (README ecran 26) : un vrai billet de l'autre reste
+            // refuse ici, mais l'agent apprend ou l'invite est attendu, et ce n'est pas une
+            // tentative de fraude a signaler.
+            $otherEvent = $this->otherEventFor($event, $token);
+
+            $this->journal($event, null, $actor, ScanResult::Refused, false, $station, alert: $otherEvent === null);
+
+            return $this->outcome(ScanResult::Refused, false, null, null, null, $otherEvent);
+        }
+
+        if (! $this->ticketIsUsable($event, $ticket)) {
             $this->journal($event, null, $actor, ScanResult::Refused, false, $station);
 
             return $this->outcome(ScanResult::Refused, false, null, null, null);
@@ -106,6 +118,43 @@ class ScanTicket
     }
 
     /**
+     * Find the other event of the organisation a genuine ticket belongs to, or null.
+     *
+     * L'identifiant d'evenement lu sans verification ne sert qu'a choisir la cle : le billet est
+     * ensuite verifie entierement avec celle de cet evenement (signature, organisation, version de
+     * cle, echeance, inscription confirmee). Un jeton forge ou perime ne revele donc rien, ni
+     * l'existence de l'autre evenement ni son lieu.
+     *
+     * @return array{name: string, venue: string|null, startsAt: string|null}|null
+     */
+    private function otherEventFor(Event $event, string $token): ?array
+    {
+        $claimedId = TicketToken::claimedEventId($token);
+
+        if ($claimedId === null || $claimedId === $event->id) {
+            return null;
+        }
+
+        $other = Event::find($claimedId);
+
+        if ($other === null) {
+            return null;
+        }
+
+        $ticket = $this->resolveTicket($other, $token);
+
+        if ($ticket === null || ! $this->ticketIsUsable($other, $ticket)) {
+            return null;
+        }
+
+        return [
+            'name' => $other->name,
+            'venue' => $other->venue,
+            'startsAt' => $other->starts_at?->toISOString(),
+        ];
+    }
+
+    /**
      * Determine whether the token's deadline has passed (SECURITY.md C2).
      *
      * La plus tardive des deux echeances fait foi : celle signee dans le jeton, et celle que la
@@ -132,7 +181,7 @@ class ScanTicket
             && $ticket->registration->status === RegistrationStatus::Confirmed;
     }
 
-    private function journal(Event $event, ?Ticket $ticket, User $actor, ScanResult $result, bool $forced, ?string $station): void
+    private function journal(Event $event, ?Ticket $ticket, User $actor, ScanResult $result, bool $forced, ?string $station, bool $alert = true): void
     {
         ScanEvent::create([
             'event_id' => $event->id,
@@ -143,7 +192,7 @@ class ScanTicket
             'station' => $station,
         ]);
 
-        if ($result === ScanResult::Refused) {
+        if ($result === ScanResult::Refused && $alert) {
             app(SendAlert::class)->toTenantMembers(
                 NotificationType::TicketRefused,
                 ['event' => $event->name],
@@ -154,12 +203,14 @@ class ScanTicket
     }
 
     /**
+     * @param  array{name: string, venue: string|null, startsAt: string|null}|null  $otherEvent
      * @return array{
      *     result: ScanResult,
      *     forced: bool,
      *     registration: array{name: string, unit: string, partySize: int, guestOf: string|null, tableNumber: int|null}|null,
      *     firstScannedAt: CarbonInterface|null,
      *     firstScannedBy: string|null,
+     *     otherEvent: array{name: string, venue: string|null, startsAt: string|null}|null,
      * }
      */
     private function outcome(
@@ -168,6 +219,7 @@ class ScanTicket
         ?Ticket $ticket,
         ?CarbonInterface $firstScannedAt,
         ?string $firstScannedBy,
+        ?array $otherEvent = null,
     ): array {
         return [
             'result' => $result,
@@ -183,6 +235,7 @@ class ScanTicket
             ],
             'firstScannedAt' => $firstScannedAt,
             'firstScannedBy' => $firstScannedBy,
+            'otherEvent' => $otherEvent,
         ];
     }
 }
