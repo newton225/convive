@@ -141,12 +141,6 @@ return [
         'flash' => 'Les autres appareils ont été déconnectés.',
     ],
 
-    'appearance' => [
-        'head' => 'Réglages d\'apparence',
-        'title' => 'Apparence',
-        'description' => 'Choisissez l\'apparence de l\'interface',
-    ],
-
     'appearance_modes' => [
         'light' => 'Clair',
         'dark' => 'Sombre',

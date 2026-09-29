@@ -60,8 +60,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('throttle:two-factor-reconfirm')
         ->name('two-factor.reconfirm.store');
 
-    Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
-
     // Les alertes (README section 5), etape 10 : la cloche et les preferences de canal. Par
     // utilisateur, hors de tout prefixe d'organisation.
     Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');

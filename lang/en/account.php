@@ -141,12 +141,6 @@ return [
         'flash' => 'Other devices have been signed out.',
     ],
 
-    'appearance' => [
-        'head' => 'Appearance settings',
-        'title' => 'Appearance',
-        'description' => 'Choose how the interface looks',
-    ],
-
     'appearance_modes' => [
         'light' => 'Light',
         'dark' => 'Dark',

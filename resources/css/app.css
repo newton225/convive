@@ -395,3 +395,19 @@
 .brand-fill {
     background-color: var(--brand-primary);
 }
+
+/*
+ * Bascule clair/sombre (use-appearance) : le nouveau theme se revele en cercle, anime par le
+ * script sur `::view-transition-new(root)`. Le fondu par defaut est coupe pour que seul le cercle
+ * se voie, et la zone de contenu perd son nom de transition le temps de la bascule, pour etre
+ * prise dans le meme cercle que le reste de la page.
+ */
+html.theme-transition::view-transition-old(root),
+html.theme-transition::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+html.theme-transition [data-slot='sidebar-inset'] {
+    view-transition-name: none;
+}

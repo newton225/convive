@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
-import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editNotifications } from '@/routes/notification-preferences';
 import { edit } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
@@ -31,11 +30,6 @@ export default function SettingsLayout({ children, wide = false }: Props) {
         {
             title: t('navigation.notifications'),
             href: editNotifications(),
-            icon: null,
-        },
-        {
-            title: t('navigation.appearance'),
-            href: editAppearance(),
             icon: null,
         },
     ];
