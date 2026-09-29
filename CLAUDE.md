@@ -749,6 +749,15 @@ parfaitement authentiques. Les controles sont ceux de `SECURITY.md` C1, aucun n'
 **Non encore fait** : le second facteur TOTP rejoue juste avant la modification (seul le mot de
 passe est redemande), l'alerte WhatsApp, et le bandeau sur le tableau de bord.
 
+### Mesure d'audience : pages commerciales seulement
+
+Google Analytics (README, « Mesure d'audience ») ne mesure que l'accueil et la vitrine, apres
+consentement. L'identifiant arrive en prop de page (`analyticsId`) de ces deux controleurs,
+**jamais en prop partagee** : le back-office ne doit pas le recevoir. Une nouvelle page
+commerciale le recoit a son tour et rend `SiteAnalytics` ; une page du back-office ou du parcours
+invite, jamais (leurs adresses portent des organisations, des jetons et des signatures). Test :
+`tests/Feature/AnalyticsTest.php`.
+
 ### Numeros de telephone : Cote d'Ivoire seule
 
 Decision du proprietaire du projet (2026-09-29) : le produit ne sert que des numeros ivoiriens,

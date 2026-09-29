@@ -20,6 +20,9 @@ class HomeController extends Controller
     public function __invoke(): Response
     {
         return Inertia::render('welcome', [
+            // Page commerciale : la seule famille de pages mesuree (README, « Mesure
+            // d'audience »). Jamais une prop partagee, que le back-office recevrait aussi.
+            'analyticsId' => config('services.google_analytics.measurement_id'),
             'plans' => collect(PlanCode::cases())
                 ->map(fn (PlanCode $code) => Plan::ensure($code))
                 ->map(fn (Plan $plan) => [

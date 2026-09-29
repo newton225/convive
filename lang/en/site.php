@@ -137,5 +137,13 @@ return [
         'rights' => 'All rights reserved.',
         'product' => 'Product',
         'account' => 'Account',
+        'analytics' => 'Audience measurement',
+    ],
+
+    'consent' => [
+        'title' => 'Measure visits to this site?',
+        'body' => 'With your consent, Google Analytics counts visits to these presentation pages to help us improve them. Nothing is measured in your workspace or during a registration, and no data is used for advertising.',
+        'accept' => 'Accept',
+        'decline' => 'Decline',
     ],
 ];

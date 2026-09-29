@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, CalendarSearch, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { ShowcaseCard } from '@/components/showcase/showcase-card';
+import { SiteAnalytics } from '@/components/site/site-analytics';
 import { Reveal } from '@/components/site/reveal';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
@@ -15,6 +16,7 @@ import type { ShowcaseEvent } from '@/types';
 
 type Props = {
     events: ShowcaseEvent[];
+    analyticsId: string | null;
 };
 
 /**
@@ -27,7 +29,7 @@ type Props = {
  * qu'exposer un lien deja rendu public, jamais une seconde facon d'y acceder. La recherche filtre
  * la liste deja chargee, sans requete : la vitrine ne porte que les evenements annonces.
  */
-export default function Showcase({ events }: Props) {
+export default function Showcase({ events, analyticsId }: Props) {
     const { t, locale } = useTranslation();
     const reduceMotion = useReducedMotion() === true;
     const [search, setSearch] = useState('');
@@ -212,7 +214,8 @@ export default function Showcase({ events }: Props) {
                 </Reveal>
             </main>
 
-            <SiteFooter />
+            <SiteFooter analyticsEnabled={analyticsId !== null} />
+            <SiteAnalytics measurementId={analyticsId} />
         </>
     );
 }

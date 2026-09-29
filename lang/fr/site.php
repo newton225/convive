@@ -137,5 +137,13 @@ return [
         'rights' => 'Tous droits réservés.',
         'product' => 'Produit',
         'account' => 'Compte',
+        'analytics' => "Mesure d'audience",
+    ],
+
+    'consent' => [
+        'title' => 'Mesurer la fréquentation de ce site ?',
+        'body' => "Avec votre accord, Google Analytics compte les visites de ces pages de présentation, pour nous aider à les améliorer. Rien n'est mesuré dans votre espace ni lors d'une inscription, et aucune donnée ne sert à la publicité.",
+        'accept' => 'Accepter',
+        'decline' => 'Refuser',
     ],
 ];

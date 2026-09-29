@@ -71,13 +71,25 @@ class SetSecurityHeaders
             ? 'http://127.0.0.1:* ws://127.0.0.1:*'
             : '';
 
+        // Google Analytics (README, « Mesure d'audience ») : ses domaines n'entrent dans la CSP
+        // que si un identifiant est configure. Le script ne se charge qu'apres consentement et
+        // sur les pages commerciales ; la CSP, elle, ne peut pas distinguer les pages d'une meme
+        // application a une seule page, elle s'ouvre donc pour tout le document.
+        $analytics = config('services.google_analytics.measurement_id')
+            ? [
+                'script' => 'https://www.googletagmanager.com',
+                'connect' => 'https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com',
+                'img' => 'https://*.google-analytics.com https://*.googletagmanager.com',
+            ]
+            : ['script' => '', 'connect' => '', 'img' => ''];
+
         $directives = [
             "default-src 'self'",
-            trim("script-src 'self' 'nonce-{$nonce}' {$devOrigin}"),
+            trim("script-src 'self' 'nonce-{$nonce}' {$analytics['script']} {$devOrigin}"),
             trim("style-src 'self' 'nonce-{$nonce}' {$devOrigin}"),
             trim("font-src 'self' {$devOrigin}"),
-            "img-src 'self' data:",
-            trim("connect-src 'self' {$devOrigin}"),
+            trim("img-src 'self' data: {$analytics['img']}"),
+            trim("connect-src 'self' {$analytics['connect']} {$devOrigin}"),
             "worker-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
@@ -85,7 +97,8 @@ class SetSecurityHeaders
             "frame-ancestors 'none'",
         ];
 
-        return implode('; ', $directives);
+        // Les sources facultatives absentes laissent des espaces doubles : on les resserre.
+        return implode('; ', array_map(fn (string $directive) => (string) preg_replace('/\s+/', ' ', $directive), $directives));
     }
 
     /**

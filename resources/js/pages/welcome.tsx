@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { SiteAnalytics } from '@/components/site/site-analytics';
 import { SiteCta } from '@/components/site/site-cta';
 import { SiteFeatures } from '@/components/site/site-features';
 import { SiteFigures } from '@/components/site/site-figures';
@@ -13,6 +14,7 @@ import type { SitePlan } from '@/types';
 type Props = {
     plans: SitePlan[];
     defaultCurrency: string;
+    analyticsId: string | null;
 };
 
 /**
@@ -20,7 +22,11 @@ type Props = {
  * fond encre, chiffres cles, artefacts reels du produit, frise d'etapes, tarifs avec un palier mis
  * en avant, bande de conclusion. Sans layout : la vitrine n'a ni barre laterale ni fil d'Ariane.
  */
-export default function Welcome({ plans, defaultCurrency }: Props) {
+export default function Welcome({
+    plans,
+    defaultCurrency,
+    analyticsId,
+}: Props) {
     const { t } = useTranslation();
 
     return (
@@ -38,7 +44,8 @@ export default function Welcome({ plans, defaultCurrency }: Props) {
             </main>
 
             <SiteCta />
-            <SiteFooter />
+            <SiteFooter analyticsEnabled={analyticsId !== null} />
+            <SiteAnalytics measurementId={analyticsId} />
         </>
     );
 }

@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { useTranslation } from '@/hooks/use-translation';
+import { OpenConsentEvent } from '@/lib/analytics';
 import { home, login, register } from '@/routes';
 import { index as showcaseIndex } from '@/routes/showcase';
 
@@ -8,7 +9,11 @@ import { index as showcaseIndex } from '@/routes/showcase';
  * Le pied de la vitrine : l'identite du produit, puis les memes chemins que l'en-tete, ranges en
  * deux colonnes, pour qui arrive en bas de page sans remonter.
  */
-export function SiteFooter() {
+export function SiteFooter({
+    analyticsEnabled = false,
+}: {
+    analyticsEnabled?: boolean;
+}) {
     const { t } = useTranslation();
     const { name } = usePage().props;
 
@@ -86,9 +91,24 @@ export function SiteFooter() {
                 </nav>
             </div>
 
-            <p className="text-muted-foreground border-border mt-12 border-t pt-6">
-                {new Date().getFullYear()} {name}. {t('site.footer.rights')}
-            </p>
+            <div className="text-muted-foreground border-border mt-12 flex flex-wrap items-center justify-between gap-3 border-t pt-6">
+                <p>
+                    {new Date().getFullYear()} {name}. {t('site.footer.rights')}
+                </p>
+                {/* Revenir sur son choix de mesure d'audience, quand elle est active. */}
+                {analyticsEnabled ? (
+                    <button
+                        type="button"
+                        className="hover:text-foreground min-h-11 transition-colors"
+                        onClick={() =>
+                            window.dispatchEvent(new Event(OpenConsentEvent))
+                        }
+                        data-test="analytics-preferences"
+                    >
+                        {t('site.footer.analytics')}
+                    </button>
+                ) : null}
+            </div>
         </footer>
     );
 }

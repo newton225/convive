@@ -20,6 +20,8 @@ class ShowcaseController extends Controller
     public function __invoke(): Response
     {
         return Inertia::render('showcase', [
+            // Page commerciale mesuree, comme l'accueil (README, « Mesure d'audience »).
+            'analyticsId' => config('services.google_analytics.measurement_id'),
             'events' => ShowcaseEvent::recentlyAnnounced()->get()
                 ->map(fn (ShowcaseEvent $event) => [
                     'name' => $event->name,

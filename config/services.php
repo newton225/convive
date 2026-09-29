@@ -36,6 +36,15 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    /*
+     * Google Analytics (README, « Mesure d'audience ») : sur les pages commerciales seulement,
+     * apres consentement du visiteur. Sans identifiant, rien n'est charge et la CSP reste fermee
+     * a Google : c'est l'etat voulu en local et en test.
+     */
+    'google_analytics' => [
+        'measurement_id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

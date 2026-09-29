@@ -522,6 +522,35 @@ compte a rebours de reservation).
 - **Signature du QR** : asymetrique (Ed25519), verifiable hors ligne sans secret sur l'appareil,
   jeton lie a un evenement et a un locataire, invalide apres cloture de l'evenement.
 
+### Mesure d'audience (Google Analytics)
+
+Décision du propriétaire du projet (2026-09-29) : Google Analytics 4 mesure la fréquentation du
+site commercial. Le script officiel `gtag.js` suffit, sans paquet supplémentaire.
+
+- **Pages mesurées : l'accueil et la vitrine des évènements à la une, rien d'autre.** Le
+  back-office désigne des organisations dans ses adresses, le parcours invité y porte des jetons
+  de reprise et des signatures : aucune de ces adresses ne doit partir chez un tiers. En quittant
+  une page commerciale, l'envoi est coupé par le drapeau officiel de Google
+  (`window['ga-disable-<identifiant>']`).
+- **Consentement préalable.** Un bandeau demande l'accord du visiteur ; rien n'est chargé ni
+  déposé chez Google avant « Accepter ». Un refus efface les cookies `_ga` éventuels. Le choix est
+  mémorisé dans le navigateur du visiteur et se révise à tout moment depuis le lien « Mesure
+  d'audience » du pied de page.
+- **Données minimales.** Une page vue ne porte que l'origine et le chemin, jamais les paramètres
+  de l'adresse. Signaux Google et personnalisation publicitaire désactivés, stockage publicitaire
+  refusé (mode consentement de Google).
+- **Configuration.** Variable d'environnement `GOOGLE_ANALYTICS_ID` (identifiant de mesure
+  `G-XXXXXXXXXX`). Vide en local et en test : rien n'est chargé, et la politique de sécurité du
+  contenu (CSP) reste fermée à Google. Renseignée, la CSP autorise les domaines de Google
+  (`www.googletagmanager.com`, `*.google-analytics.com`, `*.analytics.google.com`).
+- **Réglage à faire dans Google Analytics.** Dans le flux de données, désactiver « Changements de
+  page basés sur les événements de l'historique du navigateur » (mesure améliorée) : les pages
+  vues sont envoyées par l'application elle-même, page commerciale par page commerciale.
+- **Mentions légales.** Le traitement doit figurer dans la politique de confidentialité du site
+  (finalité, durée de conservation réglée dans Google Analytics, transfert hors de Côte d'Ivoire),
+  conformément à la loi ivoirienne n° 2013-450 sur les données personnelles et au RGPD pour les
+  visiteurs européens.
+
 ### Entités principales
 
 ```
