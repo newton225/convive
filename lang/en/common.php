@@ -38,6 +38,10 @@ return [
         'next' => 'Next',
     ],
 
+    'help' => [
+        'about' => 'Help: :subject',
+    ],
+
     'sample' => [
         'title' => 'Sample data',
         'description' => 'These figures are made up: the display is ready, the server for this screen comes in a later step.',

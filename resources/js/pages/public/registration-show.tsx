@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { CopyButton } from '@/components/copy-button';
 import { CompanionTicketPassCard } from '@/components/public/companion-ticket-pass-card';
 import InputError from '@/components/input-error';
+import { LabelWithHelp } from '@/components/label-with-help';
 import { SubmitButton } from '@/components/submit-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -536,11 +537,15 @@ export default function PublicRegistrationShow({
 
                                             {channelRequiresReference ? (
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="reference">
-                                                        {t(
+                                                    <LabelWithHelp
+                                                        htmlFor="reference"
+                                                        label={t(
                                                             'guest.proof.fields.reference',
                                                         )}
-                                                    </Label>
+                                                        help={t(
+                                                            'guest.proof.help.reference',
+                                                        )}
+                                                    />
                                                     <Input
                                                         id="reference"
                                                         name="reference"

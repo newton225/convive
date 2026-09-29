@@ -1,5 +1,7 @@
 import { Minus, Plus } from 'lucide-react';
+import { HelpTip } from '@/components/help-tip';
 import InputError from '@/components/input-error';
+import { LabelWithHelp } from '@/components/label-with-help';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,16 +25,18 @@ export function Field({
     id,
     label,
     error,
+    help,
     children,
 }: {
     id: string;
     label: string;
     error?: string;
+    help?: string;
     children: React.ReactNode;
 }) {
     return (
         <div className="space-y-2">
-            <Label htmlFor={id}>{label}</Label>
+            <LabelWithHelp htmlFor={id} label={label} help={help} />
             {children}
             <InputError message={error} />
         </div>
@@ -91,8 +95,11 @@ export function CompanionFields({
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-base">
+                <CardTitle className="flex items-center gap-1.5 text-base">
                     {t('guest.registration.companions.title')}
+                    <HelpTip subject={t('guest.registration.companions.title')}>
+                        {t('guest.registration.help.companions')}
+                    </HelpTip>
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

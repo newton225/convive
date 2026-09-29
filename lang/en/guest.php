@@ -54,6 +54,11 @@ return [
             'unit_placeholder' => 'Choose a unit',
             'companion_name' => "Companion's name",
         ],
+        'help' => [
+            'phone' => 'It is used to send your invitation card and reminders by WhatsApp. One reservation at a time per number.',
+            'unit' => 'It is used to seat members of the same unit at the same tables. If none fits you, choose "None".',
+            'companions' => 'The people coming with you. Each one takes a seat, pays the price and gets their own ticket, which you can pass on to them.',
+        ],
         'companions' => [
             'title' => 'Companions',
             'add' => 'Add a companion',
@@ -157,6 +162,9 @@ return [
             'reference' => 'Transaction reference',
             'amount_declared' => 'Amount sent',
             'receipt' => 'Receipt capture',
+        ],
+        'help' => [
+            'reference' => 'The transaction code, shown in the confirmation message from Wave, Orange Money, MTN or Moov, or on your bank receipt. It lets the organiser find your payment.',
         ],
         'submit' => 'Send my proof',
     ],

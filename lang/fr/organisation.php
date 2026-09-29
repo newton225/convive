@@ -44,6 +44,13 @@ return [
         'subdomain' => 'Sous-domaine',
     ],
 
+    'help' => [
+        'legal_form' => 'Elle figure sur vos reçus. Elle se choisit dans une liste plutôt que de se saisir, pour que chaque reçu reste conforme.',
+        'registration_number' => 'Votre numéro au Registre du commerce et du crédit mobilier. Saisissez-le tel qu’il figure sur vos documents : le format change d’un pays à l’autre. Il apparaît sur les reçus.',
+        'tax_number' => 'Votre identifiant fiscal, tel qu’il figure sur vos documents officiels. Il apparaît sur les reçus.',
+        'subdomain' => 'Le début de l’adresse de vos liens d’inscription. Il se fige dès votre premier lien publié, pour ne jamais casser les liens déjà envoyés à vos invités.',
+    ],
+
     'files' => [
         'section' => 'Fichiers de marque',
         'section_description' => "Ils apparaissent sur les liens d'invitation, les billets et les reçus. Formats acceptés : JPG, PNG et WebP, 5 Mo au maximum.",

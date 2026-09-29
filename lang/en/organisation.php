@@ -44,6 +44,13 @@ return [
         'subdomain' => 'Subdomain',
     ],
 
+    'help' => [
+        'legal_form' => 'It appears on your receipts. It is picked from a list rather than typed, so every receipt stays compliant.',
+        'registration_number' => 'Your trade and personal property credit register (RCCM) number. Type it as it appears on your documents: the format varies from country to country. It appears on receipts.',
+        'tax_number' => 'Your tax identifier, as it appears on your official documents. It appears on receipts.',
+        'subdomain' => 'The start of your registration link addresses. It is frozen as soon as your first link is published, so links already sent to your guests never break.',
+    ],
+
     'files' => [
         'section' => 'Brand files',
         'section_description' => 'They appear on invitation links, tickets and receipts. Accepted formats: JPG, PNG and WebP, 5 MB at most.',

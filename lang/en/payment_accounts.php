@@ -24,6 +24,14 @@ return [
         'is_active' => 'Offered to guests',
     ],
 
+    'help' => [
+        'label' => 'A free name to recognise this account. It does not say which network the account belongs to: the channel is what counts.',
+        'channel' => 'The network or payment method. It is what the guest sees and what statement reconciliation relies on. Changing it starts the 24-hour security delay.',
+        'account_number' => 'The number your guests pay into. A change only takes effect after 24 hours: the old number stays on show until then, and account managers are alerted straight away.',
+        'holder_name' => 'The name the guest sees when transferring: it lets them check they are paying the right person. Subject to the same 24-hour delay.',
+        'instructions' => 'A short instruction shown under the number, for instance the reference to use. It applies straight away.',
+    ],
+
     'actions' => [
         'create' => 'Add an account',
         'save' => 'Request the change',

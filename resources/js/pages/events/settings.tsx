@@ -67,6 +67,15 @@ const RuleLabels = {
     phoneVerification: 'event_settings.rules.phone_verification',
 } as const;
 
+// Seules les regles appliquees ont une aide : expliquer une regle qui n'agit pas encore, dont le
+// sens n'est pas tranche, serait decrire un comportement qui n'existe pas.
+const RuleHelp: Partial<Record<keyof typeof RuleLabels, string>> = {
+    scheduledSend: 'event_settings.rules_help.scheduled_send',
+    autoSeating: 'event_settings.rules_help.auto_seating',
+    purgeOnExhaustion: 'event_settings.rules_help.purge_on_exhaustion',
+    phoneVerification: 'event_settings.rules_help.phone_verification',
+};
+
 const ReminderFields: Record<(typeof ReminderKeys)[number], string> = {
     d7: 'reminder_j7_enabled',
     d2: 'reminder_j2_enabled',
@@ -128,6 +137,11 @@ export default function EventSettings({
     unenforcedRules,
 }: Props) {
     const { t, locale } = useTranslation();
+    const ruleHelp = (key: keyof typeof RuleLabels) => {
+        const helpKey = RuleHelp[key];
+
+        return helpKey ? t(helpKey) : undefined;
+    };
     const [reminders, setReminders] = useState(initialReminders);
     const [rules, setRules] = useState(initialRules);
     const [processing, setProcessing] = useState(false);
@@ -341,6 +355,7 @@ export default function EventSettings({
                             key={key}
                             id={`rule-${key}`}
                             label={t(RuleLabels[key])}
+                            help={ruleHelp(key)}
                             checked={rules[key]}
                             disabled={!canEditEvent}
                             hint={

@@ -38,6 +38,10 @@ return [
         'next' => 'Suivant',
     ],
 
+    'help' => [
+        'about' => 'Aide : :subject',
+    ],
+
     'sample' => [
         'title' => "Données d'exemple",
         'description' => "Ces chiffres sont fictifs : l'affichage est prêt, le serveur de cet écran arrive dans une prochaine étape.",

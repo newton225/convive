@@ -53,9 +53,16 @@ return [
         'allow_without_proof' => 'Accept a registration saved without a proof',
         'proof_legibility' => 'Require a legible receipt before sending',
         'purge_on_exhaustion' => 'Purge as soon as seats run out',
-        'phone_verification' => 'Verify the phone with a code before booking (protects against automated bookings; one more step for the guest and one WhatsApp message per code)',
+        'phone_verification' => 'Verify the phone with a code before booking',
         'temporary_hold' => 'Hold the seat during the reservation',
         'not_enforced' => 'Saved, but does not act on the event yet.',
+    ],
+
+    'rules_help' => [
+        'scheduled_send' => "Invitation cards go out on their own on the event's sending date, then with each approval made after that date. Unticked, no card goes out automatically.",
+        'auto_seating' => 'With each approved proof, the guest and their companions get a table, in approval order and with units grouped. You can always move someone by hand.',
+        'purge_on_exhaustion' => 'As soon as approved registrations fill every seat, unfinished registrations are deleted without waiting for the purge date: they no longer had any chance of getting a seat.',
+        'phone_verification' => 'The guest gets a code by WhatsApp and must enter it before booking. It stops a bot from blocking every seat, at the cost of one more step for the guest and one message sent per code.',
     ],
 
     'flash' => [

@@ -100,6 +100,9 @@ export default function PublicWaitlistJoin({
                                             'guest.registration.fields.phone',
                                         )}
                                         error={errors.phone}
+                                        help={t(
+                                            'guest.registration.help.phone',
+                                        )}
                                     >
                                         <Input
                                             id="phone"
@@ -116,6 +119,7 @@ export default function PublicWaitlistJoin({
                                             'guest.registration.fields.unit',
                                         )}
                                         error={errors.unit_id}
+                                        help={t('guest.registration.help.unit')}
                                     >
                                         <UnitSelect
                                             name="unit_id"

@@ -54,6 +54,11 @@ return [
             'unit_placeholder' => 'Choisir une unité',
             'companion_name' => 'Nom de l\'accompagnateur',
         ],
+        'help' => [
+            'phone' => 'Il sert à vous envoyer votre carte d’invitation et vos rappels par WhatsApp. Une seule réservation à la fois par numéro.',
+            'unit' => 'Elle sert à placer les membres d’une même unité aux mêmes tables. Si aucune ne vous correspond, choisissez « Aucune ».',
+            'companions' => 'Les personnes qui viennent avec vous. Chacune occupe une place, paie le tarif et reçoit son propre billet, que vous pourrez lui transmettre.',
+        ],
         'companions' => [
             'title' => 'Accompagnateurs',
             'add' => 'Ajouter un accompagnateur',
@@ -157,6 +162,9 @@ return [
             'reference' => 'Référence de la transaction',
             'amount_declared' => 'Montant versé',
             'receipt' => 'Capture du reçu',
+        ],
+        'help' => [
+            'reference' => 'Le code de la transaction, indiqué dans le message de confirmation de Wave, Orange Money, MTN ou Moov, ou sur votre reçu bancaire. Il permet à l’organisateur de retrouver votre paiement.',
         ],
         'submit' => 'Envoyer ma preuve',
     ],

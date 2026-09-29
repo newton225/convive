@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { LabelWithHelp } from '@/components/label-with-help';
 import { Badge } from '@/components/ui/badge';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -322,9 +322,11 @@ function AccountForm({
                 <>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div className="grid gap-2">
-                            <Label htmlFor={`label-${suffix}`}>
-                                {t('payment_accounts.fields.label')}
-                            </Label>
+                            <LabelWithHelp
+                                htmlFor={`label-${suffix}`}
+                                label={t('payment_accounts.fields.label')}
+                                help={t('payment_accounts.help.label')}
+                            />
                             <Input
                                 id={`label-${suffix}`}
                                 name="label"
@@ -339,9 +341,11 @@ function AccountForm({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor={`channel-${suffix}`}>
-                                {t('payment_accounts.fields.channel')}
-                            </Label>
+                            <LabelWithHelp
+                                htmlFor={`channel-${suffix}`}
+                                label={t('payment_accounts.fields.channel')}
+                                help={t('payment_accounts.help.channel')}
+                            />
                             <Select
                                 name="channel"
                                 defaultValue={account?.channel ?? undefined}
@@ -368,9 +372,13 @@ function AccountForm({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor={`number-${suffix}`}>
-                                {t('payment_accounts.fields.account_number')}
-                            </Label>
+                            <LabelWithHelp
+                                htmlFor={`number-${suffix}`}
+                                label={t(
+                                    'payment_accounts.fields.account_number',
+                                )}
+                                help={t('payment_accounts.help.account_number')}
+                            />
                             <Input
                                 id={`number-${suffix}`}
                                 name="account_number"
@@ -381,9 +389,11 @@ function AccountForm({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor={`holder-${suffix}`}>
-                                {t('payment_accounts.fields.holder_name')}
-                            </Label>
+                            <LabelWithHelp
+                                htmlFor={`holder-${suffix}`}
+                                label={t('payment_accounts.fields.holder_name')}
+                                help={t('payment_accounts.help.holder_name')}
+                            />
                             <Input
                                 id={`holder-${suffix}`}
                                 name="holder_name"
@@ -393,9 +403,13 @@ function AccountForm({
                         </div>
 
                         <div className="grid gap-2 sm:col-span-2">
-                            <Label htmlFor={`instructions-${suffix}`}>
-                                {t('payment_accounts.fields.instructions')}
-                            </Label>
+                            <LabelWithHelp
+                                htmlFor={`instructions-${suffix}`}
+                                label={t(
+                                    'payment_accounts.fields.instructions',
+                                )}
+                                help={t('payment_accounts.help.instructions')}
+                            />
                             <Input
                                 id={`instructions-${suffix}`}
                                 name="instructions"

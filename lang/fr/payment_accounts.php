@@ -24,6 +24,14 @@ return [
         'is_active' => 'Proposé aux invités',
     ],
 
+    'help' => [
+        'label' => 'Un nom libre pour reconnaître ce compte. Il ne dit pas à quel réseau le compte appartient : c’est le canal qui fait foi.',
+        'channel' => 'Le réseau ou le moyen de paiement. C’est lui que voit l’invité et qui sert au rapprochement du relevé. Le changer déclenche le délai de sécurité de 24 heures.',
+        'account_number' => 'Le numéro sur lequel vos invités versent l’argent. Une modification n’est active qu’après 24 heures : l’ancien numéro reste affiché d’ici là, et les responsables des comptes sont prévenus aussitôt.',
+        'holder_name' => 'Le nom que l’invité voit au moment du transfert : il lui permet de vérifier qu’il paie la bonne personne. Soumis au même délai de 24 heures.',
+        'instructions' => 'Une consigne courte affichée sous le numéro, par exemple le motif à indiquer. Elle s’applique tout de suite.',
+    ],
+
     'actions' => [
         'create' => 'Ajouter un compte',
         'save' => 'Demander la modification',

@@ -1,11 +1,11 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import BrandFileField from '@/components/brand-file-field';
 import Heading from '@/components/heading';
+import { LabelWithHelp } from '@/components/label-with-help';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { SubmitButton } from '@/components/submit-button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -109,11 +109,15 @@ export default function Organisation({
                                         />
 
                                         <div className="grid gap-2">
-                                            <Label htmlFor="legal_form">
-                                                {t(
+                                            <LabelWithHelp
+                                                htmlFor="legal_form"
+                                                label={t(
                                                     'organisation.fields.legal_form',
                                                 )}
-                                            </Label>
+                                                help={t(
+                                                    'organisation.help.legal_form',
+                                                )}
+                                            />
                                             <Select
                                                 name="legal_form"
                                                 defaultValue={
@@ -167,6 +171,9 @@ export default function Organisation({
                                                 branding.registrationNumber
                                             }
                                             error={errors.registration_number}
+                                            help={t(
+                                                'organisation.help.registration_number',
+                                            )}
                                         />
 
                                         <Field
@@ -176,6 +183,9 @@ export default function Organisation({
                                             )}
                                             defaultValue={branding.taxNumber}
                                             error={errors.tax_number}
+                                            help={t(
+                                                'organisation.help.tax_number',
+                                            )}
                                         />
 
                                         <Field
@@ -332,9 +342,15 @@ export default function Organisation({
                             {({ errors, processing, isDirty }) => (
                                 <>
                                     <div className="grid max-w-md gap-2">
-                                        <Label htmlFor="subdomain">
-                                            {t('organisation.fields.subdomain')}
-                                        </Label>
+                                        <LabelWithHelp
+                                            htmlFor="subdomain"
+                                            label={t(
+                                                'organisation.fields.subdomain',
+                                            )}
+                                            help={t(
+                                                'organisation.help.subdomain',
+                                            )}
+                                        />
                                         <Input
                                             id="subdomain"
                                             name="subdomain"
@@ -398,6 +414,7 @@ function Field({
     name,
     label,
     hint,
+    help,
     defaultValue,
     error,
     type = 'text',
@@ -405,13 +422,14 @@ function Field({
     name: string;
     label: string;
     hint?: string;
+    help?: string;
     defaultValue: string | null;
     error?: string;
     type?: string;
 }) {
     return (
         <div className="grid gap-2">
-            <Label htmlFor={name}>{label}</Label>
+            <LabelWithHelp htmlFor={name} label={label} help={help} />
             <Input
                 id={name}
                 name={name}

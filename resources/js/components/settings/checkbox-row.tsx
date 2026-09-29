@@ -1,3 +1,4 @@
+import { HelpTip } from '@/components/help-tip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
@@ -8,6 +9,8 @@ type Props = {
     onChange: (checked: boolean) => void;
     disabled?: boolean;
     hint?: string;
+    // Explication de la regle, derriere un bouton d'aide en bout de ligne.
+    help?: string;
 };
 
 /**
@@ -21,6 +24,7 @@ export function CheckboxRow({
     onChange,
     disabled = false,
     hint,
+    help,
 }: Props) {
     return (
         <div className="flex min-h-11 flex-col gap-1 py-1">
@@ -39,6 +43,7 @@ export function CheckboxRow({
                 >
                     {label}
                 </Label>
+                {help ? <HelpTip subject={label}>{help}</HelpTip> : null}
             </div>
             {hint ? (
                 <p className="text-muted-foreground pl-7 text-xs">{hint}</p>

@@ -54,8 +54,15 @@ return [
         'proof_legibility' => 'Exiger un reçu lisible avant l\'envoi',
         'purge_on_exhaustion' => 'Purger dès que les places sont épuisées',
         'temporary_hold' => 'Retenir la place pendant la réservation',
-        'phone_verification' => "Vérifier le téléphone par un code avant de réserver (protège contre les réservations automatisées ; une étape de plus pour l'invité et un message WhatsApp par code)",
+        'phone_verification' => 'Vérifier le téléphone par un code avant de réserver',
         'not_enforced' => 'Enregistrée, mais n\'agit pas encore sur le fonctionnement de l\'événement.',
+    ],
+
+    'rules_help' => [
+        'scheduled_send' => "Les cartes d'invitation partent d'elles-mêmes à la date d'envoi de l'événement, puis à chaque validation faite après cette date. Décochée, aucune carte ne part automatiquement.",
+        'auto_seating' => "À chaque preuve validée, l'invité et ses accompagnateurs reçoivent une table, dans l'ordre des validations et en regroupant les unités. Vous pouvez toujours déplacer quelqu'un à la main.",
+        'purge_on_exhaustion' => "Dès que les inscriptions validées remplissent toutes les places, les dossiers non finalisés sont supprimés sans attendre la date de purge : ils n'avaient plus aucune chance d'obtenir une place.",
+        'phone_verification' => "L'invité reçoit un code par WhatsApp et doit le saisir avant de réserver. Cela empêche un robot de bloquer toutes les places, au prix d'une étape de plus pour l'invité et d'un message envoyé par code.",
     ],
 
     'flash' => [

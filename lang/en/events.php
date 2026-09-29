@@ -48,6 +48,18 @@ return [
         'payment_accounts' => 'Payment accounts offered',
     ],
 
+    'help' => [
+        'table_count' => 'The event capacity is worked out for you: number of tables times seats per table. On the day, the seating plan is what counts.',
+        'seats_per_table' => 'Every table has the same number of seats. A guest and their companions always sit at the same table.',
+        'price_per_person' => 'Amount in CFA francs, with no decimals. Each companion pays this price too: the guest pays the price times the number of people registered.',
+        'companion_limit' => 'Maximum number of people a guest can register with them (10 at most). Each one takes a seat and gets their own ticket.',
+        'payment_accounts' => 'The accounts your guests pay into. You create them under Organisation, Payment accounts. A new or changed account only shows after a 24-hour security delay.',
+        'registration_deadline' => 'After this date, the public link no longer accepts registrations. Registrations already made carry on as usual.',
+        'purge_at' => 'On this date, unfinished registrations (no proof, expired, or with a rejected proof) are deleted and their seats released. Approved registrations are never touched.',
+        'invitations_send_at' => 'When invitation cards are sent, by WhatsApp and email, to every approved registration. A registration approved after this date gets its card right away.',
+        'hold_duration_minutes' => 'Time the guest has to upload their payment proof. Their seats are held meanwhile, then go back to the pool. 10 minutes by default.',
+    ],
+
     'visual' => [
         'hint' => "Poster or photo specific to this event. Without one, the organisation's banner applies.",
         'choose' => 'Choose a visual',

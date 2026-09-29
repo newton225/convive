@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { TemplatePicker } from '@/components/events/template-picker';
 import Heading from '@/components/heading';
+import { HelpTip } from '@/components/help-tip';
+import { LabelWithHelp } from '@/components/label-with-help';
 import { ProductTourButton } from '@/components/product-tour-button';
 import EventVisualField from '@/components/events/event-visual-field';
 import InputError from '@/components/input-error';
@@ -12,7 +14,6 @@ import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import {
     announce,
@@ -338,6 +339,7 @@ export default function EventForm({
                                             prefill?.tableCount ?? 0,
                                         )}
                                         error={errors.table_count}
+                                        help={t('events.help.table_count')}
                                     />
                                     <Field
                                         name="seats_per_table"
@@ -349,6 +351,7 @@ export default function EventForm({
                                             prefill?.seatsPerTable ?? 0,
                                         )}
                                         error={errors.seats_per_table}
+                                        help={t('events.help.seats_per_table')}
                                     />
                                     <Field
                                         name="price_per_person"
@@ -360,6 +363,7 @@ export default function EventForm({
                                             prefill?.pricePerPerson ?? 0,
                                         )}
                                         error={errors.price_per_person}
+                                        help={t('events.help.price_per_person')}
                                     />
                                     <Field
                                         name="companion_limit"
@@ -372,6 +376,7 @@ export default function EventForm({
                                                 defaults.companionLimit,
                                         )}
                                         error={errors.companion_limit}
+                                        help={t('events.help.companion_limit')}
                                     />
                                 </div>
 
@@ -379,8 +384,15 @@ export default function EventForm({
                                     className="space-y-2"
                                     data-tour="event-payment-accounts"
                                 >
-                                    <legend className="text-sm font-medium">
+                                    <legend className="flex items-center gap-1.5 text-sm font-medium">
                                         {t('events.fields.payment_accounts')}
+                                        <HelpTip
+                                            subject={t(
+                                                'events.fields.payment_accounts',
+                                            )}
+                                        >
+                                            {t('events.help.payment_accounts')}
+                                        </HelpTip>
                                     </legend>
 
                                     {paymentAccounts.map((account) => (
@@ -432,6 +444,9 @@ export default function EventForm({
                                             event?.registrationDeadline ?? ''
                                         }
                                         error={errors.registration_deadline}
+                                        help={t(
+                                            'events.help.registration_deadline',
+                                        )}
                                     />
                                     <Field
                                         name="purge_at"
@@ -439,6 +454,7 @@ export default function EventForm({
                                         label={t('events.fields.purge_at')}
                                         defaultValue={event?.purgeAt ?? ''}
                                         error={errors.purge_at}
+                                        help={t('events.help.purge_at')}
                                     />
                                     <Field
                                         name="invitations_send_at"
@@ -450,6 +466,9 @@ export default function EventForm({
                                             event?.invitationsSendAt ?? ''
                                         }
                                         error={errors.invitations_send_at}
+                                        help={t(
+                                            'events.help.invitations_send_at',
+                                        )}
                                     />
                                     <Field
                                         name="hold_duration_minutes"
@@ -462,6 +481,9 @@ export default function EventForm({
                                                 defaults.holdDurationMinutes,
                                         )}
                                         error={errors.hold_duration_minutes}
+                                        help={t(
+                                            'events.help.hold_duration_minutes',
+                                        )}
                                     />
                                 </div>
                             </Step>
@@ -516,6 +538,7 @@ function Field({
     type = 'text',
     placeholder,
     required = false,
+    help,
 }: {
     name: string;
     label: string;
@@ -524,10 +547,11 @@ function Field({
     type?: string;
     placeholder?: string;
     required?: boolean;
+    help?: string;
 }) {
     return (
         <div className="grid gap-2">
-            <Label htmlFor={name}>{label}</Label>
+            <LabelWithHelp htmlFor={name} label={label} help={help} />
             <Input
                 id={name}
                 name={name}

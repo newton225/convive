@@ -48,6 +48,18 @@ return [
         'payment_accounts' => 'Comptes de versement proposés',
     ],
 
+    'help' => [
+        'table_count' => 'La capacité de l’événement se calcule toute seule : nombre de tables multiplié par les places par table. C’est le plan de salle qui fait foi le jour J.',
+        'seats_per_table' => 'Chaque table a le même nombre de places. Un invité et ses accompagnateurs sont toujours assis à la même table.',
+        'price_per_person' => 'Montant en francs CFA, sans décimale. Chaque accompagnateur paie aussi ce tarif : l’invité doit verser le tarif multiplié par le nombre de personnes inscrites.',
+        'companion_limit' => 'Nombre maximal de personnes qu’un invité peut inscrire avec lui (10 au plus). Chacune occupe une place et reçoit son propre billet.',
+        'payment_accounts' => 'Les comptes sur lesquels vos invités vous versent l’argent. Ils se créent dans Organisation, Comptes de versement. Un compte nouveau ou modifié n’apparaît qu’après un délai de sécurité de 24 heures.',
+        'registration_deadline' => 'Après cette date, le lien public n’accepte plus d’inscription. Les inscriptions déjà faites continuent normalement.',
+        'purge_at' => 'À cette date, les dossiers non finalisés (sans preuve, expirés ou dont la preuve a été rejetée) sont supprimés et leurs places rendues. Les inscriptions validées ne sont jamais touchées.',
+        'invitations_send_at' => 'Date d’envoi des cartes d’invitation, par WhatsApp et par email, à toutes les inscriptions validées. Une inscription validée après cette date reçoit sa carte tout de suite.',
+        'hold_duration_minutes' => 'Temps laissé à l’invité pour déposer sa preuve de paiement. Pendant ce délai, ses places sont retenues ; ensuite, elles reviennent au stock. 10 minutes par défaut.',
+    ],
+
     'visual' => [
         'hint' => "Affiche ou photo propre à cet événement. Sans visuel, la bannière de l'organisation s'applique.",
         'choose' => 'Choisir un visuel',
