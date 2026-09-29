@@ -1,5 +1,7 @@
+import { motion, useReducedMotion } from 'framer-motion';
 import { Check, TriangleAlert } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
+import { EaseOut } from '@/lib/motion';
 
 const Rows = [
     {
@@ -24,10 +26,12 @@ const Rows = [
 
 /**
  * La file de verification des preuves (README ecran 18), avec ses signaux d'anomalie. Le signal
- * est ecrit en toutes lettres et porte une icone : rien ne repose sur la couleur seule.
+ * est ecrit en toutes lettres et porte une icone : rien ne repose sur la couleur seule. Les
+ * preuves arrivent l'une apres l'autre, comme dans la vraie file.
  */
 export function ProofsPreview() {
     const { t } = useTranslation();
+    const reduceMotion = useReducedMotion() === true;
 
     return (
         <div data-test="site-proofs-preview" className="space-y-2">
@@ -35,10 +39,18 @@ export function ProofsPreview() {
                 {t('site.preview.proofs.title')}
             </p>
             <ul className="space-y-2">
-                {Rows.map((row) => (
-                    <li
+                {Rows.map((row, index) => (
+                    <motion.li
                         key={row.reference}
-                        className="bg-muted/60 flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm"
+                        initial={reduceMotion ? false : { opacity: 0, x: 24 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: '-60px' }}
+                        transition={{
+                            duration: 0.5,
+                            delay: 0.2 + index * 0.15,
+                            ease: EaseOut,
+                        }}
+                        className="bg-muted/60 flex flex-wrap items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-sm"
                     >
                         <span>
                             <span className="font-medium">{row.name}</span>
@@ -69,7 +81,7 @@ export function ProofsPreview() {
                                 )}
                             </span>
                         </span>
-                    </li>
+                    </motion.li>
                 ))}
             </ul>
         </div>

@@ -9,6 +9,7 @@ return [
         'login' => 'Connexion',
         'register' => 'Créer mon espace',
         'dashboard' => 'Mon espace',
+        'menu' => 'Ouvrir le menu',
     ],
 
     'theme' => [
@@ -17,10 +18,22 @@ return [
 
     'hero' => [
         'eyebrow' => 'Inscriptions événementielles',
-        'title' => 'Remplissez la salle. Vérifiez chaque preuve. Contrôlez chaque entrée.',
+        'badge' => 'Pensé pour Wave, Orange Money, MTN et Moov',
+        'title_lines' => [
+            'fill' => 'Remplissez la salle.',
+            'verify' => 'Vérifiez chaque preuve.',
+            'control' => 'Contrôlez chaque entrée.',
+        ],
         'description' => 'Convive gère les inscriptions de vos événements payants à places limitées : réservation chronométrée, preuves de paiement vérifiées, plan de salle, billets signés et contrôle à l\'entrée, même sans réseau.',
         'primary' => 'Créer mon espace',
         'secondary' => 'Voir les tarifs',
+        'reassurance' => 'Plan Essentiel gratuit, sans limite de durée.',
+        'stage' => [
+            'hold' => 'Réservation en cours',
+            'proof_title' => 'Preuve validée',
+            'proof_body' => 'Table 7 attribuée, billet envoyé',
+            'scan' => 'Entrée acceptée',
+        ],
     ],
 
     'figures' => [
@@ -77,6 +90,9 @@ return [
             'title' => 'Plan de salle',
             'table' => 'Table :number',
         ],
+        'reports' => [
+            'title' => 'Présence par unité',
+        ],
         'scan' => [
             'accepted' => 'Entrée acceptée',
             'already' => 'Déjà scanné à 19 h 12',
@@ -119,5 +135,7 @@ return [
     'footer' => [
         'tagline' => 'Inscriptions événementielles pour les associations, les églises et les entreprises.',
         'rights' => 'Tous droits réservés.',
+        'product' => 'Produit',
+        'account' => 'Compte',
     ],
 ];

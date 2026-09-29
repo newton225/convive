@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
@@ -7,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { register } from '@/routes';
 import type { SitePlan } from '@/types';
 import { Reveal } from './reveal';
+import { SectionHeading } from './section-heading';
 
 type Props = {
     plans: SitePlan[];
@@ -19,6 +21,7 @@ type Props = {
  */
 export function SitePricing({ plans, currency }: Props) {
     const { t, locale } = useTranslation();
+    const reduceMotion = useReducedMotion() === true;
 
     const limit = (value: number | null) =>
         value === null ? t('site.pricing.unlimited') : String(value);
@@ -38,30 +41,30 @@ export function SitePricing({ plans, currency }: Props) {
     return (
         <section
             id="pricing"
-            className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-16"
+            className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-24"
             data-test="site-pricing"
         >
-            <Reveal>
-                <h2 className="max-w-2xl text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-                    {t('site.pricing.title')}
-                </h2>
-                <p className="text-muted-foreground mt-3">
-                    {t('site.pricing.subtitle')}
-                </p>
-            </Reveal>
+            <SectionHeading
+                eyebrow={t('site.nav.pricing')}
+                title={t('site.pricing.title')}
+                subtitle={t('site.pricing.subtitle')}
+                align="center"
+            />
 
-            <div className="mt-10 grid items-stretch gap-4 md:grid-cols-3">
+            <div className="mt-14 grid items-stretch gap-4 md:grid-cols-3">
                 {plans.map((plan, index) => (
                     <Reveal
                         key={plan.code}
                         delay={index * 0.08}
                         className="flex"
                     >
-                        <article
+                        <motion.article
+                            whileHover={reduceMotion ? undefined : { y: -6 }}
+                            transition={{ duration: 0.25, ease: 'easeOut' }}
                             className={cn(
-                                'flex w-full flex-col gap-5 rounded-2xl p-6',
+                                'flex w-full flex-col gap-6 rounded-3xl p-8',
                                 plan.highlighted
-                                    ? 'bg-foreground text-background'
+                                    ? 'site-plan-highlight text-background md:-my-3 md:py-11'
                                     : 'bg-card',
                             )}
                             data-test={`site-plan-${plan.code}`}
@@ -77,7 +80,7 @@ export function SitePricing({ plans, currency }: Props) {
                                 ) : null}
                             </div>
 
-                            <p className="text-2xl font-semibold tracking-tight">
+                            <p className="text-3xl font-semibold tracking-tight">
                                 {price(plan)}
                             </p>
 
@@ -123,7 +126,7 @@ export function SitePricing({ plans, currency }: Props) {
 
                             {plan.prices[currency] !== null ? (
                                 <Button
-                                    className="mt-auto"
+                                    className="mt-auto h-11 rounded-full"
                                     variant={
                                         plan.highlighted ? 'default' : 'outline'
                                     }
@@ -134,7 +137,7 @@ export function SitePricing({ plans, currency }: Props) {
                                     </Link>
                                 </Button>
                             ) : null}
-                        </article>
+                        </motion.article>
                     </Reveal>
                 ))}
             </div>

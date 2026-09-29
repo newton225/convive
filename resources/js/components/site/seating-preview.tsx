@@ -1,6 +1,6 @@
-import { useId } from 'react';
-import { NonceStyle } from '@/components/nonce-style';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from '@/hooks/use-translation';
+import { EaseOut } from '@/lib/motion';
 
 const Tables = [
     { number: 1, seated: 8 },
@@ -13,21 +13,23 @@ const Tables = [
 
 /**
  * Le plan de salle (README ecran 21) : chaque table montre ses places prises. Le nombre est ecrit,
- * la jauge n'est qu'un renfort visuel.
+ * la jauge n'est qu'un renfort visuel ; elle se remplit a l'arrivee a l'ecran, table apres table,
+ * par une echelle horizontale (transform), jamais par la largeur.
  */
 export function SeatingPreview() {
     const { t } = useTranslation();
+    const reduceMotion = useReducedMotion() === true;
 
     return (
-        <div data-test="site-seating-preview" className="space-y-2">
+        <div data-test="site-seating-preview" className="space-y-3">
             <p className="text-muted-foreground text-sm">
                 {t('site.preview.seating.title')}
             </p>
-            <ul className="grid grid-cols-3 gap-2">
-                {Tables.map((table) => (
+            <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {Tables.map((table, index) => (
                     <li
                         key={table.number}
-                        className="bg-muted/60 space-y-1.5 rounded-lg p-2.5"
+                        className="bg-muted/60 space-y-2 rounded-xl p-3"
                     >
                         <div className="flex items-baseline justify-between text-xs">
                             <span className="font-medium">
@@ -40,31 +42,26 @@ export function SeatingPreview() {
                             </span>
                         </div>
                         <div className="bg-background h-1.5 overflow-hidden rounded-full">
-                            <SeatingFill
-                                ratio={table.seated * 10}
-                                full={table.seated === 10}
+                            <motion.div
+                                className={`h-full origin-left rounded-full ${table.seated === 10 ? 'bg-foreground' : 'bg-primary'}`}
+                                initial={reduceMotion ? false : { scaleX: 0 }}
+                                whileInView={{ scaleX: table.seated / 10 }}
+                                animate={
+                                    reduceMotion
+                                        ? { scaleX: table.seated / 10 }
+                                        : undefined
+                                }
+                                viewport={{ once: true, margin: '-60px' }}
+                                transition={{
+                                    duration: 0.8,
+                                    delay: 0.15 + index * 0.08,
+                                    ease: EaseOut,
+                                }}
                             />
                         </div>
                     </li>
                 ))}
             </ul>
-        </div>
-    );
-}
-
-function SeatingFill({ ratio, full }: { ratio: number; full: boolean }) {
-    // Largeur calculee a l'execution : posee via une balise <style> nonce'e et scopee, pas
-    // l'attribut `style` (voir NonceStyle).
-    const scopeClass = `seating-fill-${useId().replace(/:/g, '')}`;
-
-    return (
-        <div
-            className={`${scopeClass} h-full ${full ? 'bg-foreground' : 'bg-primary'}`}
-        >
-            <NonceStyle
-                selector={`.${scopeClass}`}
-                declarations={{ width: `${ratio}%` }}
-            />
         </div>
     );
 }

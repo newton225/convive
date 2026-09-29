@@ -9,6 +9,7 @@ return [
         'login' => 'Log in',
         'register' => 'Create my workspace',
         'dashboard' => 'My workspace',
+        'menu' => 'Open the menu',
     ],
 
     'theme' => [
@@ -17,10 +18,22 @@ return [
 
     'hero' => [
         'eyebrow' => 'Event registration',
-        'title' => 'Fill the room. Check every proof. Control every entry.',
+        'badge' => 'Built for Wave, Orange Money, MTN and Moov',
+        'title_lines' => [
+            'fill' => 'Fill the room.',
+            'verify' => 'Check every proof.',
+            'control' => 'Control every entry.',
+        ],
         'description' => 'Convive handles registrations for your paid, limited-seat events: timed reservations, verified payment proofs, seating plan, signed tickets and entrance control, even offline.',
         'primary' => 'Create my workspace',
         'secondary' => 'See pricing',
+        'reassurance' => 'Essential plan free, with no time limit.',
+        'stage' => [
+            'hold' => 'Reservation in progress',
+            'proof_title' => 'Proof approved',
+            'proof_body' => 'Table 7 assigned, ticket sent',
+            'scan' => 'Entry accepted',
+        ],
     ],
 
     'figures' => [
@@ -77,6 +90,9 @@ return [
             'title' => 'Seating plan',
             'table' => 'Table :number',
         ],
+        'reports' => [
+            'title' => 'Attendance by unit',
+        ],
         'scan' => [
             'accepted' => 'Entry accepted',
             'already' => 'Already scanned at 7:12 pm',
@@ -119,5 +135,7 @@ return [
     'footer' => [
         'tagline' => 'Event registration for associations, churches and companies.',
         'rights' => 'All rights reserved.',
+        'product' => 'Product',
+        'account' => 'Account',
     ],
 ];

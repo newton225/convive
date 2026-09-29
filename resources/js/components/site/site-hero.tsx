@@ -1,82 +1,156 @@
 import { Link } from '@inertiajs/react';
-import { motion, useReducedMotion } from 'framer-motion';
+import {
+    motion,
+    useReducedMotion,
+    useScroll,
+    useTransform,
+} from 'framer-motion';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
+import { Duration, EaseOut } from '@/lib/motion';
 import { register } from '@/routes';
-import { TicketPreview } from './ticket-preview';
+import { HeroStage } from './hero-stage';
+
+const TitleLines = ['fill', 'verify', 'control'] as const;
 
 /**
- * Le bandeau d'accroche : pleine largeur sur fond encre, titre serre, et le produit pour heros (le
- * billet, pas une illustration). Une seule animation dominante : l'entree du texte puis celle du
- * billet, en cascade courte. Sans mouvement, tout s'affiche d'emblee.
+ * Le bandeau d'accroche, pleine largeur sur fond encre : grille estompee et halos indigo en fond,
+ * titre serre en trois temps, et le produit pour heros (la scene du billet, pas une
+ * illustration). Une seule animation dominante : l'entree en cascade, puis la scene qui se
+ * raconte. Au defilement, la scene s'eloigne un peu plus lentement que le texte (translation
+ * seulement). Sans mouvement, tout s'affiche d'emblee.
  */
 export function SiteHero() {
     const { t } = useTranslation();
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useReducedMotion() === true;
+    const section = useRef<HTMLElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: section,
+        offset: ['start start', 'end start'],
+    });
+    const stageY = useTransform(scrollYProgress, [0, 1], [0, 90]);
+    const glowY = useTransform(scrollYProgress, [0, 1], [0, -60]);
 
     const enter = (delay: number) =>
         reduceMotion
             ? {}
             : {
-                  initial: { opacity: 0, y: 14 },
+                  initial: { opacity: 0, y: 18 },
                   animate: { opacity: 1, y: 0 },
-                  transition: {
-                      duration: 0.5,
-                      delay,
-                      ease: 'easeOut' as const,
-                  },
+                  transition: { duration: Duration.base, delay, ease: EaseOut },
               };
 
     return (
-        <section className="bg-ink text-white" data-test="site-hero">
-            <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 pt-14 pb-20 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:pt-20 lg:pb-28">
+        <section
+            ref={section}
+            className="bg-ink relative isolate overflow-hidden text-white"
+            data-test="site-hero"
+        >
+            <div
+                className="site-grid pointer-events-none absolute inset-0 -z-10"
+                aria-hidden="true"
+            />
+            <motion.div
+                style={reduceMotion ? undefined : { y: glowY }}
+                className="pointer-events-none absolute inset-0 -z-10"
+                aria-hidden="true"
+            >
+                <motion.div
+                    className="site-glow absolute -top-40 left-1/2 size-[42rem] -translate-x-1/2"
+                    animate={
+                        reduceMotion
+                            ? undefined
+                            : { x: [-40, 40, -40], opacity: [0.8, 1, 0.8] }
+                    }
+                    transition={{
+                        duration: 14,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                    }}
+                />
+                <motion.div
+                    className="site-glow-warm absolute right-[-10rem] bottom-[-12rem] size-[34rem]"
+                    animate={reduceMotion ? undefined : { y: [0, -30, 0] }}
+                    transition={{
+                        duration: 12,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                    }}
+                />
+            </motion.div>
+
+            <div className="mx-auto grid w-full max-w-6xl items-center gap-8 px-6 pt-16 pb-20 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-12 lg:pt-24 lg:pb-32">
                 <div>
                     <motion.p
                         {...enter(0)}
-                        className="text-sm font-medium tracking-wide text-white/60 uppercase"
+                        className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/80 backdrop-blur"
                     >
-                        {t('site.hero.eyebrow')}
+                        <Sparkles className="text-primary size-3.5" />
+                        {t('site.hero.badge')}
                     </motion.p>
-                    <motion.h1
-                        {...enter(0.08)}
-                        className="mt-4 text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl"
-                    >
-                        {t('site.hero.title')}
-                    </motion.h1>
+
+                    <h1 className="mt-6 text-4xl leading-[1.04] font-semibold tracking-tight sm:text-5xl lg:text-[4.1rem]">
+                        {TitleLines.map((line, index) => (
+                            <motion.span
+                                key={line}
+                                {...enter(0.08 + index * 0.1)}
+                                className={
+                                    index === TitleLines.length - 1
+                                        ? 'site-gradient-text block pb-1'
+                                        : 'block'
+                                }
+                            >
+                                {t(`site.hero.title_lines.${line}`)}
+                            </motion.span>
+                        ))}
+                    </h1>
+
                     <motion.p
-                        {...enter(0.16)}
-                        className="mt-6 max-w-xl text-lg leading-relaxed text-white/75"
+                        {...enter(0.42)}
+                        className="mt-6 max-w-xl text-lg leading-relaxed text-white/70"
                     >
                         {t('site.hero.description')}
                     </motion.p>
+
                     <motion.div
-                        {...enter(0.24)}
-                        className="mt-8 flex flex-wrap gap-3"
+                        {...enter(0.52)}
+                        className="mt-9 flex flex-wrap items-center gap-3"
                     >
-                        <Button size="lg" asChild>
+                        <Button
+                            size="lg"
+                            className="group h-12 rounded-full px-6"
+                            asChild
+                        >
                             <Link
                                 href={register()}
                                 data-test="site-hero-register"
                             >
                                 {t('site.hero.primary')}
+                                <ArrowRight className="transition-transform duration-200 group-hover:translate-x-0.5" />
                             </Link>
                         </Button>
                         <Button
                             size="lg"
                             variant="ghost"
-                            className="text-white hover:bg-white/10 hover:text-white"
+                            className="h-12 rounded-full px-6 text-white hover:bg-white/10 hover:text-white"
                             asChild
                         >
                             <a href="#pricing">{t('site.hero.secondary')}</a>
                         </Button>
                     </motion.div>
+
+                    <motion.p
+                        {...enter(0.6)}
+                        className="mt-5 text-sm text-white/50"
+                    >
+                        {t('site.hero.reassurance')}
+                    </motion.p>
                 </div>
 
-                <motion.div
-                    {...enter(0.32)}
-                    className="flex justify-center lg:justify-end"
-                >
-                    <TicketPreview />
+                <motion.div style={reduceMotion ? undefined : { y: stageY }}>
+                    <HeroStage />
                 </motion.div>
             </div>
         </section>
