@@ -15,11 +15,14 @@ use App\Models\Registration;
 use App\Models\StatementImport;
 use App\Models\StatementLine;
 use App\Models\Tenant;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 /**
  * Le rapprochement du releve (README ecran 19), etape 9 de « Ordre de construction ».
@@ -44,9 +47,19 @@ class ReconciliationController extends Controller
 
         $lines = $current === null
             ? null
-            : StatementLine::where('statement_import_id', $current->id)
+            : QueryBuilder::for(StatementLine::where('statement_import_id', $current->id))
+                ->allowedFilters(
+                    AllowedFilter::exact('outcome'),
+                    AllowedFilter::callback('search', function (Builder $query, string $value) {
+                        $query->where(function (Builder $query) use ($value) {
+                            $query->where('reference', 'like', "%{$value}%")
+                                ->orWhere('issuer', 'like', "%{$value}%");
+                        });
+                    }),
+                )
+                ->defaultSort('line_number')
+                ->allowedSorts('line_number', 'occurred_on', 'issuer', 'amount')
                 ->with('matchedRegistration')
-                ->orderBy('line_number')
                 ->paginate(25)
                 ->withQueryString();
 
@@ -85,6 +98,11 @@ class ReconciliationController extends Controller
                 'total' => $lines?->total() ?? 0,
             ],
             'registrationOptions' => $canResolve ? $this->registrationOptions($event) : [],
+            'filters' => [
+                'search' => $request->string('filter.search')->toString() ?: null,
+                'outcome' => $request->string('filter.outcome')->toString() ?: null,
+                'sort' => $request->string('sort')->toString() ?: null,
+            ],
         ]);
     }
 

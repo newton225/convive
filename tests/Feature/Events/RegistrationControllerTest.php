@@ -131,6 +131,41 @@ class RegistrationControllerTest extends TestCase
             );
     }
 
+    public function test_le_tri_par_montant_decroissant_ordonne_les_lignes_et_revient_dans_les_filtres(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+
+        $tenant->asCurrent(function () use ($event) {
+            Registration::factory()->create(['event_id' => $event->id, 'name' => 'Petit', 'amount_due' => 10000]);
+            Registration::factory()->create(['event_id' => $event->id, 'name' => 'Grand', 'amount_due' => 90000]);
+            Registration::factory()->create(['event_id' => $event->id, 'name' => 'Moyen', 'amount_due' => 40000]);
+        });
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.registrations.index', [$tenant, $event]).'?sort=-amount_due')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('rows.0.name', 'Grand')
+                ->where('rows.1.name', 'Moyen')
+                ->where('rows.2.name', 'Petit')
+                ->where('filters.sort', '-amount_due'),
+            );
+    }
+
+    public function test_un_tri_non_autorise_est_refuse(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+
+        // Seuls les champs de `allowedSorts()` : un tri arbitraire ne doit pas atteindre la requete.
+        $this->actingAs($owner)
+            ->get(route('tenants.events.registrations.index', [$tenant, $event]).'?sort=phone')
+            ->assertStatus(400);
+    }
+
     public function test_un_membre_avec_la_permission_annule_une_inscription(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

@@ -1,6 +1,7 @@
 import { Form, Head, router } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useState } from 'react';
+import { Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import DataTable from '@/components/data-table';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -29,6 +30,7 @@ import {
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { can, Permission } from '@/lib/permissions';
+import { sortingFromParam, sortingToParam } from '@/lib/server-sorting';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import {
     importMethod,
@@ -37,6 +39,7 @@ import {
 } from '@/routes/tenants/events/reconciliation';
 import type {
     ReconciliationImportSummary,
+    ReconciliationFilters,
     ReconciliationLineRow,
     ReconciliationOutcome,
     ReconciliationRegistrationOption,
@@ -56,7 +59,10 @@ type Props = {
     rows: ReconciliationLineRow[];
     meta: RegistrationsMeta;
     registrationOptions: ReconciliationRegistrationOption[];
+    filters: ReconciliationFilters;
 };
+
+const AllOutcomes = 'all';
 
 const NoRegistration = 'none';
 
@@ -91,6 +97,7 @@ export default function EventReconciliation({
     rows,
     meta,
     registrationOptions,
+    filters,
 }: Props) {
     const { t, locale } = useTranslation();
     const [resolving, setResolving] = useState<ReconciliationLineRow | null>(
@@ -101,35 +108,80 @@ export default function EventReconciliation({
     const canImport = can(permissions, Permission.ReconciliationImport);
     const canResolve = can(permissions, Permission.ReconciliationResolve);
 
-    const navigate = (params: { import?: number; page?: number }) => {
+    const [search, setSearch] = useState(filters.search ?? '');
+
+    // Changer d'import repart d'une liste complete : ses filtres et son tri ne valent que pour
+    // le releve qu'on regardait.
+    const navigate = (params: {
+        import?: number;
+        page?: number;
+        search?: string;
+        outcome?: string;
+        sort?: string;
+    }) => {
+        const switching = params.import !== undefined;
+
         router.get(
             index([tenant.slug, event.id]).url,
             {
                 import: params.import ?? currentImportId ?? undefined,
+                filter: switching
+                    ? undefined
+                    : {
+                          search:
+                              (params.search ?? filters.search ?? '') ||
+                              undefined,
+                          outcome:
+                              (params.outcome ??
+                                  filters.outcome ??
+                                  AllOutcomes) === AllOutcomes
+                                  ? undefined
+                                  : (params.outcome ?? filters.outcome),
+                      },
+                sort: switching
+                    ? undefined
+                    : (params.sort ?? filters.sort ?? undefined),
                 page: params.page,
             },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     };
 
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (search !== (filters.search ?? '')) {
+                navigate({ search });
+            }
+        }, 300);
+
+        return () => clearTimeout(timeout);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [search]);
+
+    // L'identifiant d'une colonne triable est le champ autorise par `allowedSorts()`.
     const columns: ColumnDef<ReconciliationLineRow>[] = [
         {
-            header: t('reconciliation.columns.line'),
+            id: 'line_number',
             accessorKey: 'lineNumber',
+            header: t('reconciliation.columns.line'),
         },
         {
-            header: t('reconciliation.columns.date'),
+            id: 'occurred_on',
             accessorKey: 'occurredOn',
+            header: t('reconciliation.columns.date'),
         },
         {
             header: t('reconciliation.columns.reference'),
             cell: ({ row }) => row.original.reference ?? '',
         },
         {
-            header: t('reconciliation.columns.issuer'),
+            id: 'issuer',
             accessorKey: 'issuer',
+            header: t('reconciliation.columns.issuer'),
         },
         {
+            id: 'amount',
+            accessorKey: 'amount',
             header: t('reconciliation.columns.amount'),
             cell: ({ row }) => formatAmount(row.original.amount, locale),
         },
@@ -279,11 +331,70 @@ export default function EventReconciliation({
                     ))}
                 </div>
 
+                {currentImportId !== null ? (
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="relative min-w-56 flex-1 sm:max-w-sm">
+                            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+                            <Input
+                                type="search"
+                                value={search}
+                                onChange={(event) =>
+                                    setSearch(event.target.value)
+                                }
+                                placeholder={t(
+                                    'reconciliation.toolbar.search_placeholder',
+                                )}
+                                aria-label={t('reconciliation.toolbar.search')}
+                                className="pl-8"
+                                data-test="reconciliation-search"
+                            />
+                        </div>
+                        <Select
+                            value={filters.outcome ?? AllOutcomes}
+                            onValueChange={(value) =>
+                                navigate({ outcome: value })
+                            }
+                        >
+                            <SelectTrigger
+                                className="w-56"
+                                aria-label={t(
+                                    'reconciliation.toolbar.filter_label',
+                                )}
+                                data-test="reconciliation-outcome-filter"
+                            >
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={AllOutcomes}>
+                                    {t('reconciliation.toolbar.all')}
+                                </SelectItem>
+                                {StatCards.map(({ key }) => (
+                                    <SelectItem key={key} value={key}>
+                                        {t(`reconciliation.stats.${key}`)}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <p
+                            className="text-muted-foreground text-sm tabular-nums"
+                            aria-live="polite"
+                        >
+                            {t('reconciliation.toolbar.count', {
+                                count: meta.total,
+                            })}
+                        </p>
+                    </div>
+                ) : null}
+
                 <DataTable
                     columns={columns}
                     data={rows}
                     meta={meta}
                     onPageChange={(page) => navigate({ page })}
+                    sorting={sortingFromParam(filters.sort ?? 'line_number')}
+                    onSortingChange={(sorting) =>
+                        navigate({ sort: sortingToParam(sorting) })
+                    }
                     rowTestId="reconciliation-row"
                     emptyState={
                         <>

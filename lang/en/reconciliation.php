@@ -13,6 +13,14 @@ return [
         'rows' => 'Rows: :count',
     ],
 
+    'toolbar' => [
+        'search' => 'Search a line',
+        'search_placeholder' => 'Reference or sender',
+        'filter_label' => 'Filter by reconciliation result',
+        'all' => 'All lines',
+        'count' => '{0} No line|{1} 1 line|[2,*] :count lines',
+    ],
+
     'stats' => [
         'matched' => 'Matched',
         'amount_mismatch' => 'Amount mismatch',

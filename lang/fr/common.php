@@ -38,6 +38,20 @@ return [
         'next' => 'Suivant',
     ],
 
+    'sort' => [
+        'label' => ':column, :state. Cliquer pour :action.',
+        'state' => [
+            'none' => 'non trié',
+            'asc' => 'trié par ordre croissant',
+            'desc' => 'trié par ordre décroissant',
+        ],
+        'action' => [
+            'none' => 'retirer le tri',
+            'asc' => 'trier par ordre croissant',
+            'desc' => 'trier par ordre décroissant',
+        ],
+    ],
+
     'help' => [
         'about' => 'Aide : :subject',
     ],

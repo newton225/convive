@@ -1,9 +1,15 @@
 import {
     flexRender,
     getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
     useReactTable,
     type ColumnDef,
+    type SortingState,
+    type Updater,
 } from '@tanstack/react-table';
+import { useState } from 'react';
+import { DataTableSortHeader } from '@/components/data-table-sort-header';
 import { Button } from '@/components/ui/button';
 import {
     Table,
@@ -21,40 +27,118 @@ export type DataTableMeta = {
     total: number;
 };
 
+type ServerProps = {
+    // Pagination et tri pilotes par le serveur (`spatie/laravel-query-builder`).
+    mode?: 'server';
+    meta: DataTableMeta;
+    onPageChange: (page: number) => void;
+    // Tri serveur facultatif : sans ces deux proprietes, aucune colonne n'est triable.
+    sorting?: SortingState;
+    onSortingChange?: (sorting: SortingState) => void;
+};
+
+type ClientProps = {
+    // Tout le jeu de donnees est deja dans la page : tri et pagination dans le navigateur.
+    mode: 'client';
+    pageSize?: number;
+    initialSorting?: SortingState;
+};
+
 type Props<TData> = {
     columns: ColumnDef<TData, unknown>[];
     data: TData[];
-    meta: DataTableMeta;
-    onPageChange: (page: number) => void;
     emptyState: React.ReactNode;
     rowTestId?: string;
-};
+} & (ServerProps | ClientProps);
 
 /**
- * Table de donnees partagee par les ecrans qui paginent cote serveur (base d'inscrits, ecran 20,
- * et rapprochement, ecran 19), etape 9. Le tri et la recherche restent hors de ce composant :
- * trop specifiques a chaque ecran pour etre generiques sans sur-abstraction (CLAUDE.md). TanStack
- * Table ne gere ici que le rendu des lignes ; la pagination elle-meme est pilotee par le serveur
- * via `spatie/laravel-query-builder`, ce composant se contente d'afficher la page courante et de
- * declencher `onPageChange`.
+ * Table de donnees partagee du back-office (CLAUDE.md : tri, filtres et pagination viennent de
+ * TanStack Table, jamais d'une implementation maison). Deux modes :
+ *
+ * - `server` (defaut) : la base d'inscrits, le rapprochement, le journal. Le serveur pagine et
+ *   trie ; ce composant affiche la page courante et remonte la page ou le tri demandes.
+ * - `client` : les listes deja entierement chargees (console d'exploitation). TanStack trie et
+ *   pagine dans le navigateur.
+ *
+ * Une colonne est triable si elle a un accesseur et que le tri n'y est pas coupe
+ * (`enableSorting: false`) ; son en-tete texte devient alors un bouton de tri. Recherche et
+ * filtres restent a chaque ecran : trop propres a chacun pour etre generiques.
  */
-export default function DataTable<TData>({
-    columns,
-    data,
-    meta,
-    onPageChange,
-    emptyState,
-    rowTestId,
-}: Props<TData>) {
+export default function DataTable<TData>(props: Props<TData>) {
+    const { columns, data, emptyState, rowTestId } = props;
     const { t } = useTranslation();
+    const isClient = props.mode === 'client';
+    const [clientSorting, setClientSorting] = useState<SortingState>(
+        props.mode === 'client' ? (props.initialSorting ?? []) : [],
+    );
+
+    const serverSorting = props.mode !== 'client' ? props.sorting : undefined;
+    const onServerSortingChange =
+        props.mode !== 'client' ? props.onSortingChange : undefined;
+
+    const changeSorting = (updater: Updater<SortingState>) => {
+        if (isClient) {
+            setClientSorting(updater);
+
+            return;
+        }
+
+        const next =
+            typeof updater === 'function'
+                ? updater(serverSorting ?? [])
+                : updater;
+
+        onServerSortingChange?.(next);
+    };
 
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        manualPagination: true,
-        pageCount: meta.lastPage,
+        state: { sorting: isClient ? clientSorting : (serverSorting ?? []) },
+        onSortingChange: changeSorting,
+        enableSorting: isClient || onServerSortingChange !== undefined,
+        // Un seul critere de tri : c'est ce que le serveur sait appliquer, et ce qui se lit.
+        enableMultiSort: false,
+        // Cote serveur, retirer le tri ramene a l'ordre par defaut du controleur, souvent le meme
+        // que le tri affiche (journal par date decroissante) : le clic semblerait sans effet. On
+        // alterne donc croissant et decroissant.
+        enableSortingRemoval: isClient,
+        ...(isClient
+            ? {
+                  getSortedRowModel: getSortedRowModel(),
+                  getPaginationRowModel: getPaginationRowModel(),
+                  initialState: {
+                      pagination: {
+                          pageSize:
+                              props.mode === 'client'
+                                  ? (props.pageSize ?? 25)
+                                  : 25,
+                      },
+                  },
+              }
+            : {
+                  manualSorting: true,
+                  manualPagination: true,
+                  pageCount: props.meta.lastPage,
+              }),
     });
+
+    const meta: DataTableMeta = isClient
+        ? {
+              currentPage: table.getState().pagination.pageIndex + 1,
+              lastPage: Math.max(1, table.getPageCount()),
+              total: data.length,
+          }
+        : props.meta;
+
+    const goToPage = (page: number) => {
+        if (props.mode === 'client') {
+            table.setPageIndex(page - 1);
+        } else {
+            props.onPageChange(page);
+        }
+    };
 
     if (data.length === 0) {
         return (
@@ -71,17 +155,37 @@ export default function DataTable<TData>({
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext(),
-                                              )}
-                                    </TableHead>
-                                ))}
+                                {headerGroup.headers.map((header) => {
+                                    const definition =
+                                        header.column.columnDef.header;
+                                    const sorted = header.column.getIsSorted();
+
+                                    return (
+                                        <TableHead
+                                            key={header.id}
+                                            aria-sort={
+                                                sorted === 'asc'
+                                                    ? 'ascending'
+                                                    : sorted === 'desc'
+                                                      ? 'descending'
+                                                      : undefined
+                                            }
+                                        >
+                                            {header.isPlaceholder ? null : header.column.getCanSort() &&
+                                              typeof definition === 'string' ? (
+                                                <DataTableSortHeader
+                                                    column={header.column}
+                                                    label={definition}
+                                                />
+                                            ) : (
+                                                flexRender(
+                                                    definition,
+                                                    header.getContext(),
+                                                )
+                                            )}
+                                        </TableHead>
+                                    );
+                                })}
                             </TableRow>
                         ))}
                     </TableHeader>
@@ -115,7 +219,7 @@ export default function DataTable<TData>({
                             variant="outline"
                             size="sm"
                             disabled={meta.currentPage <= 1}
-                            onClick={() => onPageChange(meta.currentPage - 1)}
+                            onClick={() => goToPage(meta.currentPage - 1)}
                         >
                             {t('common.pagination.previous')}
                         </Button>
@@ -123,7 +227,7 @@ export default function DataTable<TData>({
                             variant="outline"
                             size="sm"
                             disabled={meta.currentPage >= meta.lastPage}
-                            onClick={() => onPageChange(meta.currentPage + 1)}
+                            onClick={() => goToPage(meta.currentPage + 1)}
                         >
                             {t('common.pagination.next')}
                         </Button>

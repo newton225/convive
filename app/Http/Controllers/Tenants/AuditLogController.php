@@ -50,6 +50,7 @@ class AuditLogController extends Controller
             'filters' => [
                 'search' => $request->string('filter.search')->toString() ?: null,
                 'type' => $request->string('filter.type')->toString() ?: null,
+                'sort' => $request->string('sort')->toString() ?: null,
             ],
             'types' => AuditLogType::values(),
         ]);

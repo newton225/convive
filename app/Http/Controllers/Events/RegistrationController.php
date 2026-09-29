@@ -64,6 +64,7 @@ class RegistrationController extends Controller
             'filters' => [
                 'search' => $request->string('filter.search')->toString() ?: null,
                 'status' => $request->string('filter.status')->toString() ?: null,
+                'sort' => $request->string('sort')->toString() ?: null,
             ],
             'cancellations' => $this->recentCancellations($event),
         ]);

@@ -16,4 +16,5 @@ export type AuditMeta = {
 export type AuditFilters = {
     search: string | null;
     type: string | null;
+    sort: string | null;
 };

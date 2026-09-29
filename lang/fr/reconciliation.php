@@ -13,6 +13,14 @@ return [
         'rows' => 'Lignes : :count',
     ],
 
+    'toolbar' => [
+        'search' => 'Rechercher une ligne',
+        'search_placeholder' => 'Référence ou émetteur',
+        'filter_label' => 'Filtrer par résultat du rapprochement',
+        'all' => 'Toutes les lignes',
+        'count' => '{0} Aucune ligne|{1} 1 ligne|[2,*] :count lignes',
+    ],
+
     'stats' => [
         'matched' => 'Rapprochées',
         'amount_mismatch' => 'Montant divergent',

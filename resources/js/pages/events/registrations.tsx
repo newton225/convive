@@ -28,6 +28,7 @@ import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
+import { sortingFromParam, sortingToParam } from '@/lib/server-sorting';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { cancel, index, purge } from '@/routes/tenants/events/registrations';
 import {
@@ -94,6 +95,7 @@ export default function EventRegistrations({
         query: {
             'filter[search]': filters.search ?? undefined,
             'filter[status]': filters.status ?? undefined,
+            sort: filters.sort ?? undefined,
         },
     };
 
@@ -101,6 +103,7 @@ export default function EventRegistrations({
         search?: string;
         status?: string;
         page?: number;
+        sort?: string | null;
     }) => {
         router.get(
             index([tenant.slug, event.id]).url,
@@ -112,6 +115,11 @@ export default function EventRegistrations({
                             ? undefined
                             : (params.status ?? filters.status),
                 },
+                // `null` retire le tri (retour a l'ordre par defaut du serveur).
+                sort:
+                    params.sort === undefined
+                        ? (filters.sort ?? undefined)
+                        : (params.sort ?? undefined),
                 page: params.page,
             },
             { preserveState: true, preserveScroll: true, replace: true },
@@ -129,8 +137,12 @@ export default function EventRegistrations({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
 
+    // L'identifiant d'une colonne triable est le champ que le controleur autorise dans
+    // `allowedSorts()` : name, party_size, amount_due.
     const columns: ColumnDef<RegistrationRow>[] = [
         {
+            id: 'name',
+            accessorKey: 'name',
             header: t('registrations.columns.name'),
             cell: ({ row }) => (
                 <div>
@@ -149,12 +161,16 @@ export default function EventRegistrations({
         {
             header: t('registrations.columns.unit'),
             accessorKey: 'unit',
+            enableSorting: false,
         },
         {
-            header: t('registrations.columns.party_size'),
+            id: 'party_size',
             accessorKey: 'partySize',
+            header: t('registrations.columns.party_size'),
         },
         {
+            id: 'amount_due',
+            accessorKey: 'amountDue',
             header: t('registrations.columns.amount_due'),
             cell: ({ row }) => formatAmount(row.original.amountDue, locale),
         },
@@ -364,6 +380,10 @@ export default function EventRegistrations({
                     data={rows}
                     meta={meta}
                     onPageChange={(page) => navigate({ page })}
+                    sorting={sortingFromParam(filters.sort)}
+                    onSortingChange={(sorting) =>
+                        navigate({ sort: sortingToParam(sorting) ?? null })
+                    }
                     rowTestId="registration-row"
                     emptyState={
                         <>

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
+import { sortingFromParam, sortingToParam } from '@/lib/server-sorting';
 import { index } from '@/routes/tenants/audit';
 import type {
     AuditEntry,
@@ -57,6 +58,7 @@ export default function Audit({
         search?: string;
         type?: string;
         page?: number;
+        sort?: string;
     }) => {
         router.get(
             index(tenant.slug).url,
@@ -68,6 +70,7 @@ export default function Audit({
                             ? undefined
                             : (params.type ?? filters.type),
                 },
+                sort: params.sort ?? filters.sort ?? undefined,
                 page: params.page,
             },
             { preserveState: true, preserveScroll: true, replace: true },
@@ -87,6 +90,9 @@ export default function Audit({
 
     const columns: ColumnDef<AuditEntry>[] = [
         {
+            // Seul tri autorise par le controleur (`allowedSorts('created_at')`).
+            id: 'created_at',
+            accessorKey: 'at',
             header: t('audit.columns.date'),
             cell: ({ row }) => (
                 <span className="whitespace-nowrap">
@@ -111,6 +117,7 @@ export default function Audit({
         {
             header: t('audit.columns.actor'),
             accessorKey: 'actor',
+            enableSorting: false,
         },
         {
             header: t('audit.columns.ip'),
@@ -173,6 +180,11 @@ export default function Audit({
                     data={entries}
                     meta={meta}
                     onPageChange={(page) => navigate({ page })}
+                    // Sans parametre, le serveur trie par date decroissante : l'en-tete le montre.
+                    sorting={sortingFromParam(filters.sort ?? '-created_at')}
+                    onSortingChange={(sorting) =>
+                        navigate({ sort: sortingToParam(sorting) })
+                    }
                     rowTestId="audit-row"
                     emptyState={
                         <>

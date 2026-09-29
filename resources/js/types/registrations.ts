@@ -4,7 +4,7 @@ export type PublicRegistrationEvent = {
     name: string;
     pricePerPerson: number;
     companionLimit: number;
-    remainingSeats: number;
+    remainingSeats: number | null;
 };
 
 export type PublicRegistrationTenant = {
@@ -108,6 +108,8 @@ export type RegistrationCancellation = {
 export type RegistrationsFilters = {
     search: string | null;
     status: string | null;
+    // Parametre `sort` de spatie/laravel-query-builder : `name`, `-amount_due`...
+    sort: string | null;
 };
 
 export type RegistrationsMeta = {
@@ -120,13 +122,8 @@ export type PublicPaymentAccount = {
     id: number;
     label: string;
     channelLabel: string | null;
+    requiresReference: boolean;
     accountNumber: string | null;
     holderName: string | null;
     instructions: string | null;
-};
-
-export type PublicPaymentChannel = {
-    value: string;
-    label: string;
-    hasAccountNumber: boolean;
 };

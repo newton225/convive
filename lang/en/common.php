@@ -38,6 +38,20 @@ return [
         'next' => 'Next',
     ],
 
+    'sort' => [
+        'label' => ':column, :state. Click to :action.',
+        'state' => [
+            'none' => 'not sorted',
+            'asc' => 'sorted ascending',
+            'desc' => 'sorted descending',
+        ],
+        'action' => [
+            'none' => 'remove the sort',
+            'asc' => 'sort ascending',
+            'desc' => 'sort descending',
+        ],
+    ],
+
     'help' => [
         'about' => 'Help: :subject',
     ],

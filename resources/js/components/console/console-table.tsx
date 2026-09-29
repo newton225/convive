@@ -8,9 +8,10 @@ type Props<TData> = {
 };
 
 /**
- * PROVISOIRE : les listes de la console tiennent sur une page tant qu'elles viennent du jeu
- * d'exemple. Quand le serveur arrive, les listes longues (organisations, journal) passent a la
- * pagination serveur de `DataTable`, comme la base d'inscrits.
+ * PROVISOIRE : les listes de la console arrivent entieres tant qu'elles viennent du jeu
+ * d'exemple ; tri et pagination se font donc dans le navigateur (mode `client` de `DataTable`).
+ * Quand le serveur arrive, les listes longues (organisations, journal) passent a la pagination et
+ * au tri serveur, comme la base d'inscrits.
  */
 export function ConsoleTable<TData>({
     columns,
@@ -19,10 +20,9 @@ export function ConsoleTable<TData>({
 }: Props<TData>) {
     return (
         <DataTable
+            mode="client"
             columns={columns}
             data={data}
-            meta={{ currentPage: 1, lastPage: 1, total: data.length }}
-            onPageChange={() => undefined}
             emptyState={emptyState}
         />
     );

@@ -24,6 +24,14 @@ export type ReconciliationImportSummary = {
     importedAt: string | null;
 };
 
+export type ReconciliationFilters = {
+    search: string | null;
+    // Une issue de `ReconciliationOutcome`, ou null pour toutes les lignes.
+    outcome: string | null;
+    // Parametre `sort` de spatie/laravel-query-builder : `line_number`, `-amount`...
+    sort: string | null;
+};
+
 export type ReconciliationStats = {
     matched: number;
     amountMismatch: number;
