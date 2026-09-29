@@ -11,3 +11,12 @@ export type SitePlan = {
     hasSso: boolean;
     highlighted: boolean;
 };
+
+// Un evenement de la vitrine publique, lu dans la table centrale (jamais dans la base d'un locataire).
+export type ShowcaseEvent = {
+    name: string;
+    organisationName: string;
+    startsAt: string | null;
+    publicUrl: string;
+    visualUrl: string | null;
+};
