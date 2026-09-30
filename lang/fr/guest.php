@@ -40,7 +40,7 @@ return [
 
     'registration' => [
         'errors' => [
-            'phone_invalid' => 'Saisissez un numéro valide : 07 07 12 34 56 pour la Côte d’Ivoire, ou avec l’indicatif du pays pour un numéro étranger, par exemple +33 6 12 34 56 78.',
+            'phone_invalid' => "Ce numéro n'est pas valide pour le pays choisi. Vérifiez le pays sélectionné devant le champ, puis le numéro.",
             'phone_already_active' => 'Une réservation est déjà en cours pour ce numéro. Terminez-la, ou attendez la fin de son délai avant d\'en créer une autre.',
             'registrations_paused' => "Les inscriptions en ligne sont momentanément suspendues pour cet événement. Contactez l'organisateur pour réserver votre place.",
             'phone_backoff' => '{1} Plusieurs réservations ont expiré pour ce numéro sans preuve de paiement. Réessayez dans 1 minute.|[2,*] Plusieurs réservations ont expiré pour ce numéro sans preuve de paiement. Réessayez dans :minutes minutes.',
