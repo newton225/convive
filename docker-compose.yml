@@ -4,6 +4,9 @@ services:
     # d'autre, seul Redis a besoin d'un service a part sur ce poste.
     redis:
         image: redis:7-alpine
+        # Relance avec Docker Desktop et apres une mise en veille : sans Redis, toute page qui
+        # touche le cache (limiteurs, verrou du journal d'audit) repond 500.
+        restart: unless-stopped
         ports:
             - '127.0.0.1:6379:6379'
         volumes:
