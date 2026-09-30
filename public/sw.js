@@ -109,9 +109,10 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Les billets en PDF (README 2.8) sont des telechargements, pas des pages : repondus par le
-    // service worker, le navigateur annulait le fichier (0 octet, nomme « tickets.txt » par Edge).
-    // Ils partent donc directement sur le reseau, et un billet ne se garde pas dans le cache.
+    // Les billets en PDF (README 2.8) sont des telechargements, pas des pages : ils partent
+    // directement sur le reseau, et un billet ne se garde pas dans le cache hors ligne. Un
+    // « tickets.txt, Aucun fichier » sous Edge ne vient pas d'ici : c'est un gestionnaire de
+    // telechargement (Internet Download Manager) qui capte le PDF et annule celui du navigateur.
     if (PDF_PATH.test(url.pathname)) {
         return;
     }
