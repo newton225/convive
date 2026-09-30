@@ -97,6 +97,12 @@ export type RegistrationRow = {
     cancellationReason: string | null;
     // Canal de la derniere preuve deposee, et heure du passage a l'entree (null tant qu'absent).
     channelLabel: string | null;
+    // Capture de la derniere preuve, quel que soit le statut : null sans preuve, sans capture, ou
+    // sans la permission de voir les preuves.
+    receiptUrl: string | null;
+    // Reference de transaction et heure du depot de cette meme preuve, pour la fiche de l'apercu.
+    proofReference: string | null;
+    proofSubmittedAt: string | null;
     enteredCount: number;
     enteredAt: string | null;
     cardSentAt: string | null;

@@ -7,10 +7,12 @@ use App\Support\PerceptualHash;
 use Database\Factories\PaymentProofFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection as SupportCollection;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -113,18 +115,51 @@ class PaymentProof extends Model implements HasMedia
      */
     public function hasDuplicateImage(): bool
     {
+        return $this->duplicateImageProofIds()->isNotEmpty();
+    }
+
+    /**
+     * Get the other proofs whose receipt looks like the same capture, oldest first, with what the
+     * treasurer needs to compare them : registration and event. Tous evenements confondus : une
+     * capture reutilisee d'un evenement a l'autre est la fraude la plus simple.
+     *
+     * @return Collection<int, self>
+     */
+    public function duplicateImageProofs(): Collection
+    {
+        $ids = $this->duplicateImageProofIds();
+
+        if ($ids->isEmpty()) {
+            return new Collection;
+        }
+
+        return self::query()
+            ->whereKey($ids)
+            ->with(['registration.event', 'media'])
+            ->orderBy('created_at')
+            ->get();
+    }
+
+    /**
+     * @return SupportCollection<int, int>
+     */
+    private function duplicateImageProofIds(): SupportCollection
+    {
         if ($this->perceptual_hash === null) {
-            return false;
+            return new SupportCollection;
         }
 
         return self::query()
             ->whereKeyNot($this->getKey())
             ->whereNotNull('perceptual_hash')
             ->get(['id', 'perceptual_hash'])
-            ->contains(fn (self $other) => PerceptualHash::hammingDistance(
+            ->filter(fn (self $other) => PerceptualHash::hammingDistance(
                 $this->perceptual_hash,
                 $other->perceptual_hash,
-            ) <= self::DuplicateHashThreshold);
+            ) <= self::DuplicateHashThreshold)
+            ->map(fn (self $other) => $other->id)
+            ->values()
+            ->toBase();
     }
 
     /**

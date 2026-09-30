@@ -27,6 +27,15 @@ class SecurityHeadersTest extends TestCase
         $this->assertMatchesRegularExpression("/style-src[^;]*'nonce-[A-Za-z0-9+\/=]+'/", $csp);
     }
 
+    public function test_la_csp_autorise_les_images_blob_pour_l_apercu_des_recus_et_rien_d_autre_en_blob()
+    {
+        $csp = $this->get(route('login'))->headers->get('Content-Security-Policy');
+
+        $this->assertMatchesRegularExpression("/img-src 'self' data: blob:/", $csp);
+        // Un blob ne doit jamais devenir du script, un cadre ou un objet.
+        $this->assertDoesNotMatchRegularExpression('/(script-src|frame-src|object-src|default-src)[^;]*blob:/', $csp);
+    }
+
     public function test_chaque_reponse_porte_un_nonce_different()
     {
         preg_match("/'nonce-([A-Za-z0-9+\/=]+)'/", $this->get(route('login'))->headers->get('Content-Security-Policy'), $first);

@@ -10,11 +10,13 @@ use App\Enums\NotificationType;
 use App\Enums\PaymentChannel;
 use App\Enums\RefundStatus;
 use App\Enums\RegistrationStatus;
+use App\Enums\TenantPermission;
 use App\Exports\RegistrationsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\CancelRegistrationRequest;
 use App\Http\Requests\Events\RecordRefundRequest;
 use App\Models\Event;
+use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\SeatingTable;
 use App\Models\Tenant;
@@ -52,8 +54,12 @@ class RegistrationController extends Controller
     {
         Gate::authorize('viewAny', [Registration::class, $tenant]);
 
+        // Meme permission que la file de preuves (`PaymentProofPolicy::view`) : un membre qui voit
+        // les inscrits sans voir les preuves n'en recoit pas le lien.
+        $canViewReceipts = $request->user()->hasTenantPermission($tenant, TenantPermission::ProofsView);
+
         $registrations = $this->filteredQuery($request, $event)
-            ->with(['unit', 'tableAssignment.seatingTable', 'latestProof', 'tickets.arrival'])
+            ->with(['unit', 'tableAssignment.seatingTable', 'latestProof.media', 'tickets.arrival'])
             ->paginate(25)
             ->withQueryString();
 
@@ -66,6 +72,7 @@ class RegistrationController extends Controller
                 // Le lien de la carte est une cle d'acces aux billets (README 2.7) : il ne part
                 // vers la page que pour qui peut l'envoyer.
                 withCardLinks: Gate::allows('sendCard', [$registration, $tenant]),
+                withReceiptLink: $canViewReceipts,
             )),
             'meta' => [
                 'currentPage' => $registrations->currentPage(),
@@ -335,9 +342,10 @@ class RegistrationController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function row(Registration $registration, bool $withCardLinks = false): array
+    private function row(Registration $registration, bool $withCardLinks = false, bool $withReceiptLink = false): array
     {
         $arrivals = $registration->tickets->pluck('arrival')->filter();
+        $proof = $registration->latestProof;
 
         return [
             'id' => $registration->id,
@@ -351,7 +359,15 @@ class RegistrationController extends Controller
             'statusLabel' => $registration->status->label(),
             'tableNumber' => $registration->tableAssignment?->seatingTable->number,
             'cancellationReason' => $registration->cancellation_reason,
-            'channelLabel' => $registration->latestProof?->channel->label(),
+            'channelLabel' => $proof?->channel->label(),
+            // La capture reste consultable quel que soit le statut : validee, annulee ou encore en
+            // attente, c'est la trace du versement. Meme route journalisee que la file de preuves
+            // (SECURITY.md H2), jamais une URL signee anonyme.
+            'receiptUrl' => $withReceiptLink && $proof?->hasMedia(PaymentProof::ReceiptCollection)
+                ? route('tenants.events.proofs.receipt', [Tenant::current(), $registration->event_id, $proof], absolute: false)
+                : null,
+            'proofReference' => $proof?->reference,
+            'proofSubmittedAt' => $proof?->created_at?->toISOString(),
             // Un billet par personne (README 2.8, ecran 20) : combien du groupe sont entres, et quand
             // le premier a passe la porte.
             'enteredCount' => $arrivals->count(),

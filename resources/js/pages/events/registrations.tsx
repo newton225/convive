@@ -1,8 +1,11 @@
 import { Head, router } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
+import { Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import DataTable from '@/components/data-table';
 import { CancelRegistrationDialog } from '@/components/registrations/cancel-registration-dialog';
+import { ReceiptPreviewDialog } from '@/components/proofs/receipt-preview-dialog';
+import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog';
 import { CancellationsCard } from '@/components/registrations/cancellations-card';
 import { InvitationCardDialog } from '@/components/registrations/invitation-card-dialog';
 import Heading from '@/components/heading';
@@ -29,6 +32,7 @@ import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
+import { registrationReceiptFacts } from '@/lib/receipt-facts';
 import { sortingFromParam, sortingToParam } from '@/lib/server-sorting';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { index, purge } from '@/routes/tenants/events/registrations';
@@ -90,6 +94,9 @@ export default function EventRegistrations({
         (RegistrationRow & { card: RegistrationCard }) | null
     >(null);
     const [purging, setPurging] = useState(false);
+    const [receiptPreview, setReceiptPreview] = useState<ReceiptPreview | null>(
+        null,
+    );
 
     const canCancel = can(permissions, Permission.RegistrationsCancel);
     const canRefund = can(permissions, Permission.RegistrationsRefund);
@@ -212,7 +219,32 @@ export default function EventRegistrations({
         },
         {
             header: t('registrations.columns.channel'),
-            cell: ({ row }) => row.original.channelLabel ?? '-',
+            cell: ({ row }) =>
+                row.original.receiptUrl ? (
+                    <button
+                        type="button"
+                        className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 underline-offset-4 outline-none hover:underline focus-visible:underline"
+                        aria-label={`${row.original.channelLabel ?? ''} : ${t('proofs.actions.open_receipt')}`}
+                        title={t('proofs.actions.open_receipt')}
+                        data-test="registration-receipt-link"
+                        onClick={() =>
+                            setReceiptPreview({
+                                url: row.original.receiptUrl ?? '',
+                                name: row.original.name,
+                                facts: registrationReceiptFacts(
+                                    row.original,
+                                    t,
+                                    locale,
+                                ),
+                            })
+                        }
+                    >
+                        {row.original.channelLabel}
+                        <Eye className="size-3.5" aria-hidden />
+                    </button>
+                ) : (
+                    (row.original.channelLabel ?? '-')
+                ),
         },
         {
             header: t('registrations.columns.entry'),
@@ -480,6 +512,11 @@ export default function EventRegistrations({
                     onClose={() => setCancelling(null)}
                 />
             ) : null}
+
+            <ReceiptPreviewDialog
+                receipt={receiptPreview}
+                onOpenChange={(open) => !open && setReceiptPreview(null)}
+            />
 
             <Dialog open={purging} onOpenChange={setPurging}>
                 <DialogContent>

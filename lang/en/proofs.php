@@ -61,6 +61,30 @@ return [
         'single_expand' => 'Only one row open at a time',
     ],
 
+    'preview' => [
+        'title' => 'Receipt from :name',
+        'description' => 'Compare the capture with the registration details before deciding.',
+        'alt' => 'Capture of the receipt submitted by :name',
+        'loading' => 'Loading the receipt',
+        'error' => 'The receipt could not be displayed. Check the connection, then try again.',
+        'retry' => 'Try again',
+        'download' => 'Download',
+        'enlarge' => 'Enlarge the receipt from :name',
+        'event' => 'Event',
+        'status' => 'Registration status',
+    ],
+
+    'duplicate_image' => [
+        'title' => 'Same capture elsewhere',
+        'description' => 'The capture submitted by :name looks like the one of these other payments. Compare the details, and click a capture to enlarge it.',
+        'show' => 'See the payments carrying this capture',
+        'current' => 'Capture under review',
+        'others' => '{0} No other payment|{1} 1 other payment with this capture|[2,*] :count other payments with this capture',
+        'same_event' => 'This event',
+        'no_receipt' => 'Capture no longer available',
+        'empty' => 'No other payment carries this capture.',
+    ],
+
     'confirm' => [
         'registration' => 'Registration',
         'phone' => 'Phone',

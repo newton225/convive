@@ -125,11 +125,23 @@ class PaymentProofController extends Controller
     }
 
     /**
+     * Meme route journalisee pour la preuve examinee et pour ses doublons (SECURITY.md H2), jamais
+     * une URL signee anonyme.
+     */
+    private function receiptUrl(PaymentProof $proof, int $eventId): ?string
+    {
+        return $proof->hasMedia(PaymentProof::ReceiptCollection)
+            ? route('tenants.events.proofs.receipt', [Tenant::current(), $eventId, $proof], absolute: false)
+            : null;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function row(Registration $registration): array
     {
         $proof = $registration->latestProof;
+        $duplicateImageProofs = $proof->duplicateImageProofs();
 
         return [
             'registrationId' => $registration->id,
@@ -150,12 +162,24 @@ class PaymentProofController extends Controller
             'reference' => $proof->reference,
             'guestNote' => $proof->guest_note,
             'paymentAccountLabel' => $proof->paymentAccount->label,
-            'receiptUrl' => $proof->hasMedia(PaymentProof::ReceiptCollection)
-                ? route('tenants.events.proofs.receipt', [Tenant::current(), $registration->event_id, $proof], absolute: false)
-                : null,
+            'receiptUrl' => $this->receiptUrl($proof, $registration->event_id),
+            // Les autres versements qui portent la meme capture, pour que le tresorier les compare
+            // avant de trancher plutot que de devoir les retrouver lui-meme.
+            'duplicateImageMatches' => $duplicateImageProofs->map(fn (PaymentProof $match) => [
+                'proofId' => $match->id,
+                'registrationReference' => $match->registration->reference,
+                'name' => $match->registration->name,
+                'eventName' => $match->registration->event->name,
+                'sameEvent' => $match->registration->event_id === $registration->event_id,
+                'status' => $match->registration->status->value,
+                'statusLabel' => $match->registration->status->label(),
+                'submittedAt' => $match->created_at?->toISOString(),
+                'reference' => $match->reference,
+                'receiptUrl' => $this->receiptUrl($match, $match->registration->event_id),
+            ])->values()->all(),
             'signals' => [
                 'duplicateReference' => $proof->hasDuplicateReference(),
-                'duplicateImage' => $proof->hasDuplicateImage(),
+                'duplicateImage' => $duplicateImageProofs->isNotEmpty(),
                 'referenceMissingFromStatement' => $proof->referenceMissingFromStatement(),
                 'statementAmountMismatch' => $proof->hasStatementAmountMismatch(),
                 // Pas un soupcon : une information que le tresorier doit lire avant de valider.

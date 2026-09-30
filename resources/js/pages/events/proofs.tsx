@@ -12,11 +12,14 @@ import {
     type SortingState,
     type Updater,
 } from '@tanstack/react-table';
-import { ChevronRight, ExternalLink, MessageSquareText } from 'lucide-react';
+import { ChevronRight, Eye, Images, MessageSquareText } from 'lucide-react';
 import { Fragment, useMemo, useState } from 'react';
 import { formatPhoneNumberIntl } from 'react-phone-number-input';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { DataTableSortHeader } from '@/components/data-table-sort-header';
+import { DuplicateImageDialog } from '@/components/proofs/duplicate-image-dialog';
+import { ReceiptPreviewDialog } from '@/components/proofs/receipt-preview-dialog';
+import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog';
 import { ProofConfirmSummary } from '@/components/proofs/proof-confirm-summary';
 import { ProofDetails } from '@/components/proofs/proof-details';
 import { ProofsToolbar } from '@/components/proofs/proofs-toolbar';
@@ -53,6 +56,7 @@ import { formatDateTime, formatRelative } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
 import type { ProofSignalFilter } from '@/lib/proof-filters';
 import { proofMatchesSearch, proofMatchesSignal } from '@/lib/proof-filters';
+import { proofReceiptFacts } from '@/lib/receipt-facts';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { approve, index, reject } from '@/routes/tenants/events/proofs';
 import type { PaymentProofRow, TenantPermissions, Translations } from '@/types';
@@ -79,6 +83,11 @@ export default function EventProofs({
     const [rejecting, setRejecting] = useState<PaymentProofRow | null>(null);
     const [approving, setApproving] = useState<PaymentProofRow | null>(null);
     const [approveProcessing, setApproveProcessing] = useState(false);
+    const [receiptPreview, setReceiptPreview] = useState<ReceiptPreview | null>(
+        null,
+    );
+    const [duplicateImageOf, setDuplicateImageOf] =
+        useState<PaymentProofRow | null>(null);
     const [expanded, setExpanded] = useState<ExpandedState>({});
     const [sorting, setSorting] = useState<SortingState>([
         { id: 'submittedAt', desc: false },
@@ -282,11 +291,32 @@ export default function EventProofs({
                         </Badge>
                     ) : null}
                     {row.original.signals.duplicateImage ? (
-                        <Badge
-                            variant="destructive"
-                            data-test="signal-duplicate-image"
-                        >
-                            {t('proofs.signals.duplicate_image')}
+                        // Le signal ouvre les versements qui portent la meme capture : le
+                        // tresorier les compare sans avoir a les chercher.
+                        <Badge variant="destructive" asChild>
+                            <button
+                                type="button"
+                                className="cursor-pointer underline-offset-2 hover:underline"
+                                aria-label={t('proofs.duplicate_image.show')}
+                                data-test="signal-duplicate-image"
+                                onClick={() =>
+                                    setDuplicateImageOf(row.original)
+                                }
+                            >
+                                <Images />
+                                {t('proofs.signals.duplicate_image')}
+                                {row.original.duplicateImageMatches.length >
+                                0 ? (
+                                    <span className="tabular-nums">
+                                        (
+                                        {
+                                            row.original.duplicateImageMatches
+                                                .length
+                                        }
+                                        )
+                                    </span>
+                                ) : null}
+                            </button>
                         </Badge>
                     ) : null}
                     {row.original.signals.referenceMissingFromStatement ? (
@@ -339,20 +369,24 @@ export default function EventProofs({
                                     variant="ghost"
                                     size="icon"
                                     className="size-7 [&_svg]:size-3.5"
-                                    asChild
+                                    aria-label={t(
+                                        'proofs.actions.open_receipt',
+                                    )}
+                                    data-test="proof-receipt-link"
+                                    data-tour="proof-receipt"
+                                    onClick={() =>
+                                        setReceiptPreview({
+                                            url: row.original.receiptUrl ?? '',
+                                            name: row.original.name,
+                                            facts: proofReceiptFacts(
+                                                row.original,
+                                                t,
+                                                locale,
+                                            ),
+                                        })
+                                    }
                                 >
-                                    <a
-                                        href={row.original.receiptUrl}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        aria-label={t(
-                                            'proofs.actions.open_receipt',
-                                        )}
-                                        data-test="proof-receipt-link"
-                                        data-tour="proof-receipt"
-                                    >
-                                        <ExternalLink />
-                                    </a>
+                                    <Eye />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -614,6 +648,16 @@ export default function EventProofs({
                     </div>
                 )}
             </div>
+
+            <ReceiptPreviewDialog
+                receipt={receiptPreview}
+                onOpenChange={(open) => !open && setReceiptPreview(null)}
+            />
+
+            <DuplicateImageDialog
+                proof={duplicateImageOf}
+                onOpenChange={(open) => !open && setDuplicateImageOf(null)}
+            />
 
             <ConfirmActionDialog
                 open={approving !== null}

@@ -5,6 +5,7 @@ namespace Tests\Feature\PaymentProofs;
 use App\Actions\PaymentProofs\SubmitPaymentProof;
 use App\Actions\Tenants\CreateTenant;
 use App\Enums\PaymentChannel;
+use App\Enums\RegistrationStatus;
 use App\Enums\TenantPermission;
 use App\Models\Event;
 use App\Models\PaymentAccount;
@@ -159,5 +160,31 @@ class ReceiptAccessTest extends TestCase
                 'rows.0.receiptUrl',
                 route('tenants.events.proofs.receipt', [$tenant, $event, $proof], absolute: false),
             ));
+    }
+
+    public function test_la_base_d_inscrits_garde_le_lien_du_recu_apres_la_validation(): void
+    {
+        ['tenant' => $tenant, 'owner' => $owner, 'event' => $event, 'proof' => $proof] = $this->submittedProof();
+        $tenant->asCurrent(fn () => $proof->registration->update(['status' => RegistrationStatus::Confirmed]));
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.registrations.index', [$tenant, $event]))
+            ->assertInertia(fn ($page) => $page->where(
+                'rows.0.receiptUrl',
+                route('tenants.events.proofs.receipt', [$tenant, $event, $proof], absolute: false),
+            ));
+    }
+
+    public function test_la_base_d_inscrits_ne_donne_pas_le_recu_sans_la_permission_des_preuves(): void
+    {
+        ['tenant' => $tenant, 'event' => $event] = $this->submittedProof();
+
+        $member = User::factory()->withTwoFactor()->create();
+        $this->joinWithPermissions($tenant, $member, [TenantPermission::RegistrationsView]);
+
+        $this->actingAs($member)
+            ->get(route('tenants.events.registrations.index', [$tenant, $event]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('rows.0.receiptUrl', null));
     }
 }

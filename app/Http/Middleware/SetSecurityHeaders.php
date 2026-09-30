@@ -88,7 +88,10 @@ class SetSecurityHeaders
             trim("script-src 'self' 'nonce-{$nonce}' {$analytics['script']} {$devOrigin}"),
             trim("style-src 'self' 'nonce-{$nonce}' {$devOrigin}"),
             trim("font-src 'self' {$devOrigin}"),
-            trim("img-src 'self' data: {$analytics['img']}"),
+            // `blob:` pour l'apercu des recus dans le back-office : le fichier arrive en piece jointe
+            // (SECURITY.md H1), le navigateur l'affiche via une URL `blob:` dans une balise `img`,
+            // ou aucun script ne s'execute. Limite a `img-src`, jamais au script ni aux cadres.
+            trim("img-src 'self' data: blob: {$analytics['img']}"),
             trim("connect-src 'self' {$analytics['connect']} {$devOrigin}"),
             "worker-src 'self'",
             "object-src 'none'",

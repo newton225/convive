@@ -61,6 +61,30 @@ return [
         'single_expand' => 'Une seule ligne ouverte à la fois',
     ],
 
+    'preview' => [
+        'title' => 'Reçu de :name',
+        'description' => 'Comparez la capture à la fiche du dossier avant de décider.',
+        'alt' => 'Capture du reçu déposé par :name',
+        'loading' => 'Chargement du reçu',
+        'error' => 'Le reçu n’a pas pu être affiché. Vérifiez la connexion, puis réessayez.',
+        'retry' => 'Réessayer',
+        'download' => 'Télécharger',
+        'enlarge' => 'Agrandir le reçu de :name',
+        'event' => 'Événement',
+        'status' => 'Statut du dossier',
+    ],
+
+    'duplicate_image' => [
+        'title' => 'Même capture ailleurs',
+        'description' => 'La capture déposée par :name ressemble à celle de ces autres versements. Comparez les fiches, et cliquez sur une capture pour l’agrandir.',
+        'show' => 'Voir les versements qui portent cette capture',
+        'current' => 'Capture examinée',
+        'others' => '{0} Aucun autre versement|{1} 1 autre versement avec cette capture|[2,*] :count autres versements avec cette capture',
+        'same_event' => 'Cet événement',
+        'no_receipt' => 'Capture plus disponible',
+        'empty' => 'Aucun autre versement ne porte cette capture.',
+    ],
+
     'confirm' => [
         'registration' => 'Dossier',
         'phone' => 'Téléphone',

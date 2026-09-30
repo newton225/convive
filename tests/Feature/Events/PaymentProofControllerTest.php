@@ -160,4 +160,56 @@ class PaymentProofControllerTest extends TestCase
             ->post(route('tenants.events.proofs.approve', [$tenant, $otherEvent, $proof]))
             ->assertNotFound();
     }
+
+    public function test_une_capture_deja_vue_liste_les_autres_preuves_qui_la_portent(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        ['event' => $event, 'earlier' => $earlier] = $tenant->asCurrent(function () {
+            $event = Event::factory()->open()->create();
+            $pending = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id]);
+            PaymentProof::factory()->withPerceptualHash('ffffffffffffffff')->create(['registration_id' => $pending->id]);
+
+            // Meme capture a un bit pres, deja validee sur un autre evenement : elle doit figurer.
+            $otherEvent = Event::factory()->open()->create(['name' => 'Gala precedent']);
+            $confirmed = Registration::factory()->confirmed()->create(['event_id' => $otherEvent->id, 'name' => 'Awa Kone']);
+            $earlier = PaymentProof::factory()->withPerceptualHash('fffffffffffffffe')->withReference('WAVE-OLD')
+                ->create(['registration_id' => $confirmed->id]);
+
+            // Capture sans rapport : elle ne doit pas figurer.
+            $unrelated = Registration::factory()->confirmed()->create(['event_id' => $event->id]);
+            PaymentProof::factory()->withPerceptualHash('0000000000000000')->create(['registration_id' => $unrelated->id]);
+
+            return ['event' => $event, 'earlier' => $earlier];
+        });
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.proofs.index', [$tenant, $event]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('rows.0.signals.duplicateImage', true)
+                ->has('rows.0.duplicateImageMatches', 1)
+                ->where('rows.0.duplicateImageMatches.0.proofId', $earlier->id)
+                ->where('rows.0.duplicateImageMatches.0.name', 'Awa Kone')
+                ->where('rows.0.duplicateImageMatches.0.eventName', 'Gala precedent')
+                ->where('rows.0.duplicateImageMatches.0.reference', 'WAVE-OLD')
+                ->where('rows.0.duplicateImageMatches.0.status', RegistrationStatus::Confirmed->value),
+            );
+    }
+
+    public function test_une_capture_inedite_ne_liste_aucune_autre_preuve(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event] = $this->proofSubmitted($tenant);
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.proofs.index', [$tenant, $event]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('rows.0.signals.duplicateImage', false)
+                ->has('rows.0.duplicateImageMatches', 0),
+            );
+    }
 }
