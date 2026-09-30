@@ -138,12 +138,23 @@ return [
         'single_notice' => 'Ce billet fait entrer une seule personne et ne sert qu\'une fois. Présentez-le à l\'entrée.',
     ],
 
+    'ticket_pdf' => [
+        'title' => 'Billets : :event',
+        'guest_of' => 'Accompagnateur de :name',
+        'notice' => "Ce billet fait entrer une seule personne et ne sert qu'une fois. Présentez-le à l'entrée, sur votre téléphone ou imprimé.",
+        'position' => 'Billet :current sur :total',
+        'download' => 'Télécharger en PDF',
+        'download_all' => 'Télécharger tous les billets en PDF',
+        'download_hint' => "À garder sur votre téléphone : il s'affiche même sans connexion à l'entrée.",
+    ],
+
     'mail' => [
         'invitation_card' => [
             'subject' => 'Votre billet pour :event',
             'intro' => 'Bonjour :name, votre inscription à :event est confirmée.',
             'table' => 'Vous êtes placé à la table :number.',
             'action' => 'Voir mon billet',
+            'companions' => 'Les billets de vos accompagnateurs, à leur transmettre :',
         ],
         'proof_reminder' => [
             'subject' => 'Il manque votre preuve de paiement pour :event',
@@ -172,6 +183,9 @@ return [
         'ticket_reminder' => 'Bonjour :name, :event a lieu dans trois heures. Votre billet : :link',
         'registration_cancelled' => 'Bonjour :name, votre inscription à :event a été annulée par l\'organisation. Motif : :reason.',
         'refund_sent' => 'Bonjour :name, votre remboursement pour :event est parti.',
+        'companion_tickets_intro' => 'Les billets de vos accompagnateurs, à leur transmettre :',
+        'companion_ticket_line' => ':name : :link',
+        'companion_ticket' => 'Bonjour :name, voici votre billet pour :event : :link',
     ],
 
     'refund' => [

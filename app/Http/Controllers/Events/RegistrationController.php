@@ -19,6 +19,7 @@ use App\Models\Registration;
 use App\Models\SeatingTable;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\InvitationCardMessage;
 use App\Support\PdfLetterhead;
 use Carbon\CarbonInterface;
 use DomainException;
@@ -60,7 +61,12 @@ class RegistrationController extends Controller
             'tenant' => ['slug' => $tenant->slug],
             'event' => ['id' => $event->id, 'name' => $event->name],
             'permissions' => $request->user()->toTenantPermissions($tenant),
-            'rows' => $registrations->getCollection()->map(fn (Registration $registration) => $this->row($registration)),
+            'rows' => $registrations->getCollection()->map(fn (Registration $registration) => $this->row(
+                $registration,
+                // Le lien de la carte est une cle d'acces aux billets (README 2.7) : il ne part
+                // vers la page que pour qui peut l'envoyer.
+                withCardLinks: Gate::allows('sendCard', [$registration, $tenant]),
+            )),
             'meta' => [
                 'currentPage' => $registrations->currentPage(),
                 'lastPage' => $registrations->lastPage(),
@@ -329,7 +335,7 @@ class RegistrationController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function row(Registration $registration): array
+    private function row(Registration $registration, bool $withCardLinks = false): array
     {
         $arrivals = $registration->tickets->pluck('arrival')->filter();
 
@@ -350,7 +356,47 @@ class RegistrationController extends Controller
             // le premier a passe la porte.
             'enteredCount' => $arrivals->count(),
             'enteredAt' => $arrivals->min('created_at')?->toISOString(),
+            'cardSentAt' => $registration->card_sent_at?->toISOString(),
+            'card' => $withCardLinks && $registration->status === RegistrationStatus::Confirmed
+                ? $this->card($registration)
+                : null,
         ];
+    }
+
+    /**
+     * Each person of the group with the link to hand them (README 2.7) : the main guest's card,
+     * then each companion's own ticket, never the card that opens the whole group.
+     *
+     * @return array{people: array<int, array{ticketId: int|null, name: string, isHolder: bool, phone: string|null, url: string|null, message: string|null}>}
+     */
+    private function card(Registration $registration): array
+    {
+        $cardUrl = $registration->signedResumeUrl();
+
+        $people = [[
+            'ticketId' => null,
+            'name' => $registration->name,
+            'isHolder' => true,
+            'phone' => $registration->phone,
+            'url' => $cardUrl,
+            'message' => $cardUrl !== null ? InvitationCardMessage::forHolder($registration, $cardUrl) : null,
+        ]];
+
+        foreach (InvitationCardMessage::companionTickets($registration) as $ticket) {
+            $url = $ticket->shareUrl();
+
+            $people[] = [
+                'ticketId' => $ticket->id,
+                'name' => $ticket->holder_name ?? '',
+                'isHolder' => false,
+                // Aucun numero n'est recueilli pour un accompagnateur.
+                'phone' => null,
+                'url' => $url,
+                'message' => $url !== null ? InvitationCardMessage::forCompanion($ticket, $url) : null,
+            ];
+        }
+
+        return ['people' => $people];
     }
 
     /**

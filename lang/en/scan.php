@@ -7,6 +7,13 @@ return [
         'placeholder' => "Aim at the ticket's QR code",
         'scanning' => 'Looking for a code...',
         'camera_denied' => 'The camera could not be activated. Check the browser permissions.',
+        'phases' => [
+            'starting' => 'Starting the camera...',
+            'searching' => 'Looking for a QR code',
+            'checking' => 'QR code detected, checking...',
+            'paused' => 'Scanning paused',
+            'error' => 'Camera unavailable',
+        ],
     ],
 
     'results' => [

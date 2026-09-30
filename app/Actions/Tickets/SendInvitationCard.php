@@ -4,6 +4,7 @@ namespace App\Actions\Tickets;
 
 use App\Enums\RegistrationStatus;
 use App\Models\Registration;
+use App\Models\User;
 use App\Notifications\Registrations\InvitationCard;
 use App\Support\GuestMessageQuota;
 use Illuminate\Support\Facades\Notification;
@@ -22,10 +23,18 @@ class SendInvitationCard
      * Idempotent via `card_sent_at` : une inscription deja servie ne l'est pas une seconde fois,
      * qu'elle soit retentee par le meme appelant ou trouvee par les deux (la validation, puis la
      * tache planifiee qui balaie les inscriptions confirmees avant elle).
+     *
+     * `$sentBy` : envoi manuel depuis la base d'inscrits (README 2.7), quand l'automatique n'a pas
+     * fonctionne ou qu'un invite a perdu sa carte. Il renvoie meme une carte deja partie, et se
+     * journalise avec son auteur : le lien de la carte est une cle d'acces aux billets.
      */
-    public function handle(Registration $registration): bool
+    public function handle(Registration $registration, ?User $sentBy = null): bool
     {
-        if ($registration->status !== RegistrationStatus::Confirmed || $registration->card_sent_at !== null) {
+        if ($registration->status !== RegistrationStatus::Confirmed) {
+            return false;
+        }
+
+        if ($sentBy === null && $registration->card_sent_at !== null) {
             return false;
         }
 
@@ -46,6 +55,15 @@ class SendInvitationCard
 
         $registration->update(['card_sent_at' => now()]);
         GuestMessageQuota::record();
+
+        if ($sentBy !== null) {
+            activity()
+                ->performedOn($registration)
+                ->causedBy($sentBy)
+                ->event('updated')
+                ->withProperties(['manual' => true, 'phone' => $registration->phone, 'email' => $registration->email])
+                ->log('registrations.card_sent');
+        }
 
         return true;
     }

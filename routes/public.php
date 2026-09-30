@@ -5,6 +5,7 @@ use App\Http\Controllers\Public\PaymentProofController as PublicPaymentProofCont
 use App\Http\Controllers\Public\RegistrationController as PublicRegistrationController;
 use App\Http\Controllers\Public\RegistrationDeletedController as PublicRegistrationDeletedController;
 use App\Http\Controllers\Public\TicketController as PublicTicketController;
+use App\Http\Controllers\Public\TicketPdfController;
 use App\Http\Controllers\Public\WaitlistController as PublicWaitlistController;
 use App\Http\Middleware\EndTenancy;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +76,13 @@ Route::middleware([
     // lien signe ci-dessus.
     Route::get('/e/{token}/ticket/{ticket}', [PublicTicketController::class, 'show'])
         ->name('public.tickets.show');
+
+    // Les billets en PDF (README 2.8), a garder hors ligne pour l'entree : un billet seul, par
+    // son lien individuel, ou tout le groupe, par le lien signe de la carte. Memes signatures.
+    Route::get('/e/{token}/ticket/{ticket}/pdf', [TicketPdfController::class, 'single'])
+        ->name('public.tickets.pdf');
+    Route::get('/e/{token}/register/{registration}/tickets.pdf', [TicketPdfController::class, 'group'])
+        ->name('public.registrations.tickets-pdf');
 
     // Le depot de la preuve (README ecran 5 etape 2 et 3, ecran 6), etape 6. Cle de debit
     // propre a cette route (CLAUDE.md, table des limiteurs) : 5 par heure, plus stricte que le

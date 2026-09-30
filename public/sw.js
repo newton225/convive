@@ -12,7 +12,8 @@
  * Toute autre navigation hors ligne affiche `/offline.html`.
  */
 
-const VERSION = 'convive-v1';
+// Monter la version vide les caches des anciennes versions a l'activation.
+const VERSION = 'convive-v2';
 const STATIC_CACHE = `${VERSION}-static`;
 const PAGES_CACHE = `${VERSION}-pages`;
 const OFFLINE_URL = '/offline.html';
@@ -20,6 +21,7 @@ const PRECACHE = [OFFLINE_URL, '/favicon.svg', '/manifest.webmanifest'];
 
 const GUEST_PATH = /^\/e\//;
 const SCAN_PATH = /^\/[^/]+\/events\/\d+\/scan$/;
+const PDF_PATH = /(\.pdf|\/pdf)$/;
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -104,6 +106,13 @@ self.addEventListener('fetch', (event) => {
     }
 
     if (request.mode !== 'navigate') {
+        return;
+    }
+
+    // Les billets en PDF (README 2.8) sont des telechargements, pas des pages : repondus par le
+    // service worker, le navigateur annulait le fichier (0 octet, nomme « tickets.txt » par Edge).
+    // Ils partent donc directement sur le reseau, et un billet ne se garde pas dans le cache.
+    if (PDF_PATH.test(url.pathname)) {
         return;
     }
 

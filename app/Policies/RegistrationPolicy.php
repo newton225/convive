@@ -54,6 +54,14 @@ class RegistrationPolicy
     }
 
     /**
+     * Determine whether the user can send or share the invitation card by hand (README 2.7).
+     */
+    public function sendCard(User $user, Registration $registration, Tenant $tenant): bool
+    {
+        return $user->hasTenantPermission($tenant, TenantPermission::MessagesSend);
+    }
+
+    /**
      * Determine whether the user can decide what happens to the payment of a cancelled
      * registration (README 2.11).
      */

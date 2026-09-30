@@ -439,6 +439,8 @@ class RegistrationController extends Controller
                 ->values()
                 ->all(),
             'tableNumber' => $registration->tableAssignment?->seatingTable->number,
+            // Tous les billets du groupe en un PDF (README 2.8), pour l'entree sans connexion.
+            'pdfUrl' => $registration->ticketsPdfUrl(),
             'scheduledSendAt' => $event->invitations_send_at?->toISOString(),
             'model' => $branding->ticket_model->value,
             'elements' => [

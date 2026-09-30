@@ -5,6 +5,7 @@ use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Events\EventSettingsController;
 use App\Http\Controllers\Events\PaymentProofController;
 use App\Http\Controllers\Events\ReconciliationController;
+use App\Http\Controllers\Events\RegistrationCardController;
 use App\Http\Controllers\Events\RegistrationController;
 use App\Http\Controllers\Events\ReportController;
 use App\Http\Controllers\Events\ScanController;
@@ -73,6 +74,9 @@ Route::prefix('{tenant}')
         Route::post('events/{event}/scan/verify', [ScanController::class, 'verify'])
             ->middleware('throttle:scan')
             ->name('tenants.events.scan.verify');
+        // L'ancienne adresse de la page de resultat, encore dans un onglet, un favori ou
+        // l'historique : retour a l'ecran de scan plutot qu'un « Method Not Allowed ».
+        Route::get('events/{event}/scan/verify', [ScanController::class, 'backToScan']);
         // Rotation de la cle des billets (SECURITY.md C2) : invalide tous les QR emis, d'ou la
         // re-authentification.
         Route::post('events/{event}/scan/rotate-key', [ScanController::class, 'rotateKey'])
@@ -82,6 +86,9 @@ Route::prefix('{tenant}')
         // La base d'inscrits (README ecran 20), etape 9.
         Route::get('events/{event}/registrations', [RegistrationController::class, 'index'])->name('tenants.events.registrations.index');
         Route::post('events/{event}/registrations/{registration}/cancel', [RegistrationController::class, 'cancel'])->name('tenants.events.registrations.cancel');
+        // Carte d'invitation a la main (README 2.7) : envoi par l'application, trace d'un partage.
+        Route::post('events/{event}/registrations/{registration}/card', [RegistrationCardController::class, 'send'])->name('tenants.events.registrations.card.send');
+        Route::post('events/{event}/registrations/{registration}/card/shared', [RegistrationCardController::class, 'shared'])->name('tenants.events.registrations.card.shared');
         // Sort du paiement d'une inscription annulee (README 2.11).
         Route::post('events/{event}/registrations/{registration}/refund', [RegistrationController::class, 'refund'])->name('tenants.events.registrations.refund');
         Route::post('events/{event}/registrations/purge', [RegistrationController::class, 'purge'])->name('tenants.events.registrations.purge');

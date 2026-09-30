@@ -24,13 +24,19 @@ use Inertia\Response;
  * Le controle a l'entree (README ecran 26), etape 7 de « Ordre de construction » : viseur,
  * compteur, trois resultats, derniers passages.
  *
- * `verify()` rend la meme page que `index()`, sans redirection : un scan est une action repetee
- * en rafale, une navigation complete a chaque code lu romprait le flux de la camera. Le front
- * la declenche en rechargement partiel Inertia (`only`), ce qui reste une visite Inertia comme
- * une autre (CLAUDE.md, « Inertia ») : aucune API JSON parallele n'est ajoutee.
+ * `verify()` suit le schema POST puis redirection d'Inertia : le verdict passe par la session,
+ * et l'adresse revient a celle de l'ecran de scan. Rendre la page directement sur l'adresse du
+ * POST la laissait dans l'historique, et y revenir envoyait un GET refuse (« Method Not
+ * Allowed »). Le front garde son rechargement partiel (`only`, `preserveState`), que la
+ * redirection conserve : la camera n'est pas interrompue entre deux billets.
  */
 class ScanController extends Controller
 {
+    /**
+     * Cle de session du verdict du dernier scan, lu une seule fois par l'ecran de scan.
+     */
+    private const ResultKey = 'scan.result';
+
     /**
      * Display the scan screen for the given event.
      */
@@ -42,9 +48,17 @@ class ScanController extends Controller
     }
 
     /**
+     * Send a visit to the verification address back to the scan screen, which authorises it.
+     */
+    public function backToScan(Tenant $tenant, Event $event): RedirectResponse
+    {
+        return to_route('tenants.events.scan.index', [$tenant, $event]);
+    }
+
+    /**
      * Verify a scanned code and record the attempt.
      */
-    public function verify(ScanTicketRequest $request, Tenant $tenant, Event $event, ScanTicket $scan): Response
+    public function verify(ScanTicketRequest $request, Tenant $tenant, Event $event, ScanTicket $scan): RedirectResponse
     {
         $outcome = $scan->handle(
             $event,
@@ -54,17 +68,16 @@ class ScanController extends Controller
             $request->validated('station'),
         );
 
-        return Inertia::render('events/scan', [
-            ...$this->props($request, $tenant, $event),
-            'result' => [
-                'result' => $outcome['result']->value,
-                'forced' => $outcome['forced'],
-                'registration' => $outcome['registration'],
-                'firstScannedAt' => $outcome['firstScannedAt']?->toISOString(),
-                'firstScannedBy' => $outcome['firstScannedBy'],
-                'otherEvent' => $outcome['otherEvent'],
-            ],
+        $request->session()->flash(self::ResultKey, [
+            'result' => $outcome['result']->value,
+            'forced' => $outcome['forced'],
+            'registration' => $outcome['registration'],
+            'firstScannedAt' => $outcome['firstScannedAt']?->toISOString(),
+            'firstScannedBy' => $outcome['firstScannedBy'],
+            'otherEvent' => $outcome['otherEvent'],
         ]);
+
+        return to_route('tenants.events.scan.index', [$tenant, $event]);
     }
 
     /**
@@ -89,6 +102,8 @@ class ScanController extends Controller
         $canViewLog = Gate::allows('viewLog', [ScanEvent::class, $tenant]);
 
         return [
+            // Verdict du scan qui vient d'avoir lieu, pose par `verify()` avant sa redirection.
+            'result' => $request->session()->get(self::ResultKey),
             'tenant' => ['slug' => $tenant->slug],
             // La cle publique (jamais la cle privee) permet de verifier un billet hors ligne, README
             // 2.8 : l'appareil de l'agent ne detient aucun secret de signature.

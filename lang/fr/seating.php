@@ -41,6 +41,16 @@ return [
         'pair' => ':unitA et :unitB',
     ],
 
+    'confirm_remove' => [
+        'title' => 'Retirer de sa table ?',
+        'description' => ':name quitte la table :number et rejoint les inscriptions sans table. Si la table se remplit entre-temps, sa place ne lui sera pas gardée.',
+    ],
+
+    'confirm_remove_constraint' => [
+        'title' => 'Retirer cette contrainte ?',
+        'description' => ':unitA et :unitB pourront de nouveau partager une table, y compris au placement automatique.',
+    ],
+
     'errors' => [
         'table_full' => "Cette table n'a plus assez de places libres pour ce groupe.",
         'table_occupied' => '{1} La table :number accueille déjà 1 personne : déplacez-la avant de retirer la table.|[2,*] La table :number accueille déjà :count personnes : déplacez-les avant de retirer la table.',

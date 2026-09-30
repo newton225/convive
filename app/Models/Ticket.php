@@ -122,6 +122,21 @@ class Ticket extends Model
      */
     public function shareUrl(): ?string
     {
+        return $this->signedPublicUrl('');
+    }
+
+    /**
+     * Get the absolute URL of this ticket alone as a PDF, to keep offline and show at the door
+     * when the connection is unreliable (README 2.8). Meme signature que le lien individuel :
+     * qui peut voir le billet peut le telecharger.
+     */
+    public function pdfUrl(): ?string
+    {
+        return $this->signedPublicUrl('/pdf');
+    }
+
+    private function signedPublicUrl(string $suffix): ?string
+    {
         $event = $this->registration->event;
         $tenant = Tenant::current();
 
@@ -134,7 +149,7 @@ class Ticket extends Model
         $port = isset($appUrl['port']) ? ':'.$appUrl['port'] : '';
         $domain = $tenant->subdomain.'.'.config('convive.public_domain');
 
-        return "{$scheme}://{$domain}{$port}/e/{$event->public_token}/ticket/{$this->id}"
+        return "{$scheme}://{$domain}{$port}/e/{$event->public_token}/ticket/{$this->id}{$suffix}"
             .'?signature='.$this->shareSignature();
     }
 

@@ -5,6 +5,7 @@ namespace App\Notifications\Registrations;
 use App\Mail\GuestNotificationMail;
 use App\Models\Registration;
 use App\Support\GuestNotificationBranding;
+use App\Support\InvitationCardMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -58,6 +59,17 @@ class InvitationCard extends Notification implements ShouldQueue
             $lines[] = __('guest.mail.invitation_card.table', ['number' => $tableNumber]);
         }
 
+        // README 2.7 : l'invite recoit aussi le billet de chaque accompagnateur, a leur transmettre.
+        $companions = InvitationCardMessage::companionLinks($registration);
+
+        if ($companions !== []) {
+            $lines[] = __('guest.mail.invitation_card.companions');
+
+            foreach ($companions as $companion) {
+                $lines[] = __('guest.whatsapp.companion_ticket_line', $companion);
+            }
+        }
+
         return (new GuestNotificationMail(
             organisationName: GuestNotificationBranding::organisationName(),
             primaryColor: $colors['primary'],
@@ -71,10 +83,6 @@ class InvitationCard extends Notification implements ShouldQueue
 
     public function toWhatsApp(mixed $notifiable): string
     {
-        return __('guest.whatsapp.invitation_card', [
-            'name' => $this->registration->name,
-            'event' => $this->registration->event->name,
-            'link' => $this->link,
-        ]);
+        return InvitationCardMessage::forHolder($this->registration, $this->link);
     }
 }

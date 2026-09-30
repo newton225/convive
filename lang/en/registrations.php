@@ -91,6 +91,36 @@ return [
         ],
     ],
 
+    'card' => [
+        'column' => 'Card',
+        'sent_on' => 'Sent on :date',
+        'not_sent' => 'Not sent yet',
+        'open' => 'Card',
+        'title' => 'Invitation card',
+        'description' => 'For :name and their group. Use this if the automatic sending did not work or the card was lost.',
+        'last_sent' => 'Last sent',
+        'holder' => 'Main guest',
+        'holder_hint' => "Their card opens the whole group's tickets, and the message includes the companions' tickets.",
+        'companion' => 'Companion',
+        'companion_hint' => 'Their own ticket only. No number is known: pick the recipient in WhatsApp.',
+        'send' => 'Send from the application',
+        'resend' => 'Send again from the application',
+        'send_hint' => 'By WhatsApp, and by email if the guest gave one.',
+        'copy' => 'Copy the link',
+        'copied' => 'Link copied',
+        'whatsapp' => 'Open WhatsApp',
+        'no_link' => 'The link cannot be built: the organisation has no subdomain or the event is not published.',
+        'traced' => 'Every sending, copy or WhatsApp opening is logged: the link lets someone in.',
+        'flash' => [
+            'sent' => 'Card sent to :name.',
+        ],
+        'errors' => [
+            'not_confirmed' => 'Only a validated registration has an invitation card.',
+            'not_sent' => 'The card was not sent: the plan\'s sending quota is reached, or the link cannot be built. Copy the link to send it yourself.',
+            'copy_failed' => 'The link could not be copied. Select it and copy it by hand.',
+        ],
+    ],
+
     'refund' => [
         'title' => 'Payment',
         'question' => 'What happens to the :amount payment?',

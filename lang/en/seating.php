@@ -41,6 +41,16 @@ return [
         'pair' => ':unitA and :unitB',
     ],
 
+    'confirm_remove' => [
+        'title' => 'Remove from their table?',
+        'description' => ':name leaves table :number and joins the registrations without a table. If the table fills up meanwhile, their seat will not be kept.',
+    ],
+
+    'confirm_remove_constraint' => [
+        'title' => 'Remove this constraint?',
+        'description' => ':unitA and :unitB will be able to share a table again, including for automatic seating.',
+    ],
+
     'errors' => [
         'table_full' => 'This table no longer has enough free seats for this party.',
         'table_occupied' => '{1} Table :number already seats 1 person: move them before removing the table.|[2,*] Table :number already seats :count people: move them before removing the table.',

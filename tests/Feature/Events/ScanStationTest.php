@@ -51,6 +51,7 @@ class ScanStationTest extends TestCase
     public function test_le_poste_de_controle_est_consigne_avec_le_passage(): void
     {
         $this->actingAs($this->owner)
+            ->followingRedirects()
             ->post(route('tenants.events.scan.verify', [$this->tenant, $this->event]), [
                 'token' => $this->token,
                 'station' => 'Entrée principale',

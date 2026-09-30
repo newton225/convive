@@ -138,12 +138,23 @@ return [
         'single_notice' => 'This ticket admits one person and can only be used once. Show it at the entrance.',
     ],
 
+    'ticket_pdf' => [
+        'title' => 'Tickets: :event',
+        'guest_of' => 'Companion of :name',
+        'notice' => 'This ticket admits one person and can only be used once. Show it at the door, on your phone or printed.',
+        'position' => 'Ticket :current of :total',
+        'download' => 'Download as PDF',
+        'download_all' => 'Download all tickets as PDF',
+        'download_hint' => 'Keep it on your phone: it opens even without a connection at the door.',
+    ],
+
     'mail' => [
         'invitation_card' => [
             'subject' => 'Your ticket for :event',
             'intro' => 'Hello :name, your registration for :event is confirmed.',
             'table' => 'You are seated at table :number.',
             'action' => 'View my ticket',
+            'companions' => 'Your companions\' tickets, to forward to them:',
         ],
         'proof_reminder' => [
             'subject' => 'Your payment proof for :event is still missing',
@@ -172,6 +183,9 @@ return [
         'ticket_reminder' => 'Hello :name, :event starts in three hours. Your ticket: :link',
         'registration_cancelled' => 'Hello :name, your registration for :event was cancelled by the organisation. Reason: :reason.',
         'refund_sent' => 'Hello :name, your refund for :event has been sent.',
+        'companion_tickets_intro' => 'Your companions\' tickets, to forward to them:',
+        'companion_ticket_line' => ':name: :link',
+        'companion_ticket' => 'Hello :name, here is your ticket for :event: :link',
     ],
 
     'refund' => [

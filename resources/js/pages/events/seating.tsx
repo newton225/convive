@@ -1,6 +1,8 @@
 import { Head, router } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
+import { ConfirmSummary } from '@/components/confirm-summary';
 import Heading from '@/components/heading';
 import { TableCapacityControl } from '@/components/seating/table-capacity-control';
 import { SubmitButton } from '@/components/submit-button';
@@ -71,6 +73,12 @@ export default function EventSeating({
 }: Props) {
     const { t } = useTranslation();
     const [pending, setPending] = useState<number | null>(null);
+    // Retirer quelqu'un de sa table lui fait perdre sa place a cette table : si elle se remplit
+    // entre-temps, il ne la retrouvera pas. D'ou la confirmation, avec la ligne visee.
+    const [unseating, setUnseating] = useState<{
+        occupant: SeatingRegistrationRow;
+        tableNumber: number;
+    } | null>(null);
     const canAssign = can(permissions, Permission.SeatingAssign);
     // Changer la taille d'une table change la capacite de l'evenement : c'est la modification de
     // l'evenement qui l'autorise, pas le placement (voir `SeatingTablePolicy::resize`).
@@ -82,12 +90,16 @@ export default function EventSeating({
         disabled: table.remaining <= 0,
     }));
 
-    function moveTo(registrationId: number, seatingTableId: number | null) {
+    function moveTo(
+        registrationId: number,
+        seatingTableId: number | null,
+        onSuccess?: () => void,
+    ) {
         setPending(registrationId);
         router.post(
             assign([tenant.slug, event.id, registrationId]).url,
             { seating_table_id: seatingTableId },
-            { onFinish: () => setPending(null) },
+            { onFinish: () => setPending(null), onSuccess },
         );
     }
 
@@ -210,10 +222,11 @@ export default function EventSeating({
                                                             }
                                                             data-test="seating-remove"
                                                             onClick={() =>
-                                                                moveTo(
-                                                                    occupant.id,
-                                                                    null,
-                                                                )
+                                                                setUnseating({
+                                                                    occupant,
+                                                                    tableNumber:
+                                                                        table.number,
+                                                                })
                                                             }
                                                         >
                                                             {t(
@@ -311,6 +324,54 @@ export default function EventSeating({
                     canManage={canAssign}
                 />
             </div>
+
+            <ConfirmActionDialog
+                open={unseating !== null}
+                onOpenChange={(open) => !open && setUnseating(null)}
+                title={t('seating.confirm_remove.title')}
+                description={t('seating.confirm_remove.description', {
+                    name: unseating?.occupant.name ?? '',
+                    number: unseating?.tableNumber ?? '',
+                })}
+                confirmLabel={t('seating.actions.remove')}
+                destructive
+                processing={
+                    unseating !== null && pending === unseating.occupant.id
+                }
+                testId="seating-remove-confirm"
+                onConfirm={() =>
+                    unseating &&
+                    moveTo(unseating.occupant.id, null, () =>
+                        setUnseating(null),
+                    )
+                }
+            >
+                {unseating ? (
+                    <ConfirmSummary
+                        testId="seating-remove-summary"
+                        items={[
+                            {
+                                label: t('seating.columns.name'),
+                                value: unseating.occupant.name,
+                                emphasis: true,
+                            },
+                            {
+                                label: t('seating.columns.unit'),
+                                value: unseating.occupant.unit,
+                            },
+                            {
+                                label: t('seating.columns.party_size'),
+                                value: unseating.occupant.partySize,
+                            },
+                            {
+                                label: t('seating.columns.table'),
+                                value: `#${unseating.tableNumber}`,
+                                emphasis: true,
+                            },
+                        ]}
+                    />
+                ) : null}
+            </ConfirmActionDialog>
         </>
     );
 }
@@ -333,6 +394,9 @@ function SeatingConstraints({
     const [otherUnitId, setOtherUnitId] = useState<string>('');
     const [processing, setProcessing] = useState(false);
     const [removing, setRemoving] = useState<number | null>(null);
+    const [confirming, setConfirming] = useState<SeatingConstraintRow | null>(
+        null,
+    );
 
     function addConstraint() {
         if (!unitId || !otherUnitId) {
@@ -357,7 +421,10 @@ function SeatingConstraints({
         setRemoving(constraintId);
         router.delete(
             destroyConstraint([tenant.slug, event.id, constraintId]).url,
-            { onFinish: () => setRemoving(null) },
+            {
+                onFinish: () => setRemoving(null),
+                onSuccess: () => setConfirming(null),
+            },
         );
     }
 
@@ -396,9 +463,7 @@ function SeatingConstraints({
                                     size="sm"
                                     disabled={removing === constraint.id}
                                     data-test="seating-constraint-remove"
-                                    onClick={() =>
-                                        removeConstraint(constraint.id)
-                                    }
+                                    onClick={() => setConfirming(constraint)}
                                 >
                                     <X className="h-4 w-4" />
                                     {t('seating.constraints.remove')}
@@ -467,6 +532,42 @@ function SeatingConstraints({
                     </SubmitButton>
                 </div>
             ) : null}
+
+            <ConfirmActionDialog
+                open={confirming !== null}
+                onOpenChange={(open) => !open && setConfirming(null)}
+                title={t('seating.confirm_remove_constraint.title')}
+                description={t(
+                    'seating.confirm_remove_constraint.description',
+                    {
+                        unitA: confirming?.unitA ?? '',
+                        unitB: confirming?.unitB ?? '',
+                    },
+                )}
+                confirmLabel={t('seating.constraints.remove')}
+                destructive
+                processing={confirming !== null && removing === confirming.id}
+                testId="seating-constraint-remove-confirm"
+                onConfirm={() => confirming && removeConstraint(confirming.id)}
+            >
+                {confirming ? (
+                    <ConfirmSummary
+                        testId="seating-constraint-remove-summary"
+                        items={[
+                            {
+                                label: t('seating.constraints.unit_a'),
+                                value: confirming.unitA,
+                                emphasis: true,
+                            },
+                            {
+                                label: t('seating.constraints.unit_b'),
+                                value: confirming.unitB,
+                                emphasis: true,
+                            },
+                        ]}
+                    />
+                ) : null}
+            </ConfirmActionDialog>
         </div>
     );
 }

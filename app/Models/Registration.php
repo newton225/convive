@@ -154,6 +154,21 @@ class Registration extends Model
      */
     public function signedResumeUrl(): ?string
     {
+        return $this->signedPublicUrl('/link');
+    }
+
+    /**
+     * Get the absolute URL of every ticket of the group as one PDF, to keep offline and show at
+     * the door when the connection is unreliable (README 2.8). Meme signature que le lien de la
+     * carte : qui peut voir les billets du groupe peut les telecharger.
+     */
+    public function ticketsPdfUrl(): ?string
+    {
+        return $this->signedPublicUrl('/tickets.pdf');
+    }
+
+    private function signedPublicUrl(string $suffix): ?string
+    {
         $event = $this->event;
         $tenant = Tenant::current();
 
@@ -166,7 +181,7 @@ class Registration extends Model
         $port = isset($appUrl['port']) ? ':'.$appUrl['port'] : '';
         $domain = $tenant->subdomain.'.'.config('convive.public_domain');
 
-        return "{$scheme}://{$domain}{$port}/e/{$event->public_token}/register/{$this->id}/link"
+        return "{$scheme}://{$domain}{$port}/e/{$event->public_token}/register/{$this->id}{$suffix}"
             .'?signature='.$this->notificationToken();
     }
 

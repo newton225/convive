@@ -84,9 +84,45 @@ class ScanControllerTest extends TestCase
         $this->joinWithPermissions($tenant, $member, [TenantPermission::ScanPerform]);
 
         $this->actingAs($member)
+            ->followingRedirects()
             ->post(route('tenants.events.scan.verify', [$tenant, $event]), ['token' => $token])
             ->assertOk()
             ->assertInertia(fn ($page) => $page->where('result.result', 'accepted'));
+    }
+
+    public function test_revenir_sur_l_ancienne_adresse_de_verification_ramene_a_l_ecran_de_scan(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event] = $this->eventWithTicket($tenant);
+
+        // Un onglet, un favori ou l'historique pointant encore sur l'adresse du POST : plus de
+        // « Method Not Allowed », retour a l'ecran de scan, sans rien scanner.
+        $this->actingAs($owner)
+            ->get(route('tenants.events.scan.verify', [$tenant, $event]))
+            ->assertRedirect(route('tenants.events.scan.index', [$tenant, $event]));
+    }
+
+    public function test_apres_un_scan_l_adresse_revient_a_l_ecran_de_scan(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event, 'token' => $token] = $this->eventWithTicket($tenant);
+
+        // Bogue : la page etait rendue sur l'adresse du POST ; revenir dessus (retour arriere,
+        // rechargement) envoyait un GET que la route refuse, « Method Not Allowed ».
+        $this->actingAs($owner)
+            ->post(route('tenants.events.scan.verify', [$tenant, $event]), ['token' => $token])
+            ->assertRedirect(route('tenants.events.scan.index', [$tenant, $event]));
+
+        // Le resultat est porte une seule fois : un rechargement ulterieur ne le reaffiche pas.
+        $this->actingAs($owner)
+            ->get(route('tenants.events.scan.index', [$tenant, $event]))
+            ->assertInertia(fn ($page) => $page->where('result.result', 'accepted'));
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.scan.index', [$tenant, $event]))
+            ->assertInertia(fn ($page) => $page->where('result', null));
     }
 
     public function test_un_membre_sans_scan_perform_ne_peut_pas_scanner(): void

@@ -65,6 +65,7 @@ class TicketController extends Controller
                 'guestOf' => $ticket->isCompanion() ? $ticket->registration->name : null,
                 'qrImage' => TicketQrCode::dataUri($ticket->signedToken()),
                 'tableNumber' => $ticket->registration->tableAssignment?->seatingTable->number,
+                'pdfUrl' => $ticket->pdfUrl(),
             ],
         ]);
     }

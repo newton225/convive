@@ -6,6 +6,7 @@ import { OfflineBanner } from '@/components/offline-banner';
 import { useState } from 'react';
 import { CopyButton } from '@/components/copy-button';
 import { CompanionTicketPassCard } from '@/components/public/companion-ticket-pass-card';
+import { TicketPdfDownload } from '@/components/public/ticket-pdf-download';
 import InputError from '@/components/input-error';
 import { LabelWithHelp } from '@/components/label-with-help';
 import { SubmitButton } from '@/components/submit-button';
@@ -254,6 +255,15 @@ export default function PublicRegistrationShow({
                                               )
                                             : null}
                                     </div>
+                                    {registration.ticket.pdfUrl ? (
+                                        <TicketPdfDownload
+                                            url={registration.ticket.pdfUrl}
+                                            all={
+                                                registration.ticket.passes
+                                                    .length > 0
+                                            }
+                                        />
+                                    ) : null}
                                     {registration.ticket.passes.length > 0 ? (
                                         <div
                                             className="space-y-3 border-t border-dashed pt-4 text-left"

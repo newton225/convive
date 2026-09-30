@@ -7,6 +7,13 @@ return [
         'placeholder' => 'Visez le QR du billet',
         'scanning' => 'Recherche du code...',
         'camera_denied' => "La caméra n'a pas pu être activée. Vérifiez les autorisations du navigateur.",
+        'phases' => [
+            'starting' => 'Démarrage de la caméra...',
+            'searching' => 'Recherche d\'un QR code',
+            'checking' => 'QR code détecté, vérification...',
+            'paused' => 'Scan en pause',
+            'error' => 'Caméra indisponible',
+        ],
     ],
 
     'results' => [

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import DataTable from '@/components/data-table';
 import { CancelRegistrationDialog } from '@/components/registrations/cancel-registration-dialog';
 import { CancellationsCard } from '@/components/registrations/cancellations-card';
+import { InvitationCardDialog } from '@/components/registrations/invitation-card-dialog';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ import {
 import type {
     RefundChannelOption,
     RegistrationCancellation,
+    RegistrationCard,
     RegistrationRow,
     RegistrationsFilters,
     RegistrationsMeta,
@@ -84,6 +86,9 @@ export default function EventRegistrations({
     const { t, locale } = useTranslation();
     const [search, setSearch] = useState(filters.search ?? '');
     const [cancelling, setCancelling] = useState<RegistrationRow | null>(null);
+    const [cardFor, setCardFor] = useState<
+        (RegistrationRow & { card: RegistrationCard }) | null
+    >(null);
     const [purging, setPurging] = useState(false);
 
     const canCancel = can(permissions, Permission.RegistrationsCancel);
@@ -243,18 +248,64 @@ export default function EventRegistrations({
                 ),
         },
         {
-            header: t('registrations.columns.actions'),
+            // README 2.7 : savoir si la carte est partie, et quand, sans ouvrir la fiche.
+            header: t('registrations.card.column'),
             cell: ({ row }) =>
-                canCancel && row.original.status !== 'cancelled' ? (
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        data-test="registration-cancel"
-                        onClick={() => setCancelling(row.original)}
+                row.original.status !== 'confirmed' ? (
+                    <span className="text-muted-foreground">-</span>
+                ) : row.original.cardSentAt ? (
+                    <span
+                        className="text-xs"
+                        data-test="registration-card-sent"
                     >
-                        {t('registrations.actions.cancel')}
-                    </Button>
-                ) : null,
+                        {t('registrations.card.sent_on', {
+                            date: formatDateTime(
+                                row.original.cardSentAt,
+                                locale,
+                            ),
+                        })}
+                    </span>
+                ) : (
+                    <span
+                        className="text-muted-foreground text-xs"
+                        data-test="registration-card-not-sent"
+                    >
+                        {t('registrations.card.not_sent')}
+                    </span>
+                ),
+        },
+        {
+            header: t('registrations.columns.actions'),
+            cell: ({ row }) => {
+                const card = row.original.card;
+
+                return (
+                    <div className="flex flex-wrap gap-2">
+                        {card !== null ? (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                data-test="registration-card"
+                                onClick={() =>
+                                    setCardFor({ ...row.original, card })
+                                }
+                            >
+                                {t('registrations.card.open')}
+                            </Button>
+                        ) : null}
+                        {canCancel && row.original.status !== 'cancelled' ? (
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                data-test="registration-cancel"
+                                onClick={() => setCancelling(row.original)}
+                            >
+                                {t('registrations.actions.cancel')}
+                            </Button>
+                        ) : null}
+                    </div>
+                );
+            },
         },
     ];
 
@@ -409,6 +460,15 @@ export default function EventRegistrations({
                     refundChannels={refundChannels}
                 />
             </div>
+
+            {cardFor ? (
+                <InvitationCardDialog
+                    tenantSlug={tenant.slug}
+                    eventId={event.id}
+                    registration={cardFor}
+                    onClose={() => setCardFor(null)}
+                />
+            ) : null}
 
             {cancelling ? (
                 <CancelRegistrationDialog

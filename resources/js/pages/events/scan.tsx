@@ -18,6 +18,8 @@ import { RotateTicketKeyCard } from '@/components/scan/rotate-ticket-key-card';
 import { ScanEventBanner } from '@/components/scan/scan-event-banner';
 import { ScanLockOverlay } from '@/components/scan/scan-lock-overlay';
 import { ScanPinForm } from '@/components/scan/scan-pin-form';
+import { ScanViewfinderStatus } from '@/components/scan/scan-viewfinder-status';
+import type { ViewfinderPhase } from '@/components/scan/scan-viewfinder-status';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { useScanLock } from '@/hooks/use-scan-lock';
 import { useScanQueue, type SyncOutcome } from '@/hooks/use-scan-queue';
@@ -36,6 +38,8 @@ import {
 } from '@/lib/ticket-verifier';
 import { rememberEntryControl } from '@/lib/entry-control-memory';
 import { formatDateTime } from '@/lib/format-date';
+import { offlineVerdict, onlineVerdict, vibrateFor } from '@/lib/scan-verdict';
+import type { ScanVerdict } from '@/lib/scan-verdict';
 import type { ScanPinVerifier } from '@/lib/scan-pin';
 import { readStation, writeStation } from '@/lib/scan-station';
 import { can, Permission } from '@/lib/permissions';
@@ -62,10 +66,14 @@ type Props = {
     acceptedCount: number;
     expectedCount: number;
     otherEventsToday: ScanSameDayEvent[];
-    result?: ScanOutcome;
+    // Verdict du scan qui vient d'avoir lieu, null a l'arrivee sur l'ecran.
+    result?: ScanOutcome | null;
 };
 
 // Lit le verdict du serveur dans les props d'une reponse, ou `failed` quand il n'y en a pas.
+// Duree d'affichage du verdict sur la camera : le temps de le lire en regardant l'invite.
+const VerdictDisplayMs = 2800;
+
 const outcomeOf = (props: unknown): SyncOutcome => {
     if (typeof props === 'object' && props !== null && 'result' in props) {
         const outcome = props.result;
@@ -125,7 +133,38 @@ export default function EventScan({
     const controlsRef = useRef<IScannerControls | null>(null);
     const lastTokenRef = useRef<string | null>(null);
     const [cameraError, setCameraError] = useState(false);
+    const [cameraReady, setCameraReady] = useState(false);
     const [pending, setPending] = useState(false);
+    // Verdict affiche quelques secondes par-dessus la camera ; `key` rejoue l'apparition meme
+    // quand deux billets de suite donnent le meme verdict.
+    const [verdict, setVerdict] = useState<{
+        value: ScanVerdict;
+        key: number;
+    } | null>(null);
+    const verdictTimerRef = useRef<number | null>(null);
+
+    function showVerdict(value: ScanVerdict) {
+        vibrateFor(value.tone);
+        setVerdict({ value, key: Date.now() });
+
+        if (verdictTimerRef.current !== null) {
+            window.clearTimeout(verdictTimerRef.current);
+        }
+
+        verdictTimerRef.current = window.setTimeout(
+            () => setVerdict(null),
+            VerdictDisplayMs,
+        );
+    }
+
+    useEffect(
+        () => () => {
+            if (verdictTimerRef.current !== null) {
+                window.clearTimeout(verdictTimerRef.current);
+            }
+        },
+        [],
+    );
     const [station, setStation] = useState(readStation);
     // Le resultat reste affiche jusqu'a « Scanner suivant » (prototype) ou jusqu'au scan suivant.
     const [resultDismissed, setResultDismissed] = useState(false);
@@ -233,6 +272,7 @@ export default function EventScan({
 
         if (verification.status !== 'valid') {
             setLocalResult(verification.status);
+            showVerdict(offlineVerdict(verification.status));
 
             return;
         }
@@ -245,6 +285,7 @@ export default function EventScan({
             )
         ) {
             setLocalResult('already_local');
+            showVerdict(offlineVerdict('already_local'));
 
             return;
         }
@@ -256,6 +297,7 @@ export default function EventScan({
         );
         enqueue(token);
         setLocalResult('verified');
+        showVerdict(offlineVerdict('verified'));
     }
 
     function handleToken(token: string) {
@@ -280,7 +322,15 @@ export default function EventScan({
                 preserveScroll: true,
                 preserveState: true,
                 only: ['result', 'recent', 'acceptedCount'],
-                onSuccess: () => setResultDismissed(false),
+                onSuccess: (page) => {
+                    setResultDismissed(false);
+
+                    const outcome = outcomeOf(page.props);
+
+                    if (outcome !== 'failed') {
+                        showVerdict(onlineVerdict(outcome));
+                    }
+                },
                 onFinish: () => {
                     setPending(false);
                     // Laisse la meme presentation valoir « deja scanne » pendant un court
@@ -343,6 +393,7 @@ export default function EventScan({
                 }
 
                 controlsRef.current = controls;
+                setCameraReady(true);
             })
             .catch(() => {
                 if (!cancelled) {
@@ -358,6 +409,16 @@ export default function EventScan({
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const viewfinderPhase: ViewfinderPhase = cameraError
+        ? 'error'
+        : !cameraReady
+          ? 'starting'
+          : scanPin === null || lock.locked
+            ? 'paused'
+            : pending
+              ? 'checking'
+              : 'searching';
 
     return (
         <>
@@ -410,9 +471,14 @@ export default function EventScan({
                     <Card>
                         <CardContent className="space-y-4 pt-6">
                             <div
-                                className="bg-muted aspect-square overflow-hidden rounded-lg"
+                                className="bg-muted relative aspect-square overflow-hidden rounded-lg"
                                 data-tour="scan-viewfinder"
                             >
+                                <ScanViewfinderStatus
+                                    phase={viewfinderPhase}
+                                    verdict={verdict?.value ?? null}
+                                    verdictKey={verdict?.key ?? 0}
+                                />
                                 <video
                                     ref={videoRef}
                                     className="h-full w-full object-cover"

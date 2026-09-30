@@ -120,12 +120,37 @@ validée après l'échéance est envoyée à la validation.
 Rappels automatiques : `J-7`, `J-2`, `J-1` aux inscriptions sans preuve, et `jour J − 3 h`
 aux billets validés.
 
+La carte envoyée à l'invité porte aussi le lien individuel du billet de chacun de ses
+accompagnateurs (voir 2.8) : il peut tout recevoir et se charger de les leur transmettre.
+
+**Envoi manuel**, depuis la base d'inscrits, quand l'envoi automatique n'a pas fonctionné ou
+qu'un invité a perdu sa carte. Réservé à la permission « Envoyer des messages »
+(`messages.send`), pour les seules inscriptions `CONFIRMED`. La base d'inscrits indique si la
+carte est partie, et quand.
+
+- **Invité principal** : envoyer ou renvoyer sa carte depuis l'application (WhatsApp, et email
+  s'il en a donné un), même si elle est déjà partie ; copier le lien de sa carte ; ou ouvrir
+  WhatsApp sur son numéro avec le message déjà rédigé, pour l'envoyer depuis son propre
+  téléphone. Le message comprend les billets des accompagnateurs.
+- **Accompagnateurs** : aucun numéro n'est recueilli pour eux. Pour chacun, copier le lien de
+  son seul billet, ou ouvrir WhatsApp avec le message déjà rédigé, le destinataire étant choisi
+  dans le téléphone de l'organisateur. Jamais la carte de l'invité principal, qui donne accès
+  aux billets de tout le groupe.
+- Le lien est une clé d'accès au billet : chaque envoi, copie de lien ou ouverture de WhatsApp
+  est journalisé, par personne, avec son auteur. Un envoi manuel compte dans le quota
+  d'envois du plan.
+
 ### 2.8 Authenticité des billets
 
 - **Un billet par personne** (décision du 2026-09-27) : l'invité reçoit un billet à son nom et un
   billet nominatif par accompagnateur, chacun avec son propre QR. Chaque personne entre quand elle
   arrive, seule ou en groupe, sans forçage. L'invité transmet à chaque accompagnateur son billet
   (lien individuel, partageable par WhatsApp depuis sa page).
+- **Billets en PDF**, pour l'entrée sans connexion stable : l'invité télécharge depuis sa page
+  tous les billets du groupe, une page par personne ; un accompagnateur télécharge son seul
+  billet depuis son lien individuel. Le QR imprimé est le même jeton signé que celui de la page,
+  vérifié de la même façon au scan. Mêmes signatures que les liens, donc accessible à qui peut
+  déjà voir le billet, et plus du tout une fois l'inscription annulée.
 - Le QR encode un **jeton signé côté serveur** par signature **asymétrique (Ed25519)**, jamais
   un simple identifiant. Le scan étant hors ligne, l'appareil de l'agent ne détient que la clé
   publique de vérification ; un HMAC symétrique exposerait le secret sur chaque téléphone

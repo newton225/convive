@@ -91,6 +91,36 @@ return [
         ],
     ],
 
+    'card' => [
+        'column' => 'Carte',
+        'sent_on' => 'Envoyée le :date',
+        'not_sent' => 'Pas encore envoyée',
+        'open' => 'Carte',
+        'title' => "Carte d'invitation",
+        'description' => "Pour :name et son groupe. À utiliser si l'envoi automatique n'a pas fonctionné ou si la carte a été perdue.",
+        'last_sent' => 'Dernier envoi',
+        'holder' => 'Invité principal',
+        'holder_hint' => 'Sa carte donne accès aux billets de tout le groupe, et le message comprend les billets des accompagnateurs.',
+        'companion' => 'Accompagnateur',
+        'companion_hint' => "Son seul billet. Aucun numéro n'est connu : choisissez le destinataire dans WhatsApp.",
+        'send' => "Envoyer depuis l'application",
+        'resend' => "Renvoyer depuis l'application",
+        'send_hint' => 'Par WhatsApp, et par email si l\'invité en a donné un.',
+        'copy' => 'Copier le lien',
+        'copied' => 'Lien copié',
+        'whatsapp' => 'Ouvrir WhatsApp',
+        'no_link' => "Le lien ne peut pas être construit : l'organisation n'a pas de sous-domaine ou l'événement n'est pas publié.",
+        'traced' => 'Chaque envoi, copie ou ouverture de WhatsApp est journalisé : le lien permet d\'entrer.',
+        'flash' => [
+            'sent' => 'Carte envoyée à :name.',
+        ],
+        'errors' => [
+            'not_confirmed' => "Seule une inscription validée a une carte d'invitation.",
+            'not_sent' => "La carte n'est pas partie : le quota d'envois du plan est atteint, ou le lien ne peut pas être construit. Copiez le lien pour l'envoyer vous-même.",
+            'copy_failed' => 'Le lien n\'a pas pu être copié. Sélectionnez-le et copiez-le à la main.',
+        ],
+    ],
+
     'refund' => [
         'title' => 'Paiement',
         'question' => 'Que devient le paiement de :amount ?',

@@ -53,6 +53,8 @@ export type TicketSummary = {
     qrImage: string;
     passes: CompanionTicketPass[];
     tableNumber: number | null;
+    // Tous les billets du groupe en un PDF (README 2.8), null sans sous-domaine ni lien public.
+    pdfUrl: string | null;
     scheduledSendAt: string | null;
     model: TicketModel;
     elements: TicketElements;
@@ -66,6 +68,7 @@ export type PublicTicketPass = {
     guestOf: string | null;
     qrImage: string;
     tableNumber: number | null;
+    pdfUrl: string | null;
 };
 
 export type RegistrationShow = {
@@ -96,6 +99,24 @@ export type RegistrationRow = {
     channelLabel: string | null;
     enteredCount: number;
     enteredAt: string | null;
+    cardSentAt: string | null;
+    // Liens de la carte et des billets (README 2.7) : null sans la permission d'envoi, ou pour
+    // une inscription qui n'est pas validee.
+    card: RegistrationCard | null;
+};
+
+export type RegistrationCardPerson = {
+    // Null pour l'invite principal : sa carte, qui donne acces a tout le groupe.
+    ticketId: number | null;
+    name: string;
+    isHolder: boolean;
+    phone: string | null;
+    url: string | null;
+    message: string | null;
+};
+
+export type RegistrationCard = {
+    people: RegistrationCardPerson[];
 };
 
 // Sort du paiement d'une inscription annulee (README 2.11), `App\Enums\RefundStatus`.

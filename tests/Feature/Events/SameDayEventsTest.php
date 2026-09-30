@@ -58,6 +58,7 @@ class SameDayEventsTest extends TestCase
     private function scanAt(Event $event, string $token): TestResponse
     {
         return $this->actingAs($this->owner)
+            ->followingRedirects()
             ->post(route('tenants.events.scan.verify', [$this->tenant, $event]), ['token' => $token]);
     }
 

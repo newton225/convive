@@ -1,10 +1,12 @@
 import { useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { FormEvent } from 'react';
 import { formatPhoneNumberIntl } from 'react-phone-number-input';
 import { ConfirmSummary } from '@/components/confirm-summary';
 import InputError from '@/components/input-error';
 import { RefundFields } from '@/components/registrations/refund-fields';
+import { RefundStatusPicker } from '@/components/registrations/refund-status-picker';
 import type { RefundFieldsData } from '@/components/registrations/refund-fields';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
@@ -20,10 +22,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
+import { Duration, EaseOut } from '@/lib/motion';
 import { cancel } from '@/routes/tenants/events/registrations';
 import type {
     RefundChannelOption,
@@ -39,8 +41,6 @@ type Props = {
     refundChannels: RefundChannelOption[];
     onClose: () => void;
 };
-
-const RefundStatuses: RefundStatus[] = ['due', 'refunded', 'kept'];
 
 type CancelForm = {
     reason: string;
@@ -62,6 +62,7 @@ export function CancelRegistrationDialog({
     onClose,
 }: Props) {
     const { t, locale } = useTranslation();
+    const reduceMotion = useReducedMotion() === true;
     const hasPayment =
         registration.status === 'confirmed' && registration.amountDue > 0;
     const amount = formatAmount(registration.amountDue, locale);
@@ -230,105 +231,116 @@ export function CancelRegistrationDialog({
                                             amount,
                                         })}
                                     </p>
-                                    <ToggleGroup
-                                        type="single"
-                                        variant="outline"
+                                    <RefundStatusPicker
                                         value={form.data.refund.status}
-                                        onValueChange={(value) => {
-                                            const next = RefundStatuses.find(
-                                                (status) => status === value,
-                                            );
+                                        onChange={(status) =>
+                                            setRefund('status', status)
+                                        }
+                                    />
 
-                                            // Un clic sur le choix deja actif le viderait : on
-                                            // garde toujours un choix.
-                                            if (next) {
-                                                setRefund('status', next);
-                                            }
-                                        }}
-                                        className="w-full"
-                                        aria-label={t(
-                                            'registrations.refund.title',
-                                        )}
+                                    {/* Le detail du choix se remplace en fondu : l'ancien sort,
+                                        le nouveau entre, sans deux blocs a suivre a la fois. */}
+                                    <AnimatePresence
+                                        mode="wait"
+                                        initial={false}
                                     >
-                                        {RefundStatuses.map((status) => (
-                                            <ToggleGroupItem
-                                                key={status}
-                                                value={status}
-                                                className="min-h-11 flex-1"
-                                                data-test={`refund-status-${status}`}
-                                            >
-                                                {t(
-                                                    `registrations.refund.statuses.${status}`,
-                                                )}
-                                            </ToggleGroupItem>
-                                        ))}
-                                    </ToggleGroup>
-                                    <p className="text-muted-foreground text-sm">
-                                        {t(
-                                            `registrations.refund.hints.${form.data.refund.status}`,
-                                        )}
-                                    </p>
-
-                                    {form.data.refund.status === 'refunded' ? (
-                                        <RefundFields
-                                            amountPaid={registration.amountDue}
-                                            channels={refundChannels}
-                                            data={form.data.refund}
-                                            onChange={setRefund}
-                                            errors={{
-                                                channel:
-                                                    form.errors[
-                                                        'refund.channel'
-                                                    ],
-                                                refunded_on:
-                                                    form.errors[
-                                                        'refund.refunded_on'
-                                                    ],
-                                                fee: form.errors['refund.fee'],
-                                                reference:
-                                                    form.errors[
-                                                        'refund.reference'
-                                                    ],
+                                        <motion.div
+                                            key={form.data.refund.status}
+                                            className="space-y-3"
+                                            initial={
+                                                reduceMotion
+                                                    ? false
+                                                    : { opacity: 0, y: -6 }
+                                            }
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={
+                                                reduceMotion
+                                                    ? undefined
+                                                    : { opacity: 0, y: -6 }
+                                            }
+                                            transition={{
+                                                duration: reduceMotion
+                                                    ? 0
+                                                    : Duration.quick,
+                                                ease: EaseOut,
                                             }}
-                                            errorPrefix="refund."
-                                            idPrefix="cancel-refund"
-                                        />
-                                    ) : null}
-
-                                    {form.data.refund.status === 'kept' ? (
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="cancel-kept-reason">
+                                        >
+                                            <p className="text-muted-foreground text-sm">
                                                 {t(
-                                                    'registrations.refund.fields.kept_reason',
+                                                    `registrations.refund.hints.${form.data.refund.status}`,
                                                 )}
-                                            </Label>
-                                            <Textarea
-                                                id="cancel-kept-reason"
-                                                value={
-                                                    form.data.refund.kept_reason
-                                                }
-                                                maxLength={500}
-                                                placeholder={t(
-                                                    'registrations.refund.fields.kept_reason_placeholder',
-                                                )}
-                                                onChange={(event) =>
-                                                    setRefund(
-                                                        'kept_reason',
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                data-test="refund-kept-reason"
-                                            />
-                                            <InputError
-                                                message={
-                                                    form.errors[
-                                                        'refund.kept_reason'
-                                                    ]
-                                                }
-                                                data-error-for="refund.kept_reason"
-                                            />
-                                        </div>
-                                    ) : null}
+                                            </p>
+
+                                            {form.data.refund.status ===
+                                            'refunded' ? (
+                                                <RefundFields
+                                                    amountPaid={
+                                                        registration.amountDue
+                                                    }
+                                                    channels={refundChannels}
+                                                    data={form.data.refund}
+                                                    onChange={setRefund}
+                                                    errors={{
+                                                        channel:
+                                                            form.errors[
+                                                                'refund.channel'
+                                                            ],
+                                                        refunded_on:
+                                                            form.errors[
+                                                                'refund.refunded_on'
+                                                            ],
+                                                        fee: form.errors[
+                                                            'refund.fee'
+                                                        ],
+                                                        reference:
+                                                            form.errors[
+                                                                'refund.reference'
+                                                            ],
+                                                    }}
+                                                    errorPrefix="refund."
+                                                    idPrefix="cancel-refund"
+                                                />
+                                            ) : null}
+
+                                            {form.data.refund.status ===
+                                            'kept' ? (
+                                                <div className="grid gap-2">
+                                                    <Label htmlFor="cancel-kept-reason">
+                                                        {t(
+                                                            'registrations.refund.fields.kept_reason',
+                                                        )}
+                                                    </Label>
+                                                    <Textarea
+                                                        id="cancel-kept-reason"
+                                                        value={
+                                                            form.data.refund
+                                                                .kept_reason
+                                                        }
+                                                        maxLength={500}
+                                                        placeholder={t(
+                                                            'registrations.refund.fields.kept_reason_placeholder',
+                                                        )}
+                                                        onChange={(event) =>
+                                                            setRefund(
+                                                                'kept_reason',
+                                                                event.target
+                                                                    .value,
+                                                            )
+                                                        }
+                                                        data-test="refund-kept-reason"
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            form.errors[
+                                                                'refund.kept_reason'
+                                                            ]
+                                                        }
+                                                        data-error-for="refund.kept_reason"
+                                                    />
+                                                </div>
+                                            ) : null}
+                                        </motion.div>
+                                    </AnimatePresence>
                                 </>
                             ) : (
                                 <p className="text-muted-foreground text-sm">

@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import { OfflineBanner } from '@/components/offline-banner';
+import { TicketPdfDownload } from '@/components/public/ticket-pdf-download';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
@@ -76,6 +77,10 @@ export default function PublicTicketShow({ event, tenant, ticket }: Props) {
                         </p>
                     </CardContent>
                 </Card>
+
+                {ticket.pdfUrl ? (
+                    <TicketPdfDownload url={ticket.pdfUrl} />
+                ) : null}
             </main>
         </div>
     );
