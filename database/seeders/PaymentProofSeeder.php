@@ -11,6 +11,7 @@ use App\Models\Tenant;
 use Closure;
 use Database\Factories\PaymentProofFactory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 /**
  * Preuves saines et preuves douteuses (README 2.9) : reference dupliquee, precision de l'invite,
@@ -37,14 +38,20 @@ class PaymentProofSeeder extends Seeder
             $event = Event::where('name', "Diner de Noel de l'Association")->first();
             $account = $event?->paymentAccounts()->first();
 
-            if (! $event || ! $account || $this->alreadySeeded($event)) {
+            if (! $event || ! $account) {
                 return;
             }
 
-            $this->healthyProofs($event, $account);
-            $this->duplicateReference($event, $account);
-            $this->guestNote($event, $account);
-            $this->duplicateCapture($event, $account);
+            if (! $this->alreadySeeded($event)) {
+                $this->healthyProofs($event, $account);
+                $this->duplicateReference($event, $account);
+                $this->guestNote($event, $account);
+                $this->duplicateCapture($event, $account);
+            }
+
+            // Hors du garde : rattrape aussi les preuves semees avant que ce seeder ne joigne une
+            // capture, sans rien recreer.
+            $this->attachMissingCaptures($event);
         });
     }
 
@@ -116,6 +123,99 @@ class PaymentProofSeeder extends Seeder
             'registration_id' => $registration->id,
             'payment_account_id' => $account->id,
         ]);
+    }
+
+    /**
+     * Joint une capture de recu simulee a chaque preuve de l'evenement qui n'en a pas : une preuve
+     * reelle en porte toujours une (le depot l'exige), et sans elle le lien « Ouvrir le recu » de la
+     * file de preuves et de la base d'inscrits n'a rien a montrer.
+     *
+     * Les deux preuves du scenario « capture deja vue » (meme empreinte) recoivent la meme image,
+     * dessinee d'apres la premiere : c'est tout le scenario. Les empreintes ne sont pas
+     * recalculees : sur des recus de meme mise en page, l'empreinte par moyenne signalerait toutes
+     * les preuves semees comme une meme capture.
+     */
+    private function attachMissingCaptures(Event $event): void
+    {
+        /** @var array<string, string> $imagesByHash */
+        $imagesByHash = [];
+
+        PaymentProof::with('registration', 'paymentAccount')
+            ->whereHas('registration', fn ($query) => $query->where('event_id', $event->id))
+            ->whereDoesntHave('media')
+            ->orderBy('id')
+            ->get()
+            ->each(function (PaymentProof $proof) use (&$imagesByHash) {
+                $image = $proof->perceptual_hash !== null
+                    ? $imagesByHash[$proof->perceptual_hash] ??= $this->receiptImage($proof)
+                    : $this->receiptImage($proof);
+
+                $path = tempnam(sys_get_temp_dir(), 'seed-receipt').'.png';
+                file_put_contents($path, $image);
+
+                $proof->addMedia($path)
+                    ->usingFileName(Str::uuid()->toString().'.png')
+                    ->usingName('receipt')
+                    ->toMediaCollection(PaymentProof::ReceiptCollection);
+            });
+    }
+
+    /**
+     * Draw a plausible mobile money confirmation screen for the proof, as PNG bytes.
+     *
+     * Police bitmap de GD agrandie : aucune police vectorielle n'est garantie sur le poste, et la
+     * lisibilite suffit pour une donnee de demonstration.
+     */
+    private function receiptImage(PaymentProof $proof): string
+    {
+        $width = 540;
+        $height = 960;
+        $image = imagecreatetruecolor($width, $height);
+        $white = (int) imagecolorallocate($image, 255, 255, 255);
+        $header = (int) imagecolorallocate($image, 29, 200, 255);
+        $ink = (int) imagecolorallocate($image, 20, 24, 32);
+        $muted = (int) imagecolorallocate($image, 110, 116, 128);
+        $line = (int) imagecolorallocate($image, 226, 230, 236);
+
+        imagefill($image, 0, 0, $white);
+        imagefilledrectangle($image, 0, 0, $width, 200, $header);
+
+        $amount = number_format($proof->registration->amount_due, 0, ',', ' ').' F CFA';
+
+        $this->text($image, $proof->channel->label(), 40, 50, 3, $white);
+        $this->text($image, 'Paiement envoye', 40, 120, 3, $white);
+        $this->text($image, $amount, 40, 260, 4, $ink);
+        $this->text($image, 'A', 40, 380, 2, $muted);
+        $this->text($image, Str::ascii($proof->paymentAccount->label), 40, 420, 2, $ink);
+        imageline($image, 40, 490, $width - 40, 490, $line);
+        $this->text($image, 'Reference', 40, 520, 2, $muted);
+        $this->text($image, (string) $proof->reference, 40, 560, 2, $ink);
+        imageline($image, 40, 630, $width - 40, 630, $line);
+        $this->text($image, 'Date', 40, 660, 2, $muted);
+        $this->text($image, $proof->created_at?->format('d/m/Y H:i') ?? '', 40, 700, 2, $ink);
+        $this->text($image, 'Frais : 0 F CFA', 40, 800, 2, $muted);
+
+        ob_start();
+        imagepng($image);
+        $contents = (string) ob_get_clean();
+        imagedestroy($image);
+
+        return $contents;
+    }
+
+    private function text(\GdImage $image, string $text, int $x, int $y, int $scale, int $color): void
+    {
+        // Fond du texte pris sous son point d'ancrage : les zones de l'ecran sont unies, et la
+        // copie agrandie ne gere pas la transparence d'une image en couleurs vraies.
+        $glyphs = imagecreatetruecolor(max(1, strlen($text) * 9), 16);
+        $under = imagecolorsforindex($image, (int) imagecolorat($image, $x, $y));
+        imagefill($glyphs, 0, 0, (int) imagecolorallocate($glyphs, $under['red'], $under['green'], $under['blue']));
+
+        $rgb = imagecolorsforindex($image, $color);
+        imagestring($glyphs, 5, 0, 0, $text, (int) imagecolorallocate($glyphs, $rgb['red'], $rgb['green'], $rgb['blue']));
+
+        imagecopyresized($image, $glyphs, $x, $y, 0, 0, imagesx($glyphs) * $scale, 16 * $scale, imagesx($glyphs), 16);
+        imagedestroy($glyphs);
     }
 
     /**
