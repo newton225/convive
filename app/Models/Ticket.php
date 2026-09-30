@@ -88,6 +88,48 @@ class Ticket extends Model
     }
 
     /**
+     * Get the person who invited this companion : name, unit and registration reference, so the
+     * companion and the entrance agent know which group they belong to. Null on the main guest's
+     * ticket. Pas le telephone : le billet d'un accompagnateur circule de main en main.
+     *
+     * @return array{name: string, unit: string, reference: string|null}|null
+     */
+    public function host(): ?array
+    {
+        if (! $this->isCompanion()) {
+            return null;
+        }
+
+        return [
+            'name' => $this->registration->name,
+            'unit' => $this->registration->unit->name,
+            'reference' => $this->registration->reference,
+        ];
+    }
+
+    /**
+     * Get the people accompanying the main guest, in the order they were entered. Empty on a
+     * companion's ticket : il ne porte que sa propre place.
+     *
+     * @return array<int, array{name: string, unit: string}>
+     */
+    public function companionsOfHolder(): array
+    {
+        if ($this->isCompanion()) {
+            return [];
+        }
+
+        return $this->registration->companions
+            ->sortBy('position')
+            ->map(fn (RegistrationCompanion $companion) => [
+                'name' => $companion->name,
+                'unit' => $companion->unit->name,
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
      * Get the name of the person this ticket admits.
      */
     public function holderName(): string

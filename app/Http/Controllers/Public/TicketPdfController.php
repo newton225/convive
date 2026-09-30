@@ -32,7 +32,7 @@ class TicketPdfController extends Controller
     {
         $event = $this->publishedEvent($request);
 
-        $ticket = Ticket::with('registration.tableAssignment.seatingTable', 'registration.unit', 'holderUnit')
+        $ticket = Ticket::with('registration.tableAssignment.seatingTable', 'registration.unit', 'registration.companions.unit', 'holderUnit')
             ->find((int) $request->route('ticket'));
 
         abort_if(
@@ -53,7 +53,7 @@ class TicketPdfController extends Controller
     {
         $event = $this->publishedEvent($request);
 
-        $registration = Registration::with('tableAssignment.seatingTable', 'unit')
+        $registration = Registration::with('tableAssignment.seatingTable', 'unit', 'companions.unit')
             ->find((int) $request->route('registration'));
 
         abort_if(
@@ -105,7 +105,11 @@ class TicketPdfController extends Controller
             'tickets' => $tickets->map(fn (Ticket $ticket) => [
                 'name' => $ticket->holderName(),
                 'unit' => $ticket->holderUnitName(),
-                'guestOf' => $ticket->isCompanion() ? $ticket->registration->name : null,
+                // L'invite principal voit qui l'accompagne, si le gabarit le prevoit (README ecran
+                // 15) ; un accompagnateur voit qui l'invite, toujours : c'est ce qui le rattache a
+                // son groupe a l'entree.
+                'companions' => $branding?->ticket_element_companions ? $ticket->companionsOfHolder() : [],
+                'host' => $ticket->host(),
                 'qrImage' => TicketQrCode::dataUri($ticket->signedToken()),
                 'tableNumber' => $ticket->registration->tableAssignment?->seatingTable->number,
             ])->values()->all(),

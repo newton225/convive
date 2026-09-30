@@ -62,7 +62,7 @@ class TicketController extends Controller
             'ticket' => [
                 'name' => $ticket->holderName(),
                 'unit' => $ticket->holderUnitName(),
-                'guestOf' => $ticket->isCompanion() ? $ticket->registration->name : null,
+                'host' => $ticket->host(),
                 'qrImage' => TicketQrCode::dataUri($ticket->signedToken()),
                 'tableNumber' => $ticket->registration->tableAssignment?->seatingTable->number,
                 'pdfUrl' => $ticket->pdfUrl(),

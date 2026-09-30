@@ -65,7 +65,8 @@ export type TicketSummary = {
 export type PublicTicketPass = {
     name: string;
     unit: string;
-    guestOf: string | null;
+    // La personne qui invite cet accompagnateur ; null sur le billet de l'invite principal.
+    host: { name: string; unit: string; reference: string | null } | null;
     qrImage: string;
     tableNumber: number | null;
     pdfUrl: string | null;

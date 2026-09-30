@@ -50,13 +50,6 @@ export default function PublicTicketShow({ event, tenant, ticket }: Props) {
                         <p className="text-muted-foreground text-sm">
                             {ticket.unit}
                         </p>
-                        {ticket.guestOf ? (
-                            <p className="text-muted-foreground text-sm">
-                                {t('guest.ticket.guest_of', {
-                                    name: ticket.guestOf,
-                                })}
-                            </p>
-                        ) : null}
                     </CardHeader>
                     <CardContent className="space-y-4 text-center">
                         <img
@@ -72,6 +65,30 @@ export default function PublicTicketShow({ event, tenant, ticket }: Props) {
                                   })
                                 : t('guest.ticket.no_table')}
                         </p>
+                        {ticket.host ? (
+                            <div
+                                className="bg-muted rounded-lg px-4 py-3 text-left text-sm"
+                                data-test="ticket-host"
+                            >
+                                <p className="text-muted-foreground text-xs font-medium uppercase">
+                                    {t('guest.ticket.host_title')}
+                                </p>
+                                <p>
+                                    <span className="font-medium">
+                                        {ticket.host.name}
+                                    </span>
+                                    {' · '}
+                                    {ticket.host.unit}
+                                </p>
+                                {ticket.host.reference ? (
+                                    <p className="text-muted-foreground text-xs">
+                                        {t('guest.ticket.host_reference', {
+                                            reference: ticket.host.reference,
+                                        })}
+                                    </p>
+                                ) : null}
+                            </div>
+                        ) : null}
                         <p className="text-muted-foreground text-sm">
                             {t('guest.ticket.single_notice')}
                         </p>

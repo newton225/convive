@@ -99,6 +99,51 @@ class TicketPdfTest extends TestCase
         Pdf::assertRespondedWithPdf(fn (PdfBuilder $pdf) => $this->holderNames($pdf) === ['Aya Kouassi', 'Kofi Kouassi', 'Marie Kouassi']);
     }
 
+    public function test_le_billet_de_l_invite_principal_liste_ses_accompagnateurs(): void
+    {
+        Pdf::fake();
+        ['registration' => $registration] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $registration->fresh()->ticketsPdfUrl());
+
+        $this->get($url)->assertOk();
+
+        Pdf::assertRespondedWithPdf(function (PdfBuilder $pdf) {
+            [$holder, $companion] = $pdf->viewData['tickets'];
+
+            return array_column($holder['companions'], 'name') === ['Kofi Kouassi', 'Marie Kouassi']
+                && $holder['host'] === null
+                && $companion['companions'] === [];
+        });
+    }
+
+    public function test_la_liste_des_accompagnateurs_suit_le_gabarit_du_billet(): void
+    {
+        Pdf::fake();
+        ['registration' => $registration] = $this->confirmedGroup();
+        $this->tenant->brandingOrCreate()->update(['ticket_element_companions' => false]);
+
+        $url = $this->tenant->asCurrent(fn () => $registration->fresh()->ticketsPdfUrl());
+
+        $this->get($url)->assertOk();
+
+        Pdf::assertRespondedWithPdf(fn (PdfBuilder $pdf) => $pdf->viewData['tickets'][0]['companions'] === []);
+    }
+
+    public function test_le_billet_d_un_accompagnateur_presente_la_personne_qui_l_invite(): void
+    {
+        Pdf::fake();
+        ['registration' => $registration, 'tickets' => $tickets] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $tickets[1]->fresh()->pdfUrl());
+
+        $this->get($url)->assertOk();
+
+        Pdf::assertRespondedWithPdf(fn (PdfBuilder $pdf) => $pdf->viewData['tickets'][0]['host']['name'] === 'Aya Kouassi'
+            && $pdf->viewData['tickets'][0]['host']['reference'] === $registration->fresh()->reference
+            && $pdf->viewData['tickets'][0]['host']['unit'] !== '');
+    }
+
     public function test_un_lien_pdf_altere_repond_404(): void
     {
         Pdf::fake();

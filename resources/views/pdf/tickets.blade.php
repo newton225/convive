@@ -21,8 +21,13 @@
         .muted { color: #6b6862; font-size: 10pt; margin-top: 1mm; }
         .qr { width: 62mm; height: 62mm; margin-top: 6mm; image-rendering: pixelated; }
         .table { font-size: 14pt; font-weight: 700; margin-top: 4mm; }
-        .notice { margin-top: 6mm; border-top: 0.4mm solid {{ $colors['secondary'] }}; padding-top: 4mm; font-size: 9pt; color: #6b6862; }
+        .notice { margin-top: 6mm; border-top: 0.4mm solid {{ $colors['secondary'] }}; padding: 4mm 8mm 0; font-size: 9pt; line-height: 1.4; color: #6b6862; }
         .position { margin-top: 2mm; font-size: 8pt; color: #9a968f; }
+        /* Le groupe : qui accompagne l'invite principal, ou qui invite un accompagnateur. En
+           ligne et en petit, pour qu'un grand groupe ne pousse pas le billet sur deux pages. */
+        .group { margin: 4mm 8mm 0; padding: 3mm 4mm; border-radius: 2mm; background: #f4f2ee; font-size: 9pt; line-height: 1.4; }
+        .group-title { font-size: 7.5pt; letter-spacing: 0.06em; text-transform: uppercase; color: #6b6862; margin-bottom: 1mm; }
+        .group-name { font-weight: 700; }
     </style>
 </head>
 <body>
@@ -46,9 +51,6 @@
             <div class="holder">
                 <div class="name">{{ $ticket['name'] }}</div>
                 <div class="muted">{{ $ticket['unit'] }}</div>
-                @if ($ticket['guestOf'])
-                    <div class="muted">{{ __('guest.ticket_pdf.guest_of', ['name' => $ticket['guestOf']]) }}</div>
-                @endif
             </div>
 
             <img class="qr" src="{{ $ticket['qrImage'] }}" alt="{{ __('guest.ticket.title') }}">
@@ -60,6 +62,23 @@
                     {{ __('guest.ticket.no_table') }}
                 @endif
             </div>
+
+            @if ($ticket['host'])
+                <div class="group">
+                    <div class="group-title">{{ __('guest.ticket_pdf.host_title') }}</div>
+                    <span class="group-name">{{ $ticket['host']['name'] }}</span> · {{ $ticket['host']['unit'] }}
+                    @if ($ticket['host']['reference'])
+                        <div class="muted">{{ __('guest.ticket_pdf.host_reference', ['reference' => $ticket['host']['reference']]) }}</div>
+                    @endif
+                </div>
+            @elseif (count($ticket['companions']) > 0)
+                <div class="group">
+                    <div class="group-title">{{ __('guest.ticket_pdf.companions_title') }}</div>
+                    @foreach ($ticket['companions'] as $companion)
+                        <span class="group-name">{{ $companion['name'] }}</span> ({{ $companion['unit'] }})@if (! $loop->last) · @endif
+                    @endforeach
+                </div>
+            @endif
 
             <div class="notice">
                 {{ __('guest.ticket_pdf.notice') }}

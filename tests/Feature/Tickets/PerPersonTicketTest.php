@@ -162,7 +162,10 @@ class PerPersonTicketTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('public/ticket-show')
                 ->where('ticket.name', 'Kofi Kouassi')
-                ->where('ticket.guestOf', 'Aya Kouassi')
+                // La personne qui l'invite, pour qu'il sache a qui se rattacher, et l'agent aussi.
+                ->where('ticket.host.name', 'Aya Kouassi')
+                ->has('ticket.host.unit')
+                ->has('ticket.host.reference')
                 ->has('ticket.qrImage'));
     }
 
