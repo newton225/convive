@@ -222,13 +222,16 @@ export default function TicketTemplate({
                                 {t('ticket_template.preview.title')}
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="flex justify-center">
-                            <BrandedTicket
-                                brand={brand}
-                                model={model}
-                                elements={elements}
-                                eventName={events[0]?.name ?? tenant.name}
-                            />
+                        <CardContent>
+                            <div className="bg-muted flex justify-center rounded-lg px-4 py-8">
+                                <BrandedTicket
+                                    brand={brand}
+                                    model={model}
+                                    elements={elements}
+                                    eventName={events[0]?.name ?? tenant.name}
+                                    eventStartsAt={events[0]?.startsAt ?? null}
+                                />
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

@@ -28,6 +28,7 @@ return [
         'seats' => 'Seats',
         'companions' => 'Companions',
         'scheduled' => 'Scheduled send',
+        'qr' => 'Ticket QR code',
         'valid' => 'Valid ticket',
     ],
 

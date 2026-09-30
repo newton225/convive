@@ -28,6 +28,7 @@ return [
         'seats' => 'Places',
         'companions' => 'Accompagnateurs',
         'scheduled' => 'Envoi programmé',
+        'qr' => 'QR code du billet',
         'valid' => 'Billet valide',
     ],
 
