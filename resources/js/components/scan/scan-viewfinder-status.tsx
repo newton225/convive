@@ -102,6 +102,21 @@ export function ScanViewfinderStatus({ phase, verdict, verdictKey }: Props) {
                 ) : null}
             </AnimatePresence>
 
+            {/* Pourtour assombri : l'oeil va droit a la zone de visee. Une ombre portee etendue
+                plutot que quatre bandes, pour suivre l'arrondi du cadre ; le conteneur du viseur
+                coupe ce qui depasse. Seulement quand la camera filme : sans image, il n'y a rien
+                a assombrir. */}
+            <div
+                className={cn(
+                    'absolute inset-[14%] rounded-xl shadow-[0_0_0_100vmax_rgb(0_0_0/0.5)] transition-opacity duration-200',
+                    phase === 'starting' || phase === 'error'
+                        ? 'opacity-0'
+                        : 'opacity-100',
+                )}
+                aria-hidden="true"
+                data-test="scan-viewfinder-mask"
+            />
+
             {/* Le cadre de visee : ou placer le QR, et sa couleur dit l'etat du dernier billet. */}
             <div
                 className={cn(
