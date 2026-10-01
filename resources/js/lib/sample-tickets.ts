@@ -19,19 +19,18 @@ const SampleCompanions: TicketCardData['companions'] = [
 
 /**
  * Les billets d'exemple de l'apercu du gabarit (README ecran 15) : un invite principal et l'un de
- * ses accompagnateurs, pour voir les deux billets que le groupe recevra. Noms d'exemple, et QR
- * d'exemple fourni par le serveur (meme rendu qu'un vrai billet, contenu sans valeur). La liste des
- * accompagnateurs suit la case du gabarit, comme `App\Support\TicketCard` sur les vrais billets.
+ * ses accompagnateurs, pour voir les deux billets que le groupe recevra. Noms d'exemple, QR
+ * d'exemple (`qrImage` null). La liste des accompagnateurs suit la case du gabarit, comme
+ * `App\Support\TicketCard` sur les vrais billets.
  */
 export function sampleTicket(
     holder: SampleTicketHolder,
     withCompanions: boolean,
-    qrImage: string | null,
 ): TicketCardData {
     if (holder === 'companion') {
         return {
             holder: { name: 'Kofi Kouassi', unit: 'QODESH' },
-            qrImage,
+            qrImage: null,
             tableNumber: 7,
             seats: 1,
             companions: [],
@@ -45,7 +44,7 @@ export function sampleTicket(
 
     return {
         holder: { name: 'Aya Kouassi', unit: 'ELIAKIM' },
-        qrImage,
+        qrImage: null,
         tableNumber: 7,
         seats: SampleCompanions.length + 1,
         companions: withCompanions ? SampleCompanions : [],

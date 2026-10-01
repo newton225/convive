@@ -49,7 +49,6 @@ type Props = {
     brand: TicketBrand;
     backgroundFile: BrandFileOption;
     bodyBackgroundFile: BrandFileOption;
-    sampleQrImage: string;
 };
 
 /**
@@ -68,7 +67,6 @@ export default function EventTicketTemplate({
     brand,
     backgroundFile,
     bodyBackgroundFile,
-    sampleQrImage,
 }: Props) {
     const { t } = useTranslation();
     const { errors } = usePage().props;
@@ -116,7 +114,6 @@ export default function EventTicketTemplate({
                     model={enabled ? model : organisation.model}
                     elements={enabled ? elements : organisation.elements}
                     previewEvent={event}
-                    sampleQrImage={sampleQrImage}
                     editable={enabled}
                     canSave
                     saveUrl={eventTicketTemplateUpdate(target).url}

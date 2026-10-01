@@ -29,8 +29,6 @@ type Props = {
     model: TicketModel;
     elements: TicketElements;
     previewEvent: TicketCardEvent;
-    // QR d'exemple, rendu comme celui d'un vrai billet ; son contenu n'ouvre aucune entree.
-    sampleQrImage: string;
     // Faux : modele et elements se lisent sans se modifier (permission absente, ou gabarit de
     // l'organisation montre sur un evenement qui n'a pas active le sien).
     editable: boolean;
@@ -69,7 +67,6 @@ export function TicketTemplateEditor({
     model: initialModel,
     elements: initialElements,
     previewEvent,
-    sampleQrImage,
     editable,
     canSave,
     saveUrl,
@@ -322,7 +319,6 @@ export function TicketTemplateEditor({
                                     ticket={sampleTicket(
                                         previewHolder,
                                         elements.companions,
-                                        sampleQrImage,
                                     )}
                                     showMissing
                                     withBackdrop={false}

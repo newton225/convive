@@ -77,8 +77,7 @@ class TicketTemplateTest extends TestCase
                 ->where('brand.backgroundUrl', null)
                 ->where('bodyBackgroundFile.value', 'ticket_body_background')
                 ->where('bodyBackgroundFile.crop', ['width' => 1000, 'height' => 1228])
-                ->where('brand.bodyBackgroundUrl', null)
-                ->where('sampleQrImage', fn (string $image) => str_starts_with($image, 'data:image/svg+xml;base64,')),
+                ->where('brand.bodyBackgroundUrl', null),
             );
 
         // Un reglage du billet, depose depuis son gabarit : pas une piece de l'identite de

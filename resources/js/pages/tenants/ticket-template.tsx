@@ -33,8 +33,6 @@ type Props = {
     events: TicketTemplateEvent[];
     backgroundFile: BrandFileOption;
     bodyBackgroundFile: BrandFileOption;
-    // QR d'exemple, rendu comme celui d'un vrai billet ; son contenu n'ouvre aucune entree.
-    sampleQrImage: string;
 };
 
 /**
@@ -52,7 +50,6 @@ export default function TicketTemplate({
     events,
     backgroundFile,
     bodyBackgroundFile,
-    sampleQrImage,
 }: Props) {
     const { t, locale } = useTranslation();
     const { errors } = usePage().props;
@@ -80,7 +77,6 @@ export default function TicketTemplate({
                         startsAt: events[0]?.startsAt ?? null,
                         venue: events[0]?.venue ?? null,
                     }}
-                    sampleQrImage={sampleQrImage}
                     editable={canEdit}
                     canSave={canEdit}
                     saveUrl={ticketTemplateUpdate(tenant.slug).url}
