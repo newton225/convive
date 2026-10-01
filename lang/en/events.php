@@ -136,6 +136,12 @@ return [
         'empty' => 'No event in this category.',
     ],
 
+    'search' => [
+        'label' => 'Search for an event',
+        'placeholder' => 'Name or venue',
+        'empty' => 'No event matches “:search” in this category.',
+    ],
+
     'badges' => [
         'published' => 'Link handed out',
         'not_ready' => 'Not publishable yet',

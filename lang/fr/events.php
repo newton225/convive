@@ -136,6 +136,12 @@ return [
         'empty' => 'Aucun événement dans cette catégorie.',
     ],
 
+    'search' => [
+        'label' => 'Rechercher un événement',
+        'placeholder' => 'Nom ou lieu',
+        'empty' => 'Aucun événement ne correspond à « :search » dans cette catégorie.',
+    ],
+
     'badges' => [
         'published' => 'Lien distribué',
         'not_ready' => 'Pas encore publiable',

@@ -1,10 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useState } from 'react';
-import { EventCard } from '@/components/events/event-card';
+import { EventGrid } from '@/components/events/event-grid';
 import { ConfirmSummary } from '@/components/confirm-summary';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
     Dialog,
@@ -19,6 +20,7 @@ import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
+import { normalizeForSearch } from '@/lib/search';
 import { close, create, index } from '@/routes/tenants/events';
 import type {
     EventListItem,
@@ -46,9 +48,20 @@ export default function EventsIndex({ tenant, events, permissions }: Props) {
         (value === 'closed'
             ? event.status === 'closed'
             : event.status !== 'closed');
+    const [search, setSearch] = useState('');
+    const needle = normalizeForSearch(search);
+    // Le nom, le sous-titre et le lieu : ce qu'on se rappelle d'un evenement qu'on cherche.
+    const found = events.filter(
+        (event) =>
+            needle === '' ||
+            normalizeForSearch(
+                [event.name, event.subtitle, event.venue].join(' '),
+            ).includes(needle),
+    );
+    // Les compteurs suivent la recherche : ils disent ou se trouvent les resultats.
     const countFor = (value: EventFilter) =>
-        events.filter((event) => matches(event, value)).length;
-    const visible = events.filter((event) => matches(event, filter));
+        found.filter((event) => matches(event, value)).length;
+    const visible = found.filter((event) => matches(event, filter));
     const [closing, setClosing] = useState<EventListItem | null>(null);
 
     return (
@@ -82,53 +95,67 @@ export default function EventsIndex({ tenant, events, permissions }: Props) {
                     </div>
                 ) : (
                     <>
-                        <ToggleGroup
-                            type="single"
-                            variant="outline"
-                            value={filter}
-                            onValueChange={(value) => {
-                                const next = EventFilters.find(
-                                    (candidate) => candidate === value,
-                                );
+                        <div className="flex flex-wrap items-center gap-3">
+                            <ToggleGroup
+                                type="single"
+                                variant="outline"
+                                value={filter}
+                                onValueChange={(value) => {
+                                    const next = EventFilters.find(
+                                        (candidate) => candidate === value,
+                                    );
 
-                                if (next) {
-                                    setFilter(next);
-                                }
-                            }}
-                            aria-label={t('events.filters.label')}
-                            className="w-fit"
-                        >
-                            {EventFilters.map((value) => (
-                                <ToggleGroupItem
-                                    key={value}
-                                    value={value}
-                                    className="px-3"
-                                    data-test={`event-filter-${value}`}
-                                >
-                                    {t(`events.filters.${value}`)}
-                                    <span className="text-muted-foreground ml-1 tabular-nums">
-                                        {countFor(value)}
-                                    </span>
-                                </ToggleGroupItem>
-                            ))}
-                        </ToggleGroup>
+                                    if (next) {
+                                        setFilter(next);
+                                    }
+                                }}
+                                aria-label={t('events.filters.label')}
+                                className="w-fit"
+                            >
+                                {EventFilters.map((value) => (
+                                    <ToggleGroupItem
+                                        key={value}
+                                        value={value}
+                                        className="px-3"
+                                        data-test={`event-filter-${value}`}
+                                    >
+                                        {t(`events.filters.${value}`)}
+                                        <span className="text-muted-foreground ml-1 tabular-nums">
+                                            {countFor(value)}
+                                        </span>
+                                    </ToggleGroupItem>
+                                ))}
+                            </ToggleGroup>
+
+                            <div className="relative min-w-56 flex-1 sm:max-w-sm">
+                                <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+                                <Input
+                                    type="search"
+                                    value={search}
+                                    onChange={(event) =>
+                                        setSearch(event.target.value)
+                                    }
+                                    placeholder={t('events.search.placeholder')}
+                                    aria-label={t('events.search.label')}
+                                    className="pl-8"
+                                    data-test="event-search"
+                                />
+                            </div>
+                        </div>
 
                         {visible.length === 0 ? (
                             <p className="text-muted-foreground text-sm">
-                                {t('events.filters.empty')}
+                                {needle === ''
+                                    ? t('events.filters.empty')
+                                    : t('events.search.empty', { search })}
                             </p>
                         ) : (
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                                {visible.map((event) => (
-                                    <EventCard
-                                        key={event.id}
-                                        tenantSlug={tenant.slug}
-                                        event={event}
-                                        permissions={permissions}
-                                        onClose={() => setClosing(event)}
-                                    />
-                                ))}
-                            </div>
+                            <EventGrid
+                                tenantSlug={tenant.slug}
+                                events={visible}
+                                permissions={permissions}
+                                onClose={setClosing}
+                            />
                         )}
                     </>
                 )}
