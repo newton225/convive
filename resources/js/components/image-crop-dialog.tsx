@@ -1,8 +1,9 @@
 import { usePage } from '@inertiajs/react';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import Cropper from 'react-easy-crop';
-import type { Area, Point } from 'react-easy-crop';
+import type { Area, Point, Size } from 'react-easy-crop';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +25,11 @@ type Props = {
     aspect: number;
     title: string;
     processing: boolean;
+    // Repere dessine par-dessus la zone de rognage, a sa taille exacte : ce qui recouvrira l'image
+    // dans le rendu final (le QR du billet).
+    guide?: ReactNode;
+    // Ce que le repere montre, a la suite de la consigne de cadrage.
+    guideHint?: string;
     onCancel: () => void;
     onConfirm: (area: CropArea) => void;
 };
@@ -33,7 +39,7 @@ const MaxZoom = 4;
 const ZoomStep = 0.25;
 
 /**
- * Rogner une image aux proportions imposees avant son envoi (fond du billet). Glisser pour
+ * Rogner une image aux proportions imposees avant son envoi (fonds du billet). Glisser pour
  * cadrer, pincer, molette ou boutons pour zoomer. Seule la zone part au serveur, en pixels de
  * l'image redressee : c'est lui qui decoupe et revalide (`SaveBrandFileRequest`), jamais une
  * image recadree par le navigateur.
@@ -46,6 +52,8 @@ export function ImageCropDialog({
     aspect,
     title,
     processing,
+    guide,
+    guideHint,
     onCancel,
     onConfirm,
 }: Props) {
@@ -55,6 +63,8 @@ export function ImageCropDialog({
     const [zoom, setZoom] = useState(MinZoom);
     const [area, setArea] = useState<Area | null>(null);
     const [source, setSource] = useState<string | null>(null);
+    // La taille a l'ecran de la zone de rognage, que la bibliotheque calcule selon l'image.
+    const [cropSize, setCropSize] = useState<Size | null>(null);
 
     // L'URL de l'apercu nait et meurt dans le meme effet : rejoue en mode strict, il en recree
     // une plutot que de garder une adresse deja revoquee.
@@ -62,6 +72,7 @@ export function ImageCropDialog({
         setCrop({ x: 0, y: 0 });
         setZoom(MinZoom);
         setArea(null);
+        setCropSize(null);
 
         if (file === null) {
             setSource(null);
@@ -90,6 +101,7 @@ export function ImageCropDialog({
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>
                         {t('organisation.files.crop.description')}
+                        {guideHint ? ` ${guideHint}` : null}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -108,9 +120,25 @@ export function ImageCropDialog({
                             onCropChange={setCrop}
                             onZoomChange={setZoom}
                             onCropComplete={(_, pixels) => setArea(pixels)}
+                            onCropSizeChange={setCropSize}
                             nonce={documentCspNonce(cspNonce)}
-                            showGrid
+                            showGrid={!guide}
                         />
+                    ) : null}
+                    {/* Centre comme la zone de rognage, et a sa taille : elle depend de l'image,
+                        d'ou un style pose par React (via le CSSOM, que la CSP laisse passer) et
+                        non une classe. Les gestes de cadrage passent au travers. */}
+                    {guide && cropSize ? (
+                        <div
+                            className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                            style={{
+                                width: cropSize.width,
+                                height: cropSize.height,
+                            }}
+                            aria-hidden="true"
+                        >
+                            {guide}
+                        </div>
                     ) : null}
                 </div>
 

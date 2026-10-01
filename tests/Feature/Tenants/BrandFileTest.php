@@ -136,6 +136,42 @@ class BrandFileTest extends TestCase
         $this->assertSame([1000, 850], [$width, $height]);
     }
 
+    public function test_le_fond_du_bas_du_billet_est_recadre_aux_proportions_du_bas_du_billet(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->upload($tenant, $owner, BrandFile::TicketBodyBackground, UploadedFile::fake()->image('fond.jpg', 1200, 400))
+            ->assertRedirect();
+
+        $media = $tenant->fresh()->branding->getFirstMedia(BrandFile::TicketBodyBackground->value);
+        $this->assertNotNull($media);
+        $this->assertTrue($media->hasGeneratedConversion(BrandFile::TicketBodyBackgroundConversion));
+
+        [$width, $height] = (array) getimagesize($media->getPath(BrandFile::TicketBodyBackgroundConversion));
+        $this->assertSame([1000, 1228], [$width, $height]);
+    }
+
+    public function test_la_zone_du_fond_du_bas_du_billet_suit_ses_propres_proportions(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $image = fn () => UploadedFile::fake()->image('fond.jpg', 800, 1000);
+
+        // Les proportions du haut du talon ne valent pas pour le bas.
+        $this->uploadCropped($tenant, $owner, BrandFile::TicketBodyBackground, $image(), [
+            'x' => 0, 'y' => 0, 'width' => 470, 'height' => 400,
+        ])->assertSessionHasErrors('crop');
+
+        $this->uploadCropped($tenant, $owner, BrandFile::TicketBodyBackground, $image(), [
+            'x' => 100, 'y' => 0, 'width' => 500, 'height' => 614,
+        ])->assertSessionHasNoErrors();
+
+        $media = $tenant->fresh()->branding->getFirstMedia(BrandFile::TicketBodyBackground->value);
+        [$width, $height] = (array) getimagesize($media->getPath());
+        $this->assertSame([500, 614], [$width, $height]);
+    }
+
     /**
      * @param  array{x: int, y: int, width: int, height: int}  $crop
      */

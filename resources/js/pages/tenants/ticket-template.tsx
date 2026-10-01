@@ -5,6 +5,8 @@ import BrandFileField from '@/components/brand-file-field';
 import Heading from '@/components/heading';
 import { SubmitButton } from '@/components/submit-button';
 import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
+import { TicketBodyGuide } from '@/components/ticket-template/ticket-body-guide';
+import { TicketStubGuide } from '@/components/ticket-template/ticket-stub-guide';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -41,6 +43,9 @@ type Props = {
     elements: TicketElements;
     events: TicketTemplateEvent[];
     backgroundFile: BrandFileOption;
+    bodyBackgroundFile: BrandFileOption;
+    // QR d'exemple, rendu comme celui d'un vrai billet ; son contenu n'ouvre aucune entree.
+    sampleQrImage: string;
 };
 
 const Models: TicketModel[] = ['classic', 'sober', 'elegant'];
@@ -68,6 +73,8 @@ export default function TicketTemplate({
     elements: initialElements,
     events,
     backgroundFile,
+    bodyBackgroundFile,
+    sampleQrImage,
 }: Props) {
     const { t, locale } = useTranslation();
     const { errors } = usePage().props;
@@ -179,12 +186,26 @@ export default function TicketTemplate({
 
                         {canEdit ? (
                             <Card data-test="ticket-background-card">
-                                <CardContent className="pt-6">
+                                <CardContent className="space-y-6 pt-6">
                                     <BrandFileField
                                         tenantSlug={tenant.slug}
                                         file={backgroundFile}
                                         url={brand.backgroundUrl}
                                         error={errors.file}
+                                        cropGuide={<TicketStubGuide />}
+                                        cropGuideHint={t(
+                                            'organisation.files.crop.stub_guide',
+                                        )}
+                                    />
+                                    <BrandFileField
+                                        tenantSlug={tenant.slug}
+                                        file={bodyBackgroundFile}
+                                        url={brand.bodyBackgroundUrl}
+                                        error={errors.file}
+                                        cropGuide={<TicketBodyGuide />}
+                                        cropGuideHint={t(
+                                            'organisation.files.crop.body_guide',
+                                        )}
                                     />
                                 </CardContent>
                             </Card>
@@ -361,6 +382,7 @@ export default function TicketTemplate({
                                             ticket={sampleTicket(
                                                 previewHolder,
                                                 elements.companions,
+                                                sampleQrImage,
                                             )}
                                             showMissing
                                             withBackdrop={false}

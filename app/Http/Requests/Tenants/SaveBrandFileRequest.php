@@ -42,10 +42,10 @@ class SaveBrandFileRequest extends FormRequest
                 // avant que le reencodage n'echoue.
                 'dimensions:min_width=1,min_height=1',
             ],
-            // La zone de rognage (en pixels de l'image redressee) : seulement pour le fond du
-            // billet, le seul fichier dont les proportions sont imposees.
+            // La zone de rognage (en pixels de l'image redressee) : seulement pour les fonds du
+            // billet, les seuls fichiers dont les proportions sont imposees.
             'crop' => [
-                Rule::prohibitedIf(fn () => $this->route('file') !== BrandFile::TicketBackground->value),
+                Rule::prohibitedIf(fn () => $this->imposedProportions() === null),
                 'nullable', 'array:x,y,width,height',
             ],
             'crop.x' => ['required_with:crop', 'integer', 'min:0'],
@@ -66,8 +66,9 @@ class SaveBrandFileRequest extends FormRequest
             function (Validator $validator) {
                 $crop = $this->crop();
                 $file = $this->file('file');
+                $proportions = $this->imposedProportions();
 
-                if ($crop === null || $validator->errors()->isNotEmpty() || ! $file instanceof UploadedFile) {
+                if ($crop === null || $proportions === null || $validator->errors()->isNotEmpty() || ! $file instanceof UploadedFile) {
                     return;
                 }
 
@@ -82,7 +83,7 @@ class SaveBrandFileRequest extends FormRequest
                 }
 
                 // Tolerance de 2 % : la zone arrive arrondie au pixel.
-                $expected = BrandFile::TicketBackgroundWidth / BrandFile::TicketBackgroundHeight;
+                $expected = $proportions['width'] / $proportions['height'];
 
                 if (abs($crop['width'] / $crop['height'] - $expected) > $expected * 0.02) {
                     $validator->errors()->add('crop', __('organisation.errors.crop_ratio'));
@@ -125,6 +126,18 @@ class SaveBrandFileRequest extends FormRequest
             'file.max' => __('organisation.errors.file_too_large'),
             'file.dimensions' => __('organisation.errors.file_not_an_image'),
         ];
+    }
+
+    /**
+     * Get the proportions imposed on the file named by the route, or null when it has none.
+     *
+     * @return array{width: int, height: int}|null
+     */
+    private function imposedProportions(): ?array
+    {
+        $file = $this->route('file');
+
+        return is_string($file) ? BrandFile::tryFrom($file)?->crop() : null;
     }
 
     private function tenant(): Tenant

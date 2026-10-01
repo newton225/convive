@@ -57,9 +57,16 @@ return [
         'replace' => 'Replace',
         'choose' => 'Choose a file',
         'remove' => 'Remove',
+        'remove_confirm' => [
+            'title' => 'Remove “:label”?',
+            'description' => 'This file will no longer appear on your invitation links, tickets and receipts. To bring it back, you will have to upload it again.',
+            'confirm' => 'Remove the file',
+        ],
         'crop' => [
             'title' => 'Crop: :label',
-            'description' => 'Drag the image to frame it, zoom in if needed. The frame has the proportions of the top of the ticket.',
+            'description' => 'Drag the image to frame it, zoom in if needed.',
+            'stub_guide' => 'The frame has the proportions of the top of the ticket; the light areas mark where the QR code and the table will sit, hiding the image there.',
+            'body_guide' => 'The frame has the proportions of the lower part of the ticket. The image appears faded there, as shown here, so the text stays readable.',
             'zoom_in' => 'Zoom in',
             'zoom_out' => 'Zoom out',
             'confirm' => 'Crop and save',
@@ -74,8 +81,12 @@ return [
             'hint' => 'Wide image, at the top of the page your guests see.',
         ],
         'ticket_background' => [
-            'label' => 'Ticket background',
+            'label' => 'Ticket top background',
             'hint' => 'Image placed behind the QR code, at the top of the ticket. It is cropped to the ticket proportions; the QR keeps its white frame so it still scans.',
+        ],
+        'ticket_body_background' => [
+            'label' => 'Ticket lower background',
+            'hint' => 'Image placed behind the text, below the perforated line. It is cropped to the ticket proportions and faded so the text stays readable.',
         ],
         'stamp' => [
             'label' => 'Stamp',

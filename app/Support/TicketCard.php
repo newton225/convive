@@ -53,7 +53,7 @@ class TicketCard
      * Get the organisation's ticket template for a web page : model, elements, brand, with brand
      * files as signed expiring URLs.
      *
-     * @return array{model: string, elements: array{logo: bool, stamp: bool, signature: bool, companions: bool}, brand: array{displayName: string, colors: array{primary: string, secondary: string}, logoUrl: string|null, stampUrl: string|null, signatureUrl: string|null, backgroundUrl: string|null}}
+     * @return array{model: string, elements: array{logo: bool, stamp: bool, signature: bool, companions: bool}, brand: array{displayName: string, colors: array{primary: string, secondary: string}, logoUrl: string|null, stampUrl: string|null, signatureUrl: string|null, backgroundUrl: string|null, bodyBackgroundUrl: string|null}}
      */
     public static function design(Tenant $tenant, Event $event): array
     {
@@ -65,13 +65,14 @@ class TicketCard
             $event,
             fn (BrandFile $file) => $branding->brandFileUrl($file),
             $branding->ticketBackgroundUrl(),
+            $branding->ticketBodyBackgroundUrl(),
         );
     }
 
     /**
      * The same template for the PDF, brand files embedded as `data:` URIs (see `PdfLetterhead`).
      *
-     * @return array{model: string, elements: array{logo: bool, stamp: bool, signature: bool, companions: bool}, brand: array{displayName: string, colors: array{primary: string, secondary: string}, logoUrl: string|null, stampUrl: string|null, signatureUrl: string|null, backgroundUrl: string|null}, tints: array{stub: string, host: string, badge: string}}
+     * @return array{model: string, elements: array{logo: bool, stamp: bool, signature: bool, companions: bool}, brand: array{displayName: string, colors: array{primary: string, secondary: string}, logoUrl: string|null, stampUrl: string|null, signatureUrl: string|null, backgroundUrl: string|null, bodyBackgroundUrl: string|null}, tints: array{stub: string, host: string, badge: string}}
      */
     public static function pdfDesign(Tenant $tenant, Event $event): array
     {
@@ -83,6 +84,7 @@ class TicketCard
             $event,
             fn (BrandFile $file) => PdfLetterhead::brandFileDataUri($branding, $file),
             PdfLetterhead::brandFileDataUri($branding, BrandFile::TicketBackground, BrandFile::TicketBackgroundConversion),
+            PdfLetterhead::brandFileDataUri($branding, BrandFile::TicketBodyBackground, BrandFile::TicketBodyBackgroundConversion),
         );
 
         // Les teintes que le composant obtient par opacite (`bg-[color:var(--brand-primary)]/8`),
@@ -116,9 +118,10 @@ class TicketCard
     /**
      * @param  callable(BrandFile): (string|null)  $file
      * @param  string|null  $background  the ticket background, already cropped for the stub
-     * @return array{model: string, elements: array{logo: bool, stamp: bool, signature: bool, companions: bool}, brand: array{displayName: string, colors: array{primary: string, secondary: string}, logoUrl: string|null, stampUrl: string|null, signatureUrl: string|null, backgroundUrl: string|null}}
+     * @param  string|null  $bodyBackground  the background of the lower part, already cropped for it
+     * @return array{model: string, elements: array{logo: bool, stamp: bool, signature: bool, companions: bool}, brand: array{displayName: string, colors: array{primary: string, secondary: string}, logoUrl: string|null, stampUrl: string|null, signatureUrl: string|null, backgroundUrl: string|null, bodyBackgroundUrl: string|null}}
      */
-    private static function designWith(Tenant $tenant, TenantBranding $branding, Event $event, callable $file, ?string $background): array
+    private static function designWith(Tenant $tenant, TenantBranding $branding, Event $event, callable $file, ?string $background, ?string $bodyBackground): array
     {
         return [
             'model' => $branding->ticket_model->value,
@@ -136,6 +139,7 @@ class TicketCard
                 'stampUrl' => $branding->ticket_element_stamp ? $file(BrandFile::Stamp) : null,
                 'signatureUrl' => $branding->ticket_element_signature ? $file(BrandFile::Signature) : null,
                 'backgroundUrl' => $background,
+                'bodyBackgroundUrl' => $bodyBackground,
             ],
         ];
     }

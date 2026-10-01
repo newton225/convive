@@ -7,6 +7,7 @@ export type TicketBrand = {
     stampUrl: string | null;
     signatureUrl: string | null;
     backgroundUrl: string | null;
+    bodyBackgroundUrl: string | null;
     representative: string | null;
 };
 
@@ -53,6 +54,9 @@ export type TicketCardBrand = {
     signatureUrl: string | null;
     // Image derriere le QR, deja recadree aux proportions du haut du talon ; null sans fond.
     backgroundUrl: string | null;
+    // Image derriere le texte, sous la ligne perforee, recadree aux proportions du bas du talon et
+    // affichee estompee ; null sans fond.
+    bodyBackgroundUrl: string | null;
 };
 
 export type TicketDesign = {

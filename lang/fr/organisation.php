@@ -57,9 +57,16 @@ return [
         'replace' => 'Remplacer',
         'choose' => 'Choisir un fichier',
         'remove' => 'Retirer',
+        'remove_confirm' => [
+            'title' => 'Retirer « :label » ?',
+            'description' => 'Ce fichier n’apparaîtra plus sur vos liens d’invitation, vos billets et vos reçus. Pour le remettre, il faudra le déposer à nouveau.',
+            'confirm' => 'Retirer le fichier',
+        ],
         'crop' => [
             'title' => 'Recadrer : :label',
-            'description' => 'Glissez l’image pour la cadrer, zoomez au besoin. Le cadre a les proportions du haut du billet.',
+            'description' => 'Glissez l’image pour la cadrer, zoomez au besoin.',
+            'stub_guide' => 'Le cadre a les proportions du haut du billet ; les zones claires marquent l’emplacement du QR et de la table, qui masqueront l’image à cet endroit.',
+            'body_guide' => 'Le cadre a les proportions du bas du billet. L’image y apparaît estompée, comme ici, pour que le texte reste lisible.',
             'zoom_in' => 'Zoomer',
             'zoom_out' => 'Dézoomer',
             'confirm' => 'Recadrer et enregistrer',
@@ -74,8 +81,12 @@ return [
             'hint' => 'Image large, en haut de la page vue par vos invités.',
         ],
         'ticket_background' => [
-            'label' => 'Fond du billet',
+            'label' => 'Fond du haut du billet',
             'hint' => 'Image placée derrière le QR, en haut du billet. Elle est recadrée aux proportions du billet ; le QR garde son cadre blanc pour rester lisible au scan.',
+        ],
+        'ticket_body_background' => [
+            'label' => 'Fond du bas du billet',
+            'hint' => 'Image placée derrière le texte, sous la ligne perforée. Elle est recadrée aux proportions du billet et estompée pour que le texte reste lisible.',
         ],
         'stamp' => [
             'label' => 'Cachet',

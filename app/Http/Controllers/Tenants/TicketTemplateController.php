@@ -9,6 +9,7 @@ use App\Http\Requests\Tenants\SaveTicketTemplateRequest;
 use App\Models\Event;
 use App\Models\Tenant;
 use App\Models\TenantBranding;
+use App\Support\TicketQrCode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -35,15 +36,13 @@ class TicketTemplateController extends Controller
             'tenant' => ['slug' => $tenant->slug, 'name' => $tenant->name],
             'permissions' => $request->user()->toTenantPermissions($tenant),
             'brand' => $this->brand($tenant, $branding),
-            // Le fond du billet se depose ici, par la meme route et les memes controles que les
+            // Les fonds du billet se deposent ici, par la meme route et les memes controles que les
             // fichiers de marque de l'organisation.
-            'backgroundFile' => [
-                'value' => BrandFile::TicketBackground->value,
-                'label' => BrandFile::TicketBackground->label(),
-                'hint' => BrandFile::TicketBackground->hint(),
-                // Les proportions du haut du talon, que le rognage impose avant l'envoi.
-                'crop' => ['width' => BrandFile::TicketBackgroundWidth, 'height' => BrandFile::TicketBackgroundHeight],
-            ],
+            'backgroundFile' => $this->fileOption(BrandFile::TicketBackground),
+            'bodyBackgroundFile' => $this->fileOption(BrandFile::TicketBodyBackground),
+            // Le QR de l'apercu, rendu comme celui d'un vrai billet et aussi dense, mais non signe :
+            // un scan le refuse.
+            'sampleQrImage' => TicketQrCode::dataUri(str_repeat('convive-apercu-', 17)),
             'model' => $branding->ticket_model->value,
             'elements' => [
                 'logo' => $branding->ticket_element_logo,
@@ -84,6 +83,20 @@ class TicketTemplateController extends Controller
     }
 
     /**
+     * @return array{value: string, label: string, hint: string, crop: array{width: int, height: int}|null}
+     */
+    private function fileOption(BrandFile $file): array
+    {
+        return [
+            'value' => $file->value,
+            'label' => $file->label(),
+            'hint' => $file->hint(),
+            // Les proportions de la partie du talon couverte, que le rognage impose avant l'envoi.
+            'crop' => $file->crop(),
+        ];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function brand(Tenant $tenant, TenantBranding $branding): array
@@ -95,6 +108,7 @@ class TicketTemplateController extends Controller
             'stampUrl' => $branding->brandFileUrl(BrandFile::Stamp),
             'signatureUrl' => $branding->brandFileUrl(BrandFile::Signature),
             'backgroundUrl' => $branding->ticketBackgroundUrl(),
+            'bodyBackgroundUrl' => $branding->ticketBodyBackgroundUrl(),
             'representative' => $branding->representative_name,
         ];
     }

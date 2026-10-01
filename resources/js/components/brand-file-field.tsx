@@ -1,6 +1,8 @@
 import { router } from '@inertiajs/react';
 import { Trash2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ImageCropDialog } from '@/components/image-crop-dialog';
 import type { CropArea } from '@/components/image-crop-dialog';
 import InputError from '@/components/input-error';
@@ -15,6 +17,9 @@ type Props = {
     file: BrandFileOption;
     url: string | null;
     error?: string;
+    // Repere affiche sur la zone de rognage, quand ce fichier en impose un.
+    cropGuide?: ReactNode;
+    cropGuideHint?: string;
 };
 
 export default function BrandFileField({
@@ -22,12 +27,15 @@ export default function BrandFileField({
     file,
     url,
     error,
+    cropGuide,
+    cropGuideHint,
 }: Props) {
     const { t } = useTranslation();
     const input = useRef<HTMLInputElement>(null);
     const [processing, setProcessing] = useState(false);
     // Le fichier en cours de rognage, quand ce fichier de marque impose ses proportions.
     const [cropping, setCropping] = useState<File | null>(null);
+    const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 
     const resetInput = () => {
         if (input.current) {
@@ -54,6 +62,7 @@ export default function BrandFileField({
     const remove = () => {
         router.delete(destroy([tenantSlug, file.value]).url, {
             onStart: () => setProcessing(true),
+            onSuccess: () => setConfirmingRemoval(false),
             onFinish: () => setProcessing(false),
         });
     };
@@ -120,7 +129,7 @@ export default function BrandFileField({
                             size="sm"
                             processing={processing}
                             data-test={`brand-file-remove-${file.value}`}
-                            onClick={remove}
+                            onClick={() => setConfirmingRemoval(true)}
                         >
                             <Trash2 className="h-4 w-4" />
                             {t('organisation.files.remove')}
@@ -132,6 +141,20 @@ export default function BrandFileField({
             <p className="text-muted-foreground text-xs">{file.hint}</p>
             <InputError message={error} />
 
+            <ConfirmActionDialog
+                open={confirmingRemoval}
+                onOpenChange={setConfirmingRemoval}
+                title={t('organisation.files.remove_confirm.title', {
+                    label: file.label,
+                })}
+                description={t('organisation.files.remove_confirm.description')}
+                confirmLabel={t('organisation.files.remove_confirm.confirm')}
+                onConfirm={remove}
+                processing={processing}
+                destructive
+                testId={`brand-file-remove-confirm-${file.value}`}
+            />
+
             {file.crop ? (
                 <ImageCropDialog
                     file={cropping}
@@ -140,6 +163,8 @@ export default function BrandFileField({
                         label: file.label,
                     })}
                     processing={processing}
+                    guide={cropGuide}
+                    guideHint={cropGuideHint}
                     onCancel={() => {
                         setCropping(null);
                         resetInput();

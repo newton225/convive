@@ -85,7 +85,7 @@ class TenantBranding extends Model implements HasMedia
     ];
 
     /**
-     * Les quatre fichiers de marque, un seul exemplaire chacun.
+     * Les fichiers de marque et les fonds du billet, un seul exemplaire chacun.
      *
      * Le SVG est absent volontairement : il peut porter du script, et rien ne justifie ce
      * risque pour un logo. Voir SECURITY.md H1.
@@ -100,16 +100,25 @@ class TenantBranding extends Model implements HasMedia
     }
 
     /**
-     * Le fond du billet est recadre des le depot, aux proportions du haut du talon : voir
-     * `BrandFile::TicketBackgroundConversion`. Synchrone, pour qu'il soit pret a l'apercu qui suit.
+     * Les fonds du billet sont recadres des le depot, aux proportions de la partie du talon qu'ils
+     * couvrent : voir `BrandFile::crop()`. Synchrone, pour qu'ils soient prets a l'apercu qui suit.
      */
     public function registerMediaConversions(?Media $media = null): void
     {
-        $this->addMediaConversion(BrandFile::TicketBackgroundConversion)
-            ->performOnCollections(BrandFile::TicketBackground->value)
-            ->nonQueued()
-            // En dernier : `fit()` passe au pilote d'image et ne rend plus la conversion.
-            ->fit(Fit::Crop, BrandFile::TicketBackgroundWidth, BrandFile::TicketBackgroundHeight);
+        foreach (BrandFile::cases() as $file) {
+            $crop = $file->crop();
+            $conversion = $file->conversion();
+
+            if ($crop === null || $conversion === null) {
+                continue;
+            }
+
+            $this->addMediaConversion($conversion)
+                ->performOnCollections($file->value)
+                ->nonQueued()
+                // En dernier : `fit()` passe au pilote d'image et ne rend plus la conversion.
+                ->fit(Fit::Crop, $crop['width'], $crop['height']);
+        }
     }
 
     /**
@@ -117,10 +126,24 @@ class TenantBranding extends Model implements HasMedia
      */
     public function ticketBackgroundUrl(int $minutes = 30): ?string
     {
-        $media = $this->getFirstMedia(BrandFile::TicketBackground->value);
+        return $this->croppedFileUrl(BrandFile::TicketBackground, $minutes);
+    }
 
-        return $media instanceof Media && $media->hasGeneratedConversion(BrandFile::TicketBackgroundConversion)
-            ? $media->getTemporaryUrl(now()->addMinutes($minutes), BrandFile::TicketBackgroundConversion)
+    /**
+     * Get a signed, expiring URL for the background of the lower part of the ticket, cropped for it.
+     */
+    public function ticketBodyBackgroundUrl(int $minutes = 30): ?string
+    {
+        return $this->croppedFileUrl(BrandFile::TicketBodyBackground, $minutes);
+    }
+
+    private function croppedFileUrl(BrandFile $file, int $minutes): ?string
+    {
+        $media = $this->getFirstMedia($file->value);
+        $conversion = $file->conversion();
+
+        return $media instanceof Media && $conversion !== null && $media->hasGeneratedConversion($conversion)
+            ? $media->getTemporaryUrl(now()->addMinutes($minutes), $conversion)
             : null;
     }
 

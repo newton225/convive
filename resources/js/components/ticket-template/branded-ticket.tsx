@@ -17,6 +17,9 @@ type Props = TicketDesign & {
     withBackdrop?: boolean;
 };
 
+// Meme seuil que `resources/views/pdf/tickets.blade.php`.
+const CompactCompanionsAbove = 4;
+
 /**
  * Le billet au format talon, le meme pour l'invite principal et chacun de ses accompagnateurs
  * (README ecran 7 et 15) : sur la page de l'invite, sur le lien individuel d'un accompagnateur,
@@ -47,6 +50,7 @@ export function BrandedTicket({
     // selecteur de classe brut : on les retire.
     const scopeClass = `brand-ticket-${useId().replace(/:/g, '')}`;
     const centered = model !== 'sober';
+    const compactCompanions = ticket.companions.length > CompactCompanionsAbove;
 
     const asset = (
         enabled: boolean,
@@ -86,19 +90,19 @@ export function BrandedTicket({
         elements.logo,
         brand.logoUrl,
         brand.displayName,
-        'size-8 object-contain',
+        'size-7 object-contain',
     );
     const stamp = asset(
         elements.stamp,
         brand.stampUrl,
         t('ticket_template.elements.stamp'),
-        'size-12 object-contain',
+        'size-10 object-contain',
     );
     const signature = asset(
         elements.signature,
         brand.signatureUrl,
         t('ticket_template.elements.signature'),
-        'h-9 w-20 object-contain',
+        'h-8 w-18 object-contain',
     );
 
     return (
@@ -111,7 +115,10 @@ export function BrandedTicket({
             <article
                 className={cn(
                     scopeClass,
-                    'text-ink relative flex min-h-[36rem] w-full max-w-80 flex-col bg-white',
+                    // Les proportions du talon du PDF (90 mm sur 187 mm) : l'apercu et le billet
+                    // telecharge ont la meme forme, et le fond du bas le meme cadrage. Un contenu
+                    // plus long allonge le billet a l'ecran plutot que de deborder.
+                    'text-ink relative flex aspect-[90/187] w-full max-w-80 flex-col bg-white',
                 )}
                 data-test="branded-ticket"
                 data-model={model}
@@ -184,173 +191,209 @@ export function BrandedTicket({
                     </p>
                 </div>
 
-                <div className="relative" aria-hidden="true">
+                <div className="relative z-10" aria-hidden="true">
                     {notches}
                     <div className="border-ink/40 mx-4 border-t-2 border-dotted" />
                 </div>
 
-                <div
-                    className={cn(
-                        'flex flex-1 flex-col px-5 pt-5',
-                        centered ? 'text-center' : 'text-left',
-                    )}
-                >
-                    <div
-                        className={cn(
-                            'flex items-center gap-2',
-                            centered ? 'justify-center' : 'justify-start',
-                        )}
-                    >
-                        {logo}
-                        <span className="text-ink/70 text-xs font-medium tracking-wide uppercase">
-                            {brand.displayName}
-                        </span>
-                    </div>
-
-                    <h3
-                        className={cn(
-                            'mt-3 text-xl leading-tight font-semibold break-words text-[color:var(--brand-primary)]',
-                            model === 'elegant' && 'font-serif text-2xl',
-                        )}
-                    >
-                        {event.name}
-                    </h3>
-
-                    {model === 'elegant' ? (
-                        <div
-                            className="mx-auto mt-2 h-0.5 w-12 bg-[color:var(--brand-secondary)]"
-                            aria-hidden="true"
+                {/* Partie basse : ce que l'invite lit, et le pied. Son fond personnalise reste
+                    estompe (15 %, comme dans le PDF et le repere de rognage) : la lecture ne depend
+                    jamais de l'image choisie. La hauteur suit le contenu, l'image la couvre. */}
+                <div className="relative isolate flex flex-1 flex-col">
+                    {brand.bodyBackgroundUrl ? (
+                        <img
+                            src={brand.bodyBackgroundUrl}
+                            alt=""
+                            className="absolute inset-0 -z-10 size-full object-cover opacity-15"
+                            data-test="ticket-body-background"
                         />
                     ) : null}
 
-                    {event.startsAt || event.venue ? (
-                        <p
-                            className={cn(
-                                'text-ink/70 mt-2 flex items-start gap-1.5 text-xs',
-                                centered && 'justify-center',
-                            )}
-                        >
-                            <CalendarDays
-                                className="mt-px size-3.5 shrink-0"
-                                aria-hidden
-                            />
-                            <span>
-                                {[
-                                    event.startsAt
-                                        ? formatDateTime(event.startsAt, locale)
-                                        : null,
-                                    event.venue,
-                                ]
-                                    .filter(Boolean)
-                                    .join(' · ')}
-                            </span>
-                        </p>
-                    ) : null}
-
-                    <dl className="mt-5 space-y-3 text-sm">
-                        <div>
-                            <dt className="text-ink/60 text-xs">
-                                {t('ticket_template.preview.guest')}
-                            </dt>
-                            <dd
-                                className="text-base font-semibold break-words"
-                                data-test="ticket-holder"
-                            >
-                                {ticket.holder.name}
-                            </dd>
-                            <dd className="text-ink/70 text-xs">
-                                {ticket.holder.unit}
-                            </dd>
-                        </div>
-                        <div
-                            className={cn(
-                                'grid grid-cols-2 gap-3',
-                                !centered && 'max-w-40',
-                            )}
-                        >
-                            <div>
-                                <dt className="text-ink/60 text-xs">
-                                    {t('ticket_template.preview.table')}
-                                </dt>
-                                <dd className="font-medium">
-                                    {ticket.tableNumber ?? '-'}
-                                </dd>
-                            </div>
-                            <div>
-                                <dt className="text-ink/60 text-xs">
-                                    {t('ticket_template.preview.seats')}
-                                </dt>
-                                <dd className="font-medium">{ticket.seats}</dd>
-                            </div>
-                        </div>
-                        {ticket.host ? (
-                            <div
-                                className="rounded-md bg-[color:var(--brand-primary)]/6 px-3 py-2"
-                                data-test="ticket-host"
-                            >
-                                <dt className="text-ink/60 text-xs">
-                                    {t('ticket_template.preview.host')}
-                                </dt>
-                                <dd className="font-medium break-words">
-                                    {ticket.host.name}
-                                </dd>
-                                <dd className="text-ink/70 text-xs">
-                                    {[ticket.host.unit, ticket.host.reference]
-                                        .filter(Boolean)
-                                        .join(' · ')}
-                                </dd>
-                            </div>
-                        ) : null}
-                        {ticket.companions.length > 0 ? (
-                            <div data-test="ticket-companions">
-                                <dt className="text-ink/60 text-xs">
-                                    {t('ticket_template.preview.companions')}
-                                </dt>
-                                <dd>
-                                    <ul className="space-y-0.5">
-                                        {ticket.companions.map(
-                                            (companion, index) => (
-                                                <li
-                                                    key={`${companion.name}-${index}`}
-                                                    className="break-words"
-                                                >
-                                                    {companion.name}
-                                                    <span className="text-ink/60 text-xs">
-                                                        {' · '}
-                                                        {companion.unit}
-                                                    </span>
-                                                </li>
-                                            ),
-                                        )}
-                                    </ul>
-                                </dd>
-                            </div>
-                        ) : null}
-                    </dl>
-                </div>
-
-                {/* Pied : validite, cachet et signature, sous la seconde paire d'encoches. */}
-                <div className="relative mt-5 px-5 pt-4 pb-8">
-                    {notches}
                     <div
                         className={cn(
-                            'flex flex-col gap-3',
-                            centered ? 'items-center' : 'items-start',
+                            'flex flex-1 flex-col px-5 pt-5',
+                            centered ? 'text-center' : 'text-left',
                         )}
                     >
-                        <span
-                            className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--brand-primary)]/10 px-3 py-1 text-xs font-medium whitespace-nowrap text-[color:var(--brand-primary)]"
-                            role="status"
+                        <div
+                            className={cn(
+                                'flex items-center gap-2',
+                                centered ? 'justify-center' : 'justify-start',
+                            )}
                         >
-                            <Check className="size-3.5" />
-                            {t('ticket_template.preview.valid')}
-                        </span>
-                        {stamp || signature ? (
-                            <div className="flex items-end gap-2">
-                                {stamp}
-                                {signature}
-                            </div>
+                            {logo}
+                            <span className="text-ink/70 text-xs font-medium tracking-wide uppercase">
+                                {brand.displayName}
+                            </span>
+                        </div>
+
+                        <h3
+                            className={cn(
+                                'mt-3 text-xl leading-tight font-semibold break-words text-[color:var(--brand-primary)]',
+                                model === 'elegant' && 'font-serif text-2xl',
+                            )}
+                        >
+                            {event.name}
+                        </h3>
+
+                        {model === 'elegant' ? (
+                            <div
+                                className="mx-auto mt-2 h-0.5 w-12 bg-[color:var(--brand-secondary)]"
+                                aria-hidden="true"
+                            />
                         ) : null}
+
+                        {event.startsAt || event.venue ? (
+                            <p
+                                className={cn(
+                                    'text-ink/70 mt-2 flex items-start gap-1.5 text-xs',
+                                    centered && 'justify-center',
+                                )}
+                            >
+                                <CalendarDays
+                                    className="mt-px size-3.5 shrink-0"
+                                    aria-hidden
+                                />
+                                <span>
+                                    {[
+                                        event.startsAt
+                                            ? formatDateTime(
+                                                  event.startsAt,
+                                                  locale,
+                                              )
+                                            : null,
+                                        event.venue,
+                                    ]
+                                        .filter(Boolean)
+                                        .join(' · ')}
+                                </span>
+                            </p>
+                        ) : null}
+
+                        <dl className="mt-5 space-y-3 text-sm">
+                            <div>
+                                <dt className="text-ink/60 text-xs">
+                                    {t('ticket_template.preview.guest')}
+                                </dt>
+                                <dd
+                                    className="text-base font-semibold break-words"
+                                    data-test="ticket-holder"
+                                >
+                                    {ticket.holder.name}
+                                </dd>
+                                <dd className="text-ink/70 text-xs">
+                                    {ticket.holder.unit}
+                                </dd>
+                            </div>
+                            <div
+                                className={cn(
+                                    'grid grid-cols-2 gap-3',
+                                    !centered && 'max-w-40',
+                                )}
+                            >
+                                <div>
+                                    <dt className="text-ink/60 text-xs">
+                                        {t('ticket_template.preview.table')}
+                                    </dt>
+                                    <dd className="font-medium">
+                                        {ticket.tableNumber ?? '-'}
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt className="text-ink/60 text-xs">
+                                        {t('ticket_template.preview.seats')}
+                                    </dt>
+                                    <dd className="font-medium">
+                                        {ticket.seats}
+                                    </dd>
+                                </div>
+                            </div>
+                            {ticket.host ? (
+                                <div
+                                    className="rounded-md bg-[color:var(--brand-primary)]/6 px-3 py-2"
+                                    data-test="ticket-host"
+                                >
+                                    <dt className="text-ink/60 text-xs">
+                                        {t('ticket_template.preview.host')}
+                                    </dt>
+                                    <dd className="font-medium break-words">
+                                        {ticket.host.name}
+                                    </dd>
+                                    <dd className="text-ink/70 text-xs">
+                                        {[
+                                            ticket.host.unit,
+                                            ticket.host.reference,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(' · ')}
+                                    </dd>
+                                </div>
+                            ) : null}
+                            {ticket.companions.length > 0 ? (
+                                <div data-test="ticket-companions">
+                                    <dt className="text-ink/60 text-xs">
+                                        {t(
+                                            'ticket_template.preview.companions',
+                                        )}
+                                    </dt>
+                                    <dd>
+                                        {/* Au-dela de quelques noms, deux colonnes sans les
+                                            unites : dix accompagnateurs tiennent ainsi sur le
+                                            talon, dont la hauteur est fixe dans le PDF. */}
+                                        <ul
+                                            className={cn(
+                                                compactCompanions
+                                                    ? 'grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-3 text-xs leading-snug'
+                                                    : 'space-y-0.5',
+                                            )}
+                                        >
+                                            {ticket.companions.map(
+                                                (companion, index) => (
+                                                    <li
+                                                        key={`${companion.name}-${index}`}
+                                                        className="break-words"
+                                                    >
+                                                        {companion.name}
+                                                        {compactCompanions ? null : (
+                                                            <span className="text-ink/60 text-xs">
+                                                                {' · '}
+                                                                {companion.unit}
+                                                            </span>
+                                                        )}
+                                                    </li>
+                                                ),
+                                            )}
+                                        </ul>
+                                    </dd>
+                                </div>
+                            ) : null}
+                        </dl>
+                    </div>
+
+                    {/* Pied : validite, cachet et signature sur une meme ligne, sous la seconde
+                        paire d'encoches. Une ligne et non deux : la place va aux noms. */}
+                    <div className="relative mt-4 px-5 pt-4 pb-7">
+                        {notches}
+                        <div
+                            className={cn(
+                                'flex flex-wrap items-center gap-x-3 gap-y-2',
+                                centered ? 'justify-center' : 'justify-start',
+                            )}
+                        >
+                            <span
+                                className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--brand-primary)]/10 px-3 py-1 text-xs font-medium whitespace-nowrap text-[color:var(--brand-primary)]"
+                                role="status"
+                            >
+                                <Check className="size-3.5" />
+                                {t('ticket_template.preview.valid')}
+                            </span>
+                            {stamp || signature ? (
+                                <div className="flex items-end gap-2">
+                                    {stamp}
+                                    {signature}
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
                 </div>
             </article>

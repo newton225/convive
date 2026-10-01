@@ -3,7 +3,7 @@
 namespace App\Enums;
 
 /**
- * Les quatre fichiers de marque d'une organisation. Catalogue ferme : le nom de collection
+ * Les fichiers de marque d'une organisation et les fonds de son billet. Catalogue ferme : le nom de collection
  * arrive par l'URL, il ne doit jamais etre une chaine libre.
  *
  * Le cachet et la signature sont apposes sur les billets, les recus et les exports PDF : ce
@@ -33,6 +33,45 @@ enum BrandFile: string
     public const TicketBackgroundWidth = 1000;
 
     public const TicketBackgroundHeight = 850;
+
+    // L'image du bas du billet, sous la ligne perforee, derriere le texte. Le billet l'affiche
+    // estompee : la lecture ne depend jamais de l'image choisie.
+    case TicketBodyBackground = 'ticket_body_background';
+
+    public const TicketBodyBackgroundConversion = 'ticket_body';
+
+    /**
+     * Les proportions du bas du talon dans le PDF (90 mm sur 110,5 mm), ou sa hauteur est fixe.
+     */
+    public const TicketBodyBackgroundWidth = 1000;
+
+    public const TicketBodyBackgroundHeight = 1228;
+
+    /**
+     * Get the proportions imposed on this file, or null when it is stored as deposited.
+     *
+     * @return array{width: int, height: int}|null
+     */
+    public function crop(): ?array
+    {
+        return match ($this) {
+            self::TicketBackground => ['width' => self::TicketBackgroundWidth, 'height' => self::TicketBackgroundHeight],
+            self::TicketBodyBackground => ['width' => self::TicketBodyBackgroundWidth, 'height' => self::TicketBodyBackgroundHeight],
+            default => null,
+        };
+    }
+
+    /**
+     * Get the name of the version cropped to those proportions, or null when there is none.
+     */
+    public function conversion(): ?string
+    {
+        return match ($this) {
+            self::TicketBackground => self::TicketBackgroundConversion,
+            self::TicketBodyBackground => self::TicketBodyBackgroundConversion,
+            default => null,
+        };
+    }
 
     /**
      * Get the label shown to the operator.
