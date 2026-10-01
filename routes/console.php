@@ -272,10 +272,6 @@ Schedule::command('tenants:sync-permissions')
     ->description('Bring every organisation up to the permission catalogue');
 
 /*
- * Releve la consommation de chaque organisation et la range dans la base centrale (README
- * section 3) : la console lit ces compteurs, jamais les bases des organisations a chaque affichage.
- */
-/*
  * Previent les Proprietaires quand un acces de support arrive a echeance (README section 3). Un
  * acces expire sans que personne n'agisse : il faut une tache pour le dire. Idempotente, par
  * `ended_notified_at`.
@@ -284,6 +280,29 @@ Schedule::call(fn (ManageSupportAccess $manage) => $manage->announceExpired())
     ->everyFiveMinutes()
     ->description('Tell owners about support accesses that reached their term');
 
+/*
+ * Releve la consommation de chaque organisation et la range dans la base centrale (README
+ * section 3) : la console lit ces compteurs, jamais les bases des organisations a chaque affichage.
+ */
 Schedule::call(fn () => TenantUsageRecorder::refreshAll())
     ->everyFifteenMinutes()
     ->description('Refresh the usage counters the console reads');
+
+/*
+ * Sauvegarde quotidienne (`config/backup.php`) : les bases de toutes les organisations et leurs
+ * fichiers, la nuit, quand l'application est la moins sollicitee. `convive:backup` et non
+ * `backup:run`, qui archiverait les fichiers sans les bases. Le menage applique ensuite la duree de
+ * conservation, et la surveillance alerte si la derniere archive est trop ancienne.
+ */
+Schedule::command('convive:backup')
+    ->dailyAt('02:30')
+    ->withoutOverlapping()
+    ->description('Back up every database and the uploaded files');
+
+Schedule::command('backup:clean')
+    ->dailyAt('03:30')
+    ->description('Remove backups past their retention period');
+
+Schedule::command('backup:monitor')
+    ->dailyAt('06:00')
+    ->description('Alert when the newest backup is too old');

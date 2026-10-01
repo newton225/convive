@@ -897,6 +897,35 @@ l'instant le gabarit texte par defaut des notifications Laravel.
 
 ---
 
+## Sauvegardes
+
+`spatie/laravel-backup`, lance par **`convive:backup`** et jamais par `backup:run` seul, qui
+archiverait les fichiers sans aucune base.
+
+- **Contenu d'une archive** : `backup-databases/` (la base centrale et celle de chaque
+  organisation), `tenant-media/` (fichiers de marque) et `payment-proofs/` (preuves de paiement).
+- **Les bases sont copiees par `VACUUM INTO`** (`App\Support\Backup\DatabaseSnapshots`), pas par
+  l'export du paquet : celui-ci appelle le programme `sqlite3`, absent d'un serveur ou seul PHP
+  est installe, et ne connait que des connexions declarees d'avance, pas une base par
+  organisation. La copie est coherente meme pendant une ecriture. Les copies sont retirees du
+  serveur des que l'archive est faite. Au passage a PostgreSQL, l'export du paquet reprend la main
+  (`backup.source.databases`) ; la classe refuse d'ici la tout autre moteur.
+- **Planification** (`routes/console.php`) : sauvegarde a 2 h 30, menage a 3 h 30, surveillance a
+  6 h. Conservation : tout pendant 7 jours, puis une par jour, par semaine, par mois, par an
+  (`config/backup.php`).
+- **Destination** : le disque `backups` (`storage/app/backups`) par defaut, donc sur le serveur de
+  l'application. Il protege d'une erreur de manipulation, pas de la perte du serveur : en
+  production, `BACKUP_DISK` designe un stockage exterieur et `BACKUP_ARCHIVE_PASSWORD` chiffre
+  l'archive. L'ecran de sante technique le rappelle tant que ce n'est pas fait.
+- **Alertes** : seuls les echecs previennent, a l'adresse `BACKUP_ALERT_EMAIL`. Sans elle, aucun
+  courriel ne part et l'etat ne se lit que sur l'ecran de sante technique.
+- **Restauration** : a la main, application arretee. Extraire l'archive, remettre `central.sqlite`
+  et les `tenant{id}.sqlite` dans `database/`, `tenant-media/` et `payment-proofs/` dans
+  `storage/app/`, puis `php artisan tenants:migrate`. Aucun bouton de restauration dans la
+  console : ecraser toutes les bases ne se fait pas d'un clic.
+
+---
+
 ## Animation et site produit
 
 Le site produit est la vitrine commerciale, il doit avoir le niveau de finition d'un site

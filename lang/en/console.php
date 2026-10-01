@@ -250,7 +250,7 @@ return [
 
     'health' => [
         'title' => 'Technical health',
-        'description' => 'Organisation databases, scheduled tasks, queues and backups.',
+        'description' => 'Organisation databases and backups.',
         'databases' => 'Organisation databases',
         'databases_ok' => 'Every database exists and is up to date.',
         'issues' => [
@@ -265,33 +265,24 @@ return [
         'flash' => [
             'migrated' => 'The database of :organisation is up to date.',
             'migration_failed' => 'The migrations of :organisation did not complete. The detail is in the server log.',
-        ],
-        'tasks' => 'Scheduled tasks',
-        'task_labels' => [
-            'payment_accounts_activation' => 'Payout account activation',
-            'registrations_purge' => 'Registration purge',
-            'scheduled_cards' => 'Scheduled invitation cards',
-            'proof_reminders' => 'Proof reminders',
-        ],
-        'task_columns' => [
-            'task' => 'Task',
-            'frequency' => 'Frequency',
-            'last_run' => 'Last run',
-            'state' => 'State',
-        ],
-        'every_minutes' => 'Every :minutes min',
-        'late' => 'Late',
-        'on_time' => 'On time',
-        'queues' => 'Queues',
-        'queue_columns' => [
-            'name' => 'Queue',
-            'pending' => 'Pending',
-            'failed' => 'Failed',
-            'oldest' => 'Oldest job',
+            'backed_up' => 'Backup completed.',
+            'backup_failed' => 'The backup did not complete. The detail is in the server log.',
+            'backup_running' => 'A backup is already running. Try again in a moment.',
         ],
         'backup' => 'Backups',
+        'backup_help' => 'One archive a day, at 2:30 am: the Convive database, the database of every organisation, their brand files and the payment proofs.',
+        'backup_none' => 'No backup yet. The first one runs tonight, or right now with the button.',
         'backup_last' => 'Last backup: :date',
         'backup_size' => ':size MB',
+        'backup_kept' => '{1} 1 archive kept, :size MB in total|[2,*] :count archives kept, :size MB in total',
+        'backup_unhealthy' => 'The last backup is more than two days old, or the destination does not respond. Check that the scheduled tasks run on the server.',
+        'backup_same_server' => 'The archives are kept on the application server: they protect against a handling mistake, not against losing the server. An external storage still has to be configured.',
+        'backup_not_encrypted' => 'The archives are not encrypted: no archive password is configured.',
+        'backup_now' => 'Back up now',
+        'backup_confirm' => [
+            'title' => 'Run a backup now?',
+            'description' => 'A full archive is created right away, on top of the nightly one. It may take a moment; the action is written to the central log.',
+        ],
         'healthy' => 'Healthy',
         'unhealthy' => 'Needs checking',
     ],
@@ -356,6 +347,7 @@ return [
             'tenant_erased' => 'Organisation erased',
             'payment_reminder_sent' => 'Overdue reminder',
             'support_access_finished' => 'Support access closed',
+            'backup_run' => 'Backup',
         ],
         'messages' => [
             'support_access_used' => ':actor viewed :organisation through a support access',
@@ -373,6 +365,7 @@ return [
             'tenant_erased' => ':organisation was erased when its scheduled deletion came due',
             'payment_reminder_sent' => ':actor reminded :organisation about an overdue payment',
             'support_access_finished' => ':actor closed their support access to :organisation',
+            'backup_run' => ':actor ran a backup',
         ],
         'empty' => [
             'title' => 'No entry',

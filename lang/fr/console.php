@@ -250,7 +250,7 @@ return [
 
     'health' => [
         'title' => 'Santé technique',
-        'description' => 'Bases des organisations, tâches planifiées, files et sauvegardes.',
+        'description' => 'Bases des organisations et sauvegardes.',
         'databases' => 'Bases des organisations',
         'databases_ok' => 'Toutes les bases existent et sont à jour.',
         'issues' => [
@@ -265,33 +265,24 @@ return [
         'flash' => [
             'migrated' => 'La base de :organisation est à jour.',
             'migration_failed' => 'Les migrations de :organisation n’ont pas abouti. Le détail est au journal du serveur.',
-        ],
-        'tasks' => 'Tâches planifiées',
-        'task_labels' => [
-            'payment_accounts_activation' => 'Activation des comptes de versement',
-            'registrations_purge' => 'Purge des inscriptions',
-            'scheduled_cards' => "Envoi programmé des cartes d'invitation",
-            'proof_reminders' => 'Rappels de preuve',
-        ],
-        'task_columns' => [
-            'task' => 'Tâche',
-            'frequency' => 'Fréquence',
-            'last_run' => 'Dernière exécution',
-            'state' => 'État',
-        ],
-        'every_minutes' => 'Toutes les :minutes min',
-        'late' => 'En retard',
-        'on_time' => "À l'heure",
-        'queues' => "Files d'attente",
-        'queue_columns' => [
-            'name' => 'File',
-            'pending' => 'En attente',
-            'failed' => 'En échec',
-            'oldest' => 'Plus ancien travail',
+            'backed_up' => 'Sauvegarde terminée.',
+            'backup_failed' => 'La sauvegarde n’a pas abouti. Le détail est au journal du serveur.',
+            'backup_running' => 'Une sauvegarde est déjà en cours. Réessayez dans un instant.',
         ],
         'backup' => 'Sauvegardes',
+        'backup_help' => 'Une archive par jour, à 2 h 30 : la base de Convive, celle de chaque organisation, leurs fichiers de marque et les preuves de paiement.',
+        'backup_none' => 'Aucune sauvegarde pour le moment. La première part cette nuit, ou tout de suite avec le bouton.',
         'backup_last' => 'Dernière sauvegarde : :date',
         'backup_size' => ':size Mo',
+        'backup_kept' => '{1} 1 archive conservée, :size Mo au total|[2,*] :count archives conservées, :size Mo au total',
+        'backup_unhealthy' => 'La dernière sauvegarde a plus de deux jours, ou la destination ne répond pas. Vérifiez que les tâches planifiées tournent sur le serveur.',
+        'backup_same_server' => 'Les archives sont gardées sur le serveur de l’application : elles protègent d’une erreur de manipulation, pas de la perte du serveur. Un stockage extérieur reste à configurer.',
+        'backup_not_encrypted' => 'Les archives ne sont pas chiffrées : aucun mot de passe d’archive n’est configuré.',
+        'backup_now' => 'Sauvegarder maintenant',
+        'backup_confirm' => [
+            'title' => 'Lancer une sauvegarde maintenant ?',
+            'description' => 'Une archive complète est créée tout de suite, en plus de celle de la nuit. Cela peut prendre quelques instants ; le geste est inscrit au journal central.',
+        ],
         'healthy' => 'Saine',
         'unhealthy' => 'À vérifier',
     ],
@@ -356,6 +347,7 @@ return [
             'tenant_erased' => 'Organisation effacée',
             'payment_reminder_sent' => 'Relance d’impayé',
             'support_access_finished' => 'Accès de support fermé',
+            'backup_run' => 'Sauvegarde',
         ],
         'messages' => [
             'support_access_used' => ':actor a consulté :organisation avec un accès de support',
@@ -373,6 +365,7 @@ return [
             'tenant_erased' => ':organisation a été effacée à l’échéance de sa suppression programmée',
             'payment_reminder_sent' => ':actor a relancé :organisation pour un impayé',
             'support_access_finished' => ':actor a fermé son accès de support à :organisation',
+            'backup_run' => ':actor a lancé une sauvegarde',
         ],
         'empty' => [
             'title' => 'Aucune entrée',

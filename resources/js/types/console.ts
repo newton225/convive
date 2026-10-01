@@ -119,24 +119,14 @@ export type ConsoleDatabaseIssue = {
     pendingMigrations: number | null;
 };
 
-export type ConsoleScheduledTask = {
-    key: string;
-    lastRunAt: string;
-    everyMinutes: number;
-    late: boolean;
-};
-
-export type ConsoleQueue = {
-    name: string;
-    pending: number;
-    failed: number;
-    oldestAt: string | null;
-};
-
 export type ConsoleBackup = {
-    lastAt: string;
-    sizeMb: number;
     healthy: boolean;
+    lastAt: string | null;
+    lastSizeBytes: number;
+    count: number;
+    totalSizeBytes: number;
+    onApplicationServer: boolean;
+    encrypted: boolean;
 };
 
 export type ConsoleAnnouncement = {
@@ -172,7 +162,8 @@ export type ConsoleAuditType =
     | 'deletion_cancelled'
     | 'tenant_erased'
     | 'payment_reminder_sent'
-    | 'support_access_finished';
+    | 'support_access_finished'
+    | 'backup_run';
 
 export type ConsoleAuditEntry = {
     id: number;

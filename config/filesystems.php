@@ -80,6 +80,18 @@ return [
             'report' => false,
         ],
 
+        /*
+         * Destination par defaut des sauvegardes (`config/backup.php`). Sur le serveur de
+         * l'application, donc sans protection contre sa perte : en production, `BACKUP_DISK`
+         * designe un stockage exterieur. Jamais servi par HTTP.
+         */
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('app/backups'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

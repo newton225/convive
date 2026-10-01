@@ -22,6 +22,7 @@
         "predis/predis": "*",
         "propaganistas/laravel-phone": "^6.0",
         "spatie/laravel-activitylog": "^4.12",
+        "spatie/laravel-backup": "^10.3",
         "spatie/laravel-medialibrary": "^11.23",
         "spatie/laravel-pdf": "^2.13",
         "spatie/laravel-permission": "^8.3",

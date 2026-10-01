@@ -47,8 +47,7 @@ class ConsoleAccessTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component($component)
-                // Seule la sante technique garde une part de jeu d'exemple (taches, files, sauvegardes).
-                ->where('isSample', $component === 'console/health'),
+                ->where('isSample', false),
             );
     }
 

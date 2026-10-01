@@ -45,6 +45,7 @@ const types: ConsoleAuditType[] = [
     'tenant_erased',
     'payment_reminder_sent',
     'support_access_finished',
+    'backup_run',
 ];
 
 /**

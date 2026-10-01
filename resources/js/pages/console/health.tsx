@@ -1,108 +1,30 @@
 import { Head } from '@inertiajs/react';
-import type { ColumnDef } from '@tanstack/react-table';
 import { CircleAlert, CircleCheck } from 'lucide-react';
-import { ConsoleTable } from '@/components/console/console-table';
+import { BackupCard } from '@/components/console/backup-card';
 import { RepairDatabaseButton } from '@/components/console/repair-database-button';
 import Heading from '@/components/heading';
-import { SampleBanner } from '@/components/sample-banner';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { translate, useTranslation } from '@/hooks/use-translation';
-import { formatDateTime, formatRelative } from '@/lib/format-date';
 import { health } from '@/routes/console';
 import type {
     ConsoleBackup,
     ConsoleDatabaseIssue,
-    ConsoleQueue,
-    ConsoleScheduledTask,
     Translations,
 } from '@/types';
 
 type Props = {
-    isSample: boolean;
     databases: ConsoleDatabaseIssue[];
-    tasks: ConsoleScheduledTask[];
-    queues: ConsoleQueue[];
     backup: ConsoleBackup;
 };
 
 /**
  * README ecran 31 : la sante technique. Bases d'organisation absentes ou en retard de migrations
- * (CLAUDE.md, « Multi-locataire » : un locataire sans ses migrations est un locataire casse),
- * taches planifiees en retard, files bloquees, sauvegardes.
+ * (CLAUDE.md, « Multi-locataire » : un locataire sans ses migrations est un locataire casse) et
+ * sauvegardes. Le suivi des taches planifiees et des files n'est pas encore construit : rien ne
+ * s'affiche a leur sujet, plutot qu'un jeu d'exemple.
  */
-export default function Health({
-    isSample,
-    databases,
-    tasks,
-    queues,
-    backup,
-}: Props) {
-    const { t, locale } = useTranslation();
-
-    const taskColumns: ColumnDef<ConsoleScheduledTask>[] = [
-        {
-            header: t('console.health.task_columns.task'),
-            cell: ({ row }) =>
-                t(`console.health.task_labels.${row.original.key}`),
-        },
-        {
-            header: t('console.health.task_columns.frequency'),
-            cell: ({ row }) =>
-                t('console.health.every_minutes', {
-                    minutes: String(row.original.everyMinutes),
-                }),
-        },
-        {
-            header: t('console.health.task_columns.last_run'),
-            cell: ({ row }) => formatRelative(row.original.lastRunAt, locale),
-        },
-        {
-            header: t('console.health.task_columns.state'),
-            cell: ({ row }) =>
-                row.original.late ? (
-                    <Badge variant="destructive">
-                        {t('console.health.late')}
-                    </Badge>
-                ) : (
-                    <Badge variant="secondary">
-                        {t('console.health.on_time')}
-                    </Badge>
-                ),
-        },
-    ];
-
-    const queueColumns: ColumnDef<ConsoleQueue>[] = [
-        {
-            header: t('console.health.queue_columns.name'),
-            cell: ({ row }) => (
-                <span className="font-mono text-xs">{row.original.name}</span>
-            ),
-        },
-        {
-            header: t('console.health.queue_columns.pending'),
-            accessorKey: 'pending',
-        },
-        {
-            header: t('console.health.queue_columns.failed'),
-            cell: ({ row }) => (
-                <span
-                    className={
-                        row.original.failed > 0 ? 'font-semibold' : undefined
-                    }
-                >
-                    {row.original.failed}
-                </span>
-            ),
-        },
-        {
-            header: t('console.health.queue_columns.oldest'),
-            cell: ({ row }) =>
-                row.original.oldestAt
-                    ? formatRelative(row.original.oldestAt, locale)
-                    : '',
-        },
-    ];
+export default function Health({ databases, backup }: Props) {
+    const { t } = useTranslation();
 
     return (
         <>
@@ -164,55 +86,7 @@ export default function Health({
                     </CardContent>
                 </Card>
 
-                {/* Les bases ci-dessus sont reelles ; la suite vient encore du jeu d'exemple. */}
-                {isSample && <SampleBanner />}
-
-                <section className="space-y-3">
-                    <h3 className="font-medium">{t('console.health.tasks')}</h3>
-                    <ConsoleTable
-                        columns={taskColumns}
-                        data={tasks}
-                        emptyState={null}
-                    />
-                </section>
-
-                <section className="space-y-3">
-                    <h3 className="font-medium">
-                        {t('console.health.queues')}
-                    </h3>
-                    <ConsoleTable
-                        columns={queueColumns}
-                        data={queues}
-                        emptyState={null}
-                    />
-                </section>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('console.health.backup')}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-wrap items-center gap-3 text-sm">
-                        <Badge
-                            variant={
-                                backup.healthy ? 'secondary' : 'destructive'
-                            }
-                        >
-                            {backup.healthy
-                                ? t('console.health.healthy')
-                                : t('console.health.unhealthy')}
-                        </Badge>
-                        <span>
-                            {t('console.health.backup_last', {
-                                date: formatDateTime(backup.lastAt, locale),
-                            })}
-                        </span>
-                        <span className="text-muted-foreground">
-                            {t('console.health.backup_size', {
-                                size: String(backup.sizeMb),
-                            })}
-                        </span>
-                    </CardContent>
-                </Card>
+                <BackupCard backup={backup} />
             </div>
         </>
     );
