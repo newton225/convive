@@ -57,6 +57,13 @@ return [
         'replace' => 'Replace',
         'choose' => 'Choose a file',
         'remove' => 'Remove',
+        'crop' => [
+            'title' => 'Crop: :label',
+            'description' => 'Drag the image to frame it, zoom in if needed. The frame has the proportions of the top of the ticket.',
+            'zoom_in' => 'Zoom in',
+            'zoom_out' => 'Zoom out',
+            'confirm' => 'Crop and save',
+        ],
         'empty' => 'No file',
         'logo' => [
             'label' => 'Square logo',
@@ -65,6 +72,10 @@ return [
         'banner' => [
             'label' => 'Public link banner',
             'hint' => 'Wide image, at the top of the page your guests see.',
+        ],
+        'ticket_background' => [
+            'label' => 'Ticket background',
+            'hint' => 'Image placed behind the QR code, at the top of the ticket. It is cropped to the ticket proportions; the QR keeps its white frame so it still scans.',
         ],
         'stamp' => [
             'label' => 'Stamp',
@@ -114,6 +125,8 @@ return [
         'color' => 'Enter a colour in hexadecimal form, for example #7b1e3a.',
         'subdomain_format' => 'The subdomain may only contain lowercase letters, digits and hyphens, with no hyphen at either end.',
         'subdomain_reserved' => 'This subdomain is reserved by the application. Please choose another one.',
+        'crop_outside' => 'The selected area goes beyond the image. Crop it again, then try again.',
+        'crop_ratio' => 'The selected area does not match the ticket proportions. Crop it again, then try again.',
         'file_not_an_image' => 'This file is not an image. Send a JPG, a PNG or a WebP.',
         'file_type' => 'Accepted formats: JPG, PNG and WebP. SVG is refused for security reasons.',
         'file_too_large' => 'The file is larger than 5 MB.',

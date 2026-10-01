@@ -118,6 +118,98 @@ class BrandFileTest extends TestCase
         $this->assertCount(1, $tenant->fresh()->branding->getMedia(BrandFile::Logo->value));
     }
 
+    public function test_le_fond_du_billet_est_recadre_aux_proportions_du_haut_du_billet(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->upload($tenant, $owner, BrandFile::TicketBackground, UploadedFile::fake()->image('fond.jpg', 1200, 400))
+            ->assertRedirect();
+
+        $media = $tenant->fresh()->branding->getFirstMedia(BrandFile::TicketBackground->value);
+        $this->assertNotNull($media);
+        $this->assertTrue($media->hasGeneratedConversion(BrandFile::TicketBackgroundConversion));
+
+        // Meme cadrage sur la page et dans le PDF : l'image stockee pour le billet a les
+        // proportions du haut du talon, quelle que soit celle deposee.
+        [$width, $height] = (array) getimagesize($media->getPath(BrandFile::TicketBackgroundConversion));
+        $this->assertSame([1000, 850], [$width, $height]);
+    }
+
+    /**
+     * @param  array{x: int, y: int, width: int, height: int}  $crop
+     */
+    private function uploadCropped(Tenant $tenant, User $actor, BrandFile $file, UploadedFile $upload, array $crop): TestResponse
+    {
+        return $this->actingAs($actor)->post(
+            route('tenants.organisation.files.store', [$tenant, $file->value]),
+            ['file' => $upload, 'crop' => $crop],
+        );
+    }
+
+    public function test_le_fond_du_billet_est_decoupe_selon_la_zone_choisie(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->uploadCropped($tenant, $owner, BrandFile::TicketBackground, UploadedFile::fake()->image('fond.jpg', 1200, 400), [
+            'x' => 100, 'y' => 0, 'width' => 470, 'height' => 400,
+        ])->assertSessionHasNoErrors();
+
+        $media = $tenant->fresh()->branding->getFirstMedia(BrandFile::TicketBackground->value);
+        [$width, $height] = (array) getimagesize($media->getPath());
+
+        // La zone choisie, decoupee par le serveur : jamais une image recadree par le navigateur.
+        $this->assertSame([470, 400], [$width, $height]);
+    }
+
+    public function test_une_zone_qui_deborde_de_l_image_est_refusee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->uploadCropped($tenant, $owner, BrandFile::TicketBackground, UploadedFile::fake()->image('fond.jpg', 600, 400), [
+            'x' => 300, 'y' => 0, 'width' => 470, 'height' => 400,
+        ])->assertSessionHasErrors('crop');
+
+        $this->assertNull($tenant->fresh()->branding?->getFirstMedia(BrandFile::TicketBackground->value));
+    }
+
+    public function test_une_zone_aux_mauvaises_proportions_est_refusee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->uploadCropped($tenant, $owner, BrandFile::TicketBackground, UploadedFile::fake()->image('fond.jpg', 1200, 400), [
+            'x' => 0, 'y' => 0, 'width' => 400, 'height' => 400,
+        ])->assertSessionHasErrors('crop');
+    }
+
+    public function test_une_zone_de_decoupe_n_est_pas_acceptee_pour_les_autres_fichiers(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->uploadCropped($tenant, $owner, BrandFile::Logo, UploadedFile::fake()->image('logo.png', 400, 400), [
+            'x' => 0, 'y' => 0, 'width' => 200, 'height' => 170,
+        ])->assertSessionHasErrors('crop');
+    }
+
+    public function test_le_depot_depuis_le_gabarit_du_billet_y_ramene(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $templateUrl = route('tenants.ticket-template.edit', $tenant);
+
+        $this->actingAs($owner)
+            ->from($templateUrl)
+            ->post(
+                route('tenants.organisation.files.store', [$tenant, BrandFile::TicketBackground->value]),
+                ['file' => UploadedFile::fake()->image('fond.png', 600, 500)],
+            )
+            ->assertRedirect($templateUrl);
+    }
+
     public function test_un_svg_est_refuse(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

@@ -1,92 +1,169 @@
+@php
+    // Le meme talon que `resources/js/components/ticket-template/branded-ticket.tsx`, sur les memes
+    // donnees (`App\Support\TicketCard`) : les deux evoluent ensemble. Festons et encoches sont des
+    // disques couleur du fond de page poses sur le bord, comme dans le composant.
+    $brand = $design['brand'];
+    $elements = $design['elements'];
+    $model = $design['model'];
+    $align = $model === 'sober' ? 'left' : 'center';
+    $backdrop = '#ebe8e4';
+    $scallops = 13;
+@endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <title>{{ __('guest.ticket_pdf.title', ['event' => $event['name']]) }}</title>
-    {{-- Rendu hors reponse HTTP (Browsershot), donc hors CSP : voir la note sur les gabarits PDF. --}}
+    {{-- Rendu hors reponse HTTP, donc hors CSP : voir la note sur les gabarits PDF. --}}
     <style>
+        @page { margin: 0; }
         * { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; }
+        html, body { margin: 0; padding: 0; background: {{ $backdrop }}; }
         body { font-family: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif; color: #1b1917; }
-        /* Une page par billet. Largeur fluide : c'est le format A5 du generateur qui fixe la page,
-           une largeur en millimetres ici deborderait et ajouterait une page blanche. */
-        .ticket { width: 100%; text-align: center; break-after: page; page-break-after: always; }
-        .ticket:last-child { break-after: auto; page-break-after: auto; }
-        .band { border-radius: 4mm; padding: 6mm; color: #fff; background: {{ $colors['primary'] }}; }
-        .organisation { font-size: 9pt; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
-        .event { font-family: 'Playfair Display', Georgia, serif; font-size: 20pt; margin: 2mm 0 1mm; }
-        .when { font-size: 10pt; }
-        .holder { margin-top: 7mm; }
-        .name { font-size: 16pt; font-weight: 700; }
-        .muted { color: #6b6862; font-size: 10pt; margin-top: 1mm; }
-        .qr { width: 62mm; height: 62mm; margin-top: 6mm; image-rendering: pixelated; }
-        .table { font-size: 14pt; font-weight: 700; margin-top: 4mm; }
-        .notice { margin-top: 6mm; border-top: 0.4mm solid {{ $colors['secondary'] }}; padding: 4mm 8mm 0; font-size: 9pt; line-height: 1.4; color: #6b6862; }
-        .position { margin-top: 2mm; font-size: 8pt; color: #9a968f; }
-        /* Le groupe : qui accompagne l'invite principal, ou qui invite un accompagnateur. En
-           ligne et en petit, pour qu'un grand groupe ne pousse pas le billet sur deux pages. */
-        .group { margin: 4mm 8mm 0; padding: 3mm 4mm; border-radius: 2mm; background: #f4f2ee; font-size: 9pt; line-height: 1.4; }
-        .group-title { font-size: 7.5pt; letter-spacing: 0.06em; text-transform: uppercase; color: #6b6862; margin-bottom: 1mm; }
-        .group-name { font-weight: 700; }
+        /* Une page A5 par billet ; le talon y est centre sur le fond gris. */
+        /* Pas de hauteur fixe : le moteur PDF ignore box-sizing, une hauteur plus la marge du haut
+           deborderait sur une seconde page. */
+        .page { padding-top: 11mm; page-break-after: always; }
+        .page:last-child { page-break-after: auto; }
+        .talon { position: relative; width: 90mm; height: 187mm; margin: 0 auto; background: #fff; }
+        .scallop { position: absolute; width: 5mm; height: 5mm; border-radius: 2.5mm; background: {{ $backdrop }}; }
+        .notch { position: absolute; width: 7mm; height: 7mm; border-radius: 3.5mm; background: {{ $backdrop }}; }
+        /* Hauteur fixe aux proportions du fond recadre (1000 x 850), comme le haut du talon a
+           l'ecran : l'image le couvre exactement, sans deformation. */
+        .stub { position: relative; height: 76.5mm; padding: 9mm 6mm 0; text-align: center; overflow: hidden; }
+        .stub-background { position: absolute; top: 0; left: 0; width: 90mm; height: 76.5mm; }
+        .stub-content { position: relative; }
+        .stub-table.on-image { display: inline-block; padding: 0.6mm 3mm; border-radius: 3mm; background: #fff; }
+        .stub.classic { background: {{ $design['tints']['stub'] }}; }
+        .qr-frame { display: inline-block; padding: 1.5mm; background: #fff; border: 0.3mm solid #e2dfda; border-radius: 1.5mm; }
+        .qr { width: 46mm; height: 46mm; image-rendering: pixelated; }
+        .stub-table { margin-top: 2.5mm; font-size: 10pt; font-weight: 700; }
+        .perforation { position: relative; height: 0; }
+        .perforation-line { margin: 0 5mm; border-top: 0.6mm dotted #a8a49d; }
+        .body { padding: 6mm 7mm 0; text-align: {{ $align }}; }
+        .organisation { font-size: 7.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #6b6862; }
+        .logo { height: 8mm; vertical-align: middle; margin-right: 2mm; }
+        .event { margin-top: 3mm; font-size: 15pt; font-weight: 700; line-height: 1.2; color: {{ $brand['colors']['primary'] }}; }
+        .event.elegant { font-family: 'Playfair Display', Georgia, serif; font-size: 17pt; font-weight: 400; }
+        .rule { width: 12mm; height: 0.6mm; margin: 2mm {{ $align === 'center' ? 'auto' : '0' }} 0; background: {{ $brand['colors']['secondary'] }}; }
+        .when { margin-top: 2mm; font-size: 8pt; color: #6b6862; }
+        .label { font-size: 7.5pt; color: #8a867f; }
+        .field { margin-top: 4mm; }
+        .holder { font-size: 12pt; font-weight: 700; }
+        .unit { font-size: 8pt; color: #6b6862; }
+        .pair { width: {{ $align === 'center' ? '100%' : '45mm' }}; margin-top: 4mm; border-collapse: collapse; }
+        .pair td { width: 50%; padding: 0; text-align: {{ $align }}; vertical-align: top; font-size: 10pt; font-weight: 600; }
+        .host { margin-top: 4mm; padding: 2mm 3mm; border-radius: 1.5mm; background: {{ $design['tints']['host'] }}; }
+        .host-name { font-size: 10pt; font-weight: 600; }
+        .companion { font-size: 9pt; line-height: 1.45; }
+        .companion span { font-size: 7.5pt; color: #8a867f; }
+        .footer { position: absolute; left: 0; right: 0; bottom: 0; padding: 5mm 7mm 8mm; text-align: {{ $align }}; }
+        .valid { display: inline-block; padding: 1mm 3.5mm; border-radius: 3mm; font-size: 8pt; font-weight: 600; color: {{ $brand['colors']['primary'] }}; background: {{ $design['tints']['badge'] }}; }
+        .marks { margin-top: 3mm; }
+        .stamp { height: 13mm; margin-right: 2mm; vertical-align: bottom; }
+        .signature { height: 10mm; max-width: 22mm; vertical-align: bottom; }
     </style>
 </head>
 <body>
-    @foreach ($tickets as $index => $ticket)
-        <section class="ticket">
-            <div class="band">
-                @if ($organisation)
-                    <div class="organisation">{{ $organisation }}</div>
-                @endif
-                <div class="event">{{ $event['name'] }}</div>
-                @if ($event['startsAt'])
-                    <div class="when">
-                        {{ $event['startsAt']->locale(app()->getLocale())->translatedFormat('j F Y, H:i') }}
-                        @if ($event['venue'])
-                            · {{ $event['venue'] }}
+    @foreach ($tickets as $ticket)
+        <div class="page">
+            <div class="talon">
+                <div class="stub {{ $model === 'classic' && ! $brand['backgroundUrl'] ? 'classic' : '' }}">
+                    @if ($brand['backgroundUrl'])
+                        <img class="stub-background" src="{{ $brand['backgroundUrl'] }}" alt="">
+                    @endif
+                    <div class="stub-content">
+                    <span class="qr-frame"><img class="qr" src="{{ $ticket['qrImage'] }}" alt="{{ __('ticket_template.preview.qr_of', ['name' => $ticket['holder']['name']]) }}"></span>
+                    <div class="stub-table {{ $brand['backgroundUrl'] ? 'on-image' : '' }}">
+                        @if ($ticket['tableNumber'] !== null)
+                            {{ __('guest.ticket.table', ['number' => $ticket['tableNumber']]) }}
+                        @else
+                            {{ __('guest.ticket.no_table') }}
                         @endif
                     </div>
-                @endif
-            </div>
+                    </div>
+                </div>
 
-            <div class="holder">
-                <div class="name">{{ $ticket['name'] }}</div>
-                <div class="muted">{{ $ticket['unit'] }}</div>
-            </div>
+                <div class="perforation">
+                    <span class="notch" style="top: -3.5mm; left: -3.5mm;"></span>
+                    <span class="notch" style="top: -3.5mm; right: -3.5mm;"></span>
+                    <div class="perforation-line"></div>
+                </div>
 
-            <img class="qr" src="{{ $ticket['qrImage'] }}" alt="{{ __('guest.ticket.title') }}">
+                <div class="body">
+                    <div class="organisation">
+                        @if ($brand['logoUrl'])
+                            <img class="logo" src="{{ $brand['logoUrl'] }}" alt="">
+                        @endif
+                        {{ $brand['displayName'] }}
+                    </div>
+                    <div class="event {{ $model === 'elegant' ? 'elegant' : '' }}">{{ $event['name'] }}</div>
+                    @if ($model === 'elegant')
+                        <div class="rule"></div>
+                    @endif
+                    @if ($event['startsAt'] || $event['venue'])
+                        <div class="when">
+                            {{ collect([
+                                $event['startsAt']?->locale(app()->getLocale())->translatedFormat('j F Y, H:i'),
+                                $event['venue'],
+                            ])->filter()->implode(' · ') }}
+                        </div>
+                    @endif
 
-            <div class="table">
-                @if ($ticket['tableNumber'] !== null)
-                    {{ __('guest.ticket.table', ['number' => $ticket['tableNumber']]) }}
-                @else
-                    {{ __('guest.ticket.no_table') }}
-                @endif
-            </div>
+                    <div class="field">
+                        <div class="label">{{ __('ticket_template.preview.guest') }}</div>
+                        <div class="holder">{{ $ticket['holder']['name'] }}</div>
+                        <div class="unit">{{ $ticket['holder']['unit'] }}</div>
+                    </div>
 
-            @if ($ticket['host'])
-                <div class="group">
-                    <div class="group-title">{{ __('guest.ticket_pdf.host_title') }}</div>
-                    <span class="group-name">{{ $ticket['host']['name'] }}</span> · {{ $ticket['host']['unit'] }}
-                    @if ($ticket['host']['reference'])
-                        <div class="muted">{{ __('guest.ticket_pdf.host_reference', ['reference' => $ticket['host']['reference']]) }}</div>
+                    <table class="pair">
+                        <tr>
+                            <td><div class="label">{{ __('ticket_template.preview.table') }}</div>{{ $ticket['tableNumber'] ?? '-' }}</td>
+                            <td><div class="label">{{ __('ticket_template.preview.seats') }}</div>{{ $ticket['seats'] }}</td>
+                        </tr>
+                    </table>
+
+                    @if ($ticket['host'])
+                        <div class="host">
+                            <div class="label">{{ __('ticket_template.preview.host') }}</div>
+                            <div class="host-name">{{ $ticket['host']['name'] }}</div>
+                            <div class="unit">{{ collect([$ticket['host']['unit'], $ticket['host']['reference']])->filter()->implode(' · ') }}</div>
+                        </div>
+                    @endif
+
+                    @if (count($ticket['companions']) > 0)
+                        <div class="field">
+                            <div class="label">{{ __('ticket_template.preview.companions') }}</div>
+                            @foreach ($ticket['companions'] as $companion)
+                                <div class="companion">{{ $companion['name'] }} <span>· {{ $companion['unit'] }}</span></div>
+                            @endforeach
+                        </div>
                     @endif
                 </div>
-            @elseif (count($ticket['companions']) > 0)
-                <div class="group">
-                    <div class="group-title">{{ __('guest.ticket_pdf.companions_title') }}</div>
-                    @foreach ($ticket['companions'] as $companion)
-                        <span class="group-name">{{ $companion['name'] }}</span> ({{ $companion['unit'] }})@if (! $loop->last) · @endif
-                    @endforeach
-                </div>
-            @endif
 
-            <div class="notice">
-                {{ __('guest.ticket_pdf.notice') }}
-                @if (count($tickets) > 1)
-                    <div class="position">{{ __('guest.ticket_pdf.position', ['current' => $index + 1, 'total' => count($tickets)]) }}</div>
-                @endif
+                <div class="footer">
+                    <span class="notch" style="top: -3.5mm; left: -3.5mm;"></span>
+                    <span class="notch" style="top: -3.5mm; right: -3.5mm;"></span>
+                    <span class="valid">{{ __('ticket_template.preview.valid') }}</span>
+                    @if ($brand['stampUrl'] || $brand['signatureUrl'])
+                        <div class="marks">
+                            @if ($brand['stampUrl'])
+                                <img class="stamp" src="{{ $brand['stampUrl'] }}" alt="">
+                            @endif
+                            @if ($brand['signatureUrl'])
+                                <img class="signature" src="{{ $brand['signatureUrl'] }}" alt="">
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
+                {{-- En dernier : peints par-dessus le haut du billet et son fond eventuel. --}}
+                @for ($i = 0; $i < $scallops; $i++)
+                    <span class="scallop" style="top: -2.5mm; left: {{ 0.6 + $i * 7 }}mm;"></span>
+                    <span class="scallop" style="bottom: -2.5mm; left: {{ 0.6 + $i * 7 }}mm;"></span>
+                @endfor
             </div>
-        </section>
+        </div>
     @endforeach
 </body>
 </html>

@@ -8,7 +8,7 @@ use App\Models\Event;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\Ticket;
-use App\Support\TicketQrCode;
+use App\Support\TicketCard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Spatie\LaravelPdf\Facades\Pdf;
@@ -91,31 +91,24 @@ class TicketPdfController extends Controller
     private function pdf(Event $event, Collection $tickets, string $filename): PdfBuilder
     {
         $tenant = Tenant::current();
-        $branding = $tenant?->brandingOrCreate();
+        abort_if(! $tenant, 404);
+        $branding = $tenant->brandingOrCreate();
 
+        // Le meme billet talon que sur la page de l'invite et le lien individuel (`TicketCard`) :
+        // memes donnees, gabarit Blade qui reprend le composant React.
         return Pdf::view('pdf.tickets', [
             'event' => [
                 'name' => $event->name,
                 'startsAt' => $event->starts_at,
                 'venue' => $event->venue,
             ],
-            'organisation' => $branding->display_name ?? $tenant?->name,
-            // Couleurs de marque : le billet fait partie du parcours invite (CLAUDE.md, « Design »).
-            'colors' => $event->colors(),
-            'tickets' => $tickets->map(fn (Ticket $ticket) => [
-                'name' => $ticket->holderName(),
-                'unit' => $ticket->holderUnitName(),
-                // L'invite principal voit qui l'accompagne, si le gabarit le prevoit (README ecran
-                // 15) ; un accompagnateur voit qui l'invite, toujours : c'est ce qui le rattache a
-                // son groupe a l'entree.
-                'companions' => $branding?->ticket_element_companions ? $ticket->companionsOfHolder() : [],
-                'host' => $ticket->host(),
-                'qrImage' => TicketQrCode::dataUri($ticket->signedToken()),
-                'tableNumber' => $ticket->registration->tableAssignment?->seatingTable->number,
-            ])->values()->all(),
+            'design' => TicketCard::pdfDesign($tenant, $event),
+            'tickets' => $tickets->map(fn (Ticket $ticket) => TicketCard::for($ticket, $branding))->values()->all(),
         ])
             ->format('a5')
-            ->margins(10, 10, 10, 10)
+            // Marges portees par le gabarit : le fond gris sur lequel le talon est pose doit
+            // couvrir toute la page, ses festons et encoches en reprennent la couleur.
+            ->margins(0, 0, 0, 0)
             ->download($filename);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Support;
 
 use App\Enums\BrandFile;
 use App\Models\Tenant;
+use App\Models\TenantBranding;
+use finfo;
 use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -52,14 +54,37 @@ class PdfLetterhead
         ];
     }
 
-    private static function dataUri(?Media $media): ?string
+    /**
+     * Get one brand file embedded as a `data:` URI, or null when the organisation has none.
+     * `$conversion` names a generated version (see `BrandFile::TicketBackgroundConversion`).
+     */
+    public static function brandFileDataUri(TenantBranding $branding, BrandFile $file, string $conversion = ''): ?string
+    {
+        $media = $branding->getFirstMedia($file->value);
+
+        if ($conversion !== '' && $media instanceof Media && ! $media->hasGeneratedConversion($conversion)) {
+            return null;
+        }
+
+        return self::dataUri($media, $conversion);
+    }
+
+    private static function dataUri(?Media $media, string $conversion = ''): ?string
     {
         if (! $media instanceof Media) {
             return null;
         }
 
-        $content = Storage::disk($media->disk)->get($media->getPathRelativeToRoot());
+        $content = Storage::disk($media->disk)->get($media->getPathRelativeToRoot($conversion));
 
-        return $content === null ? null : "data:{$media->mime_type};base64,".base64_encode($content);
+        if ($content === null) {
+            return null;
+        }
+
+        // Une conversion garde le format de l'original par defaut, mais son type se lit sur
+        // les octets plutot que de le supposer.
+        $mime = $conversion === '' ? $media->mime_type : ((new finfo(FILEINFO_MIME_TYPE))->buffer($content) ?: $media->mime_type);
+
+        return "data:{$mime};base64,".base64_encode($content);
     }
 }

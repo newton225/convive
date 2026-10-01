@@ -66,6 +66,26 @@ class TicketTemplateTest extends TestCase
             );
     }
 
+    public function test_le_gabarit_propose_le_fond_du_billet_et_l_organisation_ne_le_liste_pas(): void
+    {
+        $this->actingAs($this->owner)
+            ->get(route('tenants.ticket-template.edit', $this->tenant))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('backgroundFile.value', 'ticket_background')
+                ->where('brand.backgroundUrl', null),
+            );
+
+        // Un reglage du billet, depose depuis son gabarit : pas une piece de l'identite de
+        // l'organisation.
+        $this->actingAs($this->owner)
+            ->get(route('tenants.organisation.edit', $this->tenant))
+            ->assertInertia(fn ($page) => $page->where(
+                'brandFiles',
+                fn ($files) => ! collect($files)->contains('value', 'ticket_background'),
+            ));
+    }
+
     public function test_le_proprietaire_enregistre_le_gabarit(): void
     {
         $this->actingAs($this->owner)

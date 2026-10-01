@@ -72,7 +72,7 @@ class TicketPdfTest extends TestCase
      */
     private function holderNames(PdfBuilder $pdf): array
     {
-        return array_column($pdf->viewData['tickets'], 'name');
+        return array_column(array_column($pdf->viewData['tickets'], 'holder'), 'name');
     }
 
     public function test_le_billet_d_un_accompagnateur_se_telecharge_seul_en_pdf(): void
@@ -142,6 +142,20 @@ class TicketPdfTest extends TestCase
         Pdf::assertRespondedWithPdf(fn (PdfBuilder $pdf) => $pdf->viewData['tickets'][0]['host']['name'] === 'Aya Kouassi'
             && $pdf->viewData['tickets'][0]['host']['reference'] === $registration->fresh()->reference
             && $pdf->viewData['tickets'][0]['host']['unit'] !== '');
+    }
+
+    public function test_le_pdf_porte_le_gabarit_de_l_organisation(): void
+    {
+        Pdf::fake();
+        ['registration' => $registration] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $registration->fresh()->ticketsPdfUrl());
+
+        $this->get($url)->assertOk();
+
+        Pdf::assertRespondedWithPdf(fn (PdfBuilder $pdf) => isset($pdf->viewData['design']['model'], $pdf->viewData['design']['elements'])
+            && $pdf->viewData['tickets'][0]['seats'] === 3
+            && $pdf->viewData['tickets'][1]['seats'] === 1);
     }
 
     public function test_un_lien_pdf_altere_repond_404(): void

@@ -58,7 +58,7 @@ class OrganisationController extends Controller
                 'value' => $file->value,
                 'label' => $file->label(),
                 'hint' => $file->hint(),
-            ], BrandFile::cases()),
+            ], BrandFile::organisationCases()),
             'legalForms' => array_map(fn (LegalForm $form) => [
                 'value' => $form->value,
                 'label' => $form->label(),
@@ -92,19 +92,21 @@ class OrganisationController extends Controller
     }
 
     /**
-     * Store one of the four brand files.
+     * Store one of the brand files.
      */
     public function storeFile(SaveBrandFileRequest $request, Tenant $tenant, string $file, SaveTenantBrandFile $save): RedirectResponse
     {
-        $save->store($tenant, $this->brandFile($file), $request->file('file'));
+        $save->store($tenant, $this->brandFile($file), $request->file('file'), $request->crop());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('organisation.flash.file_updated')]);
 
-        return to_route('tenants.organisation.edit', $tenant);
+        // Retour a la page d'ou vient le depot : l'organisation, ou le gabarit du billet pour son
+        // fond (`BrandFile::TicketBackground`).
+        return redirect()->back(fallback: route('tenants.organisation.edit', $tenant));
     }
 
     /**
-     * Remove one of the four brand files.
+     * Remove one of the brand files.
      */
     public function destroyFile(Tenant $tenant, string $file, SaveTenantBrandFile $save): RedirectResponse
     {
@@ -114,7 +116,9 @@ class OrganisationController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('organisation.flash.file_deleted')]);
 
-        return to_route('tenants.organisation.edit', $tenant);
+        // Retour a la page d'ou vient le depot : l'organisation, ou le gabarit du billet pour son
+        // fond (`BrandFile::TicketBackground`).
+        return redirect()->back(fallback: route('tenants.organisation.edit', $tenant));
     }
 
     /**

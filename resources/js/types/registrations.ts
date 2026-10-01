@@ -1,4 +1,8 @@
-import type { TicketElements, TicketModel } from './ticket-template';
+import type {
+    TicketCardData,
+    TicketCardEvent,
+    TicketDesign,
+} from './ticket-template';
 
 export type PublicRegistrationEvent = {
     name: string;
@@ -32,13 +36,6 @@ export type RegistrationShowStatus =
     | 'proof_rejected'
     | 'cancelled';
 
-export type TicketSummaryBrand = {
-    displayName: string | null;
-    logoUrl: string | null;
-    stampUrl: string | null;
-    signatureUrl: string | null;
-};
-
 // Le billet d'un accompagnateur (README 2.8, un billet par personne), avec son lien individuel :
 // null quand l'organisation n'a pas encore de sous-domaine pour le construire.
 export type CompanionTicketPass = {
@@ -47,18 +44,18 @@ export type CompanionTicketPass = {
     unit: string;
     qrImage: string;
     shareUrl: string | null;
+    card: TicketCardData;
 };
 
-export type TicketSummary = {
+export type TicketSummary = TicketDesign & {
     qrImage: string;
+    card: TicketCardData;
+    event: TicketCardEvent;
     passes: CompanionTicketPass[];
     tableNumber: number | null;
     // Tous les billets du groupe en un PDF (README 2.8), null sans sous-domaine ni lien public.
     pdfUrl: string | null;
     scheduledSendAt: string | null;
-    model: TicketModel;
-    elements: TicketElements;
-    brand: TicketSummaryBrand;
 };
 
 // Le lien individuel d'un billet (`Public\TicketController`).

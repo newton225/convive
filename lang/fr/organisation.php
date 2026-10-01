@@ -57,6 +57,13 @@ return [
         'replace' => 'Remplacer',
         'choose' => 'Choisir un fichier',
         'remove' => 'Retirer',
+        'crop' => [
+            'title' => 'Recadrer : :label',
+            'description' => 'Glissez l’image pour la cadrer, zoomez au besoin. Le cadre a les proportions du haut du billet.',
+            'zoom_in' => 'Zoomer',
+            'zoom_out' => 'Dézoomer',
+            'confirm' => 'Recadrer et enregistrer',
+        ],
         'empty' => 'Aucun fichier',
         'logo' => [
             'label' => 'Logo carré',
@@ -65,6 +72,10 @@ return [
         'banner' => [
             'label' => 'Bandeau des liens publics',
             'hint' => 'Image large, en haut de la page vue par vos invités.',
+        ],
+        'ticket_background' => [
+            'label' => 'Fond du billet',
+            'hint' => 'Image placée derrière le QR, en haut du billet. Elle est recadrée aux proportions du billet ; le QR garde son cadre blanc pour rester lisible au scan.',
         ],
         'stamp' => [
             'label' => 'Cachet',
@@ -114,6 +125,8 @@ return [
         'color' => 'Saisissez une couleur au format hexadécimal, par exemple #7b1e3a.',
         'subdomain_format' => 'Le sous-domaine ne peut contenir que des lettres minuscules, des chiffres et des tirets, sans tiret au début ni à la fin.',
         'subdomain_reserved' => "Ce sous-domaine est réservé par l'application. Choisissez-en un autre.",
+        'crop_outside' => 'La zone choisie dépasse de l’image. Recadrez-la, puis réessayez.',
+        'crop_ratio' => 'La zone choisie n’a pas les proportions du billet. Recadrez-la, puis réessayez.',
         'file_not_an_image' => "Ce fichier n'est pas une image. Envoyez un JPG, un PNG ou un WebP.",
         'file_type' => 'Formats acceptés : JPG, PNG et WebP. Le SVG est refusé pour des raisons de sécurité.',
         'file_too_large' => 'Le fichier dépasse 5 Mo.',

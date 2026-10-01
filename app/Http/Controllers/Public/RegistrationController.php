@@ -18,6 +18,7 @@ use App\Models\Tenant;
 use App\Models\Ticket;
 use App\Models\Unit;
 use App\Support\PlanLimits;
+use App\Support\TicketCard;
 use App\Support\TicketQrCode;
 use App\Support\VisitorCountry;
 use Carbon\CarbonInterface;
@@ -409,7 +410,7 @@ class RegistrationController extends Controller
     private function ticketSummary(Registration $registration, Event $event, Tenant $tenant): ?array
     {
         $tickets = Ticket::where('registration_id', $registration->id)
-            ->with('holderUnit', 'registration.unit', 'registration.event')
+            ->with('holderUnit', 'registration.unit', 'registration.event', 'registration.companions.unit', 'registration.tableAssignment.seatingTable')
             ->orderBy('holder_position')
             ->get();
         $ticket = $tickets->firstWhere('holder_position', Ticket::GuestPosition);
@@ -420,11 +421,15 @@ class RegistrationController extends Controller
 
         // README ecran 15 : le gabarit du billet (modele, elements activables) est un reglage
         // d'organisation, applique ici au billet reellement remis a l'invite, pas seulement a
-        // l'apercu du back-office.
+        // l'apercu du back-office. Meme billet pour l'invite et chacun de ses accompagnateurs
+        // (`TicketCard`), sur cette page, sur leur lien individuel et dans le PDF.
         $branding = $tenant->brandingOrCreate();
+        $design = TicketCard::design($tenant, $event);
 
         return [
             'qrImage' => TicketQrCode::dataUri($ticket->signedToken()),
+            'card' => TicketCard::for($ticket, $branding),
+            'event' => TicketCard::event($event),
             // Un billet par accompagnateur (README 2.8, ecran 7), avec son lien individuel : l'invite
             // le transmet a qui arrivera sans lui.
             'passes' => $tickets
@@ -435,6 +440,7 @@ class RegistrationController extends Controller
                     'unit' => $pass->holderUnitName(),
                     'qrImage' => TicketQrCode::dataUri($pass->signedToken()),
                     'shareUrl' => $pass->shareUrl(),
+                    'card' => TicketCard::for($pass, $branding),
                 ])
                 ->values()
                 ->all(),
@@ -442,19 +448,7 @@ class RegistrationController extends Controller
             // Tous les billets du groupe en un PDF (README 2.8), pour l'entree sans connexion.
             'pdfUrl' => $registration->ticketsPdfUrl(),
             'scheduledSendAt' => $event->invitations_send_at?->toISOString(),
-            'model' => $branding->ticket_model->value,
-            'elements' => [
-                'logo' => $branding->ticket_element_logo,
-                'stamp' => $branding->ticket_element_stamp,
-                'signature' => $branding->ticket_element_signature,
-                'companions' => $branding->ticket_element_companions,
-            ],
-            'brand' => [
-                'displayName' => $branding->display_name ?? $tenant->name,
-                'logoUrl' => $branding->brandFileUrl(BrandFile::Logo),
-                'stampUrl' => $branding->brandFileUrl(BrandFile::Stamp),
-                'signatureUrl' => $branding->brandFileUrl(BrandFile::Signature),
-            ],
+            ...$design,
         ];
     }
 

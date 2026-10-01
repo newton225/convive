@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -96,6 +97,31 @@ class TenantBranding extends Model implements HasMedia
                 ->singleFile()
                 ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
         }
+    }
+
+    /**
+     * Le fond du billet est recadre des le depot, aux proportions du haut du talon : voir
+     * `BrandFile::TicketBackgroundConversion`. Synchrone, pour qu'il soit pret a l'apercu qui suit.
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion(BrandFile::TicketBackgroundConversion)
+            ->performOnCollections(BrandFile::TicketBackground->value)
+            ->nonQueued()
+            // En dernier : `fit()` passe au pilote d'image et ne rend plus la conversion.
+            ->fit(Fit::Crop, BrandFile::TicketBackgroundWidth, BrandFile::TicketBackgroundHeight);
+    }
+
+    /**
+     * Get a signed, expiring URL for the ticket background, cropped for the ticket stub.
+     */
+    public function ticketBackgroundUrl(int $minutes = 30): ?string
+    {
+        $media = $this->getFirstMedia(BrandFile::TicketBackground->value);
+
+        return $media instanceof Media && $media->hasGeneratedConversion(BrandFile::TicketBackgroundConversion)
+            ? $media->getTemporaryUrl(now()->addMinutes($minutes), BrandFile::TicketBackgroundConversion)
+            : null;
     }
 
     /**

@@ -12,14 +12,17 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class SaveTenantBrandFile
 {
     /**
-     * Store a brand file, replacing whatever was there before.
+     * Store a brand file, replacing whatever was there before. `$crop` is the area the operator
+     * chose, in pixels of the upright image, already checked by `SaveBrandFileRequest`.
+     *
+     * @param  array{x: int, y: int, width: int, height: int}|null  $crop
      */
-    public function store(Tenant $tenant, BrandFile $file, UploadedFile $upload): Media
+    public function store(Tenant $tenant, BrandFile $file, UploadedFile $upload, ?array $crop = null): Media
     {
         $branding = $tenant->brandingOrCreate();
 
         $media = $branding
-            ->addMedia($this->reencode($upload))
+            ->addMedia($this->reencode($upload, $crop))
             ->usingFileName(Str::uuid()->toString().'.'.$this->extension($upload))
             ->usingName($file->value)
             ->toMediaCollection($file->value);
@@ -66,11 +69,23 @@ class SaveTenantBrandFile
      * GPS et le modele d'appareil de qui l'a prise. Le fichier stocke doit etre une image et
      * rien d'autre. Voir CLAUDE.md, « Fichiers deposes ».
      */
-    private function reencode(UploadedFile $upload): string
+    /**
+     * @param  array{x: int, y: int, width: int, height: int}|null  $crop
+     */
+    private function reencode(UploadedFile $upload, ?array $crop): string
     {
         $destination = tempnam(sys_get_temp_dir(), 'brand').'.'.$this->extension($upload);
 
-        Image::load($upload->getRealPath())->save($destination);
+        // Redressee d'apres son EXIF avant que le reencodage ne l'efface : sinon une photo prise
+        // au telephone, droite a l'ecran, serait stockee couchee, et la zone choisie a l'ecran
+        // ne correspondrait plus aux pixels decoupes.
+        $image = Image::load($upload->getRealPath())->orientation();
+
+        if ($crop !== null) {
+            $image->manualCrop($crop['width'], $crop['height'], $crop['x'], $crop['y']);
+        }
+
+        $image->save($destination);
 
         return $destination;
     }

@@ -130,6 +130,8 @@ export type BrandFileOption = {
     value: string;
     label: string;
     hint: string;
+    // Proportions imposees (fond du billet) : le depot passe alors par un rognage.
+    crop?: { width: number; height: number };
 };
 
 export type TenantUnit = {

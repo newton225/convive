@@ -29,6 +29,11 @@ return [
         'companions' => 'Accompagnateurs',
         'scheduled' => 'Envoi programmé',
         'qr' => 'QR code du billet',
+        'qr_of' => 'QR code du billet de :name',
+        'host' => 'Invité par',
+        'holder' => 'Billet à afficher',
+        'holder_guest' => 'Invité principal',
+        'holder_companion' => 'Accompagnateur',
         'valid' => 'Billet valide',
     ],
 

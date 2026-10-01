@@ -6,6 +6,7 @@ import { OfflineBanner } from '@/components/offline-banner';
 import { useState } from 'react';
 import { CopyButton } from '@/components/copy-button';
 import { CompanionTicketPassCard } from '@/components/public/companion-ticket-pass-card';
+import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
 import { TicketPdfDownload } from '@/components/public/ticket-pdf-download';
 import InputError from '@/components/input-error';
 import { LabelWithHelp } from '@/components/label-with-help';
@@ -69,6 +70,8 @@ export default function PublicRegistrationShow({
     const { remainingSeconds, hasExpired } = useCountdown(
         registration.status === 'held' ? registration.heldUntil : null,
     );
+    // Constante locale : le retrecissement de type tient aussi dans les rappels du rendu.
+    const ticket = registration.ticket;
     const isExpired = registration.status === 'expired' || hasExpired;
     const isRejected = registration.status === 'proof_rejected';
     const isCancelled = registration.status === 'cancelled';
@@ -174,179 +177,64 @@ export default function PublicRegistrationShow({
                         </CardContent>
                     </Card>
                 ) : registration.status === 'confirmed' ? (
-                    <Card
-                        data-test="ticket-card"
-                        data-model={registration.ticket?.model}
-                        className={cn(
-                            registration.ticket?.model === 'classic' &&
-                                'border-2 border-[color:var(--brand-primary)]',
-                            registration.ticket?.model === 'elegant' &&
-                                'rounded-2xl',
-                        )}
-                    >
-                        <CardHeader>
-                            <div className="flex items-center justify-center gap-2">
-                                {registration.ticket?.elements.logo &&
-                                registration.ticket.brand.logoUrl ? (
-                                    <img
-                                        src={registration.ticket.brand.logoUrl}
-                                        alt={
-                                            registration.ticket.brand
-                                                .displayName ?? ''
-                                        }
-                                        className="size-8 object-contain"
-                                        data-test="ticket-logo"
-                                    />
-                                ) : null}
-                                <CardTitle
-                                    className={cn(
-                                        'text-base',
-                                        registration.ticket?.model ===
-                                            'elegant' && 'font-serif',
-                                    )}
-                                >
-                                    {t('guest.ticket.title')}
-                                </CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4 text-center">
-                            {registration.ticket ? (
-                                <>
-                                    <img
-                                        src={registration.ticket.qrImage}
-                                        alt={t('guest.ticket.title')}
-                                        className="mx-auto h-48 w-48"
-                                        data-test="ticket-qr"
-                                    />
-                                    <p className="font-medium">
-                                        {registration.ticket.tableNumber !==
-                                        null
-                                            ? t('guest.ticket.table', {
-                                                  number: String(
-                                                      registration.ticket
-                                                          .tableNumber,
-                                                  ),
-                                              })
-                                            : t('guest.ticket.no_table')}
-                                    </p>
-                                    <div className="space-y-1 text-left">
-                                        <p className="text-muted-foreground text-xs font-medium uppercase">
-                                            {t('guest.ticket.guests_title')}
-                                        </p>
-                                        <p
-                                            className="text-sm"
-                                            data-test="ticket-guest"
-                                        >
-                                            {registration.name} ·{' '}
-                                            {registration.unit}
-                                        </p>
-                                        {registration.ticket.elements.companions
-                                            ? registration.companions.map(
-                                                  (companion, index) => (
-                                                      <p
-                                                          key={index}
-                                                          className="text-sm"
-                                                          data-test="ticket-guest"
-                                                      >
-                                                          {companion.name} ·{' '}
-                                                          {companion.unit}
-                                                      </p>
-                                                  ),
-                                              )
-                                            : null}
-                                    </div>
-                                    {registration.ticket.pdfUrl ? (
-                                        <TicketPdfDownload
-                                            url={registration.ticket.pdfUrl}
-                                            all={
-                                                registration.ticket.passes
-                                                    .length > 0
-                                            }
-                                        />
-                                    ) : null}
-                                    {registration.ticket.passes.length > 0 ? (
-                                        <div
-                                            className="space-y-3 border-t border-dashed pt-4 text-left"
-                                            data-test="ticket-passes"
-                                        >
-                                            <div className="space-y-1">
-                                                <p className="text-muted-foreground text-xs font-medium uppercase">
-                                                    {t(
-                                                        'guest.ticket.passes_title',
-                                                    )}
-                                                </p>
-                                                <p className="text-muted-foreground text-sm">
-                                                    {t(
-                                                        'guest.ticket.passes_description',
-                                                    )}
-                                                </p>
-                                            </div>
-                                            {registration.ticket.passes.map(
-                                                (pass) => (
-                                                    <CompanionTicketPassCard
-                                                        key={pass.id}
-                                                        pass={pass}
-                                                        eventName={event.name}
-                                                    />
-                                                ),
-                                            )}
-                                        </div>
-                                    ) : null}
-                                    {registration.ticket.scheduledSendAt ? (
-                                        <p className="text-muted-foreground text-sm">
-                                            {t('guest.ticket.scheduled_send', {
-                                                date: formatDateTime(
-                                                    registration.ticket
-                                                        .scheduledSendAt,
-                                                    locale,
-                                                ),
-                                            })}
-                                        </p>
-                                    ) : null}
-                                    {(registration.ticket.elements.stamp &&
-                                        registration.ticket.brand.stampUrl) ||
-                                    (registration.ticket.elements.signature &&
-                                        registration.ticket.brand
-                                            .signatureUrl) ? (
-                                        <div className="flex items-center justify-center gap-3 border-t border-dashed pt-4">
-                                            {registration.ticket.elements
-                                                .stamp &&
-                                            registration.ticket.brand
-                                                .stampUrl ? (
-                                                <img
-                                                    src={
-                                                        registration.ticket
-                                                            .brand.stampUrl
-                                                    }
-                                                    alt={t(
-                                                        'ticket_template.elements.stamp',
-                                                    )}
-                                                    className="size-14 object-contain"
-                                                    data-test="ticket-stamp"
-                                                />
-                                            ) : null}
-                                            {registration.ticket.elements
-                                                .signature &&
-                                            registration.ticket.brand
-                                                .signatureUrl ? (
-                                                <img
-                                                    src={
-                                                        registration.ticket
-                                                            .brand.signatureUrl
-                                                    }
-                                                    alt={t(
-                                                        'ticket_template.elements.signature',
-                                                    )}
-                                                    className="h-10 w-20 object-contain"
-                                                    data-test="ticket-signature"
-                                                />
-                                            ) : null}
-                                        </div>
-                                    ) : null}
-                                </>
+                    ticket ? (
+                        // Le billet talon (README ecran 7) : le meme pour l'invite et chacun de
+                        // ses accompagnateurs, et le meme que dans le PDF (`App\Support\TicketCard`).
+                        <section
+                            className="space-y-6"
+                            data-test="ticket-card"
+                            data-model={ticket.model}
+                        >
+                            <BrandedTicket
+                                model={ticket.model}
+                                elements={ticket.elements}
+                                brand={ticket.brand}
+                                event={ticket.event}
+                                ticket={ticket.card}
+                            />
+                            {ticket.pdfUrl ? (
+                                <TicketPdfDownload
+                                    url={ticket.pdfUrl}
+                                    all={ticket.passes.length > 0}
+                                />
                             ) : null}
-                        </CardContent>
-                    </Card>
+                            {ticket.scheduledSendAt ? (
+                                <p className="text-muted-foreground text-center text-sm">
+                                    {t('guest.ticket.scheduled_send', {
+                                        date: formatDateTime(
+                                            ticket.scheduledSendAt,
+                                            locale,
+                                        ),
+                                    })}
+                                </p>
+                            ) : null}
+                            {ticket.passes.length > 0 ? (
+                                <div
+                                    className="space-y-4 border-t border-dashed pt-6"
+                                    data-test="ticket-passes"
+                                >
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground text-xs font-medium uppercase">
+                                            {t('guest.ticket.passes_title')}
+                                        </p>
+                                        <p className="text-muted-foreground text-sm">
+                                            {t(
+                                                'guest.ticket.passes_description',
+                                            )}
+                                        </p>
+                                    </div>
+                                    {ticket.passes.map((pass) => (
+                                        <CompanionTicketPassCard
+                                            key={pass.id}
+                                            pass={pass}
+                                            design={ticket}
+                                            event={ticket.event}
+                                        />
+                                    ))}
+                                </div>
+                            ) : null}
+                        </section>
+                    ) : null
                 ) : (
                     <>
                         <Card>

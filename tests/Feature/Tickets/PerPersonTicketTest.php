@@ -169,6 +169,46 @@ class PerPersonTicketTest extends TestCase
                 ->has('ticket.qrImage'));
     }
 
+    public function test_la_page_de_l_invite_donne_le_meme_billet_a_chaque_personne_du_groupe(): void
+    {
+        ['registration' => $registration] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $registration->fresh()->signedResumeUrl());
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                // Billet de l'invite principal : son groupe entier, ses accompagnateurs.
+                ->where('registration.ticket.card.holder.name', 'Aya Kouassi')
+                ->where('registration.ticket.card.seats', 3)
+                ->where('registration.ticket.card.companions.0.name', 'Kofi Kouassi')
+                ->where('registration.ticket.card.host', null)
+                // Billet d'un accompagnateur : meme forme, sa seule place et la personne qui l'invite.
+                ->where('registration.ticket.passes.0.card.holder.name', 'Kofi Kouassi')
+                ->where('registration.ticket.passes.0.card.seats', 1)
+                ->where('registration.ticket.passes.0.card.companions', [])
+                ->where('registration.ticket.passes.0.card.host.name', 'Aya Kouassi')
+                ->has('registration.ticket.event.name'),
+            );
+    }
+
+    public function test_le_lien_individuel_porte_le_meme_billet_et_le_gabarit_de_l_organisation(): void
+    {
+        ['tickets' => $tickets] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $tickets[1]->fresh()->shareUrl());
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('card.holder.name', 'Kofi Kouassi')
+                ->where('card.host.name', 'Aya Kouassi')
+                ->has('design.model')
+                ->has('design.elements')
+                ->where('design.brand.displayName', 'Convive'),
+            );
+    }
+
     public function test_un_lien_individuel_altere_repond_404(): void
     {
         ['tickets' => $tickets] = $this->confirmedGroup();

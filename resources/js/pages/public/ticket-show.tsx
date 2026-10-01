@@ -2,22 +2,38 @@ import { Head } from '@inertiajs/react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import { OfflineBanner } from '@/components/offline-banner';
 import { TicketPdfDownload } from '@/components/public/ticket-pdf-download';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
-import type { PublicRegistrationTenant, PublicTicketPass } from '@/types';
+import type {
+    PublicRegistrationTenant,
+    PublicTicketPass,
+    TicketCardData,
+    TicketCardEvent,
+    TicketDesign,
+} from '@/types';
 
 type Props = {
     event: { name: string; startsAt: string | null };
     tenant: PublicRegistrationTenant;
     ticket: PublicTicketPass;
+    card: TicketCardData;
+    ticketEvent: TicketCardEvent;
+    design: TicketDesign;
 };
 
 /**
  * Le lien individuel d'un billet (README 2.8, un billet par personne) : ce que recoit un
  * accompagnateur qui arrivera sans l'invite. Ce seul billet, jamais le dossier du groupe.
  */
-export default function PublicTicketShow({ event, tenant, ticket }: Props) {
+export default function PublicTicketShow({
+    event,
+    tenant,
+    ticket,
+    card,
+    ticketEvent,
+    design,
+}: Props) {
     const { t, locale } = useTranslation();
     const title = t('guest.ticket.single_title', { name: ticket.name });
 
@@ -27,7 +43,7 @@ export default function PublicTicketShow({ event, tenant, ticket }: Props) {
             <Head title={title} />
             <OfflineBanner />
 
-            <main className="w-full max-w-sm space-y-6 pt-12">
+            <main className="w-full max-w-md space-y-6 pt-12">
                 <div className="space-y-1 text-center">
                     {tenant.logoUrl ? (
                         <img
@@ -44,56 +60,17 @@ export default function PublicTicketShow({ event, tenant, ticket }: Props) {
                     ) : null}
                 </div>
 
-                <Card data-test="ticket-single">
-                    <CardHeader className="text-center">
-                        <CardTitle>{ticket.name}</CardTitle>
-                        <p className="text-muted-foreground text-sm">
-                            {ticket.unit}
-                        </p>
-                    </CardHeader>
-                    <CardContent className="space-y-4 text-center">
-                        <img
-                            src={ticket.qrImage}
-                            alt={title}
-                            className="mx-auto h-56 w-56 bg-white"
-                            data-test="ticket-qr"
-                        />
-                        <p className="font-medium">
-                            {ticket.tableNumber !== null
-                                ? t('guest.ticket.table', {
-                                      number: String(ticket.tableNumber),
-                                  })
-                                : t('guest.ticket.no_table')}
-                        </p>
-                        {ticket.host ? (
-                            <div
-                                className="bg-muted rounded-lg px-4 py-3 text-left text-sm"
-                                data-test="ticket-host"
-                            >
-                                <p className="text-muted-foreground text-xs font-medium uppercase">
-                                    {t('guest.ticket.host_title')}
-                                </p>
-                                <p>
-                                    <span className="font-medium">
-                                        {ticket.host.name}
-                                    </span>
-                                    {' · '}
-                                    {ticket.host.unit}
-                                </p>
-                                {ticket.host.reference ? (
-                                    <p className="text-muted-foreground text-xs">
-                                        {t('guest.ticket.host_reference', {
-                                            reference: ticket.host.reference,
-                                        })}
-                                    </p>
-                                ) : null}
-                            </div>
-                        ) : null}
-                        <p className="text-muted-foreground text-sm">
-                            {t('guest.ticket.single_notice')}
-                        </p>
-                    </CardContent>
-                </Card>
+                {/* Le meme talon que celui de l'invite principal et que le PDF. */}
+                <section data-test="ticket-single">
+                    <BrandedTicket
+                        {...design}
+                        event={ticketEvent}
+                        ticket={card}
+                    />
+                    <p className="text-muted-foreground mt-4 text-center text-sm">
+                        {t('guest.ticket.single_notice')}
+                    </p>
+                </section>
 
                 {ticket.pdfUrl ? (
                     <TicketPdfDownload url={ticket.pdfUrl} />

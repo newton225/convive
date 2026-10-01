@@ -2,10 +2,16 @@
 
 namespace App\Http\Requests\Tenants;
 
+use App\Enums\BrandFile;
 use App\Models\Tenant;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
+use Spatie\Image\Image;
 
 class SaveBrandFileRequest extends FormRequest
 {
@@ -36,6 +42,73 @@ class SaveBrandFileRequest extends FormRequest
                 // avant que le reencodage n'echoue.
                 'dimensions:min_width=1,min_height=1',
             ],
+            // La zone de rognage (en pixels de l'image redressee) : seulement pour le fond du
+            // billet, le seul fichier dont les proportions sont imposees.
+            'crop' => [
+                Rule::prohibitedIf(fn () => $this->route('file') !== BrandFile::TicketBackground->value),
+                'nullable', 'array:x,y,width,height',
+            ],
+            'crop.x' => ['required_with:crop', 'integer', 'min:0'],
+            'crop.y' => ['required_with:crop', 'integer', 'min:0'],
+            'crop.width' => ['required_with:crop', 'integer', 'min:1'],
+            'crop.height' => ['required_with:crop', 'integer', 'min:1'],
+        ];
+    }
+
+    /**
+     * Check the crop area against the image itself : inside it, and in the ticket proportions.
+     *
+     * @return array<int, Closure(Validator): void>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                $crop = $this->crop();
+                $file = $this->file('file');
+
+                if ($crop === null || $validator->errors()->isNotEmpty() || ! $file instanceof UploadedFile) {
+                    return;
+                }
+
+                // Dimensions de l'image redressee : celles que le navigateur a affichees au
+                // rognage, et celles que `SaveTenantBrandFile` decoupe.
+                $image = Image::load($file->getRealPath())->orientation();
+
+                if ($image->getWidth() < $crop['x'] + $crop['width'] || $image->getHeight() < $crop['y'] + $crop['height']) {
+                    $validator->errors()->add('crop', __('organisation.errors.crop_outside'));
+
+                    return;
+                }
+
+                // Tolerance de 2 % : la zone arrive arrondie au pixel.
+                $expected = BrandFile::TicketBackgroundWidth / BrandFile::TicketBackgroundHeight;
+
+                if (abs($crop['width'] / $crop['height'] - $expected) > $expected * 0.02) {
+                    $validator->errors()->add('crop', __('organisation.errors.crop_ratio'));
+                }
+            },
+        ];
+    }
+
+    /**
+     * Get the crop area, or null when none was sent. Its bounds are checked in `after()`.
+     *
+     * @return array{x: int, y: int, width: int, height: int}|null
+     */
+    public function crop(): ?array
+    {
+        $crop = $this->input('crop');
+
+        if (! is_array($crop)) {
+            return null;
+        }
+
+        return [
+            'x' => (int) ($crop['x'] ?? 0),
+            'y' => (int) ($crop['y'] ?? 0),
+            'width' => max(1, (int) ($crop['width'] ?? 1)),
+            'height' => max(1, (int) ($crop['height'] ?? 1)),
         ];
     }
 

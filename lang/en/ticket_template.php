@@ -29,6 +29,11 @@ return [
         'companions' => 'Companions',
         'scheduled' => 'Scheduled send',
         'qr' => 'Ticket QR code',
+        'qr_of' => 'Ticket QR code for :name',
+        'host' => 'Invited by',
+        'holder' => 'Ticket to show',
+        'holder_guest' => 'Main guest',
+        'holder_companion' => 'Companion',
         'valid' => 'Valid ticket',
     ],
 

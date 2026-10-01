@@ -6,6 +6,7 @@ export type TicketBrand = {
     logoUrl: string | null;
     stampUrl: string | null;
     signatureUrl: string | null;
+    backgroundUrl: string | null;
     representative: string | null;
 };
 
@@ -13,6 +14,7 @@ export type TicketTemplateEvent = {
     id: number;
     name: string;
     startsAt: string | null;
+    venue: string | null;
 };
 
 export type TicketElements = {
@@ -20,4 +22,41 @@ export type TicketElements = {
     stamp: boolean;
     signature: boolean;
     companions: boolean;
+};
+
+// Le billet talon d'une personne (`App\Support\TicketCard`), le meme pour l'invite principal et
+// chacun de ses accompagnateurs, sur sa page, son lien individuel et dans le PDF.
+export type TicketCardData = {
+    holder: { name: string; unit: string };
+    // Null seulement dans l'apercu du gabarit, qui montre un QR d'exemple.
+    qrImage: string | null;
+    tableNumber: number | null;
+    // Tout le groupe sur le billet principal, 1 sur celui d'un accompagnateur.
+    seats: number;
+    // Accompagnateurs de l'invite principal, si le gabarit les affiche ; vide sinon.
+    companions: { name: string; unit: string }[];
+    // La personne qui invite un accompagnateur ; null sur le billet principal.
+    host: { name: string; unit: string; reference: string | null } | null;
+};
+
+export type TicketCardEvent = {
+    name: string;
+    startsAt: string | null;
+    venue: string | null;
+};
+
+export type TicketCardBrand = {
+    displayName: string;
+    colors: { primary: string; secondary: string };
+    logoUrl: string | null;
+    stampUrl: string | null;
+    signatureUrl: string | null;
+    // Image derriere le QR, deja recadree aux proportions du haut du talon ; null sans fond.
+    backgroundUrl: string | null;
+};
+
+export type TicketDesign = {
+    model: TicketModel;
+    elements: TicketElements;
+    brand: TicketCardBrand;
 };

@@ -35,6 +35,15 @@ class TicketTemplateController extends Controller
             'tenant' => ['slug' => $tenant->slug, 'name' => $tenant->name],
             'permissions' => $request->user()->toTenantPermissions($tenant),
             'brand' => $this->brand($tenant, $branding),
+            // Le fond du billet se depose ici, par la meme route et les memes controles que les
+            // fichiers de marque de l'organisation.
+            'backgroundFile' => [
+                'value' => BrandFile::TicketBackground->value,
+                'label' => BrandFile::TicketBackground->label(),
+                'hint' => BrandFile::TicketBackground->hint(),
+                // Les proportions du haut du talon, que le rognage impose avant l'envoi.
+                'crop' => ['width' => BrandFile::TicketBackgroundWidth, 'height' => BrandFile::TicketBackgroundHeight],
+            ],
             'model' => $branding->ticket_model->value,
             'elements' => [
                 'logo' => $branding->ticket_element_logo,
@@ -50,6 +59,7 @@ class TicketTemplateController extends Controller
                     'id' => $event->id,
                     'name' => $event->name,
                     'startsAt' => $event->starts_at?->toISOString(),
+                    'venue' => $event->venue,
                 ])
                 ->all(),
         ]);
@@ -84,6 +94,7 @@ class TicketTemplateController extends Controller
             'logoUrl' => $branding->brandFileUrl(BrandFile::Logo),
             'stampUrl' => $branding->brandFileUrl(BrandFile::Stamp),
             'signatureUrl' => $branding->brandFileUrl(BrandFile::Signature),
+            'backgroundUrl' => $branding->ticketBackgroundUrl(),
             'representative' => $branding->representative_name,
         ];
     }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Tenant;
 use App\Models\Ticket;
+use App\Support\TicketCard;
 use App\Support\TicketQrCode;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -67,6 +68,10 @@ class TicketController extends Controller
                 'tableNumber' => $ticket->registration->tableAssignment?->seatingTable->number,
                 'pdfUrl' => $ticket->pdfUrl(),
             ],
+            // Le meme billet que sur la page de l'invite et dans le PDF (`TicketCard`).
+            'card' => TicketCard::for($ticket, $branding),
+            'ticketEvent' => TicketCard::event($event),
+            'design' => TicketCard::design($tenant, $event),
         ]);
     }
 }

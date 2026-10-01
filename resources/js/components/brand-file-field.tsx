@@ -1,6 +1,8 @@
 import { router } from '@inertiajs/react';
 import { Trash2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { ImageCropDialog } from '@/components/image-crop-dialog';
+import type { CropArea } from '@/components/image-crop-dialog';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import { Label } from '@/components/ui/label';
@@ -24,20 +26,26 @@ export default function BrandFileField({
     const { t } = useTranslation();
     const input = useRef<HTMLInputElement>(null);
     const [processing, setProcessing] = useState(false);
+    // Le fichier en cours de rognage, quand ce fichier de marque impose ses proportions.
+    const [cropping, setCropping] = useState<File | null>(null);
 
-    const send = (chosen: File) => {
+    const resetInput = () => {
+        if (input.current) {
+            input.current.value = '';
+        }
+    };
+
+    const send = (chosen: File, crop?: CropArea) => {
         router.post(
             store([tenantSlug, file.value]).url,
-            { file: chosen },
+            crop ? { file: chosen, crop } : { file: chosen },
             {
                 forceFormData: true,
                 onStart: () => setProcessing(true),
+                onSuccess: () => setCropping(null),
                 onFinish: () => {
                     setProcessing(false);
-
-                    if (input.current) {
-                        input.current.value = '';
-                    }
+                    resetInput();
                 },
             },
         );
@@ -80,7 +88,13 @@ export default function BrandFileField({
                         onChange={(event) => {
                             const chosen = event.target.files?.[0];
 
-                            if (chosen) {
+                            if (!chosen) {
+                                return;
+                            }
+
+                            if (file.crop) {
+                                setCropping(chosen);
+                            } else {
                                 send(chosen);
                             }
                         }}
@@ -117,6 +131,26 @@ export default function BrandFileField({
 
             <p className="text-muted-foreground text-xs">{file.hint}</p>
             <InputError message={error} />
+
+            {file.crop ? (
+                <ImageCropDialog
+                    file={cropping}
+                    aspect={file.crop.width / file.crop.height}
+                    title={t('organisation.files.crop.title', {
+                        label: file.label,
+                    })}
+                    processing={processing}
+                    onCancel={() => {
+                        setCropping(null);
+                        resetInput();
+                    }}
+                    onConfirm={(area) => {
+                        if (cropping) {
+                            send(cropping, area);
+                        }
+                    }}
+                />
+            ) : null}
         </div>
     );
 }
