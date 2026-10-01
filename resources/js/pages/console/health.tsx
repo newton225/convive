@@ -1,7 +1,10 @@
 import { Head } from '@inertiajs/react';
 import { CircleAlert, CircleCheck } from 'lucide-react';
 import { BackupCard } from '@/components/console/backup-card';
+import { HealthChecksCard } from '@/components/console/health-checks-card';
+import { QueueCard } from '@/components/console/queue-card';
 import { RepairDatabaseButton } from '@/components/console/repair-database-button';
+import { ScheduledTasksTable } from '@/components/console/scheduled-tasks-table';
 import Heading from '@/components/heading';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { translate, useTranslation } from '@/hooks/use-translation';
@@ -9,10 +12,16 @@ import { health } from '@/routes/console';
 import type {
     ConsoleBackup,
     ConsoleDatabaseIssue,
+    ConsoleHealthCheck,
+    ConsoleQueue,
+    ConsoleScheduledTask,
     Translations,
 } from '@/types';
 
 type Props = {
+    checks: ConsoleHealthCheck[];
+    tasks: ConsoleScheduledTask[];
+    queue: ConsoleQueue;
     databases: ConsoleDatabaseIssue[];
     backup: ConsoleBackup;
 };
@@ -20,10 +29,16 @@ type Props = {
 /**
  * README ecran 31 : la sante technique. Bases d'organisation absentes ou en retard de migrations
  * (CLAUDE.md, « Multi-locataire » : un locataire sans ses migrations est un locataire casse) et
- * sauvegardes. Le suivi des taches planifiees et des files n'est pas encore construit : rien ne
- * s'affiche a leur sujet, plutot qu'un jeu d'exemple.
+ * sauvegardes, controles de sante, releve des taches planifiees, file et envois en echec. Tout est
+ * lu sur ce qui existe reellement.
  */
-export default function Health({ databases, backup }: Props) {
+export default function Health({
+    checks,
+    tasks,
+    queue,
+    databases,
+    backup,
+}: Props) {
     const { t } = useTranslation();
 
     return (
@@ -36,6 +51,8 @@ export default function Health({ databases, backup }: Props) {
                     title={t('console.health.title')}
                     description={t('console.health.description')}
                 />
+
+                <HealthChecksCard checks={checks} />
 
                 <Card>
                     <CardHeader>
@@ -87,6 +104,10 @@ export default function Health({ databases, backup }: Props) {
                 </Card>
 
                 <BackupCard backup={backup} />
+
+                <QueueCard queue={queue} />
+
+                <ScheduledTasksTable tasks={tasks} />
             </div>
         </>
     );

@@ -103,7 +103,10 @@ return [
     */
 
     'batching' => [
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        // La base centrale, la seule a porter cette table. `DB_CONNECTION` designe la connexion
+        // gabarit des organisations (`config/database.php`), ou elle n'existe pas : un travail en
+        // echec n'y serait jamais enregistre.
+        'database' => 'central',
         'table' => 'job_batches',
     ],
 
@@ -122,7 +125,10 @@ return [
 
     'failed' => [
         'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        // La base centrale, la seule a porter cette table. `DB_CONNECTION` designe la connexion
+        // gabarit des organisations (`config/database.php`), ou elle n'existe pas : un travail en
+        // echec n'y serait jamais enregistre.
+        'database' => 'central',
         'table' => 'failed_jobs',
     ],
 

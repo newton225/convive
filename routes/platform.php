@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Console\AuditLogController;
+use App\Http\Controllers\Console\FailedJobController;
 use App\Http\Controllers\Console\FinishSupportAccessController;
 use App\Http\Controllers\Console\HealthController;
 use App\Http\Controllers\Console\OrganisationActionController;
@@ -51,6 +52,8 @@ Route::prefix('console')
         Route::get('health', HealthController::class)->middleware('can:console.area,"health"')->name('health');
         Route::post('health/databases/{tenant}/migrate', RepairTenantDatabaseController::class)->middleware('can:console.area,"health"')->name('health.databases.migrate');
         Route::post('health/backup', RunBackupController::class)->middleware('can:console.area,"health"')->name('health.backup');
+        Route::post('health/failed-jobs/{job}/retry', [FailedJobController::class, 'retry'])->middleware('can:console.area,"health"')->name('health.failed-jobs.retry');
+        Route::delete('health/failed-jobs/{job}', [FailedJobController::class, 'destroy'])->middleware('can:console.area,"health"')->name('health.failed-jobs.destroy');
         Route::get('showcase', [ShowcaseController::class, 'index'])->middleware('can:console.area,"showcase"')->name('showcase');
         Route::post('showcase/{announcement}/withdraw', [ShowcaseController::class, 'withdraw'])->name('showcase.withdraw');
         Route::get('audit', AuditLogController::class)->middleware('can:console.area,"audit"')->name('audit');

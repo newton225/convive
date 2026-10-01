@@ -22,7 +22,7 @@ use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes;
 
 // Sans adresse d'alerte, aucun courriel ne part. Le paquet exige quand meme une adresse valide
 // dans sa configuration : celle-ci ne recoit jamais rien, les canaux etant vides.
-$alertEmail = env('BACKUP_ALERT_EMAIL');
+$alertEmail = env('CONVIVE_ALERT_EMAIL');
 $alertChannels = $alertEmail ? ['mail'] : [];
 
 $name = env('BACKUP_NAME', 'convive');

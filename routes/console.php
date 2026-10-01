@@ -25,6 +25,9 @@ use App\Support\AuditChain;
 use App\Support\Console\TenantUsageRecorder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
+use Spatie\Health\Commands\DispatchQueueCheckJobsCommand;
+use Spatie\Health\Commands\RunHealthChecksCommand;
+use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
 
 Schedule::call(function () {
     TenantInvitation::query()
@@ -306,3 +309,20 @@ Schedule::command('backup:clean')
 Schedule::command('backup:monitor')
     ->dailyAt('06:00')
     ->description('Alert when the newest backup is too old');
+
+/*
+ * Surveillance (`App\Providers\HealthServiceProvider`). Deux temoins partent chaque minute : l'un
+ * dit que le planificateur tourne, l'autre traverse la file pour dire qu'elle est traitee. Les
+ * controles sont ensuite joues, et un echec previent par courriel (`config/health.php`).
+ */
+Schedule::command(ScheduleCheckHeartbeatCommand::class)
+    ->everyMinute()
+    ->description('Record that the scheduler is alive');
+
+Schedule::command(DispatchQueueCheckJobsCommand::class)
+    ->everyMinute()
+    ->description('Send a witness job through the queue');
+
+Schedule::command(RunHealthChecksCommand::class)
+    ->everyMinute()
+    ->description('Run the health checks and alert on failure');

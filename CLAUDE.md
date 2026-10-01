@@ -917,12 +917,41 @@ archiverait les fichiers sans aucune base.
   l'application. Il protege d'une erreur de manipulation, pas de la perte du serveur : en
   production, `BACKUP_DISK` designe un stockage exterieur et `BACKUP_ARCHIVE_PASSWORD` chiffre
   l'archive. L'ecran de sante technique le rappelle tant que ce n'est pas fait.
-- **Alertes** : seuls les echecs previennent, a l'adresse `BACKUP_ALERT_EMAIL`. Sans elle, aucun
+- **Alertes** : seuls les echecs previennent, a l'adresse `CONVIVE_ALERT_EMAIL`. Sans elle, aucun
   courriel ne part et l'etat ne se lit que sur l'ecran de sante technique.
 - **Restauration** : a la main, application arretee. Extraire l'archive, remettre `central.sqlite`
   et les `tenant{id}.sqlite` dans `database/`, `tenant-media/` et `payment-proofs/` dans
   `storage/app/`, puis `php artisan tenants:migrate`. Aucun bouton de restauration dans la
   console : ecraser toutes les bases ne se fait pas d'un clic.
+
+---
+
+## Surveillance : taches planifiees et files
+
+`spatie/laravel-health`, controles declares dans `App\Providers\HealthServiceProvider`, lus par
+l'ecran de sante technique de la console (README ecran 31).
+
+- **Controles** : planificateur vivant, taches planifiees, traitement de la file, envois en echec,
+  base centrale, Redis, espace disque. Le planificateur les joue chaque minute ; l'ecran les rejoue
+  a l'affichage (un resultat garde en cache serait celui d'avant la panne).
+- **Releve des taches** (`scheduled_task_runs`, base centrale) : tenu par
+  `App\Support\Health\ScheduledTaskRecorder` a partir des evenements du planificateur de Laravel
+  (debut, fin, echec, tache ecartee). « En retard » et « en echec » ne sont pas stockes, ils se
+  lisent sur les dates (`ScheduledTaskRun::state()`), avec cinq minutes de marge. Le releve ne doit
+  jamais empecher une tache de tourner : chaque ecriture est protegee par `rescue()`.
+- **Une nouvelle tache planifiee porte une `description()`** : c'est son nom dans le releve. Sa
+  traduction va dans `console.health.task_labels`, sous la cle `Str::slug(description, '_')`, dans
+  les deux langues ; sans traduction, l'ecran affiche la description telle quelle.
+- **Envois en echec** : lus sur `queue.failer`, relances (`queue:retry`) ou ecartes depuis la
+  console, gestes journalises. `config/queue.php` range les echecs dans la base **centrale**, la
+  seule a porter `failed_jobs`.
+- **Alertes** : un controle en echec ecrit a `CONVIVE_ALERT_EMAIL`, une fois par heure au plus. La
+  meme adresse recoit les echecs de sauvegarde. Sans elle, rien ne part.
+- **Limite a connaitre** : un planificateur arrete ne peut pas envoyer sa propre alerte. Seul un
+  service exterieur appele a chaque passage (`SCHEDULE_HEARTBEAT_URL`) previent d'un arret complet ;
+  d'ici la, l'arret ne se voit que sur l'ecran.
+- **En production**, le serveur doit faire tourner `php artisan schedule:run` chaque minute (cron)
+  et un processus `php artisan queue:work` surveille (Supervisor ou equivalent).
 
 ---
 

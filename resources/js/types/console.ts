@@ -119,6 +119,44 @@ export type ConsoleDatabaseIssue = {
     pendingMigrations: number | null;
 };
 
+// Un controle de sante rejoue a l'affichage de l'ecran (`spatie/laravel-health`).
+export type ConsoleHealthCheck = {
+    name: string;
+    status: 'ok' | 'warning' | 'failed' | 'crashed' | 'skipped';
+    summary: string;
+};
+
+// Une tache planifiee telle que le planificateur l'a relevee. `label` arrive deja traduit.
+export type ConsoleScheduledTask = {
+    name: string;
+    label: string;
+    frequency: {
+        kind: 'minutes' | 'hourly' | 'daily' | 'other';
+        minutes: number | null;
+        at: string | null;
+        expression: string;
+    };
+    lastRunAt: string | null;
+    runtimeMs: number | null;
+    state: 'ok' | 'late' | 'failed' | 'waiting';
+    failure: string | null;
+};
+
+export type ConsoleFailedJob = {
+    id: string;
+    job: string;
+    queue: string;
+    failedAt: string;
+    error: string;
+};
+
+// `pending` est nul quand la file ne repond pas.
+export type ConsoleQueue = {
+    pending: number | null;
+    failedCount: number;
+    failed: ConsoleFailedJob[];
+};
+
 export type ConsoleBackup = {
     healthy: boolean;
     lastAt: string | null;
@@ -165,7 +203,9 @@ export type ConsoleAuditType =
     | 'support_access_finished'
     | 'backup_run'
     | 'support_access_requested'
-    | 'support_access_request_taken';
+    | 'support_access_request_taken'
+    | 'failed_job_retried'
+    | 'failed_job_forgotten';
 
 export type ConsoleAuditEntry = {
     id: number;
