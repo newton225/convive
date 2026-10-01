@@ -63,7 +63,8 @@ class RecoveryAndShowcaseTest extends TestCase
 
     public function test_le_recouvrement_liste_les_impayes_reels_et_leur_suspension_a_venir(): void
     {
-        $this->freezeTime();
+        // A la seconde : la base ne garde pas les microsecondes.
+        $this->freezeSecond();
         $this->pastDue(daysAgo: 4);
 
         $this->actingAs($this->founder)
@@ -156,7 +157,7 @@ class RecoveryAndShowcaseTest extends TestCase
         $this->tenant->update(['subdomain' => 'convive']);
 
         $this->tenant->run(function () {
-            $event = Event::factory()->open()->create(['name' => 'Diner de gala']);
+            $event = Event::factory()->published()->create(['name' => 'Diner de gala']);
             app(SaveEvent::class)->announce($event);
         });
 

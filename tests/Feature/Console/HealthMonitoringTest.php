@@ -17,6 +17,7 @@ use Illuminate\Console\Events\ScheduledTaskStarting;
 use Illuminate\Console\Scheduling\Event as ScheduledEvent;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 use RuntimeException;
 use Tests\TestCase;
@@ -60,7 +61,7 @@ class HealthMonitoringTest extends TestCase
 
     private function failedJob(): string
     {
-        return (string) app('queue.failer')->log('sync', 'default', '{"displayName":"App\\\\Jobs\\\\EnvoiDeTest"}', new RuntimeException('Adresse refusee.'));
+        return (string) app('queue.failer')->log('sync', 'default', '{"uuid":"'.Str::uuid().'","displayName":"App\\\\Jobs\\\\EnvoiDeTest"}', new RuntimeException('Adresse refusee.'));
     }
 
     public function test_le_planificateur_releve_le_debut_et_la_fin_d_une_tache(): void

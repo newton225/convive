@@ -195,7 +195,8 @@ class ConsoleOrganisationTest extends TestCase
 
     public function test_la_suppression_se_programme_a_trente_jours_et_s_annule(): void
     {
-        $this->freezeTime();
+        // A la seconde : la base ne garde pas les microsecondes.
+        $this->freezeSecond();
 
         $this->actingAs($this->founder)
             ->post(route('console.organisations.deletion.schedule', $this->tenant), [
