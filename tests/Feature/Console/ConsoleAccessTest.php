@@ -48,7 +48,7 @@ class ConsoleAccessTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component($component)
-                ->where('isSample', ! in_array($component, ['console/plans', 'console/team'], true)),
+                ->where('isSample', ! in_array($component, ['console/plans', 'console/team', 'console/audit'], true)),
             );
     }
 

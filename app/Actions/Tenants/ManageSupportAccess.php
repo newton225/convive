@@ -5,6 +5,7 @@ namespace App\Actions\Tenants;
 use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\Console\ConsoleJournal;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
@@ -103,6 +104,12 @@ class ManageSupportAccess
     public function recordView(SupportAccessGrant $grant, ?string $routeName): void
     {
         $page = $this->pageOf($routeName);
+
+        // Le journal central retient que l'acces a servi, une fois : le detail des pages est dans
+        // `support_access_views` et au journal de l'organisation.
+        if (! $grant->views()->exists()) {
+            ConsoleJournal::record('support_access_used', $grant->operator, $grant->tenant);
+        }
 
         $grant->views()->create([
             'page' => $page,

@@ -38,6 +38,10 @@ const types: ConsoleAuditType[] = [
     'plan_changed',
     'announcement_withdrawn',
     'operator_invited',
+    'operator_removed',
+    'plan_updated',
+    'database_repaired',
+    'deletion_cancelled',
 ];
 
 /**
@@ -53,8 +57,8 @@ export default function ConsoleAudit({ isSample, entries }: Props) {
     const actorLabel = (entry: ConsoleAuditEntry) =>
         entry.actor ?? t('console.system_actor');
 
-    // PROVISOIRE : filtre en memoire sur le jeu d'exemple ; passe cote serveur
-    // (`spatie/laravel-query-builder`) quand le journal viendra de la base.
+    // Filtre en memoire sur les entrees recentes que le serveur envoie ; a passer cote serveur
+    // (`spatie/laravel-query-builder`) quand le journal depassera cette fenetre.
     const visible = useMemo(() => {
         const needle = search.trim().toLocaleLowerCase(locale);
 

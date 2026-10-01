@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
-import { Check, Info, Pencil, X } from 'lucide-react';
-import { PendingActionButton } from '@/components/console/pending-action-button';
+import { Check, Info, X } from 'lucide-react';
+import { EditPlanDialog } from '@/components/console/edit-plan-dialog';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
 import {
@@ -22,7 +22,7 @@ type Props = {
 
 /**
  * README ecran 30 : le catalogue des plans, prix et quotas. Les vrais plans de la base centrale,
- * en lecture seule jusqu'a l'etape 10.
+ * que la console regle.
  */
 export default function Plans({ isSample, plans }: Props) {
     const { t, locale } = useTranslation();
@@ -151,10 +151,7 @@ export default function Plans({ isSample, plans }: Props) {
                                 </ul>
                             </CardContent>
                             <CardFooter>
-                                <PendingActionButton
-                                    icon={Pencil}
-                                    label={t('console.plans.edit')}
-                                />
+                                <EditPlanDialog plan={plan} />
                             </CardFooter>
                         </Card>
                     ))}

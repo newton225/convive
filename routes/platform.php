@@ -28,7 +28,8 @@ Route::prefix('console')
         Route::put('support-availability', SupportAvailabilityController::class)->middleware('can:console.area,"support"')->name('support-availability.update');
         Route::get('organisations/{organisation}', [OrganisationController::class, 'show'])->middleware('can:console.area,"organisations"')->name('organisations.show');
         Route::get('recovery', RecoveryController::class)->middleware('can:console.area,"recovery"')->name('recovery');
-        Route::get('plans', PlanController::class)->middleware('can:console.area,"plans"')->name('plans');
+        Route::get('plans', [PlanController::class, 'index'])->middleware('can:console.area,"plans"')->name('plans');
+        Route::patch('plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
         Route::get('health', HealthController::class)->middleware('can:console.area,"health"')->name('health');
         Route::post('health/databases/{tenant}/migrate', RepairTenantDatabaseController::class)->middleware('can:console.area,"health"')->name('health.databases.migrate');
         Route::get('showcase', ShowcaseController::class)->middleware('can:console.area,"showcase"')->name('showcase');

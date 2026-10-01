@@ -141,7 +141,7 @@ return [
     'plans' => [
         'title' => 'Plans',
         'description' => 'Prix et quotas des trois plans. Une modification ne touche pas les abonnements en cours avant leur renouvellement.',
-        'read_only' => "Ces plans sont les vrais plans en base. Leur modification arrive avec l'étape 10 : l'écran est en lecture seule d'ici là.",
+        'read_only' => 'Un quota modifié s’applique tout de suite à toutes les organisations du plan. Un prix modifié vaut pour les prochains paiements ; les abonnements en cours gardent le leur.',
         'free' => 'Gratuit',
         'on_quote' => 'Sur devis',
         'per_month' => 'par mois',
@@ -158,6 +158,26 @@ return [
         'included' => 'Inclus',
         'not_included' => 'Non inclus',
         'edit' => 'Modifier',
+        'fields' => [
+            'monthly_price' => 'Prix en francs CFA',
+            'monthly_price_eur' => 'Prix en euros',
+            'monthly_price_usd' => 'Prix en dollars',
+            'max_active_events' => 'Événements actifs',
+            'max_registrations' => 'Inscrits',
+            'max_members' => 'Membres',
+        ],
+        'edit_dialog' => [
+            'title' => 'Modifier le plan :plan',
+            'description' => 'Prix mensuel et quotas. Le nom et l’ordre des plans ne se changent pas ici.',
+            'prices' => 'Prix mensuel',
+            'prices_hint' => 'Zéro : plan gratuit. Champ vide : sur devis, ou non proposé dans cette devise.',
+            'quotas' => 'Quotas',
+            'quotas_hint' => 'Champ vide : illimité. Une baisse s’applique tout de suite aux organisations de ce plan.',
+            'features' => 'Fonctions incluses',
+        ],
+        'flash' => [
+            'updated' => 'Plan :plan mis à jour.',
+        ],
     ],
 
     'health' => [
@@ -250,6 +270,10 @@ return [
             'plan_changed' => 'Changement de plan',
             'announcement_withdrawn' => 'Annonce retirée',
             'operator_invited' => 'Invitation éditeur',
+            'operator_removed' => 'Retrait éditeur',
+            'plan_updated' => 'Plan modifié',
+            'database_repaired' => 'Base réparée',
+            'deletion_cancelled' => 'Suppression annulée',
         ],
         'messages' => [
             'support_access_used' => ':actor a consulté :organisation avec un accès de support',
@@ -260,6 +284,10 @@ return [
             'plan_changed' => ':actor a changé le plan de :organisation',
             'announcement_withdrawn' => ':actor a retiré une annonce de :organisation',
             'operator_invited' => ":actor a invité un membre dans l'équipe éditeur",
+            'operator_removed' => ':actor a retiré un membre de l’équipe éditeur',
+            'plan_updated' => ':actor a modifié les prix ou les quotas d’un plan',
+            'database_repaired' => ':actor a rejoué les migrations de :organisation',
+            'deletion_cancelled' => ':actor a annulé la suppression de :organisation',
         ],
         'empty' => [
             'title' => 'Aucune entrée',

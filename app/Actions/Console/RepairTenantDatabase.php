@@ -5,10 +5,10 @@ namespace App\Actions\Console;
 use App\Actions\Tenants\SyncPermissionCatalogue;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\Console\ConsoleJournal;
 use App\Support\Console\TenantDatabaseHealth;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
@@ -37,11 +37,7 @@ class RepairTenantDatabase
 
             $exitCode = Artisan::call('tenants:migrate', ['--tenants' => [$tenant->getTenantKey()]]);
 
-            Log::info('console.tenant_database_repaired', [
-                'tenant_id' => $tenant->id,
-                'actor_id' => $actor->id,
-                'exit_code' => $exitCode,
-            ]);
+            ConsoleJournal::record('database_repaired', $actor, $tenant, ['exit_code' => $exitCode]);
 
             if ($exitCode !== 0) {
                 throw new RuntimeException(Artisan::output());

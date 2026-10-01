@@ -141,7 +141,7 @@ return [
     'plans' => [
         'title' => 'Plans',
         'description' => 'Prices and quotas of the three plans. A change does not affect running subscriptions before their renewal.',
-        'read_only' => 'These are the real plans stored in the database. Editing them comes with step 10: the screen is read only until then.',
+        'read_only' => 'A changed quota applies at once to every organisation on the plan. A changed price applies to the next payments; current subscriptions keep theirs.',
         'free' => 'Free',
         'on_quote' => 'On quote',
         'per_month' => 'per month',
@@ -158,6 +158,26 @@ return [
         'included' => 'Included',
         'not_included' => 'Not included',
         'edit' => 'Edit',
+        'fields' => [
+            'monthly_price' => 'Price in CFA francs',
+            'monthly_price_eur' => 'Price in euros',
+            'monthly_price_usd' => 'Price in dollars',
+            'max_active_events' => 'Active events',
+            'max_registrations' => 'Registrations',
+            'max_members' => 'Members',
+        ],
+        'edit_dialog' => [
+            'title' => 'Edit the :plan plan',
+            'description' => 'Monthly price and quotas. The name and order of the plans are not changed here.',
+            'prices' => 'Monthly price',
+            'prices_hint' => 'Zero: free plan. Empty field: on quote, or not offered in this currency.',
+            'quotas' => 'Quotas',
+            'quotas_hint' => 'Empty field: unlimited. A decrease applies at once to the organisations on this plan.',
+            'features' => 'Included features',
+        ],
+        'flash' => [
+            'updated' => ':plan plan updated.',
+        ],
     ],
 
     'health' => [
@@ -250,6 +270,10 @@ return [
             'plan_changed' => 'Plan change',
             'announcement_withdrawn' => 'Announcement removed',
             'operator_invited' => 'Publisher invitation',
+            'operator_removed' => 'Team member removed',
+            'plan_updated' => 'Plan edited',
+            'database_repaired' => 'Database repaired',
+            'deletion_cancelled' => 'Deletion cancelled',
         ],
         'messages' => [
             'support_access_used' => ':actor viewed :organisation through a support access',
@@ -260,6 +284,10 @@ return [
             'plan_changed' => ':actor changed the plan of :organisation',
             'announcement_withdrawn' => ':actor removed an announcement from :organisation',
             'operator_invited' => ':actor invited someone to the publisher team',
+            'operator_removed' => ':actor removed a member from the publisher team',
+            'plan_updated' => ':actor changed the prices or quotas of a plan',
+            'database_repaired' => ':actor ran the migrations of :organisation again',
+            'deletion_cancelled' => ':actor cancelled the deletion of :organisation',
         ],
         'empty' => [
             'title' => 'No entry',

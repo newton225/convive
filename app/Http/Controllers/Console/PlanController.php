@@ -2,21 +2,26 @@
 
 namespace App\Http\Controllers\Console;
 
+use App\Actions\Console\UpdatePlan;
 use App\Enums\PlanCode;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Console\UpdatePlanRequest;
 use App\Models\Plan;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Le catalogue des plans (README ecran 30). Contrairement aux autres ecrans de la console, il lit
- * les vraies lignes `plans` de la base centrale : elles existent deja (etape 10) et ne portent que
- * des prix et des quotas, rien de propre a une organisation. PROVISOIRE : la modification arrive
- * avec l'etape 10, l'ecran reste en lecture seule d'ici la.
+ * Le catalogue des plans (README ecran 30) : les vraies lignes `plans` de la base centrale, leurs
+ * prix et leurs quotas, que la console regle. Le code, le nom et l'ordre d'un plan restent dans le
+ * code (`PlanCode`).
  */
 class PlanController extends Controller
 {
-    public function __invoke(): Response
+    /**
+     * Display the plans.
+     */
+    public function index(): Response
     {
         return Inertia::render('console/plans', [
             'isSample' => false,
@@ -36,5 +41,21 @@ class PlanController extends Controller
                 ])
                 ->all(),
         ]);
+    }
+
+    /**
+     * Update the prices and quotas of the given plan.
+     */
+    public function update(UpdatePlanRequest $request, string $plan, UpdatePlan $update): RedirectResponse
+    {
+        // Le code arrive par l'URL : il vient du catalogue, jamais d'une chaine libre.
+        $code = PlanCode::tryFrom($plan);
+        abort_if($code === null, 404);
+
+        $updated = $update->handle(Plan::ensure($code), $request->attributesForPlan(), $request->user());
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('console.plans.flash.updated', ['plan' => $updated->name])]);
+
+        return to_route('console.plans');
     }
 }

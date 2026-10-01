@@ -141,7 +141,11 @@ export type ConsoleAuditType =
     | 'deletion_scheduled'
     | 'plan_changed'
     | 'announcement_withdrawn'
-    | 'operator_invited';
+    | 'operator_invited'
+    | 'operator_removed'
+    | 'plan_updated'
+    | 'database_repaired'
+    | 'deletion_cancelled';
 
 export type ConsoleAuditEntry = {
     id: number;

@@ -6,14 +6,13 @@ use App\Enums\ConsoleProfile;
 use App\Models\ConsoleOperator;
 use App\Models\User;
 use App\Notifications\Console\ConsoleOperatorInvited;
-use Illuminate\Support\Facades\Log;
+use App\Support\Console\ConsoleJournal;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
  * L'equipe editeur (README ecran 34) : inviter une personne par son adresse, la retirer. Chaque
- * geste est trace dans le journal applicatif en attendant le journal central de la console
- * (ecran 33), encore sur jeu d'exemple.
+ * geste va au journal central de la console (ecran 33).
  */
 class ManageConsoleTeam
 {
@@ -31,10 +30,9 @@ class ManageConsoleTeam
         Notification::route('mail', $operator->email)
             ->notify(new ConsoleOperatorInvited($operator, $invitedBy->name));
 
-        Log::info('console.operator_invited', [
+        ConsoleJournal::record('operator_invited', $invitedBy, null, [
             'email' => $operator->email,
             'profile' => $profile->value,
-            'actor_id' => $invitedBy->id,
         ]);
 
         return $operator;
@@ -57,10 +55,9 @@ class ManageConsoleTeam
 
         $operator->delete();
 
-        Log::info('console.operator_removed', [
+        ConsoleJournal::record('operator_removed', $removedBy, null, [
             'email' => $operator->email,
             'profile' => $operator->profile->value,
-            'actor_id' => $removedBy->id,
         ]);
     }
 }
