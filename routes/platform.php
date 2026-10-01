@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Console\AuditLogController;
 use App\Http\Controllers\Console\HealthController;
+use App\Http\Controllers\Console\OrganisationActionController;
 use App\Http\Controllers\Console\OrganisationController;
 use App\Http\Controllers\Console\PlanController;
 use App\Http\Controllers\Console\RecoveryController;
@@ -27,6 +28,14 @@ Route::prefix('console')
         // organisations.
         Route::put('support-availability', SupportAvailabilityController::class)->middleware('can:console.area,"support"')->name('support-availability.update');
         Route::get('organisations/{organisation}', [OrganisationController::class, 'show'])->middleware('can:console.area,"organisations"')->name('organisations.show');
+
+        // Les actions de l'editeur sur une organisation (README section 3) : Fondateurs et
+        // Comptabilite.
+        Route::post('organisations/{tenant}/suspend', [OrganisationActionController::class, 'suspend'])->name('organisations.suspend');
+        Route::post('organisations/{tenant}/reactivate', [OrganisationActionController::class, 'reactivate'])->middleware('can:console.area,"organisation_actions"')->name('organisations.reactivate');
+        Route::patch('organisations/{tenant}/plan', [OrganisationActionController::class, 'changePlan'])->name('organisations.plan.update');
+        Route::post('organisations/{tenant}/deletion', [OrganisationActionController::class, 'scheduleDeletion'])->name('organisations.deletion.schedule');
+        Route::delete('organisations/{tenant}/deletion', [OrganisationActionController::class, 'cancelDeletion'])->middleware('can:console.area,"organisation_actions"')->name('organisations.deletion.cancel');
         Route::get('recovery', RecoveryController::class)->middleware('can:console.area,"recovery"')->name('recovery');
         Route::get('plans', [PlanController::class, 'index'])->middleware('can:console.area,"plans"')->name('plans');
         Route::patch('plans/{plan}', [PlanController::class, 'update'])->name('plans.update');

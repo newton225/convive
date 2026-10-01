@@ -44,11 +44,14 @@ use Stancl\Tenancy\Events;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ * @property Carbon|null $deletion_scheduled_at
  * @property-read Domain|null $domain
  * @property-read Collection<int, TenantInvitation> $invitations
  * @property-read Collection<int, Membership> $memberships
  * @property-read Collection<int, User> $members
  * @property-read TenantBranding|null $branding
+ * @property-read TenantSuspension|null $suspension
+ * @property-read TenantUsage|null $usage
  */
 #[Fillable(['name', 'slug', 'is_personal', 'subdomain'])]
 #[Hidden(['tenancy_db_name', 'tenancy_db_username', 'tenancy_db_password'])]
@@ -317,11 +320,42 @@ class Tenant extends Model implements TenantWithDatabase
     }
 
     /**
-     * Determine whether the tenant is suspended for non-payment (README section 3, J+10).
+     * Determine whether the tenant is suspended (README section 3) : automatiquement a J+10
+     * d'impaye, ou a la main par l'editeur, avec un motif.
      */
     public function isSuspended(): bool
     {
-        return $this->subscription?->status === SubscriptionStatus::Suspended;
+        return $this->subscription?->status === SubscriptionStatus::Suspended
+            || $this->isSuspendedByEditor();
+    }
+
+    /**
+     * Determine whether the editor suspended the tenant by hand. Le paiement ne leve pas cette
+     * suspension : seul l'editeur la leve.
+     */
+    public function isSuspendedByEditor(): bool
+    {
+        return $this->suspension !== null;
+    }
+
+    /**
+     * Get the manual suspension in progress, if any.
+     *
+     * @return HasOne<TenantSuspension, $this>
+     */
+    public function suspension(): HasOne
+    {
+        return $this->hasOne(TenantSuspension::class)->whereNull('lifted_at');
+    }
+
+    /**
+     * Get the consumption counters the console keeps for this tenant.
+     *
+     * @return HasOne<TenantUsage, $this>
+     */
+    public function usage(): HasOne
+    {
+        return $this->hasOne(TenantUsage::class);
     }
 
     /**
@@ -419,6 +453,7 @@ class Tenant extends Model implements TenantWithDatabase
     {
         return [
             'is_personal' => 'boolean',
+            'deletion_scheduled_at' => 'datetime',
         ];
     }
 

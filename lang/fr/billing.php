@@ -84,6 +84,7 @@ return [
 
     'errors' => [
         'suspended' => 'Cet espace est suspendu pour impayé. Réglez l\'abonnement pour le rouvrir.',
+        'suspended_by_editor' => 'Cet espace a été suspendu par l’équipe Convive. Écrivez au support pour en connaître la raison et le rouvrir.',
         'event_quota' => 'Le plan :plan n\'autorise pas d\'autre événement actif. Clôturez un événement ou passez à un plan supérieur.',
         'member_quota' => 'Le plan :plan ne permet pas d\'ajouter d\'autre membre, invitations en attente comprises. Passez à un plan supérieur.',
         'not_purchasable' => 'Ce plan ne se souscrit pas en ligne : il est gratuit, ou se négocie sur devis.',

@@ -14,6 +14,7 @@ return [
         'active' => 'Up to date',
         'past_due' => 'Payment overdue',
         'suspended' => 'Suspended',
+        'suspended_by_editor' => 'This space has been suspended by the Convive team. Write to support to learn why and reopen it.',
         'canceled' => 'Canceled',
     ],
 

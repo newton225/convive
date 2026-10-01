@@ -1,17 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import {
-    ArrowLeft,
-    CalendarPlus,
-    Info,
-    Package,
-    Pause,
-    Play,
-    Trash2,
-} from 'lucide-react';
+import { ArrowLeft, Info } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
 import { OrganisationStatusBadge } from '@/components/console/organisation-status-badge';
-import { PendingActionButton } from '@/components/console/pending-action-button';
+import { OrganisationActions } from '@/components/console/organisation-actions';
 import { QuotaUsage } from '@/components/console/quota-usage';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
@@ -21,11 +13,18 @@ import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatMoney } from '@/lib/format-currency';
 import { formatDate, formatDateTime } from '@/lib/format-date';
 import { index, show } from '@/routes/console/organisations';
-import type { ConsoleOrganisationDetails, Translations } from '@/types';
+import type {
+    ConsoleOrganisationDetails,
+    ConsolePlanOption,
+    Translations,
+} from '@/types';
 
 type Props = {
     isSample: boolean;
     organisation: ConsoleOrganisationDetails;
+    plans: ConsolePlanOption[];
+    // Faux pour un profil editeur qui lit les organisations sans pouvoir agir (Support).
+    canAct: boolean;
 };
 
 type Invoice = ConsoleOrganisationDetails['invoices'][number];
@@ -35,7 +34,12 @@ type Invoice = ConsoleOrganisationDetails['invoices'][number];
  * factures, acces de support en cours et actions de l'editeur. Le contenu de l'organisation n'y
  * figure pas : il ne se lit qu'avec un acces de support qu'elle a ouvert.
  */
-export default function Organisation({ isSample, organisation }: Props) {
+export default function Organisation({
+    isSample,
+    organisation,
+    plans,
+    canAct,
+}: Props) {
     const { t, locale } = useTranslation();
 
     const invoiceColumns: ColumnDef<Invoice>[] = [
@@ -192,7 +196,7 @@ export default function Organisation({ isSample, organisation }: Props) {
                                         {formatDate(item.at, locale)} :{' '}
                                         {t(
                                             `console.organisation.history_types.${item.type}`,
-                                            { detail: item.detail },
+                                            { detail: item.detail ?? '' },
                                         )}
                                     </li>
                                 ))}
@@ -247,44 +251,16 @@ export default function Organisation({ isSample, organisation }: Props) {
                             {t('console.organisation.actions')}
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-wrap gap-2">
-                        <PendingActionButton
-                            icon={Package}
-                            label={t(
-                                'console.organisation.action_labels.change_plan',
-                            )}
-                        />
-                        {organisation.status === 'trial' && (
-                            <PendingActionButton
-                                icon={CalendarPlus}
-                                label={t(
-                                    'console.organisation.action_labels.extend_trial',
-                                )}
-                            />
-                        )}
-                        {organisation.status === 'suspended' ? (
-                            <PendingActionButton
-                                icon={Play}
-                                label={t(
-                                    'console.organisation.action_labels.reactivate',
-                                )}
+                    <CardContent>
+                        {canAct ? (
+                            <OrganisationActions
+                                organisation={organisation}
+                                plans={plans}
                             />
                         ) : (
-                            <PendingActionButton
-                                icon={Pause}
-                                label={t(
-                                    'console.organisation.action_labels.suspend',
-                                )}
-                            />
-                        )}
-                        {organisation.status !== 'deletion_scheduled' && (
-                            <PendingActionButton
-                                icon={Trash2}
-                                variant="destructive"
-                                label={t(
-                                    'console.organisation.action_labels.schedule_deletion',
-                                )}
-                            />
+                            <p className="text-muted-foreground text-sm">
+                                {t('console.organisation.actions_not_allowed')}
+                            </p>
                         )}
                     </CardContent>
                 </Card>
@@ -302,7 +278,8 @@ export default function Organisation({ isSample, organisation }: Props) {
                                     operator:
                                         organisation.supportAccess.operator,
                                     granted_by:
-                                        organisation.supportAccess.grantedBy,
+                                        organisation.supportAccess.grantedBy ??
+                                        '',
                                     expires: formatDateTime(
                                         organisation.supportAccess.expiresAt,
                                         locale,

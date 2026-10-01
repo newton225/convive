@@ -17,7 +17,8 @@ export type ConsoleOrganisationSummary = {
     planName: string;
     status: ConsoleOrganisationStatus;
     openedAt: string;
-    lastActivityAt: string;
+    // Null tant que la consommation de l'organisation n'a pas ete relevee.
+    lastActivityAt: string | null;
     usage: {
         activeEvents: ConsoleQuota;
         registrations: ConsoleQuota;
@@ -31,9 +32,17 @@ export type ConsoleOrganisationSummary = {
 
 export type ConsoleOrganisationDetails = ConsoleOrganisationSummary & {
     legalName: string;
-    contactEmail: string;
-    subdomain: string;
-    history: { at: string; type: 'opened' | 'plan_changed'; detail: string }[];
+    contactEmail: string | null;
+    subdomain: string | null;
+    // Le motif d'une suspension manuelle en cours, et si c'est bien l'editeur qui a suspendu :
+    // c'est la seule suspension qu'il leve depuis la console.
+    suspensionReason: string | null;
+    suspendedByEditor: boolean;
+    history: {
+        at: string;
+        type: 'opened' | 'plan_changed';
+        detail: string | null;
+    }[];
     invoices: {
         number: string;
         amount: number;
@@ -43,7 +52,7 @@ export type ConsoleOrganisationDetails = ConsoleOrganisationSummary & {
     }[];
     supportAccess: {
         operator: string;
-        grantedBy: string;
+        grantedBy: string | null;
         expiresAt: string;
     } | null;
     consoleActions: {
@@ -73,6 +82,11 @@ export type ConsoleFailedPayment = {
     amount: number;
     currency: string;
     reason: string;
+};
+
+export type ConsolePlanOption = {
+    code: string;
+    name: string;
 };
 
 export type ConsolePlan = {
@@ -145,7 +159,8 @@ export type ConsoleAuditType =
     | 'operator_removed'
     | 'plan_updated'
     | 'database_repaired'
-    | 'deletion_cancelled';
+    | 'deletion_cancelled'
+    | 'tenant_erased';
 
 export type ConsoleAuditEntry = {
     id: number;

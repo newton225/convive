@@ -58,7 +58,7 @@ export default function Organisations({
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState<string>(AllStatuses);
 
-    // PROVISOIRE : filtre en memoire sur le jeu d'exemple ; passe cote serveur
+    // Filtre en memoire sur la liste que le serveur envoie ; a passer cote serveur
     // (`spatie/laravel-query-builder`) quand la liste viendra de la base.
     const visible = useMemo(() => {
         const needle = search.trim().toLocaleLowerCase(locale);
@@ -113,7 +113,9 @@ export default function Organisations({
             header: t('console.organisations.columns.last_activity'),
             cell: ({ row }) => (
                 <span className="text-muted-foreground whitespace-nowrap">
-                    {formatRelative(row.original.lastActivityAt, locale)}
+                    {row.original.lastActivityAt
+                        ? formatRelative(row.original.lastActivityAt, locale)
+                        : ''}
                 </span>
             ),
         },

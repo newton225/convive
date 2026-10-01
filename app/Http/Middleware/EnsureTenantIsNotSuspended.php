@@ -8,8 +8,9 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Arrete les operations d'une organisation suspendue pour impaye (README section 3, J+10) : le
- * back-office des evenements renvoie vers l'ecran d'abonnement, ou l'equipe peut regler.
+ * Arrete les operations d'une organisation suspendue (README section 3) : pour impaye a J+10, ou
+ * a la main par l'editeur. Le back-office des evenements renvoie vers l'ecran d'abonnement, ou
+ * l'equipe peut regler ; le message dit laquelle des deux suspensions s'applique.
  *
  * Les reglages de l'organisation (equipe, profils, abonnement) restent accessibles : c'est par la
  * qu'on regularise. Vient apres `EnsureTenantMembership` : un locataire tiers a deja recu 404, il
@@ -24,7 +25,9 @@ class EnsureTenantIsNotSuspended
 
         if ($tenant !== null && $tenant->isSuspended()) {
             return redirect()->route('tenants.billing.show', $tenant)
-                ->withErrors(['billing' => __('billing.errors.suspended')]);
+                ->withErrors(['billing' => __($tenant->isSuspendedByEditor()
+                    ? 'billing.errors.suspended_by_editor'
+                    : 'billing.errors.suspended')]);
         }
 
         return $next($request);
