@@ -9,6 +9,7 @@ import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
     Select,
     SelectContent,
@@ -53,6 +54,7 @@ export default function SupportAccess({
     const form = useForm({
         operator_id: '',
         duration: String(durations[durations.length - 1]),
+        reason: '',
     });
     const chosenOperator = operators.find(
         (operator) => String(operator.id) === form.data.operator_id,
@@ -61,7 +63,7 @@ export default function SupportAccess({
     const open = () => {
         form.post(store(tenant.slug).url, {
             preserveScroll: true,
-            onSuccess: () => form.reset('operator_id'),
+            onSuccess: () => form.reset('operator_id', 'reason'),
             onFinish: () => setConfirming(false),
         });
     };
@@ -78,6 +80,14 @@ export default function SupportAccess({
         {
             header: t('support_access.history.columns.operator'),
             accessorKey: 'operator',
+        },
+        {
+            header: t('support_access.history.columns.reason'),
+            cell: ({ row }) => (
+                <span className="text-muted-foreground">
+                    {row.original.reason ?? ''}
+                </span>
+            ),
         },
         {
             header: t('support_access.history.columns.granted_at'),
@@ -156,6 +166,15 @@ export default function SupportAccess({
                                     </p>
                                 )}
                             </div>
+
+                            {activeAccess.reason ? (
+                                <p>
+                                    <span className="text-muted-foreground">
+                                        {t('support_access.active.reason')} :
+                                    </span>{' '}
+                                    {activeAccess.reason}
+                                </p>
+                            ) : null}
 
                             <SubmitButton
                                 type="button"
@@ -279,12 +298,33 @@ export default function SupportAccess({
                                 <InputError message={form.errors.duration} />
                             </div>
                         </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="support-reason">
+                                {t('support_access.grant.reason')}
+                            </Label>
+                            <Textarea
+                                id="support-reason"
+                                name="reason"
+                                rows={3}
+                                maxLength={500}
+                                disabled={activeAccess !== null}
+                                value={form.data.reason}
+                                onChange={(event) =>
+                                    form.setData('reason', event.target.value)
+                                }
+                            />
+                            <p className="text-muted-foreground text-xs">
+                                {t('support_access.grant.reason_hint')}
+                            </p>
+                            <InputError message={form.errors.reason} />
+                        </div>
                         <SubmitButton
                             type="button"
                             processing={form.processing}
                             disabled={
                                 activeAccess !== null ||
-                                chosenOperator === undefined
+                                chosenOperator === undefined ||
+                                form.data.reason.trim() === ''
                             }
                             onClick={() => setConfirming(true)}
                             data-test="support-access-open"

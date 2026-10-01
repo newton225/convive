@@ -51,6 +51,7 @@ class SupportAccessTest extends TestCase
             ->post(route('tenants.support-access.store', $this->tenant), [
                 'operator_id' => $this->operator->id,
                 'duration' => 4,
+                'reason' => 'Les preuves du diner de gala n apparaissent pas dans la file.',
                 ...$payload,
             ]);
     }
@@ -121,6 +122,24 @@ class SupportAccessTest extends TestCase
 
         $logged = $this->tenant->asCurrent(fn () => Activity::where('description', 'support_access.opened')->count());
         $this->assertSame(1, $logged);
+    }
+
+    public function test_le_motif_est_obligatoire_et_garde_avec_l_acces(): void
+    {
+        $this->open($this->owner, ['reason' => ''])->assertSessionHasErrors('reason');
+        $this->open($this->owner, ['reason' => 'Aide'])->assertSessionHasErrors('reason');
+        $this->assertSame(0, SupportAccessGrant::count());
+
+        $this->open($this->owner)->assertSessionHasNoErrors();
+
+        $this->assertSame('Les preuves du diner de gala n apparaissent pas dans la file.', SupportAccessGrant::sole()->reason);
+
+        // La personne de l'equipe Convive lit le motif dans la console, avant meme d'entrer.
+        $this->actingAs($this->operator)
+            ->get(route('console.organisations.index'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('supportGrants.0.reason', 'Les preuves du diner de gala n apparaissent pas dans la file.'),
+            );
     }
 
     public function test_une_duree_de_plus_de_24_heures_est_refusee(): void

@@ -57,6 +57,7 @@ export type ConsoleOrganisationDetails = ConsoleOrganisationSummary & {
     supportAccess: {
         operator: string;
         grantedBy: string | null;
+        reason: string | null;
         expiresAt: string;
     } | null;
     consoleActions: {

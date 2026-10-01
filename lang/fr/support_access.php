@@ -17,6 +17,7 @@ return [
         'title' => 'Accès en cours',
         'summary' => ':operator peut consulter votre espace jusqu’au :expires.',
         'granted' => 'Ouvert par :granted_by le :date.',
+        'reason' => 'Motif',
         'revoke' => 'Révoquer l’accès',
         'views' => 'Pages consultées',
         'views_empty' => 'Aucune page consultée pour le moment.',
@@ -42,6 +43,8 @@ return [
         'no_operator' => 'Personne de l’équipe Convive n’est disponible pour le moment. Écrivez au support : la personne qui vous aide se rendra disponible, et son nom apparaîtra ici.',
         'duration' => 'Durée',
         'hours' => '{1} 1 heure|[2,*] :count heures',
+        'reason' => 'Pourquoi ouvrez-vous cet accès ?',
+        'reason_hint' => 'Une ou deux phrases : le problème et l’événement concerné. La personne de l’équipe Convive lira ce motif avant d’entrer, et il reste dans votre historique. N’y mettez ni mot de passe ni numéro de compte.',
         'submit' => 'Ouvrir l’accès',
         'confirm_title' => 'Ouvrir un accès à :operator ?',
         'confirm_description' => 'Cette personne de l’équipe Convive pourra lire vos événements, vos inscrits, vos preuves et votre journal pendant :duration. Elle ne pourra rien modifier, et vous pourrez révoquer l’accès à tout moment.',
@@ -53,6 +56,7 @@ return [
         'empty' => 'Aucun accès n’a encore été ouvert.',
         'columns' => [
             'operator' => 'Personne',
+            'reason' => 'Motif',
             'granted_at' => 'Ouvert le',
             'ended_at' => 'Fermé le',
             'end_reason' => 'Fin',
@@ -64,6 +68,7 @@ return [
         ],
     ],
     'errors' => [
+        'reason' => 'Dites en une phrase pourquoi vous ouvrez cet accès (10 caractères au moins).',
         'already_open' => 'Un accès est déjà ouvert. Révoquez-le avant d’en ouvrir un autre.',
         'operator' => 'Choisissez une personne de l’équipe Convive.',
         'duration' => 'Choisissez l’une des durées proposées, 24 heures au plus.',

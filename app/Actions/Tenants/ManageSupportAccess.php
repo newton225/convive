@@ -42,9 +42,9 @@ class ManageSupportAccess
      *
      * @throws ValidationException
      */
-    public function open(Tenant $tenant, User $operator, User $grantedBy, int $hours): SupportAccessGrant
+    public function open(Tenant $tenant, User $operator, User $grantedBy, int $hours, string $reason): SupportAccessGrant
     {
-        return Cache::lock("support-access:{$tenant->id}", 10)->block(5, function () use ($tenant, $operator, $grantedBy, $hours) {
+        return Cache::lock("support-access:{$tenant->id}", 10)->block(5, function () use ($tenant, $operator, $grantedBy, $hours, $reason) {
             if (SupportAccessGrant::where('tenant_id', $tenant->id)->active()->exists()) {
                 throw ValidationException::withMessages([
                     'operator_id' => __('support_access.errors.already_open'),
@@ -55,6 +55,7 @@ class ManageSupportAccess
                 'tenant_id' => $tenant->id,
                 'operator_id' => $operator->id,
                 'granted_by_id' => $grantedBy->id,
+                'reason' => $reason,
                 'expires_at' => now()->addHours($hours),
             ]);
 
@@ -64,6 +65,7 @@ class ManageSupportAccess
                 ->event('created')
                 ->withProperties([
                     'operator' => $operator->name,
+                    'reason' => $reason,
                     'expires_at' => $grant->expires_at->toISOString(),
                     'tenant_id' => $tenant->id,
                 ])

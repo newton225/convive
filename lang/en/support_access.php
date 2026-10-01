@@ -17,6 +17,7 @@ return [
         'title' => 'Current access',
         'summary' => ':operator can view your space until :expires.',
         'granted' => 'Opened by :granted_by on :date.',
+        'reason' => 'Reason',
         'revoke' => 'Revoke the access',
         'views' => 'Pages viewed',
         'views_empty' => 'No page viewed yet.',
@@ -42,6 +43,8 @@ return [
         'no_operator' => 'Nobody from the Convive team is available at the moment. Write to support: the person helping you will make themselves available, and their name will appear here.',
         'duration' => 'Duration',
         'hours' => '{1} 1 hour|[2,*] :count hours',
+        'reason' => 'Why are you opening this access?',
+        'reason_hint' => 'One or two sentences: the problem and the event concerned. The member of the Convive team reads this reason before entering, and it stays in your history. Do not put a password or an account number in it.',
         'submit' => 'Open the access',
         'confirm_title' => 'Open an access for :operator?',
         'confirm_description' => 'This member of the Convive team will be able to read your events, registrations, proofs and audit log for :duration. They cannot change anything, and you can revoke the access at any time.',
@@ -53,6 +56,7 @@ return [
         'empty' => 'No access has been opened yet.',
         'columns' => [
             'operator' => 'Person',
+            'reason' => 'Reason',
             'granted_at' => 'Opened on',
             'ended_at' => 'Closed on',
             'end_reason' => 'End',
@@ -64,6 +68,7 @@ return [
         ],
     ],
     'errors' => [
+        'reason' => 'Say in one sentence why you are opening this access (at least 10 characters).',
         'already_open' => 'An access is already open. Revoke it before opening another one.',
         'operator' => 'Choose a member of the Convive team.',
         'duration' => 'Choose one of the durations offered, 24 hours at most.',

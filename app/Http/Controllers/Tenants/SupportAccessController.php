@@ -59,6 +59,7 @@ class SupportAccessController extends Controller
                 'id' => $active->id,
                 'operator' => $active->operator->name,
                 'grantedBy' => $active->grantedBy?->name,
+                'reason' => $active->reason,
                 'grantedAt' => $active->created_at?->toISOString(),
                 'expiresAt' => $active->expires_at->toISOString(),
                 'views' => $active->views()
@@ -82,6 +83,7 @@ class SupportAccessController extends Controller
                 ->map(fn (SupportAccessGrant $grant) => [
                     'id' => $grant->id,
                     'operator' => $grant->operator->name,
+                    'reason' => $grant->reason,
                     'grantedAt' => $grant->created_at?->toISOString(),
                     'endedAt' => $grant->endedAt()->toISOString(),
                     'endReason' => $grant->revoked_at !== null ? 'revoked' : 'expired',
@@ -99,7 +101,7 @@ class SupportAccessController extends Controller
         $operator = self::operators()->firstWhere('id', (int) $request->validated('operator_id'));
         abort_if($operator === null, 404);
 
-        $manage->open($tenant, $operator, $request->user(), (int) $request->validated('duration'));
+        $manage->open($tenant, $operator, $request->user(), (int) $request->validated('duration'), $request->validated('reason'));
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('support_access.flash.opened', ['operator' => $operator->name])]);
 

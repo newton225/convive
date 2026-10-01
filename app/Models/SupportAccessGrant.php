@@ -23,6 +23,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property int $tenant_id
  * @property int $operator_id
  * @property int|null $granted_by_id
+ * @property string|null $reason
  * @property Carbon $expires_at
  * @property Carbon|null $revoked_at
  * @property int|null $revoked_by_id
@@ -32,7 +33,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property-read User $operator
  * @property-read User|null $grantedBy
  */
-#[Fillable(['tenant_id', 'operator_id', 'granted_by_id', 'expires_at', 'revoked_at', 'revoked_by_id'])]
+#[Fillable(['tenant_id', 'operator_id', 'granted_by_id', 'reason', 'expires_at', 'revoked_at', 'revoked_by_id'])]
 class SupportAccessGrant extends Model
 {
     use CentralConnection;

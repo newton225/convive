@@ -287,6 +287,11 @@ export default function Organisation({
                                         locale,
                                     ),
                                 })}
+                                {organisation.supportAccess.reason ? (
+                                    <span className="text-muted-foreground mt-1 block">
+                                        {organisation.supportAccess.reason}
+                                    </span>
+                                ) : null}
                             </p>
                         ) : (
                             <p className="text-muted-foreground">

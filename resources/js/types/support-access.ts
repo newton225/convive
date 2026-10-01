@@ -8,6 +8,8 @@ export type ActiveSupportAccess = {
     id: number;
     operator: string;
     grantedBy: string | null;
+    // Pourquoi l'acces a ete ouvert ; null seulement sur un acces anterieur au motif obligatoire.
+    reason: string | null;
     grantedAt: string;
     expiresAt: string;
     views: SupportAccessView[];
@@ -16,6 +18,7 @@ export type ActiveSupportAccess = {
 export type PastSupportAccess = {
     id: number;
     operator: string;
+    reason: string | null;
     grantedAt: string;
     endedAt: string;
     endReason: 'expired' | 'revoked';
@@ -40,6 +43,7 @@ export type SupportAccessNotice = {
 export type ConsoleSupportGrant = {
     id: number;
     organisation: string;
+    reason: string | null;
     url: string;
     expiresAt: string;
 };

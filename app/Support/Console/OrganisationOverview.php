@@ -126,6 +126,7 @@ class OrganisationOverview
             'supportAccess' => $supportAccess === null ? null : [
                 'operator' => $supportAccess->operator->name,
                 'grantedBy' => $supportAccess->grantedBy?->name,
+                'reason' => $supportAccess->reason,
                 'expiresAt' => $supportAccess->expires_at->toISOString(),
             ],
             'consoleActions' => $actions

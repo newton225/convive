@@ -49,6 +49,8 @@ class OrganisationController extends Controller
                 ->map(fn (SupportAccessGrant $grant) => [
                     'id' => $grant->id,
                     'organisation' => $grant->tenant->name,
+                    // Ce que l'organisation attend de cet acces : la personne sait quoi regarder.
+                    'reason' => $grant->reason,
                     'url' => route('dashboard', ['current_tenant' => $grant->tenant->slug]),
                     'expiresAt' => $grant->expires_at->toISOString(),
                 ])
