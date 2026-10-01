@@ -45,6 +45,8 @@ use Stancl\Tenancy\Events;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  * @property Carbon|null $deletion_scheduled_at
+ * @property Carbon|null $trial_started_at
+ * @property Carbon|null $trial_ends_at
  * @property-read Domain|null $domain
  * @property-read Collection<int, TenantInvitation> $invitations
  * @property-read Collection<int, Membership> $memberships
@@ -77,6 +79,14 @@ class Tenant extends Model implements TenantWithDatabase
         static::creating(function (Tenant $tenant) {
             if (empty($tenant->slug)) {
                 $tenant->slug = static::generateUniqueTenantSlug($tenant->name);
+            }
+
+            // Tout espace neuf s'ouvre a l'essai (README section 3). Sans duree configuree,
+            // l'essai n'a pas de date de fin.
+            $tenant->trial_started_at ??= Carbon::now();
+
+            if ($tenant->trial_ends_at === null && is_numeric(config('convive.trial.days'))) {
+                $tenant->trial_ends_at = Carbon::now()->addDays((int) config('convive.trial.days'));
             }
         });
 
@@ -310,13 +320,35 @@ class Tenant extends Model implements TenantWithDatabase
     }
 
     /**
-     * Get the plan the tenant runs on : its subscription's, or the default one when it has none
-     * (README section 3). Une organisation n'a donc jamais besoin d'une ligne d'abonnement pour
+     * Get the plan the tenant runs on : its subscription's, the trial plan while it is on trial,
+     * or the default one (README section 3). Une organisation n'a donc jamais besoin d'une ligne d'abonnement pour
      * etre limitee : le plan par defaut s'applique des sa creation.
      */
     public function plan(): Plan
     {
-        return $this->subscription->plan ?? Plan::ensure(PlanCode::default());
+        return $this->subscription->plan
+            ?? Plan::ensure($this->isOnTrial() ? self::trialPlanCode() : PlanCode::default());
+    }
+
+    /**
+     * Determine whether the tenant is on its trial period (README section 3) : un essai ouvert, pas
+     * encore echu, et aucun abonnement. Un abonnement l'emporte toujours sur l'essai ; un essai
+     * echu rend la main au plan par defaut, sans rien supprimer.
+     */
+    public function isOnTrial(): bool
+    {
+        return config('convive.trial.enabled')
+            && $this->trial_started_at !== null
+            && ($this->trial_ends_at === null || $this->trial_ends_at->isFuture())
+            && $this->subscription === null;
+    }
+
+    /**
+     * Get the plan a tenant runs on during its trial.
+     */
+    public static function trialPlanCode(): PlanCode
+    {
+        return PlanCode::tryFrom((string) config('convive.trial.plan')) ?? PlanCode::default();
     }
 
     /**
@@ -454,6 +486,8 @@ class Tenant extends Model implements TenantWithDatabase
         return [
             'is_personal' => 'boolean',
             'deletion_scheduled_at' => 'datetime',
+            'trial_started_at' => 'datetime',
+            'trial_ends_at' => 'datetime',
         ];
     }
 

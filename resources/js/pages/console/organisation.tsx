@@ -79,11 +79,13 @@ export default function Organisation({
             label: t('console.organisation.plan'),
             value: organisation.planName,
         },
-        ...(organisation.trialEndsAt
+        ...(organisation.onTrial
             ? [
                   {
                       label: t('console.organisation.trial_ends'),
-                      value: formatDate(organisation.trialEndsAt, locale),
+                      value: organisation.trialEndsAt
+                          ? formatDate(organisation.trialEndsAt, locale)
+                          : t('console.organisation.trial_unlimited'),
                   },
               ]
             : []),

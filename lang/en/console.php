@@ -70,6 +70,7 @@ return [
         'plan' => 'Plan',
         'status' => 'State',
         'trial_ends' => 'Trial ends',
+        'trial_unlimited' => 'No end date',
         'past_due_since' => 'Past due since',
         'suspended_at' => 'Suspended on',
         'deletion_at' => 'Permanent deletion on',
@@ -94,6 +95,7 @@ return [
         'action_labels' => [
             'change_plan' => 'Change plan',
             'extend_trial' => 'Extend trial',
+            'offer_trial' => 'Offer a trial',
             'suspend' => 'Suspend',
             'reactivate' => 'Reactivate',
             'schedule_deletion' => 'Schedule deletion',
@@ -104,6 +106,8 @@ return [
         'suspended_for_non_payment' => 'This organisation is suspended for non-payment: the suspension is lifted by paying, not from the console.',
         'fields' => [
             'plan' => 'Plan',
+            'trial_ends_at' => 'End of the trial',
+            'trial_ends_at_hint' => 'Leave empty for a trial with no end date. When it ends, the organisation falls back to the free plan; nothing is removed.',
             'reason' => 'Reason for the suspension',
             'request_reference' => 'Reference of the written request',
             'request_reference_hint' => 'Date and subject of the email, or number of the letter: deletion only happens at the organisation’s written request.',
@@ -111,6 +115,7 @@ return [
             'confirmation_named' => 'To confirm, type “:organisation” again',
         ],
         'dialogs' => [
+            'trial' => 'During the trial, the organisation enjoys the Association plan without a subscription.',
             'change_plan' => 'The change takes effect at once. A downgrade is refused while usage exceeds the quotas of the target plan.',
             'suspend_title' => 'Suspend :organisation?',
             'suspend' => 'Its back office will redirect to the subscription screen and its public links will accept no new registration. Tickets already issued remain valid at the door. The reason is kept in the log.',
@@ -125,6 +130,7 @@ return [
             'suspended' => ':organisation is suspended.',
             'reactivated' => ':organisation is reactivated.',
             'plan_changed' => 'The plan of :organisation has been changed.',
+            'trial_extended' => 'The trial of :organisation has been updated.',
             'deletion_scheduled' => 'The deletion of :organisation is scheduled in 30 days.',
             'deletion_cancelled' => 'The deletion of :organisation is cancelled.',
         ],
@@ -132,6 +138,7 @@ return [
             'already_suspended' => 'This organisation is already suspended by the Convive team.',
             'not_suspended_by_editor' => 'This organisation was not suspended from the console: there is nothing to lift here.',
             'same_plan' => 'The organisation is already on this plan.',
+            'trial_has_subscription' => 'This organisation has a subscription, which takes precedence over the trial: there is nothing to offer.',
             'plan_paid_online' => 'This subscription is paid online: changing the plan here would leave the provider billing the old price. The change is made from the organisation’s Subscription screen.',
             'usage_unreadable' => 'The usage of the organisation cannot be read (missing database?). Repair its database from the technical health screen, then try again.',
             'downgrade_refused' => 'Moving to the :plan plan is refused while usage exceeds its quotas: :quotas.',

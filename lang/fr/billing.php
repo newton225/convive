@@ -109,4 +109,8 @@ return [
             'line' => 'L\'abonnement de :tenant reste impayé : l\'espace est suspendu. Réglez l\'abonnement pour le rouvrir.',
         ],
     ],
+    'trial' => [
+        'unlimited' => 'Période d’essai : vous profitez de ce plan sans abonnement, sans date de fin pour le moment.',
+        'until' => 'Période d’essai : vous profitez de ce plan sans abonnement jusqu’au :date.',
+    ],
 ];

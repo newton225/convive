@@ -6,12 +6,14 @@ use App\Actions\Console\ManageOrganisation;
 use App\Enums\PlanCode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Console\ChangeOrganisationPlanRequest;
+use App\Http\Requests\Console\ExtendOrganisationTrialRequest;
 use App\Http\Requests\Console\ScheduleOrganisationDeletionRequest;
 use App\Http\Requests\Console\SuspendOrganisationRequest;
 use App\Models\Plan;
 use App\Models\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 
 /**
@@ -40,6 +42,16 @@ class OrganisationActionController extends Controller
         $manage->changePlan($tenant, Plan::ensure(PlanCode::from($request->validated('plan'))), $request->user());
 
         return $this->back($tenant, 'plan_changed');
+    }
+
+    public function extendTrial(ExtendOrganisationTrialRequest $request, Tenant $tenant, ManageOrganisation $manage): RedirectResponse
+    {
+        $endsAt = $request->validated('ends_at');
+
+        // La fin de l'essai est la fin du jour choisi : l'organisation en profite jusqu'au soir.
+        $manage->extendTrial($tenant, $endsAt === null ? null : Carbon::parse($endsAt)->endOfDay(), $request->user());
+
+        return $this->back($tenant, 'trial_extended');
     }
 
     public function scheduleDeletion(ScheduleOrganisationDeletionRequest $request, Tenant $tenant, ManageOrganisation $manage): RedirectResponse

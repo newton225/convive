@@ -24,6 +24,8 @@ class OrganisationOverview
 
     private static ?Plan $defaultPlan = null;
 
+    private static ?Plan $trialPlan = null;
+
     /**
      * Get the line of the organisations list. Expects `subscription.plan`, `usage` and
      * `suspension` to be loaded when called for a whole list.
@@ -33,8 +35,10 @@ class OrganisationOverview
     public static function summary(Tenant $tenant): array
     {
         $subscription = $tenant->subscription;
-        // Le plan par defaut n'est lu qu'une fois pour toute la liste.
-        $plan = $subscription->plan ?? (self::$defaultPlan ??= Plan::ensure(PlanCode::default()));
+        // Le plan par defaut et celui de l'essai ne sont lus qu'une fois pour toute la liste.
+        $plan = $subscription->plan ?? ($tenant->isOnTrial()
+            ? (self::$trialPlan ??= Plan::ensure(Tenant::trialPlanCode()))
+            : (self::$defaultPlan ??= Plan::ensure(PlanCode::default())));
         $usage = $tenant->usage;
 
         return [
@@ -52,8 +56,9 @@ class OrganisationOverview
             ],
             'pastDueSince' => $subscription?->past_due_since?->toISOString(),
             'suspendedAt' => ($tenant->suspension->created_at ?? $subscription?->suspended_at)?->toISOString(),
-            // Aucune periode d'essai n'existe encore dans le produit (voir `ManageOrganisation`).
-            'trialEndsAt' => null,
+            // A l'essai, avec ou sans date de fin (nulle : sans fin).
+            'onTrial' => $tenant->isOnTrial(),
+            'trialEndsAt' => $tenant->isOnTrial() ? $tenant->trial_ends_at?->toISOString() : null,
             'deletionAt' => $tenant->deletion_scheduled_at?->toISOString(),
         ];
     }
@@ -87,6 +92,8 @@ class OrganisationOverview
             'suspensionReason' => $tenant->suspension?->reason,
             // Vrai quand la suspension vient de l'editeur : c'est la seule qu'il leve d'ici.
             'suspendedByEditor' => $tenant->isSuspendedByEditor(),
+            // Un abonnement l'emporte sur l'essai : on n'en offre pas a une organisation abonnee.
+            'hasSubscription' => $tenant->subscription !== null,
             'history' => [
                 [
                     'at' => $tenant->created_at?->toISOString(),
@@ -140,6 +147,7 @@ class OrganisationOverview
             $tenant->deletion_scheduled_at !== null => 'deletion_scheduled',
             $tenant->isSuspended() => 'suspended',
             $tenant->subscription?->status === SubscriptionStatus::PastDue => 'past_due',
+            $tenant->isOnTrial() => 'trial',
             default => 'active',
         };
     }

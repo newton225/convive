@@ -50,6 +50,8 @@ type Props = {
     currencies: string[];
     defaultCurrency: string;
     subscription: BillingSubscription | null;
+    // A l'essai sur le plan affiche ; `endsAt` nul veut dire « sans date de fin ».
+    trial: { endsAt: string | null } | null;
     usage: BillingUsage;
     plans: BillingPlan[];
     invoices: BillingInvoice[];
@@ -127,6 +129,7 @@ export default function Billing({
     currencies,
     defaultCurrency,
     subscription,
+    trial,
     usage,
     plans,
     invoices,
@@ -216,6 +219,18 @@ export default function Billing({
                             <p className="text-muted-foreground">
                                 {priceLabel(plan)}
                             </p>
+                            {trial ? (
+                                <p data-test="billing-trial">
+                                    {trial.endsAt
+                                        ? t('billing.trial.until', {
+                                              date: formatDate(
+                                                  trial.endsAt,
+                                                  locale,
+                                              ),
+                                          })
+                                        : t('billing.trial.unlimited')}
+                                </p>
+                            ) : null}
                             {subscription?.currentPeriodEndsAt ? (
                                 <p>
                                     {t('billing.subscription.renews', {

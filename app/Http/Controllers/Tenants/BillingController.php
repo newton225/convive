@@ -59,6 +59,9 @@ class BillingController extends Controller
                 'suspendedAt' => $subscription->suspended_at?->toISOString(),
                 'canceledAt' => $subscription->canceled_at?->toISOString(),
             ],
+            // A l'essai : l'organisation profite du plan ci-dessus sans abonnement, jusqu'a la date
+            // indiquee, ou sans date de fin.
+            'trial' => $tenant->isOnTrial() ? ['endsAt' => $tenant->trial_ends_at?->toISOString()] : null,
             'usage' => PlanLimits::for($tenant)->usage(),
             // PROVISOIRE : adresse par defaut tant que le proprietaire n'en a pas fourni une
             // reelle (CLAUDE.md, `config('convive.billing.sales_contact_email')`).

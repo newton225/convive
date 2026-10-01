@@ -34,6 +34,7 @@ Route::prefix('console')
         Route::post('organisations/{tenant}/suspend', [OrganisationActionController::class, 'suspend'])->name('organisations.suspend');
         Route::post('organisations/{tenant}/reactivate', [OrganisationActionController::class, 'reactivate'])->middleware('can:console.area,"organisation_actions"')->name('organisations.reactivate');
         Route::patch('organisations/{tenant}/plan', [OrganisationActionController::class, 'changePlan'])->name('organisations.plan.update');
+        Route::patch('organisations/{tenant}/trial', [OrganisationActionController::class, 'extendTrial'])->name('organisations.trial.update');
         Route::post('organisations/{tenant}/deletion', [OrganisationActionController::class, 'scheduleDeletion'])->name('organisations.deletion.schedule');
         Route::delete('organisations/{tenant}/deletion', [OrganisationActionController::class, 'cancelDeletion'])->middleware('can:console.area,"organisation_actions"')->name('organisations.deletion.cancel');
         Route::get('recovery', RecoveryController::class)->middleware('can:console.area,"recovery"')->name('recovery');

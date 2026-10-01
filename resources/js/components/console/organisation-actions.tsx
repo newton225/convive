@@ -3,6 +3,7 @@ import { Play, Undo2 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ChangePlanDialog } from '@/components/console/change-plan-dialog';
+import { ExtendTrialDialog } from '@/components/console/extend-trial-dialog';
 import { ScheduleDeletionDialog } from '@/components/console/schedule-deletion-dialog';
 import { SuspendOrganisationDialog } from '@/components/console/suspend-organisation-dialog';
 import { Button } from '@/components/ui/button';
@@ -20,10 +21,9 @@ type Pending = 'reactivate' | 'cancel_deletion';
 
 /**
  * Les actions de l'editeur sur une organisation (README section 3 et ecran 28) : changer de plan,
- * suspendre ou reactiver, programmer ou annuler la suppression. Chaque bouton n'apparait que dans
- * l'etat ou l'action a un sens ; le serveur revalide de toute facon.
- *
- * Offrir ou prolonger un essai n'est pas propose : le produit n'a pas encore de periode d'essai.
+ * offrir ou prolonger l'essai, suspendre ou reactiver, programmer ou annuler la suppression.
+ * Chaque bouton n'apparait que dans l'etat ou l'action a un sens ; le serveur revalide de toute
+ * facon.
  */
 export function OrganisationActions({ organisation, plans }: Props) {
     const { t } = useTranslation();
@@ -57,6 +57,15 @@ export function OrganisationActions({ organisation, plans }: Props) {
                     currentPlan={organisation.plan}
                     plans={plans}
                 />
+
+                {/* Un abonnement l'emporte sur l'essai : rien a offrir a une organisation abonnee. */}
+                {organisation.hasSubscription ? null : (
+                    <ExtendTrialDialog
+                        slug={organisation.slug}
+                        onTrial={organisation.onTrial}
+                        endsAt={organisation.trialEndsAt}
+                    />
+                )}
 
                 {organisation.suspendedByEditor ? (
                     <Button

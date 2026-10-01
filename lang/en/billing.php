@@ -109,4 +109,8 @@ return [
             'line' => 'The subscription of :tenant remains unpaid: the workspace is suspended. Pay the subscription to reopen it.',
         ],
     ],
+    'trial' => [
+        'unlimited' => 'Trial period: you enjoy this plan without a subscription, with no end date for now.',
+        'until' => 'Trial period: you enjoy this plan without a subscription until :date.',
+    ],
 ];

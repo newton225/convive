@@ -26,6 +26,8 @@ export type ConsoleOrganisationSummary = {
     };
     pastDueSince: string | null;
     suspendedAt: string | null;
+    // A l'essai ; `trialEndsAt` nul veut alors dire « sans date de fin ».
+    onTrial: boolean;
     trialEndsAt: string | null;
     deletionAt: string | null;
 };
@@ -38,6 +40,8 @@ export type ConsoleOrganisationDetails = ConsoleOrganisationSummary & {
     // c'est la seule suspension qu'il leve depuis la console.
     suspensionReason: string | null;
     suspendedByEditor: boolean;
+    // Un abonnement l'emporte sur l'essai : on n'en offre pas a une organisation abonnee.
+    hasSubscription: boolean;
     history: {
         at: string;
         type: 'opened' | 'plan_changed';

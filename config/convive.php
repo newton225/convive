@@ -69,6 +69,15 @@ return [
     |
     */
 
+    // La periode d'essai (README section 3). Tout espace neuf est a l'essai sur le plan ci-dessous.
+    // Sans duree, l'essai n'a pas de date de fin : c'est la regle du moment (decision du
+    // proprietaire du projet, 2026-10-01), l'editeur en pose une depuis la console au besoin.
+    'trial' => [
+        'enabled' => (bool) env('CONVIVE_TRIAL_ENABLED', true),
+        'plan' => env('CONVIVE_TRIAL_PLAN', 'association'),
+        'days' => env('CONVIVE_TRIAL_DAYS'),
+    ],
+
     'billing' => [
         'enforce_plan_limits' => (bool) env('CONVIVE_ENFORCE_PLAN_LIMITS', true),
 

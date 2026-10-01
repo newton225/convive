@@ -10,12 +10,13 @@ use App\Models\TenantSuspension;
 use App\Models\User;
 use App\Support\Console\ConsoleJournal;
 use App\Support\Console\TenantUsageRecorder;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
  * Les actions de l'editeur sur une organisation (README section 3) : suspendre et reactiver,
- * changer de plan, programmer ou annuler sa suppression. Chacune va au journal central, avec
+ * changer de plan, offrir ou prolonger un essai, programmer ou annuler sa suppression. Chacune va au journal central, avec
  * l'avant et l'apres.
  */
 class ManageOrganisation
@@ -111,6 +112,32 @@ class ManageOrganisation
                 'detail' => $target->name,
             ]);
         });
+    }
+
+    /**
+     * Offer or extend the trial of the organisation (README section 3). `$endsAt` nul : un essai
+     * sans date de fin. Sans effet sur une organisation abonnee, dont l'abonnement l'emporte : on
+     * le refuse plutot que de laisser croire qu'il s'applique.
+     *
+     * @throws ValidationException
+     */
+    public function extendTrial(Tenant $tenant, ?CarbonInterface $endsAt, User $actor): void
+    {
+        if ($tenant->subscription !== null) {
+            throw ValidationException::withMessages(['ends_at' => __('console.organisation.errors.trial_has_subscription')]);
+        }
+
+        $before = $tenant->trial_ends_at?->toISOString();
+
+        $tenant->forceFill([
+            'trial_started_at' => $tenant->trial_started_at ?? now(),
+            'trial_ends_at' => $endsAt,
+        ])->save();
+
+        ConsoleJournal::record('trial_extended', $actor, $tenant, [
+            'old' => ['trial_ends_at' => $before],
+            'attributes' => ['trial_ends_at' => $endsAt?->toISOString()],
+        ]);
     }
 
     /**

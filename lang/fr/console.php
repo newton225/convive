@@ -70,6 +70,7 @@ return [
         'plan' => 'Plan',
         'status' => 'État',
         'trial_ends' => "Fin de l'essai",
+        'trial_unlimited' => 'Sans date de fin',
         'past_due_since' => 'Impayé depuis',
         'suspended_at' => 'Suspendue le',
         'deletion_at' => 'Suppression définitive le',
@@ -94,6 +95,7 @@ return [
         'action_labels' => [
             'change_plan' => 'Changer de plan',
             'extend_trial' => "Prolonger l'essai",
+            'offer_trial' => 'Offrir un essai',
             'suspend' => 'Suspendre',
             'reactivate' => 'Réactiver',
             'schedule_deletion' => 'Programmer la suppression',
@@ -104,6 +106,8 @@ return [
         'suspended_for_non_payment' => 'Cette organisation est suspendue pour impayé : la suspension se lève par le paiement, pas depuis la console.',
         'fields' => [
             'plan' => 'Plan',
+            'trial_ends_at' => 'Fin de l’essai',
+            'trial_ends_at_hint' => 'Laissez vide pour un essai sans date de fin. À l’échéance, l’organisation retombe sur le plan gratuit ; rien n’est supprimé.',
             'reason' => 'Motif de la suspension',
             'request_reference' => 'Référence de la demande écrite',
             'request_reference_hint' => 'Date et objet de l’email, ou numéro du courrier : la suppression ne se fait qu’à la demande écrite de l’organisation.',
@@ -111,6 +115,7 @@ return [
             'confirmation_named' => 'Pour confirmer, retapez « :organisation »',
         ],
         'dialogs' => [
+            'trial' => 'Pendant l’essai, l’organisation profite du plan Association sans abonnement.',
             'change_plan' => 'Le changement prend effet tout de suite. Une descente est refusée tant que la consommation dépasse les quotas du plan visé.',
             'suspend_title' => 'Suspendre :organisation ?',
             'suspend' => 'Son back-office renverra vers l’écran d’abonnement et ses liens publics n’accepteront plus de nouvelle inscription. Les billets déjà émis restent valides à l’entrée. Le motif est gardé au journal.',
@@ -125,6 +130,7 @@ return [
             'suspended' => ':organisation est suspendue.',
             'reactivated' => ':organisation est réactivée.',
             'plan_changed' => 'Le plan de :organisation a été changé.',
+            'trial_extended' => 'L’essai de :organisation est mis à jour.',
             'deletion_scheduled' => 'La suppression de :organisation est programmée dans 30 jours.',
             'deletion_cancelled' => 'La suppression de :organisation est annulée.',
         ],
@@ -132,6 +138,7 @@ return [
             'already_suspended' => 'Cette organisation est déjà suspendue par l’équipe Convive.',
             'not_suspended_by_editor' => 'Cette organisation n’a pas été suspendue depuis la console : il n’y a rien à lever ici.',
             'same_plan' => 'L’organisation est déjà sur ce plan.',
+            'trial_has_subscription' => 'Cette organisation a un abonnement, qui l’emporte sur l’essai : il n’y a rien à offrir.',
             'plan_paid_online' => 'Cet abonnement est réglé en ligne : changer le plan ici laisserait le prestataire facturer l’ancien prix. Le changement se fait depuis l’écran Abonnement de l’organisation.',
             'usage_unreadable' => 'La consommation de l’organisation ne peut pas être lue (base absente ?). Réparez sa base depuis la santé technique, puis réessayez.',
             'downgrade_refused' => 'Le passage au plan :plan est refusé tant que la consommation dépasse ses quotas : :quotas.',
