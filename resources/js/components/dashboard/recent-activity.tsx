@@ -1,3 +1,4 @@
+import { HelpTip } from '@/components/help-tip';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
@@ -17,8 +18,11 @@ export function RecentActivity({ activity }: Props) {
     return (
         <Card data-test="dashboard-activity">
             <CardHeader>
-                <CardTitle className="text-base">
+                <CardTitle className="flex items-center gap-1.5 text-base">
                     {t('dashboard.activity.title')}
+                    <HelpTip subject={t('dashboard.activity.title')}>
+                        {t('dashboard.help.activity')}
+                    </HelpTip>
                 </CardTitle>
             </CardHeader>
             <CardContent>

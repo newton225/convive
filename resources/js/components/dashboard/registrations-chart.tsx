@@ -8,6 +8,7 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
+import { HelpTip } from '@/components/help-tip';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import type { DashboardDayCount } from '@/types';
@@ -35,8 +36,11 @@ export function RegistrationsChart({ data }: Props) {
     return (
         <Card data-test="dashboard-registrations-chart">
             <CardHeader>
-                <CardTitle className="text-base">
+                <CardTitle className="flex items-center gap-1.5 text-base">
                     {t('dashboard.charts.per_day')}
+                    <HelpTip subject={t('dashboard.charts.per_day')}>
+                        {t('dashboard.help.per_day')}
+                    </HelpTip>
                 </CardTitle>
             </CardHeader>
             <CardContent>

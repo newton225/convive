@@ -7,6 +7,7 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
+import { HelpTip } from '@/components/help-tip';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import type { DashboardChannelCount } from '@/types';
@@ -26,8 +27,11 @@ export function ChannelsChart({ data }: Props) {
     return (
         <Card data-test="dashboard-channels-chart">
             <CardHeader>
-                <CardTitle className="text-base">
+                <CardTitle className="flex items-center gap-1.5 text-base">
                     {t('dashboard.charts.by_channel')}
+                    <HelpTip subject={t('dashboard.charts.by_channel')}>
+                        {t('dashboard.help.by_channel')}
+                    </HelpTip>
                 </CardTitle>
             </CardHeader>
             <CardContent>

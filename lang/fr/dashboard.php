@@ -23,9 +23,25 @@ return [
         'validated' => ':share % du total · :amount encaissés',
         'waiting' => '{1} dont 1 en attente depuis plus de 24 h|[2,*] dont :count en attente depuis plus de 24 h',
         'purge' => 'purge automatique :when',
+        'capacity' => '{0} aucune place au plan de salle|{1} sur 1 place au total|[2,*] sur :count places au total',
+    ],
+
+    // Ce que chaque bloc compte exactement, dans sa bulle d'aide.
+    'help' => [
+        'registrations' => 'Toutes les inscriptions reçues pour cet événement, quel que soit leur état : confirmées, en attente, expirées ou annulées. Une inscription peut compter plusieurs personnes, l’invité et ses accompagnateurs.',
+        'validated' => 'Les inscriptions dont la preuve de paiement a été validée : leurs places sont acquises. Le montant encaissé additionne ce que ces inscriptions ont versé, y compris celles annulées après validation.',
+        'to_check' => 'Les inscriptions dont la preuve a été déposée et attend d’être validée ou rejetée dans la file des preuves.',
+        'without_proof' => 'Les inscriptions sans preuve valable : formulaire non terminé, réservation en cours ou expirée, preuve rejetée. À la purge, celles qui n’ont toujours rien déposé sont supprimées.',
+        'seats_left' => 'Ce qu’un nouvel invité peut encore réserver : la capacité du plan de salle, moins les places des inscriptions confirmées et des réservations en cours.',
+        'hold_expiry' => 'Une réservation bloque des places pendant son décompte. Sans preuve déposée avant la fin, elle expire et ses places sont rendues. Une inscription relancée après expiration compte pour une réservation de plus.',
+        'per_day' => 'Le nombre d’inscriptions créées chaque jour sur la période affichée, tous états confondus. Utile pour voir l’effet d’une annonce ou d’une relance.',
+        'by_channel' => 'Toutes les preuves déposées pour cet événement, validées ou non, réparties selon le moyen de paiement utilisé.',
+        'tables' => 'Pour chaque table du plan de salle, les places déjà attribuées sur sa capacité. Une inscription confirmée mais pas encore placée n’y figure pas.',
+        'activity' => 'Les derniers faits de cet événement : preuves déposées, validées ou rejetées, inscriptions annulées, réservations expirées et billets refusés à l’entrée.',
     ],
 
     'hold_expiry' => [
+        'title' => 'Réservations expirées',
         'rate' => ':rate % des réservations ont expiré sans preuve (:lapsed sur :holds).',
         'none' => 'Aucune réservation pour le moment.',
         'help' => 'Un taux qui monte brusquement peut signaler des réservations faites par un robot pour bloquer les places.',

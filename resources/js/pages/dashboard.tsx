@@ -53,8 +53,16 @@ const KpiLabels: Record<(typeof Kpis)[number], string> = {
     seatsLeft: 'dashboard.kpis.seats_left',
 };
 
+const KpiHelp: Record<(typeof Kpis)[number], string> = {
+    registrations: 'dashboard.help.registrations',
+    validated: 'dashboard.help.validated',
+    toCheck: 'dashboard.help.to_check',
+    withoutProof: 'dashboard.help.without_proof',
+    seatsLeft: 'dashboard.help.seats_left',
+};
+
 // Le sous-titre de chaque chiffre cle (prototype Convive.dc.html) : tendance, argent encaisse,
-// attente trop longue, prochaine purge.
+// attente trop longue, prochaine purge, capacite de la salle.
 function kpiHint(
     kpi: (typeof Kpis)[number],
     overview: DashboardOverview,
@@ -87,6 +95,10 @@ function kpiHint(
                       when: formatRelative(context.purgeAt, locale),
                   })
                 : null;
+        case 'seatsLeft':
+            return t('dashboard.hints.capacity', {
+                count: overview.capacity,
+            });
         default:
             return null;
     }
@@ -241,6 +253,7 @@ export default function Dashboard({
                                     label={t(KpiLabels[kpi])}
                                     value={overview.kpis[kpi]}
                                     hint={kpiHint(kpi, overview, t, locale)}
+                                    help={t(KpiHelp[kpi])}
                                     testId={`dashboard-kpi-${kpi}`}
                                 />
                             ))}

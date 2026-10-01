@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { HelpTip } from '@/components/help-tip';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { NonceStyle } from '@/components/nonce-style';
 import { useTranslation } from '@/hooks/use-translation';
@@ -17,8 +18,11 @@ export function TableOccupancy({ tables }: Props) {
     return (
         <Card data-test="dashboard-table-occupancy">
             <CardHeader>
-                <CardTitle className="text-base">
+                <CardTitle className="flex items-center gap-1.5 text-base">
                     {t('dashboard.charts.tables')}
+                    <HelpTip subject={t('dashboard.charts.tables')}>
+                        {t('dashboard.help.tables')}
+                    </HelpTip>
                 </CardTitle>
             </CardHeader>
             <CardContent>

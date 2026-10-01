@@ -23,9 +23,25 @@ return [
         'validated' => ':share% of total · :amount collected',
         'waiting' => '{1} including 1 waiting for over 24 h|[2,*] including :count waiting for over 24 h',
         'purge' => 'automatic purge :when',
+        'capacity' => '{0} no seat on the seating plan|{1} out of 1 seat in total|[2,*] out of :count seats in total',
+    ],
+
+    // Ce que chaque bloc compte exactement, dans sa bulle d'aide.
+    'help' => [
+        'registrations' => 'Every registration received for this event, whatever its state: confirmed, pending, expired or cancelled. One registration may cover several people, the guest and their companions.',
+        'validated' => 'Registrations whose proof of payment has been approved: their seats are secured. The collected amount adds up what these registrations paid, including those cancelled after approval.',
+        'to_check' => 'Registrations whose proof has been submitted and is waiting to be approved or rejected in the proof queue.',
+        'without_proof' => 'Registrations without a valid proof: unfinished form, hold in progress or expired, rejected proof. At the purge, those that still have submitted nothing are removed.',
+        'seats_left' => 'What a new guest can still book: the capacity of the seating plan, minus the seats of confirmed registrations and of holds in progress.',
+        'hold_expiry' => 'A hold blocks seats during its countdown. Without a proof submitted before the end, it expires and its seats are released. A registration restarted after expiry counts as one more hold.',
+        'per_day' => 'The number of registrations created each day over the period shown, in every state. Useful to see the effect of an announcement or a reminder.',
+        'by_channel' => 'Every proof submitted for this event, approved or not, broken down by the payment method used.',
+        'tables' => 'For each table of the seating plan, the seats already assigned out of its capacity. A confirmed registration that is not seated yet does not appear here.',
+        'activity' => 'The latest facts of this event: proofs submitted, approved or rejected, cancelled registrations, expired holds and tickets refused at the door.',
     ],
 
     'hold_expiry' => [
+        'title' => 'Expired holds',
         'rate' => ':rate% of reservations expired without a proof (:lapsed out of :holds).',
         'none' => 'No reservation yet.',
         'help' => 'A rate that jumps suddenly can signal reservations made by a bot to block the seats.',

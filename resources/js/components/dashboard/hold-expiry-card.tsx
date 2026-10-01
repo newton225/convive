@@ -1,4 +1,5 @@
 import { TimerOff } from 'lucide-react';
+import { HelpTip } from '@/components/help-tip';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import type { DashboardHoldExpiry } from '@/types';
@@ -19,7 +20,7 @@ export function HoldExpiryCard({ expiry }: Props) {
         <Card data-test="dashboard-hold-expiry">
             <CardContent className="flex items-start gap-3">
                 <TimerOff className="text-muted-foreground mt-1 size-4 shrink-0" />
-                <div className="space-y-1 text-sm">
+                <div className="min-w-0 flex-1 space-y-1 text-sm">
                     <p className="font-medium">
                         {expiry.rate === null
                             ? t('dashboard.hold_expiry.none')
@@ -33,6 +34,9 @@ export function HoldExpiryCard({ expiry }: Props) {
                         {t('dashboard.hold_expiry.help')}
                     </p>
                 </div>
+                <HelpTip subject={t('dashboard.hold_expiry.title')}>
+                    {t('dashboard.help.hold_expiry')}
+                </HelpTip>
             </CardContent>
         </Card>
     );
