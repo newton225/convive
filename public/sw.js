@@ -13,7 +13,7 @@
  */
 
 // Monter la version vide les caches des anciennes versions a l'activation.
-const VERSION = 'convive-v2';
+const VERSION = 'convive-v3';
 const STATIC_CACHE = `${VERSION}-static`;
 const PAGES_CACHE = `${VERSION}-pages`;
 const OFFLINE_URL = '/offline.html';
