@@ -170,6 +170,14 @@ return [
             'pending_migrations' => '{1} 1 migration en attente|[2,*] :count migrations en attente',
         ],
         'migrate' => 'Rejouer les migrations',
+        'migrate_confirm' => [
+            'title' => 'Rejouer les migrations de :organisation ?',
+            'description' => 'La base est créée si elle manque, puis mise à jour : seules des tables et des colonnes sont ajoutées, aucune donnée n’est supprimée. Le geste ne s’annule pas.',
+        ],
+        'flash' => [
+            'migrated' => 'La base de :organisation est à jour.',
+            'migration_failed' => 'Les migrations de :organisation n’ont pas abouti. Le détail est au journal du serveur.',
+        ],
         'tasks' => 'Tâches planifiées',
         'task_labels' => [
             'payment_accounts_activation' => 'Activation des comptes de versement',

@@ -5,6 +5,7 @@ use App\Http\Controllers\Console\HealthController;
 use App\Http\Controllers\Console\OrganisationController;
 use App\Http\Controllers\Console\PlanController;
 use App\Http\Controllers\Console\RecoveryController;
+use App\Http\Controllers\Console\RepairTenantDatabaseController;
 use App\Http\Controllers\Console\ShowcaseController;
 use App\Http\Controllers\Console\SupportAvailabilityController;
 use App\Http\Controllers\Console\TeamController;
@@ -29,6 +30,7 @@ Route::prefix('console')
         Route::get('recovery', RecoveryController::class)->middleware('can:console.area,"recovery"')->name('recovery');
         Route::get('plans', PlanController::class)->middleware('can:console.area,"plans"')->name('plans');
         Route::get('health', HealthController::class)->middleware('can:console.area,"health"')->name('health');
+        Route::post('health/databases/{tenant}/migrate', RepairTenantDatabaseController::class)->middleware('can:console.area,"health"')->name('health.databases.migrate');
         Route::get('showcase', ShowcaseController::class)->middleware('can:console.area,"showcase"')->name('showcase');
         Route::get('audit', AuditLogController::class)->middleware('can:console.area,"audit"')->name('audit');
         // L'equipe editeur (README ecran 34) : reservee aux Fondateurs.

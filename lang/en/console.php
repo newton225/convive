@@ -170,6 +170,14 @@ return [
             'pending_migrations' => '{1} 1 pending migration|[2,*] :count pending migrations',
         ],
         'migrate' => 'Run the migrations again',
+        'migrate_confirm' => [
+            'title' => 'Run the migrations of :organisation again?',
+            'description' => 'The database is created if it is missing, then brought up to date: only tables and columns are added, no data is removed. This cannot be undone.',
+        ],
+        'flash' => [
+            'migrated' => 'The database of :organisation is up to date.',
+            'migration_failed' => 'The migrations of :organisation did not complete. The detail is in the server log.',
+        ],
         'tasks' => 'Scheduled tasks',
         'task_labels' => [
             'payment_accounts_activation' => 'Payout account activation',

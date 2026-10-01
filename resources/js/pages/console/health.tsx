@@ -1,8 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { CircleAlert, CircleCheck, DatabaseZap } from 'lucide-react';
+import { CircleAlert, CircleCheck } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
-import { PendingActionButton } from '@/components/console/pending-action-button';
+import { RepairDatabaseButton } from '@/components/console/repair-database-button';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDateTime, formatRelative } from '@/lib/format-date';
 import { health } from '@/routes/console';
-import { show } from '@/routes/console/organisations';
 import type {
     ConsoleBackup,
     ConsoleDatabaseIssue,
@@ -110,8 +109,6 @@ export default function Health({
             <Head title={t('console.health.title')} />
 
             <div className="flex flex-col space-y-6">
-                {isSample && <SampleBanner />}
-
                 <Heading
                     variant="small"
                     title={t('console.health.title')}
@@ -137,12 +134,9 @@ export default function Health({
                                     >
                                         <span className="flex items-center gap-2">
                                             <CircleAlert className="size-4 shrink-0" />
-                                            <Link
-                                                href={show(item.slug)}
-                                                className="font-medium underline-offset-4 hover:underline"
-                                            >
+                                            <span className="font-medium">
                                                 {item.name}
-                                            </Link>
+                                            </span>
                                             <span className="text-muted-foreground">
                                                 {item.issue ===
                                                 'missing_database'
@@ -159,9 +153,9 @@ export default function Health({
                                                       )}
                                             </span>
                                         </span>
-                                        <PendingActionButton
-                                            icon={DatabaseZap}
-                                            label={t('console.health.migrate')}
+                                        <RepairDatabaseButton
+                                            slug={item.slug}
+                                            name={item.name}
                                         />
                                     </li>
                                 ))}
@@ -169,6 +163,9 @@ export default function Health({
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Les bases ci-dessus sont reelles ; la suite vient encore du jeu d'exemple. */}
+                {isSample && <SampleBanner />}
 
                 <section className="space-y-3">
                     <h3 className="font-medium">{t('console.health.tasks')}</h3>

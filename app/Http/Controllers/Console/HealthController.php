@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Console;
 
 use App\Http\Controllers\Controller;
 use App\Support\Console\ConsoleSampleData;
+use App\Support\Console\TenantDatabaseHealth;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * PROVISOIRE : la sante technique (README ecran 31), rendue sur le jeu d'exemple. Le serveur
- * s'appuiera sur `spatie/laravel-health` (CLAUDE.md, table Spatie).
+ * La sante technique (README ecran 31). Les bases des organisations sont reelles
+ * (`TenantDatabaseHealth`). PROVISOIRE pour le reste : taches planifiees, files et sauvegardes
+ * viennent encore du jeu d'exemple, en attendant `spatie/laravel-health` (CLAUDE.md, table Spatie).
  */
 class HealthController extends Controller
 {
@@ -18,6 +20,7 @@ class HealthController extends Controller
         return Inertia::render('console/health', [
             'isSample' => true,
             ...ConsoleSampleData::health(),
+            'databases' => TenantDatabaseHealth::issues(),
         ]);
     }
 }
