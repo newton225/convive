@@ -4,17 +4,18 @@ namespace App\Concerns;
 
 use App\Data\TenantPermissions;
 use App\Data\UserTenant;
+use App\Enums\ConsoleArea;
 use App\Enums\TenantPermission;
 use App\Models\Membership;
 use App\Models\Profile;
 use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
+use App\Support\Console\ConsoleAccess;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -148,12 +149,12 @@ trait HasTenants
 
     /**
      * Get the support access currently letting the user read the given tenant, if any (README
-     * section 3). Deux conditions, relues a chaque appel : l'utilisateur fait toujours partie de
-     * l'equipe Convive, et un Proprietaire lui a ouvert un acces ni revoque ni echu.
+     * section 3). Deux conditions, relues a chaque appel : son profil editeur ouvre toujours
+     * l'acces de support, et un Proprietaire lui a ouvert un acces ni revoque ni echu.
      */
     public function supportAccessTo(Tenant $tenant): ?SupportAccessGrant
     {
-        if (! Gate::forUser($this)->allows('console.access')) {
+        if (! ConsoleAccess::allows($this, ConsoleArea::Support)) {
             return null;
         }
 

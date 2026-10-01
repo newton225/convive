@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Console;
 
+use App\Enums\ConsoleArea;
 use App\Http\Controllers\Controller;
 use App\Models\SupportAccessGrant;
+use App\Support\Console\ConsoleAccess;
 use App\Support\Console\ConsoleSampleData;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -27,7 +29,9 @@ class OrganisationController extends Controller
             // Reels, eux : les acces de support ouverts au compte connecte (README section 3), sa
             // seule porte vers le contenu d'une organisation.
             // Chacun decide d'apparaitre ou non dans la liste proposee aux organisations.
-            'supportAvailable' => $request->user()->support_available,
+            'supportAvailable' => ConsoleAccess::allows($request->user(), ConsoleArea::Support)
+                ? $request->user()->support_available
+                : null,
             'supportGrants' => SupportAccessGrant::where('operator_id', $request->user()->id)
                 ->active()
                 ->with('tenant')

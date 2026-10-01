@@ -20,15 +20,19 @@ Route::prefix('console')
     ->middleware(['auth', 'verified', EnsureConsoleOperator::class])
     ->group(function () {
         Route::redirect('/', '/console/organisations')->name('home');
-        Route::get('organisations', [OrganisationController::class, 'index'])->name('organisations.index');
+        // Chaque ecran n'est ouvert qu'aux profils editeur qui en ont la zone (`ConsoleProfile`).
+        Route::get('organisations', [OrganisationController::class, 'index'])->middleware('can:console.area,"organisations"')->name('organisations.index');
         // Acces du support : chacun choisit d'apparaitre ou non dans la liste proposee aux
         // organisations.
-        Route::put('support-availability', SupportAvailabilityController::class)->name('support-availability.update');
-        Route::get('organisations/{organisation}', [OrganisationController::class, 'show'])->name('organisations.show');
-        Route::get('recovery', RecoveryController::class)->name('recovery');
-        Route::get('plans', PlanController::class)->name('plans');
-        Route::get('health', HealthController::class)->name('health');
-        Route::get('showcase', ShowcaseController::class)->name('showcase');
-        Route::get('audit', AuditLogController::class)->name('audit');
-        Route::get('team', TeamController::class)->name('team');
+        Route::put('support-availability', SupportAvailabilityController::class)->middleware('can:console.area,"support"')->name('support-availability.update');
+        Route::get('organisations/{organisation}', [OrganisationController::class, 'show'])->middleware('can:console.area,"organisations"')->name('organisations.show');
+        Route::get('recovery', RecoveryController::class)->middleware('can:console.area,"recovery"')->name('recovery');
+        Route::get('plans', PlanController::class)->middleware('can:console.area,"plans"')->name('plans');
+        Route::get('health', HealthController::class)->middleware('can:console.area,"health"')->name('health');
+        Route::get('showcase', ShowcaseController::class)->middleware('can:console.area,"showcase"')->name('showcase');
+        Route::get('audit', AuditLogController::class)->middleware('can:console.area,"audit"')->name('audit');
+        // L'equipe editeur (README ecran 34) : reservee aux Fondateurs.
+        Route::get('team', [TeamController::class, 'index'])->middleware('can:console.area,"team"')->name('team');
+        Route::post('team', [TeamController::class, 'store'])->name('team.store');
+        Route::delete('team/{operator}', [TeamController::class, 'destroy'])->middleware('can:console.area,"team"')->name('team.destroy');
     });

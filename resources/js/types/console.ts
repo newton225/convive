@@ -156,14 +156,18 @@ export type ConsoleOperatorProfile = 'founder' | 'support' | 'accounting';
 
 export type ConsoleOperator = {
     id: number;
+    // Null pour un Fondateur de depart, defini dans la configuration et non dans l'equipe en base.
+    operatorId: number | null;
     name: string;
     email: string;
     profile: ConsoleOperatorProfile;
     twoFactor: boolean;
     lastLoginAt: string | null;
+    removable: boolean;
 };
 
 export type ConsoleOperatorInvitation = {
+    id: number;
     email: string;
     profile: ConsoleOperatorProfile;
     sentAt: string;

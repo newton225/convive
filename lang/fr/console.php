@@ -2,6 +2,7 @@
 
 return [
     'title' => "Console d'exploitation",
+    'two_factor_required' => 'La console exige la double authentification. Activez-la, puis revenez.',
     'pending_action' => 'Bientôt disponible : cette action n’est pas encore en service.',
     'system_actor' => 'Système',
 
@@ -286,6 +287,36 @@ return [
         'invitations' => 'Invitations en attente',
         'invitations_empty' => 'Aucune invitation en attente.',
         'invite' => 'Inviter un membre',
+        'invite_dialog' => [
+            'title' => 'Inviter un membre',
+            'description' => 'La personne ouvrira la console avec le compte qui porte cette adresse, une fois vérifiée. Si elle n’a pas encore de compte, elle en crée un avec cette adresse.',
+            'email' => 'Adresse email',
+            'profile' => 'Profil',
+            'submit' => 'Envoyer l’invitation',
+        ],
+        'actions' => 'Actions',
+        'remove' => 'Retirer',
+        'cancel_invitation' => 'Annuler',
+        'bootstrap_founder' => 'Fondateur de départ, défini dans la configuration du serveur.',
+        'remove_confirm' => [
+            'title' => 'Retirer :email de l’équipe ?',
+            'description' => 'Son compte n’ouvrira plus aucun écran de la console, dès sa prochaine page. Les accès de support qui lui sont ouverts ne lui donneront plus rien.',
+            'confirm' => 'Retirer de l’équipe',
+        ],
+        'flash' => [
+            'invited' => 'Invitation envoyée à :email.',
+            'removed' => ':email ne fait plus partie de l’équipe.',
+        ],
+        'errors' => [
+            'already_member' => 'Cette adresse fait déjà partie de l’équipe.',
+            'cannot_remove_self' => 'Vous ne pouvez pas vous retirer vous-même de l’équipe.',
+        ],
+        'invitation_mail' => [
+            'subject' => 'Vous rejoignez l’équipe Convive',
+            'intro' => ':inviter vous a ajouté à l’équipe Convive, avec le profil :profile.',
+            'instruction' => 'Connectez-vous avec le compte qui porte l’adresse :email, ou créez-le avec cette adresse. La double authentification est obligatoire.',
+            'action' => 'Ouvrir la console',
+        ],
     ],
     // Les acces de support ouverts au compte connecte : la seule porte de l'editeur vers le
     // contenu d'une organisation.

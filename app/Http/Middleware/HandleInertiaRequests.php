@@ -7,6 +7,7 @@ use App\Models\DatabaseNotification;
 use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\Console\ConsoleAccess;
 use App\Support\Locale;
 use App\Support\PlanLimits;
 use Illuminate\Http\Request;
@@ -95,6 +96,9 @@ class HandleInertiaRequests extends Middleware
             'supportAccess' => fn () => $user ? $this->supportAccess($request, $tenant()) : null,
             // Sert uniquement a afficher le lien vers la console ; ses routes revalident.
             'canAccessConsole' => fn () => $user !== null && Gate::forUser($user)->allows('console.access'),
+            // Les ecrans de la console que le profil editeur du compte ouvre : sert a n'afficher que
+            // ses liens dans le menu de la console ; chaque route revalide.
+            'consoleAreas' => fn () => $user !== null ? ConsoleAccess::areasOf($user) : [],
         ];
     }
 

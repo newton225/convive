@@ -2,6 +2,7 @@
 
 return [
     'title' => 'Operations console',
+    'two_factor_required' => 'The console requires two-factor authentication. Enable it, then come back.',
     'pending_action' => 'Coming soon: this action is not in service yet.',
     'system_actor' => 'System',
 
@@ -286,6 +287,36 @@ return [
         'invitations' => 'Pending invitations',
         'invitations_empty' => 'No pending invitation.',
         'invite' => 'Invite a member',
+        'invite_dialog' => [
+            'title' => 'Invite a member',
+            'description' => 'The person will open the console with the account that carries this address, once verified. If they have no account yet, they create one with this address.',
+            'email' => 'Email address',
+            'profile' => 'Profile',
+            'submit' => 'Send the invitation',
+        ],
+        'actions' => 'Actions',
+        'remove' => 'Remove',
+        'cancel_invitation' => 'Cancel',
+        'bootstrap_founder' => 'Initial founder, set in the server configuration.',
+        'remove_confirm' => [
+            'title' => 'Remove :email from the team?',
+            'description' => 'Their account will no longer open any screen of the console, from their next page on. Support accesses open for them will give them nothing.',
+            'confirm' => 'Remove from the team',
+        ],
+        'flash' => [
+            'invited' => 'Invitation sent to :email.',
+            'removed' => ':email is no longer part of the team.',
+        ],
+        'errors' => [
+            'already_member' => 'This address is already part of the team.',
+            'cannot_remove_self' => 'You cannot remove yourself from the team.',
+        ],
+        'invitation_mail' => [
+            'subject' => 'You are joining the Convive team',
+            'intro' => ':inviter added you to the Convive team, with the :profile profile.',
+            'instruction' => 'Sign in with the account that carries the address :email, or create it with this address. Two-factor authentication is required.',
+            'action' => 'Open the console',
+        ],
     ],
     // Les acces de support ouverts au compte connecte : la seule porte de l'editeur vers le
     // contenu d'une organisation.

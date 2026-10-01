@@ -41,49 +41,59 @@ import type { NavItem } from '@/types';
  */
 export function ConsoleSidebar() {
     const { t } = useTranslation();
-    const tenant = usePage().props.currentTenant;
+    const { currentTenant: tenant, consoleAreas } = usePage().props;
+    // Seuls les ecrans que le profil editeur ouvre ; chaque route revalide.
+    const allowed = (item: NavItem & { area: string }) =>
+        consoleAreas.includes(item.area);
     const backOfficeUrl = tenant ? dashboard(tenant.slug) : '/';
 
-    const clientItems: NavItem[] = [
+    const clientItems = [
         {
             title: t('console.nav.organisations'),
             href: organisationsIndex(),
             icon: Building2,
+            area: 'organisations',
         },
         {
             title: t('console.nav.recovery'),
             href: recovery(),
             icon: HandCoins,
+            area: 'recovery',
         },
         {
             title: t('console.nav.plans'),
             href: plans(),
             icon: Package,
+            area: 'plans',
         },
-    ];
+    ].filter(allowed);
 
-    const platformItems: NavItem[] = [
+    const platformItems = [
         {
             title: t('console.nav.health'),
             href: health(),
             icon: HeartPulse,
+            area: 'health',
         },
         {
             title: t('console.nav.showcase'),
             href: showcase(),
             icon: Megaphone,
+            area: 'showcase',
         },
         {
             title: t('console.nav.audit'),
             href: audit(),
             icon: ScrollText,
+            area: 'audit',
         },
         {
             title: t('console.nav.team'),
             href: team(),
             icon: UsersRound,
+            area: 'team',
         },
-    ];
+    ].filter(allowed);
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -107,10 +117,12 @@ export function ConsoleSidebar() {
                     items={clientItems}
                     label={t('console.nav.group_clients')}
                 />
-                <NavMain
-                    items={platformItems}
-                    label={t('console.nav.group_platform')}
-                />
+                {platformItems.length > 0 ? (
+                    <NavMain
+                        items={platformItems}
+                        label={t('console.nav.group_platform')}
+                    />
+                ) : null}
             </SidebarContent>
 
             <SidebarFooter>

@@ -28,6 +28,7 @@ declare module '@inertiajs/core' {
             currentPlan: CurrentPlan | null;
             completedTours: string[];
             canAccessConsole: boolean;
+            consoleAreas: string[];
             appVersion: string | null;
             supportAccess: SupportAccessNotice | null;
             [key: string]: unknown;

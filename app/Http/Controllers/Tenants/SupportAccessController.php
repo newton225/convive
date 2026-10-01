@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Tenants;
 
 use App\Actions\Tenants\ManageSupportAccess;
+use App\Enums\ConsoleArea;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenants\OpenSupportAccessRequest;
 use App\Models\SupportAccessGrant;
 use App\Models\SupportAccessView;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\Console\ConsoleAccess;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,9 +23,8 @@ use Inertia\Response;
  * l'equipe Convive un acces en lecture seule, de 24 heures au plus, qu'il peut revoquer, et relit
  * ce qui a ete consulte.
  *
- * L'equipe Convive est, pour l'instant, celle du controle d'acces actuel de la console
- * (`convive.console.operators`) : les comptes editeur distincts arrivent avec le reste de la
- * console (etape 11) et remplaceront `operators()`.
+ * L'equipe Convive est celle de la console dont le profil ouvre l'acces de support (Fondateur,
+ * Support), voir `ConsoleAccess`.
  */
 class SupportAccessController extends Controller
 {
@@ -131,7 +132,7 @@ class SupportAccessController extends Controller
      */
     public static function operators(): Collection
     {
-        $emails = config('convive.console.operators');
+        $emails = ConsoleAccess::emailsAllowedTo(ConsoleArea::Support);
 
         return $emails === []
             ? new Collection

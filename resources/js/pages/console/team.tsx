@@ -1,15 +1,18 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { UserPlus } from 'lucide-react';
+import { useState } from 'react';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ConsoleTable } from '@/components/console/console-table';
-import { PendingActionButton } from '@/components/console/pending-action-button';
+import { InviteOperatorDialog } from '@/components/console/invite-operator-dialog';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDate, formatRelative } from '@/lib/format-date';
 import { team } from '@/routes/console';
+import { destroy } from '@/routes/console/team';
 import type {
     ConsoleOperator,
     ConsoleOperatorInvitation,
@@ -26,11 +29,34 @@ type Props = {
 const profiles: ConsoleOperatorProfile[] = ['founder', 'support', 'accounting'];
 
 /**
- * README ecran 34 : l'equipe editeur. Comptes distincts des comptes d'organisation, double
- * authentification obligatoire, trois profils (Fondateur, Support, Comptabilite).
+ * README ecran 34 : l'equipe editeur. Double authentification obligatoire, trois profils
+ * (Fondateur, Support, Comptabilite) qui ouvrent chacun leurs ecrans de la console. Un Fondateur
+ * invite une personne par son adresse et la retire ; les Fondateurs de depart, definis dans la
+ * configuration du serveur, ne se retirent pas d'ici.
  */
 export default function Team({ isSample, operators, invitations }: Props) {
     const { t, locale } = useTranslation();
+    // L'adresse a retirer (membre ou invitation), tant que la confirmation est ouverte.
+    const [removing, setRemoving] = useState<{
+        operatorId: number;
+        email: string;
+    } | null>(null);
+    const [processing, setProcessing] = useState(false);
+
+    const remove = () => {
+        if (!removing) {
+            return;
+        }
+
+        router.delete(destroy(removing.operatorId).url, {
+            preserveScroll: true,
+            onStart: () => setProcessing(true),
+            onFinish: () => {
+                setProcessing(false);
+                setRemoving(null);
+            },
+        });
+    };
 
     const operatorColumns: ColumnDef<ConsoleOperator>[] = [
         {
@@ -69,6 +95,32 @@ export default function Team({ isSample, operators, invitations }: Props) {
                     ? formatRelative(row.original.lastLoginAt, locale)
                     : '',
         },
+        {
+            id: 'actions',
+            header: t('console.team.actions'),
+            cell: ({ row }) => {
+                const { operatorId, email, removable } = row.original;
+
+                if (operatorId === null) {
+                    return (
+                        <span className="text-muted-foreground text-xs">
+                            {t('console.team.bootstrap_founder')}
+                        </span>
+                    );
+                }
+
+                return removable ? (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setRemoving({ operatorId, email })}
+                        data-test="console-team-remove"
+                    >
+                        {t('console.team.remove')}
+                    </Button>
+                ) : null;
+            },
+        },
     ];
 
     const invitationColumns: ColumnDef<ConsoleOperatorInvitation>[] = [
@@ -85,6 +137,25 @@ export default function Team({ isSample, operators, invitations }: Props) {
             header: t('console.team.columns.sent_at'),
             cell: ({ row }) => formatDate(row.original.sentAt, locale),
         },
+        {
+            id: 'actions',
+            header: t('console.team.actions'),
+            cell: ({ row }) => (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                        setRemoving({
+                            operatorId: row.original.id,
+                            email: row.original.email,
+                        })
+                    }
+                    data-test="console-team-cancel-invitation"
+                >
+                    {t('console.team.cancel_invitation')}
+                </Button>
+            ),
+        },
     ];
 
     return (
@@ -100,11 +171,7 @@ export default function Team({ isSample, operators, invitations }: Props) {
                         title={t('console.team.title')}
                         description={t('console.team.description')}
                     />
-                    <PendingActionButton
-                        icon={UserPlus}
-                        variant="default"
-                        label={t('console.team.invite')}
-                    />
+                    <InviteOperatorDialog profiles={profiles} />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
@@ -150,6 +217,20 @@ export default function Team({ isSample, operators, invitations }: Props) {
                     />
                 </section>
             </div>
+
+            <ConfirmActionDialog
+                open={removing !== null}
+                onOpenChange={(open) => !open && setRemoving(null)}
+                title={t('console.team.remove_confirm.title', {
+                    email: removing?.email ?? '',
+                })}
+                description={t('console.team.remove_confirm.description')}
+                confirmLabel={t('console.team.remove_confirm.confirm')}
+                onConfirm={remove}
+                processing={processing}
+                destructive
+                testId="console-team-remove-confirm"
+            />
         </>
     );
 }

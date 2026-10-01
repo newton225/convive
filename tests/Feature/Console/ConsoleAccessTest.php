@@ -41,14 +41,14 @@ class ConsoleAccessTest extends TestCase
     public function test_un_operateur_de_la_console_ouvre_l_ecran(string $route, array $parameters, string $component): void
     {
         config(['convive.console.operators' => ['exploitation@convive.test']]);
-        $operator = User::factory()->create(['email' => 'exploitation@convive.test']);
+        $operator = User::factory()->withTwoFactor()->create(['email' => 'exploitation@convive.test']);
 
         $this->actingAs($operator)
             ->get(route($route, $parameters))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component($component)
-                ->where('isSample', $component !== 'console/plans'),
+                ->where('isSample', ! in_array($component, ['console/plans', 'console/team'], true)),
             );
     }
 
@@ -79,7 +79,7 @@ class ConsoleAccessTest extends TestCase
     public function test_une_organisation_inconnue_recoit_404(): void
     {
         config(['convive.console.operators' => ['exploitation@convive.test']]);
-        $operator = User::factory()->create(['email' => 'exploitation@convive.test']);
+        $operator = User::factory()->withTwoFactor()->create(['email' => 'exploitation@convive.test']);
 
         $this->actingAs($operator)
             ->get(route('console.organisations.show', ['organisation' => 'inconnue']))
@@ -89,7 +89,7 @@ class ConsoleAccessTest extends TestCase
     public function test_seul_un_operateur_recoit_le_lien_vers_la_console(): void
     {
         config(['convive.console.operators' => ['exploitation@convive.test']]);
-        $operator = User::factory()->create(['email' => 'exploitation@convive.test']);
+        $operator = User::factory()->withTwoFactor()->create(['email' => 'exploitation@convive.test']);
         $member = User::factory()->create(['email' => 'membre@convive.test']);
 
         $this->actingAs($operator)

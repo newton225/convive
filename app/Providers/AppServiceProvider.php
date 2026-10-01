@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\SubscriptionBillingGateway;
 use App\Contracts\WhatsAppSender;
+use App\Enums\ConsoleArea;
 use App\Http\Middleware\EnforceAbsoluteSessionLifetime;
 use App\Models\AuditEntry;
 use App\Models\ScanEvent;
@@ -14,6 +15,7 @@ use App\Policies\ReportPolicy;
 use App\Policies\ScanPolicy;
 use App\Support\AuditChain;
 use App\Support\AuditTrail;
+use App\Support\Console\ConsoleAccess;
 use App\Support\EventReport;
 use App\Support\LogWhatsAppSender;
 use App\Support\Stripe\StripeApi;
@@ -238,12 +240,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(EventReport::class, ReportPolicy::class);
         Gate::policy(AuditTrail::class, AuditPolicy::class);
 
-        // PROVISOIRE : la console d'exploitation (README section 3) s'ouvre aux adresses de
-        // `convive.console.operators` tant que les comptes editeur distincts n'existent pas.
-        Gate::define('console.access', fn (User $user) => in_array(
-            strtolower($user->email),
-            config('convive.console.operators'),
-            true,
-        ));
+        // La console d'exploitation (README section 3) : ouverte a l'equipe editeur, chaque profil
+        // n'y ouvrant que ses ecrans. `ConsoleAccess` en est la seule source de verite.
+        Gate::define('console.access', fn (User $user) => ConsoleAccess::profileOf($user) !== null);
+        Gate::define('console.area', fn (User $user, string $area) => ($zone = ConsoleArea::tryFrom($area)) !== null
+            && ConsoleAccess::allows($user, $zone));
     }
 }

@@ -30,7 +30,8 @@ type Props = {
     organisations: ConsoleOrganisationSummary[];
     // Reels, eux : les acces de support ouverts au compte connecte.
     supportGrants: ConsoleSupportGrant[];
-    supportAvailable: boolean;
+    // Null pour un profil editeur qui n'ouvre pas l'acces de support (Comptabilite).
+    supportAvailable: boolean | null;
 };
 
 const AllStatuses = 'all';
@@ -144,10 +145,12 @@ export default function Organisations({
             <Head title={t('console.organisations.title')} />
 
             <div className="flex flex-col space-y-6">
-                <SupportGrantsCard
-                    available={supportAvailable}
-                    grants={supportGrants}
-                />
+                {supportAvailable === null ? null : (
+                    <SupportGrantsCard
+                        available={supportAvailable}
+                        grants={supportGrants}
+                    />
+                )}
 
                 {isSample && <SampleBanner />}
 
