@@ -16,6 +16,7 @@ import {
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { AppVersion } from '@/components/app-version';
 import { PlanUsage } from '@/components/plan-usage';
 import { TenantSwitcher } from '@/components/tenant-switcher';
 import {
@@ -174,6 +175,7 @@ export function AppSidebar() {
             <SidebarFooter data-tour="user-menu">
                 <PlanUsage />
                 <NavUser />
+                <AppVersion />
             </SidebarFooter>
         </Sidebar>
     );

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
+import { AppVersion } from '@/components/app-version';
 import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
@@ -131,6 +132,7 @@ export function ConsoleSidebar() {
                     </SidebarMenuItem>
                 </SidebarMenu>
                 <NavUser />
+                <AppVersion />
             </SidebarFooter>
         </Sidebar>
     );

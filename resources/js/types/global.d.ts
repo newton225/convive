@@ -27,6 +27,7 @@ declare module '@inertiajs/core' {
             currentPlan: CurrentPlan | null;
             completedTours: string[];
             canAccessConsole: boolean;
+            appVersion: string | null;
             [key: string]: unknown;
         };
     }

@@ -4,6 +4,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Version de l'application
+    |--------------------------------------------------------------------------
+    |
+    | Affichee au pied du menu du back-office : c'est elle qu'un membre cite quand il
+    | signale un probleme. A faire avancer a chaque livraison, ici ou par APP_VERSION
+    | sur le serveur.
+    |
+    */
+
+    'version' => env('APP_VERSION', '0.1.0'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Double authentification exigee par le profil
     |--------------------------------------------------------------------------
     |

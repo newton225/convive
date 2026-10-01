@@ -57,6 +57,9 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            // Pour le pied du menu du back-office. Jamais a un visiteur anonyme : il n'a pas a savoir
+            // quelle version tourne.
+            'appVersion' => $user ? config('convive.version') : null,
             'auth' => [
                 'user' => $user,
             ],

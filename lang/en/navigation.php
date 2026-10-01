@@ -25,4 +25,5 @@ return [
     'profiles' => 'Profiles and permissions',
     'console' => 'Operations console',
     'support_access' => 'Support access',
+    'version' => 'Convive, version :version',
 ];
