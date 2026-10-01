@@ -2,7 +2,7 @@
 
 return [
     'title' => "Console d'exploitation",
-    'pending_action' => 'Disponible quand le serveur de la console sera construit.',
+    'pending_action' => 'Bientôt disponible : cette action n’est pas encore en service.',
     'system_actor' => 'Système',
 
     'nav' => [

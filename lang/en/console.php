@@ -2,7 +2,7 @@
 
 return [
     'title' => 'Operations console',
-    'pending_action' => 'Available once the console server is built.',
+    'pending_action' => 'Coming soon: this action is not in service yet.',
     'system_actor' => 'System',
 
     'nav' => [
