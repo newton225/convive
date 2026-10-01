@@ -290,7 +290,14 @@ return [
     // Les acces de support ouverts au compte connecte : la seule porte de l'editeur vers le
     // contenu d'une organisation.
     'support_grants' => [
-        'title' => 'Accès de support ouverts pour vous',
+        'title' => 'Accès de support',
+        'availability' => 'Apparaître dans la liste proposée aux organisations',
+        'availability_hint' => 'Décochée, aucun Propriétaire ne voit votre nom ni ne peut vous ouvrir un accès. Les accès déjà ouverts restent valables jusqu’à leur terme.',
+        'empty' => 'Aucun accès ne vous est ouvert pour le moment.',
+        'flash' => [
+            'available' => 'Vous apparaissez maintenant dans la liste proposée aux organisations.',
+            'unavailable' => 'Vous n’apparaissez plus dans la liste proposée aux organisations.',
+        ],
         'description' => 'Ces organisations vous ont ouvert leur espace en lecture seule. Chaque page que vous consultez est inscrite à leur journal.',
         'until' => 'jusqu’au :expires',
         'open' => 'Consulter',

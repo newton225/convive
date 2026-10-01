@@ -37,7 +37,7 @@ class SupportAccessTest extends TestCase
         $this->owner = User::factory()->withTwoFactor()->create();
         $this->tenant = app(CreateTenant::class)->handle($this->owner, 'Association Convive');
 
-        $this->operator = User::factory()->withTwoFactor()->create(['email' => 'support@convive.test']);
+        $this->operator = User::factory()->withTwoFactor()->create(['email' => 'support@convive.test', 'support_available' => true]);
         config(['convive.console.operators' => ['support@convive.test']]);
     }
 
@@ -137,6 +137,60 @@ class SupportAccessTest extends TestCase
         $this->open($this->owner, ['operator_id' => $outsider->id])->assertSessionHasErrors('operator_id');
 
         $this->assertSame(0, SupportAccessGrant::count());
+    }
+
+    public function test_une_personne_de_l_equipe_qui_ne_s_est_pas_rendue_visible_n_est_ni_listee_ni_choisissable(): void
+    {
+        $discreet = User::factory()->withTwoFactor()->create(['email' => 'discret@convive.test']);
+        config(['convive.console.operators' => ['support@convive.test', 'discret@convive.test']]);
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.support-access.show', $this->tenant))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('operators', 1)
+                ->where('operators.0.id', $this->operator->id),
+            );
+
+        $this->open($this->owner, ['operator_id' => $discreet->id])->assertSessionHasErrors('operator_id');
+
+        $this->assertSame(0, SupportAccessGrant::count());
+    }
+
+    public function test_chacun_choisit_d_apparaitre_ou_non_dans_la_liste(): void
+    {
+        $this->actingAs($this->operator)
+            ->put(route('console.support-availability.update'), ['available' => false])
+            ->assertRedirect(route('console.organisations.index'));
+
+        $this->assertFalse($this->operator->fresh()->support_available);
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.support-access.show', $this->tenant))
+            ->assertInertia(fn (Assert $page) => $page->where('operators', []));
+
+        $this->actingAs($this->operator)
+            ->put(route('console.support-availability.update'), ['available' => true]);
+
+        $this->assertTrue($this->operator->fresh()->support_available);
+    }
+
+    public function test_un_compte_hors_de_l_equipe_convive_ne_peut_pas_se_rendre_visible(): void
+    {
+        $this->actingAs($this->owner)
+            ->put(route('console.support-availability.update'), ['available' => true])
+            ->assertNotFound();
+
+        $this->assertFalse($this->owner->fresh()->support_available);
+    }
+
+    public function test_se_masquer_ne_ferme_pas_un_acces_deja_ouvert(): void
+    {
+        $this->grant();
+        $this->operator->forceFill(['support_available' => false])->save();
+
+        $this->actingAs($this->operator)
+            ->get(route('tenants.events.index', $this->tenant))
+            ->assertOk();
     }
 
     public function test_un_seul_acces_a_la_fois(): void

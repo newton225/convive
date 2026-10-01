@@ -290,7 +290,14 @@ return [
     // Les acces de support ouverts au compte connecte : la seule porte de l'editeur vers le
     // contenu d'une organisation.
     'support_grants' => [
-        'title' => 'Support accesses open for you',
+        'title' => 'Support access',
+        'availability' => 'Appear in the list offered to organisations',
+        'availability_hint' => 'When unchecked, no owner sees your name or can open an access for you. Accesses already open remain valid until they end.',
+        'empty' => 'No access is open for you at the moment.',
+        'flash' => [
+            'available' => 'You now appear in the list offered to organisations.',
+            'unavailable' => 'You no longer appear in the list offered to organisations.',
+        ],
         'description' => 'These organisations opened their space to you in read-only mode. Every page you view is written to their audit log.',
         'until' => 'until :expires',
         'open' => 'View',

@@ -123,7 +123,9 @@ class SupportAccessController extends Controller
     }
 
     /**
-     * Get the members of the Convive team an access can be opened to.
+     * Get the members of the Convive team an access can be opened to : ceux qui s'y sont rendus
+     * visibles (`SupportAvailabilityController`). Une organisation ne lit jamais la liste de toute
+     * l'equipe, et ne peut pas ouvrir d'acces a qui n'y figure pas.
      *
      * @return Collection<int, User>
      */
@@ -133,6 +135,6 @@ class SupportAccessController extends Controller
 
         return $emails === []
             ? new Collection
-            : User::whereIn('email', $emails)->orderBy('name')->get();
+            : User::whereIn('email', $emails)->where('support_available', true)->orderBy('name')->get();
     }
 }

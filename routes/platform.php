@@ -6,6 +6,7 @@ use App\Http\Controllers\Console\OrganisationController;
 use App\Http\Controllers\Console\PlanController;
 use App\Http\Controllers\Console\RecoveryController;
 use App\Http\Controllers\Console\ShowcaseController;
+use App\Http\Controllers\Console\SupportAvailabilityController;
 use App\Http\Controllers\Console\TeamController;
 use App\Http\Middleware\EnsureConsoleOperator;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,9 @@ Route::prefix('console')
     ->group(function () {
         Route::redirect('/', '/console/organisations')->name('home');
         Route::get('organisations', [OrganisationController::class, 'index'])->name('organisations.index');
+        // Acces du support : chacun choisit d'apparaitre ou non dans la liste proposee aux
+        // organisations.
+        Route::put('support-availability', SupportAvailabilityController::class)->name('support-availability.update');
         Route::get('organisations/{organisation}', [OrganisationController::class, 'show'])->name('organisations.show');
         Route::get('recovery', RecoveryController::class)->name('recovery');
         Route::get('plans', PlanController::class)->name('plans');

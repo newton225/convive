@@ -207,7 +207,9 @@ export default function SupportAccess({
                         <p className="text-muted-foreground">
                             {activeAccess
                                 ? t('support_access.grant.one_at_a_time')
-                                : t('support_access.grant.none_active')}
+                                : operators.length === 0
+                                  ? t('support_access.grant.no_operator')
+                                  : t('support_access.grant.none_active')}
                         </p>
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="grid gap-2">
@@ -215,7 +217,10 @@ export default function SupportAccess({
                                     {t('support_access.grant.operator')}
                                 </Label>
                                 <Select
-                                    disabled={activeAccess !== null}
+                                    disabled={
+                                        activeAccess !== null ||
+                                        operators.length === 0
+                                    }
                                     value={form.data.operator_id}
                                     onValueChange={(value) =>
                                         form.setData('operator_id', value)

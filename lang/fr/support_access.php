@@ -39,6 +39,7 @@ return [
         'none_active' => 'Aucun accès n’est ouvert en ce moment.',
         'operator' => 'Personne de l’équipe Convive',
         'operator_placeholder' => 'Choisir une personne',
+        'no_operator' => 'Personne de l’équipe Convive n’est disponible pour le moment. Écrivez au support : la personne qui vous aide se rendra disponible, et son nom apparaîtra ici.',
         'duration' => 'Durée',
         'hours' => '{1} 1 heure|[2,*] :count heures',
         'submit' => 'Ouvrir l’accès',

@@ -30,6 +30,7 @@ type Props = {
     organisations: ConsoleOrganisationSummary[];
     // Reels, eux : les acces de support ouverts au compte connecte.
     supportGrants: ConsoleSupportGrant[];
+    supportAvailable: boolean;
 };
 
 const AllStatuses = 'all';
@@ -50,6 +51,7 @@ export default function Organisations({
     isSample,
     organisations,
     supportGrants,
+    supportAvailable,
 }: Props) {
     const { t, locale } = useTranslation();
     const [search, setSearch] = useState('');
@@ -142,7 +144,10 @@ export default function Organisations({
             <Head title={t('console.organisations.title')} />
 
             <div className="flex flex-col space-y-6">
-                <SupportGrantsCard grants={supportGrants} />
+                <SupportGrantsCard
+                    available={supportAvailable}
+                    grants={supportGrants}
+                />
 
                 {isSample && <SampleBanner />}
 

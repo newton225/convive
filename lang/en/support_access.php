@@ -39,6 +39,7 @@ return [
         'none_active' => 'No access is open right now.',
         'operator' => 'Person of the Convive team',
         'operator_placeholder' => 'Choose a person',
+        'no_operator' => 'Nobody from the Convive team is available at the moment. Write to support: the person helping you will make themselves available, and their name will appear here.',
         'duration' => 'Duration',
         'hours' => '{1} 1 hour|[2,*] :count hours',
         'submit' => 'Open the access',

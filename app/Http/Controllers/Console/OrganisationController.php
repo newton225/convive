@@ -26,6 +26,8 @@ class OrganisationController extends Controller
             'organisations' => ConsoleSampleData::organisations(),
             // Reels, eux : les acces de support ouverts au compte connecte (README section 3), sa
             // seule porte vers le contenu d'une organisation.
+            // Chacun decide d'apparaitre ou non dans la liste proposee aux organisations.
+            'supportAvailable' => $request->user()->support_available,
             'supportGrants' => SupportAccessGrant::where('operator_id', $request->user()->id)
                 ->active()
                 ->with('tenant')

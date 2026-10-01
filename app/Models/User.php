@@ -39,6 +39,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property Carbon|null $updated_at
  * @property array{salt: string, hash: string, iterations: int}|null $scan_pin_verifier
  * @property array<int, string>|null $completed_tours
+ * @property bool $support_available
  * @property-read Tenant|null $currentTenant
  * @property-read Collection<int, Membership> $tenantMemberships
  * @property-read Collection<int, Tenant> $tenants
@@ -110,6 +111,7 @@ class User extends Authenticatable implements PasskeyUser
             'two_factor_confirmed_at' => 'datetime',
             'scan_pin_verifier' => 'array',
             'completed_tours' => 'array',
+            'support_available' => 'boolean',
         ];
     }
 
