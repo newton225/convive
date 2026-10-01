@@ -31,6 +31,14 @@ class ExtendOrganisationTrialRequest extends FormRequest
     /**
      * @return array<string, string>
      */
+    public function messages(): array
+    {
+        return ['ends_at.after' => __('console.organisation.errors.trial_date_past')];
+    }
+
+    /**
+     * @return array<string, string>
+     */
     public function attributes(): array
     {
         return ['ends_at' => __('console.organisation.fields.trial_ends_at')];

@@ -139,6 +139,7 @@ return [
             'not_suspended_by_editor' => 'Cette organisation n’a pas été suspendue depuis la console : il n’y a rien à lever ici.',
             'same_plan' => 'L’organisation est déjà sur ce plan.',
             'trial_has_subscription' => 'Cette organisation a un abonnement, qui l’emporte sur l’essai : il n’y a rien à offrir.',
+            'trial_date_past' => 'Choisissez une date de fin à venir, ou laissez le champ vide pour un essai sans fin.',
             'plan_paid_online' => 'Cet abonnement est réglé en ligne : changer le plan ici laisserait le prestataire facturer l’ancien prix. Le changement se fait depuis l’écran Abonnement de l’organisation.',
             'usage_unreadable' => 'La consommation de l’organisation ne peut pas être lue (base absente ?). Réparez sa base depuis la santé technique, puis réessayez.',
             'downgrade_refused' => 'Le passage au plan :plan est refusé tant que la consommation dépasse ses quotas : :quotas.',

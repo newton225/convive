@@ -139,6 +139,7 @@ return [
             'not_suspended_by_editor' => 'This organisation was not suspended from the console: there is nothing to lift here.',
             'same_plan' => 'The organisation is already on this plan.',
             'trial_has_subscription' => 'This organisation has a subscription, which takes precedence over the trial: there is nothing to offer.',
+            'trial_date_past' => 'Choose an end date in the future, or leave the field empty for a trial with no end.',
             'plan_paid_online' => 'This subscription is paid online: changing the plan here would leave the provider billing the old price. The change is made from the organisation’s Subscription screen.',
             'usage_unreadable' => 'The usage of the organisation cannot be read (missing database?). Repair its database from the technical health screen, then try again.',
             'downgrade_refused' => 'Moving to the :plan plan is refused while usage exceeds its quotas: :quotas.',
