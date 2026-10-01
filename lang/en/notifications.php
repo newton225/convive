@@ -21,6 +21,7 @@ return [
         'ticket_refused' => 'A ticket was refused at the entrance of :event.',
         'large_export' => ':name exported :count registrations of :event (:format).',
         'message_quota_reached' => 'The :plan plan sending quota is reached (:count messages this month): cards and reminders to guests will resume next month, or as soon as the plan changes.',
+        'plan_limits_lowered' => 'The limits of the :plan plan have been lowered and your organisation exceeds at least one of them. Nothing is closed or removed, but you can no longer publish an event, take a new registration or invite a member beyond the limit. Your usage is on the Subscription screen.',
     ],
 
     'preferences' => [
@@ -40,6 +41,7 @@ return [
             'ticket_refused' => 'Ticket refused at the entrance',
             'large_export' => 'Large export of the registration base',
             'message_quota_reached' => 'Sending quota reached',
+            'plan_limits_lowered' => 'Plan limits lowered',
         ],
         'channels' => [
             'app' => 'In the app',

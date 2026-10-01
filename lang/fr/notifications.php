@@ -21,6 +21,7 @@ return [
         'ticket_refused' => 'Un billet a été refusé à l\'entrée de :event.',
         'large_export' => ':name a exporté :count inscrits de :event (:format).',
         'message_quota_reached' => 'Le quota d\'envois du plan :plan est atteint (:count messages ce mois-ci) : les cartes et rappels aux invités reprendront le mois prochain, ou dès un changement de plan.',
+        'plan_limits_lowered' => 'Les limites du plan :plan ont été abaissées et votre organisation en dépasse au moins une. Rien n’est fermé ni supprimé, mais vous ne pourrez plus publier d’événement, accueillir de nouvelle inscription ou inviter de membre au-delà de la limite. Votre consommation est sur l’écran Abonnement.',
     ],
 
     'preferences' => [
@@ -40,6 +41,7 @@ return [
             'ticket_refused' => 'Billet refusé à l\'entrée',
             'large_export' => 'Export volumineux de la base d\'inscrits',
             'message_quota_reached' => 'Quota d\'envois atteint',
+            'plan_limits_lowered' => 'Limites du plan abaissées',
         ],
         'channels' => [
             'app' => 'Dans l\'application',

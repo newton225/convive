@@ -5,6 +5,7 @@ import {
     FileDown,
     FileCheck,
     FileX,
+    Gauge,
     MessageSquareWarning,
     ShieldAlert,
     Trash2,
@@ -29,6 +30,7 @@ const icons: Record<string, LucideIcon> = {
     ticket_refused: ShieldAlert,
     large_export: FileDown,
     message_quota_reached: MessageSquareWarning,
+    plan_limits_lowered: Gauge,
 };
 
 export function notificationIcon(type: string | null): LucideIcon {

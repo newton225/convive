@@ -234,7 +234,7 @@ return [
             'prices' => 'What the plan costs per month',
             'prices_hint' => 'Enter 0 for a free plan. Leave empty if the price is negotiated case by case, or if the plan is not sold in this currency.',
             'quotas' => 'What the plan allows at most',
-            'quotas_hint' => 'Leave empty to set no limit. If you lower a limit, it applies at once to the organisations on this plan.',
+            'quotas_hint' => 'Leave empty to set no limit. If you lower a limit, it applies at once: organisations above it keep what they already have, cannot go further, and receive an alert.',
             'quota_help' => [
                 'max_active_events' => 'Active events: how many events an organisation can have open at the same time.',
                 'max_registrations' => 'Registrations: how many people can register, across all open events.',

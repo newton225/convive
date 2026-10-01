@@ -234,7 +234,7 @@ return [
             'prices' => 'Ce que le plan coûte par mois',
             'prices_hint' => 'Mettez 0 pour un plan gratuit. Laissez vide si le prix se négocie au cas par cas, ou si le plan ne se vend pas dans cette monnaie.',
             'quotas' => 'Ce que le plan autorise au maximum',
-            'quotas_hint' => 'Laissez vide pour ne mettre aucune limite. Si vous baissez une limite, elle s’applique tout de suite aux organisations qui ont ce plan.',
+            'quotas_hint' => 'Laissez vide pour ne mettre aucune limite. Si vous baissez une limite, elle s’applique tout de suite : les organisations qui la dépassent gardent ce qu’elles ont déjà, ne peuvent plus aller au-delà, et reçoivent une alerte.',
             'quota_help' => [
                 'max_active_events' => 'Événements actifs : combien d’événements une organisation peut avoir ouverts en même temps.',
                 'max_registrations' => 'Inscrits : combien de personnes peuvent s’inscrire, tous événements ouverts confondus.',

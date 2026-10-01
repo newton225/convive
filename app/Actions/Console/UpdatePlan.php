@@ -2,6 +2,7 @@
 
 namespace App\Actions\Console;
 
+use App\Jobs\AlertOrganisationsOverPlanLimits;
 use App\Models\Plan;
 use App\Models\User;
 use App\Support\Console\ConsoleJournal;
@@ -27,6 +28,13 @@ class UpdatePlan
     ];
 
     /**
+     * Les limites du plan, celles dont une baisse peut bloquer une organisation.
+     *
+     * @var array<int, string>
+     */
+    private const Quotas = ['max_active_events', 'max_registrations', 'max_members'];
+
+    /**
      * @param  array<string, mixed>  $attributes
      */
     public function handle(Plan $plan, array $attributes, User $actor): Plan
@@ -45,7 +53,31 @@ class UpdatePlan
                 ]);
             }
 
+            // Une limite abaissee s'applique tout de suite : les organisations du plan qui la
+            // depassent sont prevenues, une fois la modification enregistree.
+            $lowered = $this->loweredQuotas($before, $plan);
+
+            if ($lowered !== []) {
+                AlertOrganisationsOverPlanLimits::dispatch($plan->id, $lowered)->afterCommit();
+            }
+
             return $plan;
         });
+    }
+
+    /**
+     * Get the quotas that became stricter : une limite posee la ou il n'y en avait pas, ou une
+     * limite plus basse qu'avant.
+     *
+     * @param  array<string, mixed>  $before
+     * @return array<int, string>
+     */
+    private function loweredQuotas(array $before, Plan $plan): array
+    {
+        return array_values(array_filter(self::Quotas, function (string $quota) use ($before, $plan) {
+            $after = $plan->getAttribute($quota);
+
+            return $after !== null && ($before[$quota] === null || $after < $before[$quota]);
+        }));
     }
 }
