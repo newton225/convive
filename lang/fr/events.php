@@ -102,6 +102,7 @@ return [
         'copy_link' => 'Copier le lien',
         'proofs' => 'Preuves',
         'seating' => 'Plan de salle',
+        'ticket_template' => 'Gabarit du billet',
         'scan' => 'Scan',
         'registrations' => 'Base d\'inscrits',
         'report' => 'Rapport',
@@ -187,7 +188,7 @@ return [
 
     'confirm_publish' => [
         'title' => "Publier l'événement ?",
-        'description' => "Relisez ce que les invités vont voir : une fois le lien distribué, une erreur se corrige moins facilement.",
+        'description' => 'Relisez ce que les invités vont voir : une fois le lien distribué, une erreur se corrige moins facilement.',
         'summary' => 'Ce que verront les invités',
         'capacity' => 'Capacité',
         'seats' => '{0} Aucune place|{1} 1 place|[2,*] :count places',

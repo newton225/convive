@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Tenant;
 use App\Models\TenantBranding;
 use App\Models\Ticket;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * Les donnees d'un billet au format talon (README ecran 7 et 15), une seule source pour toutes ses
@@ -32,7 +33,9 @@ class TicketCard
             'seats' => $ticket->isCompanion() ? 1 : $ticket->registration->party_size,
             // La liste suit le gabarit ; la personne qui invite, jamais : c'est ce qui rattache un
             // accompagnateur a son groupe a l'entree.
-            'companions' => $branding->ticket_element_companions ? $ticket->companionsOfHolder() : [],
+            'companions' => $ticket->registration->event->ticketTemplate($branding)['elements']['companions']
+                ? $ticket->companionsOfHolder()
+                : [],
             'host' => $ticket->host(),
         ];
     }
@@ -64,8 +67,7 @@ class TicketCard
             $branding,
             $event,
             fn (BrandFile $file) => $branding->brandFileUrl($file),
-            $branding->ticketBackgroundUrl(),
-            $branding->ticketBodyBackgroundUrl(),
+            fn (Media $media, string $conversion) => $media->getTemporaryUrl(now()->addMinutes(30), $conversion),
         );
     }
 
@@ -83,8 +85,7 @@ class TicketCard
             $branding,
             $event,
             fn (BrandFile $file) => PdfLetterhead::brandFileDataUri($branding, $file),
-            PdfLetterhead::brandFileDataUri($branding, BrandFile::TicketBackground, BrandFile::TicketBackgroundConversion),
-            PdfLetterhead::brandFileDataUri($branding, BrandFile::TicketBodyBackground, BrandFile::TicketBodyBackgroundConversion),
+            fn (Media $media, string $conversion) => PdfLetterhead::mediaDataUri($media, $conversion),
         );
 
         // Les teintes que le composant obtient par opacite (`bg-[color:var(--brand-primary)]/8`),
@@ -117,29 +118,34 @@ class TicketCard
 
     /**
      * @param  callable(BrandFile): (string|null)  $file
-     * @param  string|null  $background  the ticket background, already cropped for the stub
-     * @param  string|null  $bodyBackground  the background of the lower part, already cropped for it
+     * @param  callable(Media, string): (string|null)  $background  the address of a cropped ticket background
      * @return array{model: string, elements: array{logo: bool, stamp: bool, signature: bool, companions: bool}, brand: array{displayName: string, colors: array{primary: string, secondary: string}, logoUrl: string|null, stampUrl: string|null, signatureUrl: string|null, backgroundUrl: string|null, bodyBackgroundUrl: string|null}}
      */
-    private static function designWith(Tenant $tenant, TenantBranding $branding, Event $event, callable $file, ?string $background, ?string $bodyBackground): array
+    private static function designWith(Tenant $tenant, TenantBranding $branding, Event $event, callable $file, callable $background): array
     {
+        // Le gabarit de l'evenement s'il en a active un, celui de l'organisation sinon.
+        $template = $event->ticketTemplate($branding);
+        $elements = $template['elements'];
+
+        $backgroundOf = function (BrandFile $backgroundFile) use ($event, $branding, $background): ?string {
+            $media = $event->ticketBackgroundMedia($backgroundFile, $branding);
+            $conversion = $backgroundFile->conversion();
+
+            return $media !== null && $conversion !== null ? $background($media, $conversion) : null;
+        };
+
         return [
-            'model' => $branding->ticket_model->value,
-            'elements' => [
-                'logo' => $branding->ticket_element_logo,
-                'stamp' => $branding->ticket_element_stamp,
-                'signature' => $branding->ticket_element_signature,
-                'companions' => $branding->ticket_element_companions,
-            ],
+            'model' => $template['model']->value,
+            'elements' => $elements,
             'brand' => [
                 'displayName' => $branding->display_name ?? $tenant->name,
                 // Couleurs de l'evenement si elles sont posees, de l'organisation sinon.
                 'colors' => $event->colors(),
-                'logoUrl' => $branding->ticket_element_logo ? $file(BrandFile::Logo) : null,
-                'stampUrl' => $branding->ticket_element_stamp ? $file(BrandFile::Stamp) : null,
-                'signatureUrl' => $branding->ticket_element_signature ? $file(BrandFile::Signature) : null,
-                'backgroundUrl' => $background,
-                'bodyBackgroundUrl' => $bodyBackground,
+                'logoUrl' => $elements['logo'] ? $file(BrandFile::Logo) : null,
+                'stampUrl' => $elements['stamp'] ? $file(BrandFile::Stamp) : null,
+                'signatureUrl' => $elements['signature'] ? $file(BrandFile::Signature) : null,
+                'backgroundUrl' => $backgroundOf(BrandFile::TicketBackground),
+                'bodyBackgroundUrl' => $backgroundOf(BrandFile::TicketBodyBackground),
             ],
         ];
     }

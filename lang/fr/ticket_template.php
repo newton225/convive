@@ -47,4 +47,18 @@ return [
     'flash' => [
         'updated' => 'Gabarit du billet mis à jour.',
     ],
+
+    // Le gabarit propre a un evenement : active, il l'emporte sur celui de l'organisation.
+    'event' => [
+        'title' => 'Gabarit du billet de l’événement',
+        'description' => 'Donnez à :event un billet différent de celui de votre organisation.',
+        'enable' => 'Utiliser un gabarit propre à cet événement',
+        'enable_hint' => 'Activé, ce gabarit l’emporte sur celui de l’organisation pour les billets de cet événement. Désactivé, celui de l’organisation s’applique.',
+        'organisation_applies' => 'Le gabarit de l’organisation s’applique à cet événement : il s’affiche ici tel quel.',
+        'organisation_link' => 'Modifier le gabarit de l’organisation',
+        'save_first' => 'Enregistrez pour déposer des fonds propres à cet événement.',
+        'background_fallback' => 'Sans image propre à cet événement, celle de l’organisation s’applique.',
+        'remove_confirm' => 'Le fond de l’organisation s’appliquera de nouveau à cet événement. Pour remettre celui-ci, il faudra le déposer à nouveau.',
+        'global_note' => 'Un événement peut avoir son propre gabarit, depuis son menu « Gabarit du billet ».',
+    ],
 ];

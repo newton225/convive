@@ -3,6 +3,7 @@
 namespace App\Actions\Events;
 
 use App\Actions\Seating\SyncSeatingTables;
+use App\Enums\BrandFile;
 use App\Enums\EventStatus;
 use App\Models\Event;
 use App\Models\SeatingTable;
@@ -312,13 +313,104 @@ class SaveEvent
         return $event;
     }
 
-    private function reencode(UploadedFile $upload): string
+    /**
+     * Save the event's own ticket template (README ecran 15). Desactive, il rend la main a celui
+     * de l'organisation sans effacer ce qui avait ete regle.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public function ticketTemplate(Event $event, array $attributes): Event
+    {
+        return DB::transaction(function () use ($event, $attributes) {
+            $before = $this->ticketTemplateSnapshot($event);
+
+            $event->fill($attributes);
+            $event->save();
+
+            activity()
+                ->performedOn($event)
+                ->event('updated')
+                ->withProperties([
+                    'old' => $before,
+                    'attributes' => $this->ticketTemplateSnapshot($event),
+                ])
+                ->log('event.ticket_template_updated');
+
+            return $event;
+        });
+    }
+
+    /**
+     * Store one of the event's own ticket backgrounds, replacing whatever was there before.
+     * `$crop` is the area the operator framed, in pixels of the upright image.
+     *
+     * @param  array{x: int, y: int, width: int, height: int}|null  $crop
+     */
+    public function ticketBackground(Event $event, BrandFile $file, UploadedFile $upload, ?array $crop = null): Event
+    {
+        $event->addMedia($this->reencode($upload, $crop))
+            ->usingFileName(Str::uuid()->toString().'.'.$this->extension($upload))
+            ->usingName($file->value)
+            ->toMediaCollection($file->value);
+
+        activity()
+            ->performedOn($event)
+            ->event('updated')
+            ->withProperties(['file' => $file->value])
+            ->log('event.ticket_background_updated');
+
+        return $event;
+    }
+
+    /**
+     * Remove one of the event's own ticket backgrounds : the organisation's applies again.
+     */
+    public function removeTicketBackground(Event $event, BrandFile $file): Event
+    {
+        $event->clearMediaCollection($file->value);
+
+        activity()
+            ->performedOn($event)
+            ->event('updated')
+            ->withProperties(['file' => $file->value])
+            ->log('event.ticket_background_deleted');
+
+        return $event;
+    }
+
+    /**
+     * @param  array{x: int, y: int, width: int, height: int}|null  $crop
+     */
+    private function reencode(UploadedFile $upload, ?array $crop = null): string
     {
         $destination = tempnam(sys_get_temp_dir(), 'event').'.'.$this->extension($upload);
 
-        Image::load($upload->getRealPath())->save($destination);
+        $image = Image::load($upload->getRealPath());
+
+        if ($crop !== null) {
+            // Redressee d'abord : la zone a ete choisie sur l'image telle que le navigateur
+            // l'affiche (voir `SaveTenantBrandFile::reencode()`).
+            $image->orientation()->manualCrop($crop['width'], $crop['height'], $crop['x'], $crop['y']);
+        }
+
+        $image->save($destination);
 
         return $destination;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function ticketTemplateSnapshot(Event $event): array
+    {
+        return [
+            'ticket_template_enabled' => $event->ticket_template_enabled,
+            'ticket_model' => $event->ticket_model?->value,
+            'ticket_element_logo' => $event->ticket_element_logo,
+            'ticket_element_stamp' => $event->ticket_element_stamp,
+            'ticket_element_signature' => $event->ticket_element_signature,
+            'ticket_element_companions' => $event->ticket_element_companions,
+        ];
     }
 
     private function extension(UploadedFile $upload): string

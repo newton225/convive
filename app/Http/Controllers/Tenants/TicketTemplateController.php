@@ -38,11 +38,9 @@ class TicketTemplateController extends Controller
             'brand' => $this->brand($tenant, $branding),
             // Les fonds du billet se deposent ici, par la meme route et les memes controles que les
             // fichiers de marque de l'organisation.
-            'backgroundFile' => $this->fileOption(BrandFile::TicketBackground),
-            'bodyBackgroundFile' => $this->fileOption(BrandFile::TicketBodyBackground),
-            // Le QR de l'apercu, rendu comme celui d'un vrai billet et aussi dense, mais non signe :
-            // un scan le refuse.
-            'sampleQrImage' => TicketQrCode::dataUri(str_repeat('convive-apercu-', 17)),
+            'backgroundFile' => BrandFile::TicketBackground->toOption(),
+            'bodyBackgroundFile' => BrandFile::TicketBodyBackground->toOption(),
+            'sampleQrImage' => TicketQrCode::sample(),
             'model' => $branding->ticket_model->value,
             'elements' => [
                 'logo' => $branding->ticket_element_logo,
@@ -80,20 +78,6 @@ class TicketTemplateController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => __('ticket_template.flash.updated')]);
 
         return to_route('tenants.ticket-template.edit', $tenant);
-    }
-
-    /**
-     * @return array{value: string, label: string, hint: string, crop: array{width: int, height: int}|null}
-     */
-    private function fileOption(BrandFile $file): array
-    {
-        return [
-            'value' => $file->value,
-            'label' => $file->label(),
-            'hint' => $file->hint(),
-            // Les proportions de la partie du talon couverte, que le rognage impose avant l'envoi.
-            'crop' => $file->crop(),
-        ];
     }
 
     /**

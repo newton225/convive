@@ -20,6 +20,11 @@ type Props = {
     // Repere affiche sur la zone de rognage, quand ce fichier en impose un.
     cropGuide?: ReactNode;
     cropGuideHint?: string;
+    // Ou deposer et retirer le fichier, quand ce n'est pas un fichier de l'organisation (fond du
+    // billet propre a un evenement).
+    urls?: { store: string; destroy: string };
+    // La consequence du retrait, quand elle differe de celle d'un fichier de l'organisation.
+    removalDescription?: string;
 };
 
 export default function BrandFileField({
@@ -29,6 +34,8 @@ export default function BrandFileField({
     error,
     cropGuide,
     cropGuideHint,
+    urls,
+    removalDescription,
 }: Props) {
     const { t } = useTranslation();
     const input = useRef<HTMLInputElement>(null);
@@ -45,7 +52,7 @@ export default function BrandFileField({
 
     const send = (chosen: File, crop?: CropArea) => {
         router.post(
-            store([tenantSlug, file.value]).url,
+            urls?.store ?? store([tenantSlug, file.value]).url,
             crop ? { file: chosen, crop } : { file: chosen },
             {
                 forceFormData: true,
@@ -60,7 +67,7 @@ export default function BrandFileField({
     };
 
     const remove = () => {
-        router.delete(destroy([tenantSlug, file.value]).url, {
+        router.delete(urls?.destroy ?? destroy([tenantSlug, file.value]).url, {
             onStart: () => setProcessing(true),
             onSuccess: () => setConfirmingRemoval(false),
             onFinish: () => setProcessing(false),
@@ -147,7 +154,10 @@ export default function BrandFileField({
                 title={t('organisation.files.remove_confirm.title', {
                     label: file.label,
                 })}
-                description={t('organisation.files.remove_confirm.description')}
+                description={
+                    removalDescription ??
+                    t('organisation.files.remove_confirm.description')
+                }
                 confirmLabel={t('organisation.files.remove_confirm.confirm')}
                 onConfirm={remove}
                 processing={processing}

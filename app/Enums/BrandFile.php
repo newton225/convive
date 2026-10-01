@@ -90,6 +90,22 @@ enum BrandFile: string
     }
 
     /**
+     * Get what a deposit field needs to know about this file.
+     *
+     * @return array{value: string, label: string, hint: string, crop: array{width: int, height: int}|null}
+     */
+    public function toOption(): array
+    {
+        return [
+            'value' => $this->value,
+            'label' => $this->label(),
+            'hint' => $this->hint(),
+            // Les proportions de la partie du talon couverte, que le rognage impose avant l'envoi.
+            'crop' => $this->crop(),
+        ];
+    }
+
+    /**
      * Get the files edited on the organisation form (README ecran 14).
      *
      * @return array<int, self>
@@ -97,6 +113,16 @@ enum BrandFile: string
     public static function organisationCases(): array
     {
         return [self::Logo, self::Banner, self::Stamp, self::Signature];
+    }
+
+    /**
+     * Get the ticket backgrounds, the files an event may also carry for its own template.
+     *
+     * @return array<int, self>
+     */
+    public static function ticketBackgrounds(): array
+    {
+        return [self::TicketBackground, self::TicketBodyBackground];
     }
 
     /**

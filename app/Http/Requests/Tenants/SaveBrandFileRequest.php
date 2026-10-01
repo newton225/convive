@@ -140,7 +140,7 @@ class SaveBrandFileRequest extends FormRequest
         return is_string($file) ? BrandFile::tryFrom($file)?->crop() : null;
     }
 
-    private function tenant(): Tenant
+    protected function tenant(): Tenant
     {
         $tenant = $this->route('tenant');
 

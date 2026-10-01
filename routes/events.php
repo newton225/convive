@@ -3,6 +3,7 @@
 use App\Http\Controllers\Events\EntryControlController;
 use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Events\EventSettingsController;
+use App\Http\Controllers\Events\EventTicketTemplateController;
 use App\Http\Controllers\Events\PaymentProofController;
 use App\Http\Controllers\Events\ReconciliationController;
 use App\Http\Controllers\Events\RegistrationCardController;
@@ -50,6 +51,13 @@ Route::prefix('{tenant}')
         // l'organisation.
         Route::post('events/{event}/visual', [EventController::class, 'storeVisual'])->name('tenants.events.visual.store');
         Route::delete('events/{event}/visual', [EventController::class, 'destroyVisual'])->name('tenants.events.visual.destroy');
+
+        // Le gabarit du billet propre a l'evenement (README ecran 15) : active, il l'emporte sur
+        // celui de l'organisation. Ses fonds se deposent comme ceux de l'organisation.
+        Route::get('events/{event}/ticket-template', [EventTicketTemplateController::class, 'edit'])->name('tenants.events.ticket-template.edit');
+        Route::patch('events/{event}/ticket-template', [EventTicketTemplateController::class, 'update'])->name('tenants.events.ticket-template.update');
+        Route::post('events/{event}/ticket-template/files/{file}', [EventTicketTemplateController::class, 'storeFile'])->name('tenants.events.ticket-template.files.store');
+        Route::delete('events/{event}/ticket-template/files/{file}', [EventTicketTemplateController::class, 'destroyFile'])->name('tenants.events.ticket-template.files.destroy');
 
         // La file de verification des preuves (README ecran 18), etape 6.
         Route::get('events/{event}/proofs', [PaymentProofController::class, 'index'])->name('tenants.events.proofs.index');

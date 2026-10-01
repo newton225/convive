@@ -47,4 +47,18 @@ return [
     'flash' => [
         'updated' => 'Ticket template updated.',
     ],
+
+    // The template of a single event: when enabled, it takes precedence over the organisation's.
+    'event' => [
+        'title' => 'Event ticket template',
+        'description' => 'Give :event a ticket that differs from your organisation’s.',
+        'enable' => 'Use a template specific to this event',
+        'enable_hint' => 'When enabled, this template takes precedence over the organisation’s for this event’s tickets. When disabled, the organisation’s applies.',
+        'organisation_applies' => 'The organisation’s template applies to this event: it is shown here as is.',
+        'organisation_link' => 'Edit the organisation’s template',
+        'save_first' => 'Save to upload backgrounds specific to this event.',
+        'background_fallback' => 'Without an image specific to this event, the organisation’s applies.',
+        'remove_confirm' => 'The organisation’s background will apply to this event again. To bring this one back, you will have to upload it again.',
+        'global_note' => 'An event can have its own template, from its “Ticket template” menu.',
+    ],
 ];

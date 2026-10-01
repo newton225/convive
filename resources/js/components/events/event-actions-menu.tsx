@@ -21,6 +21,7 @@ import { show as reportShow } from '@/routes/tenants/events/report';
 import { index as scanIndex } from '@/routes/tenants/events/scan';
 import { index as seatingIndex } from '@/routes/tenants/events/seating';
 import { edit as settingsEdit } from '@/routes/tenants/events/settings';
+import { edit as ticketTemplateEdit } from '@/routes/tenants/events/ticket-template';
 import type { EventListItem, TenantPermissions } from '@/types';
 
 type Props = {
@@ -100,6 +101,11 @@ export function EventActionsMenu({
             href: settingsEdit(target).url,
             label: t('events.settings.link'),
             test: 'event-settings',
+        },
+        allowed(Permission.EventsUpdate) && {
+            href: ticketTemplateEdit(target).url,
+            label: t('events.actions.ticket_template'),
+            test: 'event-ticket-template',
         },
     ].filter((item) => item !== false);
 

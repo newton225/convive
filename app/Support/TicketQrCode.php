@@ -31,6 +31,15 @@ class TicketQrCode
     private const MarginModules = 2;
 
     /**
+     * Render the QR code shown in a ticket template preview : the look and density of a real
+     * ticket, but unsigned, so a scan refuses it.
+     */
+    public static function sample(): string
+    {
+        return self::dataUri(str_repeat('convive-apercu-', 17));
+    }
+
+    /**
      * Render the given signed token as a QR code, returned as a data URI ready for an <img> tag.
      */
     public static function dataUri(string $token): string

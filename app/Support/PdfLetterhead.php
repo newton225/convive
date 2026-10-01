@@ -69,6 +69,14 @@ class PdfLetterhead
         return self::dataUri($media, $conversion);
     }
 
+    /**
+     * Get a stored image (or one of its generated versions) embedded as a `data:` URI.
+     */
+    public static function mediaDataUri(Media $media, string $conversion = ''): ?string
+    {
+        return self::dataUri($media, $conversion);
+    }
+
     private static function dataUri(?Media $media, string $conversion = ''): ?string
     {
         if (! $media instanceof Media) {

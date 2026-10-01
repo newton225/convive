@@ -102,6 +102,7 @@ return [
         'copy_link' => 'Copy the link',
         'proofs' => 'Proofs',
         'seating' => 'Seating plan',
+        'ticket_template' => 'Ticket template',
         'scan' => 'Scan',
         'registrations' => 'Registrations',
         'report' => 'Report',

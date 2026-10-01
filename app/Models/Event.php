@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\BrandFile;
 use App\Enums\EventStatus;
 use App\Enums\RefundStatus;
 use App\Enums\RegistrationStatus;
+use App\Enums\TicketModel;
 use Carbon\CarbonImmutable;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -17,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -61,6 +64,12 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property bool $rule_temporary_hold
  * @property bool $rule_phone_verification
  * @property bool $rule_show_remaining_seats
+ * @property bool $ticket_template_enabled
+ * @property TicketModel|null $ticket_model
+ * @property bool $ticket_element_logo
+ * @property bool $ticket_element_stamp
+ * @property bool $ticket_element_signature
+ * @property bool $ticket_element_companions
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  * @property CarbonImmutable|null $deleted_at
@@ -75,6 +84,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
     'rule_scheduled_send', 'rule_auto_seating', 'rule_allow_without_proof',
     'rule_proof_legibility', 'rule_purge_on_exhaustion', 'rule_temporary_hold', 'rule_phone_verification',
     'rule_show_remaining_seats',
+    'ticket_template_enabled', 'ticket_model', 'ticket_element_logo', 'ticket_element_stamp',
+    'ticket_element_signature', 'ticket_element_companions',
 ])]
 #[Hidden(['qr_secret_key'])]
 class Event extends Model implements HasMedia
@@ -127,6 +138,83 @@ class Event extends Model implements HasMedia
         $this->addMediaCollection(self::VisualCollection)
             ->singleFile()
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+
+        // Les fonds du billet propres a l'evenement, sous les memes noms que ceux de l'organisation.
+        foreach (BrandFile::ticketBackgrounds() as $file) {
+            $this->addMediaCollection($file->value)
+                ->singleFile()
+                ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+        }
+    }
+
+    /**
+     * Les fonds du billet sont recadres des le depot, comme ceux de l'organisation (voir
+     * `TenantBranding::registerMediaConversions()`).
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        foreach (BrandFile::ticketBackgrounds() as $file) {
+            $crop = $file->crop();
+            $conversion = $file->conversion();
+
+            if ($crop === null || $conversion === null) {
+                continue;
+            }
+
+            $this->addMediaConversion($conversion)
+                ->performOnCollections($file->value)
+                ->nonQueued()
+                ->fit(Fit::Crop, $crop['width'], $crop['height']);
+        }
+    }
+
+    /**
+     * Get the ticket template that applies to this event : its own when it is enabled, the
+     * organisation's otherwise (README ecran 15).
+     *
+     * @return array{model: TicketModel, elements: array{logo: bool, stamp: bool, signature: bool, companions: bool}}
+     */
+    public function ticketTemplate(TenantBranding $branding): array
+    {
+        $source = $this->ticket_template_enabled ? $this : $branding;
+
+        return [
+            'model' => $source->ticket_model ?? $branding->ticket_model,
+            'elements' => [
+                'logo' => $source->ticket_element_logo,
+                'stamp' => $source->ticket_element_stamp,
+                'signature' => $source->ticket_element_signature,
+                'companions' => $source->ticket_element_companions,
+            ],
+        ];
+    }
+
+    /**
+     * Get the cropped ticket background that applies to this event : its own when its template
+     * is enabled and it has one, the organisation's otherwise. Null without any.
+     */
+    public function ticketBackgroundMedia(BrandFile $file, TenantBranding $branding): ?Media
+    {
+        $conversion = $file->conversion();
+        $own = $this->ticket_template_enabled ? $this->getFirstMedia($file->value) : null;
+        $media = $own ?? $branding->getFirstMedia($file->value);
+
+        return $media instanceof Media && $conversion !== null && $media->hasGeneratedConversion($conversion)
+            ? $media
+            : null;
+    }
+
+    /**
+     * Get a signed, expiring URL for this event's own ticket background, cropped, or null.
+     */
+    public function ownTicketBackgroundUrl(BrandFile $file, int $minutes = 30): ?string
+    {
+        $media = $this->getFirstMedia($file->value);
+        $conversion = $file->conversion();
+
+        return $media instanceof Media && $conversion !== null && $media->hasGeneratedConversion($conversion)
+            ? $media->getTemporaryUrl(now()->addMinutes($minutes), $conversion)
+            : null;
     }
 
     /**
@@ -535,6 +623,12 @@ class Event extends Model implements HasMedia
             'rule_temporary_hold' => 'boolean',
             'rule_phone_verification' => 'boolean',
             'rule_show_remaining_seats' => 'boolean',
+            'ticket_template_enabled' => 'boolean',
+            'ticket_model' => TicketModel::class,
+            'ticket_element_logo' => 'boolean',
+            'ticket_element_stamp' => 'boolean',
+            'ticket_element_signature' => 'boolean',
+            'ticket_element_companions' => 'boolean',
         ];
     }
 }
