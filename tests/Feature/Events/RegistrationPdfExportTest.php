@@ -61,6 +61,22 @@ class RegistrationPdfExportTest extends TestCase
             && $this->namesSentToView($pdf) === ['Aya Kouassi']);
     }
 
+    public function test_le_fichier_des_listes_de_controle_porte_le_nom_de_l_evenement(): void
+    {
+        Pdf::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $tenant->asCurrent(fn () => $event->update(['name' => 'Dîner de Noël de l\'Association']));
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.registrations.export.checklists', [$tenant, $event]))
+            ->assertOk();
+
+        Pdf::assertRespondedWithPdf(fn (PdfBuilder $pdf) => $pdf->downloadName === 'listes-de-controle-diner-de-noel-de-lassociation.pdf');
+    }
+
     public function test_l_export_pdf_reprend_le_filtre_actif_de_l_ecran(): void
     {
         Pdf::fake();

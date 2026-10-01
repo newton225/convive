@@ -12,6 +12,7 @@ use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
@@ -273,7 +274,7 @@ class RegistrationControllerTest extends TestCase
             ->assertOk();
 
         Excel::assertDownloaded(
-            "inscrits-{$event->id}.xlsx",
+            'inscrits-'.Str::slug($event->name).'.xlsx',
             fn (RegistrationsExport $export) => $tenant->asCurrent(fn () => $export->query()->count()) === 1,
         );
     }
@@ -321,7 +322,7 @@ class RegistrationControllerTest extends TestCase
             ->get(route('tenants.events.registrations.export.csv', [$tenant, $event]))
             ->assertOk();
 
-        Excel::assertDownloaded("inscrits-{$event->id}.csv");
+        Excel::assertDownloaded('inscrits-'.Str::slug($event->name).'.csv');
     }
 
     public function test_un_export_est_journalise_avec_le_nombre_de_lignes_et_les_filtres(): void

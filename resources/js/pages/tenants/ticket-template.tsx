@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
 import BrandFileField from '@/components/brand-file-field';
+import { DownloadButton } from '@/components/download-button';
 import Heading from '@/components/heading';
 import { SubmitButton } from '@/components/submit-button';
 import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
@@ -429,25 +430,21 @@ export default function TicketTemplate({
                                             ) : null}
                                         </span>
                                         {canExport ? (
-                                            <Button
+                                            <DownloadButton
                                                 variant="outline"
                                                 size="sm"
-                                                asChild
+                                                href={
+                                                    checklists([
+                                                        tenant.slug,
+                                                        event.id,
+                                                    ]).url
+                                                }
+                                                data-test="ticket-print-link"
                                             >
-                                                <a
-                                                    href={
-                                                        checklists([
-                                                            tenant.slug,
-                                                            event.id,
-                                                        ]).url
-                                                    }
-                                                    data-test="ticket-print-link"
-                                                >
-                                                    {t(
-                                                        'ticket_template.print.button',
-                                                    )}
-                                                </a>
-                                            </Button>
+                                                {t(
+                                                    'ticket_template.print.button',
+                                                )}
+                                            </DownloadButton>
                                         ) : null}
                                     </li>
                                 ))}

@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Excel as ExcelFormat;
@@ -153,7 +154,7 @@ class RegistrationController extends Controller
 
         return Excel::download(
             new RegistrationsExport($this->exportQuery($request, $event)),
-            "inscrits-{$event->id}.xlsx",
+            $this->exportFilename($event, 'inscrits', 'xlsx'),
         );
     }
 
@@ -168,7 +169,7 @@ class RegistrationController extends Controller
 
         return Excel::download(
             new RegistrationsExport($this->exportQuery($request, $event)),
-            "inscrits-{$event->id}.csv",
+            $this->exportFilename($event, 'inscrits', 'csv'),
             ExcelFormat::CSV,
         );
     }
@@ -202,7 +203,7 @@ class RegistrationController extends Controller
         ])
             ->format('a4')
             ->landscape()
-            ->download("inscrits-{$event->id}.pdf");
+            ->download($this->exportFilename($event, 'inscrits', 'pdf'));
     }
 
     /**
@@ -253,7 +254,19 @@ class RegistrationController extends Controller
             'watermark' => $this->watermark($request),
         ])
             ->format('a4')
-            ->download("listes-de-controle-{$event->id}.pdf");
+            ->download($this->exportFilename($event, 'listes-de-controle', 'pdf'));
+    }
+
+    /**
+     * Le nom du fichier exporte porte celui de l'evenement : plusieurs exports ranges dans le meme
+     * dossier se distinguent sans les ouvrir. L'identifiant sert de repli pour un nom sans lettre
+     * ni chiffre.
+     */
+    private function exportFilename(Event $event, string $prefix, string $extension): string
+    {
+        $name = Str::slug($event->name);
+
+        return $prefix.'-'.($name !== '' ? $name : $event->id).'.'.$extension;
     }
 
     /**

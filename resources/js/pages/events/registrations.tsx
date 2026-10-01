@@ -3,6 +3,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import DataTable from '@/components/data-table';
+import { DownloadButton } from '@/components/download-button';
 import { CancelRegistrationDialog } from '@/components/registrations/cancel-registration-dialog';
 import { ReceiptPreviewDialog } from '@/components/proofs/receipt-preview-dialog';
 import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog';
@@ -403,57 +404,47 @@ export default function EventRegistrations({
                             <span className="text-muted-foreground text-sm">
                                 {t('registrations.actions.export')}
                             </span>
-                            <Button variant="outline" size="sm" asChild>
-                                <a
-                                    href={
-                                        excel(
-                                            [tenant.slug, event.id],
-                                            exportQuery,
-                                        ).url
-                                    }
-                                    data-test="registrations-export-excel"
-                                >
-                                    {t('registrations.actions.export_excel')}
-                                </a>
-                            </Button>
-                            <Button variant="outline" size="sm" asChild>
-                                <a
-                                    href={
-                                        csv(
-                                            [tenant.slug, event.id],
-                                            exportQuery,
-                                        ).url
-                                    }
-                                    data-test="registrations-export-csv"
-                                >
-                                    {t('registrations.actions.export_csv')}
-                                </a>
-                            </Button>
-                            <Button variant="outline" size="sm" asChild>
-                                <a
-                                    href={
-                                        pdf(
-                                            [tenant.slug, event.id],
-                                            exportQuery,
-                                        ).url
-                                    }
-                                    data-test="registrations-export-pdf"
-                                >
-                                    {t('registrations.actions.export_pdf')}
-                                </a>
-                            </Button>
-                            <Button variant="outline" size="sm" asChild>
-                                <a
-                                    href={
-                                        checklists([tenant.slug, event.id]).url
-                                    }
-                                    data-test="registrations-export-checklists"
-                                >
-                                    {t(
-                                        'registrations.actions.export_checklists',
-                                    )}
-                                </a>
-                            </Button>
+                            <DownloadButton
+                                variant="outline"
+                                size="sm"
+                                href={
+                                    excel([tenant.slug, event.id], exportQuery)
+                                        .url
+                                }
+                                data-test="registrations-export-excel"
+                            >
+                                {t('registrations.actions.export_excel')}
+                            </DownloadButton>
+                            <DownloadButton
+                                variant="outline"
+                                size="sm"
+                                href={
+                                    csv([tenant.slug, event.id], exportQuery)
+                                        .url
+                                }
+                                data-test="registrations-export-csv"
+                            >
+                                {t('registrations.actions.export_csv')}
+                            </DownloadButton>
+                            <DownloadButton
+                                variant="outline"
+                                size="sm"
+                                href={
+                                    pdf([tenant.slug, event.id], exportQuery)
+                                        .url
+                                }
+                                data-test="registrations-export-pdf"
+                            >
+                                {t('registrations.actions.export_pdf')}
+                            </DownloadButton>
+                            <DownloadButton
+                                variant="outline"
+                                size="sm"
+                                href={checklists([tenant.slug, event.id]).url}
+                                data-test="registrations-export-checklists"
+                            >
+                                {t('registrations.actions.export_checklists')}
+                            </DownloadButton>
                         </div>
                     ) : null}
                 </div>
