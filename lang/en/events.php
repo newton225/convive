@@ -76,6 +76,11 @@ return [
         'choose' => 'Choose a visual',
         'replace' => 'Replace',
         'remove' => 'Remove',
+        'remove_confirm' => [
+            'title' => 'Remove this event’s visual?',
+            'description' => 'The organisation’s banner will replace it on the public link. To bring it back, you will have to upload it again.',
+            'confirm' => 'Remove the visual',
+        ],
         'empty' => 'No visual',
     ],
 

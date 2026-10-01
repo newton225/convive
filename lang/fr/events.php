@@ -76,6 +76,11 @@ return [
         'choose' => 'Choisir un visuel',
         'replace' => 'Remplacer',
         'remove' => 'Retirer',
+        'remove_confirm' => [
+            'title' => 'Retirer le visuel de cet événement ?',
+            'description' => 'La bannière de l’organisation le remplacera sur le lien public. Pour le remettre, il faudra le déposer à nouveau.',
+            'confirm' => 'Retirer le visuel',
+        ],
         'empty' => 'Aucun visuel',
     ],
 

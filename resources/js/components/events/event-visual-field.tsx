@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { Trash2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import { Label } from '@/components/ui/label';
@@ -28,6 +29,7 @@ export default function EventVisualField({
     const { t } = useTranslation();
     const input = useRef<HTMLInputElement>(null);
     const [processing, setProcessing] = useState(false);
+    const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 
     const send = (chosen: File) => {
         router.post(
@@ -50,6 +52,7 @@ export default function EventVisualField({
     const remove = () => {
         router.delete(destroy([tenantSlug, eventId]).url, {
             onStart: () => setProcessing(true),
+            onSuccess: () => setConfirmingRemoval(false),
             onFinish: () => setProcessing(false),
         });
     };
@@ -110,7 +113,7 @@ export default function EventVisualField({
                             size="sm"
                             processing={processing}
                             data-test="event-visual-remove"
-                            onClick={remove}
+                            onClick={() => setConfirmingRemoval(true)}
                         >
                             <Trash2 className="h-4 w-4" />
                             {t('events.visual.remove')}
@@ -123,6 +126,18 @@ export default function EventVisualField({
                 {t('events.visual.hint')}
             </p>
             <InputError message={error} />
+
+            <ConfirmActionDialog
+                open={confirmingRemoval}
+                onOpenChange={setConfirmingRemoval}
+                title={t('events.visual.remove_confirm.title')}
+                description={t('events.visual.remove_confirm.description')}
+                confirmLabel={t('events.visual.remove_confirm.confirm')}
+                onConfirm={remove}
+                processing={processing}
+                destructive
+                testId="event-visual-remove-confirm"
+            />
         </div>
     );
 }
