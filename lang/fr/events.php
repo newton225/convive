@@ -220,4 +220,12 @@ return [
     'settings' => [
         'link' => 'Réglages',
     ],
+
+    // Courriel a l'organisation quand l'editeur retire son annonce de la vitrine.
+    'announcement_withdrawn_mail' => [
+        'subject' => 'L’annonce de « :event » a été retirée de la vitrine',
+        'intro' => 'L’équipe Convive a retiré de la vitrine du site l’annonce de votre événement « :event ».',
+        'reason' => 'Motif : :reason',
+        'outro' => 'Votre événement et son lien public ne sont pas touchés : vos invités peuvent toujours s’inscrire. Pour en parler, répondez à ce message.',
+    ],
 ];

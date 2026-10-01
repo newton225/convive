@@ -1,8 +1,8 @@
 import { Head } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { ExternalLink, EyeOff } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
-import { PendingActionButton } from '@/components/console/pending-action-button';
+import { WithdrawAnnouncementDialog } from '@/components/console/withdraw-announcement-dialog';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
 import { translate, useTranslation } from '@/hooks/use-translation';
@@ -48,7 +48,10 @@ export default function Showcase({
         },
         {
             header: t('console.showcase.columns.starts_at'),
-            cell: ({ row }) => formatDate(row.original.startsAt, locale),
+            cell: ({ row }) =>
+                row.original.startsAt
+                    ? formatDate(row.original.startsAt, locale)
+                    : '',
         },
         {
             id: 'actions',
@@ -64,9 +67,9 @@ export default function Showcase({
                         <ExternalLink className="size-4" />
                         {t('console.showcase.open_link')}
                     </a>
-                    <PendingActionButton
-                        icon={EyeOff}
-                        label={t('console.showcase.withdraw')}
+                    <WithdrawAnnouncementDialog
+                        id={row.original.id}
+                        eventName={row.original.eventName}
                     />
                 </div>
             ),
@@ -88,7 +91,7 @@ export default function Showcase({
         },
         {
             header: t('console.showcase.columns.actor'),
-            accessorKey: 'actor',
+            cell: ({ row }) => row.original.actor ?? t('console.system_actor'),
         },
         {
             header: t('console.showcase.columns.reason'),

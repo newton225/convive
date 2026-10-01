@@ -76,16 +76,21 @@ export type ConsoleUnpaid = {
     pastDueSince: string | null;
     remindersSent: number;
     suspendsAt: string | null;
-    failureReason: string;
+};
+
+// Ce qui est du, par devise : un total qui melangerait des devises ne dirait rien.
+export type ConsoleAmountDue = {
+    currency: string;
+    amount: number;
 };
 
 export type ConsoleFailedPayment = {
+    id: number;
     slug: string;
     name: string;
     at: string;
     amount: number;
     currency: string;
-    reason: string;
 };
 
 export type ConsolePlanOption = {
@@ -138,7 +143,7 @@ export type ConsoleAnnouncement = {
     eventName: string;
     organisationName: string;
     announcedAt: string;
-    startsAt: string;
+    startsAt: string | null;
     publicUrl: string;
 };
 
@@ -147,7 +152,7 @@ export type ConsoleWithdrawnAnnouncement = {
     eventName: string;
     organisationName: string;
     withdrawnAt: string;
-    actor: string;
+    actor: string | null;
     reason: string;
 };
 
@@ -164,7 +169,8 @@ export type ConsoleAuditType =
     | 'plan_updated'
     | 'database_repaired'
     | 'deletion_cancelled'
-    | 'tenant_erased';
+    | 'tenant_erased'
+    | 'payment_reminder_sent';
 
 export type ConsoleAuditEntry = {
     id: number;

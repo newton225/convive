@@ -1,17 +1,17 @@
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Send } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
-import { PendingActionButton } from '@/components/console/pending-action-button';
+import { RemindButton } from '@/components/console/remind-button';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
 import { Card, CardContent } from '@/components/ui/card';
 import { translate, useTranslation } from '@/hooks/use-translation';
-import { formatAmount, formatMoney } from '@/lib/format-currency';
+import { formatMoney } from '@/lib/format-currency';
 import { formatDate } from '@/lib/format-date';
 import { recovery } from '@/routes/console';
 import { show } from '@/routes/console/organisations';
 import type {
+    ConsoleAmountDue,
     ConsoleFailedPayment,
     ConsoleUnpaid,
     Translations,
@@ -20,6 +20,7 @@ import type {
 type Props = {
     isSample: boolean;
     unpaid: ConsoleUnpaid[];
+    amountsDue: ConsoleAmountDue[];
     failedPayments: ConsoleFailedPayment[];
 };
 
@@ -27,7 +28,12 @@ type Props = {
  * README ecran 29 : le recouvrement. Impayes en cours, relances envoyees, suspensions a venir a
  * J+10 (README section 3, Facturation) et paiements en echec.
  */
-export default function Recovery({ isSample, unpaid, failedPayments }: Props) {
+export default function Recovery({
+    isSample,
+    unpaid,
+    amountsDue,
+    failedPayments,
+}: Props) {
     const { t, locale } = useTranslation();
 
     const pastDueCount = unpaid.filter(
@@ -36,8 +42,6 @@ export default function Recovery({ isSample, unpaid, failedPayments }: Props) {
     const suspendedCount = unpaid.filter(
         (row) => row.status === 'suspended',
     ).length;
-    // Le jeu d'exemple ne porte que du franc CFA ; le serveur totalisera par devise.
-    const amountDue = unpaid.reduce((total, row) => total + row.amount, 0);
 
     const organisationLink = (slug: string, name: string) => (
         <Link
@@ -95,10 +99,7 @@ export default function Recovery({ isSample, unpaid, failedPayments }: Props) {
             header: '',
             cell: ({ row }) =>
                 row.original.status === 'past_due' ? (
-                    <PendingActionButton
-                        icon={Send}
-                        label={t('console.recovery.remind')}
-                    />
+                    <RemindButton slug={row.original.slug} />
                 ) : null,
         },
     ];
@@ -118,11 +119,6 @@ export default function Recovery({ isSample, unpaid, failedPayments }: Props) {
             cell: ({ row }) =>
                 formatMoney(row.original.amount, row.original.currency, locale),
         },
-        {
-            header: t('console.recovery.failed_columns.reason'),
-            cell: ({ row }) =>
-                t(`console.recovery.reasons.${row.original.reason}`),
-        },
     ];
 
     const summary = [
@@ -136,7 +132,14 @@ export default function Recovery({ isSample, unpaid, failedPayments }: Props) {
         },
         {
             label: t('console.recovery.summary.amount_due'),
-            value: formatAmount(amountDue, locale),
+            value:
+                amountsDue.length === 0
+                    ? t('console.recovery.nothing_due')
+                    : amountsDue
+                          .map((due) =>
+                              formatMoney(due.amount, due.currency, locale),
+                          )
+                          .join(' · '),
         },
     ];
 

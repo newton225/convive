@@ -24,7 +24,6 @@ class ConsoleAccessTest extends TestCase
     {
         return [
             'organisations' => ['console.organisations.index', [], 'console/organisations'],
-            'fiche organisation' => ['console.organisations.show', ['organisation' => 'eglise-bethel'], 'console/organisation'],
             'recouvrement' => ['console.recovery', [], 'console/recovery'],
             'plans' => ['console.plans', [], 'console/plans'],
             'sante technique' => ['console.health', [], 'console/health'],
@@ -48,7 +47,8 @@ class ConsoleAccessTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component($component)
-                ->where('isSample', ! in_array($component, ['console/plans', 'console/team', 'console/audit'], true)),
+                // Seule la sante technique garde une part de jeu d'exemple (taches, files, sauvegardes).
+                ->where('isSample', $component === 'console/health'),
             );
     }
 

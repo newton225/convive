@@ -37,12 +37,14 @@ Route::prefix('console')
         Route::patch('organisations/{tenant}/trial', [OrganisationActionController::class, 'extendTrial'])->name('organisations.trial.update');
         Route::post('organisations/{tenant}/deletion', [OrganisationActionController::class, 'scheduleDeletion'])->name('organisations.deletion.schedule');
         Route::delete('organisations/{tenant}/deletion', [OrganisationActionController::class, 'cancelDeletion'])->middleware('can:console.area,"organisation_actions"')->name('organisations.deletion.cancel');
-        Route::get('recovery', RecoveryController::class)->middleware('can:console.area,"recovery"')->name('recovery');
+        Route::get('recovery', [RecoveryController::class, 'index'])->middleware('can:console.area,"recovery"')->name('recovery');
+        Route::post('recovery/{tenant}/remind', [RecoveryController::class, 'remind'])->middleware('can:console.area,"recovery"')->name('recovery.remind');
         Route::get('plans', [PlanController::class, 'index'])->middleware('can:console.area,"plans"')->name('plans');
         Route::patch('plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
         Route::get('health', HealthController::class)->middleware('can:console.area,"health"')->name('health');
         Route::post('health/databases/{tenant}/migrate', RepairTenantDatabaseController::class)->middleware('can:console.area,"health"')->name('health.databases.migrate');
-        Route::get('showcase', ShowcaseController::class)->middleware('can:console.area,"showcase"')->name('showcase');
+        Route::get('showcase', [ShowcaseController::class, 'index'])->middleware('can:console.area,"showcase"')->name('showcase');
+        Route::post('showcase/{announcement}/withdraw', [ShowcaseController::class, 'withdraw'])->name('showcase.withdraw');
         Route::get('audit', AuditLogController::class)->middleware('can:console.area,"audit"')->name('audit');
         // L'equipe editeur (README ecran 34) : reservee aux Fondateurs.
         Route::get('team', [TeamController::class, 'index'])->middleware('can:console.area,"team"')->name('team');

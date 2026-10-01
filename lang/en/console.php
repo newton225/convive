@@ -190,6 +190,14 @@ return [
         ],
         'failed_empty' => 'No failed payment.',
         'remind' => 'Send a reminder',
+        'nothing_due' => 'Nothing',
+        'flash' => [
+            'reminded' => 'Reminder sent to :organisation.',
+        ],
+        'errors' => [
+            'not_past_due' => 'This organisation is not overdue: there is nothing to remind.',
+            'already_reminded' => 'A reminder was already sent less than 24 hours ago. Try again tomorrow.',
+        ],
     ],
 
     'plans' => [
@@ -300,6 +308,17 @@ return [
         'active_empty' => 'No event announced yet.',
         'withdrawn' => 'Removed announcements',
         'withdrawn_empty' => 'No announcement removed.',
+        'fields' => [
+            'reason' => 'Reason for the withdrawal',
+        ],
+        'withdraw_dialog' => [
+            'title' => 'Withdraw “:event” from the showcase?',
+            'description' => 'The announcement leaves the product site at once. The public link of the event remains valid. The reason is sent as written to the organisation.',
+            'submit' => 'Withdraw the announcement',
+        ],
+        'flash' => [
+            'withdrawn' => 'The announcement of “:event” has been withdrawn from the showcase.',
+        ],
     ],
 
     'audit' => [
@@ -329,6 +348,7 @@ return [
             'database_repaired' => 'Database repaired',
             'deletion_cancelled' => 'Deletion cancelled',
             'tenant_erased' => 'Organisation erased',
+            'payment_reminder_sent' => 'Overdue reminder',
         ],
         'messages' => [
             'support_access_used' => ':actor viewed :organisation through a support access',
@@ -344,6 +364,7 @@ return [
             'database_repaired' => ':actor ran the migrations of :organisation again',
             'deletion_cancelled' => ':actor cancelled the deletion of :organisation',
             'tenant_erased' => ':organisation was erased when its scheduled deletion came due',
+            'payment_reminder_sent' => ':actor reminded :organisation about an overdue payment',
         ],
         'empty' => [
             'title' => 'No entry',

@@ -190,6 +190,14 @@ return [
         ],
         'failed_empty' => 'Aucun paiement en échec.',
         'remind' => 'Relancer',
+        'nothing_due' => 'Rien',
+        'flash' => [
+            'reminded' => 'Relance envoyée à :organisation.',
+        ],
+        'errors' => [
+            'not_past_due' => 'Cette organisation n’est pas en impayé : il n’y a rien à relancer.',
+            'already_reminded' => 'Une relance est déjà partie il y a moins de 24 heures. Réessayez demain.',
+        ],
     ],
 
     'plans' => [
@@ -300,6 +308,17 @@ return [
         'active_empty' => 'Aucun événement annoncé pour le moment.',
         'withdrawn' => 'Annonces retirées',
         'withdrawn_empty' => 'Aucune annonce retirée.',
+        'fields' => [
+            'reason' => 'Motif du retrait',
+        ],
+        'withdraw_dialog' => [
+            'title' => 'Retirer « :event » de la vitrine ?',
+            'description' => 'L’annonce disparaît du site produit tout de suite. Le lien public de l’événement reste valide. Le motif est envoyé tel quel à l’organisation.',
+            'submit' => 'Retirer l’annonce',
+        ],
+        'flash' => [
+            'withdrawn' => 'L’annonce de « :event » est retirée de la vitrine.',
+        ],
     ],
 
     'audit' => [
@@ -329,6 +348,7 @@ return [
             'database_repaired' => 'Base réparée',
             'deletion_cancelled' => 'Suppression annulée',
             'tenant_erased' => 'Organisation effacée',
+            'payment_reminder_sent' => 'Relance d’impayé',
         ],
         'messages' => [
             'support_access_used' => ':actor a consulté :organisation avec un accès de support',
@@ -344,6 +364,7 @@ return [
             'database_repaired' => ':actor a rejoué les migrations de :organisation',
             'deletion_cancelled' => ':actor a annulé la suppression de :organisation',
             'tenant_erased' => ':organisation a été effacée à l’échéance de sa suppression programmée',
+            'payment_reminder_sent' => ':actor a relancé :organisation pour un impayé',
         ],
         'empty' => [
             'title' => 'Aucune entrée',

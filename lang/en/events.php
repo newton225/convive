@@ -220,4 +220,12 @@ return [
     'settings' => [
         'link' => 'Settings',
     ],
+
+    // Courriel a l'organisation quand l'editeur retire son annonce de la vitrine.
+    'announcement_withdrawn_mail' => [
+        'subject' => 'The announcement of “:event” has been withdrawn from the showcase',
+        'intro' => 'The Convive team withdrew the announcement of your event “:event” from the site showcase.',
+        'reason' => 'Reason: :reason',
+        'outro' => 'Your event and its public link are untouched: your guests can still register. To discuss it, reply to this message.',
+    ],
 ];
