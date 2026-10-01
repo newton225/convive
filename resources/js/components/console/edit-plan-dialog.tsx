@@ -118,7 +118,7 @@ export function EditPlanDialog({ plan }: Props) {
                     {t('console.plans.edit')}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
                 <form onSubmit={submit} className="space-y-5">
                     <DialogHeader>
                         <DialogTitle>
@@ -154,6 +154,17 @@ export function EditPlanDialog({ plan }: Props) {
                                 numberField(name, '1', '1'),
                             )}
                         </div>
+                        {/* Ce que chaque limite compte, en toutes lettres : les trois mots seuls ne
+                            le disent pas. */}
+                        <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-xs">
+                            {QuotaFields.map((name) => (
+                                <li key={name}>
+                                    {t(
+                                        `console.plans.edit_dialog.quota_help.${name}`,
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
                         <p className="text-muted-foreground text-xs">
                             {t('console.plans.edit_dialog.quotas_hint')}
                         </p>
@@ -163,6 +174,9 @@ export function EditPlanDialog({ plan }: Props) {
                         <legend className="text-sm font-medium">
                             {t('console.plans.edit_dialog.features')}
                         </legend>
+                        <p className="text-muted-foreground text-xs">
+                            {t('console.plans.edit_dialog.features_hint')}
+                        </p>
                         <CheckboxRow
                             id={`plan-${plan.code}-reconciliation`}
                             label={t('console.plans.features.reconciliation')}
