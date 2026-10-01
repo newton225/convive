@@ -160,8 +160,9 @@ class ManageSupportAccess
     }
 
     /**
-     * Let a member of the Convive team take a request : ils deviennent visibles de l'organisation,
-     * dont les Proprietaires sont prevenus. L'acces reste a ouvrir par l'un d'eux.
+     * Let a member of the Convive team take a request : ils deviennent visibles de cette
+     * organisation, et d'elle seule (`SupportAccessController::operators()`), dont les
+     * Proprietaires sont prevenus. L'acces reste a ouvrir par l'un d'eux.
      *
      * Appelee depuis la console, donc hors de la tenancy de l'organisation : la ligne de son
      * journal s'ecrit sous `run()`.
@@ -173,10 +174,6 @@ class ManageSupportAccess
         }
 
         $request->update(['taken_by_id' => $operator->id, 'taken_at' => now()]);
-
-        // Prendre la demande, c'est accepter d'apparaitre : sans cela, l'organisation ne
-        // pourrait toujours ouvrir l'acces a personne.
-        $operator->forceFill(['support_available' => true])->save();
 
         $tenant = $request->tenant;
 

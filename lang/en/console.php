@@ -440,7 +440,7 @@ return [
     // contenu d'une organisation.
     'support_requests' => [
         'title' => 'Help requests',
-        'hint' => 'These organisations want to open their space and see no one to open it to. By taking a request, you appear in their list and their owners are told; the access is still theirs to open.',
+        'hint' => 'These organisations want to open their space and see no one to open it to. By taking a request, you appear in the list of that organisation only, and its owners are told; the access is still theirs to open.',
         'from' => ':name, on :date',
         'take' => 'Take it',
         'taken_by_me' => 'Taken by you: waiting for the access to be opened.',

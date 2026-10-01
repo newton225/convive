@@ -30,7 +30,7 @@ class OpenSupportAccessRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'operator_id' => ['required', 'integer', Rule::in(SupportAccessController::operators()->modelKeys())],
+            'operator_id' => ['required', 'integer', Rule::in(SupportAccessController::operators($this->tenant())->modelKeys())],
             'duration' => ['required', 'integer', Rule::in(SupportAccessGrant::DurationsInHours)],
             // Pourquoi l'acces est ouvert : la personne de l'equipe Convive sait quoi regarder, et
             // l'organisation garde la trace de ce qu'elle a autorise.

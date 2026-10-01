@@ -440,7 +440,7 @@ return [
     // contenu d'une organisation.
     'support_requests' => [
         'title' => 'Demandes d’aide',
-        'hint' => 'Ces organisations veulent ouvrir leur espace et ne voient personne à qui le faire. En prenant une demande en charge, vous apparaissez dans leur liste et leurs Propriétaires sont prévenus ; l’accès reste à ouvrir par eux.',
+        'hint' => 'Ces organisations veulent ouvrir leur espace et ne voient personne à qui le faire. En prenant une demande en charge, vous apparaissez dans la liste de cette organisation seulement, et ses Propriétaires sont prévenus ; l’accès reste à ouvrir par eux.',
         'from' => ':name, le :date',
         'take' => 'Prendre en charge',
         'taken_by_me' => 'Prise en charge par vous : en attente de l’ouverture de l’accès.',

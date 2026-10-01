@@ -14,7 +14,8 @@ type Props = {
 /**
  * Les demandes d'aide en attente, vues par l'equipe Convive (README section 3) : des organisations
  * veulent ouvrir leur espace et ne voient personne a qui le faire. « Prendre en charge » rend la
- * personne visible de l'organisation et previent ses Proprietaires ; l'acces reste a ouvrir par eux.
+ * personne visible de cette organisation seulement et previent ses Proprietaires ; l'acces reste a
+ * ouvrir par eux.
  */
 export function SupportRequestsList({ requests }: Props) {
     const { t, locale } = useTranslation();

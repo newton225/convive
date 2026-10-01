@@ -67,7 +67,7 @@ class SupportAccessController extends Controller
                 'takenBy' => $pending->takenBy?->name,
                 'takenById' => $pending->taken_by_id,
             ],
-            'operators' => self::operators()
+            'operators' => self::operators($tenant)
                 ->map(fn (User $operator) => ['id' => $operator->id, 'name' => $operator->name])
                 ->values()
                 ->all(),
@@ -116,7 +116,7 @@ class SupportAccessController extends Controller
      */
     public function store(OpenSupportAccessRequest $request, Tenant $tenant, ManageSupportAccess $manage): RedirectResponse
     {
-        $operator = self::operators()->firstWhere('id', (int) $request->validated('operator_id'));
+        $operator = self::operators($tenant)->firstWhere('id', (int) $request->validated('operator_id'));
         abort_if($operator === null, 404);
 
         $manage->open($tenant, $operator, $request->user(), (int) $request->validated('duration'), $request->validated('reason'));
@@ -144,18 +144,30 @@ class SupportAccessController extends Controller
     }
 
     /**
-     * Get the members of the Convive team an access can be opened to : ceux qui s'y sont rendus
-     * visibles (`SupportAvailabilityController`). Une organisation ne lit jamais la liste de toute
-     * l'equipe, et ne peut pas ouvrir d'acces a qui n'y figure pas.
+     * Get the members of the Convive team the organisation can open an access to : ceux qui se
+     * sont rendus visibles de toutes (`SupportAvailabilityController`), et celui qui a pris en
+     * charge la demande d'aide de cette organisation, visible d'elle seule tant que la demande est
+     * en attente. Une organisation ne lit jamais la liste de toute l'equipe, et ne peut pas ouvrir
+     * d'acces a qui n'y figure pas.
      *
      * @return Collection<int, User>
      */
-    public static function operators(): Collection
+    public static function operators(Tenant $tenant): Collection
     {
         $emails = ConsoleAccess::emailsAllowedTo(ConsoleArea::Support);
 
-        return $emails === []
-            ? new Collection
-            : User::whereIn('email', $emails)->where('support_available', true)->orderBy('name')->get();
+        if ($emails === []) {
+            return new Collection;
+        }
+
+        $takenBy = SupportAccessRequest::where('tenant_id', $tenant->id)
+            ->pending()
+            ->whereNotNull('taken_by_id')
+            ->pluck('taken_by_id');
+
+        return User::whereIn('email', $emails)
+            ->where(fn ($query) => $query->where('support_available', true)->orWhereIn('id', $takenBy))
+            ->orderBy('name')
+            ->get();
     }
 }

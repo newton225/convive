@@ -155,10 +155,43 @@ class SupportAccessRequestTest extends TestCase
             ->assertRedirect(route('console.organisations.index'));
 
         $this->assertSame($this->operator->id, $request->fresh()->taken_by_id);
-        $this->assertTrue(SupportAccessController::operators()->contains('id', $this->operator->id));
+        $this->assertTrue(SupportAccessController::operators($this->tenant)->contains('id', $this->operator->id));
+        $this->assertFalse($this->operator->fresh()->support_available);
         Notification::assertSentTo($this->owner, SupportAccessRequestTaken::class);
         // Toujours aucun acces : c'est l'organisation qui l'ouvre.
         $this->assertNull($this->operator->supportAccessTo($this->tenant));
+    }
+
+    public function test_la_personne_n_est_visible_que_de_l_organisation_qui_a_demande(): void
+    {
+        Notification::fake();
+        $otherOwner = User::factory()->withTwoFactor()->create();
+        $other = app(CreateTenant::class)->handle($otherOwner, 'Autre Association');
+
+        $this->actingAs($this->operator)->post(route('console.support-requests.take', $this->pendingRequest()));
+
+        $this->assertTrue(SupportAccessController::operators($other)->isEmpty());
+
+        // Et l'autre organisation ne peut pas lui ouvrir d'acces.
+        $this->actingAs($otherOwner)
+            ->withSession(['auth.password_confirmed_at' => time()])
+            ->post(route('tenants.support-access.store', $other), [
+                'operator_id' => $this->operator->id,
+                'duration' => 4,
+                'reason' => 'Tentative depuis une autre organisation.',
+            ])
+            ->assertSessionHasErrors('operator_id');
+    }
+
+    public function test_la_personne_n_est_plus_visible_une_fois_la_demande_annulee(): void
+    {
+        Notification::fake();
+        $request = $this->pendingRequest();
+
+        $this->actingAs($this->operator)->post(route('console.support-requests.take', $request));
+        $this->actingAs($this->owner)->delete(route('tenants.support-access.requests.destroy', [$this->tenant, $request]));
+
+        $this->assertTrue(SupportAccessController::operators($this->tenant)->isEmpty());
     }
 
     public function test_un_compte_hors_de_l_equipe_convive_ne_prend_pas_une_demande_en_charge(): void
@@ -176,7 +209,7 @@ class SupportAccessRequestTest extends TestCase
     {
         Notification::fake();
         $request = $this->pendingRequest();
-        $this->operator->forceFill(['support_available' => true])->save();
+        $request->update(['taken_by_id' => $this->operator->id, 'taken_at' => now()]);
 
         $this->actingAs($this->owner)
             ->withSession(['auth.password_confirmed_at' => time()])

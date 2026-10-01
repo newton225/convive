@@ -11,9 +11,9 @@ use Inertia\Inertia;
 
 /**
  * « Prendre en charge » une demande d'aide (README section 3) : la personne de l'equipe Convive
- * devient visible de l'organisation, dont les Proprietaires sont prevenus. Aucun acces n'est
- * ouvert : c'est l'organisation qui l'ouvre. La zone `support` de la route reserve le geste aux
- * profils qui peuvent recevoir un acces.
+ * devient visible de cette organisation seulement, dont les Proprietaires sont prevenus. Aucun
+ * acces n'est ouvert : c'est l'organisation qui l'ouvre. La zone `support` de la route reserve le
+ * geste aux profils qui peuvent recevoir un acces.
  */
 class TakeSupportRequestController extends Controller
 {
