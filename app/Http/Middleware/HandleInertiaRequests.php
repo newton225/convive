@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Enums\NotificationType;
 use App\Models\DatabaseNotification;
+use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Locale;
@@ -55,6 +56,11 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
 
+        // L'organisation affichee : celle du membre, ou celle qu'un compte de l'equipe Convive
+        // consulte sous un acces de support (pose par `EnsureTenantMembership`). Evaluee au rendu,
+        // donc apres ce middleware de route.
+        $tenant = fn (): ?Tenant => $this->supportAccessOf($request)->tenant ?? $user?->currentTenant;
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -74,18 +80,46 @@ class HandleInertiaRequests extends Middleware
             // « once » d'Inertia) : elles pesaient l'essentiel de chaque navigation. La cle porte
             // la langue, pour qu'un changement de langue les redemande.
             'translations' => Inertia::once(fn () => $this->translations())->as('translations:'.app()->getLocale()),
-            'currentTenant' => fn () => $user?->currentTenant ? $user->toUserTenant($user->currentTenant) : null,
+            'currentTenant' => fn () => $user && $tenant() ? $user->toUserTenant($tenant()) : null,
             'tenants' => fn () => $user?->toUserTenants(includeCurrent: true) ?? [],
             'notifications' => fn () => $user ? $this->notifications($user) : null,
             // Ce que le membre peut faire dans l'organisation courante : sert uniquement a masquer les
             // liens interdits du menu (chaque route revalide cote serveur).
-            'tenantPermissions' => fn () => $user?->currentTenant ? $user->toTenantPermissions($user->currentTenant) : null,
+            'tenantPermissions' => fn () => $user && $tenant() ? $user->toTenantPermissions($tenant()) : null,
             // Plan courant et son usage principal, pour le menu lateral (prototype Convive.dc.html).
             // Les visites guidees deja terminees : une visite ne redemarre pas d'elle-meme.
             'completedTours' => fn () => $user->completed_tours ?? [],
-            'currentPlan' => fn () => $user?->currentTenant ? $this->currentPlan($user->currentTenant) : null,
+            'currentPlan' => fn () => $user && $tenant() ? $this->currentPlan($tenant()) : null,
+            // Le bandeau permanent d'un acces de support en cours (README section 3) : tous les
+            // membres le voient, et la personne de l'equipe Convive sait qu'elle consulte.
+            'supportAccess' => fn () => $user ? $this->supportAccess($request, $tenant()) : null,
             // Sert uniquement a afficher le lien vers la console ; ses routes revalident.
             'canAccessConsole' => fn () => $user !== null && Gate::forUser($user)->allows('console.access'),
+        ];
+    }
+
+    private function supportAccessOf(Request $request): ?SupportAccessGrant
+    {
+        $grant = $request->attributes->get(EnsureTenantMembership::SupportAccessAttribute);
+
+        return $grant instanceof SupportAccessGrant ? $grant : null;
+    }
+
+    /**
+     * @return array{operator: string, expiresAt: string, viewing: bool}|null
+     */
+    private function supportAccess(Request $request, ?Tenant $tenant): ?array
+    {
+        $viewing = $this->supportAccessOf($request);
+
+        $grant = $viewing ?? ($tenant
+            ? SupportAccessGrant::where('tenant_id', $tenant->id)->active()->with('operator')->latest('id')->first()
+            : null);
+
+        return $grant === null ? null : [
+            'operator' => $grant->operator->name,
+            'expiresAt' => $grant->expires_at->toISOString(),
+            'viewing' => $viewing !== null,
         ];
     }
 

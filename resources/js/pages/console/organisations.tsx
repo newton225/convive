@@ -5,6 +5,7 @@ import { ConsoleTable } from '@/components/console/console-table';
 import { OrganisationStatusBadge } from '@/components/console/organisation-status-badge';
 import { QuotaUsage } from '@/components/console/quota-usage';
 import Heading from '@/components/heading';
+import { SupportGrantsCard } from '@/components/console/support-grants-card';
 import { SampleBanner } from '@/components/sample-banner';
 import { Input } from '@/components/ui/input';
 import {
@@ -20,12 +21,15 @@ import { index, show } from '@/routes/console/organisations';
 import type {
     ConsoleOrganisationStatus,
     ConsoleOrganisationSummary,
+    ConsoleSupportGrant,
     Translations,
 } from '@/types';
 
 type Props = {
     isSample: boolean;
     organisations: ConsoleOrganisationSummary[];
+    // Reels, eux : les acces de support ouverts au compte connecte.
+    supportGrants: ConsoleSupportGrant[];
 };
 
 const AllStatuses = 'all';
@@ -42,7 +46,11 @@ const statuses: ConsoleOrganisationStatus[] = [
  * README ecran 27 : les organisations clientes, leur plan, leur etat et leur consommation. Des
  * metadonnees seulement, jamais le contenu d'une organisation (README section 3).
  */
-export default function Organisations({ isSample, organisations }: Props) {
+export default function Organisations({
+    isSample,
+    organisations,
+    supportGrants,
+}: Props) {
     const { t, locale } = useTranslation();
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState<string>(AllStatuses);
@@ -134,6 +142,8 @@ export default function Organisations({ isSample, organisations }: Props) {
             <Head title={t('console.organisations.title')} />
 
             <div className="flex flex-col space-y-6">
+                <SupportGrantsCard grants={supportGrants} />
+
                 {isSample && <SampleBanner />}
 
                 <Heading

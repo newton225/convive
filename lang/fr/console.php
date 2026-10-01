@@ -287,4 +287,12 @@ return [
         'invitations_empty' => 'Aucune invitation en attente.',
         'invite' => 'Inviter un membre',
     ],
+    // Les acces de support ouverts au compte connecte : la seule porte de l'editeur vers le
+    // contenu d'une organisation.
+    'support_grants' => [
+        'title' => 'Accès de support ouverts pour vous',
+        'description' => 'Ces organisations vous ont ouvert leur espace en lecture seule. Chaque page que vous consultez est inscrite à leur journal.',
+        'until' => 'jusqu’au :expires',
+        'open' => 'Consulter',
+    ],
 ];

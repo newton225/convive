@@ -64,6 +64,21 @@ enum TenantPermission: string
     case AuditView = 'audit.view';
 
     /**
+     * Get what an open support access lets a member of the Convive team do (README section 3) :
+     * consulter, jamais agir. Ni export, ni comptes de versement, ni reglages : lire le contenu
+     * suffit a aider, et rien de plus ne doit sortir de l'organisation.
+     *
+     * @return array<int, self>
+     */
+    public static function supportReadable(): array
+    {
+        return [
+            self::EventsView, self::RegistrationsView, self::ProofsView, self::SeatingView,
+            self::ScanLogView, self::ReportsView, self::TeamView, self::AuditView,
+        ];
+    }
+
+    /**
      * Get the domain this permission is grouped under in the interface.
      */
     public function domain(): TenantPermissionDomain

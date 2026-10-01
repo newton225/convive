@@ -28,6 +28,10 @@ return [
         'proofs' => 'Proofs to check',
         'audit' => 'Audit log',
         'organisation' => 'Space and brand',
+        'dashboard' => 'Dashboard',
+        'seating' => 'Seating plan',
+        'reports' => 'Report',
+        'other' => 'Other page',
     ],
 
     'grant' => [
@@ -38,6 +42,8 @@ return [
         'duration' => 'Duration',
         'hours' => '{1} 1 hour|[2,*] :count hours',
         'submit' => 'Open the access',
+        'confirm_title' => 'Open an access for :operator?',
+        'confirm_description' => 'This member of the Convive team will be able to read your events, registrations, proofs and audit log for :duration. They cannot change anything, and you can revoke the access at any time.',
         'one_at_a_time' => 'One access at a time: revoke the current one to open another.',
     ],
 
@@ -55,5 +61,22 @@ return [
             'expired' => 'Expired',
             'revoked' => 'Revoked',
         ],
+    ],
+    'errors' => [
+        'already_open' => 'An access is already open. Revoke it before opening another one.',
+        'operator' => 'Choose a member of the Convive team.',
+        'duration' => 'Choose one of the durations offered, 24 hours at most.',
+        'read_only' => 'A support access is read only: this action is not allowed.',
+    ],
+
+    'flash' => [
+        'opened' => 'Access opened for :operator.',
+        'revoked' => 'Access revoked.',
+    ],
+
+    'banner' => [
+        'member' => ':operator, from the Convive team, can view this space in read-only mode until :expires.',
+        'viewing' => 'Support access: you are viewing :organisation in read-only mode until :expires. Every page you view is logged.',
+        'manage' => 'Manage the access',
     ],
 ];

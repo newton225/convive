@@ -1,10 +1,12 @@
-import { Head } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { LifeBuoy, ShieldOff } from 'lucide-react';
+import { useState } from 'react';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ConsoleTable } from '@/components/console/console-table';
-import { PendingActionButton } from '@/components/console/pending-action-button';
 import Heading from '@/components/heading';
-import { SampleBanner } from '@/components/sample-banner';
+import InputError from '@/components/input-error';
+import { SubmitButton } from '@/components/submit-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import {
@@ -16,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
-import { show } from '@/routes/tenants/support-access';
+import { destroy, show, store } from '@/routes/tenants/support-access';
 import type {
     ActiveSupportAccess,
     PastSupportAccess,
@@ -26,7 +28,6 @@ import type {
 
 type Props = {
     tenant: { slug: string; name: string };
-    isSample: boolean;
     durations: number[];
     operators: SupportOperatorOption[];
     activeAccess: ActiveSupportAccess | null;
@@ -36,16 +37,42 @@ type Props = {
 /**
  * README ecran 25, « acces du support » : le Proprietaire ouvre a une personne nommee de l'equipe
  * Convive un acces en lecture seule, de 24 heures au plus, le revoque, et relit ce qui a ete
- * consulte (README section 3, « Console d'exploitation »).
+ * consulte (README section 3, « Console d'exploitation »). Les regles sont appliquees par le
+ * serveur (`ManageSupportAccess`, `EnsureTenantMembership`) ; l'ecran les reflete.
  */
 export default function SupportAccess({
-    isSample,
+    tenant,
     durations,
     operators,
     activeAccess,
     pastAccesses,
 }: Props) {
     const { t, locale } = useTranslation();
+    const [confirming, setConfirming] = useState(false);
+    const [revoking, setRevoking] = useState(false);
+    const form = useForm({
+        operator_id: '',
+        duration: String(durations[durations.length - 1]),
+    });
+    const chosenOperator = operators.find(
+        (operator) => String(operator.id) === form.data.operator_id,
+    );
+
+    const open = () => {
+        form.post(store(tenant.slug).url, {
+            preserveScroll: true,
+            onSuccess: () => form.reset('operator_id'),
+            onFinish: () => setConfirming(false),
+        });
+    };
+
+    const revoke = (grantId: number) => {
+        router.delete(destroy([tenant.slug, grantId]).url, {
+            preserveScroll: true,
+            onStart: () => setRevoking(true),
+            onFinish: () => setRevoking(false),
+        });
+    };
 
     const historyColumns: ColumnDef<PastSupportAccess>[] = [
         {
@@ -78,8 +105,6 @@ export default function SupportAccess({
             <Head title={t('support_access.title')} />
 
             <div className="flex flex-col space-y-6">
-                {isSample && <SampleBanner />}
-
                 <Heading
                     variant="small"
                     title={t('support_access.title')}
@@ -132,11 +157,16 @@ export default function SupportAccess({
                                 )}
                             </div>
 
-                            <PendingActionButton
-                                icon={ShieldOff}
+                            <SubmitButton
+                                type="button"
                                 variant="destructive"
-                                label={t('support_access.active.revoke')}
-                            />
+                                processing={revoking}
+                                onClick={() => revoke(activeAccess.id)}
+                                data-test="support-access-revoke"
+                            >
+                                <ShieldOff />
+                                {t('support_access.active.revoke')}
+                            </SubmitButton>
 
                             <div className="space-y-2">
                                 <h3 className="font-medium">
@@ -149,7 +179,7 @@ export default function SupportAccess({
                                 ) : (
                                     <ul className="space-y-1">
                                         {activeAccess.views.map((view) => (
-                                            <li key={view.at}>
+                                            <li key={view.id}>
                                                 <span className="text-muted-foreground">
                                                     {formatDateTime(
                                                         view.at,
@@ -184,7 +214,13 @@ export default function SupportAccess({
                                 <Label htmlFor="support-operator">
                                     {t('support_access.grant.operator')}
                                 </Label>
-                                <Select disabled={activeAccess !== null}>
+                                <Select
+                                    disabled={activeAccess !== null}
+                                    value={form.data.operator_id}
+                                    onValueChange={(value) =>
+                                        form.setData('operator_id', value)
+                                    }
+                                >
                                     <SelectTrigger id="support-operator">
                                         <SelectValue
                                             placeholder={t(
@@ -203,6 +239,7 @@ export default function SupportAccess({
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                <InputError message={form.errors.operator_id} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="support-duration">
@@ -210,9 +247,10 @@ export default function SupportAccess({
                                 </Label>
                                 <Select
                                     disabled={activeAccess !== null}
-                                    defaultValue={String(
-                                        durations[durations.length - 1],
-                                    )}
+                                    value={form.data.duration}
+                                    onValueChange={(value) =>
+                                        form.setData('duration', value)
+                                    }
                                 >
                                     <SelectTrigger id="support-duration">
                                         <SelectValue />
@@ -233,13 +271,22 @@ export default function SupportAccess({
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                <InputError message={form.errors.duration} />
                             </div>
                         </div>
-                        <PendingActionButton
-                            icon={LifeBuoy}
-                            variant="default"
-                            label={t('support_access.grant.submit')}
-                        />
+                        <SubmitButton
+                            type="button"
+                            processing={form.processing}
+                            disabled={
+                                activeAccess !== null ||
+                                chosenOperator === undefined
+                            }
+                            onClick={() => setConfirming(true)}
+                            data-test="support-access-open"
+                        >
+                            <LifeBuoy />
+                            {t('support_access.grant.submit')}
+                        </SubmitButton>
                     </CardContent>
                 </Card>
 
@@ -258,6 +305,25 @@ export default function SupportAccess({
                     />
                 </section>
             </div>
+
+            {/* Ouvrir son contenu a l'editeur engage toute l'organisation : la confirmation
+                rappelle a qui, pour combien de temps, et ce que la personne pourra lire. */}
+            <ConfirmActionDialog
+                open={confirming}
+                onOpenChange={setConfirming}
+                title={t('support_access.grant.confirm_title', {
+                    operator: chosenOperator?.name ?? '',
+                })}
+                description={t('support_access.grant.confirm_description', {
+                    duration: t('support_access.grant.hours', {
+                        count: Number(form.data.duration),
+                    }),
+                })}
+                confirmLabel={t('support_access.grant.submit')}
+                onConfirm={open}
+                processing={form.processing}
+                testId="support-access-confirm"
+            />
         </>
     );
 }

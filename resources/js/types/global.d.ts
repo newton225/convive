@@ -1,6 +1,7 @@
 import type { Auth } from '@/types/auth';
 import type { LocaleCode, SupportedLocales, Translations } from '@/types/i18n';
 import type { NotificationsSummary } from '@/types/notifications';
+import type { SupportAccessNotice } from '@/types/support-access';
 import type { CurrentPlan, TenantPermissions } from '@/types/tenants';
 import type { Tenant } from '@/types/tenants';
 
@@ -28,6 +29,7 @@ declare module '@inertiajs/core' {
             completedTours: string[];
             canAccessConsole: boolean;
             appVersion: string | null;
+            supportAccess: SupportAccessNotice | null;
             [key: string]: unknown;
         };
     }

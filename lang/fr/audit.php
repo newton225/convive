@@ -38,7 +38,7 @@ return [
         'proofs.rejected' => 'Preuve rejetée',
         'registrations.purged' => 'Inscriptions purgées',
         'registrations.cancelled' => 'Inscription annulée',
-        'registrations.refunded' => "Remboursement enregistré",
+        'registrations.refunded' => 'Remboursement enregistré',
         'registrations.card_sent' => 'Carte envoyée à la main',
         'registrations.card_shared' => 'Lien de carte transmis',
         'reconciliation.resolved' => 'Ligne de relevé résolue',
@@ -59,6 +59,12 @@ return [
         'unit.updated' => 'Unité modifiée',
         'unit.deleted' => 'Unité désactivée',
         'tenant_member.profile_assigned' => 'Profil affecté',
+        'support_access.opened' => 'Accès du support ouvert',
+        'support_access.revoked' => 'Accès du support révoqué',
+        'support_access.page_viewed' => 'Page consultée par le support',
+        'event.ticket_template_updated' => 'Gabarit du billet de l’événement',
+        'event.ticket_background_updated' => 'Fond du billet de l’événement déposé',
+        'event.ticket_background_deleted' => 'Fond du billet de l’événement retiré',
     ],
 
     'messages' => [
@@ -80,7 +86,7 @@ return [
         'proofs.rejected' => ':actor a rejeté une preuve de paiement.',
         'registrations.purged' => ':actor a déclenché la purge des inscriptions non finalisées.',
         'registrations.cancelled' => ':actor a annulé l\'inscription de « :subject ».',
-        'registrations.refunded' => ":actor a enregistré le remboursement de « :subject ».",
+        'registrations.refunded' => ':actor a enregistré le remboursement de « :subject ».',
         'registrations.card_sent' => ':actor a envoyé la carte d\'invitation de « :subject ».',
         'registrations.card_shared' => ':actor a transmis un lien de carte ou de billet de « :subject ».',
         'reconciliation.resolved' => ':actor a résolu une ligne du relevé.',
@@ -101,6 +107,12 @@ return [
         'unit.updated' => ':actor a modifié l\'unité « :subject ».',
         'unit.deleted' => ':actor a désactivé l\'unité « :subject ».',
         'tenant_member.profile_assigned' => ':actor a affecté un profil à un membre.',
+        'support_access.opened' => ':actor a ouvert un accès de support à l’équipe Convive.',
+        'support_access.revoked' => ':actor a révoqué l’accès de support.',
+        'support_access.page_viewed' => ':actor, de l’équipe Convive, a consulté une page de l’organisation.',
+        'event.ticket_template_updated' => ':actor a modifié le gabarit du billet de l’événement « :subject ».',
+        'event.ticket_background_updated' => ':actor a déposé un fond du billet pour l’événement « :subject ».',
+        'event.ticket_background_deleted' => ':actor a retiré un fond du billet de l’événement « :subject ».',
     ],
 
     'empty' => [

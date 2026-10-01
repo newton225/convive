@@ -38,7 +38,7 @@ return [
         'proofs.rejected' => 'Proof rejected',
         'registrations.purged' => 'Registrations purged',
         'registrations.cancelled' => 'Registration cancelled',
-        'registrations.refunded' => "Refund recorded",
+        'registrations.refunded' => 'Refund recorded',
         'registrations.card_sent' => 'Card sent by hand',
         'registrations.card_shared' => 'Card link shared',
         'reconciliation.resolved' => 'Statement line resolved',
@@ -59,6 +59,12 @@ return [
         'unit.updated' => 'Unit updated',
         'unit.deleted' => 'Unit deactivated',
         'tenant_member.profile_assigned' => 'Profile assigned',
+        'support_access.opened' => 'Support access opened',
+        'support_access.revoked' => 'Support access revoked',
+        'support_access.page_viewed' => 'Page viewed by support',
+        'event.ticket_template_updated' => 'Event ticket template',
+        'event.ticket_background_updated' => 'Event ticket background uploaded',
+        'event.ticket_background_deleted' => 'Event ticket background removed',
     ],
 
     'messages' => [
@@ -101,6 +107,12 @@ return [
         'unit.updated' => ':actor updated the unit ":subject".',
         'unit.deleted' => ':actor deactivated the unit ":subject".',
         'tenant_member.profile_assigned' => ':actor assigned a profile to a member.',
+        'support_access.opened' => ':actor opened a support access for the Convive team.',
+        'support_access.revoked' => ':actor revoked the support access.',
+        'support_access.page_viewed' => ':actor, from the Convive team, viewed a page of the organisation.',
+        'event.ticket_template_updated' => ':actor changed the ticket template of the event “:subject”.',
+        'event.ticket_background_updated' => ':actor uploaded a ticket background for the event “:subject”.',
+        'event.ticket_background_deleted' => ':actor removed a ticket background from the event “:subject”.',
     ],
 
     'empty' => [

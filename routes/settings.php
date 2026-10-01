@@ -124,6 +124,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // Acces du support (README ecran 25) : reserve au Proprietaire, voir `TenantPolicy`.
             Route::get('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'show'])->name('tenants.support-access.show');
+            // Ouvrir le contenu de l'organisation a l'editeur engage l'organisation entiere : mot de
+            // passe redemande. Revoquer referme, et ne l'exige pas.
+            Route::post('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'store'])->middleware(RequirePassword::class)->name('tenants.support-access.store');
+            Route::delete('settings/tenants/{tenant}/support-access/{grant}', [SupportAccessController::class, 'destroy'])->name('tenants.support-access.destroy');
 
             // Journalisation (README ecran 23) et gabarit du billet (ecran 15).
             Route::get('settings/tenants/{tenant}/audit', [AuditLogController::class, 'index'])->name('tenants.audit.index');

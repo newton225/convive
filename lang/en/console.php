@@ -287,4 +287,12 @@ return [
         'invitations_empty' => 'No pending invitation.',
         'invite' => 'Invite a member',
     ],
+    // Les acces de support ouverts au compte connecte : la seule porte de l'editeur vers le
+    // contenu d'une organisation.
+    'support_grants' => [
+        'title' => 'Support accesses open for you',
+        'description' => 'These organisations opened their space to you in read-only mode. Every page you view is written to their audit log.',
+        'until' => 'until :expires',
+        'open' => 'View',
+    ],
 ];

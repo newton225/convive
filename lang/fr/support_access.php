@@ -28,6 +28,10 @@ return [
         'proofs' => 'Preuves à vérifier',
         'audit' => 'Journalisation',
         'organisation' => 'Espace et marque',
+        'dashboard' => 'Tableau de bord',
+        'seating' => 'Plan de salle',
+        'reports' => 'Rapport',
+        'other' => 'Autre page',
     ],
 
     'grant' => [
@@ -38,6 +42,8 @@ return [
         'duration' => 'Durée',
         'hours' => '{1} 1 heure|[2,*] :count heures',
         'submit' => 'Ouvrir l’accès',
+        'confirm_title' => 'Ouvrir un accès à :operator ?',
+        'confirm_description' => 'Cette personne de l’équipe Convive pourra lire vos événements, vos inscrits, vos preuves et votre journal pendant :duration. Elle ne pourra rien modifier, et vous pourrez révoquer l’accès à tout moment.',
         'one_at_a_time' => 'Un seul accès à la fois : révoquez celui en cours pour en ouvrir un autre.',
     ],
 
@@ -55,5 +61,22 @@ return [
             'expired' => 'Arrivé à échéance',
             'revoked' => 'Révoqué',
         ],
+    ],
+    'errors' => [
+        'already_open' => 'Un accès est déjà ouvert. Révoquez-le avant d’en ouvrir un autre.',
+        'operator' => 'Choisissez une personne de l’équipe Convive.',
+        'duration' => 'Choisissez l’une des durées proposées, 24 heures au plus.',
+        'read_only' => 'Un accès de support est en lecture seule : cette action n’est pas permise.',
+    ],
+
+    'flash' => [
+        'opened' => 'Accès ouvert à :operator.',
+        'revoked' => 'Accès révoqué.',
+    ],
+
+    'banner' => [
+        'member' => ':operator, de l’équipe Convive, peut consulter cet espace en lecture seule jusqu’au :expires.',
+        'viewing' => 'Accès de support : vous consultez :organisation en lecture seule jusqu’au :expires. Chaque page consultée est journalisée.',
+        'manage' => 'Gérer l’accès',
     ],
 ];

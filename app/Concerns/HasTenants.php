@@ -7,12 +7,14 @@ use App\Data\UserTenant;
 use App\Enums\TenantPermission;
 use App\Models\Membership;
 use App\Models\Profile;
+use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -132,7 +134,35 @@ trait HasTenants
         // l'appeler apres le retour de `tenantProfile()` la chargerait hors du contexte de
         // locataire pose par `run()`, des que rien d'autre ne le maintient actif (donc hors
         // d'une requete authentifiee, comme dans un test qui appelle cette methode seule).
-        return $tenant->run(fn () => $this->tenantProfile($tenant)?->permissionValues()) ?? [];
+        $own = $tenant->run(fn () => $this->tenantProfile($tenant)?->permissionValues());
+
+        if ($own !== null) {
+            return $own;
+        }
+
+        // Sans profil dans l'organisation : rien, sauf la lecture qu'ouvre un acces de support.
+        return $this->supportAccessTo($tenant) !== null
+            ? array_map(fn (TenantPermission $permission) => $permission->value, TenantPermission::supportReadable())
+            : [];
+    }
+
+    /**
+     * Get the support access currently letting the user read the given tenant, if any (README
+     * section 3). Deux conditions, relues a chaque appel : l'utilisateur fait toujours partie de
+     * l'equipe Convive, et un Proprietaire lui a ouvert un acces ni revoque ni echu.
+     */
+    public function supportAccessTo(Tenant $tenant): ?SupportAccessGrant
+    {
+        if (! Gate::forUser($this)->allows('console.access')) {
+            return null;
+        }
+
+        return SupportAccessGrant::query()
+            ->where('tenant_id', $tenant->id)
+            ->where('operator_id', $this->getKey())
+            ->active()
+            ->latest('id')
+            ->first();
     }
 
     /**
