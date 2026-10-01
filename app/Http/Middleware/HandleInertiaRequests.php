@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Vite;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -69,7 +70,10 @@ class HandleInertiaRequests extends Middleware
             'cspNonce' => Vite::cspNonce(),
             'locale' => app()->getLocale(),
             'supportedLocales' => Locale::supported(),
-            'translations' => fn () => $this->translations(),
+            // Envoyees une seule fois, puis gardees par le navigateur d'une page a l'autre (prop
+            // « once » d'Inertia) : elles pesaient l'essentiel de chaque navigation. La cle porte
+            // la langue, pour qu'un changement de langue les redemande.
+            'translations' => Inertia::once(fn () => $this->translations())->as('translations:'.app()->getLocale()),
             'currentTenant' => fn () => $user?->currentTenant ? $user->toUserTenant($user->currentTenant) : null,
             'tenants' => fn () => $user?->toUserTenants(includeCurrent: true) ?? [],
             'notifications' => fn () => $user ? $this->notifications($user) : null,
