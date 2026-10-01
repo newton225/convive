@@ -35,6 +35,7 @@ return [
         'holder_guest' => 'Main guest',
         'holder_companion' => 'Companion',
         'valid' => 'Valid ticket',
+        'copyright' => '© :year Convive',
     ],
 
     'print' => [

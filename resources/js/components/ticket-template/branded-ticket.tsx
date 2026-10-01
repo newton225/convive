@@ -394,6 +394,19 @@ export function BrandedTicket({
                                 </div>
                             ) : null}
                         </div>
+                        {/* La mention de l'editeur, dans la marge basse du pied : elle n'ajoute
+                            aucune hauteur au billet. */}
+                        <p
+                            className={cn(
+                                'text-ink/60 absolute inset-x-5 bottom-2 text-[0.625rem] leading-none',
+                                centered ? 'text-center' : 'text-left',
+                            )}
+                            data-test="ticket-copyright"
+                        >
+                            {t('ticket_template.preview.copyright', {
+                                year: String(new Date().getFullYear()),
+                            })}
+                        </p>
                     </div>
                 </div>
             </article>

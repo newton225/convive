@@ -71,6 +71,9 @@
         /* Validite, cachet et signature sur une meme ligne : la place va aux noms. */
         .footer { position: absolute; left: 0; right: 0; bottom: 0; padding: 3mm 7mm 5mm; text-align: {{ $align }}; }
         .valid { display: inline-block; vertical-align: middle; padding: 1mm 3.5mm; border-radius: 3mm; font-size: 8pt; font-weight: 600; color: {{ $brand['colors']['primary'] }}; background: {{ $design['tints']['badge'] }}; }
+        /* La mention de l'editeur, dans la marge basse du talon : elle n'ajoute aucune hauteur.
+           Placee depuis le haut du talon : le moteur PDF situe mal un `bottom` imbrique. */
+        .copyright { position: absolute; left: 7mm; top: 182mm; width: 76mm; font-size: 5.5pt; line-height: 1; color: #8a867f; text-align: {{ $align }}; }
         .marks { display: inline-block; margin-left: 3mm; vertical-align: middle; }
         .stamp { height: 11mm; margin-right: 2mm; vertical-align: middle; }
         .signature { height: 9mm; max-width: 20mm; vertical-align: middle; }
@@ -183,6 +186,8 @@
                         </div>
                     @endif
                 </div>
+
+                <div class="copyright">{{ __('ticket_template.preview.copyright', ['year' => now()->year]) }}</div>
 
                 {{-- En dernier : peints par-dessus le haut du billet et son fond eventuel. --}}
                 @for ($i = 0; $i < $scallops; $i++)
