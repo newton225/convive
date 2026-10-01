@@ -2,11 +2,16 @@
 
 namespace App\Actions\Tenants;
 
+use App\Enums\ConsoleArea;
 use App\Models\SupportAccessGrant;
+use App\Models\SupportAccessRequest;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\Tenants\SupportAccessEnded;
 use App\Notifications\Tenants\SupportAccessOpened;
+use App\Notifications\Tenants\SupportAccessRequested;
+use App\Notifications\Tenants\SupportAccessRequestTaken;
+use App\Support\Console\ConsoleAccess;
 use App\Support\Console\ConsoleJournal;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
@@ -19,7 +24,8 @@ use Illuminate\Validation\ValidationException;
  * trace centrale est la table `support_access_views`.
  *
  * Deux messages encadrent l'acces : la personne de l'equipe Convive est prevenue a l'ouverture,
- * les Proprietaires quand il se termine.
+ * les Proprietaires quand il se termine. Quand personne de l'equipe n'est visible, une demande
+ * d'aide la previent d'abord (`request`, `take`).
  */
 class ManageSupportAccess
 {
@@ -66,6 +72,9 @@ class ManageSupportAccess
                 'expires_at' => now()->addHours($hours),
             ]);
 
+            // La demande d'aide a obtenu ce qu'elle demandait.
+            SupportAccessRequest::where('tenant_id', $tenant->id)->pending()->update(['closed_at' => now()]);
+
             activity()
                 ->performedOn($tenant)
                 ->causedBy($grantedBy)
@@ -85,6 +94,102 @@ class ManageSupportAccess
         $operator->notify(new SupportAccessOpened($grant));
 
         return $grant;
+    }
+
+    /**
+     * Tell the Convive team the organisation wants to open its space, when nobody there is visible
+     * to receive the access. N'ouvre rien : la demande previent, c'est tout.
+     *
+     * Une seule demande en attente par organisation, sous le meme verrou que l'ouverture.
+     *
+     * @throws ValidationException
+     */
+    public function request(Tenant $tenant, User $requestedBy, string $reason): SupportAccessRequest
+    {
+        $request = Cache::lock("support-access:{$tenant->id}", 10)->block(5, function () use ($tenant, $requestedBy, $reason) {
+            if (SupportAccessRequest::where('tenant_id', $tenant->id)->pending()->exists()) {
+                throw ValidationException::withMessages([
+                    'reason' => __('support_access.errors.already_requested'),
+                ]);
+            }
+
+            $request = SupportAccessRequest::create([
+                'tenant_id' => $tenant->id,
+                'requested_by_id' => $requestedBy->id,
+                'reason' => $reason,
+            ]);
+
+            activity()
+                ->performedOn($tenant)
+                ->causedBy($requestedBy)
+                ->event('created')
+                ->withProperties(['reason' => $reason, 'tenant_id' => $tenant->id])
+                ->log('support_access.requested');
+
+            return $request;
+        });
+
+        ConsoleJournal::record('support_access_requested', $requestedBy, $tenant);
+
+        // Toute l'equipe qui peut recevoir un acces, visible ou non : c'est justement parce que
+        // personne n'est visible que la demande existe.
+        $team = User::whereIn('email', ConsoleAccess::emailsAllowedTo(ConsoleArea::Support))->get();
+
+        Notification::send($team, new SupportAccessRequested($tenant->name, $requestedBy->name, $reason));
+
+        return $request;
+    }
+
+    /**
+     * Withdraw a request the organisation no longer needs.
+     */
+    public function cancelRequest(SupportAccessRequest $request, User $cancelledBy): void
+    {
+        if (! $request->isPending()) {
+            return;
+        }
+
+        $request->update(['closed_at' => now()]);
+
+        activity()
+            ->performedOn($request->tenant)
+            ->causedBy($cancelledBy)
+            ->event('deleted')
+            ->withProperties(['tenant_id' => $request->tenant_id])
+            ->log('support_access.request_cancelled');
+    }
+
+    /**
+     * Let a member of the Convive team take a request : ils deviennent visibles de l'organisation,
+     * dont les Proprietaires sont prevenus. L'acces reste a ouvrir par l'un d'eux.
+     *
+     * Appelee depuis la console, donc hors de la tenancy de l'organisation : la ligne de son
+     * journal s'ecrit sous `run()`.
+     */
+    public function take(SupportAccessRequest $request, User $operator): void
+    {
+        if (! $request->isPending() || $request->taken_by_id === $operator->id) {
+            return;
+        }
+
+        $request->update(['taken_by_id' => $operator->id, 'taken_at' => now()]);
+
+        // Prendre la demande, c'est accepter d'apparaitre : sans cela, l'organisation ne
+        // pourrait toujours ouvrir l'acces a personne.
+        $operator->forceFill(['support_available' => true])->save();
+
+        $tenant = $request->tenant;
+
+        $tenant->run(fn () => activity()
+            ->performedOn($tenant)
+            ->causedBy($operator)
+            ->event('updated')
+            ->withProperties(['operator' => $operator->name, 'tenant_id' => $tenant->id])
+            ->log('support_access.request_taken'));
+
+        ConsoleJournal::record('support_access_request_taken', $operator, $tenant);
+
+        Notification::send($tenant->owners(), new SupportAccessRequestTaken($tenant->name, $tenant->slug, $operator->name));
     }
 
     /**

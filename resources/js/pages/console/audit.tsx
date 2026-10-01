@@ -46,6 +46,8 @@ const types: ConsoleAuditType[] = [
     'payment_reminder_sent',
     'support_access_finished',
     'backup_run',
+    'support_access_requested',
+    'support_access_request_taken',
 ];
 
 /**

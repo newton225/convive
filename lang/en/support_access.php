@@ -40,7 +40,7 @@ return [
         'none_active' => 'No access is open right now.',
         'operator' => 'Person of the Convive team',
         'operator_placeholder' => 'Choose a person',
-        'no_operator' => 'Nobody from the Convive team is available at the moment. Write to support: the person helping you will make themselves available, and their name will appear here.',
+        'no_operator' => 'Nobody from the Convive team is visible at the moment. Tell the team above: the person helping you will make themselves available, and their name will appear here.',
         'duration' => 'Duration',
         'hours' => '{1} 1 hour|[2,*] :count hours',
         'reason' => 'Why are you opening this access?',
@@ -49,6 +49,18 @@ return [
         'confirm_title' => 'Open an access for :operator?',
         'confirm_description' => 'This member of the Convive team will be able to read your events, registrations, proofs and audit log for :duration. They cannot change anything, and you can revoke the access at any time.',
         'one_at_a_time' => 'One access at a time: revoke the current one to open another.',
+    ],
+
+    'request' => [
+        'title' => 'Tell the Convive team',
+        'intro' => 'Nobody from the Convive team is visible to receive an access. Say what brings you: the whole support team is told, and the person helping you writes to you as soon as they are available. This request opens no access.',
+        'reason' => 'What do you need?',
+        'reason_hint' => 'One or two sentences: the problem and the event concerned. Do not put a password or an account number in it.',
+        'submit' => 'Tell the team',
+        'sent' => 'Request sent on :date. The Convive team has been told; you will get an email as soon as someone makes themselves available.',
+        'taken' => ':operator, from the Convive team, took your request. You now have to open the access to them below.',
+        'your_message' => 'Your message',
+        'cancel' => 'Cancel the request',
     ],
 
     'history' => [
@@ -72,6 +84,8 @@ return [
     'errors' => [
         'note' => 'Write in one sentence what you found (at least 10 characters).',
         'reason' => 'Say in one sentence why you are opening this access (at least 10 characters).',
+        'request_reason' => 'Say in one sentence what you need (at least 10 characters).',
+        'already_requested' => 'A request is already waiting. The Convive team has been told.',
         'already_open' => 'An access is already open. Revoke it before opening another one.',
         'operator' => 'Choose a member of the Convive team.',
         'duration' => 'Choose one of the durations offered, 24 hours at most.',
@@ -82,6 +96,8 @@ return [
         'finished' => 'The access to :organisation is closed. The organisation has been told.',
         'opened' => 'Access opened for :operator.',
         'revoked' => 'Access revoked.',
+        'requested' => 'The Convive team has been told. You will get an email as soon as someone makes themselves available.',
+        'request_cancelled' => 'Request cancelled.',
     ],
 
     'banner' => [
@@ -105,6 +121,19 @@ return [
             'until' => 'The access closes on :expires.',
             'action' => 'Open the console',
             'outro' => 'Every page you view is written to the organisation’s audit log. When you are done, close the access with “I am done”.',
+        ],
+        'requested' => [
+            'subject' => ':organisation is asking support for help',
+            'intro' => ':requested_by, from :organisation, wants to open their space to the Convive team, and nobody is visible there at the moment.',
+            'reason' => 'Their request: :reason',
+            'action' => 'Open the console',
+            'outro' => 'Take the request from the console: you will appear in the list of the organisation, which can then open the access to you. Nothing is open until then.',
+        ],
+        'taken' => [
+            'subject' => ':operator, from the Convive team, can help you',
+            'intro' => ':operator took the help request of :organisation and now appears in the list of people an access can be opened to.',
+            'next' => 'No access is open yet: it is yours to open, for the duration you choose.',
+            'action' => 'Open the access',
         ],
         'ended' => [
             'subject' => 'The support access to :organisation is closed',

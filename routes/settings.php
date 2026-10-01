@@ -11,6 +11,7 @@ use App\Http\Controllers\Tenants\OrganisationController;
 use App\Http\Controllers\Tenants\PaymentAccountController;
 use App\Http\Controllers\Tenants\ProfileController as TenantProfileController;
 use App\Http\Controllers\Tenants\SupportAccessController;
+use App\Http\Controllers\Tenants\SupportAccessRequestController;
 use App\Http\Controllers\Tenants\TenantController;
 use App\Http\Controllers\Tenants\TenantInvitationController;
 use App\Http\Controllers\Tenants\TenantMemberController;
@@ -128,6 +129,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // passe redemande. Revoquer referme, et ne l'exige pas.
             Route::post('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'store'])->middleware(RequirePassword::class)->name('tenants.support-access.store');
             Route::delete('settings/tenants/{tenant}/support-access/{grant}', [SupportAccessController::class, 'destroy'])->name('tenants.support-access.destroy');
+            // La demande d'aide previent l'equipe Convive sans rien ouvrir : pas de mot de passe
+            // redemande, mais chaque demande envoie des courriels, d'ou la limite.
+            Route::post('settings/tenants/{tenant}/support-access-requests', [SupportAccessRequestController::class, 'store'])->middleware('throttle:support-request')->name('tenants.support-access.requests.store');
+            Route::delete('settings/tenants/{tenant}/support-access-requests/{supportRequest}', [SupportAccessRequestController::class, 'destroy'])->name('tenants.support-access.requests.destroy');
 
             // Journalisation (README ecran 23) et gabarit du billet (ecran 15).
             Route::get('settings/tenants/{tenant}/audit', [AuditLogController::class, 'index'])->name('tenants.audit.index');

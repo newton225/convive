@@ -195,6 +195,9 @@ class AppServiceProvider extends ServiceProvider
         // d'un meme poste de controle peuvent partager une adresse).
         RateLimiter::for('scan', fn ($request) => Limit::perMinute(60)->by($request->user()?->id));
 
+        // Demande d'aide au support : chaque demande ecrit a toute l'equipe Convive.
+        RateLimiter::for('support-request', fn ($request) => Limit::perHour(5)->by($request->user()?->id));
+
         // Exports (Excel/CSV/PDF/listes de controle) et import de releve (table de CLAUDE.md).
         RateLimiter::for('exports', fn ($request) => Limit::perHour(5)->by($request->user()?->id));
 

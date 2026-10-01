@@ -7,6 +7,7 @@ import { ConsoleTable } from '@/components/console/console-table';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
+import { SupportRequestCard } from '@/components/support-request-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,6 +24,7 @@ import { destroy, show, store } from '@/routes/tenants/support-access';
 import type {
     ActiveSupportAccess,
     PastSupportAccess,
+    PendingSupportRequest,
     SupportOperatorOption,
     Translations,
 } from '@/types';
@@ -32,6 +34,7 @@ type Props = {
     durations: number[];
     operators: SupportOperatorOption[];
     activeAccess: ActiveSupportAccess | null;
+    pendingRequest: PendingSupportRequest | null;
     pastAccesses: PastSupportAccess[];
 };
 
@@ -46,15 +49,21 @@ export default function SupportAccess({
     durations,
     operators,
     activeAccess,
+    pendingRequest,
     pastAccesses,
 }: Props) {
     const { t, locale } = useTranslation();
     const [confirming, setConfirming] = useState(false);
     const [revoking, setRevoking] = useState(false);
+    // La demande d'aide deja ecrite n'est pas a ressaisir : son motif et la personne qui l'a
+    // prise en charge sont repris, il ne reste qu'a choisir la duree.
+    const takenOperator = operators.find(
+        (operator) => operator.id === pendingRequest?.takenById,
+    );
     const form = useForm({
-        operator_id: '',
+        operator_id: takenOperator ? String(takenOperator.id) : '',
         duration: String(durations[durations.length - 1]),
-        reason: '',
+        reason: pendingRequest?.reason ?? '',
     });
     const chosenOperator = operators.find(
         (operator) => String(operator.id) === form.data.operator_id,
@@ -225,6 +234,16 @@ export default function SupportAccess({
                         </CardContent>
                     </Card>
                 )}
+
+                {/* Personne de visible, ou une demande deja partie : l'organisation previent
+                    l'equipe Convive, et suit ou en est sa demande. */}
+                {activeAccess === null &&
+                (pendingRequest !== null || operators.length === 0) ? (
+                    <SupportRequestCard
+                        tenantSlug={tenant.slug}
+                        pendingRequest={pendingRequest}
+                    />
+                ) : null}
 
                 <Card>
                     <CardHeader>

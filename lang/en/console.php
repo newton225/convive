@@ -348,6 +348,8 @@ return [
             'payment_reminder_sent' => 'Overdue reminder',
             'support_access_finished' => 'Support access closed',
             'backup_run' => 'Backup',
+            'support_access_requested' => 'Help request',
+            'support_access_request_taken' => 'Help request taken',
         ],
         'messages' => [
             'support_access_used' => ':actor viewed :organisation through a support access',
@@ -366,6 +368,8 @@ return [
             'payment_reminder_sent' => ':actor reminded :organisation about an overdue payment',
             'support_access_finished' => ':actor closed their support access to :organisation',
             'backup_run' => ':actor ran a backup',
+            'support_access_requested' => ':actor, from :organisation, asked support for help',
+            'support_access_request_taken' => ':actor took the help request of :organisation',
         ],
         'empty' => [
             'title' => 'No entry',
@@ -434,6 +438,18 @@ return [
     ],
     // Les acces de support ouverts au compte connecte : la seule porte de l'editeur vers le
     // contenu d'une organisation.
+    'support_requests' => [
+        'title' => 'Help requests',
+        'hint' => 'These organisations want to open their space and see no one to open it to. By taking a request, you appear in their list and their owners are told; the access is still theirs to open.',
+        'from' => ':name, on :date',
+        'take' => 'Take it',
+        'taken_by_me' => 'Taken by you: waiting for the access to be opened.',
+        'taken_by' => 'Taken by :operator.',
+        'flash' => [
+            'taken' => 'Request taken: :organisation has been told and can open the access to you.',
+        ],
+    ],
+
     'support_grants' => [
         'title' => 'Support access',
         'availability' => 'Appear in the list offered to organisations',

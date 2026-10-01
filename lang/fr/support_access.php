@@ -40,7 +40,7 @@ return [
         'none_active' => 'Aucun accès n’est ouvert en ce moment.',
         'operator' => 'Personne de l’équipe Convive',
         'operator_placeholder' => 'Choisir une personne',
-        'no_operator' => 'Personne de l’équipe Convive n’est disponible pour le moment. Écrivez au support : la personne qui vous aide se rendra disponible, et son nom apparaîtra ici.',
+        'no_operator' => 'Personne de l’équipe Convive n’est visible pour le moment. Prévenez l’équipe ci-dessus : la personne qui vous aide se rendra disponible, et son nom apparaîtra ici.',
         'duration' => 'Durée',
         'hours' => '{1} 1 heure|[2,*] :count heures',
         'reason' => 'Pourquoi ouvrez-vous cet accès ?',
@@ -49,6 +49,18 @@ return [
         'confirm_title' => 'Ouvrir un accès à :operator ?',
         'confirm_description' => 'Cette personne de l’équipe Convive pourra lire vos événements, vos inscrits, vos preuves et votre journal pendant :duration. Elle ne pourra rien modifier, et vous pourrez révoquer l’accès à tout moment.',
         'one_at_a_time' => 'Un seul accès à la fois : révoquez celui en cours pour en ouvrir un autre.',
+    ],
+
+    'request' => [
+        'title' => 'Prévenir l’équipe Convive',
+        'intro' => 'Personne de l’équipe Convive n’est visible pour recevoir un accès. Dites ce qui vous amène : toute l’équipe du support est prévenue, et celui qui vous aide vous écrit dès qu’il est disponible. Cette demande n’ouvre aucun accès.',
+        'reason' => 'De quoi avez-vous besoin ?',
+        'reason_hint' => 'Une ou deux phrases : le problème et l’événement concerné. N’y mettez ni mot de passe ni numéro de compte.',
+        'submit' => 'Prévenir l’équipe',
+        'sent' => 'Demande envoyée le :date. L’équipe Convive est prévenue ; vous recevrez un courriel dès qu’une personne se rend disponible.',
+        'taken' => ':operator, de l’équipe Convive, a pris votre demande en charge. Il vous reste à lui ouvrir l’accès ci-dessous.',
+        'your_message' => 'Votre message',
+        'cancel' => 'Annuler la demande',
     ],
 
     'history' => [
@@ -72,6 +84,8 @@ return [
     'errors' => [
         'note' => 'Écrivez en une phrase ce que vous avez constaté (10 caractères au moins).',
         'reason' => 'Dites en une phrase pourquoi vous ouvrez cet accès (10 caractères au moins).',
+        'request_reason' => 'Dites en une phrase de quoi vous avez besoin (10 caractères au moins).',
+        'already_requested' => 'Une demande est déjà en attente. L’équipe Convive est prévenue.',
         'already_open' => 'Un accès est déjà ouvert. Révoquez-le avant d’en ouvrir un autre.',
         'operator' => 'Choisissez une personne de l’équipe Convive.',
         'duration' => 'Choisissez l’une des durées proposées, 24 heures au plus.',
@@ -82,6 +96,8 @@ return [
         'finished' => 'L’accès à :organisation est fermé. L’organisation est prévenue.',
         'opened' => 'Accès ouvert à :operator.',
         'revoked' => 'Accès révoqué.',
+        'requested' => 'L’équipe Convive est prévenue. Vous recevrez un courriel dès qu’une personne se rend disponible.',
+        'request_cancelled' => 'Demande annulée.',
     ],
 
     'banner' => [
@@ -105,6 +121,19 @@ return [
             'until' => 'L’accès se ferme le :expires.',
             'action' => 'Ouvrir la console',
             'outro' => 'Chaque page que vous consultez est inscrite au journal de l’organisation. Quand vous avez fini, fermez l’accès avec « J’ai terminé ».',
+        ],
+        'requested' => [
+            'subject' => ':organisation demande l’aide du support',
+            'intro' => ':requested_by, de :organisation, souhaite ouvrir son espace à l’équipe Convive, et personne n’y est visible pour le moment.',
+            'reason' => 'Sa demande : :reason',
+            'action' => 'Ouvrir la console',
+            'outro' => 'Prenez la demande en charge depuis la console : vous apparaîtrez dans la liste de l’organisation, qui pourra alors vous ouvrir l’accès. Rien n’est ouvert d’ici là.',
+        ],
+        'taken' => [
+            'subject' => ':operator, de l’équipe Convive, peut vous aider',
+            'intro' => ':operator a pris en charge la demande d’aide de :organisation et apparaît maintenant dans la liste des personnes à qui ouvrir un accès.',
+            'next' => 'Aucun accès n’est ouvert pour l’instant : c’est à vous de l’ouvrir, pour la durée de votre choix.',
+            'action' => 'Ouvrir l’accès',
         ],
         'ended' => [
             'subject' => 'L’accès de support à :organisation est fermé',

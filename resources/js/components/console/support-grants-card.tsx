@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { LifeBuoy } from 'lucide-react';
 import { useState } from 'react';
+import { SupportRequestsList } from '@/components/console/support-requests-list';
 import { FinishSupportAccessDialog } from '@/components/finish-support-access-dialog';
 import { CheckboxRow } from '@/components/settings/checkbox-row';
 import { Button } from '@/components/ui/button';
@@ -8,12 +9,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
 import { update as updateAvailability } from '@/routes/console/support-availability';
-import type { ConsoleSupportGrant } from '@/types';
+import type { ConsoleSupportGrant, ConsoleSupportRequest } from '@/types';
 
 type Props = {
     // Vrai quand le compte connecte apparait dans la liste proposee aux organisations.
     available: boolean;
     grants: ConsoleSupportGrant[];
+    // Les organisations qui demandent de l'aide et ne voient personne a qui ouvrir leur espace.
+    requests: ConsoleSupportRequest[];
 };
 
 /**
@@ -23,7 +26,7 @@ type Props = {
  * back-office de l'organisation : un chargement complet, pas une visite Inertia dans la mise en
  * page de la console.
  */
-export function SupportGrantsCard({ available, grants }: Props) {
+export function SupportGrantsCard({ available, grants, requests }: Props) {
     const { t, locale } = useTranslation();
     const [saving, setSaving] = useState(false);
 
@@ -59,6 +62,8 @@ export function SupportGrantsCard({ available, grants }: Props) {
                     disabled={saving}
                     onChange={setAvailable}
                 />
+
+                <SupportRequestsList requests={requests} />
 
                 {grants.length === 0 ? (
                     <p className="text-muted-foreground text-sm">

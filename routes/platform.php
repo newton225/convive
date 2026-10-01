@@ -11,6 +11,7 @@ use App\Http\Controllers\Console\RepairTenantDatabaseController;
 use App\Http\Controllers\Console\RunBackupController;
 use App\Http\Controllers\Console\ShowcaseController;
 use App\Http\Controllers\Console\SupportAvailabilityController;
+use App\Http\Controllers\Console\TakeSupportRequestController;
 use App\Http\Controllers\Console\TeamController;
 use App\Http\Middleware\EnsureConsoleOperator;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,8 @@ Route::prefix('console')
         Route::put('support-availability', SupportAvailabilityController::class)->middleware('can:console.area,"support"')->name('support-availability.update');
         // « J'ai termine » : la personne ferme elle-meme l'acces qu'une organisation lui a ouvert.
         Route::post('support-access/{grant}/finish', FinishSupportAccessController::class)->middleware('can:console.area,"support"')->name('support-access.finish');
+        // « Prendre en charge » une demande d'aide : la personne se rend visible de l'organisation.
+        Route::post('support-requests/{supportRequest}/take', TakeSupportRequestController::class)->middleware('can:console.area,"support"')->name('support-requests.take');
         Route::get('organisations/{organisation}', [OrganisationController::class, 'show'])->middleware('can:console.area,"organisations"')->name('organisations.show');
 
         // Les actions de l'editeur sur une organisation (README section 3) : Fondateurs et

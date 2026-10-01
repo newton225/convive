@@ -163,7 +163,9 @@ export type ConsoleAuditType =
     | 'tenant_erased'
     | 'payment_reminder_sent'
     | 'support_access_finished'
-    | 'backup_run';
+    | 'backup_run'
+    | 'support_access_requested'
+    | 'support_access_request_taken';
 
 export type ConsoleAuditEntry = {
     id: number;

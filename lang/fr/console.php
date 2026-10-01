@@ -348,6 +348,8 @@ return [
             'payment_reminder_sent' => 'Relance d’impayé',
             'support_access_finished' => 'Accès de support fermé',
             'backup_run' => 'Sauvegarde',
+            'support_access_requested' => 'Demande d’aide',
+            'support_access_request_taken' => 'Demande d’aide prise en charge',
         ],
         'messages' => [
             'support_access_used' => ':actor a consulté :organisation avec un accès de support',
@@ -366,6 +368,8 @@ return [
             'payment_reminder_sent' => ':actor a relancé :organisation pour un impayé',
             'support_access_finished' => ':actor a fermé son accès de support à :organisation',
             'backup_run' => ':actor a lancé une sauvegarde',
+            'support_access_requested' => ':actor, de :organisation, a demandé l’aide du support',
+            'support_access_request_taken' => ':actor a pris en charge la demande d’aide de :organisation',
         ],
         'empty' => [
             'title' => 'Aucune entrée',
@@ -434,6 +438,18 @@ return [
     ],
     // Les acces de support ouverts au compte connecte : la seule porte de l'editeur vers le
     // contenu d'une organisation.
+    'support_requests' => [
+        'title' => 'Demandes d’aide',
+        'hint' => 'Ces organisations veulent ouvrir leur espace et ne voient personne à qui le faire. En prenant une demande en charge, vous apparaissez dans leur liste et leurs Propriétaires sont prévenus ; l’accès reste à ouvrir par eux.',
+        'from' => ':name, le :date',
+        'take' => 'Prendre en charge',
+        'taken_by_me' => 'Prise en charge par vous : en attente de l’ouverture de l’accès.',
+        'taken_by' => 'Prise en charge par :operator.',
+        'flash' => [
+            'taken' => 'Demande prise en charge : :organisation est prévenue et peut vous ouvrir l’accès.',
+        ],
+    ],
+
     'support_grants' => [
         'title' => 'Accès de support',
         'availability' => 'Apparaître dans la liste proposée aux organisations',

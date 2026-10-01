@@ -22,6 +22,7 @@ import type {
     ConsoleOrganisationStatus,
     ConsoleOrganisationSummary,
     ConsoleSupportGrant,
+    ConsoleSupportRequest,
     Translations,
 } from '@/types';
 
@@ -30,6 +31,7 @@ type Props = {
     organisations: ConsoleOrganisationSummary[];
     // Reels, eux : les acces de support ouverts au compte connecte.
     supportGrants: ConsoleSupportGrant[];
+    supportRequests: ConsoleSupportRequest[];
     // Null pour un profil editeur qui n'ouvre pas l'acces de support (Comptabilite).
     supportAvailable: boolean | null;
 };
@@ -52,6 +54,7 @@ export default function Organisations({
     isSample,
     organisations,
     supportGrants,
+    supportRequests,
     supportAvailable,
 }: Props) {
     const { t, locale } = useTranslation();
@@ -151,6 +154,7 @@ export default function Organisations({
                     <SupportGrantsCard
                         available={supportAvailable}
                         grants={supportGrants}
+                        requests={supportRequests}
                     />
                 )}
 

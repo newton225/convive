@@ -7,6 +7,7 @@ use App\Enums\ConsoleArea;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenants\OpenSupportAccessRequest;
 use App\Models\SupportAccessGrant;
+use App\Models\SupportAccessRequest;
 use App\Models\SupportAccessView;
 use App\Models\Tenant;
 use App\Models\User;
@@ -48,9 +49,24 @@ class SupportAccessController extends Controller
             ->latest('id')
             ->first();
 
+        $pending = SupportAccessRequest::where('tenant_id', $tenant->id)
+            ->pending()
+            ->with('takenBy')
+            ->latest('id')
+            ->first();
+
         return Inertia::render('tenants/support-access', [
             'tenant' => ['slug' => $tenant->slug, 'name' => $tenant->name],
             'durations' => SupportAccessGrant::DurationsInHours,
+            // La demande d'aide en attente : envoyee quand personne de l'equipe Convive n'est
+            // visible, elle se ferme a l'ouverture d'un acces.
+            'pendingRequest' => $pending === null ? null : [
+                'id' => $pending->id,
+                'reason' => $pending->reason,
+                'requestedAt' => $pending->created_at?->toISOString(),
+                'takenBy' => $pending->takenBy?->name,
+                'takenById' => $pending->taken_by_id,
+            ],
             'operators' => self::operators()
                 ->map(fn (User $operator) => ['id' => $operator->id, 'name' => $operator->name])
                 ->values()

@@ -27,6 +27,27 @@ export type PastSupportAccess = {
     viewsCount: number;
 };
 
+// La demande d'aide en attente, vue par l'organisation : envoyee quand personne de l'equipe
+// Convive n'est visible. `takenBy` est le nom de la personne qui l'a prise en charge.
+export type PendingSupportRequest = {
+    id: number;
+    reason: string;
+    requestedAt: string;
+    takenBy: string | null;
+    takenById: number | null;
+};
+
+// Une demande d'aide en attente, listee dans la console.
+export type ConsoleSupportRequest = {
+    id: number;
+    organisation: string;
+    requestedBy: string | null;
+    reason: string;
+    requestedAt: string;
+    takenBy: string | null;
+    takenByMe: boolean;
+};
+
 export type SupportOperatorOption = {
     id: number;
     name: string;

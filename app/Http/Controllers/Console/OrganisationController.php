@@ -7,6 +7,7 @@ use App\Enums\PlanCode;
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use App\Models\SupportAccessGrant;
+use App\Models\SupportAccessRequest;
 use App\Models\Tenant;
 use App\Support\Console\ConsoleAccess;
 use App\Support\Console\OrganisationOverview;
@@ -39,6 +40,26 @@ class OrganisationController extends Controller
             'supportAvailable' => ConsoleAccess::allows($request->user(), ConsoleArea::Support)
                 ? $request->user()->support_available
                 : null,
+            // Les demandes d'aide en attente : une organisation veut ouvrir son espace et personne
+            // n'est visible. Lues par les seuls profils qui peuvent recevoir un acces.
+            'supportRequests' => ConsoleAccess::allows($request->user(), ConsoleArea::Support)
+                ? SupportAccessRequest::query()
+                    ->pending()
+                    ->whereHas('tenant')
+                    ->with('tenant', 'requestedBy', 'takenBy')
+                    ->oldest('id')
+                    ->get()
+                    ->map(fn (SupportAccessRequest $supportRequest) => [
+                        'id' => $supportRequest->id,
+                        'organisation' => $supportRequest->tenant->name,
+                        'requestedBy' => $supportRequest->requestedBy?->name,
+                        'reason' => $supportRequest->reason,
+                        'requestedAt' => $supportRequest->created_at?->toISOString(),
+                        'takenBy' => $supportRequest->takenBy?->name,
+                        'takenByMe' => $supportRequest->taken_by_id === $request->user()->id,
+                    ])
+                    ->all()
+                : [],
             // Les acces de support ouverts au compte connecte (README section 3), sa seule porte
             // vers le contenu d'une organisation.
             'supportGrants' => SupportAccessGrant::where('operator_id', $request->user()->id)
