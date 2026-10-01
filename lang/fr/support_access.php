@@ -61,13 +61,16 @@ return [
             'ended_at' => 'Fermé le',
             'end_reason' => 'Fin',
             'views' => 'Pages consultées',
+            'closing_note' => 'Conclusion du support',
         ],
         'end_reasons' => [
             'expired' => 'Arrivé à échéance',
             'revoked' => 'Révoqué',
+            'finished' => 'Fermé par le support',
         ],
     ],
     'errors' => [
+        'note' => 'Écrivez en une phrase ce que vous avez constaté (10 caractères au moins).',
         'reason' => 'Dites en une phrase pourquoi vous ouvrez cet accès (10 caractères au moins).',
         'already_open' => 'Un accès est déjà ouvert. Révoquez-le avant d’en ouvrir un autre.',
         'operator' => 'Choisissez une personne de l’équipe Convive.',
@@ -76,6 +79,7 @@ return [
     ],
 
     'flash' => [
+        'finished' => 'L’accès à :organisation est fermé. L’organisation est prévenue.',
         'opened' => 'Accès ouvert à :operator.',
         'revoked' => 'Accès révoqué.',
     ],
@@ -84,5 +88,34 @@ return [
         'member' => ':operator, de l’équipe Convive, peut consulter cet espace en lecture seule jusqu’au :expires.',
         'viewing' => 'Accès de support : vous consultez :organisation en lecture seule jusqu’au :expires. Chaque page consultée est journalisée.',
         'manage' => 'Gérer l’accès',
+    ],
+    'finish' => [
+        'button' => 'J’ai terminé',
+        'title' => 'Fermer l’accès à :organisation ?',
+        'description' => 'Vous ne pourrez plus consulter cet espace : il faudrait que l’organisation vous rouvre un accès. Les Propriétaires sont prévenus et lisent votre note.',
+        'note' => 'Ce que vous avez constaté',
+        'note_hint' => 'En une ou deux phrases : la cause du problème, ou ce qu’il reste à faire. La note est lue par l’organisation : ni donnée d’invité, ni information interne.',
+        'submit' => 'Fermer l’accès',
+    ],
+    'mail' => [
+        'opened' => [
+            'subject' => ':organisation vous a ouvert un accès de support',
+            'intro' => ':granted_by vous a ouvert un accès en lecture seule à l’espace de :organisation.',
+            'reason' => 'Motif : :reason',
+            'until' => 'L’accès se ferme le :expires.',
+            'action' => 'Ouvrir la console',
+            'outro' => 'Chaque page que vous consultez est inscrite au journal de l’organisation. Quand vous avez fini, fermez l’accès avec « J’ai terminé ».',
+        ],
+        'ended' => [
+            'subject' => 'L’accès de support à :organisation est fermé',
+            'reasons' => [
+                'finished' => ':operator, de l’équipe Convive, a terminé et a fermé son accès à :organisation.',
+                'revoked' => 'L’accès de :operator, de l’équipe Convive, à :organisation a été révoqué.',
+                'expired' => 'L’accès de :operator, de l’équipe Convive, à :organisation est arrivé à échéance.',
+            ],
+            'views' => '{0} Aucune page n’a été consultée.|{1} 1 page a été consultée.|[2,*] :count pages ont été consultées.',
+            'note' => 'Conclusion du support : :note',
+            'action' => 'Voir le détail',
+        ],
     ],
 ];

@@ -355,6 +355,7 @@ return [
             'deletion_cancelled' => 'Suppression annulée',
             'tenant_erased' => 'Organisation effacée',
             'payment_reminder_sent' => 'Relance d’impayé',
+            'support_access_finished' => 'Accès de support fermé',
         ],
         'messages' => [
             'support_access_used' => ':actor a consulté :organisation avec un accès de support',
@@ -371,6 +372,7 @@ return [
             'deletion_cancelled' => ':actor a annulé la suppression de :organisation',
             'tenant_erased' => ':organisation a été effacée à l’échéance de sa suppression programmée',
             'payment_reminder_sent' => ':actor a relancé :organisation pour un impayé',
+            'support_access_finished' => ':actor a fermé son accès de support à :organisation',
         ],
         'empty' => [
             'title' => 'Aucune entrée',

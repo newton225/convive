@@ -110,7 +110,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{operator: string, expiresAt: string, viewing: bool}|null
+     * @return array{id: int, operator: string, expiresAt: string, viewing: bool}|null
      */
     private function supportAccess(Request $request, ?Tenant $tenant): ?array
     {
@@ -121,6 +121,7 @@ class HandleInertiaRequests extends Middleware
             : null);
 
         return $grant === null ? null : [
+            'id' => $grant->id,
             'operator' => $grant->operator->name,
             'expiresAt' => $grant->expires_at->toISOString(),
             'viewing' => $viewing !== null,

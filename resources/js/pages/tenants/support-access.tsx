@@ -108,6 +108,14 @@ export default function SupportAccess({
             header: t('support_access.history.columns.views'),
             accessorKey: 'viewsCount',
         },
+        {
+            header: t('support_access.history.columns.closing_note'),
+            cell: ({ row }) => (
+                <span className="text-muted-foreground">
+                    {row.original.closingNote ?? ''}
+                </span>
+            ),
+        },
     ];
 
     return (

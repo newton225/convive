@@ -21,7 +21,9 @@ export type PastSupportAccess = {
     reason: string | null;
     grantedAt: string;
     endedAt: string;
-    endReason: 'expired' | 'revoked';
+    endReason: 'expired' | 'revoked' | 'finished';
+    // La note laissee par la personne de l'equipe Convive quand elle a ferme l'acces elle-meme.
+    closingNote: string | null;
     viewsCount: number;
 };
 
@@ -33,6 +35,7 @@ export type SupportOperatorOption = {
 // L'acces de support en cours sur l'organisation affichee (prop partagee) : le bandeau permanent.
 // `viewing` est vrai pour la personne de l'equipe Convive qui consulte sous cet acces.
 export type SupportAccessNotice = {
+    id: number;
     operator: string;
     expiresAt: string;
     viewing: boolean;

@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { LifeBuoy } from 'lucide-react';
 import { useState } from 'react';
+import { FinishSupportAccessDialog } from '@/components/finish-support-access-dialog';
 import { CheckboxRow } from '@/components/settings/checkbox-row';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -88,14 +89,20 @@ export function SupportGrantsCard({ available, grants }: Props) {
                                         </span>
                                     ) : null}
                                 </span>
-                                <Button asChild variant="outline" size="sm">
-                                    <a
-                                        href={grant.url}
-                                        data-test="console-support-grant-open"
-                                    >
-                                        {t('console.support_grants.open')}
-                                    </a>
-                                </Button>
+                                <span className="flex flex-wrap items-center gap-2">
+                                    <Button asChild variant="outline" size="sm">
+                                        <a
+                                            href={grant.url}
+                                            data-test="console-support-grant-open"
+                                        >
+                                            {t('console.support_grants.open')}
+                                        </a>
+                                    </Button>
+                                    <FinishSupportAccessDialog
+                                        grantId={grant.id}
+                                        organisation={grant.organisation}
+                                    />
+                                </span>
                             </li>
                         ))}
                     </ul>

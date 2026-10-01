@@ -5,6 +5,7 @@ use App\Actions\Billing\ProcessOverdueSubscriptions;
 use App\Actions\Notifications\NotifyUpcomingPurge;
 use App\Actions\Registrations\ExpireHolds;
 use App\Actions\Registrations\PurgeRegistrations;
+use App\Actions\Tenants\ManageSupportAccess;
 use App\Actions\Tenants\SavePaymentAccount;
 use App\Actions\Tickets\SendInvitationCard;
 use App\Actions\Tickets\SendProofReminder;
@@ -274,6 +275,15 @@ Schedule::command('tenants:sync-permissions')
  * Releve la consommation de chaque organisation et la range dans la base centrale (README
  * section 3) : la console lit ces compteurs, jamais les bases des organisations a chaque affichage.
  */
+/*
+ * Previent les Proprietaires quand un acces de support arrive a echeance (README section 3). Un
+ * acces expire sans que personne n'agisse : il faut une tache pour le dire. Idempotente, par
+ * `ended_notified_at`.
+ */
+Schedule::call(fn (ManageSupportAccess $manage) => $manage->announceExpired())
+    ->everyFiveMinutes()
+    ->description('Tell owners about support accesses that reached their term');
+
 Schedule::call(fn () => TenantUsageRecorder::refreshAll())
     ->everyFifteenMinutes()
     ->description('Refresh the usage counters the console reads');

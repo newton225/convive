@@ -355,6 +355,7 @@ return [
             'deletion_cancelled' => 'Deletion cancelled',
             'tenant_erased' => 'Organisation erased',
             'payment_reminder_sent' => 'Overdue reminder',
+            'support_access_finished' => 'Support access closed',
         ],
         'messages' => [
             'support_access_used' => ':actor viewed :organisation through a support access',
@@ -371,6 +372,7 @@ return [
             'deletion_cancelled' => ':actor cancelled the deletion of :organisation',
             'tenant_erased' => ':organisation was erased when its scheduled deletion came due',
             'payment_reminder_sent' => ':actor reminded :organisation about an overdue payment',
+            'support_access_finished' => ':actor closed their support access to :organisation',
         ],
         'empty' => [
             'title' => 'No entry',

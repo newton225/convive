@@ -171,7 +171,8 @@ export type ConsoleAuditType =
     | 'database_repaired'
     | 'deletion_cancelled'
     | 'tenant_erased'
-    | 'payment_reminder_sent';
+    | 'payment_reminder_sent'
+    | 'support_access_finished';
 
 export type ConsoleAuditEntry = {
     id: number;

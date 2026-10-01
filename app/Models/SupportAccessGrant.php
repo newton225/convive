@@ -27,13 +27,16 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property Carbon $expires_at
  * @property Carbon|null $revoked_at
  * @property int|null $revoked_by_id
+ * @property Carbon|null $finished_at
+ * @property string|null $closing_note
+ * @property Carbon|null $ended_notified_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Tenant $tenant
  * @property-read User $operator
  * @property-read User|null $grantedBy
  */
-#[Fillable(['tenant_id', 'operator_id', 'granted_by_id', 'reason', 'expires_at', 'revoked_at', 'revoked_by_id'])]
+#[Fillable(['tenant_id', 'operator_id', 'granted_by_id', 'reason', 'expires_at', 'revoked_at', 'revoked_by_id', 'finished_at', 'closing_note'])]
 class SupportAccessGrant extends Model
 {
     use CentralConnection;
@@ -49,13 +52,13 @@ class SupportAccessGrant extends Model
     protected $dateFormat = 'Y-m-d H:i:s';
 
     /**
-     * Scope the query to the accesses still open : neither revoked nor past their term.
+     * Scope the query to the accesses still open : neither revoked, finished nor past their term.
      *
      * @param  Builder<self>  $query
      */
     public function scopeActive(Builder $query): void
     {
-        $query->whereNull('revoked_at')->where('expires_at', '>', now());
+        $query->whereNull('revoked_at')->whereNull('finished_at')->where('expires_at', '>', now());
     }
 
     /**
@@ -63,7 +66,7 @@ class SupportAccessGrant extends Model
      */
     public function isActive(): bool
     {
-        return $this->revoked_at === null && $this->expires_at->isFuture();
+        return $this->revoked_at === null && $this->finished_at === null && $this->expires_at->isFuture();
     }
 
     /**
@@ -71,7 +74,20 @@ class SupportAccessGrant extends Model
      */
     public function endedAt(): Carbon
     {
-        return $this->revoked_at ?? $this->expires_at;
+        return $this->finished_at ?? $this->revoked_at ?? $this->expires_at;
+    }
+
+    /**
+     * Get why this access stopped : ferme par la personne de l'equipe Convive, revoque par un
+     * Proprietaire, ou arrive a echeance.
+     */
+    public function endReason(): string
+    {
+        return match (true) {
+            $this->finished_at !== null => 'finished',
+            $this->revoked_at !== null => 'revoked',
+            default => 'expired',
+        };
     }
 
     /**
@@ -124,6 +140,8 @@ class SupportAccessGrant extends Model
         return [
             'expires_at' => 'datetime',
             'revoked_at' => 'datetime',
+            'finished_at' => 'datetime',
+            'ended_notified_at' => 'datetime',
         ];
     }
 }

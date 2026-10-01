@@ -61,13 +61,16 @@ return [
             'ended_at' => 'Closed on',
             'end_reason' => 'End',
             'views' => 'Pages viewed',
+            'closing_note' => 'Support’s conclusion',
         ],
         'end_reasons' => [
             'expired' => 'Expired',
             'revoked' => 'Revoked',
+            'finished' => 'Closed by support',
         ],
     ],
     'errors' => [
+        'note' => 'Write in one sentence what you found (at least 10 characters).',
         'reason' => 'Say in one sentence why you are opening this access (at least 10 characters).',
         'already_open' => 'An access is already open. Revoke it before opening another one.',
         'operator' => 'Choose a member of the Convive team.',
@@ -76,6 +79,7 @@ return [
     ],
 
     'flash' => [
+        'finished' => 'The access to :organisation is closed. The organisation has been told.',
         'opened' => 'Access opened for :operator.',
         'revoked' => 'Access revoked.',
     ],
@@ -84,5 +88,34 @@ return [
         'member' => ':operator, from the Convive team, can view this space in read-only mode until :expires.',
         'viewing' => 'Support access: you are viewing :organisation in read-only mode until :expires. Every page you view is logged.',
         'manage' => 'Manage the access',
+    ],
+    'finish' => [
+        'button' => 'I am done',
+        'title' => 'Close the access to :organisation?',
+        'description' => 'You will no longer be able to view this space: the organisation would have to open an access for you again. The owners are told and read your note.',
+        'note' => 'What you found',
+        'note_hint' => 'In one or two sentences: the cause of the problem, or what remains to be done. The note is read by the organisation: no guest data, no internal information.',
+        'submit' => 'Close the access',
+    ],
+    'mail' => [
+        'opened' => [
+            'subject' => ':organisation opened a support access for you',
+            'intro' => ':granted_by opened a read-only access for you to the space of :organisation.',
+            'reason' => 'Reason: :reason',
+            'until' => 'The access closes on :expires.',
+            'action' => 'Open the console',
+            'outro' => 'Every page you view is written to the organisation’s audit log. When you are done, close the access with “I am done”.',
+        ],
+        'ended' => [
+            'subject' => 'The support access to :organisation is closed',
+            'reasons' => [
+                'finished' => ':operator, from the Convive team, is done and closed their access to :organisation.',
+                'revoked' => 'The access of :operator, from the Convive team, to :organisation was revoked.',
+                'expired' => 'The access of :operator, from the Convive team, to :organisation reached its term.',
+            ],
+            'views' => '{0} No page was viewed.|{1} 1 page was viewed.|[2,*] :count pages were viewed.',
+            'note' => 'Support’s conclusion: :note',
+            'action' => 'See the detail',
+        ],
     ],
 ];

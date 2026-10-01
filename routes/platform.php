@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Console\AuditLogController;
+use App\Http\Controllers\Console\FinishSupportAccessController;
 use App\Http\Controllers\Console\HealthController;
 use App\Http\Controllers\Console\OrganisationActionController;
 use App\Http\Controllers\Console\OrganisationController;
@@ -27,6 +28,8 @@ Route::prefix('console')
         // Acces du support : chacun choisit d'apparaitre ou non dans la liste proposee aux
         // organisations.
         Route::put('support-availability', SupportAvailabilityController::class)->middleware('can:console.area,"support"')->name('support-availability.update');
+        // « J'ai termine » : la personne ferme elle-meme l'acces qu'une organisation lui a ouvert.
+        Route::post('support-access/{grant}/finish', FinishSupportAccessController::class)->middleware('can:console.area,"support"')->name('support-access.finish');
         Route::get('organisations/{organisation}', [OrganisationController::class, 'show'])->middleware('can:console.area,"organisations"')->name('organisations.show');
 
         // Les actions de l'editeur sur une organisation (README section 3) : Fondateurs et

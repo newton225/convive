@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { LifeBuoy } from 'lucide-react';
+import { FinishSupportAccessDialog } from '@/components/finish-support-access-dialog';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
@@ -39,6 +40,13 @@ export function SupportAccessBanner() {
                           expires,
                       })}
             </p>
+            {/* La personne qui consulte ferme l'acces des qu'elle a fini, sans attendre l'echeance. */}
+            {supportAccess.viewing ? (
+                <FinishSupportAccessDialog
+                    grantId={supportAccess.id}
+                    organisation={currentTenant.name}
+                />
+            ) : null}
             {!supportAccess.viewing && currentTenant.isOwner ? (
                 <Button asChild variant="outline" size="sm">
                     <Link href={supportAccessShow(currentTenant.slug)}>

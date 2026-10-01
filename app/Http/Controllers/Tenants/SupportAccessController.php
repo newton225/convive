@@ -86,7 +86,9 @@ class SupportAccessController extends Controller
                     'reason' => $grant->reason,
                     'grantedAt' => $grant->created_at?->toISOString(),
                     'endedAt' => $grant->endedAt()->toISOString(),
-                    'endReason' => $grant->revoked_at !== null ? 'revoked' : 'expired',
+                    'endReason' => $grant->endReason(),
+                    // Ce que la personne de l'equipe Convive a constate, quand elle a ferme l'acces.
+                    'closingNote' => $grant->closing_note,
                     'viewsCount' => $grant->views_count,
                 ])
                 ->all(),
