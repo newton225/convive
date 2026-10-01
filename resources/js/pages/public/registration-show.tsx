@@ -6,6 +6,7 @@ import { OfflineBanner } from '@/components/offline-banner';
 import { useState } from 'react';
 import { CopyButton } from '@/components/copy-button';
 import { CompanionTicketPassCard } from '@/components/public/companion-ticket-pass-card';
+import { ShareAllTicketsButton } from '@/components/public/share-all-tickets-button';
 import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
 import { TicketPdfDownload } from '@/components/public/ticket-pdf-download';
 import InputError from '@/components/input-error';
@@ -223,6 +224,10 @@ export default function PublicRegistrationShow({
                                             )}
                                         </p>
                                     </div>
+                                    <ShareAllTicketsButton
+                                        passes={ticket.passes}
+                                        eventName={ticket.event.name}
+                                    />
                                     {ticket.passes.map((pass) => (
                                         <CompanionTicketPassCard
                                             key={pass.id}
