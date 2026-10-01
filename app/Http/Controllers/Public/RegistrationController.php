@@ -227,8 +227,7 @@ class RegistrationController extends Controller
     }
 
     /**
-     * Show the reservation : countdown, payment accounts (README ecran 5). Le depot de la
-     * preuve elle-meme (canal, reference, capture) est l'etape 6, pas encore construite.
+     * Show the reservation : countdown, payment accounts (README ecran 5).
      *
      * Adressee par un jeton de reprise, jamais par l'identifiant de l'inscription (CLAUDE.md,
      * « Securite ») : aucun identifiant sequentiel devinable dans une URL publique.

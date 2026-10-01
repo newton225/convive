@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\DB;
  * Un accompagnateur est toujours assis avec son invitant : l'attribution porte sur l'inscription
  * entiere (participant plus accompagnateurs), jamais sur un occupant individuel. Si aucune table
  * n'a assez de places libres pour le groupe entier, l'inscription reste confirmee mais non
- * placee : un placement manuel reste possible (README 2.6), a construire avec le plan de salle
- * (ecran 21).
+ * placee : le placement manuel se fait depuis le plan de salle (README 2.6, ecran 21,
+ * `MoveRegistrationToTable`).
  */
 class AssignTable
 {

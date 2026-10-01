@@ -51,7 +51,8 @@ class TenancyServiceProvider extends ServiceProvider
             // et un modele Eloquent avec SoftDeletes declenche quand meme les evenements
             // deleting/deleted sur une suppression douce. Brancher DeleteDatabase ici
             // detruirait la base d'une organisation « corbeille », recuperable par principe.
-            // La suppression physique reste une action separee et deliberee, a construire.
+            // La suppression physique est une action separee et deliberee : la commande
+            // `tenants:erase-scheduled`, a l'echeance d'une suppression programmee.
             Events\TenantDeleted::class => [],
 
             // Domain events

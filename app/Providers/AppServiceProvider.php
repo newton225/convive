@@ -40,6 +40,14 @@ use Stripe\StripeClient;
 class AppServiceProvider extends ServiceProvider
 {
     /**
+     * Exports et imports de releve permis par heure et par utilisateur. SECURITY.md M3 en demande
+     * 5 : compromis accepte par le proprietaire du projet (2026-10-01), la limite basse bloquait
+     * l'impression des listes de controle de plusieurs evenements le meme jour. La fuite par
+     * export reste couverte par la journalisation, l'alerte au Proprietaire et le filigrane.
+     */
+    public const ExportsPerHour = 30;
+
+    /**
      * Register any application services.
      *
      * `WhatsAppSender` derriere une interface dediee (CLAUDE.md, « Pile imposee ») : seul cet
@@ -199,7 +207,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('support-request', fn ($request) => Limit::perHour(5)->by($request->user()?->id));
 
         // Exports (Excel/CSV/PDF/listes de controle) et import de releve (table de CLAUDE.md).
-        RateLimiter::for('exports', fn ($request) => Limit::perHour(5)->by($request->user()?->id));
+        // 30 par heure : un organisateur qui imprime les listes de controle de plusieurs
+        // evenements le meme jour atteignait l'ancienne limite de 5 sans rien faire d'anormal.
+        RateLimiter::for('exports', fn ($request) => Limit::perHour(self::ExportsPerHour)->by($request->user()?->id));
 
         // Renvoi du code de verification du telephone (SECURITY.md C3) : chaque envoi coute un
         // message, 3 par tranche de 10 minutes et par inscription plus IP.

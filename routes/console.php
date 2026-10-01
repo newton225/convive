@@ -119,9 +119,7 @@ Schedule::call(function (PurgeRegistrations $purge) {
 
 /*
  * Purge automatique (README 2.4), second declencheur : la capacite est atteinte par les seules
- * inscriptions confirmees, sans attendre l'echeance. `Confirmed` n'est pas encore atteignable
- * par le code (etape 6, validation de la preuve) : ce declencheur reste en place, pret des que
- * la transition existera.
+ * inscriptions confirmees, sans attendre l'echeance.
  */
 Schedule::call(function (PurgeRegistrations $purge) {
     Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(

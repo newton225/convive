@@ -8,10 +8,10 @@ type Props<TData> = {
 };
 
 /**
- * PROVISOIRE : les listes de la console arrivent entieres tant qu'elles viennent du jeu
- * d'exemple ; tri et pagination se font donc dans le navigateur (mode `client` de `DataTable`).
- * Quand le serveur arrive, les listes longues (organisations, journal) passent a la pagination et
- * au tri serveur, comme la base d'inscrits.
+ * Les listes de la console arrivent entieres : tri et pagination se font dans le navigateur (mode
+ * `client` de `DataTable`). Au dela de quelques milliers de lignes, les listes longues
+ * (organisations, journal) devront passer a la pagination et au tri serveur, comme la base
+ * d'inscrits (CLAUDE.md, « Composants d'interface »).
  */
 export function ConsoleTable<TData>({
     columns,
