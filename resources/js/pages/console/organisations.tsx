@@ -44,6 +44,7 @@ const statuses: ConsoleOrganisationStatus[] = [
     'past_due',
     'suspended',
     'deletion_scheduled',
+    'deleted_by_owner',
 ];
 
 /**

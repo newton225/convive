@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { Play, Undo2 } from 'lucide-react';
+import { ArchiveRestore, Play, Undo2 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ChangePlanDialog } from '@/components/console/change-plan-dialog';
@@ -17,13 +17,16 @@ type Props = {
     plans: ConsolePlanOption[];
 };
 
-type Pending = 'reactivate' | 'cancel_deletion';
+type Pending = 'reactivate' | 'cancel_deletion' | 'restore';
 
 /**
  * Les actions de l'editeur sur une organisation (README section 3 et ecran 28) : changer de plan,
  * offrir ou prolonger l'essai, suspendre ou reactiver, programmer ou annuler la suppression.
  * Chaque bouton n'apparait que dans l'etat ou l'action a un sens ; le serveur revalide de toute
  * facon.
+ *
+ * Une organisation supprimee par son Proprietaire n'offre qu'un geste : la restaurer, tant que
+ * son effacement n'a pas eu lieu.
  */
 export function OrganisationActions({ organisation, plans }: Props) {
     const { t } = useTranslation();
@@ -44,10 +47,49 @@ export function OrganisationActions({ organisation, plans }: Props) {
             router.post(reactivate(organisation.slug).url, {}, options);
         }
 
-        if (pending === 'cancel_deletion') {
+        // Restaurer et annuler la suppression sont le meme geste pour le serveur : il sort
+        // l'organisation de la corbeille quand elle s'y trouve.
+        if (pending === 'cancel_deletion' || pending === 'restore') {
             router.delete(cancelDeletion(organisation.slug).url, options);
         }
     };
+
+    const confirmation = (
+        <ConfirmActionDialog
+            open={pending !== null}
+            onOpenChange={(open) => !open && setPending(null)}
+            title={t(
+                `console.organisation.dialogs.${pending ?? 'reactivate'}_title`,
+                { organisation: organisation.name },
+            )}
+            description={t(
+                `console.organisation.dialogs.${pending ?? 'reactivate'}`,
+            )}
+            confirmLabel={t(
+                `console.organisation.action_labels.${pending ?? 'reactivate'}`,
+            )}
+            onConfirm={run}
+            processing={processing}
+            testId="console-organisation-confirm"
+        />
+    );
+
+    if (organisation.status === 'deleted_by_owner') {
+        return (
+            <div className="space-y-3">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPending('restore')}
+                    data-test="console-organisation-restore"
+                >
+                    <ArchiveRestore />
+                    {t('console.organisation.action_labels.restore')}
+                </Button>
+                {confirmation}
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-3">
@@ -121,23 +163,7 @@ export function OrganisationActions({ organisation, plans }: Props) {
                 </p>
             ) : null}
 
-            <ConfirmActionDialog
-                open={pending !== null}
-                onOpenChange={(open) => !open && setPending(null)}
-                title={t(
-                    `console.organisation.dialogs.${pending ?? 'reactivate'}_title`,
-                    { organisation: organisation.name },
-                )}
-                description={t(
-                    `console.organisation.dialogs.${pending ?? 'reactivate'}`,
-                )}
-                confirmLabel={t(
-                    `console.organisation.action_labels.${pending ?? 'reactivate'}`,
-                )}
-                onConfirm={run}
-                processing={processing}
-                testId="console-organisation-confirm"
-            />
+            {confirmation}
         </div>
     );
 }

@@ -25,6 +25,7 @@ return [
         'past_due' => 'Impayé',
         'suspended' => 'Suspendue',
         'deletion_scheduled' => 'Suppression programmée',
+        'deleted_by_owner' => 'Supprimée par son Propriétaire',
     ],
 
     'usage' => [
@@ -100,6 +101,7 @@ return [
             'reactivate' => 'Réactiver',
             'schedule_deletion' => 'Programmer la suppression',
             'cancel_deletion' => 'Annuler la suppression',
+            'restore' => 'Restaurer l’organisation',
         ],
         'actions_not_allowed' => 'Votre profil lit les organisations sans pouvoir agir sur elles.',
         'suspension_reason' => 'Motif de la suspension',
@@ -125,6 +127,8 @@ return [
             'deletion' => 'Rien n’est effacé aujourd’hui. Dans 30 jours, sa base et ses fichiers seront effacés, sans retour possible. D’ici là, la suppression peut être annulée.',
             'cancel_deletion_title' => 'Annuler la suppression de :organisation ?',
             'cancel_deletion' => 'L’organisation ne sera pas effacée. Rien n’a été perdu.',
+            'restore_title' => 'Restaurer :organisation ?',
+            'restore' => 'Son Propriétaire l’a supprimée. Elle redevient accessible tout de suite : ses membres la retrouvent avec le profil qu’ils portaient, et elle ne sera pas effacée. Ses invitations en attente, elles, ne reviennent pas.',
         ],
         'flash' => [
             'suspended' => ':organisation est suspendue.',
@@ -133,6 +137,7 @@ return [
             'trial_extended' => 'L’essai de :organisation est mis à jour.',
             'deletion_scheduled' => 'La suppression de :organisation est programmée dans 30 jours.',
             'deletion_cancelled' => 'La suppression de :organisation est annulée.',
+            'restored' => ':organisation est restaurée : ses membres y ont de nouveau accès.',
         ],
         'errors' => [
             'already_suspended' => 'Cette organisation est déjà suspendue par l’équipe Convive.',
@@ -463,6 +468,8 @@ return [
             'payment_reminder_sent' => 'Relance d’impayé',
             'support_access_finished' => 'Accès de support fermé',
             'backup_run' => 'Sauvegarde',
+            'tenant_deleted_by_owner' => 'Suppression par le Propriétaire',
+            'tenant_restored' => 'Organisation restaurée',
             'failed_job_retried' => 'Envoi relancé',
             'failed_job_forgotten' => 'Envoi écarté',
             'support_access_requested' => 'Demande d’aide',
@@ -485,6 +492,8 @@ return [
             'payment_reminder_sent' => ':actor a relancé :organisation pour un impayé',
             'support_access_finished' => ':actor a fermé son accès de support à :organisation',
             'backup_run' => ':actor a lancé une sauvegarde',
+            'tenant_deleted_by_owner' => ':actor a supprimé son organisation :organisation',
+            'tenant_restored' => ':actor a restauré :organisation',
             'failed_job_retried' => ':actor a relancé un envoi en échec',
             'failed_job_forgotten' => ':actor a écarté un envoi en échec',
             'support_access_requested' => ':actor, de :organisation, a demandé l’aide du support',

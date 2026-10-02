@@ -30,7 +30,9 @@ class OrganisationController extends Controller
     {
         return Inertia::render('console/organisations', [
             'isSample' => false,
-            'organisations' => Tenant::query()
+            // Avec les organisations supprimees par leur Proprietaire : elles restent restaurables
+            // jusqu'a leur effacement.
+            'organisations' => Tenant::withTrashed()
                 ->with('subscription.plan', 'usage', 'suspension')
                 ->orderBy('name')
                 ->get()
@@ -84,7 +86,7 @@ class OrganisationController extends Controller
      */
     public function show(Request $request, string $organisation): Response
     {
-        $tenant = Tenant::where('slug', $organisation)->first();
+        $tenant = Tenant::withTrashed()->where('slug', $organisation)->first();
         abort_if($tenant === null, 404);
 
         // Une seule organisation : ses compteurs sont releves a l'ouverture de sa fiche.

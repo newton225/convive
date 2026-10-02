@@ -26,7 +26,8 @@ class EraseScheduledTenantsCommand extends Command
 {
     public function handle(): int
     {
-        $due = Tenant::query()
+        // Avec la corbeille : une organisation supprimee par son Proprietaire s'efface au meme terme.
+        $due = Tenant::withTrashed()
             ->whereNotNull('deletion_scheduled_at')
             ->where('deletion_scheduled_at', '<=', now())
             ->get();

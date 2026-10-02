@@ -44,7 +44,7 @@ Route::prefix('console')
         Route::patch('organisations/{tenant}/plan', [OrganisationActionController::class, 'changePlan'])->name('organisations.plan.update');
         Route::patch('organisations/{tenant}/trial', [OrganisationActionController::class, 'extendTrial'])->name('organisations.trial.update');
         Route::post('organisations/{tenant}/deletion', [OrganisationActionController::class, 'scheduleDeletion'])->name('organisations.deletion.schedule');
-        Route::delete('organisations/{tenant}/deletion', [OrganisationActionController::class, 'cancelDeletion'])->middleware('can:console.area,"organisation_actions"')->name('organisations.deletion.cancel');
+        Route::delete('organisations/{tenant}/deletion', [OrganisationActionController::class, 'cancelDeletion'])->middleware('can:console.area,"organisation_actions"')->withTrashed()->name('organisations.deletion.cancel');
         Route::get('recovery', [RecoveryController::class, 'index'])->middleware('can:console.area,"recovery"')->name('recovery');
         Route::post('recovery/{tenant}/remind', [RecoveryController::class, 'remind'])->middleware('can:console.area,"recovery"')->name('recovery.remind');
         Route::get('plans', [PlanController::class, 'index'])->middleware('can:console.area,"plans"')->name('plans');

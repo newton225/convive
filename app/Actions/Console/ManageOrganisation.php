@@ -161,17 +161,48 @@ class ManageOrganisation
     }
 
     /**
+     * Cancel a scheduled erasure. Quand l'organisation a ete supprimee par son Proprietaire, c'est
+     * une restauration : elle sort de la corbeille et ses membres la retrouvent.
+     *
+     * Returns true when the organisation was restored from the trash.
+     *
      * @throws ValidationException
      */
-    public function cancelDeletion(Tenant $tenant, User $actor): void
+    public function cancelDeletion(Tenant $tenant, User $actor): bool
     {
         if ($tenant->deletion_scheduled_at === null) {
             throw ValidationException::withMessages(['organisation' => __('console.organisation.errors.deletion_not_scheduled')]);
         }
 
+        $restored = $tenant->trashed();
+
         $tenant->forceFill(['deletion_scheduled_at' => null])->save();
 
-        ConsoleJournal::record('deletion_cancelled', $actor, $tenant);
+        if ($restored) {
+            $tenant->restore();
+            $this->restoreMemberships($tenant);
+        }
+
+        ConsoleJournal::record($restored ? 'tenant_restored' : 'deletion_cancelled', $actor, $tenant);
+
+        return $restored;
+    }
+
+    /**
+     * Give the organisation its members back. La suppression retire les appartenances centrales,
+     * mais les profils restent affectes dans la base de l'organisation : c'est la qu'on relit qui
+     * en etait membre, et chacun retrouve le profil qu'il portait.
+     */
+    private function restoreMemberships(Tenant $tenant): void
+    {
+        $userIds = $tenant->run(fn () => DB::table(config('permission.table_names.model_has_roles'))
+            ->where('model_type', (new User)->getMorphClass())
+            ->pluck(config('permission.column_names.model_morph_key'))
+            ->all());
+
+        User::whereKey($userIds)->each(
+            fn (User $user) => $tenant->memberships()->firstOrCreate(['user_id' => $user->id]),
+        );
     }
 
     /**

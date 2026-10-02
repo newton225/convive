@@ -145,6 +145,8 @@ class OrganisationOverview
     public static function status(Tenant $tenant): string
     {
         return match (true) {
+            // Supprimee par son Proprietaire : dans la corbeille, restaurable jusqu'a l'effacement.
+            $tenant->trashed() => 'deleted_by_owner',
             $tenant->deletion_scheduled_at !== null => 'deletion_scheduled',
             $tenant->isSuspended() => 'suspended',
             $tenant->subscription?->status === SubscriptionStatus::PastDue => 'past_due',

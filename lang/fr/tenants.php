@@ -7,7 +7,7 @@ return [
         'switched' => 'Vous êtes maintenant dans « :name ».',
         'created' => 'Organisation créée.',
         'updated' => 'Organisation mise à jour.',
-        'deleted' => 'Organisation supprimée.',
+        'deleted' => 'Organisation supprimée. Ses données seront effacées dans 30 jours.',
         'left' => 'Vous avez quitté l\'organisation ":name".',
         'invitation_sent' => 'Invitation envoyée.',
         'invitation_cancelled' => 'Invitation annulée.',
@@ -82,7 +82,17 @@ return [
         'title' => 'Supprimer l\'organisation',
         'description' => 'Supprimer définitivement votre organisation',
         'warning_title' => 'Attention',
-        'warning_body' => 'Cette action est définitive : les membres et les invitations de cette organisation seront supprimés.',
+        'warning_body' => 'L’organisation disparaît tout de suite pour tous ses membres, et ses invitations sont annulées. Ses données sont effacées définitivement dans 30 jours ; d’ici là, l’équipe Convive peut la restaurer à votre demande.',
+    ],
+
+    'mail' => [
+        'deletion_scheduled' => [
+            'subject' => ':organisation a été supprimée',
+            'intro' => ':deleted_by a supprimé l’organisation :organisation. Elle n’est plus accessible à ses membres.',
+            'erase_at' => 'Ses données seront effacées définitivement le :date.',
+            'restore' => 'D’ici là, l’équipe Convive peut la restaurer, avec ses membres et ses événements : écrivez-lui avant cette date.',
+            'restore_with_address' => 'D’ici là, l’équipe Convive peut la restaurer, avec ses membres et ses événements : écrivez à :email avant cette date.',
+        ],
     ],
 
     'confirm' => [

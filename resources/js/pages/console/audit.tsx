@@ -50,6 +50,8 @@ const types: ConsoleAuditType[] = [
     'support_access_request_taken',
     'failed_job_retried',
     'failed_job_forgotten',
+    'tenant_deleted_by_owner',
+    'tenant_restored',
 ];
 
 /**

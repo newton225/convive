@@ -11,6 +11,7 @@ const variants: Record<
     past_due: 'destructive',
     suspended: 'destructive',
     deletion_scheduled: 'outline',
+    deleted_by_owner: 'destructive',
 };
 
 /**

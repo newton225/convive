@@ -3,7 +3,9 @@ export type ConsoleOrganisationStatus =
     | 'active'
     | 'past_due'
     | 'suspended'
-    | 'deletion_scheduled';
+    | 'deletion_scheduled'
+    // Supprimee par son Proprietaire : restaurable jusqu'a son effacement.
+    | 'deleted_by_owner';
 
 export type ConsoleQuota = {
     used: number;
@@ -205,7 +207,9 @@ export type ConsoleAuditType =
     | 'support_access_requested'
     | 'support_access_request_taken'
     | 'failed_job_retried'
-    | 'failed_job_forgotten';
+    | 'failed_job_forgotten'
+    | 'tenant_deleted_by_owner'
+    | 'tenant_restored';
 
 export type ConsoleAuditEntry = {
     id: number;

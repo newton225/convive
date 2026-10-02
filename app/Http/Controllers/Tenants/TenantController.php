@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tenants;
 
 use App\Actions\Tenants\CreateTenant;
+use App\Actions\Tenants\DeleteTenant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenants\DeleteTenantRequest;
 use App\Http\Requests\Tenants\SaveTenantRequest;
@@ -157,22 +158,14 @@ class TenantController extends Controller
     /**
      * Delete the specified tenant.
      */
-    public function destroy(DeleteTenantRequest $request, Tenant $tenant): RedirectResponse
+    public function destroy(DeleteTenantRequest $request, Tenant $tenant, DeleteTenant $delete): RedirectResponse
     {
         $user = $request->user();
         $fallbackTenant = $user->isCurrentTenant($tenant)
             ? $user->fallbackTenant($tenant)
             : null;
 
-        DB::transaction(function () use ($user, $tenant) {
-            User::where('current_tenant_id', $tenant->id)
-                ->where('id', '!=', $user->id)
-                ->each(fn (User $affectedUser) => $affectedUser->switchTenant($affectedUser->personalTenant()));
-
-            $tenant->invitations()->delete();
-            $tenant->memberships()->delete();
-            $tenant->delete();
-        });
+        $delete->handle($tenant, $user);
 
         if ($fallbackTenant) {
             $user->switchTenant($fallbackTenant);

@@ -63,9 +63,9 @@ class OrganisationActionController extends Controller
 
     public function cancelDeletion(Request $request, Tenant $tenant, ManageOrganisation $manage): RedirectResponse
     {
-        $manage->cancelDeletion($tenant, $request->user());
+        $restored = $manage->cancelDeletion($tenant, $request->user());
 
-        return $this->back($tenant, 'deletion_cancelled');
+        return $this->back($tenant, $restored ? 'restored' : 'deletion_cancelled');
     }
 
     private function back(Tenant $tenant, string $message): RedirectResponse

@@ -78,6 +78,10 @@ return [
         'days' => env('CONVIVE_TRIAL_DAYS'),
     ],
 
+    // L'adresse ou une organisation ecrit a l'equipe Convive (restauration, aide). Vide tant que
+    // le proprietaire du projet ne l'a pas fournie : les messages s'en passent alors.
+    'support_email' => env('CONVIVE_SUPPORT_EMAIL'),
+
     'billing' => [
         'enforce_plan_limits' => (bool) env('CONVIVE_ENFORCE_PLAN_LIMITS', true),
 

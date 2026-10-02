@@ -25,6 +25,7 @@ return [
         'past_due' => 'Past due',
         'suspended' => 'Suspended',
         'deletion_scheduled' => 'Deletion scheduled',
+        'deleted_by_owner' => 'Deleted by its owner',
     ],
 
     'usage' => [
@@ -100,6 +101,7 @@ return [
             'reactivate' => 'Reactivate',
             'schedule_deletion' => 'Schedule deletion',
             'cancel_deletion' => 'Cancel the deletion',
+            'restore' => 'Restore the organisation',
         ],
         'actions_not_allowed' => 'Your profile reads organisations without being able to act on them.',
         'suspension_reason' => 'Reason for the suspension',
@@ -125,6 +127,8 @@ return [
             'deletion' => 'Nothing is erased today. In 30 days, its database and files will be erased for good. Until then, the deletion can be cancelled.',
             'cancel_deletion_title' => 'Cancel the deletion of :organisation?',
             'cancel_deletion' => 'The organisation will not be erased. Nothing has been lost.',
+            'restore_title' => 'Restore :organisation?',
+            'restore' => 'Its owner deleted it. It becomes reachable again right away: its members get it back with the profile they held, and it will not be erased. Its pending invitations do not come back.',
         ],
         'flash' => [
             'suspended' => ':organisation is suspended.',
@@ -133,6 +137,7 @@ return [
             'trial_extended' => 'The trial of :organisation has been updated.',
             'deletion_scheduled' => 'The deletion of :organisation is scheduled in 30 days.',
             'deletion_cancelled' => 'The deletion of :organisation is cancelled.',
+            'restored' => ':organisation is restored: its members can reach it again.',
         ],
         'errors' => [
             'already_suspended' => 'This organisation is already suspended by the Convive team.',
@@ -463,6 +468,8 @@ return [
             'payment_reminder_sent' => 'Overdue reminder',
             'support_access_finished' => 'Support access closed',
             'backup_run' => 'Backup',
+            'tenant_deleted_by_owner' => 'Deletion by the owner',
+            'tenant_restored' => 'Organisation restored',
             'failed_job_retried' => 'Message retried',
             'failed_job_forgotten' => 'Message discarded',
             'support_access_requested' => 'Help request',
@@ -485,6 +492,8 @@ return [
             'payment_reminder_sent' => ':actor reminded :organisation about an overdue payment',
             'support_access_finished' => ':actor closed their support access to :organisation',
             'backup_run' => ':actor ran a backup',
+            'tenant_deleted_by_owner' => ':actor deleted their organisation :organisation',
+            'tenant_restored' => ':actor restored :organisation',
             'failed_job_retried' => ':actor retried a failed message',
             'failed_job_forgotten' => ':actor discarded a failed message',
             'support_access_requested' => ':actor, from :organisation, asked support for help',

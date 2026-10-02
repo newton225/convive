@@ -47,7 +47,9 @@ class DatabaseSnapshots
         self::snapshot(DB::connection('central'), $directory.DIRECTORY_SEPARATOR.'central.sqlite');
         $count = 1;
 
-        Tenant::query()->each(function (Tenant $tenant) use ($directory, &$count) {
+        // Avec la corbeille : une organisation supprimee reste restaurable trente jours, sa base se
+        // sauvegarde donc jusqu'a son effacement.
+        Tenant::withTrashed()->each(function (Tenant $tenant) use ($directory, &$count) {
             $database = $tenant->database();
 
             if (! $database->manager()->databaseExists($database->getName())) {

@@ -82,7 +82,17 @@ return [
         'title' => 'Delete organisation',
         'description' => 'Permanently delete your organisation',
         'warning_title' => 'Warning',
-        'warning_body' => 'This cannot be undone: the members and invitations of this organisation will be deleted.',
+        'warning_body' => 'The organisation disappears right away for all its members, and its invitations are cancelled. Its data is erased for good in 30 days; until then, the Convive team can restore it at your request.',
+    ],
+
+    'mail' => [
+        'deletion_scheduled' => [
+            'subject' => ':organisation was deleted',
+            'intro' => ':deleted_by deleted the organisation :organisation. Its members can no longer reach it.',
+            'erase_at' => 'Its data will be erased for good on :date.',
+            'restore' => 'Until then, the Convive team can restore it, with its members and its events: write to them before that date.',
+            'restore_with_address' => 'Until then, the Convive team can restore it, with its members and its events: write to :email before that date.',
+        ],
     ],
 
     'confirm' => [
