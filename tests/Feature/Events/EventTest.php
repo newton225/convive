@@ -35,8 +35,7 @@ class EventTest extends TestCase
             'starts_at' => now()->addMonth()->toDateTimeString(),
             'venue' => 'Hotel Ivoire',
             'venue_address' => 'Boulevard Hassan II, Cocody',
-            'table_count' => 20,
-            'seats_per_table' => 10,
+            'table_groups' => [['count' => 20, 'seats' => 10]],
             'price_per_person' => 15000,
             'companion_limit' => 5,
             'registration_deadline' => now()->addWeeks(3)->toDateTimeString(),
@@ -138,8 +137,7 @@ class EventTest extends TestCase
         $tenant = $this->tenantOwnedBy($owner);
 
         $this->actingAs($owner)->post(route('tenants.events.store', $tenant), $this->payload([
-            'table_count' => 12,
-            'seats_per_table' => 8,
+            'table_groups' => [['count' => 12, 'seats' => 8]],
         ]));
 
         // La capacite se lit sur les tables du plan de salle, dans la base de l'organisation.
@@ -200,8 +198,7 @@ class EventTest extends TestCase
         $tenant->update(['subdomain' => 'convive-ci']);
 
         $event = $tenant->asCurrent(fn () => Event::factory()->create([
-            'table_count' => 0,
-            'seats_per_table' => 0,
+            'tables' => [0, 0],
         ]));
 
         $this->assertFalse($event->isReadyToPublish());
@@ -501,7 +498,7 @@ class EventTest extends TestCase
         // Sans inscription confirmee ou en cours (etape 5), ce calcul porte sur zero et les
         // places restantes valent la capacite.
         $tenant->asCurrent(function () {
-            $event = Event::factory()->create(['table_count' => 10, 'seats_per_table' => 8]);
+            $event = Event::factory()->create(['tables' => [10, 8]]);
 
             $this->assertSame(80, $event->remainingSeats());
             $this->assertFalse($event->isFull());
@@ -513,7 +510,7 @@ class EventTest extends TestCase
         $tenant = $this->tenantOwnedBy(User::factory()->withTwoFactor()->create());
 
         $tenant->asCurrent(function () {
-            $event = Event::factory()->create(['table_count' => 0, 'seats_per_table' => 0]);
+            $event = Event::factory()->create(['tables' => [0, 0]]);
 
             $this->assertSame(0, $event->remainingSeats());
             $this->assertTrue($event->isFull());
@@ -561,8 +558,7 @@ class EventTest extends TestCase
 
         $tenant->asCurrent(function () {
             $event = Event::factory()->published()->create([
-                'table_count' => 0,
-                'seats_per_table' => 0,
+                'tables' => [0, 0],
                 'registration_deadline' => now()->addWeek(),
             ]);
 

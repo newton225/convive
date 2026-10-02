@@ -31,8 +31,7 @@ class AssignTableTest extends TestCase
     private function eventOf(Tenant $tenant, array $attributes = []): Event
     {
         return $tenant->asCurrent(fn () => Event::factory()->open()->create([
-            'table_count' => 2,
-            'seats_per_table' => 4,
+            'tables' => [2, 4],
             ...$attributes,
         ]));
     }
@@ -72,18 +71,17 @@ class AssignTableTest extends TestCase
     }
 
     /**
-     * README 2.6 : la capacite de l'evenement reste derivee de `table_count x seats_per_table`,
-     * les lignes de table ne sont donc pas saisies a part : elles se provisionnent au premier
-     * besoin.
+     * README 2.6 : les tables existent des l'enregistrement de l'evenement (`SyncSeatingTables`).
+     * L'attribution choisit parmi elles, elle n'en cree jamais.
      */
-    public function test_provisionne_les_tables_manquantes_a_la_premiere_utilisation(): void
+    public function test_l_attribution_ne_cree_aucune_table(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 3, 'seats_per_table' => 4]);
+        $event = $this->eventOf($tenant, ['tables' => [3, 4]]);
         $registration = $this->confirmedRegistration($tenant, $event);
 
-        $this->assertSame(0, $tenant->asCurrent(fn () => SeatingTable::where('event_id', $event->id)->count()));
+        $this->assertSame(3, $tenant->asCurrent(fn () => SeatingTable::where('event_id', $event->id)->count()));
 
         $tenant->asCurrent(fn () => app(AssignTable::class)->handle($registration));
 
@@ -94,7 +92,8 @@ class AssignTableTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant);
+        // Sans table posee par la fabrique : le test pose les siennes.
+        $event = $this->eventOf($tenant, ['tables' => null]);
         $etatMajor = $this->unitNamed($tenant, 'ETAT MAJOR');
 
         $reserved = $tenant->asCurrent(fn () => SeatingTable::factory()->create([
@@ -120,7 +119,7 @@ class AssignTableTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 1, 'seats_per_table' => 4]);
+        $event = $this->eventOf($tenant, ['tables' => null]);
         $etatMajor = $this->unitNamed($tenant, 'ETAT MAJOR');
         $qodesh = $this->unitNamed($tenant, 'QODESH');
 
@@ -142,7 +141,7 @@ class AssignTableTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 2, 'seats_per_table' => 4]);
+        $event = $this->eventOf($tenant, ['tables' => [2, 4]]);
         $qodesh = $this->unitNamed($tenant, 'QODESH');
 
         $first = $this->confirmedRegistration($tenant, $event, ['unit_id' => $qodesh->id]);
@@ -162,7 +161,7 @@ class AssignTableTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 2, 'seats_per_table' => 4]);
+        $event = $this->eventOf($tenant, ['tables' => [2, 4]]);
         $qodesh = $this->unitNamed($tenant, 'QODESH');
         $chosen = $this->unitNamed($tenant, 'CHOSEN');
 
@@ -187,7 +186,7 @@ class AssignTableTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 1, 'seats_per_table' => 2]);
+        $event = $this->eventOf($tenant, ['tables' => [1, 2]]);
 
         $registration = $this->confirmedRegistration($tenant, $event, ['party_size' => 3]);
 

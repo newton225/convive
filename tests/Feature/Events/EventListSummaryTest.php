@@ -25,7 +25,7 @@ class EventListSummaryTest extends TestCase
         $tenant = app(CreateTenant::class)->handle($owner, 'Association Convive');
 
         $tenant->asCurrent(function () {
-            $event = Event::factory()->open()->create(['table_count' => 2, 'seats_per_table' => 5]);
+            $event = Event::factory()->open()->create(['tables' => [2, 5]]);
             Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 3, 'amount_due' => 45000]);
             Registration::factory()->create(['event_id' => $event->id, 'party_size' => 2, 'amount_due' => 30000, 'status' => RegistrationStatus::ProofSubmitted]);
         });

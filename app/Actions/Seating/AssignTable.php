@@ -49,8 +49,6 @@ class AssignTable
                 return $existing;
             }
 
-            $this->ensureTablesExist($event);
-
             $table = $this->pickTable($event, $registration);
 
             if ($table === null) {
@@ -63,27 +61,6 @@ class AssignTable
                 'assigned_manually' => false,
             ]));
         });
-    }
-
-    /**
-     * Create whatever tables are still missing for the event's current room plan.
-     *
-     * Provisionnees paresseusement plutot qu'a la sauvegarde de l'evenement : `table_count`
-     * peut encore changer avant la premiere validation.
-     */
-    private function ensureTablesExist(Event $event): void
-    {
-        $existingNumbers = SeatingTable::where('event_id', $event->id)->pluck('number')->all();
-
-        for ($number = 1; $number <= $event->table_count; $number++) {
-            if (! in_array($number, $existingNumbers, true)) {
-                SeatingTable::create([
-                    'event_id' => $event->id,
-                    'number' => $number,
-                    'capacity' => $event->seats_per_table,
-                ]);
-            }
-        }
     }
 
     /**

@@ -102,7 +102,7 @@ class CancelRegistrationTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $tenant->asCurrent(fn () => Event::factory()->create(['table_count' => 1, 'seats_per_table' => 1]));
+        $event = $tenant->asCurrent(fn () => Event::factory()->create(['tables' => [1, 1]]));
 
         $registration = $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 1]));
         $tenant->asCurrent(fn () => WaitlistEntry::factory()->create(['event_id' => $event->id]));

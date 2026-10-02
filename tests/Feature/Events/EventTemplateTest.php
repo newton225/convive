@@ -34,7 +34,7 @@ class EventTemplateTest extends TestCase
 
     public function test_l_ecran_de_creation_propose_les_evenements_existants_comme_modeles(): void
     {
-        $this->tenant->asCurrent(fn () => Event::factory()->create(['name' => 'Gala des Sentinelles 2026', 'table_count' => 22]));
+        $this->tenant->asCurrent(fn () => Event::factory()->create(['name' => 'Gala des Sentinelles 2026', 'tables' => [22, 10]]));
 
         $this->actingAs($this->owner)
             ->get(route('tenants.events.create', $this->tenant))
@@ -50,8 +50,7 @@ class EventTemplateTest extends TestCase
             $account = PaymentAccount::factory()->create();
             $source = Event::factory()->create([
                 'name' => 'Gala des Sentinelles 2026',
-                'table_count' => 22,
-                'seats_per_table' => 10,
+                'tables' => [22, 10],
                 'price_per_person' => 25000,
                 'companion_limit' => 4,
                 'starts_at' => now()->addMonth(),
@@ -65,8 +64,7 @@ class EventTemplateTest extends TestCase
             ->get(route('tenants.events.create', ['tenant' => $this->tenant, 'from' => $source->id]))
             ->assertInertia(fn (Assert $page) => $page
                 ->where('template.sourceName', 'Gala des Sentinelles 2026')
-                ->where('template.tableCount', 22)
-                ->where('template.seatsPerTable', 10)
+                ->where('template.tableGroups', [['count' => 22, 'seats' => 10]])
                 ->where('template.pricePerPerson', 25000)
                 ->where('template.companionLimit', 4)
                 ->where('template.paymentAccountIds', [$accountId])

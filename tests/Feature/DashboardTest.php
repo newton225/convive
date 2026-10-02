@@ -172,7 +172,7 @@ class DashboardTest extends TestCase
         $tenant = $this->tenantOwnedBy($owner);
 
         $tenant->asCurrent(function () {
-            $event = Event::factory()->open()->create(['table_count' => 5, 'seats_per_table' => 10]);
+            $event = Event::factory()->open()->create(['tables' => [5, 10]]);
             Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 2]);
             Registration::factory()->proofSubmitted()->create(['event_id' => $event->id, 'party_size' => 1]);
             Registration::factory()->held()->create(['event_id' => $event->id, 'party_size' => 1]);
@@ -246,7 +246,7 @@ class DashboardTest extends TestCase
         $tenant = $this->tenantOwnedBy($owner);
 
         $tenant->asCurrent(function () {
-            $event = Event::factory()->open()->create(['table_count' => 5, 'seats_per_table' => 10]);
+            $event = Event::factory()->open()->create(['tables' => [5, 10]]);
             Registration::factory()->confirmed()->create(['event_id' => $event->id, 'hold_sequence' => 1]);
             Registration::factory()->create(['event_id' => $event->id, 'status' => 'expired', 'hold_sequence' => 2]);
             // Relancee une fois apres expiration, puis expiree de nouveau : deux reservations,
@@ -272,8 +272,7 @@ class DashboardTest extends TestCase
 
         $tenant->asCurrent(function () {
             $event = Event::factory()->open()->create([
-                'table_count' => 5,
-                'seats_per_table' => 10,
+                'tables' => [5, 10],
                 'starts_at' => now()->addDays(10),
                 'purge_at' => now()->addDay(),
             ]);

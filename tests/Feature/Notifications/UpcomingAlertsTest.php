@@ -55,7 +55,7 @@ class UpcomingAlertsTest extends TestCase
         Notification::fake();
 
         // 10 tables de 4 : 40 places, seuil a 25 % soit 10 places restantes.
-        $event = $this->tenant->asCurrent(fn () => Event::factory()->open()->create(['table_count' => 10, 'seats_per_table' => 4]));
+        $event = $this->tenant->asCurrent(fn () => Event::factory()->open()->create(['tables' => [10, 4]]));
 
         $this->hold($event, 29);
         $this->assertSame(0, $this->alertsOf(NotificationType::SeatsLow));

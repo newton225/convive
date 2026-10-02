@@ -618,11 +618,11 @@ change.
   tables des l'enregistrement, numerotees groupe apres groupe, et le plan de salle ajuste une
   table precise. Jamais une table sous le nombre de personnes deja placees, jamais une table
   occupee supprimee, jamais une capacite totale sous les places deja prises d'un evenement publie.
-- **`table_count` et `seats_per_table` sont en sursis.** Ils ne servent plus que de repli pour un
-  evenement dont les tables n'ont pas encore ete creees (`Event::capacity()`), et restent remplis
-  a titre indicatif. A supprimer, avec l'accord du proprietaire du projet deja donne, une fois
-  toutes les organisations passees au nouveau plan (migration de donnees qui cree les tables
-  manquantes).
+- **`table_count` et `seats_per_table` n'existent plus** (retires le 2026-10-02, avec l'accord du
+  proprietaire du projet). La capacite est la somme des places des tables, un evenement sans table
+  n'a aucune place. En test, la fabrique d'evenement pose vingt tables de dix places ; la cle
+  `tables` de `create()` decrit une autre salle (`[nombre, places]`) ou aucune (`null`, quand le
+  test pose ses propres tables).
 - **« Complet » n'est pas un statut stocke** mais un etat calcule. Un statut stocke devrait
   etre mis a jour par quelqu'un, et ce quelqu'un se tromperait au pire moment. Les statuts
   reellement stockes sont brouillon, ouvert, en cours, termine.

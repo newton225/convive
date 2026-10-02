@@ -36,8 +36,6 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property string|null $venue_address
  * @property string|null $primary_color
  * @property string|null $secondary_color
- * @property int $table_count
- * @property int $seats_per_table
  * @property int $price_per_person
  * @property int $companion_limit
  * @property CarbonImmutable|null $registration_deadline
@@ -78,7 +76,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 #[Fillable([
     'name', 'subtitle', 'starts_at', 'venue', 'venue_address',
     'primary_color', 'secondary_color',
-    'table_count', 'seats_per_table', 'price_per_person', 'companion_limit',
+    'price_per_person', 'companion_limit',
     'registration_deadline', 'purge_at', 'invitations_send_at', 'hold_duration_minutes',
     'reminder_j7_enabled', 'reminder_j2_enabled', 'reminder_j1_enabled', 'reminder_day_of_enabled',
     'rule_scheduled_send', 'rule_auto_seating', 'rule_allow_without_proof',
@@ -281,15 +279,11 @@ class Event extends Model implements HasMedia
      *
      * La capacite ne se saisit pas : c'est le plan de salle qui fait foi le jour J. Les tables
      * n'ont pas toutes le meme nombre de places (decision du 2026-09-29) : on additionne celles de
-     * chaque table. Un evenement dont les tables n'ont pas encore ete creees (enregistre avant
-     * cette regle) garde l'ancien calcul, tables x places par table, jusqu'a sa prochaine
-     * sauvegarde.
+     * chaque table. Un evenement sans table n'a aucune place.
      */
     public function capacity(): int
     {
-        $seats = $this->exists ? (int) $this->seatingTables()->sum('capacity') : 0;
-
-        return $seats > 0 ? $seats : $this->table_count * $this->seats_per_table;
+        return $this->exists ? (int) $this->seatingTables()->sum('capacity') : 0;
     }
 
     /**
@@ -502,7 +496,7 @@ class Event extends Model implements HasMedia
      * Get (creating on first use) the Ed25519 key pair that signs this event's tickets
      * (README 2.8, SECURITY.md C2).
      *
-     * Generee paresseusement, comme `public_token` : `table_count` et la date peuvent encore
+     * Generee paresseusement, comme `public_token` : le plan de salle et la date peuvent encore
      * changer avant le premier billet emis, la cle n'a pas besoin d'exister avant.
      *
      * `qr_secret_key` chiffree au repos (voir `casts()`) : un palliatif honnete en attendant le
@@ -604,8 +598,6 @@ class Event extends Model implements HasMedia
             'invitations_send_at' => 'datetime',
             'published_at' => 'datetime',
             'announced_at' => 'datetime',
-            'table_count' => 'integer',
-            'seats_per_table' => 'integer',
             'price_per_person' => 'integer',
             'companion_limit' => 'integer',
             'hold_duration_minutes' => 'integer',

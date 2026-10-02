@@ -47,12 +47,6 @@ class SyncSeatingTables
     {
         $capacities = SeatingTable::where('event_id', $event->id)->orderBy('number')->pluck('capacity');
 
-        if ($capacities->isEmpty()) {
-            return $event->table_count > 0 && $event->seats_per_table > 0
-                ? [['count' => $event->table_count, 'seats' => $event->seats_per_table]]
-                : [];
-        }
-
         $groups = [];
 
         foreach ($capacities as $capacity) {

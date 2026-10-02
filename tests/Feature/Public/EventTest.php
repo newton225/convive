@@ -191,8 +191,7 @@ class EventTest extends TestCase
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
         $event = $this->publishedEvent($tenant, [
-            'table_count' => 5,
-            'seats_per_table' => 4,
+            'tables' => [5, 4],
             'price_per_person' => 25000,
             'rule_show_remaining_seats' => true,
         ]);
@@ -213,7 +212,7 @@ class EventTest extends TestCase
         // page. Le serveur ne l'envoie pas du tout.
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
-        $event = $this->publishedEvent($tenant, ['table_count' => 5, 'seats_per_table' => 4]);
+        $event = $this->publishedEvent($tenant, ['tables' => [5, 4]]);
 
         $this->get($this->publicUrl($tenant, $event))
             ->assertOk()
@@ -228,7 +227,7 @@ class EventTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
-        $event = $this->publishedEvent($tenant, ['table_count' => 0, 'seats_per_table' => 0]);
+        $event = $this->publishedEvent($tenant, ['tables' => [0, 0]]);
 
         $this->get($this->publicUrl($tenant, $event))
             ->assertOk()

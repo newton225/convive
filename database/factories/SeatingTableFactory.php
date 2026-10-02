@@ -18,7 +18,9 @@ class SeatingTableFactory extends Factory
     {
         return [
             'event_id' => Event::factory(),
-            'number' => fake()->unique()->numberBetween(1, 200),
+            // Au-dessus des tables que la fabrique d'evenement pose d'elle-meme (1 a 20) : une table
+            // ajoutee a la main ne heurte jamais leur numero.
+            'number' => fake()->unique()->numberBetween(201, 400),
             'capacity' => 10,
         ];
     }

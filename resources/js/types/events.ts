@@ -35,8 +35,6 @@ export type EventDetails = EventSummary & {
     primaryColor: string | null;
     secondaryColor: string | null;
     visualUrl: string | null;
-    tableCount: number;
-    seatsPerTable: number;
     tableGroups: EventTableGroup[];
     companionLimit: number;
     registrationDeadline: string | null;
@@ -63,8 +61,6 @@ export type EventTemplate = {
     venueAddress: string | null;
     primaryColor: string | null;
     secondaryColor: string | null;
-    tableCount: number;
-    seatsPerTable: number;
     tableGroups: EventTableGroup[];
     pricePerPerson: number;
     companionLimit: number;

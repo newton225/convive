@@ -348,7 +348,7 @@ class RegistrationTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
-        $event = $this->publishedEvent($tenant, ['table_count' => 5, 'seats_per_table' => 10, 'rule_show_remaining_seats' => true]);
+        $event = $this->publishedEvent($tenant, ['tables' => [5, 10], 'rule_show_remaining_seats' => true]);
 
         $payload = $this->validPayload($tenant);
         $response = $this->post($this->registrationFormUrl($tenant, $event), $payload);
@@ -391,7 +391,7 @@ class RegistrationTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
-        $event = $this->publishedEvent($tenant, ['table_count' => 5, 'seats_per_table' => 10]);
+        $event = $this->publishedEvent($tenant, ['tables' => [5, 10]]);
 
         $payload = $this->validPayload($tenant);
         $response = $this->post($this->registrationFormUrl($tenant, $event), $payload);
@@ -501,7 +501,7 @@ class RegistrationTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
-        $event = $this->publishedEvent($tenant, ['table_count' => 1, 'seats_per_table' => 1]);
+        $event = $this->publishedEvent($tenant, ['tables' => [1, 1]]);
 
         $plainToken = Registration::generateResumeToken();
         $expired = $tenant->asCurrent(fn () => Registration::factory()->expired()->create([
@@ -765,7 +765,7 @@ class RegistrationTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
-        $event = $this->publishedEvent($tenant, ['table_count' => 50, 'seats_per_table' => 10]);
+        $event = $this->publishedEvent($tenant, ['tables' => [50, 10]]);
         $url = $this->registrationFormUrl($tenant, $event);
 
         // Numeros differents : seul le plafond par IP peut arreter ce script.

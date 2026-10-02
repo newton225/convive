@@ -235,7 +235,7 @@ class SubscriptionLifecycleTest extends TestCase
     {
         $this->subscription('suspended');
 
-        $accepts = $this->tenant->fresh()->asCurrent(fn () => Event::factory()->open()->create(['table_count' => 5, 'seats_per_table' => 10])->acceptsRegistrations());
+        $accepts = $this->tenant->fresh()->asCurrent(fn () => Event::factory()->open()->create(['tables' => [5, 10]])->acceptsRegistrations());
 
         $this->assertFalse($accepts);
     }
@@ -244,7 +244,7 @@ class SubscriptionLifecycleTest extends TestCase
     {
         $this->subscription('active');
 
-        $accepts = $this->tenant->fresh()->asCurrent(fn () => Event::factory()->open()->create(['table_count' => 5, 'seats_per_table' => 10])->acceptsRegistrations());
+        $accepts = $this->tenant->fresh()->asCurrent(fn () => Event::factory()->open()->create(['tables' => [5, 10]])->acceptsRegistrations());
 
         $this->assertTrue($accepts);
     }

@@ -53,7 +53,7 @@ class HoldRegistrationTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 1, 'seats_per_table' => 1]);
+        $event = $this->eventOf($tenant, ['tables' => [1, 1]]);
 
         $first = $this->draftOf($tenant, $event, ['party_size' => 1]);
         $second = $this->draftOf($tenant, $event, ['party_size' => 1]);
@@ -74,7 +74,7 @@ class HoldRegistrationTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 1, 'seats_per_table' => 2]);
+        $event = $this->eventOf($tenant, ['tables' => [1, 2]]);
 
         $registration = $this->draftOf($tenant, $event, ['party_size' => 3]);
 
@@ -88,7 +88,7 @@ class HoldRegistrationTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 1, 'seats_per_table' => 1]);
+        $event = $this->eventOf($tenant, ['tables' => [1, 1]]);
 
         $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create([
             'event_id' => $event->id,
@@ -104,7 +104,7 @@ class HoldRegistrationTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 1, 'seats_per_table' => 1]);
+        $event = $this->eventOf($tenant, ['tables' => [1, 1]]);
 
         $this->draftOf($tenant, $event, [
             'status' => RegistrationStatus::Held,

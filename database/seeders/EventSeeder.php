@@ -33,28 +33,28 @@ class EventSeeder extends Seeder
             $this->draftEvent($this->schedule(
                 name: 'Convention Annuelle 2027',
                 startsAt: $draftStartsAt,
-                extra: ['status' => EventStatus::Draft, 'table_count' => 30, 'seats_per_table' => 10],
+                extra: ['status' => EventStatus::Draft, 'tables' => [30, 10]],
             ));
 
             $dinerStartsAt = now()->addWeeks(6);
             $this->publishedEvent($accounts, $dinerStartsAt, $this->schedule(
                 name: 'Diner de Noel de l\'Association',
                 startsAt: $dinerStartsAt,
-                extra: ['table_count' => 15, 'seats_per_table' => 8],
+                extra: ['tables' => [15, 8]],
             ));
 
             $louangeStartsAt = now()->subHour();
             $this->publishedEvent($accounts, $louangeStartsAt, $this->schedule(
                 name: 'Nuit de Louange',
                 startsAt: $louangeStartsAt,
-                extra: ['status' => EventStatus::Ongoing, 'table_count' => 10, 'seats_per_table' => 8],
+                extra: ['status' => EventStatus::Ongoing, 'tables' => [10, 8]],
             ));
 
             $familleStartsAt = now()->subMonths(4);
             $this->publishedEvent($accounts, $familleStartsAt, $this->schedule(
                 name: 'Soiree des Familles 2025',
                 startsAt: $familleStartsAt,
-                extra: ['status' => EventStatus::Closed, 'table_count' => 12, 'seats_per_table' => 8],
+                extra: ['status' => EventStatus::Closed, 'tables' => [12, 8]],
             ));
 
             // Petite capacite, deliberement : `RegistrationSeeder` la remplit entierement pour
@@ -63,7 +63,7 @@ class EventSeeder extends Seeder
             $this->publishedEvent($accounts, $dejeunerStartsAt, $this->schedule(
                 name: 'Petit Dejeuner des Femmes Leaders',
                 startsAt: $dejeunerStartsAt,
-                extra: ['table_count' => 2, 'seats_per_table' => 4],
+                extra: ['tables' => [2, 4]],
             ));
         });
     }

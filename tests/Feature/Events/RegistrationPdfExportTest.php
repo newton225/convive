@@ -34,7 +34,8 @@ class RegistrationPdfExportTest extends TestCase
 
     private function eventOf(Tenant $tenant): Event
     {
-        return $tenant->asCurrent(fn () => Event::factory()->open()->create());
+        // Sans table posee par la fabrique : les tests des listes de controle posent les leurs.
+        return $tenant->asCurrent(fn () => Event::factory()->open()->create(['tables' => null]));
     }
 
     /**

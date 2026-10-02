@@ -174,8 +174,6 @@ class ShowcaseAnnouncementTest extends TestCase
             'starts_at' => $event->starts_at->toDateTimeString(),
             'venue' => $event->venue,
             'venue_address' => $event->venue_address,
-            'table_count' => $event->table_count,
-            'seats_per_table' => $event->seats_per_table,
             'price_per_person' => $event->price_per_person,
             'companion_limit' => $event->companion_limit,
             'registration_deadline' => $event->registration_deadline->toDateTimeString(),

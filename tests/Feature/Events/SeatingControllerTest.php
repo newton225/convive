@@ -30,7 +30,8 @@ class SeatingControllerTest extends TestCase
     private function eventWithTableAndRegistration(Tenant $tenant): array
     {
         return $tenant->asCurrent(function () {
-            $event = Event::factory()->open()->create();
+            // Sans table posee par la fabrique : le test pose la sienne.
+            $event = Event::factory()->open()->create(['tables' => null]);
             $table = SeatingTable::factory()->create(['event_id' => $event->id, 'capacity' => 4]);
             $registration = Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 1]);
 

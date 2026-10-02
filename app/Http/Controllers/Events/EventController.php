@@ -283,8 +283,6 @@ class EventController extends Controller
             'primaryColor' => $event->primary_color,
             'secondaryColor' => $event->secondary_color,
             'visualUrl' => $event->visualUrl(),
-            'tableCount' => $event->table_count,
-            'seatsPerTable' => $event->seats_per_table,
             // La salle telle que le formulaire la decrit : groupes de tables de meme taille.
             'tableGroups' => SyncSeatingTables::groupsOf($event),
             'companionLimit' => $event->companion_limit,
@@ -305,11 +303,11 @@ class EventController extends Controller
      */
     private function templates(): array
     {
-        return Event::latest('created_at')->limit(12)->get()
+        return Event::withCount('seatingTables')->latest('created_at')->limit(12)->get()
             ->map(fn (Event $event) => [
                 'id' => $event->id,
                 'name' => $event->name,
-                'tableCount' => $event->table_count,
+                'tableCount' => (int) $event->seating_tables_count,
                 'pricePerPerson' => $event->price_per_person,
             ])
             ->all();
@@ -342,8 +340,6 @@ class EventController extends Controller
             'venueAddress' => $source->venue_address,
             'primaryColor' => $source->primary_color,
             'secondaryColor' => $source->secondary_color,
-            'tableCount' => $source->table_count,
-            'seatsPerTable' => $source->seats_per_table,
             'tableGroups' => SyncSeatingTables::groupsOf($source),
             'pricePerPerson' => $source->price_per_person,
             'companionLimit' => $source->companion_limit,
@@ -375,17 +371,7 @@ class EventController extends Controller
      */
     private function attributes(SaveEventRequest $request): array
     {
-        $plan = $request->tablePlan();
-
-        // `table_count` et `seats_per_table` sont en sursis (CLAUDE.md, « Evenements ») : remplis
-        // a titre indicatif a partir du plan, ils ne font plus la capacite des qu'il y a des tables.
-        $tables = $plan === null ? [] : [
-            'table_count' => count($plan),
-            'seats_per_table' => $plan === [] ? 0 : max($plan),
-        ];
-
         return [
-            ...$tables,
             'name' => $request->validated('name'),
             'subtitle' => $request->validated('subtitle'),
             'starts_at' => $request->validated('starts_at'),

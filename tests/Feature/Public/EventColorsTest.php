@@ -43,8 +43,7 @@ class EventColorsTest extends TestCase
     private function publishedEvent(array $attributes = []): Event
     {
         return $this->tenant->asCurrent(fn () => Event::factory()->published()->create([
-            'table_count' => 10,
-            'seats_per_table' => 10,
+            'tables' => [10, 10],
             ...$attributes,
         ]));
     }

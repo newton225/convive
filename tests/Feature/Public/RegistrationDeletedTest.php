@@ -40,8 +40,7 @@ class RegistrationDeletedTest extends TestCase
     {
         $event = $this->tenant->asCurrent(fn () => Event::factory()->published()->create([
             'name' => 'Gala',
-            'table_count' => 10,
-            'seats_per_table' => 10,
+            'tables' => [10, 10],
         ]));
 
         $this->get($this->urlFor($event->public_token))

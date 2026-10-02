@@ -34,7 +34,7 @@ class PromoteNextWaitlistEntryTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 1, 'seats_per_table' => 1]);
+        $event = $this->eventOf($tenant, ['tables' => [1, 1]]);
 
         [$first, $second] = $tenant->asCurrent(fn () => [
             WaitlistEntry::factory()->create(['event_id' => $event->id]),
@@ -56,7 +56,7 @@ class PromoteNextWaitlistEntryTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 1, 'seats_per_table' => 1]);
+        $event = $this->eventOf($tenant, ['tables' => [1, 1]]);
 
         $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create([
             'event_id' => $event->id,
@@ -74,7 +74,7 @@ class PromoteNextWaitlistEntryTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 1, 'seats_per_table' => 1]);
+        $event = $this->eventOf($tenant, ['tables' => [1, 1]]);
 
         $promoted = $tenant->asCurrent(fn () => app(PromoteNextWaitlistEntry::class)->handle($event));
 
@@ -85,7 +85,7 @@ class PromoteNextWaitlistEntryTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $this->eventOf($tenant, ['table_count' => 2, 'seats_per_table' => 1]);
+        $event = $this->eventOf($tenant, ['tables' => [2, 1]]);
 
         $entry = $tenant->asCurrent(fn () => WaitlistEntry::factory()->invited()->create(['event_id' => $event->id]));
 

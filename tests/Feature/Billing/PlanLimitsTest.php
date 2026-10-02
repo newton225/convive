@@ -169,7 +169,7 @@ class PlanLimitsTest extends TestCase
     public function test_reserver_au_dela_du_plafond_d_inscrits_est_refuse(): void
     {
         $held = $this->tenant->asCurrent(function () {
-            $event = Event::factory()->open()->create(['table_count' => 50, 'seats_per_table' => 10]);
+            $event = Event::factory()->open()->create(['tables' => [50, 10]]);
             Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 200]);
             $newcomer = Registration::factory()->create(['event_id' => $event->id, 'party_size' => 1]);
 
@@ -182,7 +182,7 @@ class PlanLimitsTest extends TestCase
     public function test_reserver_sous_le_plafond_reste_possible(): void
     {
         $held = $this->tenant->asCurrent(function () {
-            $event = Event::factory()->open()->create(['table_count' => 50, 'seats_per_table' => 10]);
+            $event = Event::factory()->open()->create(['tables' => [50, 10]]);
             $registration = Registration::factory()->create(['event_id' => $event->id, 'party_size' => 1]);
 
             return app(HoldRegistration::class)->handle($event, $registration);

@@ -97,25 +97,6 @@ class TablePlanTest extends TestCase
         $this->assertSame(48, $this->tenant->asCurrent(fn () => $event->fresh()->capacity()));
     }
 
-    public function test_l_ancien_format_reste_accepte_comme_un_seul_groupe(): void
-    {
-        $payload = $this->payload([]);
-        unset($payload['table_groups']);
-
-        $this->actingAs($this->owner)
-            ->post(route('tenants.events.store', $this->tenant), [...$payload, 'table_count' => 4, 'seats_per_table' => 10])
-            ->assertSessionHasNoErrors();
-
-        $this->assertSame([1 => 10, 2 => 10, 3 => 10, 4 => 10], $this->tables($this->event()));
-    }
-
-    public function test_un_evenement_sans_tables_creees_garde_l_ancien_calcul(): void
-    {
-        $event = $this->tenant->asCurrent(fn () => Event::factory()->create(['table_count' => 5, 'seats_per_table' => 6]));
-
-        $this->assertSame(30, $this->tenant->asCurrent(fn () => $event->capacity()));
-    }
-
     public function test_une_table_occupee_ne_se_retire_pas_du_plan(): void
     {
         $this->actingAs($this->owner)->post(route('tenants.events.store', $this->tenant), $this->payload([
@@ -213,9 +194,7 @@ class TablePlanTest extends TestCase
     public function test_un_evenement_publie_ne_descend_pas_sous_les_places_deja_prises(): void
     {
         $event = $this->tenant->asCurrent(function () {
-            $event = Event::factory()->published()->create(['table_count' => 2, 'seats_per_table' => 5]);
-            SeatingTable::factory()->create(['event_id' => $event->id, 'number' => 1, 'capacity' => 5]);
-            SeatingTable::factory()->create(['event_id' => $event->id, 'number' => 2, 'capacity' => 5]);
+            $event = Event::factory()->published()->create(['tables' => [2, 5]]);
             // Confirmee mais pas encore placee : elle compte dans les places prises.
             Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 8]);
 

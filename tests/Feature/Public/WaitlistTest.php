@@ -96,7 +96,7 @@ class WaitlistTest extends TestCase
      */
     private function fullEvent(Tenant $tenant): Event
     {
-        $event = $this->publishedEvent($tenant, ['table_count' => 1, 'seats_per_table' => 1]);
+        $event = $this->publishedEvent($tenant, ['tables' => [1, 1]]);
 
         $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create([
             'event_id' => $event->id,
@@ -178,7 +178,7 @@ class WaitlistTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
-        $event = $this->publishedEvent($tenant, ['table_count' => 1, 'seats_per_table' => 1, 'price_per_person' => 15000]);
+        $event = $this->publishedEvent($tenant, ['tables' => [1, 1], 'price_per_person' => 15000]);
 
         $unitId = $tenant->asCurrent(fn () => Unit::where('name', 'QODESH')->value('id'));
 

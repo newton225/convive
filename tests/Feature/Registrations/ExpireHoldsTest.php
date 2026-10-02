@@ -31,7 +31,7 @@ class ExpireHoldsTest extends TestCase
         parent::setUp();
 
         $this->tenant = app(CreateTenant::class)->handle(User::factory()->withTwoFactor()->create(), 'Association Convive');
-        $this->event = $this->tenant->asCurrent(fn () => Event::factory()->open()->create(['table_count' => 1, 'seats_per_table' => 2]));
+        $this->event = $this->tenant->asCurrent(fn () => Event::factory()->open()->create(['tables' => [1, 2]]));
     }
 
     public function test_marque_expirees_les_reservations_dont_le_decompte_est_ecoule(): void

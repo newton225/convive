@@ -44,7 +44,7 @@ class RegistrationCapMessageTest extends TestCase
 
         $event = $tenant->asCurrent(function () {
             PaymentAccount::factory()->create();
-            $event = Event::factory()->published()->create(['table_count' => 50, 'seats_per_table' => 10]);
+            $event = Event::factory()->published()->create(['tables' => [50, 10]]);
             $event->paymentAccounts()->sync(PaymentAccount::publiclyVisible()->pluck('id')->all());
 
             // Plafond du plan Essentiel atteint par un autre evenement de l'organisation.

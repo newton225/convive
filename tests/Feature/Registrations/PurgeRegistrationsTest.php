@@ -90,7 +90,7 @@ class PurgeRegistrationsTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $event = $tenant->asCurrent(fn () => Event::factory()->create(['table_count' => 1, 'seats_per_table' => 1]));
+        $event = $tenant->asCurrent(fn () => Event::factory()->create(['tables' => [1, 1]]));
 
         $tenant->asCurrent(function () use ($event) {
             Registration::factory()->held()->create(['event_id' => $event->id, 'party_size' => 1]);

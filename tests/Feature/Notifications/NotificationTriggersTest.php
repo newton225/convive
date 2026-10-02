@@ -56,8 +56,7 @@ class NotificationTriggersTest extends TestCase
         $this->tenant = app(CreateTenant::class)->handle($this->owner, 'Association Convive');
         $this->event = $this->tenant->asCurrent(fn () => Event::factory()->open()->create([
             'name' => 'Gala',
-            'table_count' => 1,
-            'seats_per_table' => 2,
+            'tables' => [1, 2],
         ]));
     }
 

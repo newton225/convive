@@ -33,8 +33,7 @@ class EventSettingsControllerTest extends TestCase
         $this->tenant = app(CreateTenant::class)->handle($this->owner, 'Association Convive');
         $this->event = $this->tenant->asCurrent(fn () => Event::factory()->open()->create([
             'name' => 'Gala',
-            'table_count' => 20,
-            'seats_per_table' => 10,
+            'tables' => [20, 10],
             'hold_duration_minutes' => 15,
         ]));
     }

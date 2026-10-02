@@ -36,7 +36,7 @@ class PurgeDeletedEventsTest extends TestCase
     public function test_un_evenement_supprime_depuis_plus_de_trente_jours_est_efface_avec_son_visuel(): void
     {
         [$event, $path] = $this->tenant->asCurrent(function () {
-            $event = Event::factory()->create();
+            $event = Event::factory()->create(['tables' => null]);
             SeatingTable::create(['event_id' => $event->id, 'number' => 1, 'capacity' => 8]);
             $media = $event->addMedia(UploadedFile::fake()->image('visuel.jpg', 600, 400))
                 ->toMediaCollection(Event::VisualCollection);
