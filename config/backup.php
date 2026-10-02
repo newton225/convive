@@ -162,14 +162,16 @@ return [
         'strategy' => DefaultStrategy::class,
 
         // Tout pendant 7 jours, puis une par jour pendant 16 jours, une par semaine pendant
-        // 8 semaines, une par mois pendant 4 mois, une par an pendant 2 ans. La plus recente
-        // n'est jamais supprimee.
+        // 8 semaines, une par mois pendant 9 mois. Aucune archive annuelle : l'ensemble tient sous
+        // un an (decision du proprietaire du projet, 2026-10-02). C'est la duree pendant laquelle
+        // une organisation effacee peut encore se trouver dans une archive, annoncee a qui supprime
+        // la sienne ; `BackupRetentionTest` garde ce plafond. La plus recente n'est jamais supprimee.
         'default_strategy' => [
             'keep_all_backups_for_days' => 7,
             'keep_daily_backups_for_days' => 16,
             'keep_weekly_backups_for_weeks' => 8,
-            'keep_monthly_backups_for_months' => 4,
-            'keep_yearly_backups_for_years' => 2,
+            'keep_monthly_backups_for_months' => 9,
+            'keep_yearly_backups_for_years' => 0,
             'delete_oldest_backups_when_using_more_megabytes_than' => (int) env('BACKUP_MAX_STORAGE_MB', 5000),
         ],
 

@@ -911,8 +911,10 @@ archiverait les fichiers sans aucune base.
   serveur des que l'archive est faite. Au passage a PostgreSQL, l'export du paquet reprend la main
   (`backup.source.databases`) ; la classe refuse d'ici la tout autre moteur.
 - **Planification** (`routes/console.php`) : sauvegarde a 2 h 30, menage a 3 h 30, surveillance a
-  6 h. Conservation : tout pendant 7 jours, puis une par jour, par semaine, par mois, par an
-  (`config/backup.php`).
+  6 h. Conservation : tout pendant 7 jours, puis une par jour, par semaine, par mois, **un an au
+  plus** et aucune archive annuelle (`config/backup.php`). C'est le temps pendant lequel une
+  organisation effacee peut encore figurer dans une archive : annonce a qui supprime la sienne,
+  garde par `BackupRetentionTest`.
 - **Destination** : le disque `backups` (`storage/app/backups`) par defaut, donc sur le serveur de
   l'application. Il protege d'une erreur de manipulation, pas de la perte du serveur : en
   production, `BACKUP_DISK` designe un stockage exterieur et `BACKUP_ARCHIVE_PASSWORD` chiffre

@@ -391,7 +391,7 @@ return [
             'description' => 'Il est retiré de la liste et ne partira jamais. Le geste ne s’annule pas et est inscrit au journal central.',
         ],
         'backup' => 'Sauvegardes',
-        'backup_help' => 'Une archive par jour, à 2 h 30 : la base de Convive, celle de chaque organisation, leurs fichiers de marque et les preuves de paiement.',
+        'backup_help' => 'Une archive par jour, à 2 h 30 : la base de Convive, celle de chaque organisation, leurs fichiers de marque et les preuves de paiement. Aucune archive n’est gardée plus d’un an.',
         'backup_none' => 'Aucune sauvegarde pour le moment. La première part cette nuit, ou tout de suite avec le bouton.',
         'backup_last' => 'Dernière sauvegarde : :date',
         'backup_size' => ':size Mo',

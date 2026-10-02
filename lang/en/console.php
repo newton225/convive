@@ -391,7 +391,7 @@ return [
             'description' => 'It is removed from the list and will never be sent. This cannot be undone and is written to the central log.',
         ],
         'backup' => 'Backups',
-        'backup_help' => 'One archive a day, at 2:30 am: the Convive database, the database of every organisation, their brand files and the payment proofs.',
+        'backup_help' => 'One archive a day, at 2:30 am: the Convive database, the database of every organisation, their brand files and the payment proofs. No archive is kept for more than one year.',
         'backup_none' => 'No backup yet. The first one runs tonight, or right now with the button.',
         'backup_last' => 'Last backup: :date',
         'backup_size' => ':size MB',

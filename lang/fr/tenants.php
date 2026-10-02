@@ -82,14 +82,14 @@ return [
         'title' => 'Supprimer l\'organisation',
         'description' => 'Supprimer définitivement votre organisation',
         'warning_title' => 'Attention',
-        'warning_body' => 'L’organisation disparaît tout de suite pour tous ses membres, et ses invitations sont annulées. Ses données sont effacées définitivement dans 30 jours ; d’ici là, l’équipe Convive peut la restaurer à votre demande.',
+        'warning_body' => 'L’organisation disparaît tout de suite pour tous ses membres, et ses invitations sont annulées. Ses données sont effacées définitivement dans 30 jours ; d’ici là, l’équipe Convive peut la restaurer à votre demande. Des copies peuvent subsister jusqu’à un an dans nos sauvegardes, qui ne servent qu’en cas de panne.',
     ],
 
     'mail' => [
         'deletion_scheduled' => [
             'subject' => ':organisation a été supprimée',
             'intro' => ':deleted_by a supprimé l’organisation :organisation. Elle n’est plus accessible à ses membres.',
-            'erase_at' => 'Ses données seront effacées définitivement le :date.',
+            'erase_at' => 'Ses données seront effacées définitivement le :date. Des copies peuvent subsister jusqu’à un an dans nos sauvegardes, qui ne servent qu’en cas de panne.',
             'restore' => 'D’ici là, l’équipe Convive peut la restaurer, avec ses membres et ses événements : écrivez-lui avant cette date.',
             'restore_with_address' => 'D’ici là, l’équipe Convive peut la restaurer, avec ses membres et ses événements : écrivez à :email avant cette date.',
         ],

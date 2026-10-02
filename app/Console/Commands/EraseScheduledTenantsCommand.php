@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\Storage;
  * Sans `--force`, la commande ne fait que lister ce qu'elle effacerait : l'effacement ne se
  * rattrape pas. Le planificateur la lance chaque nuit avec `--force` (`routes/console.php`).
  *
- * Les sauvegardes deja faites gardent l'organisation jusqu'au terme de leur conservation
- * (`config/backup.php`) : l'effacement ne les reecrit pas.
+ * Les sauvegardes deja faites gardent l'organisation jusqu'au terme de leur conservation, un an au
+ * plus (`config/backup.php`) : l'effacement ne les reecrit pas.
  */
 #[Signature('tenants:erase-scheduled {--force : Efface reellement, au lieu de lister}')]
 #[Description('Efface les organisations dont la suppression programmee est arrivee a echeance')]
