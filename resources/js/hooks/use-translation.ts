@@ -2,19 +2,42 @@ import { usePage } from '@inertiajs/react';
 import { useCallback } from 'react';
 import type { TranslationReplacements, Translations } from '@/types/i18n';
 
+/**
+ * Descend dans les traductions le long d'une cle pointee. Une cle peut elle-meme contenir des
+ * points : le journal range ses textes sous le nom de l'action (`organisation.legal_updated`), a
+ * l'interieur de `audit.types`. A chaque niveau, la cle la plus longue qui existe l'emporte.
+ */
+const lookup = (branch: unknown, segments: string[]): unknown => {
+    if (segments.length === 0) {
+        return branch;
+    }
+
+    if (!branch || typeof branch !== 'object') {
+        return undefined;
+    }
+
+    const entries = branch as Record<string, unknown>;
+
+    for (let length = segments.length; length >= 1; length--) {
+        const head = segments.slice(0, length).join('.');
+
+        if (head in entries) {
+            const found = lookup(entries[head], segments.slice(length));
+
+            if (found !== undefined) {
+                return found;
+            }
+        }
+    }
+
+    return undefined;
+};
+
 const resolve = (
     translations: Record<string, unknown>,
     key: string,
 ): string | null => {
-    const value = key
-        .split('.')
-        .reduce<unknown>(
-            (branch, segment) =>
-                branch && typeof branch === 'object'
-                    ? (branch as Record<string, unknown>)[segment]
-                    : undefined,
-            translations,
-        );
+    const value = lookup(translations, key.split('.'));
 
     return typeof value === 'string' ? value : null;
 };

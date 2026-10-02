@@ -3,23 +3,31 @@
 return [
     'title' => 'Audit log',
     'description' => "The organisation's sensitive actions : who, what, when, from which address.",
-    'retention' => 'Retention: 24 months. The log is write-only.',
+    'retention' => 'This history is kept for 24 months. Nobody can change or erase it.',
     'system_actor' => 'Scheduled task',
 
     'columns' => [
         'date' => 'Date',
-        'type' => 'Type',
-        'message' => 'Message',
-        'actor' => 'Actor',
-        'ip' => 'IP address',
+        'type' => 'Action',
+        'message' => 'What happened',
+        'actor' => 'By whom',
+        'ip' => 'From address',
     ],
 
     'filters' => [
-        'search_placeholder' => 'Search a message or an actor',
+        'search_placeholder' => 'Search an action or a person',
         'type_all' => 'All types',
     ],
 
     'types' => [
+        'registrations.exported' => 'Registration list exported',
+        'report.exported' => 'Report exported',
+        'payment_proof.receipt_viewed' => 'Payment receipt viewed',
+        'event.settings_updated' => 'Event settings changed',
+        'event.announced' => 'Event announced on the showcase',
+        'event.announcement_withdrawn' => 'Announcement withdrawn',
+        'event.ticket_key_rotated' => 'Ticket key renewed',
+        'account.other_sessions_closed' => 'Other devices signed out',
         'organisation.legal_updated' => 'Legal identity',
         'organisation.brand_updated' => 'Brand',
         'organisation.subdomain_updated' => 'Subdomain',
@@ -72,6 +80,14 @@ return [
     ],
 
     'messages' => [
+        'registrations.exported' => ':actor exported the registration list.',
+        'report.exported' => ':actor exported the event report.',
+        'payment_proof.receipt_viewed' => ':actor viewed the receipt of a payment proof.',
+        'event.settings_updated' => ':actor changed the settings of the event “:subject”.',
+        'event.announced' => ':actor announced the event “:subject” on the public showcase.',
+        'event.announcement_withdrawn' => ':actor withdrew the event “:subject” from the public showcase.',
+        'event.ticket_key_rotated' => ':actor renewed the key that signs the tickets of “:subject”: older tickets must be issued again.',
+        'account.other_sessions_closed' => ':actor signed out their other devices.',
         'organisation.legal_updated' => ':actor updated the organisation\'s legal identity.',
         'organisation.brand_updated' => ":actor updated the organisation's brand.",
         'organisation.subdomain_updated' => ":actor updated the organisation's subdomain.",

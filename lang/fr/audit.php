@@ -3,23 +3,31 @@
 return [
     'title' => 'Journalisation',
     'description' => 'Les actions sensibles de l\'organisation : qui, quoi, quand, depuis quelle adresse.',
-    'retention' => 'Conservation : 24 mois. Le journal est en écriture seule.',
+    'retention' => 'Cet historique est gardé 24 mois. Personne ne peut le modifier ni l’effacer.',
     'system_actor' => 'Tâche planifiée',
 
     'columns' => [
         'date' => 'Date',
-        'type' => 'Type',
-        'message' => 'Message',
-        'actor' => 'Acteur',
-        'ip' => 'Adresse IP',
+        'type' => 'Action',
+        'message' => 'Ce qui s’est passé',
+        'actor' => 'Par qui',
+        'ip' => 'Depuis l’adresse',
     ],
 
     'filters' => [
-        'search_placeholder' => 'Rechercher un message ou un acteur',
+        'search_placeholder' => 'Rechercher une action ou une personne',
         'type_all' => 'Tous les types',
     ],
 
     'types' => [
+        'registrations.exported' => 'Liste des inscrits exportée',
+        'report.exported' => 'Rapport exporté',
+        'payment_proof.receipt_viewed' => 'Reçu de paiement consulté',
+        'event.settings_updated' => 'Réglages de l’événement modifiés',
+        'event.announced' => 'Événement annoncé sur la vitrine',
+        'event.announcement_withdrawn' => 'Annonce retirée de la vitrine',
+        'event.ticket_key_rotated' => 'Clé des billets renouvelée',
+        'account.other_sessions_closed' => 'Autres appareils déconnectés',
         'organisation.legal_updated' => 'Identité légale',
         'organisation.brand_updated' => 'Marque',
         'organisation.subdomain_updated' => 'Sous-domaine',
@@ -72,6 +80,14 @@ return [
     ],
 
     'messages' => [
+        'registrations.exported' => ':actor a exporté la liste des inscrits.',
+        'report.exported' => ':actor a exporté le rapport de l’événement.',
+        'payment_proof.receipt_viewed' => ':actor a consulté le reçu d’une preuve de paiement.',
+        'event.settings_updated' => ':actor a modifié les réglages de l’événement « :subject ».',
+        'event.announced' => ':actor a annoncé l’événement « :subject » sur la vitrine publique.',
+        'event.announcement_withdrawn' => ':actor a retiré l’événement « :subject » de la vitrine publique.',
+        'event.ticket_key_rotated' => ':actor a renouvelé la clé qui signe les billets de « :subject » : les anciens billets doivent être réémis.',
+        'account.other_sessions_closed' => ':actor a déconnecté ses autres appareils.',
         'organisation.legal_updated' => ":actor a modifié l'identité légale de l'organisation.",
         'organisation.brand_updated' => ":actor a modifié la marque de l'organisation.",
         'organisation.subdomain_updated' => ":actor a modifié le sous-domaine de l'organisation.",

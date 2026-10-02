@@ -18,6 +18,12 @@ const translations = {
     guest: {
         seats: 'place restante|places restantes',
     },
+    audit: {
+        types: {
+            'organisation.legal_updated': 'Identité légale',
+            'event.created': 'Événement créé',
+        },
+    },
 };
 
 describe('translate', () => {
@@ -36,6 +42,19 @@ describe('translate', () => {
     it('rend la clé quand elle désigne un groupe et non un texte', () => {
         expect(translate(translations, 'common.actions')).toBe(
             'common.actions',
+        );
+    });
+
+    it('trouve un texte rangé sous une clé qui contient elle-même un point', () => {
+        // Le journal range ses textes sous le nom de l'action.
+        expect(
+            translate(translations, 'audit.types.organisation.legal_updated'),
+        ).toBe('Identité légale');
+        expect(translate(translations, 'audit.types.event.created')).toBe(
+            'Événement créé',
+        );
+        expect(translate(translations, 'audit.types.event.inconnue')).toBe(
+            'audit.types.event.inconnue',
         );
     });
 
