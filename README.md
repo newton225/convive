@@ -444,7 +444,8 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
     nombre de personnes déjà placées).
 22. **Rapports post-événement** — présence et absents comptés par personne, recettes, durée
     moyenne de contrôle, présence et recettes par unité, export PDF.
-23. **Journalisation** — date, type, message, acteur, IP ; conservation 24 mois.
+23. **Historique des actions** — date, action, ce qui s'est passé, par qui, depuis quelle
+    adresse ; conservation 24 mois, sans modification ni effacement possibles.
 24. **Réglages événement** — identité visuelle, places totales, échéances, rappels, règles
     (envoi programmé, attribution automatique, inscription sans preuve, lisibilité de la preuve,
     purge à l'épuisement, réservation temporaire).
