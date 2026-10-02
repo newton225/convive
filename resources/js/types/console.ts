@@ -159,6 +159,28 @@ export type ConsoleQueue = {
     failed: ConsoleFailedJob[];
 };
 
+// L'integrite des journaux d'audit, verifiee chaque nuit. `checkedAt` est nul tant que la
+// verification n'a jamais tourne.
+export type ConsoleAuditChains = {
+    checkedAt: string | null;
+    count: number;
+    broken: {
+        scope: string;
+        organisation: string | null;
+        entryId: number;
+        checkedAt: string;
+    }[];
+};
+
+// Une limite de debit atteinte ou une connexion verrouillee.
+export type ConsoleSecurityEvent = {
+    id: number;
+    at: string;
+    type: 'rate_limited' | 'login_lockout';
+    subject: string | null;
+    ip: string | null;
+};
+
 export type ConsoleBackup = {
     healthy: boolean;
     lastAt: string | null;

@@ -17,4 +17,5 @@ enum ConsoleArea: string
     case Audit = 'audit';
     case Team = 'team';
     case Support = 'support';
+    case Security = 'security';
 }

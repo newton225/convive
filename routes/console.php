@@ -22,9 +22,8 @@ use App\Models\Tenant;
 use App\Models\TenantInvitation;
 use App\Models\Ticket;
 use App\Models\WaitlistEntry;
-use App\Support\AuditChain;
+use App\Support\Console\SecurityJournal;
 use App\Support\Console\TenantUsageRecorder;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
 use Spatie\Health\Commands\DispatchQueueCheckJobsCommand;
 use Spatie\Health\Commands\RunHealthChecksCommand;
@@ -249,19 +248,14 @@ Schedule::call(function (PurgeAuditLog $purge) {
 
 /*
  * Verification quotidienne de la chaine d'empreintes du journal (SECURITY.md M6). Une rupture est
- * signalee au niveau critique : une entree modifiee ou supprimee hors de la purge tracee.
+ * signalee au niveau critique : une entree modifiee ou supprimee hors de la purge tracee. Le
+ * resultat est garde pour l'ecran Securite de la console et le controle de sante, qui previent par
+ * courriel. Les faits de securite de plus de 90 jours partent au meme passage.
  */
 Schedule::call(function () {
-    $report = function (string $scope): void {
-        $brokenId = AuditChain::firstBrokenEntry();
-
-        if ($brokenId !== null) {
-            Log::critical('Chaine du journal d\'audit rompue', ['scope' => $scope, 'entry_id' => $brokenId]);
-        }
-    };
-
-    $report('central');
-    Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(fn () => $report('tenant:'.$tenant->id)));
+    SecurityJournal::checkAuditChain();
+    Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(fn () => SecurityJournal::checkAuditChain($tenant)));
+    SecurityJournal::purge();
 })->daily()->description('Verify the audit log hash chains');
 
 /*

@@ -7,6 +7,7 @@ import {
     Megaphone,
     Package,
     ScrollText,
+    ShieldAlert,
     UsersRound,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -29,6 +30,7 @@ import {
     health,
     plans,
     recovery,
+    security,
     showcase,
     team,
 } from '@/routes/console';
@@ -74,6 +76,12 @@ export function ConsoleSidebar() {
             href: health(),
             icon: HeartPulse,
             area: 'health',
+        },
+        {
+            title: t('console.nav.security'),
+            href: security(),
+            icon: ShieldAlert,
+            area: 'security',
         },
         {
             title: t('console.nav.showcase'),

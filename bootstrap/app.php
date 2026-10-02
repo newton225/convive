@@ -9,6 +9,7 @@ use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetSecurityHeaders;
 use App\Http\Middleware\SetTenantUrlDefaults;
 use App\Http\Responses\RateLimitedResponse;
+use App\Support\Console\SecurityJournal;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -93,5 +94,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Limite de debit atteinte : un message qui dit quand reessayer, jamais une page 429 nue
         // (CLAUDE.md, « Limitation de debit »).
-        $exceptions->render(fn (ThrottleRequestsException $e, Request $request) => RateLimitedResponse::for($request, $e));
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            // « Chaque blocage est journalise » : l'ecran Securite de la console le montre.
+            SecurityJournal::rateLimited($request);
+
+            return RateLimitedResponse::for($request, $e);
+        });
     })->create();

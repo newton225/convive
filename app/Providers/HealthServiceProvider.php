@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Support\Console\SecurityJournal;
+use App\Support\Health\Checks\AuditChainCheck;
 use App\Support\Health\Checks\FailedJobsCheck;
 use App\Support\Health\Checks\ScheduledTasksCheck;
 use App\Support\Health\ScheduledTaskRecorder;
+use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
@@ -27,6 +30,9 @@ class HealthServiceProvider extends ServiceProvider
     {
         Event::subscribe(ScheduledTaskRecorder::class);
 
+        // Une connexion verrouillee apres trop d'echecs : montree par l'ecran Securite.
+        Event::listen(Lockout::class, fn (Lockout $event) => SecurityJournal::lockout($event->request));
+
         Health::checks([
             // Le planificateur lui-meme : s'il s'arrete, plus rien ne tourne, ni purge ni rappel.
             ScheduleCheck::new()->name('schedule')->heartbeatMaxAgeInMinutes(2),
@@ -34,6 +40,7 @@ class HealthServiceProvider extends ServiceProvider
             // Un travail temoin part chaque minute : s'il n'est pas traite, aucun envoi ne l'est.
             QueueCheck::new()->name('queue')->failWhenHealthJobTakesLongerThanMinutes(5),
             FailedJobsCheck::new()->name('failed_jobs'),
+            AuditChainCheck::new()->name('audit_chain'),
             DatabaseCheck::new()->name('database')->connectionName('central'),
             RedisCheck::new()->name('redis')->if(fn () => in_array('redis', [config('queue.default'), config('cache.default')], true)),
             // Le controle lit la commande `df`, absente d'un poste Windows de developpement.

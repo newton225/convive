@@ -19,6 +19,7 @@ const CheckOrder = [
     'scheduled_tasks',
     'queue',
     'failed_jobs',
+    'audit_chain',
     'database',
     'redis',
     'disk',

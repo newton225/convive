@@ -13,6 +13,7 @@ return [
         'recovery' => 'Recouvrement',
         'plans' => 'Plans',
         'health' => 'Santé technique',
+        'security' => 'Sécurité',
         'showcase' => 'Vitrine',
         'audit' => 'Journal central',
         'team' => 'Équipe éditeur',
@@ -253,6 +254,30 @@ return [
         ],
     ],
 
+    'security' => [
+        'title' => 'Sécurité',
+        'description' => 'Intégrité des journaux d’audit, limites de débit atteintes et connexions verrouillées.',
+        'chains' => 'Intégrité des journaux d’audit',
+        'chains_hint' => 'Chaque nuit, le journal de Convive et celui de chaque organisation sont vérifiés : une entrée modifiée ou supprimée en dehors de la purge prévue se voit ici.',
+        'chains_never' => 'La vérification n’a encore jamais tourné sur ce serveur : elle part cette nuit.',
+        'chains_ok' => '{1} 1 journal vérifié, intact. Dernière vérification complète : :date.|[2,*] :count journaux vérifiés, tous intacts. Dernière vérification complète : :date.',
+        'central_log' => 'Journal central de Convive',
+        'chain_broken' => ': chaîne rompue à l’entrée n° :entry, constatée le :date. Une entrée a été modifiée ou supprimée : à examiner sans attendre.',
+        'events' => 'Blocages',
+        'events_day' => 'Sur les dernières 24 heures : :limited limites de débit atteintes, :lockouts connexions verrouillées. Une même adresse qui insiste n’est comptée qu’une fois par minute.',
+        'events_empty' => 'Aucun blocage enregistré.',
+        'columns' => [
+            'date' => 'Date',
+            'type' => 'Type',
+            'subject' => 'Cible',
+            'ip' => 'Adresse IP',
+        ],
+        'types' => [
+            'rate_limited' => 'Limite de débit',
+            'login_lockout' => 'Connexion verrouillée',
+        ],
+    ],
+
     'health' => [
         'title' => 'Santé technique',
         'description' => 'Planificateur, file d’envois, bases des organisations et sauvegardes.',
@@ -301,6 +326,11 @@ return [
                 'label' => 'Traitement de la file',
                 'ok' => 'Les envois sont traités.',
                 'failed' => 'La file n’est pas traitée : courriels et messages s’accumulent sans partir. Vérifiez que le processus de file tourne sur le serveur.',
+            ],
+            'audit_chain' => [
+                'label' => 'Journaux d’audit',
+                'ok' => 'Aucune chaîne rompue.',
+                'failed' => 'Un journal d’audit a été altéré : voir l’écran Sécurité.',
             ],
             'failed_jobs' => [
                 'label' => 'Envois en échec',

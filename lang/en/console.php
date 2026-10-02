@@ -13,6 +13,7 @@ return [
         'recovery' => 'Collections',
         'plans' => 'Plans',
         'health' => 'Technical health',
+        'security' => 'Security',
         'showcase' => 'Showcase',
         'audit' => 'Central log',
         'team' => 'Publisher team',
@@ -253,6 +254,30 @@ return [
         ],
     ],
 
+    'security' => [
+        'title' => 'Security',
+        'description' => 'Integrity of the audit logs, rate limits reached and locked sign-ins.',
+        'chains' => 'Integrity of the audit logs',
+        'chains_hint' => 'Every night, the log of Convive and that of each organisation are verified: an entry changed or removed outside the planned purge shows here.',
+        'chains_never' => 'The verification has never run on this server yet: it starts tonight.',
+        'chains_ok' => '{1} 1 log verified, intact. Last full verification: :date.|[2,*] :count logs verified, all intact. Last full verification: :date.',
+        'central_log' => 'Central log of Convive',
+        'chain_broken' => ': chain broken at entry no. :entry, found on :date. An entry was changed or removed: to be examined without delay.',
+        'events' => 'Blocks',
+        'events_day' => 'Over the last 24 hours: :limited rate limits reached, :lockouts locked sign-ins. An address that keeps trying is only counted once a minute.',
+        'events_empty' => 'No block recorded.',
+        'columns' => [
+            'date' => 'Date',
+            'type' => 'Type',
+            'subject' => 'Target',
+            'ip' => 'IP address',
+        ],
+        'types' => [
+            'rate_limited' => 'Rate limit',
+            'login_lockout' => 'Locked sign-in',
+        ],
+    ],
+
     'health' => [
         'title' => 'Technical health',
         'description' => 'Scheduler, message queue, organisation databases and backups.',
@@ -301,6 +326,11 @@ return [
                 'label' => 'Queue processing',
                 'ok' => 'Messages are being processed.',
                 'failed' => 'The queue is not processed: emails and messages pile up without leaving. Check that the queue worker runs on the server.',
+            ],
+            'audit_chain' => [
+                'label' => 'Audit logs',
+                'ok' => 'No broken chain.',
+                'failed' => 'An audit log was tampered with: see the Security screen.',
             ],
             'failed_jobs' => [
                 'label' => 'Failed messages',

@@ -29,6 +29,7 @@ class ConsoleAccessTest extends TestCase
             'sante technique' => ['console.health', [], 'console/health'],
             'vitrine' => ['console.showcase', [], 'console/showcase'],
             'journal central' => ['console.audit', [], 'console/audit'],
+            'securite' => ['console.security', [], 'console/security'],
             'equipe editeur' => ['console.team', [], 'console/team'],
         ];
     }

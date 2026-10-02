@@ -10,6 +10,7 @@ use App\Http\Controllers\Console\PlanController;
 use App\Http\Controllers\Console\RecoveryController;
 use App\Http\Controllers\Console\RepairTenantDatabaseController;
 use App\Http\Controllers\Console\RunBackupController;
+use App\Http\Controllers\Console\SecurityController;
 use App\Http\Controllers\Console\ShowcaseController;
 use App\Http\Controllers\Console\SupportAvailabilityController;
 use App\Http\Controllers\Console\TakeSupportRequestController;
@@ -56,6 +57,7 @@ Route::prefix('console')
         Route::delete('health/failed-jobs/{job}', [FailedJobController::class, 'destroy'])->middleware('can:console.area,"health"')->name('health.failed-jobs.destroy');
         Route::get('showcase', [ShowcaseController::class, 'index'])->middleware('can:console.area,"showcase"')->name('showcase');
         Route::post('showcase/{announcement}/withdraw', [ShowcaseController::class, 'withdraw'])->name('showcase.withdraw');
+        Route::get('security', SecurityController::class)->middleware('can:console.area,"security"')->name('security');
         Route::get('audit', AuditLogController::class)->middleware('can:console.area,"audit"')->name('audit');
         // L'equipe editeur (README ecran 34) : reservee aux Fondateurs.
         Route::get('team', [TeamController::class, 'index'])->middleware('can:console.area,"team"')->name('team');
