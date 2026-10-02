@@ -82,6 +82,29 @@ return [
     // le proprietaire du projet ne l'a pas fournie : les messages s'en passent alors.
     'support_email' => env('CONVIVE_SUPPORT_EMAIL'),
 
+    /*
+    | L'editeur du service et ses prestataires, tels qu'ils figurent dans la politique de
+    | confidentialite, les conditions d'utilisation et les mentions legales
+    | (`App\Support\LegalDocument`). Une valeur vide s'affiche « [a completer] », et
+    | `convive:production-check` refuse de partir en production tant qu'il en reste une.
+    | `reviewed` passe a vrai quand un juriste a valide les textes : d'ici la, chaque page le dit.
+    */
+    'legal' => [
+        'editor_name' => env('CONVIVE_LEGAL_EDITOR_NAME'),
+        'legal_form' => env('CONVIVE_LEGAL_FORM'),
+        'share_capital' => env('CONVIVE_LEGAL_SHARE_CAPITAL'),
+        'registration_number' => env('CONVIVE_LEGAL_RCCM'),
+        'tax_number' => env('CONVIVE_LEGAL_TAX_NUMBER'),
+        'editor_address' => env('CONVIVE_LEGAL_ADDRESS'),
+        'publication_director' => env('CONVIVE_LEGAL_PUBLICATION_DIRECTOR'),
+        'contact_email' => env('CONVIVE_LEGAL_CONTACT_EMAIL'),
+        'privacy_email' => env('CONVIVE_LEGAL_PRIVACY_EMAIL'),
+        'host_name' => env('CONVIVE_LEGAL_HOST_NAME'),
+        'host_address' => env('CONVIVE_LEGAL_HOST_ADDRESS'),
+        'mail_provider' => env('CONVIVE_LEGAL_MAIL_PROVIDER'),
+        'reviewed' => (bool) env('CONVIVE_LEGAL_REVIEWED', false),
+    ],
+
     'billing' => [
         'enforce_plan_limits' => (bool) env('CONVIVE_ENFORCE_PLAN_LIMITS', true),
 

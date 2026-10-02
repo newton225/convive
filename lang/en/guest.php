@@ -39,6 +39,8 @@ return [
     ],
 
     'registration' => [
+        'privacy_notice' => 'This information is passed on to :organisation, which organises this event, to manage your registration.',
+        'privacy_link' => 'How your data is handled',
         'errors' => [
             'phone_invalid' => 'This number is not valid for the selected country. Check the country chosen in front of the field, then the number.',
             'phone_already_active' => 'A reservation is already in progress for this number. Finish it, or wait for its time limit to end before creating another.',

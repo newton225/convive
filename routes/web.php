@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProductTourController;
 use App\Http\Controllers\ShowcaseController;
@@ -16,6 +17,11 @@ Route::get('/', HomeController::class)->middleware('guest')->name('home');
 // Vitrine des evenements a la une (CLAUDE.md, « Annonce sur le site produit ») : accessible a
 // tous, connecte ou non, contrairement a la page d'accueil marketing.
 Route::get('evenements-a-la-une', ShowcaseController::class)->name('showcase.index');
+
+// Pages juridiques, ouvertes a tous (connecte ou non) : chaque route fixe le document qu'elle rend.
+Route::get('confidentialite', LegalController::class)->defaults('document', 'privacy')->name('legal.privacy');
+Route::get('conditions', LegalController::class)->defaults('document', 'terms')->name('legal.terms');
+Route::get('mentions-legales', LegalController::class)->defaults('document', 'notice')->name('legal.notice');
 
 Route::put('locale', [LocaleController::class, 'update'])->name('locale.update');
 

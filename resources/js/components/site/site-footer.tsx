@@ -3,11 +3,12 @@ import AppLogoIcon from '@/components/app-logo-icon';
 import { useTranslation } from '@/hooks/use-translation';
 import { OpenConsentEvent } from '@/lib/analytics';
 import { home, login, register } from '@/routes';
+import { notice, privacy, terms } from '@/routes/legal';
 import { index as showcaseIndex } from '@/routes/showcase';
 
 /**
  * Le pied de la vitrine : l'identite du produit, puis les memes chemins que l'en-tete, ranges en
- * deux colonnes, pour qui arrive en bas de page sans remonter.
+ * colonnes, pour qui arrive en bas de page sans remonter, et les pages juridiques.
  */
 export function SiteFooter({
     analyticsEnabled = false,
@@ -22,7 +23,7 @@ export function SiteFooter({
 
     return (
         <footer className="mx-auto w-full max-w-6xl px-6 pt-16 pb-10 text-sm">
-            <div className="grid gap-10 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="grid gap-10 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
                 <div className="space-y-3">
                     <p className="flex items-center gap-2 text-base font-semibold">
                         <AppLogoIcon className="size-6 fill-current" />
@@ -85,6 +86,27 @@ export function SiteFooter({
                         <li>
                             <Link href={register()} className={linkClass}>
                                 {t('site.nav.register')}
+                            </Link>
+                        </li>
+                    </ul>
+                </nav>
+
+                <nav className="space-y-3" aria-label={t('site.footer.legal')}>
+                    <p className="font-semibold">{t('site.footer.legal')}</p>
+                    <ul className="space-y-2">
+                        <li>
+                            <Link href={privacy()} className={linkClass}>
+                                {t('site.footer.privacy')}
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href={terms()} className={linkClass}>
+                                {t('site.footer.terms')}
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href={notice()} className={linkClass}>
+                                {t('site.footer.notice')}
                             </Link>
                         </li>
                     </ul>

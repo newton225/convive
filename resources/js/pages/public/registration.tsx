@@ -30,6 +30,8 @@ type Props = {
     units: PublicUnitOption[];
     token: string;
     defaultCountry: Country;
+    // La politique de confidentialite, sur le site de l'editeur.
+    privacyUrl: string;
 };
 
 /**
@@ -47,6 +49,7 @@ export default function PublicRegistration({
     units,
     token,
     defaultCountry,
+    privacyUrl,
 }: Props) {
     const { t, locale } = useTranslation();
     const [companionIds, setCompanionIds] = useState<number[]>([]);
@@ -215,6 +218,23 @@ export default function PublicRegistration({
                             >
                                 {t('guest.registration.submit')}
                             </SubmitButton>
+
+                            <p
+                                className="text-muted-foreground text-center text-xs"
+                                data-test="registration-privacy"
+                            >
+                                {t('guest.registration.privacy_notice', {
+                                    organisation: tenant.displayName,
+                                })}{' '}
+                                <a
+                                    href={privacyUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="underline underline-offset-2"
+                                >
+                                    {t('guest.registration.privacy_link')}
+                                </a>
+                            </p>
                         </>
                     )}
                 </Form>

@@ -51,6 +51,7 @@ class RegistrationTest extends TestCase
             'phone' => '+225 07 07 12 34 56',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'terms' => 'on',
         ]);
 
         $this->assertAuthenticated();
@@ -73,6 +74,7 @@ class RegistrationTest extends TestCase
             'phone' => '+225 07 07 12 34 56',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'terms' => 'on',
         ]);
 
         $user = User::where('email', 'amara@example.com')->firstOrFail();
@@ -89,6 +91,7 @@ class RegistrationTest extends TestCase
             'email' => 'amara@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'terms' => 'on',
         ])->assertSessionHasErrors('phone');
 
         $this->assertGuest();
@@ -104,6 +107,7 @@ class RegistrationTest extends TestCase
             'phone' => '+225 05 05 11 22 33',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'terms' => 'on',
         ]);
 
         $user = User::where('email', 'fatou@example.com')->firstOrFail();

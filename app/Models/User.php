@@ -44,7 +44,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property-read Collection<int, Membership> $tenantMemberships
  * @property-read Collection<int, Tenant> $tenants
  */
-#[Fillable(['name', 'email', 'phone', 'password', 'current_tenant_id'])]
+#[Fillable(['name', 'email', 'phone', 'password', 'current_tenant_id', 'terms_accepted_at', 'terms_version'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'scan_pin_verifier'])]
 class User extends Authenticatable implements PasskeyUser
 {
@@ -107,6 +107,7 @@ class User extends Authenticatable implements PasskeyUser
     {
         return [
             'email_verified_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
             'scan_pin_verifier' => 'array',

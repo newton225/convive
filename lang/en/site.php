@@ -138,6 +138,10 @@ return [
         'product' => 'Product',
         'account' => 'Account',
         'analytics' => 'Audience measurement',
+        'legal' => 'Legal information',
+        'privacy' => 'Privacy',
+        'terms' => 'Terms of use',
+        'notice' => 'Legal notice',
     ],
 
     'consent' => [

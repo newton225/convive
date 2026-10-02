@@ -6,6 +6,7 @@ use App\Actions\Tenants\CreateTenant;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use App\Support\LegalDocument;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -35,7 +36,10 @@ class CreateNewUser implements CreatesNewUsers
             'phone' => $this->phoneRules(required: true),
             'organisation_name' => ['nullable', 'string', 'max:255'],
             'password' => $this->passwordRules(),
-        ])->validate();
+            // L'acceptation des conditions et de la politique de confidentialite, gardee avec sa
+            // date et la version acceptee : c'est la preuve du contrat.
+            'terms' => ['accepted'],
+        ], ['terms.accepted' => __('account.register.terms_required')])->validate();
 
         return DB::transaction(function () use ($input) {
             $user = User::create([
@@ -43,6 +47,8 @@ class CreateNewUser implements CreatesNewUsers
                 'email' => $input['email'],
                 'phone' => $input['phone'],
                 'password' => $input['password'],
+                'terms_accepted_at' => now(),
+                'terms_version' => LegalDocument::Version,
             ]);
 
             $organisationName = trim((string) ($input['organisation_name'] ?? ''));

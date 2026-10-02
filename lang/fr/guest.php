@@ -39,6 +39,8 @@ return [
     ],
 
     'registration' => [
+        'privacy_notice' => 'Ces informations sont transmises à :organisation, qui organise cet événement, pour gérer votre inscription.',
+        'privacy_link' => 'Comment vos données sont traitées',
         'errors' => [
             'phone_invalid' => "Ce numéro n'est pas valide pour le pays choisi. Vérifiez le pays sélectionné devant le champ, puis le numéro.",
             'phone_already_active' => 'Une réservation est déjà en cours pour ce numéro. Terminez-la, ou attendez la fin de son délai avant d\'en créer une autre.',

@@ -957,6 +957,31 @@ l'ecran de sante technique de la console (README ecran 31).
 
 ---
 
+## Documents juridiques
+
+Politique de confidentialite, conditions d'utilisation et mentions legales : `/confidentialite`,
+`/conditions`, `/mentions-legales`, domaine central, lies depuis le pied du site, la creation de
+compte et le formulaire d'inscription de l'invite.
+
+- **Les textes sont dans `lang/{fr,en}/legal.php`**, lus cote serveur par
+  `App\Support\LegalDocument` et passes en props : le groupe n'est pas dans
+  `HandleInertiaRequests::TranslationGroups`, il alourdirait chaque page.
+- **Ils decrivent ce que le code fait reellement.** Une duree ou une regle qui change dans le code
+  (delai d'effacement, conservation des sauvegardes ou du journal, duree de session, prestataire,
+  donnee collectee) se change dans les deux langues **dans le meme commit**, et
+  `LegalDocument::Version` avance. `LegalPagesTest` accroche les durees annoncees aux constantes.
+- **L'identite de l'editeur et de ses prestataires vient de `config('convive.legal')`**, jamais d'un
+  texte en dur. Une valeur vide s'affiche « [a completer] », et `convive:production-check` refuse
+  de partir en production tant qu'il en reste une ou que `CONVIVE_LEGAL_REVIEWED` n'est pas vrai.
+- **Ces textes ne sont pas un avis juridique** : rediges a partir du fonctionnement du service, ils
+  portent un bandeau « en cours de validation » jusqu'a leur relecture par un juriste.
+- **L'acceptation est gardee** : `users.terms_accepted_at` et `users.terms_version`, poses a la
+  creation du compte, case obligatoire.
+- **Roles** : l'organisation est responsable du traitement des donnees de ses invites, l'editeur
+  est son sous-traitant ; l'editeur est responsable pour les comptes, la facturation et le site.
+
+---
+
 ## Animation et site produit
 
 Le site produit est la vitrine commerciale, il doit avoir le niveau de finition d'un site
@@ -1088,6 +1113,7 @@ invite. Aucun texte affiche n'est ecrit en dur dans le code : ni en PHP, ni en T
 | `lang/{fr,en}/tenants.php`                                                      | organisations, membres, invitations                          |
 | `lang/{fr,en}/organisation.php`                                                 | identite legale, marque, sous-domaine                        |
 | `lang/{fr,en}/profiles.php`, `permissions.php`                                  | profils et catalogue de permissions                          |
+| `lang/{fr,en}/legal.php`                                                        | documents juridiques, lus cote serveur seulement             |
 | `lang/{fr,en}/{auth,validation,passwords,pagination,http-statuses,actions}.php` | traductions du framework, fournies par `laravel-lang/common` |
 
 Les fichiers du framework sont **generes**, pas ecrits a la main : `php artisan lang:add <code>`

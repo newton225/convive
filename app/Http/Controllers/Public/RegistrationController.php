@@ -17,6 +17,7 @@ use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\Ticket;
 use App\Models\Unit;
+use App\Support\LegalDocument;
 use App\Support\PlanLimits;
 use App\Support\TicketCard;
 use App\Support\TicketQrCode;
@@ -52,6 +53,8 @@ class RegistrationController extends Controller
 
         return Inertia::render('public/registration', [
             'token' => $token,
+            // L'invite lit comment ses donnees sont traitees avant de les envoyer.
+            'privacyUrl' => LegalDocument::url('privacy'),
             'defaultCountry' => VisitorCountry::from(request()),
             'event' => [
                 'name' => $event->name,

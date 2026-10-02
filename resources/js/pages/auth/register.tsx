@@ -4,10 +4,12 @@ import PasswordInput from '@/components/password-input';
 import TenantInvitationAlert from '@/components/tenant-invitation-alert';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
+import { privacy, terms } from '@/routes/legal';
 import { store } from '@/routes/register';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import type { TenantInvitationContext, Translations } from '@/types';
@@ -155,10 +157,50 @@ export default function Register({ passwordRules, tenantInvitation }: Props) {
                                 />
                             </div>
 
+                            {/* L'acceptation des conditions et de la politique de confidentialite :
+                                le serveur garde sa date et la version acceptee. */}
+                            <div className="grid gap-2">
+                                <div className="flex items-start gap-3">
+                                    <Checkbox
+                                        id="terms"
+                                        name="terms"
+                                        required
+                                        tabIndex={5}
+                                        className="mt-0.5"
+                                        data-test="register-terms"
+                                    />
+                                    <Label
+                                        htmlFor="terms"
+                                        className="block text-sm leading-relaxed font-normal"
+                                    >
+                                        {t('account.register.terms_prefix')}{' '}
+                                        <a
+                                            href={terms().url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="underline underline-offset-2"
+                                        >
+                                            {t('account.register.terms_link')}
+                                        </a>{' '}
+                                        {t('account.register.terms_joiner')}{' '}
+                                        <a
+                                            href={privacy().url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="underline underline-offset-2"
+                                        >
+                                            {t('account.register.privacy_link')}
+                                        </a>
+                                        .
+                                    </Label>
+                                </div>
+                                <InputError message={errors.terms} />
+                            </div>
+
                             <Button
                                 type="submit"
                                 className="mt-2 w-full"
-                                tabIndex={5}
+                                tabIndex={6}
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\LegalDocument;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -27,6 +28,8 @@ class ProductionCheckCommand extends Command
             'TRUSTED_PROXIES ne doit jamais contenir * : X-Forwarded-For deviendrait falsifiable (SECURITY.md C3).' => str_contains((string) config('convive.security.trusted_proxies'), '*'),
             'MAIL_MAILER ne doit pas ecrire les emails dans le journal ni les jeter.' => in_array(config('mail.default'), ['log', 'array'], true),
             'CONVIVE_ENFORCE_TWO_FACTOR doit rester actif en production.' => config('convive.two_factor.enforced') !== true,
+            'Les pages juridiques sont incompletes : renseignez l\'identite de l\'editeur ('.implode(', ', LegalDocument::missingIdentity()).').' => LegalDocument::missingIdentity() !== [],
+            'CONVIVE_LEGAL_REVIEWED doit valoir true : les pages juridiques n\'ont pas ete validees par un juriste.' => ! LegalDocument::isReviewed(),
         ]));
 
         if ($failures === []) {

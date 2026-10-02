@@ -5,6 +5,7 @@ export type * from './console';
 export type * from './dashboard';
 export type * from './event-settings';
 export type * from './i18n';
+export type * from './legal';
 export type * from './navigation';
 export type * from './notifications';
 export type * from './events';
