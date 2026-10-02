@@ -159,6 +159,20 @@ export type ConsoleQueue = {
     failed: ConsoleFailedJob[];
 };
 
+// Un compte tel que la console le montre : jamais son mot de passe ni le contenu de ses
+// organisations.
+export type ConsoleAccount = {
+    id: number;
+    name: string;
+    email: string;
+    phone: string | null;
+    createdAt: string | null;
+    hasTwoFactor: boolean;
+    organisations: string[];
+    blockedAt: string | null;
+    blockedReason: string | null;
+};
+
 // L'integrite des journaux d'audit, verifiee chaque nuit. `checkedAt` est nul tant que la
 // verification n'a jamais tourne.
 export type ConsoleAuditChains = {
@@ -231,7 +245,10 @@ export type ConsoleAuditType =
     | 'failed_job_retried'
     | 'failed_job_forgotten'
     | 'tenant_deleted_by_owner'
-    | 'tenant_restored';
+    | 'tenant_restored'
+    | 'account_blocked'
+    | 'account_unblocked'
+    | 'two_factor_reset';
 
 export type ConsoleAuditEntry = {
     id: number;

@@ -8,6 +8,7 @@ import {
     Package,
     ScrollText,
     ShieldAlert,
+    UserSearch,
     UsersRound,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -34,6 +35,7 @@ import {
     showcase,
     team,
 } from '@/routes/console';
+import { index as accountsIndex } from '@/routes/console/accounts';
 import { index as organisationsIndex } from '@/routes/console/organisations';
 import type { NavItem } from '@/types';
 
@@ -55,6 +57,12 @@ export function ConsoleSidebar() {
             href: organisationsIndex(),
             icon: Building2,
             area: 'organisations',
+        },
+        {
+            title: t('console.nav.accounts'),
+            href: accountsIndex(),
+            icon: UserSearch,
+            area: 'accounts',
         },
         {
             title: t('console.nav.recovery'),

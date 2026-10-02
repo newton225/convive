@@ -25,6 +25,7 @@ return [
     ],
 
     'login' => [
+        'blocked' => 'This account is blocked. Contact the Convive team to find out more.',
         'head' => 'Log in',
         'title' => 'Log in to your account',
         'description' => 'Enter your email address and password',

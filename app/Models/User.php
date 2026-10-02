@@ -30,6 +30,8 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property string|null $phone
  * @property Carbon|null $email_verified_at
  * @property string $password
+ * @property Carbon|null $blocked_at
+ * @property string|null $blocked_reason
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
  * @property Carbon|null $two_factor_confirmed_at
@@ -99,6 +101,14 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     /**
+     * Determine whether the Convive team blocked this account : il ne se connecte plus.
+     */
+    public function isBlocked(): bool
+    {
+        return $this->blocked_at !== null;
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -108,6 +118,7 @@ class User extends Authenticatable implements PasskeyUser
         return [
             'email_verified_at' => 'datetime',
             'terms_accepted_at' => 'datetime',
+            'blocked_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
             'scan_pin_verifier' => 'array',

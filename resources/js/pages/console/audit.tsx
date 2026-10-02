@@ -52,6 +52,9 @@ const types: ConsoleAuditType[] = [
     'failed_job_forgotten',
     'tenant_deleted_by_owner',
     'tenant_restored',
+    'account_blocked',
+    'account_unblocked',
+    'two_factor_reset',
 ];
 
 /**

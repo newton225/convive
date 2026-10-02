@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EndTenancy;
 use App\Http\Middleware\EnforceAbsoluteSessionLifetime;
+use App\Http\Middleware\EnsureAccountIsNotBlocked;
 use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -51,6 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             AuthenticateSession::class,
             EnforceAbsoluteSessionLifetime::class,
+            EnsureAccountIsNotBlocked::class,
             SetSecurityHeaders::class,
             HandleAppearance::class,
             SetLocale::class,

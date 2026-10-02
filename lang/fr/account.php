@@ -25,6 +25,7 @@ return [
     ],
 
     'login' => [
+        'blocked' => 'Ce compte est bloqué. Contactez l’équipe Convive pour en savoir plus.',
         'head' => 'Connexion',
         'title' => 'Connexion à votre espace',
         'description' => 'Saisissez votre adresse email et votre mot de passe',

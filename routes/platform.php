@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Console\AccountController;
 use App\Http\Controllers\Console\AuditLogController;
 use App\Http\Controllers\Console\FailedJobController;
 use App\Http\Controllers\Console\FinishSupportAccessController;
@@ -58,6 +59,11 @@ Route::prefix('console')
         Route::get('showcase', [ShowcaseController::class, 'index'])->middleware('can:console.area,"showcase"')->name('showcase');
         Route::post('showcase/{announcement}/withdraw', [ShowcaseController::class, 'withdraw'])->name('showcase.withdraw');
         Route::get('security', SecurityController::class)->middleware('can:console.area,"security"')->name('security');
+        // Les comptes : recherche, blocage, reinitialisation de la double authentification.
+        Route::get('accounts', [AccountController::class, 'index'])->middleware('can:console.area,"accounts"')->name('accounts.index');
+        Route::post('accounts/{user}/block', [AccountController::class, 'block'])->middleware('can:console.area,"accounts"')->name('accounts.block');
+        Route::delete('accounts/{user}/block', [AccountController::class, 'unblock'])->middleware('can:console.area,"accounts"')->name('accounts.unblock');
+        Route::post('accounts/{user}/two-factor-reset', [AccountController::class, 'resetTwoFactor'])->middleware('can:console.area,"accounts"')->name('accounts.two-factor-reset');
         Route::get('audit', AuditLogController::class)->middleware('can:console.area,"audit"')->name('audit');
         // L'equipe editeur (README ecran 34) : reservee aux Fondateurs.
         Route::get('team', [TeamController::class, 'index'])->middleware('can:console.area,"team"')->name('team');
