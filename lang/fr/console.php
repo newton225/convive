@@ -346,6 +346,7 @@ return [
             'alert_when_the_newest_backup_is_too_old' => 'Surveillance des sauvegardes',
             'record_that_the_scheduler_is_alive' => 'Témoin du planificateur',
             'send_a_witness_job_through_the_queue' => 'Témoin de la file',
+            'erase_organisations_whose_scheduled_deletion_is_due' => 'Effacement des organisations à l’échéance de leur suppression',
             'run_the_health_checks_and_alert_on_failure' => 'Contrôles de santé et alertes',
         ],
         'task_columns' => [

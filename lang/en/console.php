@@ -346,6 +346,7 @@ return [
             'alert_when_the_newest_backup_is_too_old' => 'Backup monitoring',
             'record_that_the_scheduler_is_alive' => 'Scheduler heartbeat',
             'send_a_witness_job_through_the_queue' => 'Queue heartbeat',
+            'erase_organisations_whose_scheduled_deletion_is_due' => 'Erasure of organisations whose deletion is due',
             'run_the_health_checks_and_alert_on_failure' => 'Health checks and alerts',
         ],
         'task_columns' => [

@@ -324,3 +324,13 @@ Schedule::command(DispatchQueueCheckJobsCommand::class)
 Schedule::command(RunHealthChecksCommand::class)
     ->everyMinute()
     ->description('Run the health checks and alert on failure');
+
+/*
+ * Efface les organisations dont la suppression programmee est arrivee a echeance (README
+ * section 3) : trente jours apres la demande, sauf annulation depuis la console. `--force` : sans
+ * lui la commande ne fait que lister. L'effacement ne se rattrape pas, chaque borne est testee
+ * (`EraseScheduledTenantsTest`).
+ */
+Schedule::command('tenants:erase-scheduled --force')
+    ->dailyAt('04:30')
+    ->description('Erase organisations whose scheduled deletion is due');

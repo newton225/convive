@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Storage;
  * garde la trace de l'operation, sans les donnees.
  *
  * Sans `--force`, la commande ne fait que lister ce qu'elle effacerait : l'effacement ne se
- * rattrape pas. Elle n'est volontairement pas planifiee tant que ses tests n'ont pas ete executes ;
- * d'ici la, elle se lance a la main.
+ * rattrape pas. Le planificateur la lance chaque nuit avec `--force` (`routes/console.php`).
+ *
+ * Les sauvegardes deja faites gardent l'organisation jusqu'au terme de leur conservation
+ * (`config/backup.php`) : l'effacement ne les reecrit pas.
  */
 #[Signature('tenants:erase-scheduled {--force : Efface reellement, au lieu de lister}')]
 #[Description('Efface les organisations dont la suppression programmee est arrivee a echeance')]
@@ -56,7 +58,11 @@ class EraseScheduledTenantsCommand extends Command
             'scheduled_for' => $tenant->deletion_scheduled_at?->toISOString(),
         ]);
 
-        Storage::disk('tenant_media')->deleteDirectory("tenants/{$tenant->id}");
+        // Les fichiers de marque et les preuves de paiement : deux disques, ranges tous deux par
+        // organisation. Les preuves portent des donnees personnelles, elles partent aussi.
+        foreach (['tenant_media', 'payment_proofs'] as $disk) {
+            Storage::disk($disk)->deleteDirectory("tenants/{$tenant->id}");
+        }
 
         $database = $tenant->database();
 
