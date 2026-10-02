@@ -61,6 +61,56 @@ class RecoveryAndShowcaseTest extends TestCase
         ]);
     }
 
+    public function test_les_revenus_comptent_les_abonnements_a_jour_et_ce_qui_a_ete_encaisse(): void
+    {
+        $plan = Plan::ensure(PlanCode::Association);
+        $subscription = Subscription::create([
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::Active,
+            'currency' => 'XOF',
+        ]);
+
+        $invoice = fn (string $number, InvoiceStatus $status, $paidAt) => Invoice::create([
+            'tenant_id' => $this->tenant->id,
+            'subscription_id' => $subscription->id,
+            'number' => $number,
+            'amount' => 45000,
+            'currency' => 'XOF',
+            'status' => $status,
+            'issued_at' => $paidAt ?? now(),
+            'paid_at' => $paidAt,
+        ]);
+
+        $invoice('CNV-TEST-0101', InvoiceStatus::Paid, now());
+        $invoice('CNV-TEST-0102', InvoiceStatus::Paid, now()->subMonthNoOverflow()->startOfMonth()->addDays(2));
+        // Une facture en echec n'est pas un encaissement.
+        $invoice('CNV-TEST-0103', InvoiceStatus::Failed, null);
+
+        $this->actingAs($this->founder)
+            ->get(route('console.recovery'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('revenue.subscribers', 1)
+                ->where('revenue.recurring.0.currency', 'XOF')
+                ->where('revenue.recurring.0.amount', $plan->monthly_price)
+                ->where('revenue.collectedThisMonth.0.amount', 45000)
+                ->where('revenue.collectedLastMonth.0.amount', 45000)
+                ->where('revenue.byPlan.0.count', 1),
+            );
+    }
+
+    public function test_un_abonnement_en_impaye_ne_compte_pas_dans_le_revenu_recurrent(): void
+    {
+        $this->pastDue(daysAgo: 4);
+
+        $this->actingAs($this->founder)
+            ->get(route('console.recovery'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('revenue.subscribers', 0)
+                ->has('revenue.recurring', 0),
+            );
+    }
+
     public function test_le_recouvrement_liste_les_impayes_reels_et_leur_suspension_a_venir(): void
     {
         // A la seconde : la base ne garde pas les microsecondes.

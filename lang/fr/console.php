@@ -11,7 +11,7 @@ return [
         'group_platform' => 'Plateforme',
         'organisations' => 'Organisations',
         'accounts' => 'Comptes',
-        'recovery' => 'Recouvrement',
+        'recovery' => 'Revenus et recouvrement',
         'plans' => 'Plans',
         'health' => 'Santé technique',
         'security' => 'Sécurité',
@@ -163,9 +163,19 @@ return [
         'console_actions_empty' => 'Aucune action de la console pour le moment.',
     ],
 
+    'revenue' => [
+        'title' => 'Revenus',
+        'hint' => 'Ce que les abonnements à jour rapportent chaque mois, et ce qui a réellement été encaissé. Chaque montant reste dans sa devise.',
+        'recurring' => 'Revenu mensuel récurrent',
+        'collected_this_month' => 'Encaissé ce mois-ci',
+        'collected_last_month' => 'Encaissé le mois dernier',
+        'none' => 'Rien',
+        'subscribers' => '{0} Aucun abonnement payant à jour.|{1} 1 abonnement payant à jour.|[2,*] :count abonnements payants à jour.',
+    ],
+
     'recovery' => [
-        'title' => 'Recouvrement',
-        'description' => 'Impayés en cours, relances envoyées et suspensions à venir (J+10).',
+        'title' => 'Revenus et recouvrement',
+        'description' => 'Revenus des abonnements, impayés en cours, relances envoyées et suspensions à venir (J+10).',
         'summary' => [
             'past_due' => 'Organisations en impayé',
             'suspended' => 'Organisations suspendues',

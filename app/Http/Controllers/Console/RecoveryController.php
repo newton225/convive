@@ -6,6 +6,7 @@ use App\Actions\Console\SendPaymentReminder;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Support\Console\RecoveryOverview;
+use App\Support\Console\RevenueOverview;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -30,6 +31,7 @@ class RecoveryController extends Controller
             'unpaid' => $unpaid,
             'amountsDue' => RecoveryOverview::amountsDue($unpaid),
             'failedPayments' => RecoveryOverview::failedPayments(),
+            'revenue' => RevenueOverview::summary(),
         ]);
     }
 

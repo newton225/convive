@@ -11,7 +11,7 @@ return [
         'group_platform' => 'Platform',
         'organisations' => 'Organisations',
         'accounts' => 'Accounts',
-        'recovery' => 'Collections',
+        'recovery' => 'Revenue and collections',
         'plans' => 'Plans',
         'health' => 'Technical health',
         'security' => 'Security',
@@ -163,9 +163,19 @@ return [
         'console_actions_empty' => 'No console action yet.',
     ],
 
+    'revenue' => [
+        'title' => 'Revenue',
+        'hint' => 'What the up-to-date subscriptions bring in every month, and what was really collected. Each amount stays in its currency.',
+        'recurring' => 'Monthly recurring revenue',
+        'collected_this_month' => 'Collected this month',
+        'collected_last_month' => 'Collected last month',
+        'none' => 'Nothing',
+        'subscribers' => '{0} No paid subscription up to date.|{1} 1 paid subscription up to date.|[2,*] :count paid subscriptions up to date.',
+    ],
+
     'recovery' => [
-        'title' => 'Collections',
-        'description' => 'Outstanding payments, reminders sent and upcoming suspensions (day 10).',
+        'title' => 'Revenue and collections',
+        'description' => 'Subscription revenue, outstanding payments, reminders sent and upcoming suspensions (day 10).',
         'summary' => [
             'past_due' => 'Organisations past due',
             'suspended' => 'Suspended organisations',

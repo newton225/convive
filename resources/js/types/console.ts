@@ -87,6 +87,15 @@ export type ConsoleAmountDue = {
     amount: number;
 };
 
+// Les revenus de l'editeur, par devise.
+export type ConsoleRevenue = {
+    recurring: ConsoleAmountDue[];
+    subscribers: number;
+    byPlan: { plan: string; count: number }[];
+    collectedThisMonth: ConsoleAmountDue[];
+    collectedLastMonth: ConsoleAmountDue[];
+};
+
 export type ConsoleFailedPayment = {
     id: number;
     slug: string;

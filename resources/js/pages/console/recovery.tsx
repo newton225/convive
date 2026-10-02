@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { ConsoleTable } from '@/components/console/console-table';
+import { RevenueCard } from '@/components/console/revenue-card';
 import { RemindButton } from '@/components/console/remind-button';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
@@ -12,6 +13,7 @@ import { recovery } from '@/routes/console';
 import { show } from '@/routes/console/organisations';
 import type {
     ConsoleAmountDue,
+    ConsoleRevenue,
     ConsoleFailedPayment,
     ConsoleUnpaid,
     Translations,
@@ -22,6 +24,7 @@ type Props = {
     unpaid: ConsoleUnpaid[];
     amountsDue: ConsoleAmountDue[];
     failedPayments: ConsoleFailedPayment[];
+    revenue: ConsoleRevenue;
 };
 
 /**
@@ -33,6 +36,7 @@ export default function Recovery({
     unpaid,
     amountsDue,
     failedPayments,
+    revenue,
 }: Props) {
     const { t, locale } = useTranslation();
 
@@ -155,6 +159,8 @@ export default function Recovery({
                     title={t('console.recovery.title')}
                     description={t('console.recovery.description')}
                 />
+
+                <RevenueCard revenue={revenue} />
 
                 <div className="grid gap-4 sm:grid-cols-3">
                     {summary.map((item) => (
