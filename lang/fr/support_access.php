@@ -7,7 +7,8 @@ return [
     'rules' => [
         'title' => 'Ce que permet un accès',
         'read_only' => 'Lecture seule : le support voit votre espace, il ne peut rien modifier.',
-        'limited' => '24 heures au plus, et vous pouvez le révoquer à tout moment.',
+        'limited' => '{1} 1 heure au plus à la fois, et vous pouvez le prolonger ou le révoquer à tout moment.|[2,*] :count heures au plus à la fois, et vous pouvez le prolonger ou le révoquer à tout moment.',
+        'scope' => 'Vous choisissez ce qu’il ouvre : toute votre organisation, ou un seul événement.',
         'named' => 'Nominatif : il est ouvert à une seule personne de l’équipe Convive.',
         'logged' => 'Chaque page consultée est inscrite ci-dessous et dans votre journal.',
         'banner' => 'Tant que l’accès est ouvert, un bandeau le rappelle à tous les membres.',
@@ -16,6 +17,8 @@ return [
     'active' => [
         'title' => 'Accès en cours',
         'summary' => ':operator peut consulter votre espace jusqu’au :expires.',
+        'scope_all' => 'Il porte sur toute votre organisation.',
+        'scope_event' => 'Il est limité à l’événement « :event » : le reste de votre organisation n’est pas ouvert.',
         'granted' => 'Ouvert par :granted_by le :date.',
         'reason' => 'Motif',
         'revoke' => 'Révoquer l’accès',
@@ -42,6 +45,11 @@ return [
         'operator_placeholder' => 'Choisir une personne',
         'no_operator' => 'Personne de l’équipe Convive n’est visible pour le moment. Prévenez l’équipe ci-dessus : la personne qui vous aide se rendra disponible, et son nom apparaîtra ici.',
         'duration' => 'Durée',
+        'scope' => 'Ce que l’accès ouvre',
+        'scope_all' => 'Toute l’organisation',
+        'scope_event' => 'Seulement l’événement « :event »',
+        'scope_hint' => 'Limité à un événement, l’accès n’ouvre que ses écrans (inscrits, preuves, plan de salle, rapport) : ni vos autres événements, ni le tableau de bord, ni l’historique des actions.',
+        'confirm_description_event' => 'Cette personne de l’équipe Convive pourra lire l’événement « :event » (ses inscrits, ses preuves, son plan de salle, son rapport) pendant :duration, et rien d’autre de votre organisation. Elle ne pourra rien modifier, et vous pourrez révoquer l’accès à tout moment.',
         'hours' => '{1} 1 heure|[2,*] :count heures',
         'reason' => 'Pourquoi ouvrez-vous cet accès ?',
         'reason_hint' => 'Une ou deux phrases : le problème et l’événement concerné. La personne de l’équipe Convive lira ce motif avant d’entrer, et il reste dans votre historique. N’y mettez ni mot de passe ni numéro de compte.',
@@ -49,6 +57,13 @@ return [
         'confirm_title' => 'Ouvrir un accès à :operator ?',
         'confirm_description' => 'Cette personne de l’équipe Convive pourra lire vos événements, vos inscrits, vos preuves et votre journal pendant :duration. Elle ne pourra rien modifier, et vous pourrez révoquer l’accès à tout moment.',
         'one_at_a_time' => 'Un seul accès à la fois : révoquez celui en cours pour en ouvrir un autre.',
+    ],
+
+    'extend' => [
+        'button' => 'Prolonger l’accès',
+        'title' => 'Prolonger l’accès de :operator ?',
+        'description' => '{1} Le temps choisi s’ajoute à l’échéance actuelle. L’accès n’a jamais plus d’1 heure devant lui : au-delà, il faudra le prolonger de nouveau.|[2,*] Le temps choisi s’ajoute à l’échéance actuelle. L’accès n’a jamais plus de :count heures devant lui : au-delà, il faudra le prolonger de nouveau.',
+        'duration' => 'Temps à ajouter',
     ],
 
     'request' => [
@@ -74,6 +89,7 @@ return [
             'end_reason' => 'Fin',
             'views' => 'Pages consultées',
             'closing_note' => 'Conclusion du support',
+            'scope' => 'Portée',
         ],
         'end_reasons' => [
             'expired' => 'Arrivé à échéance',
@@ -87,14 +103,19 @@ return [
         'request_reason' => 'Dites en une phrase de quoi vous avez besoin (10 caractères au moins).',
         'already_requested' => 'Une demande est déjà en attente. L’équipe Convive est prévenue.',
         'already_open' => 'Un accès est déjà ouvert. Révoquez-le avant d’en ouvrir un autre.',
+        'event' => 'Choisissez l’un de vos événements.',
+        'not_open' => 'Cet accès est déjà fermé : ouvrez-en un nouveau.',
+        'extension_cap' => '{1} L’accès court déjà pour 1 heure, le maximum. Prolongez-le plus tard.|[2,*] L’accès court déjà pour :count heures, le maximum. Prolongez-le plus tard.',
+        'limited_to_event' => 'Cet accès est limité à l’événement « :event » : le reste de l’organisation ne vous est pas ouvert.',
         'operator' => 'Choisissez une personne de l’équipe Convive.',
-        'duration' => 'Choisissez l’une des durées proposées, 24 heures au plus.',
+        'duration' => 'Choisissez l’une des durées proposées.',
         'read_only' => 'Un accès de support est en lecture seule : cette action n’est pas permise.',
     ],
 
     'flash' => [
         'finished' => 'L’accès à :organisation est fermé. L’organisation est prévenue.',
         'opened' => 'Accès ouvert à :operator.',
+        'extended' => 'Accès prolongé.',
         'revoked' => 'Accès révoqué.',
         'requested' => 'L’équipe Convive est prévenue. Vous recevrez un courriel dès qu’une personne se rend disponible.',
         'request_cancelled' => 'Demande annulée.',
@@ -103,6 +124,8 @@ return [
     'banner' => [
         'member' => ':operator, de l’équipe Convive, peut consulter cet espace en lecture seule jusqu’au :expires.',
         'viewing' => 'Accès de support : vous consultez :organisation en lecture seule jusqu’au :expires. Chaque page consultée est journalisée.',
+        'member_event' => ':operator, de l’équipe Convive, peut consulter l’événement « :event » en lecture seule jusqu’au :expires.',
+        'viewing_event' => 'Accès de support : vous consultez l’événement « :event » de :organisation en lecture seule jusqu’au :expires. Chaque page consultée est journalisée.',
         'manage' => 'Gérer l’accès',
     ],
     'finish' => [
@@ -119,8 +142,14 @@ return [
             'intro' => ':granted_by vous a ouvert un accès en lecture seule à l’espace de :organisation.',
             'reason' => 'Motif : :reason',
             'until' => 'L’accès se ferme le :expires.',
+            'scope_all' => 'L’accès porte sur toute l’organisation.',
+            'scope_event' => 'L’accès est limité à l’événement « :event ».',
             'action' => 'Ouvrir la console',
             'outro' => 'Chaque page que vous consultez est inscrite au journal de l’organisation. Quand vous avez fini, fermez l’accès avec « J’ai terminé ».',
+        ],
+        'extended' => [
+            'subject' => ':organisation a prolongé votre accès de support',
+            'intro' => ':organisation a prolongé l’accès en lecture seule qui vous est ouvert.',
         ],
         'requested' => [
             'subject' => ':organisation demande l’aide du support',

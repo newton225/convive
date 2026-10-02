@@ -136,6 +136,7 @@ class OrganisationOverview
                 'operator' => $supportAccess->operator->name,
                 'grantedBy' => $supportAccess->grantedBy?->name,
                 'reason' => $supportAccess->reason,
+                'event' => $supportAccess->event_name,
                 'expiresAt' => $supportAccess->expires_at->toISOString(),
             ],
             'consoleActions' => $actions

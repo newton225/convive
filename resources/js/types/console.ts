@@ -74,6 +74,7 @@ export type ConsoleOrganisationDetails = ConsoleOrganisationSummary & {
         operator: string;
         grantedBy: string | null;
         reason: string | null;
+        event: string | null;
         expiresAt: string;
     } | null;
     consoleActions: {

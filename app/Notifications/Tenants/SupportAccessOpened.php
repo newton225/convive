@@ -39,6 +39,9 @@ class SupportAccessOpened extends Notification implements ShouldQueue
                 'granted_by' => $this->grant->grantedBy->name ?? $tenant->name,
             ]))
             ->line(__('support_access.mail.opened.reason', ['reason' => (string) $this->grant->reason]))
+            ->line($this->grant->isLimitedToEvent()
+                ? __('support_access.mail.opened.scope_event', ['event' => (string) $this->grant->event_name])
+                : __('support_access.mail.opened.scope_all'))
             ->line(__('support_access.mail.opened.until', [
                 'expires' => $this->grant->expires_at->translatedFormat('j F Y, H:i'),
             ]))

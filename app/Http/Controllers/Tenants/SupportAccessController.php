@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Tenants;
 use App\Actions\Tenants\ManageSupportAccess;
 use App\Enums\ConsoleArea;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Tenants\ExtendSupportAccessRequest;
 use App\Http\Requests\Tenants\OpenSupportAccessRequest;
+use App\Models\Event;
 use App\Models\SupportAccessGrant;
 use App\Models\SupportAccessRequest;
 use App\Models\SupportAccessView;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Settings\SupportSettings;
 use App\Support\Console\ConsoleAccess;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -39,7 +42,7 @@ class SupportAccessController extends Controller
     /**
      * Display the support access of the organisation : the one in progress, and the past ones.
      */
-    public function show(Tenant $tenant): Response
+    public function show(Tenant $tenant, SupportSettings $settings): Response
     {
         Gate::authorize('manageSupportAccess', $tenant);
 
@@ -57,7 +60,14 @@ class SupportAccessController extends Controller
 
         return Inertia::render('tenants/support-access', [
             'tenant' => ['slug' => $tenant->slug, 'name' => $tenant->name],
-            'durations' => SupportAccessGrant::DurationsInHours,
+            'durations' => $settings->durations,
+            // Le plus qu'un acces puisse avoir devant lui, prolongations comprises.
+            'maxHours' => $settings->maxHours(),
+            // De quoi limiter l'acces a un seul evenement.
+            'events' => Event::ordered()
+                ->get(['id', 'name'])
+                ->map(fn (Event $event) => ['id' => $event->id, 'name' => $event->name])
+                ->all(),
             // La demande d'aide en attente : envoyee quand personne de l'equipe Convive n'est
             // visible, elle se ferme a l'ouverture d'un acces.
             'pendingRequest' => $pending === null ? null : [
@@ -76,6 +86,8 @@ class SupportAccessController extends Controller
                 'operator' => $active->operator->name,
                 'grantedBy' => $active->grantedBy?->name,
                 'reason' => $active->reason,
+                // Nul : toute l'organisation.
+                'event' => $active->event_name,
                 'grantedAt' => $active->created_at?->toISOString(),
                 'expiresAt' => $active->expires_at->toISOString(),
                 'views' => $active->views()
@@ -100,6 +112,7 @@ class SupportAccessController extends Controller
                     'id' => $grant->id,
                     'operator' => $grant->operator->name,
                     'reason' => $grant->reason,
+                    'event' => $grant->event_name,
                     'grantedAt' => $grant->created_at?->toISOString(),
                     'endedAt' => $grant->endedAt()->toISOString(),
                     'endReason' => $grant->endReason(),
@@ -119,9 +132,26 @@ class SupportAccessController extends Controller
         $operator = self::operators($tenant)->firstWhere('id', (int) $request->validated('operator_id'));
         abort_if($operator === null, 404);
 
-        $manage->open($tenant, $operator, $request->user(), (int) $request->validated('duration'), $request->validated('reason'));
+        $event = $request->validated('event_id') === null ? null : Event::whereKey((int) $request->validated('event_id'))->firstOrFail();
+
+        $manage->open($tenant, $operator, $request->user(), (int) $request->validated('duration'), $request->validated('reason'), $event);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('support_access.flash.opened', ['operator' => $operator->name])]);
+
+        return to_route('tenants.support-access.show', $tenant);
+    }
+
+    /**
+     * Give the access in progress more time.
+     */
+    public function update(ExtendSupportAccessRequest $request, Tenant $tenant, SupportAccessGrant $grant, ManageSupportAccess $manage): RedirectResponse
+    {
+        // Table centrale : l'acces d'une autre organisation n'existe pas pour celle-ci.
+        abort_if($grant->tenant_id !== $tenant->id, 404);
+
+        $manage->extend($grant, (int) $request->validated('duration'), $request->user());
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('support_access.flash.extended')]);
 
         return to_route('tenants.support-access.show', $tenant);
     }

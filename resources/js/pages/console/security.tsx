@@ -3,6 +3,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { CircleAlert, CircleCheck } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
 import { ExportLimitDialog } from '@/components/console/export-limit-dialog';
+import { SupportDurationsDialog } from '@/components/console/support-durations-dialog';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,7 @@ type Props = {
     counts: { rateLimited: number; lockouts: number };
     events: ConsoleSecurityEvent[];
     exportsPerHour: number;
+    supportDurations: number[];
 };
 
 /**
@@ -32,6 +34,7 @@ export default function ConsoleSecurity({
     counts,
     events,
     exportsPerHour,
+    supportDurations,
 }: Props) {
     const { t, locale } = useTranslation();
 
@@ -93,6 +96,29 @@ export default function ConsoleSecurity({
                         {t('console.security.export_limit.current', {
                             count: exportsPerHour,
                         })}
+                    </CardContent>
+                </Card>
+
+                <Card data-test="console-support-durations">
+                    <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+                        <div className="space-y-1">
+                            <CardTitle>
+                                {t('console.security.support_durations.title')}
+                            </CardTitle>
+                            <p className="text-muted-foreground text-sm">
+                                {t('console.security.support_durations.hint')}
+                            </p>
+                        </div>
+                        <SupportDurationsDialog durations={supportDurations} />
+                    </CardHeader>
+                    <CardContent className="text-sm font-medium">
+                        {supportDurations
+                            .map((hours) =>
+                                t('support_access.grant.hours', {
+                                    count: hours,
+                                }),
+                            )
+                            .join(', ')}
                     </CardContent>
                 </Card>
 

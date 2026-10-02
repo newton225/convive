@@ -831,6 +831,24 @@ reste reglable, jusqu'a un essai sans fin.
 - **En test** l'essai est ferme (`CONVIVE_TRIAL_ENABLED=false` dans `phpunit.xml`) ; un test qui en
   a besoin regle `TrialSettings` lui-meme.
 
+### Acces du support : portee, prolongation, durees
+
+Decisions du proprietaire du projet (2026-10-02), en plus de ce que dit README ecran 25.
+
+- **Limite a un evenement, au choix de l'organisation** (`support_access_grants.event_id`, plus
+  `event_name` pour l'historique : l'evenement vit dans une autre base). Le controle est en un seul
+  endroit, `EnsureTenantMembership` : une route qui porte `{event}` doit porter le sien, sinon 404 ;
+  la liste des evenements ne montre que lui ; tout autre ecran de l'organisation ramene a cette
+  liste. **Un nouvel ecran lisible par le support qui ouvre une piece precise** (`{proof}`,
+  `{registration}`) doit verifier qu'elle appartient a l'evenement de l'adresse, comme
+  `PaymentProofController::ensureBelongsToEvent()` : c'est ce qui tient la limite.
+- **Prolongation** (`ManageSupportAccess::extend()`) : le temps choisi s'ajoute a l'echeance, sans
+  rouvrir l'acces. Plafond : jamais plus que la duree la plus longue proposee devant soi. Mot de
+  passe redemande, ligne d'historique, courriel a la personne de l'equipe Convive.
+- **Durees proposees** : `App\Settings\SupportSettings`, reglees depuis l'ecran Securite de la
+  console (1, 4, 12, 24 heures au depart ; 72 heures au plus chacune). La constante
+  `SupportAccessGrant::DurationsInHours` n'est plus que la valeur de depart.
+
 ---
 
 ## Comptes de versement

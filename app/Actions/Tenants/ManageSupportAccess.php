@@ -3,14 +3,17 @@
 namespace App\Actions\Tenants;
 
 use App\Enums\ConsoleArea;
+use App\Models\Event;
 use App\Models\SupportAccessGrant;
 use App\Models\SupportAccessRequest;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\Tenants\SupportAccessEnded;
+use App\Notifications\Tenants\SupportAccessExtended;
 use App\Notifications\Tenants\SupportAccessOpened;
 use App\Notifications\Tenants\SupportAccessRequested;
 use App\Notifications\Tenants\SupportAccessRequestTaken;
+use App\Settings\SupportSettings;
 use App\Support\Console\ConsoleAccess;
 use App\Support\Console\ConsoleJournal;
 use Illuminate\Support\Facades\Cache;
@@ -55,9 +58,9 @@ class ManageSupportAccess
      *
      * @throws ValidationException
      */
-    public function open(Tenant $tenant, User $operator, User $grantedBy, int $hours, string $reason): SupportAccessGrant
+    public function open(Tenant $tenant, User $operator, User $grantedBy, int $hours, string $reason, ?Event $event = null): SupportAccessGrant
     {
-        $grant = Cache::lock("support-access:{$tenant->id}", 10)->block(5, function () use ($tenant, $operator, $grantedBy, $hours, $reason) {
+        $grant = Cache::lock("support-access:{$tenant->id}", 10)->block(5, function () use ($tenant, $operator, $grantedBy, $hours, $reason, $event) {
             if (SupportAccessGrant::where('tenant_id', $tenant->id)->active()->exists()) {
                 throw ValidationException::withMessages([
                     'operator_id' => __('support_access.errors.already_open'),
@@ -69,6 +72,10 @@ class ManageSupportAccess
                 'operator_id' => $operator->id,
                 'granted_by_id' => $grantedBy->id,
                 'reason' => $reason,
+                // Limite a un evenement quand l'organisation l'a choisi : le reste de son espace
+                // reste ferme a la personne de l'equipe Convive (`EnsureTenantMembership`).
+                'event_id' => $event?->id,
+                'event_name' => $event?->name,
                 'expires_at' => now()->addHours($hours),
             ]);
 
@@ -82,6 +89,7 @@ class ManageSupportAccess
                 ->withProperties([
                     'operator' => $operator->name,
                     'reason' => $reason,
+                    'event' => $event?->name,
                     'expires_at' => $grant->expires_at->toISOString(),
                     'tenant_id' => $tenant->id,
                 ])
@@ -92,6 +100,52 @@ class ManageSupportAccess
 
         // Sans ce message, la personne ne le saurait qu'en ouvrant la console.
         $operator->notify(new SupportAccessOpened($grant));
+
+        return $grant;
+    }
+
+    /**
+     * Give the access in progress more time, without closing and reopening it.
+     *
+     * Le plafond : un acces n'a jamais devant lui plus que la duree la plus longue proposee
+     * (`SupportSettings::maxHours()`). Il peut etre prolonge autant de fois qu'il le faut, mais
+     * chaque fois par un geste d'un Proprietaire, jamais pour une semaine d'un coup.
+     *
+     * @throws ValidationException
+     */
+    public function extend(SupportAccessGrant $grant, int $hours, User $extendedBy): SupportAccessGrant
+    {
+        if (! $grant->isActive()) {
+            throw ValidationException::withMessages(['duration' => __('support_access.errors.not_open')]);
+        }
+
+        $maxHours = app(SupportSettings::class)->maxHours();
+        $before = $grant->expires_at;
+        $after = $before->addHours($hours)->min(now()->addHours($maxHours));
+
+        // Deja au plafond : l'horloge avance entre deux gestes, quelques secondes de plus ne sont pas
+        // une prolongation, et ne meritent ni ligne d'historique ni courriel.
+        if ($before->diffInSeconds($after) < 60) {
+            throw ValidationException::withMessages([
+                'duration' => trans_choice('support_access.errors.extension_cap', $maxHours, ['count' => $maxHours]),
+            ]);
+        }
+
+        $grant->update(['expires_at' => $after]);
+
+        activity()
+            ->performedOn($grant->tenant)
+            ->causedBy($extendedBy)
+            ->event('updated')
+            ->withProperties([
+                'operator' => $grant->operator->name,
+                'old' => ['expires_at' => $before->toISOString()],
+                'attributes' => ['expires_at' => $after->toISOString()],
+                'tenant_id' => $grant->tenant_id,
+            ])
+            ->log('support_access.extended');
+
+        $grant->operator->notify(new SupportAccessExtended($grant));
 
         return $grant;
     }

@@ -31,14 +31,26 @@ export function SupportAccessBanner() {
             <LifeBuoy className="size-4 shrink-0" aria-hidden />
             <p className="min-w-0 flex-1">
                 {supportAccess.viewing
-                    ? t('support_access.banner.viewing', {
-                          organisation: currentTenant.name,
-                          expires,
-                      })
-                    : t('support_access.banner.member', {
-                          operator: supportAccess.operator,
-                          expires,
-                      })}
+                    ? t(
+                          supportAccess.event
+                              ? 'support_access.banner.viewing_event'
+                              : 'support_access.banner.viewing',
+                          {
+                              organisation: currentTenant.name,
+                              event: supportAccess.event ?? '',
+                              expires,
+                          },
+                      )
+                    : t(
+                          supportAccess.event
+                              ? 'support_access.banner.member_event'
+                              : 'support_access.banner.member',
+                          {
+                              operator: supportAccess.operator,
+                              event: supportAccess.event ?? '',
+                              expires,
+                          },
+                      )}
             </p>
             {/* La personne qui consulte ferme l'acces des qu'elle a fini, sans attendre l'echeance. */}
             {supportAccess.viewing ? (

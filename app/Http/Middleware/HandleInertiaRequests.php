@@ -114,7 +114,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{id: int, operator: string, expiresAt: string, viewing: bool}|null
+     * @return array{id: int, operator: string, event: string|null, expiresAt: string, viewing: bool}|null
      */
     private function supportAccess(Request $request, ?Tenant $tenant): ?array
     {
@@ -127,6 +127,8 @@ class HandleInertiaRequests extends Middleware
         return $grant === null ? null : [
             'id' => $grant->id,
             'operator' => $grant->operator->name,
+            // L'evenement auquel l'acces est limite ; nul, toute l'organisation.
+            'event' => $grant->event_name,
             'expiresAt' => $grant->expires_at->toISOString(),
             'viewing' => $viewing !== null,
         ];

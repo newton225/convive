@@ -74,7 +74,12 @@ class OrganisationController extends Controller
                     'organisation' => $grant->tenant->name,
                     // Ce que l'organisation attend de cet acces : la personne sait quoi regarder.
                     'reason' => $grant->reason,
-                    'url' => route('dashboard', ['current_tenant' => $grant->tenant->slug]),
+                    'event' => $grant->event_name,
+                    // Limite a un evenement, l'acces n'ouvre pas le tableau de bord : la liste des
+                    // evenements, ou seul le sien figure.
+                    'url' => $grant->isLimitedToEvent()
+                        ? route('tenants.events.index', $grant->tenant->slug)
+                        : route('dashboard', ['current_tenant' => $grant->tenant->slug]),
                     'expiresAt' => $grant->expires_at->toISOString(),
                 ])
                 ->all(),

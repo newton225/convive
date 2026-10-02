@@ -93,6 +93,16 @@ export function SupportGrantsCard({ available, grants, requests }: Props) {
                                             {grant.reason}
                                         </span>
                                     ) : null}
+                                    {grant.event ? (
+                                        <span
+                                            className="block"
+                                            data-test="console-support-grant-scope"
+                                        >
+                                            {t('console.support_grants.scope', {
+                                                event: grant.event,
+                                            })}
+                                        </span>
+                                    ) : null}
                                 </span>
                                 <span className="flex flex-wrap items-center gap-2">
                                     <Button asChild variant="outline" size="sm">

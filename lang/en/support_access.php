@@ -7,7 +7,8 @@ return [
     'rules' => [
         'title' => 'What an access allows',
         'read_only' => 'Read only: support sees your space and cannot change anything.',
-        'limited' => '24 hours at most, and you can revoke it at any time.',
+        'limited' => '{1} 1 hour at most at a time, and you can extend or revoke it at any time.|[2,*] :count hours at most at a time, and you can extend or revoke it at any time.',
+        'scope' => 'You choose what it opens: your whole organisation, or a single event.',
         'named' => 'Named: it is open to a single person of the Convive team.',
         'logged' => 'Every page viewed is listed below and in your audit log.',
         'banner' => 'While the access is open, a banner reminds every member.',
@@ -16,6 +17,8 @@ return [
     'active' => [
         'title' => 'Current access',
         'summary' => ':operator can view your space until :expires.',
+        'scope_all' => 'It covers your whole organisation.',
+        'scope_event' => 'It is limited to the event “:event”: the rest of your organisation is not open.',
         'granted' => 'Opened by :granted_by on :date.',
         'reason' => 'Reason',
         'revoke' => 'Revoke the access',
@@ -42,6 +45,11 @@ return [
         'operator_placeholder' => 'Choose a person',
         'no_operator' => 'Nobody from the Convive team is visible at the moment. Tell the team above: the person helping you will make themselves available, and their name will appear here.',
         'duration' => 'Duration',
+        'scope' => 'What the access opens',
+        'scope_all' => 'The whole organisation',
+        'scope_event' => 'Only the event “:event”',
+        'scope_hint' => 'Limited to one event, the access only opens its screens (registrations, proofs, seating plan, report): not your other events, the dashboard or the action history.',
+        'confirm_description_event' => 'This member of the Convive team will be able to read the event “:event” (its registrations, proofs, seating plan and report) for :duration, and nothing else of your organisation. They cannot change anything, and you can revoke the access at any time.',
         'hours' => '{1} 1 hour|[2,*] :count hours',
         'reason' => 'Why are you opening this access?',
         'reason_hint' => 'One or two sentences: the problem and the event concerned. The member of the Convive team reads this reason before entering, and it stays in your history. Do not put a password or an account number in it.',
@@ -49,6 +57,13 @@ return [
         'confirm_title' => 'Open an access for :operator?',
         'confirm_description' => 'This member of the Convive team will be able to read your events, registrations, proofs and audit log for :duration. They cannot change anything, and you can revoke the access at any time.',
         'one_at_a_time' => 'One access at a time: revoke the current one to open another.',
+    ],
+
+    'extend' => [
+        'button' => 'Extend the access',
+        'title' => 'Extend the access of :operator?',
+        'description' => '{1} The time you choose is added to the current end. The access never has more than 1 hour ahead of it: beyond that, it must be extended again.|[2,*] The time you choose is added to the current end. The access never has more than :count hours ahead of it: beyond that, it must be extended again.',
+        'duration' => 'Time to add',
     ],
 
     'request' => [
@@ -74,6 +89,7 @@ return [
             'end_reason' => 'End',
             'views' => 'Pages viewed',
             'closing_note' => 'Support’s conclusion',
+            'scope' => 'Scope',
         ],
         'end_reasons' => [
             'expired' => 'Expired',
@@ -87,14 +103,19 @@ return [
         'request_reason' => 'Say in one sentence what you need (at least 10 characters).',
         'already_requested' => 'A request is already waiting. The Convive team has been told.',
         'already_open' => 'An access is already open. Revoke it before opening another one.',
+        'event' => 'Choose one of your events.',
+        'not_open' => 'This access is already closed: open a new one.',
+        'extension_cap' => '{1} The access already runs for 1 hour, the maximum. Extend it later.|[2,*] The access already runs for :count hours, the maximum. Extend it later.',
+        'limited_to_event' => 'This access is limited to the event “:event”: the rest of the organisation is not open to you.',
         'operator' => 'Choose a member of the Convive team.',
-        'duration' => 'Choose one of the durations offered, 24 hours at most.',
+        'duration' => 'Choose one of the durations offered.',
         'read_only' => 'A support access is read only: this action is not allowed.',
     ],
 
     'flash' => [
         'finished' => 'The access to :organisation is closed. The organisation has been told.',
         'opened' => 'Access opened for :operator.',
+        'extended' => 'Access extended.',
         'revoked' => 'Access revoked.',
         'requested' => 'The Convive team has been told. You will get an email as soon as someone makes themselves available.',
         'request_cancelled' => 'Request cancelled.',
@@ -103,6 +124,8 @@ return [
     'banner' => [
         'member' => ':operator, from the Convive team, can view this space in read-only mode until :expires.',
         'viewing' => 'Support access: you are viewing :organisation in read-only mode until :expires. Every page you view is logged.',
+        'member_event' => ':operator, from the Convive team, can view the event “:event” in read-only mode until :expires.',
+        'viewing_event' => 'Support access: you are viewing the event “:event” of :organisation in read-only mode until :expires. Every page you view is logged.',
         'manage' => 'Manage the access',
     ],
     'finish' => [
@@ -119,8 +142,14 @@ return [
             'intro' => ':granted_by opened a read-only access for you to the space of :organisation.',
             'reason' => 'Reason: :reason',
             'until' => 'The access closes on :expires.',
+            'scope_all' => 'The access covers the whole organisation.',
+            'scope_event' => 'The access is limited to the event “:event”.',
             'action' => 'Open the console',
             'outro' => 'Every page you view is written to the organisation’s audit log. When you are done, close the access with “I am done”.',
+        ],
+        'extended' => [
+            'subject' => ':organisation extended your support access',
+            'intro' => ':organisation extended the read-only access open to you.',
         ],
         'requested' => [
             'subject' => ':organisation is asking support for help',

@@ -6,10 +6,12 @@ use App\Actions\Events\SaveEvent;
 use App\Actions\Seating\SyncSeatingTables;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Requests\Events\SaveEventRequest;
 use App\Http\Requests\Events\SaveEventVisualRequest;
 use App\Models\Event;
 use App\Models\PaymentAccount;
+use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
 use App\Support\PlanLimits;
 use Illuminate\Http\RedirectResponse;
@@ -29,7 +31,10 @@ class EventController extends Controller
 
         return Inertia::render('events/index', [
             'tenant' => $this->tenantPayload($tenant),
-            'events' => Event::ordered()->with('paymentAccounts')->get()
+            'events' => Event::ordered()
+                // Un acces de support limite a un evenement ne voit que lui (README ecran 25).
+                ->when($this->supportEventId($request), fn ($query, int $eventId) => $query->whereKey($eventId))
+                ->with('paymentAccounts')->get()
                 ->map(fn (Event $event) => [
                     ...$this->summary($event),
                     // README ecran 12 : de quoi juger d'un coup d'oeil ou agir, sans ouvrir l'evenement.
@@ -40,6 +45,16 @@ class EventController extends Controller
                 ]),
             'permissions' => $request->user()->toTenantPermissions($tenant),
         ]);
+    }
+
+    /**
+     * Get the only event a limited support access may read, or null for a member or a full access.
+     */
+    private function supportEventId(Request $request): ?int
+    {
+        $grant = $request->attributes->get(EnsureTenantMembership::SupportAccessAttribute);
+
+        return $grant instanceof SupportAccessGrant ? $grant->event_id : null;
     }
 
     /**

@@ -4,6 +4,7 @@ import { LifeBuoy, ShieldOff } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ConsoleTable } from '@/components/console/console-table';
+import { ExtendSupportAccessDialog } from '@/components/extend-support-access-dialog';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
@@ -25,6 +26,7 @@ import type {
     ActiveSupportAccess,
     PastSupportAccess,
     PendingSupportRequest,
+    SupportEventOption,
     SupportOperatorOption,
     Translations,
 } from '@/types';
@@ -32,6 +34,8 @@ import type {
 type Props = {
     tenant: { slug: string; name: string };
     durations: number[];
+    maxHours: number;
+    events: SupportEventOption[];
     operators: SupportOperatorOption[];
     activeAccess: ActiveSupportAccess | null;
     pendingRequest: PendingSupportRequest | null;
@@ -47,6 +51,8 @@ type Props = {
 export default function SupportAccess({
     tenant,
     durations,
+    maxHours,
+    events,
     operators,
     activeAccess,
     pendingRequest,
@@ -63,16 +69,26 @@ export default function SupportAccess({
     const form = useForm({
         operator_id: takenOperator ? String(takenOperator.id) : '',
         duration: String(durations[durations.length - 1]),
+        // Vide : toute l'organisation.
+        event_id: '',
         reason: pendingRequest?.reason ?? '',
     });
+    const chosenEvent = events.find(
+        (event) => String(event.id) === form.data.event_id,
+    );
     const chosenOperator = operators.find(
         (operator) => String(operator.id) === form.data.operator_id,
     );
 
     const open = () => {
+        form.transform((data) => ({
+            ...data,
+            event_id: data.event_id === '' ? null : data.event_id,
+        }));
+
         form.post(store(tenant.slug).url, {
             preserveScroll: true,
-            onSuccess: () => form.reset('operator_id', 'reason'),
+            onSuccess: () => form.reset('operator_id', 'event_id', 'reason'),
             onFinish: () => setConfirming(false),
         });
     };
@@ -97,6 +113,11 @@ export default function SupportAccess({
                     {row.original.reason ?? ''}
                 </span>
             ),
+        },
+        {
+            header: t('support_access.history.columns.scope'),
+            cell: ({ row }) =>
+                row.original.event ?? t('support_access.grant.scope_all'),
         },
         {
             header: t('support_access.history.columns.granted_at'),
@@ -145,7 +166,12 @@ export default function SupportAccess({
                     <CardContent>
                         <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
                             <li>{t('support_access.rules.read_only')}</li>
-                            <li>{t('support_access.rules.limited')}</li>
+                            <li>
+                                {t('support_access.rules.limited', {
+                                    count: maxHours,
+                                })}
+                            </li>
+                            <li>{t('support_access.rules.scope')}</li>
                             <li>{t('support_access.rules.named')}</li>
                             <li>{t('support_access.rules.logged')}</li>
                             <li>{t('support_access.rules.banner')}</li>
@@ -184,6 +210,14 @@ export default function SupportAccess({
                                 )}
                             </div>
 
+                            <p data-test="support-access-scope">
+                                {activeAccess.event
+                                    ? t('support_access.active.scope_event', {
+                                          event: activeAccess.event,
+                                      })
+                                    : t('support_access.active.scope_all')}
+                            </p>
+
                             {activeAccess.reason ? (
                                 <p>
                                     <span className="text-muted-foreground">
@@ -193,16 +227,25 @@ export default function SupportAccess({
                                 </p>
                             ) : null}
 
-                            <SubmitButton
-                                type="button"
-                                variant="destructive"
-                                processing={revoking}
-                                onClick={() => revoke(activeAccess.id)}
-                                data-test="support-access-revoke"
-                            >
-                                <ShieldOff />
-                                {t('support_access.active.revoke')}
-                            </SubmitButton>
+                            <div className="flex flex-wrap gap-2">
+                                <ExtendSupportAccessDialog
+                                    tenantSlug={tenant.slug}
+                                    grantId={activeAccess.id}
+                                    operator={activeAccess.operator}
+                                    durations={durations}
+                                    maxHours={maxHours}
+                                />
+                                <SubmitButton
+                                    type="button"
+                                    variant="destructive"
+                                    processing={revoking}
+                                    onClick={() => revoke(activeAccess.id)}
+                                    data-test="support-access-revoke"
+                                >
+                                    <ShieldOff />
+                                    {t('support_access.active.revoke')}
+                                </SubmitButton>
+                            </div>
 
                             <div className="space-y-2">
                                 <h3 className="font-medium">
@@ -326,6 +369,45 @@ export default function SupportAccess({
                             </div>
                         </div>
                         <div className="grid gap-2">
+                            <Label htmlFor="support-scope">
+                                {t('support_access.grant.scope')}
+                            </Label>
+                            <Select
+                                disabled={activeAccess !== null}
+                                value={form.data.event_id || 'all'}
+                                onValueChange={(value) =>
+                                    form.setData(
+                                        'event_id',
+                                        value === 'all' ? '' : value,
+                                    )
+                                }
+                            >
+                                <SelectTrigger id="support-scope">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">
+                                        {t('support_access.grant.scope_all')}
+                                    </SelectItem>
+                                    {events.map((event) => (
+                                        <SelectItem
+                                            key={event.id}
+                                            value={String(event.id)}
+                                        >
+                                            {t(
+                                                'support_access.grant.scope_event',
+                                                { event: event.name },
+                                            )}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-muted-foreground text-xs">
+                                {t('support_access.grant.scope_hint')}
+                            </p>
+                            <InputError message={form.errors.event_id} />
+                        </div>
+                        <div className="grid gap-2">
                             <Label htmlFor="support-reason">
                                 {t('support_access.grant.reason')}
                             </Label>
@@ -386,11 +468,17 @@ export default function SupportAccess({
                 title={t('support_access.grant.confirm_title', {
                     operator: chosenOperator?.name ?? '',
                 })}
-                description={t('support_access.grant.confirm_description', {
-                    duration: t('support_access.grant.hours', {
-                        count: Number(form.data.duration),
-                    }),
-                })}
+                description={t(
+                    chosenEvent
+                        ? 'support_access.grant.confirm_description_event'
+                        : 'support_access.grant.confirm_description',
+                    {
+                        event: chosenEvent?.name ?? '',
+                        duration: t('support_access.grant.hours', {
+                            count: Number(form.data.duration),
+                        }),
+                    },
+                )}
                 confirmLabel={t('support_access.grant.submit')}
                 onConfirm={open}
                 processing={form.processing}

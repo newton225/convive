@@ -3,8 +3,9 @@
 namespace App\Http\Requests\Tenants;
 
 use App\Http\Controllers\Tenants\SupportAccessController;
-use App\Models\SupportAccessGrant;
+use App\Models\Event;
 use App\Models\Tenant;
+use App\Settings\SupportSettings;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -31,7 +32,9 @@ class OpenSupportAccessRequest extends FormRequest
     {
         return [
             'operator_id' => ['required', 'integer', Rule::in(SupportAccessController::operators($this->tenant())->modelKeys())],
-            'duration' => ['required', 'integer', Rule::in(SupportAccessGrant::DurationsInHours)],
+            'duration' => ['required', 'integer', Rule::in(app(SupportSettings::class)->durations)],
+            // Vide : toute l'organisation. Sinon l'un de ses evenements, cherche dans sa base.
+            'event_id' => ['nullable', 'integer', Rule::exists(Event::class, 'id')],
             // Pourquoi l'acces est ouvert : la personne de l'equipe Convive sait quoi regarder, et
             // l'organisation garde la trace de ce qu'elle a autorise.
             'reason' => ['required', 'string', 'min:10', 'max:500'],
@@ -47,6 +50,7 @@ class OpenSupportAccessRequest extends FormRequest
             'operator_id.required' => __('support_access.errors.operator'),
             'operator_id.in' => __('support_access.errors.operator'),
             'duration.in' => __('support_access.errors.duration'),
+            'event_id.exists' => __('support_access.errors.event'),
             'reason.required' => __('support_access.errors.reason'),
             'reason.min' => __('support_access.errors.reason'),
         ];

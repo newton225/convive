@@ -3,9 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Actions\Tenants\ManageSupportAccess;
+use App\Models\Event;
 use App\Models\Tenant;
 use Closure;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -46,6 +48,21 @@ class EnsureTenantMembership
         // Lecture seule, quelles que soient les permissions verifiees plus loin : aucune requete
         // qui modifie ne passe sous un acces de support.
         abort_if($supportAccess !== null && ! $request->isMethodSafe(), 403, __('support_access.errors.read_only'));
+
+        // Acces limite a un evenement (README ecran 25) : seuls ses ecrans et la liste des
+        // evenements s'ouvrent. Un autre evenement n'existe pas pour cet acces ; un ecran qui parle
+        // de toute l'organisation ramene a la liste.
+        if ($supportAccess?->isLimitedToEvent()) {
+            $routeEvent = $request->route('event');
+
+            if ($routeEvent !== null) {
+                abort_if((int) ($routeEvent instanceof Event ? $routeEvent->getKey() : $routeEvent) !== $supportAccess->event_id, 404);
+            } elseif ($request->route()?->getName() !== 'tenants.events.index') {
+                Inertia::flash('toast', ['type' => 'info', 'message' => __('support_access.errors.limited_to_event', ['event' => $supportAccess->event_name])]);
+
+                return to_route('tenants.events.index', $tenant);
+            }
+        }
 
         tenancy()->initialize($tenant);
 

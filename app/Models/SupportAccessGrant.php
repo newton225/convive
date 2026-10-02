@@ -25,6 +25,8 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property int $operator_id
  * @property int|null $granted_by_id
  * @property string|null $reason
+ * @property int|null $event_id
+ * @property string|null $event_name
  * @property Carbon $expires_at
  * @property Carbon|null $revoked_at
  * @property int|null $revoked_by_id
@@ -37,14 +39,15 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property-read User $operator
  * @property-read User|null $grantedBy
  */
-#[Fillable(['tenant_id', 'operator_id', 'granted_by_id', 'reason', 'expires_at', 'revoked_at', 'revoked_by_id', 'finished_at', 'closing_note'])]
+#[Fillable(['tenant_id', 'operator_id', 'granted_by_id', 'reason', 'event_id', 'event_name', 'expires_at', 'revoked_at', 'revoked_by_id', 'finished_at', 'closing_note'])]
 class SupportAccessGrant extends Model
 {
     use CentralConnection;
 
     /**
-     * Durees proposees, en heures. Le plafond de 24 heures est une decision du proprietaire du
-     * projet (2026-09-28), il ne se saisit pas en texte libre.
+     * Durees proposees au depart, en heures (decision du proprietaire du projet, 2026-09-28).
+     * Depuis le 2026-10-02 elles se reglent depuis la console : celles en vigueur sont dans
+     * `App\Settings\SupportSettings`, cette constante n'en est que la valeur initiale.
      *
      * @var array<int, int>
      */
@@ -68,6 +71,14 @@ class SupportAccessGrant extends Model
     public function isActive(): bool
     {
         return $this->revoked_at === null && $this->finished_at === null && $this->expires_at->isFuture();
+    }
+
+    /**
+     * Determine whether this access only opens one event of the organisation (README ecran 25).
+     */
+    public function isLimitedToEvent(): bool
+    {
+        return $this->event_id !== null;
     }
 
     /**
@@ -141,6 +152,7 @@ class SupportAccessGrant extends Model
     protected function casts(): array
     {
         return [
+            'event_id' => 'integer',
             'expires_at' => 'datetime',
             'revoked_at' => 'datetime',
             'finished_at' => 'datetime',

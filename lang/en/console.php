@@ -395,6 +395,16 @@ return [
     ],
 
     'security' => [
+        'support_durations' => [
+            'title' => 'Support access: durations offered',
+            'hint' => 'The durations an organisation can choose when it opens its space to a member of the team. The longest is also the most an access can have ahead of it, extensions included.',
+            'dialog' => 'The change applies to accesses opened or extended from now on. An access already open keeps its end.',
+            'field' => 'Durations, in hours',
+            'field_hint' => 'Separated by commas, for example: 1, 4, 12, 24. One to eight durations, 72 hours at most each.',
+            'invalid' => 'Enter whole numbers of hours, from 1 to :max, separated by commas.',
+            'too_many' => 'Eight durations at most.',
+            'flash' => 'The support access durations are updated.',
+        ],
         'export_limit' => [
             'title' => 'Export limit',
             'hint' => 'How many exports (registration list, reports, checklists) and statement imports one person can run per hour, in every organisation. This is what prevents a whole base from being siphoned off.',
@@ -645,6 +655,7 @@ return [
             'plan_updated' => 'Plan edited',
             'trial_settings_updated' => 'Trial period set',
             'export_limit_updated' => 'Export limit set',
+            'support_durations_updated' => 'Support access durations set',
             'database_repaired' => 'Database repaired',
             'deletion_cancelled' => 'Deletion cancelled',
             'tenant_erased' => 'Organisation erased',
@@ -675,6 +686,7 @@ return [
             'plan_updated' => ':actor changed the prices or quotas of a plan',
             'trial_settings_updated' => ':actor changed the trial period settings',
             'export_limit_updated' => ':actor changed the hourly export limit',
+            'support_durations_updated' => ':actor changed the durations offered for a support access',
             'database_repaired' => ':actor ran the migrations of :organisation again',
             'deletion_cancelled' => ':actor cancelled the deletion of :organisation',
             'tenant_erased' => ':organisation was erased when its scheduled deletion came due',
@@ -771,6 +783,7 @@ return [
     ],
 
     'support_grants' => [
+        'scope' => 'Limited to the event “:event”.',
         'title' => 'Support access',
         'availability' => 'Appear in the list offered to organisations',
         'availability_hint' => 'When unchecked, no owner sees your name or can open an access for you. Accesses already open remain valid until they end.',

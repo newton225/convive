@@ -10,6 +10,8 @@ export type ActiveSupportAccess = {
     grantedBy: string | null;
     // Pourquoi l'acces a ete ouvert ; null seulement sur un acces anterieur au motif obligatoire.
     reason: string | null;
+    // L'evenement auquel l'acces est limite ; null : toute l'organisation.
+    event: string | null;
     grantedAt: string;
     expiresAt: string;
     views: SupportAccessView[];
@@ -19,6 +21,7 @@ export type PastSupportAccess = {
     id: number;
     operator: string;
     reason: string | null;
+    event: string | null;
     grantedAt: string;
     endedAt: string;
     endReason: 'expired' | 'revoked' | 'finished';
@@ -48,6 +51,12 @@ export type ConsoleSupportRequest = {
     takenByMe: boolean;
 };
 
+// Un evenement de l'organisation, propose pour limiter l'acces.
+export type SupportEventOption = {
+    id: number;
+    name: string;
+};
+
 export type SupportOperatorOption = {
     id: number;
     name: string;
@@ -58,6 +67,8 @@ export type SupportOperatorOption = {
 export type SupportAccessNotice = {
     id: number;
     operator: string;
+    // L'evenement auquel l'acces est limite ; null : toute l'organisation.
+    event: string | null;
     expiresAt: string;
     viewing: boolean;
 };
@@ -68,6 +79,7 @@ export type ConsoleSupportGrant = {
     id: number;
     organisation: string;
     reason: string | null;
+    event: string | null;
     url: string;
     expiresAt: string;
 };

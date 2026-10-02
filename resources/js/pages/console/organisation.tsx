@@ -302,6 +302,14 @@ export default function Organisation({
                                         {organisation.supportAccess.reason}
                                     </span>
                                 ) : null}
+                                {organisation.supportAccess.event ? (
+                                    <span className="mt-1 block">
+                                        {t('console.support_grants.scope', {
+                                            event: organisation.supportAccess
+                                                .event,
+                                        })}
+                                    </span>
+                                ) : null}
                             </p>
                         ) : (
                             <p className="text-muted-foreground">

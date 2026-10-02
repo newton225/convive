@@ -395,6 +395,16 @@ return [
     ],
 
     'security' => [
+        'support_durations' => [
+            'title' => 'Accès du support : durées proposées',
+            'hint' => 'Les durées qu’une organisation peut choisir quand elle ouvre son espace à une personne de l’équipe. La plus longue est aussi le maximum qu’un accès peut avoir devant lui, prolongations comprises.',
+            'dialog' => 'Le changement vaut pour les accès ouverts ou prolongés à partir de maintenant. Un accès déjà ouvert garde son échéance.',
+            'field' => 'Durées, en heures',
+            'field_hint' => 'Séparées par des virgules, par exemple : 1, 4, 12, 24. De une à huit durées, 72 heures au plus chacune.',
+            'invalid' => 'Saisissez des nombres d’heures entiers, de 1 à :max, séparés par des virgules.',
+            'too_many' => 'Huit durées au plus.',
+            'flash' => 'Les durées d’accès du support sont mises à jour.',
+        ],
         'export_limit' => [
             'title' => 'Limite d’exports',
             'hint' => 'Combien d’exports (liste des inscrits, rapports, listes de contrôle) et d’imports de relevé une même personne peut lancer par heure, dans toutes les organisations. C’est ce qui empêche d’aspirer une base entière.',
@@ -645,6 +655,7 @@ return [
             'plan_updated' => 'Plan modifié',
             'trial_settings_updated' => 'Période d’essai réglée',
             'export_limit_updated' => 'Limite d’exports réglée',
+            'support_durations_updated' => 'Durées d’accès du support réglées',
             'database_repaired' => 'Base réparée',
             'deletion_cancelled' => 'Suppression annulée',
             'tenant_erased' => 'Organisation effacée',
@@ -675,6 +686,7 @@ return [
             'plan_updated' => ':actor a modifié les prix ou les quotas d’un plan',
             'trial_settings_updated' => ':actor a modifié les réglages de la période d’essai',
             'export_limit_updated' => ':actor a modifié la limite d’exports par heure',
+            'support_durations_updated' => ':actor a modifié les durées proposées pour un accès de support',
             'database_repaired' => ':actor a rejoué les migrations de :organisation',
             'deletion_cancelled' => ':actor a annulé la suppression de :organisation',
             'tenant_erased' => ':organisation a été effacée à l’échéance de sa suppression programmée',
@@ -771,6 +783,7 @@ return [
     ],
 
     'support_grants' => [
+        'scope' => 'Limité à l’événement « :event ».',
         'title' => 'Accès de support',
         'availability' => 'Apparaître dans la liste proposée aux organisations',
         'availability_hint' => 'Décochée, aucun Propriétaire ne voit votre nom ni ne peut vous ouvrir un accès. Les accès déjà ouverts restent valables jusqu’à leur terme.',
