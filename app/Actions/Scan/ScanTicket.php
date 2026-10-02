@@ -106,12 +106,14 @@ class ScanTicket
             ]);
 
             $this->journal($event, $ticket, $actor, ScanResult::Accepted, false, $station, manual: $manual);
+            $this->reportEntryWithoutScan($event, $ticket, $actor, $manual);
 
             return $this->outcome(ScanResult::Accepted, false, $ticket, null, null, manual: $manual);
         } catch (QueryException) {
             $arrival = $ticket->arrival()->first();
 
             $this->journal($event, $ticket, $actor, ScanResult::AlreadyScanned, $force, $station, manual: $manual);
+            $this->reportEntryWithoutScan($event, $ticket, $actor, $manual && $force);
 
             return $this->outcome(
                 ScanResult::AlreadyScanned,
@@ -122,6 +124,25 @@ class ScanTicket
                 manual: $manual,
             );
         }
+    }
+
+    /**
+     * Tell those who watch the organisation's history that someone was let in without their
+     * ticket being read : sans cette alerte, un agent qui fait entrer des complices sous le nom
+     * d'invites pas encore arrives ne serait vu que de qui pense a relire les passages.
+     */
+    private function reportEntryWithoutScan(Event $event, Ticket $ticket, User $actor, bool $admittedWithoutScan): void
+    {
+        if (! $admittedWithoutScan) {
+            return;
+        }
+
+        app(SendAlert::class)->toTenantMembers(
+            NotificationType::EntryWithoutScan,
+            ['event' => $event->name, 'agent' => $actor->name, 'guest' => $ticket->holderName()],
+            route('tenants.events.scan.index', [Tenant::current(), $event], absolute: false),
+            except: $actor,
+        );
     }
 
     /**

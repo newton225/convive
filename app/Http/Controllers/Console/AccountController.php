@@ -6,6 +6,7 @@ use App\Actions\Console\ManageAccount;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\Search\UnaccentedSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,10 +42,7 @@ class AccountController extends Controller
             'minimumSearchLength' => self::MinimumSearchLength,
             'results' => $searchable
                 ? User::query()
-                    ->where(fn (Builder $query) => $query
-                        ->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%"))
+                    ->tap(fn (Builder $query) => UnaccentedSearch::apply($query, ['name', 'email', 'phone'], $search))
                     ->orderBy('name')
                     ->limit(self::ResultsShown)
                     ->get()

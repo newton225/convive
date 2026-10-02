@@ -10,6 +10,7 @@ import { SiteHeader } from '@/components/site/site-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/hooks/use-translation';
+import { matchesSearch } from '@/lib/search';
 import { Duration, EaseOut } from '@/lib/motion';
 import { register } from '@/routes';
 import type { ShowcaseEvent } from '@/types';
@@ -30,21 +31,19 @@ type Props = {
  * la liste deja chargee, sans requete : la vitrine ne porte que les evenements annonces.
  */
 export default function Showcase({ events, analyticsId }: Props) {
-    const { t, locale } = useTranslation();
+    const { t } = useTranslation();
     const reduceMotion = useReducedMotion() === true;
     const [search, setSearch] = useState('');
 
-    const visible = useMemo(() => {
-        const needle = search.trim().toLocaleLowerCase(locale);
-
-        return needle === ''
-            ? events
-            : events.filter((event) =>
-                  [event.name, event.organisationName].some((value) =>
-                      value.toLocaleLowerCase(locale).includes(needle),
-                  ),
-              );
-    }, [events, search, locale]);
+    const visible = useMemo(
+        () =>
+            events.filter((event) =>
+                [event.name, event.organisationName].some((value) =>
+                    matchesSearch(value, search),
+                ),
+            ),
+        [events, search],
+    );
 
     const enter = (delay: number) =>
         reduceMotion

@@ -18,6 +18,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { useTranslation } from '@/hooks/use-translation';
+import { matchesSearch } from '@/lib/search';
 import { cn } from '@/lib/utils';
 
 type CountryOption = { value?: Country; label: string };
@@ -82,7 +83,13 @@ export function CountrySelect({ value, onChange, options, disabled }: Props) {
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-72 p-0" align="start">
-                <Command>
+                {/* « cote » doit trouver « Côte d'Ivoire » : le filtre par defaut de la liste
+                    ne retire pas les accents. */}
+                <Command
+                    filter={(value, search) =>
+                        matchesSearch(value, search) ? 1 : 0
+                    }
+                >
                     <CommandInput
                         placeholder={t(
                             'guest.registration.phone_country.search',

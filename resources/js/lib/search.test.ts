@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { normalizeForSearch } from '@/lib/search';
+import { matchesSearch, normalizeForSearch } from '@/lib/search';
 
 describe('normalizeForSearch', () => {
     it('retire les accents et la casse', () => {
@@ -16,5 +16,17 @@ describe('normalizeForSearch', () => {
 
         expect(venue.includes(normalizeForSearch('fetes'))).toBe(true);
         expect(venue.includes(normalizeForSearch('Yopougon'))).toBe(false);
+    });
+});
+
+describe('matchesSearch', () => {
+    it('trouve un nom accentué par une saisie sans accent, et inversement', () => {
+        expect(matchesSearch("Côte d'Ivoire +225", 'cote')).toBe(true);
+        expect(matchesSearch('Senegal +221', 'Sénégal')).toBe(true);
+        expect(matchesSearch('Bénin +229', 'togo')).toBe(false);
+    });
+
+    it('correspond à tout quand rien n’est saisi', () => {
+        expect(matchesSearch('Gala de fin d’année', '   ')).toBe(true);
     });
 });

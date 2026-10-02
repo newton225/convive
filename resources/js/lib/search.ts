@@ -9,3 +9,11 @@ export function normalizeForSearch(value: string): string {
         .toLowerCase()
         .trim();
 }
+
+/**
+ * Dit si un texte contient la saisie, sans tenir compte des accents ni de la casse. Une saisie vide
+ * correspond a tout : rien n'a ete demande.
+ */
+export function matchesSearch(text: string, query: string): boolean {
+    return normalizeForSearch(text).includes(normalizeForSearch(query));
+}

@@ -23,6 +23,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Support\InvitationCardMessage;
 use App\Support\PdfLetterhead;
+use App\Support\Search\UnaccentedSearch;
 use Carbon\CarbonInterface;
 use DomainException;
 use Illuminate\Database\Eloquent\Builder;
@@ -331,12 +332,7 @@ class RegistrationController extends Controller
         return QueryBuilder::for(Registration::where('event_id', $event->id))
             ->allowedFilters(
                 AllowedFilter::callback('search', function (Builder $query, string $value) {
-                    $query->where(function (Builder $query) use ($value) {
-                        $query->where('name', 'like', "%{$value}%")
-                            ->orWhere('reference', 'like', "%{$value}%")
-                            ->orWhere('phone', 'like', "%{$value}%")
-                            ->orWhere('email', 'like', "%{$value}%");
-                    });
+                    UnaccentedSearch::apply($query, ['name', 'reference', 'phone', 'email'], $value);
                 }),
                 AllowedFilter::callback('status', function (Builder $query, string $value) {
                     match ($value) {

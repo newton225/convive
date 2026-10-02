@@ -48,10 +48,11 @@ return [
 
     'lookup' => [
         'title' => 'Billet illisible ?',
-        'description' => "Écran cassé, téléphone éteint, billet oublié : retrouvez l'invité par la référence de son dossier ou par son nom, puis validez son entrée. Elle sera notée « sans scan », à votre nom.",
+        'description' => "Écran cassé, téléphone éteint, billet oublié : retrouvez l'invité par la référence de son dossier ou par son nom, puis validez son entrée. Elle sera notée « sans scan », à votre nom, et les responsables en seront prévenus.",
         'label' => 'Référence du dossier ou nom',
         'placeholder' => 'Par exemple : SP-2026-0008 ou Kouassi',
         'submit' => 'Rechercher',
+        'no_permission' => "Billet illisible ? Seul un responsable peut faire entrer un invité sans scanner son billet. Orientez l'invité vers lui.",
         'offline' => 'La recherche demande une connexion. Sans réseau, seul le scan du billet fonctionne.',
         'too_short' => 'Saisissez au moins :count caractères.',
         'empty' => "Aucun billet valide ne correspond. Vérifiez l'orthographe ou la référence. Si le paiement n'est pas confirmé, orientez l'invité vers l'accueil.",

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\AuditTrail;
+use App\Support\Search\UnaccentedSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -69,10 +70,12 @@ class AuditLogController extends Controller
                     // « Multi-locataire ») : `User` vit dans la base centrale, une connexion
                     // separee. On resout d'abord les identifiants cote central, puis on filtre
                     // sur `causer_id` cote locataire, jamais de jointure entre les deux bases.
-                    $causerIds = User::where('name', 'like', "%{$value}%")->pluck('id');
+                    $causerIds = User::query()
+                        ->tap(fn (Builder $users) => UnaccentedSearch::apply($users, ['name'], $value))
+                        ->pluck('id');
 
                     $query->where(function (Builder $query) use ($value, $causerIds) {
-                        $query->where('description', 'like', "%{$value}%")
+                        $query->where(fn (Builder $description) => UnaccentedSearch::apply($description, ['description'], $value))
                             ->orWhere(function (Builder $query) use ($causerIds) {
                                 $query->where('causer_type', User::class)
                                     ->whereIn('causer_id', $causerIds);

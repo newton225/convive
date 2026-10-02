@@ -742,9 +742,13 @@ du dossier ou par son nom, puis valide son entree. Saisir le jeton a la main n'a
 est trop long.
 
 - **Permission dediee `scan.manual`**, en plus de `scan.perform`. Le QR prouve que l'invite detient
-  son billet ; un nom retrouve dans une liste ne prouve que la parole de l'agent. Le profil Hotesse
-  la recoit a l'ouverture d'un espace ; une organisation deja ouverte la donne elle-meme
-  (`tenants:sync-permissions` ne sert que le Proprietaire).
+  son billet ; un nom retrouve dans une liste ne prouve que la parole de l'agent. **Seul le
+  Proprietaire la detient a l'ouverture d'un espace** (decision du 2026-10-02) : a lui de la
+  confier depuis l'ecran des profils. Une hotesse qui ne l'a pas oriente l'invite vers un
+  responsable, et l'ecran le lui dit.
+- **Chaque entree sans scan previent** les porteurs de `audit.view`
+  (`NotificationType::EntryWithoutScan`), avec le nom de l'agent et de l'invite : un agent qui
+  ferait entrer des complices sous le nom d'invites pas encore arrives se voit le soir meme.
 - **Memes regles qu'un billet scanne** : `ScanTicket::handleWithoutScan()` passe par le meme chemin
   d'admission (inscription confirmee, evenement non clos, une entree par billet, forcage sous
   `scan.force`). Jamais un second chemin qui ecrirait `TicketArrival` a sa facon.
@@ -756,6 +760,18 @@ est trop long.
   doit pas la detenir.
 - **Un refus sans scan n'alerte pas** comme une fraude : c'est une inscription annulee ou un
   evenement clos entre la recherche et la validation, pas un faux billet.
+
+### Recherche : sans accents, partout
+
+Decision du proprietaire du projet (2026-10-02) : toute recherche ignore les accents et la casse.
+« kouame » trouve « Kouamé ».
+
+- **Cote serveur** : `App\Support\Search\UnaccentedSearch::apply($query, [colonnes], $terme)`,
+  jamais un `like` direct. La comparaison s'ecrit `lower(unaccent(colonne)) like ?` : `unaccent`
+  est native a PostgreSQL (extension a activer par migration le jour du basculement) et fournie a
+  SQLite sous le meme nom a l'ouverture de chaque connexion (`AppServiceProvider`).
+- **Cote client** : `normalizeForSearch()` de `resources/js/lib/search.ts`, jamais un
+  `toLowerCase().includes()` direct.
 
 ---
 

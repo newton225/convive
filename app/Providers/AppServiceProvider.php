@@ -18,12 +18,14 @@ use App\Support\AuditTrail;
 use App\Support\Console\ConsoleAccess;
 use App\Support\EventReport;
 use App\Support\LogWhatsAppSender;
+use App\Support\Search\UnaccentedSearch;
 use App\Support\Stripe\StripeApi;
 use App\Support\Stripe\StripeSubscriptionBillingGateway;
 use App\Support\UnconfiguredBillingGateway;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -77,6 +79,14 @@ class AppServiceProvider extends ServiceProvider
         $this->configureSessionsAndProxies();
 
         Notification::extend('whatsapp', fn ($app) => $app->make(WhatsAppChannel::class));
+
+        // Recherche sans accents : la base centrale et celle de chaque organisation la recoivent a
+        // leur ouverture (`UnaccentedSearch`).
+        Event::listen(ConnectionEstablished::class, fn (ConnectionEstablished $event) => UnaccentedSearch::prepare($event->connection));
+
+        foreach (DB::getConnections() as $connection) {
+            UnaccentedSearch::prepare($connection);
+        }
     }
 
     /**

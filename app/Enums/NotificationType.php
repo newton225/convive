@@ -18,6 +18,7 @@ enum NotificationType: string
     case RegistrationsPurged = 'registrations_purged';
     case TeamInvitationPending = 'team_invitation_pending';
     case TicketRefused = 'ticket_refused';
+    case EntryWithoutScan = 'entry_without_scan';
     case LargeExport = 'large_export';
     case MessageQuotaReached = 'message_quota_reached';
     case PlanLimitsLowered = 'plan_limits_lowered';
@@ -37,8 +38,9 @@ enum NotificationType: string
             self::SeatsExhausted, self::SeatsLow => TenantPermission::EventsView,
             self::PurgeScheduled => TenantPermission::RegistrationsView,
             self::TicketRefused => TenantPermission::ScanLogView,
-            // SECURITY.md M3 : ceux qui surveillent le journal, le Proprietaire en tete.
-            self::LargeExport => TenantPermission::AuditView,
+            // SECURITY.md M3 : ceux qui surveillent le journal, le Proprietaire en tete. Une
+            // entree sans scan les regarde aussi : c'est la parole d'un agent, pas un billet lu.
+            self::LargeExport, self::EntryWithoutScan => TenantPermission::AuditView,
             self::MessageQuotaReached, self::PlanLimitsLowered => TenantPermission::BillingView,
             self::TeamInvitationPending => null,
         };

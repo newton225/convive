@@ -6,6 +6,7 @@ use App\Enums\RegistrationStatus;
 use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Support\Search\UnaccentedSearch;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -60,20 +61,18 @@ class FindTicketsForEntry
             ];
         }
 
-        $pattern = "%{$search}%";
-
         $tickets = Ticket::query()
             ->whereHas('registration', fn (Builder $registration) => $registration
                 ->where('event_id', $event->id)
                 ->where('status', RegistrationStatus::Confirmed))
             ->where(fn (Builder $query) => $query
                 // La reference designe le dossier : elle rend le billet de chaque personne du groupe.
-                ->whereHas('registration', fn (Builder $registration) => $registration->whereLike('reference', $pattern))
-                ->orWhereLike('holder_name', $pattern)
+                ->whereHas('registration', fn (Builder $registration) => UnaccentedSearch::apply($registration, ['reference'], $search))
+                ->orWhere(fn (Builder $companion) => UnaccentedSearch::apply($companion, ['holder_name'], $search))
                 // Le billet de l'invite principal ne porte pas de nom propre : c'est celui du dossier.
                 ->orWhere(fn (Builder $main) => $main
                     ->where('holder_position', Ticket::GuestPosition)
-                    ->whereHas('registration', fn (Builder $registration) => $registration->whereLike('name', $pattern))))
+                    ->whereHas('registration', fn (Builder $registration) => UnaccentedSearch::apply($registration, ['name'], $search))))
             ->with('registration.unit', 'registration.tableAssignment.seatingTable', 'holderUnit', 'arrival')
             ->orderBy('registration_id')
             ->orderBy('holder_position')

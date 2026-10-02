@@ -48,10 +48,11 @@ return [
 
     'lookup' => [
         'title' => 'Ticket cannot be read?',
-        'description' => 'Broken screen, dead phone, forgotten ticket: find the guest by their registration reference or by name, then confirm their entry. It will be recorded as "not scanned", under your name.',
+        'description' => 'Broken screen, dead phone, forgotten ticket: find the guest by their registration reference or by name, then confirm their entry. It will be recorded as "not scanned", under your name, and the managers will be told.',
         'label' => 'Registration reference or name',
         'placeholder' => 'For example: SP-2026-0008 or Kouassi',
         'submit' => 'Search',
+        'no_permission' => 'Ticket cannot be read? Only a manager can let a guest in without scanning their ticket. Send the guest to them.',
         'offline' => 'Searching needs a connection. Without network, only scanning the ticket works.',
         'too_short' => 'Type at least :count characters.',
         'empty' => 'No valid ticket matches. Check the spelling or the reference. If the payment is not confirmed, send the guest to the welcome desk.',

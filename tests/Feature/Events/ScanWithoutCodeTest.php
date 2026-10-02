@@ -5,6 +5,7 @@ namespace Tests\Feature\Events;
 use App\Actions\Events\SaveEvent;
 use App\Actions\Tenants\CreateTenant;
 use App\Actions\Tickets\IssueTicket;
+use App\Enums\NotificationType;
 use App\Enums\ScanResult;
 use App\Enums\TenantPermission;
 use App\Models\Event;
@@ -398,12 +399,70 @@ class ScanWithoutCodeTest extends TestCase
         $this->admit($this->owner, $this->ticket)->assertTooManyRequests();
     }
 
-    public function test_le_profil_hotesse_d_une_nouvelle_organisation_peut_valider_sans_scan(): void
+    public function test_seul_le_proprietaire_recoit_la_permission_a_l_ouverture_d_une_organisation(): void
     {
-        $permissions = $this->tenant->asCurrent(
-            fn () => Profile::where('name', 'Hotesse')->firstOrFail()->permissions->pluck('name')->all(),
-        );
+        // Faire entrer quelqu'un sur son seul nom est une decision de responsable : a lui de la
+        // confier a qui il veut depuis l'ecran des profils.
+        $holders = $this->tenant->asCurrent(fn () => Profile::query()
+            ->whereHas('permissions', fn ($query) => $query->where('name', TenantPermission::ScanManual->value))
+            ->pluck('name')
+            ->all());
 
-        $this->assertContains(TenantPermission::ScanManual->value, $permissions);
+        $this->assertSame([Profile::Owner], $holders);
+    }
+
+    public function test_retrouve_un_invite_au_nom_accentue_par_une_saisie_sans_accent(): void
+    {
+        $this->tenant->asCurrent(fn () => $this->issueFor($this->event, 'Yao Kouamé', 'SP-2026-0011'));
+
+        $this->find($this->owner, 'kouame')
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('lookup.tickets', 1)
+                ->where('lookup.tickets.0.name', 'Yao Kouamé'),
+            );
+    }
+
+    public function test_une_entree_sans_scan_previent_ceux_qui_suivent_l_historique(): void
+    {
+        Notification::fake();
+        $manager = $this->agentWith(TenantPermission::AuditView);
+        $hostess = $this->agentWith(TenantPermission::ScanPerform, TenantPermission::ScanLogView);
+
+        $this->admit($this->owner, $this->ticket);
+
+        Notification::assertSentTo($manager, TenantAlert::class, fn (TenantAlert $alert) => $alert->type === NotificationType::EntryWithoutScan
+            && $alert->params['guest'] === 'Aya Kouassi'
+            && $alert->params['agent'] === $this->owner->name);
+        Notification::assertNotSentTo($hostess, TenantAlert::class);
+        // L'agent n'a pas besoin d'etre prevenu de ce qu'il vient de faire.
+        Notification::assertNotSentTo($this->owner, TenantAlert::class);
+    }
+
+    public function test_une_entree_forcee_sans_scan_previent_aussi(): void
+    {
+        $this->admit($this->owner, $this->ticket);
+
+        Notification::fake();
+        $manager = $this->agentWith(TenantPermission::AuditView);
+
+        // Deja entre, non force : personne n'est entre, rien a signaler.
+        $this->admit($this->owner, $this->ticket);
+        Notification::assertNothingSent();
+
+        $this->admit($this->owner, $this->ticket, ['force' => true]);
+        Notification::assertSentTo($manager, TenantAlert::class, fn (TenantAlert $alert) => $alert->type === NotificationType::EntryWithoutScan);
+    }
+
+    public function test_un_billet_scanne_ne_previent_personne(): void
+    {
+        Notification::fake();
+        $this->agentWith(TenantPermission::AuditView);
+
+        $token = $this->tenant->asCurrent(fn () => $this->ticket->signedToken());
+
+        $this->actingAs($this->owner)
+            ->post(route('tenants.events.scan.verify', [$this->tenant, $this->event]), ['token' => $token]);
+
+        Notification::assertNothingSent();
     }
 }

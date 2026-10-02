@@ -767,6 +767,13 @@ export default function EventScan({
                                 onActivity={lock.registerActivity}
                                 onAdmit={admitWithoutScan}
                             />
+                        ) : !event.closed ? (
+                            <p
+                                className="text-muted-foreground text-sm"
+                                data-test="guest-lookup-no-permission"
+                            >
+                                {t('scan.lookup.no_permission')}
+                            </p>
                         ) : null}
 
                         {canRotateKey && event.qrPublicKey !== null ? (

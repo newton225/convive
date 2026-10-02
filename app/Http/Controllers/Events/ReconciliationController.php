@@ -15,6 +15,7 @@ use App\Models\Registration;
 use App\Models\StatementImport;
 use App\Models\StatementLine;
 use App\Models\Tenant;
+use App\Support\Search\UnaccentedSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -51,10 +52,7 @@ class ReconciliationController extends Controller
                 ->allowedFilters(
                     AllowedFilter::exact('outcome'),
                     AllowedFilter::callback('search', function (Builder $query, string $value) {
-                        $query->where(function (Builder $query) use ($value) {
-                            $query->where('reference', 'like', "%{$value}%")
-                                ->orWhere('issuer', 'like', "%{$value}%");
-                        });
+                        UnaccentedSearch::apply($query, ['reference', 'issuer'], $value);
                     }),
                 )
                 ->defaultSort('line_number')
