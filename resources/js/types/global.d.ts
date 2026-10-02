@@ -30,6 +30,8 @@ declare module '@inertiajs/core' {
             canAccessConsole: boolean;
             consoleAreas: string[];
             appVersion: string | null;
+            // Livraison en service : sa date et l'identifiant de sa modification.
+            appRelease: { releasedAt: string; commit: string | null } | null;
             supportAccess: SupportAccessNotice | null;
             [key: string]: unknown;
         };

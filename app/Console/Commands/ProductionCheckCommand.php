@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Support\LegalDocument;
+use App\Support\Release;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -31,6 +32,7 @@ class ProductionCheckCommand extends Command
             'LOG_STACK ne doit pas contenir single : un fichier de journal unique grossit jusqu\'a remplir le disque. Utilisez daily.' => in_array('single', (array) config('logging.channels.stack.channels'), true),
             'CONVIVE_ENFORCE_TWO_FACTOR doit rester actif en production.' => config('convive.two_factor.enforced') !== true,
             'Les pages juridiques sont incompletes : renseignez l\'identite de l\'editeur ('.implode(', ', LegalDocument::missingIdentity()).').' => LegalDocument::missingIdentity() !== [],
+            'La livraison n\'est pas estampillee : jouez php artisan convive:release apres chaque mise a jour du code, pour que la version affichee dise ce qui tourne.' => Release::current() === null,
             'CONVIVE_LEGAL_REVIEWED doit valoir true : les pages juridiques n\'ont pas ete validees par un juriste.' => ! LegalDocument::isReviewed(),
         ]));
 

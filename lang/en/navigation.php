@@ -26,4 +26,6 @@ return [
     'console' => 'Operations console',
     'support_access' => 'Support access',
     'version' => 'Convive, version :version',
+    'version_released' => 'Convive, version :version of :date',
+    'version_commit' => 'Change :commit',
 ];

@@ -8,12 +8,17 @@ return [
     |--------------------------------------------------------------------------
     |
     | Affichee au pied du menu du back-office : c'est elle qu'un membre cite quand il
-    | signale un probleme. A faire avancer a chaque livraison, ici ou par APP_VERSION
-    | sur le serveur.
+    | signale un probleme. Deux parties (decision du proprietaire du projet, 2026-10-02) :
+    | - le numero, choisi a la main, a faire avancer a chaque livraison marquante, ici ou par
+    |   APP_VERSION sur le serveur ;
+    | - la date de livraison et l'identifiant de la modification, poses tout seuls par
+    |   `php artisan convive:release` dans le fichier ci-dessous, hors du depot.
     |
     */
 
     'version' => env('APP_VERSION', '0.1.0'),
+
+    'release_path' => env('CONVIVE_RELEASE_PATH', storage_path('framework/release.json')),
 
     /*
     |--------------------------------------------------------------------------

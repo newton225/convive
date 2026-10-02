@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\Console\ConsoleAccess;
 use App\Support\Locale;
 use App\Support\PlanLimits;
+use App\Support\Release;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Lang;
@@ -68,6 +69,9 @@ class HandleInertiaRequests extends Middleware
             // Pour le pied du menu du back-office. Jamais a un visiteur anonyme : il n'a pas a savoir
             // quelle version tourne.
             'appVersion' => $user ? config('convive.version') : null,
+            // La date de la livraison en service et l'identifiant de sa modification, nuls tant
+            // qu'aucune livraison n'a ete estampillee (`convive:release`).
+            'appRelease' => $user ? Release::current() : null,
             'auth' => [
                 'user' => $user,
             ],

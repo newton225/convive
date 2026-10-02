@@ -455,9 +455,11 @@ Ce qui est en place :
 - **Taches planifiees et commandes** : elles bouclent sur les organisations et posent le contexte
   a chaque tour (`$tenant->run()` ou son alias `asCurrent()`).
 - **Nouvelle table metier** : directement dans `database/migrations/tenant/`, sans colonne
-  `tenant_id`. **Deploiement** : `php artisan tenants:migrate` puis
+  `tenant_id`. **Deploiement** : `php artisan migrate`, `php artisan tenants:migrate`,
   `php artisan tenants:sync-permissions`, sans quoi une organisation deja ouverte garde un schema
-  ou un catalogue de permissions en retard.
+  ou un catalogue de permissions en retard ; puis `php artisan convive:release`, qui estampille
+  la livraison (date et identifiant de la modification, affiches a cote du numero de version que
+  le proprietaire du projet choisit dans `APP_VERSION`).
 
 ### Nommage du locataire
 
