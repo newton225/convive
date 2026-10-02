@@ -181,7 +181,7 @@ return [
 
     'confirm_delete' => [
         'title' => "Supprimer l'événement",
-        'description' => "L'événement \":name\" sera supprimé. Cette action est définitive.",
+        'description' => "L'événement \":name\" disparaît tout de suite de votre liste, et il est effacé définitivement au bout de 30 jours.",
     ],
 
     'templates' => [

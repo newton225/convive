@@ -181,7 +181,7 @@ return [
 
     'confirm_delete' => [
         'title' => 'Delete event',
-        'description' => 'The ":name" event will be deleted. This cannot be undone.',
+        'description' => 'The ":name" event disappears from your list right away, and is erased for good after 30 days.',
     ],
 
     'templates' => [

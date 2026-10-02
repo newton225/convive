@@ -352,6 +352,7 @@ return [
             'record_that_the_scheduler_is_alive' => 'Scheduler heartbeat',
             'send_a_witness_job_through_the_queue' => 'Queue heartbeat',
             'erase_organisations_whose_scheduled_deletion_is_due' => 'Erasure of organisations whose deletion is due',
+            'erase_events_deleted_more_than_thirty_days_ago' => 'Erasure of events deleted more than 30 days ago',
             'run_the_health_checks_and_alert_on_failure' => 'Health checks and alerts',
         ],
         'task_columns' => [

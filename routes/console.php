@@ -2,6 +2,7 @@
 
 use App\Actions\Audit\PurgeAuditLog;
 use App\Actions\Billing\ProcessOverdueSubscriptions;
+use App\Actions\Events\PurgeDeletedEvents;
 use App\Actions\Notifications\NotifyUpcomingPurge;
 use App\Actions\Registrations\ExpireHolds;
 use App\Actions\Registrations\PurgeRegistrations;
@@ -334,3 +335,12 @@ Schedule::command(RunHealthChecksCommand::class)
 Schedule::command('tenants:erase-scheduled --force')
     ->dailyAt('04:30')
     ->description('Erase organisations whose scheduled deletion is due');
+
+/*
+ * Efface pour de bon les evenements supprimes depuis plus de trente jours (des brouillons : un
+ * evenement publie se cloture). Sans cette tache, ils resteraient dans la corbeille indefiniment,
+ * avec leur visuel.
+ */
+Schedule::call(function (PurgeDeletedEvents $purge) {
+    Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(fn () => $purge->handle()));
+})->daily()->description('Erase events deleted more than thirty days ago');
