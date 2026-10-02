@@ -142,7 +142,8 @@ class EventTest extends TestCase
             'seats_per_table' => 8,
         ]));
 
-        $this->assertSame(96, $this->eventOf($tenant)->capacity());
+        // La capacite se lit sur les tables du plan de salle, dans la base de l'organisation.
+        $this->assertSame(96, $tenant->asCurrent(fn () => Event::firstOrFail()->capacity()));
     }
 
     public function test_le_montant_du_suit_le_nombre_d_accompagnateurs(): void

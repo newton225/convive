@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Spatie\LaravelPdf\PdfBuilder;
@@ -133,7 +134,7 @@ class ReportControllerTest extends TestCase
         $tenant = $this->tenantOwnedBy($owner);
         $event = $this->eventOf($tenant);
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < AppServiceProvider::ExportsPerHour; $i++) {
             $this->actingAs($owner)
                 ->get(route('tenants.events.report.export.pdf', [$tenant, $event]))
                 ->assertOk();

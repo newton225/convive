@@ -6,6 +6,7 @@ use App\Actions\Tenants\CreateTenant;
 use App\Models\Event;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Tests\TestCase;
@@ -43,7 +44,7 @@ class RateLimitMessageTest extends TestCase
 
     private function exhaustExports(): void
     {
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < AppServiceProvider::ExportsPerHour; $i++) {
             $this->actingAs($this->owner)->get($this->exportUrl())->assertOk();
         }
     }

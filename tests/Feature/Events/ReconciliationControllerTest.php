@@ -11,6 +11,7 @@ use App\Models\StatementImport;
 use App\Models\StatementLine;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
@@ -255,7 +256,7 @@ class ReconciliationControllerTest extends TestCase
         $tenant = $this->tenantOwnedBy($owner);
         $event = $this->eventOf($tenant);
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < AppServiceProvider::ExportsPerHour; $i++) {
             $this->actingAs($owner)
                 ->post(route('tenants.events.reconciliation.import', [$tenant, $event]), [
                     'file' => $this->csv("date,reference,emetteur,montant\n2026-09-20,WV000{$i},Aya Kouassi,15000"),

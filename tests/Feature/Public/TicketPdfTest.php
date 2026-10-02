@@ -136,11 +136,13 @@ class TicketPdfTest extends TestCase
         ['registration' => $registration, 'tickets' => $tickets] = $this->confirmedGroup();
 
         $url = $this->tenant->asCurrent(fn () => $tickets[1]->fresh()->pdfUrl());
+        // Lue dans la base de l'organisation, avant de quitter son contexte.
+        $reference = $this->tenant->asCurrent(fn () => $registration->fresh()->reference);
 
         $this->get($url)->assertOk();
 
         Pdf::assertRespondedWithPdf(fn (PdfBuilder $pdf) => $pdf->viewData['tickets'][0]['host']['name'] === 'Aya Kouassi'
-            && $pdf->viewData['tickets'][0]['host']['reference'] === $registration->fresh()->reference
+            && $pdf->viewData['tickets'][0]['host']['reference'] === $reference
             && $pdf->viewData['tickets'][0]['host']['unit'] !== '');
     }
 

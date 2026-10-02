@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -70,9 +71,11 @@ class SupportAccessGrant extends Model
     }
 
     /**
-     * Get the moment this access stopped, or will stop, granting anything.
+     * Get the moment this access stopped, or will stop, granting anything. Les dates de
+     * l'application sont immuables (`Date::use(CarbonImmutable::class)`) : le type de retour est
+     * l'interface, pas la classe modifiable.
      */
-    public function endedAt(): Carbon
+    public function endedAt(): CarbonInterface
     {
         return $this->finished_at ?? $this->revoked_at ?? $this->expires_at;
     }

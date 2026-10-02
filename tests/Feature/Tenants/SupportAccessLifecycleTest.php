@@ -175,6 +175,7 @@ class SupportAccessLifecycleTest extends TestCase
 
         $this->actingAs($this->owner)
             ->get(route('tenants.support-access.show', $this->tenant))
+            ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('activeAccess', null)
                 ->where('pastAccesses.0.endReason', 'finished')

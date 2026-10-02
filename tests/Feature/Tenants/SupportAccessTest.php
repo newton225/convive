@@ -107,7 +107,8 @@ class SupportAccessTest extends TestCase
 
     public function test_le_proprietaire_ouvre_un_acces_nominatif_et_limite_dans_le_temps(): void
     {
-        $this->freezeTime();
+        // A la seconde : la base ne garde pas les microsecondes.
+        $this->freezeSecond();
 
         $this->open($this->owner, ['duration' => 12])
             ->assertRedirect(route('tenants.support-access.show', $this->tenant));
