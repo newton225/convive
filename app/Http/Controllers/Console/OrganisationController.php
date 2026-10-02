@@ -33,7 +33,7 @@ class OrganisationController extends Controller
             // Avec les organisations supprimees par leur Proprietaire : elles restent restaurables
             // jusqu'a leur effacement.
             'organisations' => Tenant::withTrashed()
-                ->with('subscription.plan', 'usage', 'suspension')
+                ->with('subscription.plan', 'usage', 'suspension', 'limits')
                 ->orderBy('name')
                 ->get()
                 ->map(fn (Tenant $tenant) => OrganisationOverview::summary($tenant))
@@ -91,7 +91,7 @@ class OrganisationController extends Controller
 
         // Une seule organisation : ses compteurs sont releves a l'ouverture de sa fiche.
         TenantUsageRecorder::refresh($tenant);
-        $tenant->load('subscription.plan', 'usage', 'suspension', 'branding');
+        $tenant->load('subscription.plan', 'usage', 'suspension', 'branding', 'limits');
 
         return Inertia::render('console/organisation', [
             'isSample' => false,

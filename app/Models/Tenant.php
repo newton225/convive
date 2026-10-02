@@ -54,6 +54,7 @@ use Stancl\Tenancy\Events;
  * @property-read TenantBranding|null $branding
  * @property-read TenantSuspension|null $suspension
  * @property-read TenantUsage|null $usage
+ * @property-read TenantLimit|null $limits
  */
 #[Fillable(['name', 'slug', 'is_personal', 'subdomain'])]
 #[Hidden(['tenancy_db_name', 'tenancy_db_username', 'tenancy_db_password'])]
@@ -378,6 +379,35 @@ class Tenant extends Model implements TenantWithDatabase
     public function suspension(): HasOne
     {
         return $this->hasOne(TenantSuspension::class)->whereNull('lifted_at');
+    }
+
+    /**
+     * Get the limits set for this tenant alone, if any (README section 3).
+     *
+     * @return HasOne<TenantLimit, $this>
+     */
+    public function limits(): HasOne
+    {
+        return $this->hasOne(TenantLimit::class);
+    }
+
+    /**
+     * Get the ceiling that applies to this tenant for the given quota (`max_active_events`...),
+     * null when unlimited : la limite propre a l'organisation quand l'editeur en a regle une,
+     * sinon celle de son plan.
+     */
+    public function limit(string $quota): ?int
+    {
+        return $this->limitUnder($this->plan(), $quota);
+    }
+
+    /**
+     * Get the ceiling this tenant would have on the given plan : ses limites propres le suivent
+     * d'un plan a l'autre.
+     */
+    public function limitUnder(Plan $plan, string $quota): ?int
+    {
+        return $this->limits?->getAttribute($quota) ?? $plan->getAttribute($quota);
     }
 
     /**

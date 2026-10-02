@@ -12,6 +12,19 @@ export type ConsoleQuota = {
     max: number | null;
 };
 
+export type ConsoleQuotaName =
+    | 'max_active_events'
+    | 'max_registrations'
+    | 'max_members'
+    | 'max_messages_per_month';
+
+// Pour chaque limite : celle reglee pour l'organisation seule (null : aucune) et celle de son plan
+// (null : sans limite).
+export type ConsoleOrganisationLimits = Record<
+    ConsoleQuotaName,
+    { own: number | null; plan: number | null }
+>;
+
 export type ConsoleOrganisationSummary = {
     slug: string;
     name: string;
@@ -44,6 +57,7 @@ export type ConsoleOrganisationDetails = ConsoleOrganisationSummary & {
     suspendedByEditor: boolean;
     // Un abonnement l'emporte sur l'essai : on n'en offre pas a une organisation abonnee.
     hasSubscription: boolean;
+    limits: ConsoleOrganisationLimits;
     history: {
         at: string;
         type: 'opened' | 'plan_changed';

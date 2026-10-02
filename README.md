@@ -227,9 +227,16 @@ devient.
   responsable signataire, forme juridique, numéro RCCM/registre, numéro de contribuable,
   adresse du siège, email, téléphone, sous-domaine.
   Le cachet et la signature sont apposés sur les billets, reçus et exports PDF.
-- **Plans** : Essentiel (1 événement actif, 200 inscrits, 2 membres), Association (5 / 1 000 /
-  10, + rapprochement + rapports), Institution (illimité, domaine propre, SSO).
-  Les quotas doivent être **appliqués**, pas seulement affichés.
+- **Plans** : Essentiel (1 événement actif, 200 inscrits, 2 membres, 1 000 messages aux invités
+  par mois), Association (5 / 1 000 / 10 / 5 000, + rapprochement + rapports), Institution
+  (illimité, domaine propre, SSO).
+  Les quotas doivent être **appliqués**, pas seulement affichés. Tous se règlent depuis la
+  console, plan par plan.
+- **Limites particulières** : l'éditeur peut régler, depuis la fiche d'une organisation dans la
+  console, des limites propres à cette organisation (événements actifs, inscrits, membres,
+  messages par mois). Une limite remplie remplace celle du plan pour elle seule et la suit si
+  elle change de plan ; une limite vide suit le plan. C'est ce qui porte un devis Institution.
+  Chaque réglage va au journal central.
 - **Facturation** : moyen de paiement enregistré, prélèvement mensuel, relance J+3 en cas
   d'échec, suspension de l'espace à J+10 d'impayé, historique de factures.
 

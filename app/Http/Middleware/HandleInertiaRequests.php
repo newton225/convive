@@ -138,7 +138,7 @@ class HandleInertiaRequests extends Middleware
         return [
             'name' => $plan->name,
             'activeEvents' => PlanLimits::for($tenant)->activeEvents(),
-            'maxActiveEvents' => $plan->max_active_events,
+            'maxActiveEvents' => $tenant->limit('max_active_events'),
         ];
     }
 

@@ -789,6 +789,21 @@ Decision du proprietaire du projet (2026-10-02) : toute recherche ignore les acc
 - **Cote client** : `normalizeForSearch()` de `resources/js/lib/search.ts`, jamais un
   `toLowerCase().includes()` direct.
 
+### Plans : limites du plan et limites propres a une organisation
+
+- **Quatre limites** par plan : evenements actifs, inscrits, membres, messages aux invites par mois
+  (`max_messages_per_month`, SECURITY.md H5 : 1 000 pour Essentiel, 5 000 pour Association, aucune
+  pour Institution, decision du 2026-10-02). Toutes se reglent depuis l'ecran des plans de la
+  console ; `PlanCode` ne donne que les valeurs de depart.
+- **Limites propres a une organisation** (`tenant_limits`, base centrale, decision du 2026-10-02) :
+  ce qu'un devis a negocie pour elle seule, regle depuis sa fiche dans la console
+  (`ManageOrganisation::setLimits()`, journal central). Une valeur remplace celle du plan et suit
+  l'organisation d'un plan a l'autre ; une valeur nulle suit le plan.
+- **Un seul endroit tranche** : `Tenant::limit('max_...')` (et `limitUnder()` pour un plan vise).
+  Ne jamais lire `$tenant->plan()->max_...` pour appliquer ou afficher une limite : ce serait
+  ignorer la limite propre a l'organisation.
+- Une limite propre ne sait pas dire « illimite » sur un plan limite : on y met un grand nombre.
+
 ---
 
 ## Comptes de versement

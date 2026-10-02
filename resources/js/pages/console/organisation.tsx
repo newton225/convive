@@ -244,6 +244,16 @@ export default function Organisation({
                                 </dd>
                             </div>
                         </dl>
+                        {Object.values(organisation.limits).some(
+                            (limit) => limit.own !== null,
+                        ) ? (
+                            <p
+                                className="text-muted-foreground mt-4 text-sm"
+                                data-test="console-organisation-own-limits"
+                            >
+                                {t('console.organisation.limits.own_note')}
+                            </p>
+                        ) : null}
                     </CardContent>
                 </Card>
 

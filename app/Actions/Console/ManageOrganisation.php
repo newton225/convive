@@ -6,6 +6,7 @@ use App\Enums\SubscriptionStatus;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\Tenant;
+use App\Models\TenantLimit;
 use App\Models\TenantSuspension;
 use App\Models\User;
 use App\Support\Console\ConsoleJournal;
@@ -141,6 +142,43 @@ class ManageOrganisation
     }
 
     /**
+     * Set the limits of this organisation alone (README section 3) : ce qu'un devis a negocie pour
+     * elle. Une limite nulle rend la main au plan. Sans effet et sans trace quand rien ne change.
+     *
+     * Une limite abaissee sous la consommation n'efface rien : l'organisation garde ce qu'elle a
+     * et ne peut plus aller au-dela, comme pour une limite de plan abaissee.
+     *
+     * @param  array<string, int|null>  $limits
+     */
+    public function setLimits(Tenant $tenant, array $limits, User $actor): void
+    {
+        $limits = array_intersect_key($limits, array_flip(TenantLimit::Quotas));
+        $empty = array_fill_keys(TenantLimit::Quotas, null);
+        $before = [...$empty, ...($tenant->limits?->only(TenantLimit::Quotas) ?? [])];
+        $after = [...$before, ...$limits];
+
+        if ($after === $before) {
+            return;
+        }
+
+        DB::connection($tenant->getConnectionName())->transaction(function () use ($tenant, $before, $after, $empty, $actor) {
+            // Plus aucune limite propre : la ligne n'a plus de raison d'etre.
+            if ($after === $empty) {
+                $tenant->limits()->delete();
+            } else {
+                $tenant->limits()->updateOrCreate([], $after);
+            }
+
+            $tenant->unsetRelation('limits');
+
+            ConsoleJournal::record('limits_changed', $actor, $tenant, [
+                'old' => $before,
+                'attributes' => $after,
+            ]);
+        });
+    }
+
+    /**
      * Schedule the erasure of the organisation, at its written request (README section 3). It can
      * be cancelled until the date ; nothing is erased here.
      *
@@ -219,9 +257,10 @@ class ManageOrganisation
         }
 
         $exceeded = collect([
-            'active_events' => [$usage->active_events, $target->max_active_events],
-            'registrations' => [$usage->registrations, $target->max_registrations],
-            'members' => [$usage->members, $target->max_members],
+            // Les limites propres a l'organisation la suivent sur le plan vise.
+            'active_events' => [$usage->active_events, $tenant->limitUnder($target, 'max_active_events')],
+            'registrations' => [$usage->registrations, $tenant->limitUnder($target, 'max_registrations')],
+            'members' => [$usage->members, $tenant->limitUnder($target, 'max_members')],
         ])
             ->filter(fn (array $pair) => $pair[1] !== null && $pair[0] > $pair[1])
             ->map(fn (array $pair, string $quota) => __("console.organisation.errors.exceeded.{$quota}", ['used' => $pair[0], 'max' => $pair[1]]))

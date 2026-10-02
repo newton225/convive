@@ -71,7 +71,8 @@ class AlertOrganisationsOverPlanLimits implements ShouldQueue
         ];
 
         foreach ($this->loweredQuotas as $quota) {
-            $max = $plan->getAttribute($quota);
+            // Une organisation qui a sa propre limite n'est pas touchee par celle du plan.
+            $max = $tenant->limitUnder($plan, $quota);
 
             if ($max !== null && isset($used[$quota]) && $used[$quota] > $max) {
                 return true;

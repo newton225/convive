@@ -9,6 +9,7 @@ use App\Models\Invoice;
 use App\Models\Plan;
 use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
+use App\Models\TenantLimit;
 
 /**
  * Ce que la console montre d'une organisation (README section 3, ecrans 27 et 28) : des
@@ -27,7 +28,7 @@ class OrganisationOverview
     private static ?Plan $trialPlan = null;
 
     /**
-     * Get the line of the organisations list. Expects `subscription.plan`, `usage` and
+     * Get the line of the organisations list. Expects `subscription.plan`, `usage`, `limits` and
      * `suspension` to be loaded when called for a whole list.
      *
      * @return array<string, mixed>
@@ -50,9 +51,9 @@ class OrganisationOverview
             'openedAt' => $tenant->created_at?->toISOString(),
             'lastActivityAt' => $usage?->last_activity_at?->toISOString(),
             'usage' => [
-                'activeEvents' => ['used' => $usage->active_events ?? 0, 'max' => $plan->max_active_events],
-                'registrations' => ['used' => $usage->registrations ?? 0, 'max' => $plan->max_registrations],
-                'members' => ['used' => $usage->members ?? 0, 'max' => $plan->max_members],
+                'activeEvents' => ['used' => $usage->active_events ?? 0, 'max' => $tenant->limitUnder($plan, 'max_active_events')],
+                'registrations' => ['used' => $usage->registrations ?? 0, 'max' => $tenant->limitUnder($plan, 'max_registrations')],
+                'members' => ['used' => $usage->members ?? 0, 'max' => $tenant->limitUnder($plan, 'max_members')],
             ],
             'pastDueSince' => $subscription?->past_due_since?->toISOString(),
             'suspendedAt' => ($tenant->suspension->created_at ?? $subscription?->suspended_at)?->toISOString(),
@@ -94,6 +95,14 @@ class OrganisationOverview
             'suspendedByEditor' => $tenant->isSuspendedByEditor(),
             // Un abonnement l'emporte sur l'essai : on n'en offre pas a une organisation abonnee.
             'hasSubscription' => $tenant->subscription !== null,
+            // Pour chaque limite : celle reglee pour cette organisation seule (nulle : aucune), et
+            // celle de son plan, rappelee a cote du champ.
+            'limits' => collect(TenantLimit::Quotas)
+                ->mapWithKeys(fn (string $quota) => [$quota => [
+                    'own' => $tenant->limits?->getAttribute($quota),
+                    'plan' => $tenant->plan()->getAttribute($quota),
+                ]])
+                ->all(),
             'history' => [
                 [
                     'at' => $tenant->created_at?->toISOString(),

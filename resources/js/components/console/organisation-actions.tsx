@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ChangePlanDialog } from '@/components/console/change-plan-dialog';
 import { ExtendTrialDialog } from '@/components/console/extend-trial-dialog';
+import { OrganisationLimitsDialog } from '@/components/console/organisation-limits-dialog';
 import { ScheduleDeletionDialog } from '@/components/console/schedule-deletion-dialog';
 import { SuspendOrganisationDialog } from '@/components/console/suspend-organisation-dialog';
 import { Button } from '@/components/ui/button';
@@ -98,6 +99,11 @@ export function OrganisationActions({ organisation, plans }: Props) {
                     slug={organisation.slug}
                     currentPlan={organisation.plan}
                     plans={plans}
+                />
+
+                <OrganisationLimitsDialog
+                    slug={organisation.slug}
+                    limits={organisation.limits}
                 />
 
                 {/* Un abonnement l'emporte sur l'essai : rien a offrir a une organisation abonnee. */}

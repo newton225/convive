@@ -24,6 +24,9 @@ use Illuminate\Database\Eloquent\Builder;
  * - Membres : les membres de l'equipe plus les invitations encore en attente, sans quoi on
  *   depasserait le plafond en invitant tout le monde avant que quiconque accepte.
  *
+ * Chaque plafond est celui de l'organisation quand l'editeur lui en a regle un en propre, sinon
+ * celui de son plan (`Tenant::limit()`).
+ *
  * Un plafond `null` est illimite. Tout se coupe avec `convive.billing.enforce_plan_limits`.
  * Les comptes en base d'une organisation se lisent sous sa tenancy (`Tenant::run()`).
  */
@@ -46,7 +49,7 @@ class PlanLimits
      */
     public function canPublishEvent(): bool
     {
-        return $this->hasRoom($this->tenant->plan()->max_active_events, $this->activeEvents(), 1);
+        return $this->hasRoom($this->tenant->limit('max_active_events'), $this->activeEvents(), 1);
     }
 
     /**
@@ -54,7 +57,7 @@ class PlanLimits
      */
     public function canRegister(int $people): bool
     {
-        return $this->hasRoom($this->tenant->plan()->max_registrations, $this->registrations(), $people);
+        return $this->hasRoom($this->tenant->limit('max_registrations'), $this->registrations(), $people);
     }
 
     /**
@@ -62,7 +65,7 @@ class PlanLimits
      */
     public function canAddMember(): bool
     {
-        return $this->hasRoom($this->tenant->plan()->max_members, $this->members(), 1);
+        return $this->hasRoom($this->tenant->limit('max_members'), $this->members(), 1);
     }
 
     /**
@@ -109,7 +112,7 @@ class PlanLimits
      */
     public function canSendMessage(): bool
     {
-        return $this->hasRoom($this->tenant->plan()->max_messages_per_month, $this->messagesThisMonth(), 1);
+        return $this->hasRoom($this->tenant->limit('max_messages_per_month'), $this->messagesThisMonth(), 1);
     }
 
     /**
@@ -119,13 +122,11 @@ class PlanLimits
      */
     public function usage(): array
     {
-        $plan = $this->tenant->plan();
-
         return [
-            'events' => ['used' => $this->activeEvents(), 'max' => $plan->max_active_events],
-            'registrations' => ['used' => $this->registrations(), 'max' => $plan->max_registrations],
-            'members' => ['used' => $this->members(), 'max' => $plan->max_members],
-            'messages' => ['used' => $this->messagesThisMonth(), 'max' => $plan->max_messages_per_month],
+            'events' => ['used' => $this->activeEvents(), 'max' => $this->tenant->limit('max_active_events')],
+            'registrations' => ['used' => $this->registrations(), 'max' => $this->tenant->limit('max_registrations')],
+            'members' => ['used' => $this->members(), 'max' => $this->tenant->limit('max_members')],
+            'messages' => ['used' => $this->messagesThisMonth(), 'max' => $this->tenant->limit('max_messages_per_month')],
         ];
     }
 

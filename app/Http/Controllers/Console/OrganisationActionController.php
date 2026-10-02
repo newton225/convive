@@ -9,6 +9,7 @@ use App\Http\Requests\Console\ChangeOrganisationPlanRequest;
 use App\Http\Requests\Console\ExtendOrganisationTrialRequest;
 use App\Http\Requests\Console\ScheduleOrganisationDeletionRequest;
 use App\Http\Requests\Console\SuspendOrganisationRequest;
+use App\Http\Requests\Console\UpdateOrganisationLimitsRequest;
 use App\Models\Plan;
 use App\Models\Tenant;
 use Illuminate\Http\RedirectResponse;
@@ -52,6 +53,13 @@ class OrganisationActionController extends Controller
         $manage->extendTrial($tenant, $endsAt === null ? null : Carbon::parse($endsAt)->endOfDay(), $request->user());
 
         return $this->back($tenant, 'trial_extended');
+    }
+
+    public function updateLimits(UpdateOrganisationLimitsRequest $request, Tenant $tenant, ManageOrganisation $manage): RedirectResponse
+    {
+        $manage->setLimits($tenant, $request->limits(), $request->user());
+
+        return $this->back($tenant, 'limits_changed');
     }
 
     public function scheduleDeletion(ScheduleOrganisationDeletionRequest $request, Tenant $tenant, ManageOrganisation $manage): RedirectResponse
