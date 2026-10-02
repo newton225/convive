@@ -230,6 +230,7 @@ return [
             'active_events' => 'Active events',
             'registrations' => 'Registrations',
             'members' => 'Members',
+            'messages' => 'Guest messages per month',
         ],
         'features' => [
             'reconciliation' => 'Statement reconciliation',
@@ -245,6 +246,7 @@ return [
             'max_active_events' => 'Active events',
             'max_registrations' => 'Registrations',
             'max_members' => 'Members',
+            'max_messages_per_month' => 'Messages per month',
         ],
         'edit_dialog' => [
             'title' => 'Edit the :plan plan',
@@ -257,6 +259,7 @@ return [
                 'max_active_events' => 'Active events: how many events an organisation can have open at the same time.',
                 'max_registrations' => 'Registrations: how many people can register, across all open events.',
                 'max_members' => 'Members: how many people can be part of the organisation’s team, pending invitations included.',
+                'max_messages_per_month' => 'Messages per month: how many invitation cards and reminders go out to guests each month. The counter restarts at the beginning of the month; an organisation that reaches the ceiling is told, and its sendings resume the next month or as soon as the limit is raised.',
             ],
             'features' => 'What the plan unlocks on top',
             'features_hint' => 'Tick the features reserved for this plan. Unticked, the feature is not offered to the organisations on this plan.',

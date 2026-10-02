@@ -5,6 +5,7 @@ export type BillingPlan = {
     maxActiveEvents: number | null;
     maxRegistrations: number | null;
     maxMembers: number | null;
+    maxMessagesPerMonth: number | null;
     hasReconciliation: boolean;
     hasReports: boolean;
     hasCustomDomain: boolean;

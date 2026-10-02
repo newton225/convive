@@ -539,6 +539,22 @@ vers l'ecran de securite avec un message qui dit pourquoi.
   absente. En test et en production il est actif : les tests du back-office agissent donc avec
   `User::factory()->withTwoFactor()`.
 
+### Codes de secours de la double authentification
+
+SECURITY.md M5 : haches, a usage unique, denombres (fait le 2026-10-02).
+
+- **Seule l'empreinte SHA-256 est gardee** (`App\Support\Auth\RecoveryCodes`), rangee dans la
+  colonne chiffree de Fortify. `App\Listeners\SealRecoveryCodes` la pose des que Fortify cree des
+  codes (activation, regeneration).
+- **Affiches une seule fois**, sur l'ecran de securite, une fois la double authentification en
+  service (`freshRecoveryCodes`, lu puis retire de la session). Ensuite l'ecran dit combien il en
+  reste et propose d'en generer de nouveaux, apres confirmation.
+- **Un code utilise est retire**, pas remplace : `User::replaceRecoveryCode()` remplace celui de
+  Fortify, qui en creerait un nouveau que personne ne verrait.
+- **La comparaison de Fortify est remplacee** (`App\Http\Requests\Auth\TwoFactorLoginRequest`, lie
+  dans `FortifyServiceProvider`) : la sienne accepterait l'empreinte elle-meme comme code. Fortify
+  n'offre pas de point d'extension pour cela ; a reverifier a chaque montee de version du paquet.
+
 ### Verifier une permission
 
 Cote serveur : `$user->hasTenantPermission($tenant, TenantPermission::ProofsApprove)`. Les

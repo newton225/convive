@@ -102,6 +102,9 @@ export function SitePricing({ plans, currency }: Props) {
                                     t('site.pricing.members', {
                                         count: limit(plan.maxMembers),
                                     }),
+                                    t('site.pricing.messages', {
+                                        count: limit(plan.maxMessagesPerMonth),
+                                    }),
                                     plan.hasReconciliation
                                         ? t('site.pricing.reconciliation')
                                         : null,

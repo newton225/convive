@@ -7,6 +7,7 @@ use App\Http\Requests\Settings\CloseOtherSessionsRequest;
 use App\Http\Requests\Settings\PasswordUpdateRequest;
 use App\Http\Requests\Settings\ScanPinRequest;
 use App\Http\Requests\Settings\TwoFactorAuthenticationRequest;
+use App\Support\Auth\RecoveryCodes;
 use App\Support\ConnectedDevices;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -51,6 +52,17 @@ class SecurityController extends Controller
 
             $props['twoFactorEnabled'] = $request->user()->hasEnabledTwoFactorAuthentication();
             $props['requiresConfirmation'] = Features::optionEnabled(Features::twoFactorAuthentication(), 'confirm');
+            $props['recoveryCodesRemaining'] = RecoveryCodes::remaining($request->user());
+            // Affiches une seule fois (SECURITY.md M5), et seulement quand la double
+            // authentification est en service : avant sa confirmation, l'ecran ne les montrerait
+            // pas et ils seraient perdus.
+            $props['freshRecoveryCodes'] = $props['twoFactorEnabled']
+                ? $request->session()->pull(RecoveryCodes::SessionKey)
+                : null;
+
+            if ($request->user()->two_factor_secret === null) {
+                $request->session()->forget(RecoveryCodes::SessionKey);
+            }
         }
 
         return Inertia::render('settings/security', $props);

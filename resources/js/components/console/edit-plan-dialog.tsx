@@ -31,7 +31,8 @@ type Field =
     | 'monthly_price_usd'
     | 'max_active_events'
     | 'max_registrations'
-    | 'max_members';
+    | 'max_members'
+    | 'max_messages_per_month';
 
 const PriceFields: { name: Field; step: string }[] = [
     { name: 'monthly_price', step: '1' },
@@ -43,6 +44,7 @@ const QuotaFields: Field[] = [
     'max_active_events',
     'max_registrations',
     'max_members',
+    'max_messages_per_month',
 ];
 
 // Un nombre stocke redevient ce qui se saisit ; un champ vide veut dire « sur devis » ou
@@ -64,6 +66,7 @@ export function EditPlanDialog({ plan }: Props) {
         max_active_events: asInput(plan.maxActiveEvents),
         max_registrations: asInput(plan.maxRegistrations),
         max_members: asInput(plan.maxMembers),
+        max_messages_per_month: asInput(plan.maxMessagesPerMonth),
         has_reconciliation: plan.hasReconciliation,
         has_reports: plan.hasReports,
     });

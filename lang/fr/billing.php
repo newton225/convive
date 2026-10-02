@@ -64,6 +64,7 @@ return [
         'events' => 'Événements actifs : :count',
         'registrations' => 'Inscrits : :count',
         'members' => 'Membres : :count',
+        'messages' => 'Messages aux invités par mois : :count',
         'reconciliation' => 'Rapprochement du relevé',
         'reports' => 'Rapports après événement',
         'custom_domain' => 'Domaine propre',

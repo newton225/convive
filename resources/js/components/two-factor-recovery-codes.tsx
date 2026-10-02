@@ -1,8 +1,7 @@
-import { Form } from '@inertiajs/react';
-import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import AlertError from '@/components/alert-error';
-import { SubmitButton } from '@/components/submit-button';
+import { router } from '@inertiajs/react';
+import { LockKeyhole, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -15,48 +14,41 @@ import { useTranslation } from '@/hooks/use-translation';
 import { regenerateRecoveryCodes } from '@/routes/two-factor';
 
 type Props = {
-    recoveryCodesList: string[];
-    fetchRecoveryCodes: () => Promise<void>;
-    errors: string[];
+    // Les codes tout juste crees, envoyes une seule fois par le serveur ; null ensuite.
+    freshCodes: string[] | null;
+    remaining: number;
 };
 
+/**
+ * Codes de secours de la double authentification (SECURITY.md M5). Le serveur n'en garde que
+ * l'empreinte : ils s'affichent une seule fois, a leur creation. Ensuite l'ecran dit seulement
+ * combien il en reste, et propose d'en creer de nouveaux.
+ */
 export default function TwoFactorRecoveryCodes({
-    recoveryCodesList,
-    fetchRecoveryCodes,
-    errors,
+    freshCodes,
+    remaining,
 }: Props) {
     const { t } = useTranslation();
-    const [codesAreVisible, setCodesAreVisible] = useState<boolean>(false);
-    const codesSectionRef = useRef<HTMLDivElement | null>(null);
-    const canRegenerateCodes = recoveryCodesList.length > 0 && codesAreVisible;
+    const [confirming, setConfirming] = useState(false);
+    const [processing, setProcessing] = useState(false);
 
-    const toggleCodesVisibility = useCallback(async () => {
-        if (!codesAreVisible && !recoveryCodesList.length) {
-            await fetchRecoveryCodes();
-        }
-
-        setCodesAreVisible(!codesAreVisible);
-
-        if (!codesAreVisible) {
-            setTimeout(() => {
-                codesSectionRef.current?.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest',
-                });
-            });
-        }
-    }, [codesAreVisible, recoveryCodesList.length, fetchRecoveryCodes]);
-
-    useEffect(() => {
-        if (!recoveryCodesList.length) {
-            void fetchRecoveryCodes();
-        }
-    }, [recoveryCodesList.length, fetchRecoveryCodes]);
-
-    const RecoveryCodeIconComponent = codesAreVisible ? EyeOff : Eye;
+    const regenerate = () => {
+        router.post(
+            regenerateRecoveryCodes().url,
+            {},
+            {
+                preserveScroll: true,
+                onStart: () => setProcessing(true),
+                onFinish: () => {
+                    setProcessing(false);
+                    setConfirming(false);
+                },
+            },
+        );
+    };
 
     return (
-        <Card>
+        <Card data-test="recovery-codes">
             <CardHeader>
                 <CardTitle className="flex gap-3">
                     <LockKeyhole className="size-4" aria-hidden="true" />
@@ -66,108 +58,68 @@ export default function TwoFactorRecoveryCodes({
                     {t('account.recovery_codes.description')}
                 </CardDescription>
             </CardHeader>
-            <CardContent>
-                <div className="flex flex-col gap-3 select-none sm:flex-row sm:items-center sm:justify-between">
-                    <Button
-                        onClick={toggleCodesVisibility}
-                        className="w-fit"
-                        aria-expanded={codesAreVisible}
-                        aria-controls="recovery-codes-section"
-                    >
-                        <RecoveryCodeIconComponent
-                            className="size-4"
-                            aria-hidden="true"
-                        />
-                        {codesAreVisible
-                            ? t('account.recovery_codes.hide')
-                            : t('account.recovery_codes.show')}
-                    </Button>
-
-                    {canRegenerateCodes && (
-                        <Form
-                            {...regenerateRecoveryCodes.form()}
-                            options={{ preserveScroll: true }}
-                            onSuccess={fetchRecoveryCodes}
+            <CardContent className="space-y-4">
+                {freshCodes && freshCodes.length > 0 ? (
+                    <div className="space-y-3" data-test="recovery-codes-fresh">
+                        <p className="text-sm font-medium">
+                            {t('account.recovery_codes.shown_once')}
+                        </p>
+                        <div
+                            className="bg-muted grid gap-1 rounded-lg p-4 font-mono text-sm"
+                            role="list"
+                            aria-label={t('account.recovery_codes.list_label')}
                         >
-                            {({ processing }) => (
-                                <SubmitButton
-                                    variant="secondary"
-                                    processing={processing}
-                                    aria-describedby="regenerate-warning"
-                                >
-                                    <RefreshCw />{' '}
-                                    {t('account.recovery_codes.regenerate')}
-                                </SubmitButton>
-                            )}
-                        </Form>
-                    )}
-                </div>
-                <div
-                    id="recovery-codes-section"
-                    className={`relative overflow-hidden transition-all duration-300 ${codesAreVisible ? 'h-auto opacity-100' : 'h-0 opacity-0'}`}
-                    aria-hidden={!codesAreVisible}
-                >
-                    <div className="mt-3 space-y-3">
-                        {errors?.length ? (
-                            <AlertError errors={errors} />
-                        ) : (
-                            <>
+                            {freshCodes.map((code) => (
                                 <div
-                                    ref={codesSectionRef}
-                                    className="bg-muted grid gap-1 rounded-lg p-4 font-mono text-sm"
-                                    role="list"
-                                    aria-label={t(
-                                        'account.recovery_codes.list_label',
-                                    )}
+                                    key={code}
+                                    role="listitem"
+                                    className="select-text"
                                 >
-                                    {recoveryCodesList.length ? (
-                                        recoveryCodesList.map((code, index) => (
-                                            <div
-                                                key={index}
-                                                role="listitem"
-                                                className="select-text"
-                                            >
-                                                {code}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div
-                                            className="space-y-2"
-                                            aria-label={t(
-                                                'account.recovery_codes.loading_label',
-                                            )}
-                                        >
-                                            {Array.from(
-                                                { length: 8 },
-                                                (_, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="bg-muted-foreground/20 h-4 animate-pulse rounded"
-                                                        aria-hidden="true"
-                                                    />
-                                                ),
-                                            )}
-                                        </div>
-                                    )}
+                                    {code}
                                 </div>
-
-                                <div className="text-muted-foreground text-xs select-none">
-                                    <p id="regenerate-warning">
-                                        {t(
-                                            'account.recovery_codes.usage_warning',
-                                            {
-                                                action: t(
-                                                    'account.recovery_codes.regenerate',
-                                                ),
-                                            },
-                                        )}
-                                    </p>
-                                </div>
-                            </>
-                        )}
+                            ))}
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div
+                        className="space-y-1 text-sm"
+                        data-test="recovery-codes-remaining"
+                    >
+                        <p className="font-medium">
+                            {t('account.recovery_codes.remaining', {
+                                count: remaining,
+                            })}
+                        </p>
+                        <p className="text-muted-foreground">
+                            {t('account.recovery_codes.hidden_hint')}
+                        </p>
+                    </div>
+                )}
+
+                <p className="text-muted-foreground text-xs">
+                    {t('account.recovery_codes.usage_warning')}
+                </p>
+
+                <Button
+                    variant="secondary"
+                    onClick={() => setConfirming(true)}
+                    data-test="recovery-codes-regenerate"
+                >
+                    <RefreshCw aria-hidden="true" />
+                    {t('account.recovery_codes.regenerate')}
+                </Button>
             </CardContent>
+
+            <ConfirmActionDialog
+                open={confirming}
+                onOpenChange={setConfirming}
+                title={t('account.recovery_codes.regenerate_title')}
+                description={t('account.recovery_codes.regenerate_body')}
+                confirmLabel={t('account.recovery_codes.regenerate')}
+                onConfirm={regenerate}
+                processing={processing}
+                testId="recovery-codes-regenerate-confirm"
+            />
         </Card>
     );
 }

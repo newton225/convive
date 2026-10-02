@@ -16,8 +16,11 @@ namespace App\Enums;
  * centimes (6900 = 69,00) : 69 EUR (parite fixe du franc CFA, 655,957) et 79 USD, confirmes par le
  * proprietaire le 2026-09-27.
  *
- * Messages aux invites (`max_messages_per_month`, SECURITY.md H5) : aucun plafond pour l'instant
- * (decision du 2026-09-27), la mecanique est prete dans `PlanLimits`.
+ * Messages aux invites (`max_messages_per_month`, SECURITY.md H5) : 1 000 par mois pour Essentiel,
+ * 5 000 pour Association, aucun plafond pour Institution (decision du 2026-10-02, qui remplace
+ * celle du 2026-09-27). Un invite recoit au plus cinq messages environ (carte, trois rappels de
+ * preuve, rappel du jour J) : ces plafonds couvrent le quota d'inscrits de chaque plan. Reglables
+ * depuis la console, comme les autres limites.
  *
  * Domaine personnalise et SSO : colonnes conservees pour le jour ou ils seront construits, mais
  * annonces nulle part tant qu'ils n'existent pas (decision du 2026-09-27).
@@ -50,7 +53,7 @@ enum PlanCode: string
                 'max_active_events' => 1,
                 'max_registrations' => 200,
                 'max_members' => 2,
-                'max_messages_per_month' => null,
+                'max_messages_per_month' => 1000,
                 'has_reconciliation' => false,
                 'has_reports' => false,
                 'has_custom_domain' => false,
@@ -65,7 +68,7 @@ enum PlanCode: string
                 'max_active_events' => 5,
                 'max_registrations' => 1000,
                 'max_members' => 10,
-                'max_messages_per_month' => null,
+                'max_messages_per_month' => 5000,
                 'has_reconciliation' => true,
                 'has_reports' => true,
                 'has_custom_domain' => false,

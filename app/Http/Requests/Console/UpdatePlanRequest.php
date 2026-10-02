@@ -36,6 +36,7 @@ class UpdatePlanRequest extends FormRequest
             'max_active_events' => ['nullable', 'integer', 'min:1', 'max:1000000'],
             'max_registrations' => ['nullable', 'integer', 'min:1', 'max:100000000'],
             'max_members' => ['nullable', 'integer', 'min:1', 'max:1000000'],
+            'max_messages_per_month' => ['nullable', 'integer', 'min:1', 'max:100000000'],
             'has_reconciliation' => ['required', 'boolean'],
             'has_reports' => ['required', 'boolean'],
         ];
@@ -46,7 +47,7 @@ class UpdatePlanRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return collect(['monthly_price', 'monthly_price_eur', 'monthly_price_usd', 'max_active_events', 'max_registrations', 'max_members'])
+        return collect(['monthly_price', 'monthly_price_eur', 'monthly_price_usd', 'max_active_events', 'max_registrations', 'max_members', 'max_messages_per_month'])
             ->mapWithKeys(fn (string $field) => [$field => __("console.plans.fields.{$field}")])
             ->all();
     }
@@ -68,6 +69,7 @@ class UpdatePlanRequest extends FormRequest
             'max_active_events' => $integer($this->validated('max_active_events')),
             'max_registrations' => $integer($this->validated('max_registrations')),
             'max_members' => $integer($this->validated('max_members')),
+            'max_messages_per_month' => $integer($this->validated('max_messages_per_month')),
             'has_reconciliation' => $this->boolean('has_reconciliation'),
             'has_reports' => $this->boolean('has_reports'),
         ];

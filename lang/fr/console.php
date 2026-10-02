@@ -230,6 +230,7 @@ return [
             'active_events' => 'Événements actifs',
             'registrations' => 'Inscrits',
             'members' => 'Membres',
+            'messages' => 'Messages aux invités par mois',
         ],
         'features' => [
             'reconciliation' => 'Rapprochement du relevé',
@@ -245,6 +246,7 @@ return [
             'max_active_events' => 'Événements actifs',
             'max_registrations' => 'Inscrits',
             'max_members' => 'Membres',
+            'max_messages_per_month' => 'Messages par mois',
         ],
         'edit_dialog' => [
             'title' => 'Modifier le plan :plan',
@@ -257,6 +259,7 @@ return [
                 'max_active_events' => 'Événements actifs : combien d’événements une organisation peut avoir ouverts en même temps.',
                 'max_registrations' => 'Inscrits : combien de personnes peuvent s’inscrire, tous événements ouverts confondus.',
                 'max_members' => 'Membres : combien de personnes peuvent faire partie de l’équipe de l’organisation, invitations en attente comprises.',
+                'max_messages_per_month' => 'Messages par mois : combien de cartes d’invitation et de rappels partent vers les invités chaque mois. Le compteur repart de zéro au début du mois ; une organisation qui atteint le plafond est prévenue, et ses envois reprennent le mois suivant ou dès que la limite est relevée.',
             ],
             'features' => 'Ce que le plan débloque en plus',
             'features_hint' => 'Cochez les fonctions réservées à ce plan. Décochée, la fonction n’est pas proposée aux organisations de ce plan.',

@@ -169,6 +169,7 @@ class BillingController extends Controller
             'maxActiveEvents' => $plan->max_active_events,
             'maxRegistrations' => $plan->max_registrations,
             'maxMembers' => $plan->max_members,
+            'maxMessagesPerMonth' => $plan->max_messages_per_month,
             'hasReconciliation' => $plan->has_reconciliation,
             'hasReports' => $plan->has_reports,
             'hasCustomDomain' => $plan->has_custom_domain,

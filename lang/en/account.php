@@ -203,12 +203,14 @@ return [
     'recovery_codes' => [
         'title' => '2FA recovery codes',
         'description' => 'Recovery codes let you regain access if you lose your 2FA device. Store them in a secure password manager.',
-        'show' => 'View recovery codes',
-        'hide' => 'Hide recovery codes',
-        'regenerate' => 'Regenerate codes',
+        'regenerate' => 'Generate new codes',
         'list_label' => 'Recovery codes',
-        'loading_label' => 'Loading recovery codes',
-        'usage_warning' => 'Each recovery code can be used once to access your account and will be removed after use. If you need more, click :action above.',
+        'shown_once' => 'Write these codes down now: they will never be shown again.',
+        'remaining' => '{0} You have no recovery code left.|{1} You have 1 recovery code left.|[2,*] You have :count recovery codes left.',
+        'hidden_hint' => 'For your security, your codes can no longer be displayed: we only keep their fingerprint. If you did not write them down, generate new ones.',
+        'usage_warning' => 'Each code works once: it is removed as soon as it has been used.',
+        'regenerate_title' => 'Generate new recovery codes?',
+        'regenerate_body' => 'Your current codes will stop working at once. The new ones will be shown a single time: have something ready to write them down.',
     ],
 
     'session' => [

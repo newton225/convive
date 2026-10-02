@@ -203,12 +203,14 @@ return [
     'recovery_codes' => [
         'title' => 'Codes de secours 2FA',
         'description' => "Les codes de secours permettent de retrouver l'accès au compte en cas de perte de l'appareil d'authentification. À conserver dans un gestionnaire de mots de passe.",
-        'show' => 'Afficher les codes de secours',
-        'hide' => 'Masquer les codes de secours',
-        'regenerate' => 'Régénérer les codes',
+        'regenerate' => 'Générer de nouveaux codes',
         'list_label' => 'Codes de secours',
-        'loading_label' => 'Chargement des codes de secours',
-        'usage_warning' => "Chaque code de secours ne peut être utilisé qu'une fois et est retiré après usage. Pour en obtenir d'autres, cliquer sur :action ci-dessus.",
+        'shown_once' => 'Notez ces codes maintenant : ils ne seront plus jamais affichés.',
+        'remaining' => '{0} Il ne vous reste aucun code de secours.|{1} Il vous reste 1 code de secours.|[2,*] Il vous reste :count codes de secours.',
+        'hidden_hint' => 'Par sécurité, vos codes ne peuvent plus être affichés : nous n’en gardons que l’empreinte. Si vous ne les avez pas notés, générez-en de nouveaux.',
+        'usage_warning' => 'Chaque code ne sert qu’une fois : il est retiré dès qu’il a été utilisé.',
+        'regenerate_title' => 'Générer de nouveaux codes de secours ?',
+        'regenerate_body' => 'Vos codes actuels cesseront de fonctionner tout de suite. Les nouveaux s’afficheront une seule fois : préparez de quoi les noter.',
     ],
 
     'session' => [

@@ -144,6 +144,8 @@ export default function Security(props: Props) {
                 canManageTwoFactor={props.canManageTwoFactor}
                 requiresConfirmation={props.requiresConfirmation}
                 twoFactorEnabled={props.twoFactorEnabled}
+                freshRecoveryCodes={props.freshRecoveryCodes}
+                recoveryCodesRemaining={props.recoveryCodesRemaining}
             />
 
             <ManagePasskeys

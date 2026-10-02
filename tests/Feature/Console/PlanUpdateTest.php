@@ -31,6 +31,7 @@ class PlanUpdateTest extends TestCase
     }
 
     /**
+     * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
      */
     private function payload(array $overrides = []): array
@@ -65,6 +66,25 @@ class PlanUpdateTest extends TestCase
         $this->assertNull($plan->max_members);
         $this->assertTrue($plan->has_reconciliation);
         $this->assertFalse($plan->has_reports);
+    }
+
+    public function test_un_fondateur_regle_le_plafond_de_messages_d_un_plan(): void
+    {
+        $this->actingAs($this->founder)
+            ->patch(route('console.plans.update', 'essential'), $this->payload(['max_messages_per_month' => 2500]))
+            ->assertRedirect(route('console.plans'));
+
+        $this->assertSame(2500, Plan::ensure(PlanCode::Essential)->max_messages_per_month);
+
+        // Vide : plus de plafond.
+        $this->actingAs($this->founder)
+            ->patch(route('console.plans.update', 'essential'), $this->payload(['max_messages_per_month' => null]));
+
+        $this->assertNull(Plan::ensure(PlanCode::Essential)->max_messages_per_month);
+
+        $this->actingAs($this->founder)
+            ->patch(route('console.plans.update', 'essential'), $this->payload(['max_messages_per_month' => 0]))
+            ->assertSessionHasErrors('max_messages_per_month');
     }
 
     public function test_la_modification_va_au_journal_central_avec_l_avant_et_l_apres(): void

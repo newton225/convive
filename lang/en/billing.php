@@ -65,6 +65,7 @@ return [
         'events' => 'Active events: :count',
         'registrations' => 'Registered guests: :count',
         'members' => 'Members: :count',
+        'messages' => 'Guest messages per month: :count',
         'reconciliation' => 'Statement reconciliation',
         'reports' => 'Post-event reports',
         'custom_domain' => 'Custom domain',

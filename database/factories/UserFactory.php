@@ -76,7 +76,7 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'two_factor_secret' => encrypt(self::TwoFactorSecret),
-            'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
+            'two_factor_recovery_codes' => encrypt(json_encode([hash('sha256', 'recovery-code-1')])),
             'two_factor_confirmed_at' => now(),
         ]);
     }

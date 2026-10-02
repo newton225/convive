@@ -62,13 +62,20 @@ class MessageQuotaTest extends TestCase
     {
         Notification::fake();
 
-        $this->assertNull(PlanCode::Essential->definition()['max_messages_per_month']);
+        Plan::ensure(PlanCode::Essential)->update(['max_messages_per_month' => null]);
 
         $this->assertTrue($this->sendCard($this->confirmedRegistration()));
         $this->assertTrue($this->sendCard($this->confirmedRegistration()));
 
         $this->assertSame(2, PlanLimits::for($this->tenant)->messagesThisMonth());
         $this->assertSame(['used' => 2, 'max' => null], PlanLimits::for($this->tenant)->usage()['messages']);
+    }
+
+    public function test_chaque_plan_part_avec_le_plafond_arrete_par_le_proprietaire(): void
+    {
+        $this->assertSame(1000, Plan::ensure(PlanCode::Essential)->max_messages_per_month);
+        $this->assertSame(5000, Plan::ensure(PlanCode::Association)->max_messages_per_month);
+        $this->assertNull(Plan::ensure(PlanCode::Institution)->max_messages_per_month);
     }
 
     public function test_au_dela_du_plafond_l_envoi_est_suspendu_et_l_abonnement_prevenu_une_fois(): void

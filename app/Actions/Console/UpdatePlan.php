@@ -23,12 +23,14 @@ class UpdatePlan
      */
     private const Editable = [
         'monthly_price', 'monthly_price_eur', 'monthly_price_usd',
-        'max_active_events', 'max_registrations', 'max_members',
+        'max_active_events', 'max_registrations', 'max_members', 'max_messages_per_month',
         'has_reconciliation', 'has_reports',
     ];
 
     /**
-     * Les limites du plan, celles dont une baisse peut bloquer une organisation.
+     * Les limites du plan, celles dont une baisse peut bloquer une organisation. Le plafond de
+     * messages n'en est pas : il se remet a zero chaque mois, et l'organisation qui l'atteint est
+     * prevenue a ce moment-la (`GuestMessageQuota`).
      *
      * @var array<int, string>
      */

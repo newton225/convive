@@ -136,6 +136,10 @@ export default function Plans({ isSample, plans }: Props) {
                                         {t('console.plans.quotas.members')}
                                     </dt>
                                     <dd>{quota(plan.maxMembers)}</dd>
+                                    <dt className="text-muted-foreground">
+                                        {t('console.plans.quotas.messages')}
+                                    </dt>
+                                    <dd>{quota(plan.maxMessagesPerMonth)}</dd>
                                 </dl>
                                 <ul className="space-y-1">
                                     {feature(

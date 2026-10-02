@@ -430,6 +430,13 @@ export default function Billing({
                                                 count: limit(item.maxMembers),
                                             })}
                                         </li>
+                                        <li>
+                                            {t('billing.plans.messages', {
+                                                count: limit(
+                                                    item.maxMessagesPerMonth,
+                                                ),
+                                            })}
+                                        </li>
                                         {item.hasReconciliation ? (
                                             <li>
                                                 {t(

@@ -7,6 +7,7 @@ use App\Concerns\HasTenants;
 use App\Enums\NotificationChannel;
 use App\Enums\NotificationType;
 use App\Enums\ProductTour;
+use App\Support\Auth\RecoveryCodes;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -19,6 +20,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
+use Laravel\Fortify\Events\RecoveryCodeReplaced;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Stancl\Tenancy\Database\Concerns\CentralConnection;
@@ -55,6 +57,22 @@ class User extends Authenticatable implements PasskeyUser
     // qui est en cours (voir CLAUDE.md, « Multi-locataire »).
     /** @use HasFactory<UserFactory> */
     use CentralConnection, HasFactory, HasTenants, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+
+    /**
+     * Retire a recovery code that was just used to sign in.
+     *
+     * Fortify le remplacerait par un nouveau code : personne ne le verrait, les codes n'etant
+     * affiches qu'a leur creation. Un code utilise est retire, il en reste un de moins
+     * (SECURITY.md M5 : a usage unique, denombres).
+     *
+     * @param  string  $code  l'empreinte du code, rendue par `TwoFactorLoginRequest::validRecoveryCode()`
+     */
+    public function replaceRecoveryCode($code): void
+    {
+        RecoveryCodes::consume($this, (string) $code);
+
+        RecoveryCodeReplaced::dispatch($this, $code);
+    }
 
     /**
      * Get the user's alerts, newest first.
