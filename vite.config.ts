@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
+import { fileURLToPath } from 'node:url';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 
 export default defineConfig({
@@ -46,6 +47,19 @@ export default defineConfig({
                 '**/vendor/**',
             ],
         },
+    },
+    // Tests d'interface (CLAUDE.md, « Conventions de code » : Vitest plus Testing Library), a cote du
+    // fichier qu'ils verifient. L'alias est declare ici pour ne pas dependre des extensions de
+    // Laravel, qui n'ont rien a faire dans un test.
+    resolve: {
+        alias: {
+            '@': fileURLToPath(new URL('./resources/js', import.meta.url)),
+        },
+    },
+    test: {
+        environment: 'jsdom',
+        include: ['resources/js/**/*.test.{ts,tsx}'],
+        setupFiles: ['resources/js/test/setup.ts'],
     },
     lint: {
         ignorePatterns: [

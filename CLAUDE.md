@@ -130,7 +130,11 @@ preuves et du plan de salle avant l'etape 7), plutot que de n'y penser que pour 
 - Formatage automatique : **Pint** pour PHP, **Prettier** et **ESLint** pour TypeScript, en
   hook de pre-commit.
 - Tests : **Pest** pour le back, **Vitest** plus **Testing Library** pour le front, tests de
-  bout en bout sur les parcours critiques.
+  bout en bout sur les parcours critiques. Les tests du front vivent a cote du fichier qu'ils
+  verifient (`search.ts`, `search.test.ts`), importent depuis `vite-plus/test` et se lancent par
+  `npm test` (`vp test run`, environnement `jsdom`, reglage dans `vite.config.ts`). Un composant
+  qui lit ses textes par `useTranslation()` se teste avec ce hook simule : la traduction rend la
+  cle, le test porte sur ce que le composant affiche.
 
 ---
 
