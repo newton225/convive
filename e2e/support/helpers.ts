@@ -1,26 +1,130 @@
 import fs from 'node:fs';
 import zlib from 'node:zlib';
-import type { Page } from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { Browser, Page, TestInfo } from '@playwright/test';
 import { account, statePath } from '../environment';
 import type { State } from '../environment';
 
 /**
- * Ce que la mise en place a note : l'organisation de demonstration et un evenement ouvert.
+ * Ce que la mise en place a note : l'organisation de demonstration, ses evenements, son tarif.
  */
 export function state(): State {
     return JSON.parse(fs.readFileSync(statePath, 'utf8')) as State;
 }
 
 /**
- * Connecte le compte de demonstration (Proprietaire de l'organisation, sans double
- * authentification dans cet environnement).
+ * Connecte un compte de demonstration. Par defaut le Proprietaire ; dans cet environnement aucun
+ * compte n'a de double authentification a saisir.
  */
-export async function signIn(page: Page): Promise<void> {
+export async function signIn(
+    page: Page,
+    email: string = account.email,
+): Promise<void> {
     await page.goto('/login');
-    await page.locator('#email').fill(account.email);
+    await page.locator('#email').fill(email);
     await page.locator('#password').fill(account.password);
     await page.getByTestId('login-button').click();
     await page.waitForURL((url) => !url.pathname.startsWith('/login'));
+}
+
+/**
+ * Un numero de telephone ivoirien propre a un test et a un navigateur. Une meme personne ne tient
+ * qu'une reservation active par evenement, et tous les parcours partagent la meme base : deux tests
+ * ne doivent jamais se presenter sous le meme numero.
+ */
+export function phoneFor(testInfo: TestInfo, sequence: number): string {
+    const browser = testInfo.project.name === 'iphone' ? 2 : 1;
+
+    return `07070${browser}${String(sequence).padStart(2, '0')}00`;
+}
+
+/**
+ * Remplit le formulaire d'inscription du lien public et l'envoie. Rend l'adresse de la page de
+ * reservation, celle sur laquelle l'invite revient.
+ */
+export async function register(
+    page: Page,
+    guest: {
+        eventUrl: string;
+        name: string;
+        phone: string;
+        unit: string;
+        companions?: string[];
+    },
+): Promise<string> {
+    await page.goto(guest.eventUrl);
+    await page.getByTestId('register-link').click();
+
+    await expect(page.getByTestId('registration-form')).toBeVisible();
+    await page.getByTestId('registration-name').fill(guest.name);
+    await page.locator('#phone').fill(guest.phone);
+    await page.getByTestId('registration-unit').click();
+    await page.getByRole('option', { name: guest.unit, exact: true }).click();
+
+    for (const [index, companion] of (guest.companions ?? []).entries()) {
+        await page.getByTestId('companion-add').click();
+        await page.getByTestId('companion-name').nth(index).fill(companion);
+        await page.getByTestId('companion-unit').nth(index).click();
+        await page
+            .getByRole('option', { name: guest.unit, exact: true })
+            .click();
+    }
+
+    await page.getByTestId('registration-submit').click();
+    await expect(page.getByTestId('registration-countdown')).toBeVisible();
+
+    return page.url();
+}
+
+/**
+ * Depose une preuve de paiement sur la page de reservation ouverte.
+ */
+export async function submitProof(
+    page: Page,
+    reference: string,
+): Promise<void> {
+    await page.getByTestId('proof-account').click();
+    await page.getByRole('option').first().click();
+    await page.getByTestId('proof-reference').fill(reference);
+    await page.getByTestId('proof-receipt').setInputFiles(receiptImage());
+    await page.getByTestId('proof-submit').click();
+
+    await expect(page.getByTestId('registration-proof-status')).toBeVisible();
+}
+
+/**
+ * Ouvre la file des preuves de l'evenement dans une session a part, celle de l'organisateur, y
+ * applique un geste sur la preuve de l'invite nomme, puis referme la session.
+ */
+export async function decideProof(
+    browser: Browser,
+    guestName: string,
+    decision: 'approve' | 'reject',
+): Promise<void> {
+    const { tenantSlug, eventId } = state();
+    const context = await browser.newContext({ locale: 'fr-FR' });
+    const page = await context.newPage();
+
+    await signIn(page);
+    await page.goto(`/${tenantSlug}/events/${eventId}/proofs`);
+
+    const row = page.getByTestId('proof-row').filter({ hasText: guestName });
+
+    await expect(row).toBeVisible();
+    await row.getByTestId(`proof-${decision}`).click();
+    await page.getByTestId(`proof-${decision}-confirm`).click();
+    // Une preuve tranchee quitte la file.
+    await expect(row).toBeHidden();
+
+    await context.close();
+}
+
+/**
+ * Les chiffres d'un montant affiche, sans l'espacement des milliers ni le libelle de la devise :
+ * `Intl` ne separe pas les milliers par le meme caractere d'un navigateur a l'autre.
+ */
+export function digitsOf(text: string | null): string {
+    return (text ?? '').replace(/\D/g, '');
 }
 
 /**

@@ -46,8 +46,14 @@ export const account = {
 
 export type State = {
     tenantSlug: string;
+    // Une organisation dont le compte « Lecture » de demonstration n'est pas membre.
+    foreignTenantSlug: string;
+    // Un evenement ouvert, avec des places et un compte de versement visible.
     eventId: number;
     eventName: string;
     publicUrl: string;
+    pricePerPerson: number;
+    // Un evenement complet, pour la liste d'attente.
+    fullEventUrl: string;
     unit: string;
 };

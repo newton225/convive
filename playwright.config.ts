@@ -37,7 +37,7 @@ export default defineConfig({
         {
             name: 'iphone',
             use: { ...devices['iPhone 14'] },
-            // Le back-office se teste au bureau ; l'iPhone rejoue le seul parcours de l'invite.
+            // Le back-office se teste au bureau ; l'iPhone rejoue les parcours de l'invite.
             testMatch: '**/guest-*.spec.ts',
         },
     ],
