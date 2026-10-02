@@ -12,6 +12,8 @@ export type ScanRegistrationSummary = {
 export type ScanOutcome = {
     result: ScanResultValue;
     forced: boolean;
+    // Entree validee sans scan : l'invite a ete retrouve par sa reference ou son nom.
+    manual?: boolean;
     registration: ScanRegistrationSummary | null;
     firstScannedAt: string | null;
     firstScannedBy: string | null;
@@ -33,9 +35,32 @@ export type ScanRecentRow = {
     id: number;
     result: ScanResultValue;
     forced: boolean;
+    manual: boolean;
     name: string | null;
     scannedAt: string | null;
     station: string | null;
+};
+
+export type ScanLookupTicket = {
+    id: number;
+    name: string;
+    unit: string;
+    guestOf: string | null;
+    reference: string | null;
+    tableNumber: number | null;
+    // Premier passage deja enregistre pour ce billet, null s'il n'a pas encore servi.
+    arrivedAt: string | null;
+    arrivedBy: string | null;
+};
+
+// Recherche d'un invite a l'entree quand son QR ne peut pas etre lu (README ecran 26).
+export type ScanLookup = {
+    search: string;
+    tooShort: boolean;
+    minimumLength: number;
+    limit: number;
+    truncated: boolean;
+    tickets: ScanLookupTicket[];
 };
 
 export type ScanEventProps = {

@@ -38,6 +38,14 @@ class ScanPolicy
     }
 
     /**
+     * Determine whether the user can look a guest up and admit them without scanning their ticket.
+     */
+    public function admitWithoutScan(User $user, Tenant $tenant): bool
+    {
+        return $user->hasTenantPermission($tenant, TenantPermission::ScanManual);
+    }
+
+    /**
      * Determine whether the user can see the log of recent passages.
      */
     public function viewLog(User $user, Tenant $tenant): bool

@@ -85,6 +85,15 @@ Route::prefix('{tenant}')
         // L'ancienne adresse de la page de resultat, encore dans un onglet, un favori ou
         // l'historique : retour a l'ecran de scan plutot qu'un « Method Not Allowed ».
         Route::get('events/{event}/scan/verify', [ScanController::class, 'backToScan']);
+        // Entree sans scan : retrouver un invite par sa reference ou son nom, puis valider. Meme
+        // limite de debit que le scan, pour qu'une recherche ne serve pas a aspirer la liste.
+        Route::get('events/{event}/scan/find', [ScanController::class, 'find'])
+            ->middleware('throttle:scan')
+            ->name('tenants.events.scan.find');
+        Route::post('events/{event}/scan/admit', [ScanController::class, 'admit'])
+            ->middleware('throttle:scan')
+            ->name('tenants.events.scan.admit');
+        Route::get('events/{event}/scan/admit', [ScanController::class, 'backToScan']);
         // Rotation de la cle des billets (SECURITY.md C2) : invalide tous les QR emis, d'ou la
         // re-authentification.
         Route::post('events/{event}/scan/rotate-key', [ScanController::class, 'rotateKey'])

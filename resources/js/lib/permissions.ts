@@ -22,6 +22,7 @@ export const Permission = {
     SeatingAssign: 'seating.assign',
     ScanPerform: 'scan.perform',
     ScanForce: 'scan.force',
+    ScanManual: 'scan.manual',
     ScanLogView: 'scan.log.view',
     TeamView: 'team.view',
     TeamInvite: 'team.invite',

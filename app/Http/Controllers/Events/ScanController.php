@@ -2,18 +2,22 @@
 
 namespace App\Http\Controllers\Events;
 
+use App\Actions\Scan\FindTicketsForEntry;
 use App\Actions\Scan\ScanTicket;
 use App\Actions\Tickets\RotateTicketSigningKey;
 use App\Enums\EventStatus;
 use App\Enums\RegistrationStatus;
 use App\Enums\ScanResult;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Events\AdmitWithoutScanRequest;
+use App\Http\Requests\Events\FindGuestAtEntryRequest;
 use App\Http\Requests\Events\ScanTicketRequest;
 use App\Models\Event;
 use App\Models\ScanEvent;
 use App\Models\Tenant;
 use App\Models\Ticket;
 use App\Support\TicketRevocationList;
+use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -68,16 +72,70 @@ class ScanController extends Controller
             $request->validated('station'),
         );
 
+        $this->flashOutcome($request, $outcome);
+
+        return to_route('tenants.events.scan.index', [$tenant, $event]);
+    }
+
+    /**
+     * Look a guest up by registration reference or by name, when their code cannot be read.
+     *
+     * Rend l'ecran de scan lui-meme, avec le resultat de la recherche en plus : le front ne
+     * recharge que cette prop, la camera n'est pas interrompue.
+     */
+    public function find(FindGuestAtEntryRequest $request, Tenant $tenant, Event $event, FindTicketsForEntry $lookup): Response
+    {
+        return Inertia::render('events/scan', [
+            ...$this->props($request, $tenant, $event),
+            'lookup' => $lookup->handle($event, (string) $request->validated('search')),
+        ]);
+    }
+
+    /**
+     * Admit a guest found by the search, without scanning their ticket, and record it as such.
+     */
+    public function admit(AdmitWithoutScanRequest $request, Tenant $tenant, Event $event, ScanTicket $scan): RedirectResponse
+    {
+        // Un billet d'un autre evenement recoit la meme reponse qu'un billet inconnu.
+        $ticket = Ticket::whereKey($request->validated('ticket'))
+            ->whereHas('registration', fn ($query) => $query->where('event_id', $event->id))
+            ->firstOrFail();
+
+        $this->flashOutcome($request, $scan->handleWithoutScan(
+            $event,
+            $ticket,
+            $request->user(),
+            $request->boolean('force'),
+            $request->validated('station'),
+        ));
+
+        return to_route('tenants.events.scan.index', [$tenant, $event]);
+    }
+
+    /**
+     * Carry the verdict to the scan screen, read once after the redirect.
+     *
+     * @param  array{
+     *     result: ScanResult,
+     *     forced: bool,
+     *     manual: bool,
+     *     registration: array<string, mixed>|null,
+     *     firstScannedAt: CarbonInterface|null,
+     *     firstScannedBy: string|null,
+     *     otherEvent: array<string, mixed>|null,
+     * }  $outcome
+     */
+    private function flashOutcome(Request $request, array $outcome): void
+    {
         $request->session()->flash(self::ResultKey, [
             'result' => $outcome['result']->value,
             'forced' => $outcome['forced'],
+            'manual' => $outcome['manual'],
             'registration' => $outcome['registration'],
             'firstScannedAt' => $outcome['firstScannedAt']?->toISOString(),
             'firstScannedBy' => $outcome['firstScannedBy'],
             'otherEvent' => $outcome['otherEvent'],
         ]);
-
-        return to_route('tenants.events.scan.index', [$tenant, $event]);
     }
 
     /**
@@ -104,6 +162,8 @@ class ScanController extends Controller
         return [
             // Verdict du scan qui vient d'avoir lieu, pose par `verify()` avant sa redirection.
             'result' => $request->session()->get(self::ResultKey),
+            // Resultat d'une recherche d'invite : pose seulement par `find()`.
+            'lookup' => null,
             'tenant' => ['slug' => $tenant->slug],
             // La cle publique (jamais la cle privee) permet de verifier un billet hors ligne, README
             // 2.8 : l'appareil de l'agent ne detient aucun secret de signature.
@@ -169,6 +229,7 @@ class ScanController extends Controller
                 'id' => $scan->id,
                 'result' => $scan->result->value,
                 'forced' => $scan->forced,
+                'manual' => $scan->manual,
                 'station' => $scan->station,
                 'name' => $scan->ticket?->holderName(),
                 'scannedAt' => $scan->created_at?->toISOString(),

@@ -24,6 +24,16 @@ use Illuminate\Database\QueryException;
  * distingue de « refuse » qu'apres avoir su qu'il s'agit d'un billet reel : un jeton falsifie ou
  * expire est refuse, jamais annonce comme deja utilise (ce serait confirmer a un faussaire que
  * le format qu'il a essaye correspond a un billet existant).
+ *
+ * @phpstan-type ScanOutcome array{
+ *     result: ScanResult,
+ *     forced: bool,
+ *     manual: bool,
+ *     registration: array{name: string, unit: string, partySize: int, guestOf: string|null, tableNumber: int|null}|null,
+ *     firstScannedAt: CarbonInterface|null,
+ *     firstScannedBy: string|null,
+ *     otherEvent: array{name: string, venue: string|null, startsAt: string|null}|null,
+ * }
  */
 class ScanTicket
 {
@@ -35,14 +45,7 @@ class ScanTicket
      * pas de `Cache::lock()` ici, l'echec de l'ecriture EST le signal recherche, pas un accident
      * a retenter.
      *
-     * @return array{
-     *     result: ScanResult,
-     *     forced: bool,
-     *     registration: array{name: string, unit: string, partySize: int, guestOf: string|null, tableNumber: int|null}|null,
-     *     firstScannedAt: CarbonInterface|null,
-     *     firstScannedBy: string|null,
-     *     otherEvent: array{name: string, venue: string|null, startsAt: string|null}|null,
-     * }
+     * @return ScanOutcome
      */
     public function handle(Event $event, string $token, User $actor, bool $force = false, ?string $station = null): array
     {
@@ -59,10 +62,41 @@ class ScanTicket
             return $this->outcome(ScanResult::Refused, false, null, null, null, $otherEvent);
         }
 
-        if (! $this->ticketIsUsable($event, $ticket)) {
-            $this->journal($event, null, $actor, ScanResult::Refused, false, $station);
+        return $this->admit($event, $ticket, $actor, $force, $station, manual: false);
+    }
 
-            return $this->outcome(ScanResult::Refused, false, null, null, null);
+    /**
+     * Admit the holder of a ticket found by the entrance search, without its QR being read
+     * (README ecran 26 : ecran casse, telephone eteint, billet oublie).
+     *
+     * Memes regles qu'un billet scanne : inscription confirmee, evenement non clos, une seule
+     * entree par billet, forcage trace. Le passage est journalise `manual` : la signature n'a pas
+     * ete verifiee, c'est l'agent qui repond de l'identite de la personne.
+     *
+     * @return ScanOutcome
+     */
+    public function handleWithoutScan(Event $event, Ticket $ticket, User $actor, bool $force = false, ?string $station = null): array
+    {
+        if ($ticket->registration->event_id !== $event->id) {
+            $this->journal($event, null, $actor, ScanResult::Refused, false, $station, alert: false, manual: true);
+
+            return $this->outcome(ScanResult::Refused, false, null, null, null, manual: true);
+        }
+
+        return $this->admit($event, $ticket, $actor, $force, $station, manual: true);
+    }
+
+    /**
+     * @return ScanOutcome
+     */
+    private function admit(Event $event, Ticket $ticket, User $actor, bool $force, ?string $station, bool $manual): array
+    {
+        if (! $this->ticketIsUsable($event, $ticket)) {
+            // Sans scan, un refus n'est pas une tentative de fraude a signaler : l'inscription a
+            // ete annulee ou l'evenement clos entre la recherche et la validation.
+            $this->journal($event, null, $actor, ScanResult::Refused, false, $station, alert: ! $manual, manual: $manual);
+
+            return $this->outcome(ScanResult::Refused, false, null, null, null, manual: $manual);
         }
 
         try {
@@ -71,13 +105,13 @@ class ScanTicket
                 'performed_by_user_id' => $actor->id,
             ]);
 
-            $this->journal($event, $ticket, $actor, ScanResult::Accepted, false, $station);
+            $this->journal($event, $ticket, $actor, ScanResult::Accepted, false, $station, manual: $manual);
 
-            return $this->outcome(ScanResult::Accepted, false, $ticket, null, null);
+            return $this->outcome(ScanResult::Accepted, false, $ticket, null, null, manual: $manual);
         } catch (QueryException) {
             $arrival = $ticket->arrival()->first();
 
-            $this->journal($event, $ticket, $actor, ScanResult::AlreadyScanned, $force, $station);
+            $this->journal($event, $ticket, $actor, ScanResult::AlreadyScanned, $force, $station, manual: $manual);
 
             return $this->outcome(
                 ScanResult::AlreadyScanned,
@@ -85,6 +119,7 @@ class ScanTicket
                 $force ? $ticket : null,
                 $arrival?->created_at,
                 $arrival !== null ? User::find($arrival->performed_by_user_id)?->name : null,
+                manual: $manual,
             );
         }
     }
@@ -181,7 +216,7 @@ class ScanTicket
             && $ticket->registration->status === RegistrationStatus::Confirmed;
     }
 
-    private function journal(Event $event, ?Ticket $ticket, User $actor, ScanResult $result, bool $forced, ?string $station, bool $alert = true): void
+    private function journal(Event $event, ?Ticket $ticket, User $actor, ScanResult $result, bool $forced, ?string $station, bool $alert = true, bool $manual = false): void
     {
         ScanEvent::create([
             'event_id' => $event->id,
@@ -189,6 +224,7 @@ class ScanTicket
             'performed_by_user_id' => $actor->id,
             'result' => $result,
             'forced' => $forced,
+            'manual' => $manual,
             'station' => $station,
         ]);
 
@@ -204,14 +240,7 @@ class ScanTicket
 
     /**
      * @param  array{name: string, venue: string|null, startsAt: string|null}|null  $otherEvent
-     * @return array{
-     *     result: ScanResult,
-     *     forced: bool,
-     *     registration: array{name: string, unit: string, partySize: int, guestOf: string|null, tableNumber: int|null}|null,
-     *     firstScannedAt: CarbonInterface|null,
-     *     firstScannedBy: string|null,
-     *     otherEvent: array{name: string, venue: string|null, startsAt: string|null}|null,
-     * }
+     * @return ScanOutcome
      */
     private function outcome(
         ScanResult $result,
@@ -220,10 +249,12 @@ class ScanTicket
         ?CarbonInterface $firstScannedAt,
         ?string $firstScannedBy,
         ?array $otherEvent = null,
+        bool $manual = false,
     ): array {
         return [
             'result' => $result,
             'forced' => $forced,
+            'manual' => $manual,
             // Un billet fait entrer une seule personne (README 2.8, un billet par personne) : le nom
             // et l'unite sont ceux de son titulaire, `guestOf` nomme l'invite d'un accompagnateur.
             'registration' => $ticket === null ? null : [

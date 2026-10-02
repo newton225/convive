@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InstallPrompt } from '@/components/install-prompt';
+import { GuestLookupCard } from '@/components/scan/guest-lookup-card';
 import {
     OfflineScanPanel,
     type LocalScanKind,
@@ -44,9 +45,10 @@ import type { ScanPinVerifier } from '@/lib/scan-pin';
 import { readStation, writeStation } from '@/lib/scan-station';
 import { can, Permission } from '@/lib/permissions';
 import { index as eventsIndex } from '@/routes/tenants/events';
-import { index, verify } from '@/routes/tenants/events/scan';
+import { admit, index, verify } from '@/routes/tenants/events/scan';
 import type {
     ScanEventProps,
+    ScanLookup,
     ScanOutcome,
     ScanRecentRow,
     ScanSameDayEvent,
@@ -68,6 +70,8 @@ type Props = {
     otherEventsToday: ScanSameDayEvent[];
     // Verdict du scan qui vient d'avoir lieu, null a l'arrivee sur l'ecran.
     result?: ScanOutcome | null;
+    // Recherche d'un invite dont le QR ne peut pas etre lu, null tant que rien n'a ete cherche.
+    lookup?: ScanLookup | null;
 };
 
 // Lit le verdict du serveur dans les props d'une reponse, ou `failed` quand il n'y en a pas.
@@ -121,6 +125,7 @@ export default function EventScan({
     expectedCount,
     otherEventsToday,
     result,
+    lookup,
 }: Props) {
     const { t, locale } = useTranslation();
 
@@ -169,6 +174,7 @@ export default function EventScan({
     // Le resultat reste affiche jusqu'a « Scanner suivant » (prototype) ou jusqu'au scan suivant.
     const [resultDismissed, setResultDismissed] = useState(false);
     const canForce = can(permissions, Permission.ScanForce);
+    const canAdmitWithoutScan = can(permissions, Permission.ScanManual);
     const online = useOnlineStatus();
     const lock = useScanLock(scanPin);
     // La camera tourne en continu : sans code choisi ou ecran verrouille, les billets lus sont
@@ -342,6 +348,41 @@ export default function EventScan({
                         }
                     }, 3000);
                 },
+            },
+        );
+    }
+
+    // Entree sans scan : le billet a ete retrouve par la recherche, pas lu par la camera.
+    function admitWithoutScan(
+        ticketId: number,
+        force: boolean,
+        done: () => void,
+    ) {
+        setPending(true);
+        setLocalResult(null);
+        // « Forcer l'entree » du resultat rejoue le dernier code lu : il ne doit pas viser un
+        // billet scanne plus tot.
+        lastTokenRef.current = null;
+
+        router.post(
+            admit([tenant.slug, event.id]).url,
+            { ticket: ticketId, force, station },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                only: ['result', 'recent', 'acceptedCount', 'lookup'],
+                onSuccess: (page) => {
+                    setResultDismissed(false);
+
+                    const outcome = outcomeOf(page.props);
+
+                    if (outcome !== 'failed') {
+                        showVerdict(onlineVerdict(outcome));
+                    }
+
+                    done();
+                },
+                onFinish: () => setPending(false),
             },
         );
     }
@@ -568,6 +609,14 @@ export default function EventScan({
                                                 {t('scan.result.forced_badge')}
                                             </Badge>
                                         ) : null}
+                                        {result.manual ? (
+                                            <Badge
+                                                variant="outline"
+                                                data-test="scan-result-manual"
+                                            >
+                                                {t('scan.result.manual_badge')}
+                                            </Badge>
+                                        ) : null}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-2">
@@ -634,7 +683,9 @@ export default function EventScan({
                                                     )}
                                                 </p>
                                             ) : null}
-                                            {canForce && !result.forced ? (
+                                            {canForce &&
+                                            !result.forced &&
+                                            !result.manual ? (
                                                 <SubmitButton
                                                     type="button"
                                                     variant="destructive"
@@ -704,6 +755,20 @@ export default function EventScan({
                             </Card>
                         ) : null}
 
+                        {canAdmitWithoutScan && !event.closed ? (
+                            <GuestLookupCard
+                                tenantSlug={tenant.slug}
+                                eventId={event.id}
+                                lookup={lookup ?? null}
+                                online={online}
+                                blocked={scanPin === null || lock.locked}
+                                canForce={canForce}
+                                processing={pending}
+                                onActivity={lock.registerActivity}
+                                onAdmit={admitWithoutScan}
+                            />
+                        ) : null}
+
                         {canRotateKey && event.qrPublicKey !== null ? (
                             <RotateTicketKeyCard
                                 tenantSlug={tenant.slug}
@@ -733,6 +798,13 @@ export default function EventScan({
                                             >
                                                 <span>
                                                     {row.name ?? '-'}
+                                                    {row.manual ? (
+                                                        <span className="text-muted-foreground block text-xs">
+                                                            {t(
+                                                                'scan.result.manual_badge',
+                                                            )}
+                                                        </span>
+                                                    ) : null}
                                                     {row.station ? (
                                                         <span className="text-muted-foreground block text-xs">
                                                             {row.station}

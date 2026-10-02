@@ -38,6 +38,7 @@ enum TenantPermission: string
 
     case ScanPerform = 'scan.perform';
     case ScanForce = 'scan.force';
+    case ScanManual = 'scan.manual';
     case ScanLogView = 'scan.log.view';
 
     case MessagesSchedule = 'messages.schedule';
@@ -101,7 +102,7 @@ enum TenantPermission: string
             self::SeatingView, self::SeatingAssign,
             self::SeatingConstraints => TenantPermissionDomain::Seating,
 
-            self::ScanPerform, self::ScanForce,
+            self::ScanPerform, self::ScanForce, self::ScanManual,
             self::ScanLogView => TenantPermissionDomain::Scan,
 
             self::MessagesSchedule, self::MessagesSend,

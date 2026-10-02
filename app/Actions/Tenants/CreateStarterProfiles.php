@@ -86,11 +86,13 @@ class CreateStarterProfiles
      */
     private function hostPermissions(): array
     {
-        // Le forcage d'entree fait partie du poste d'accueil : il est autorise, et journalise.
+        // Le forcage d'entree et l'entree sans scan (billet illisible, telephone eteint) font
+        // partie du poste d'accueil : ils sont autorises, et journalises.
         return $this->values([
             TenantPermission::EventsView,
             TenantPermission::ScanPerform,
             TenantPermission::ScanForce,
+            TenantPermission::ScanManual,
             TenantPermission::ScanLogView,
         ]);
     }

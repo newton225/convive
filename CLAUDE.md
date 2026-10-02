@@ -734,6 +734,29 @@ jamais recu le lien. **Ceci est la decision retenue, le code n'est pas encore ec
 - **Permission dediee**, distincte de `events.update` : annoncer publiquement une organisation
   est une decision de visibilite, pas une simple modification de fiche.
 
+### Entree sans scan
+
+Decision du proprietaire du projet (2026-10-02) : quand le QR ne peut pas etre lu (ecran casse,
+telephone eteint, billet oublie), l'agent retrouve l'invite sur l'ecran de scan par la reference
+du dossier ou par son nom, puis valide son entree. Saisir le jeton a la main n'a pas de sens : il
+est trop long.
+
+- **Permission dediee `scan.manual`**, en plus de `scan.perform`. Le QR prouve que l'invite detient
+  son billet ; un nom retrouve dans une liste ne prouve que la parole de l'agent. Le profil Hotesse
+  la recoit a l'ouverture d'un espace ; une organisation deja ouverte la donne elle-meme
+  (`tenants:sync-permissions` ne sert que le Proprietaire).
+- **Memes regles qu'un billet scanne** : `ScanTicket::handleWithoutScan()` passe par le meme chemin
+  d'admission (inscription confirmee, evenement non clos, une entree par billet, forcage sous
+  `scan.force`). Jamais un second chemin qui ecrirait `TicketArrival` a sa facon.
+- **Journalise comme tel** : `scan_events.manual`, affiche « Sans scan » dans les derniers passages.
+- **Recherche bornee** (`FindTicketsForEntry`) : trois caracteres au moins, dix billets au plus,
+  inscriptions confirmees de cet evenement seulement, limite de debit `scan`. Elle ne doit pas
+  servir a lire la liste des invites depuis le telephone d'un agent.
+- **En ligne seulement** : hors connexion, l'appareil ne detient pas la liste des invites, et ne
+  doit pas la detenir.
+- **Un refus sans scan n'alerte pas** comme une fraude : c'est une inscription annulee ou un
+  evenement clos entre la recherche et la validation, pas un faux billet.
+
 ---
 
 ## Comptes de versement
