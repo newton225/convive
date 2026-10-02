@@ -21,6 +21,8 @@ class ProductionCheckCommandTest extends TestCase
             'mail.default' => 'resend',
             'convive.two_factor.enforced' => true,
             'convive.security.trusted_proxies' => '10.0.0.1',
+            'logging.channels.stack.channels' => ['daily'],
+            'logging.channels.daily.level' => 'warning',
             'convive.legal' => [
                 'editor_name' => 'Convive SARL',
                 'legal_form' => 'SARL',
@@ -37,6 +39,26 @@ class ProductionCheckCommandTest extends TestCase
                 'reviewed' => true,
             ],
         ]);
+    }
+
+    public function test_un_journal_sans_rotation_fait_echouer_la_verification(): void
+    {
+        $this->safeConfiguration();
+        config(['logging.channels.stack.channels' => ['single']]);
+
+        $this->artisan('convive:production-check')
+            ->expectsOutputToContain('LOG_STACK')
+            ->assertFailed();
+    }
+
+    public function test_un_journal_au_niveau_debug_fait_echouer_la_verification(): void
+    {
+        $this->safeConfiguration();
+        config(['logging.channels.daily.level' => 'debug']);
+
+        $this->artisan('convive:production-check')
+            ->expectsOutputToContain('LOG_LEVEL')
+            ->assertFailed();
     }
 
     public function test_une_identite_d_editeur_incomplete_fait_echouer_la_verification(): void

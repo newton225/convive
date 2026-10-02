@@ -952,6 +952,11 @@ l'ecran de sante technique de la console (README ecran 31).
 - **Limite a connaitre** : un planificateur arrete ne peut pas envoyer sa propre alerte. Seul un
   service exterieur appele a chaque passage (`SCHEDULE_HEARTBEAT_URL`) previent d'un arret complet ;
   d'ici la, l'arret ne se voit que sur l'ecran.
+- **Journal applicatif** (`storage/logs`) : un fichier par jour (`LOG_STACK=daily`), garde 14 jours
+  (30 en production), niveau `warning` en production. Jamais `single`, fichier unique sans limite.
+  Un 404 attendu (sous-domaine inconnu) n'y ecrit rien (`dontReport` dans `bootstrap/app.php`), et
+  les tests n'y ecrivent pas (`LOG_CHANNEL=null`). Ce qui doit se voir va dans un journal de
+  l'application (audit, journal central, ecran Securite), pas seulement dans ce fichier.
 - **En production**, le serveur doit faire tourner `php artisan schedule:run` chaque minute (cron)
   et un processus `php artisan queue:work` surveille (Supervisor ou equivalent).
 

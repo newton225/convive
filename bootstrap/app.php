@@ -92,6 +92,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(fn (TenantCouldNotBeIdentifiedException $e) => abort(404));
         $exceptions->render(fn (NotASubdomainException $e) => abort(404));
 
+        // Ces deux cas sont un 404 attendu, pas une panne : chaque robot qui essaie un sous-domaine
+        // au hasard ecrirait sinon une erreur avec sa pile d'appel, et le journal ne servirait plus
+        // a voir les vraies.
+        $exceptions->dontReport([
+            TenantCouldNotBeIdentifiedException::class,
+            NotASubdomainException::class,
+        ]);
+
         // Limite de debit atteinte : un message qui dit quand reessayer, jamais une page 429 nue
         // (CLAUDE.md, « Limitation de debit »).
         $exceptions->render(function (ThrottleRequestsException $e, Request $request) {

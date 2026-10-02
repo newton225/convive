@@ -10,6 +10,7 @@ use App\Models\PaymentAccount;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Exceptions;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -125,6 +126,16 @@ class EventTest extends TestCase
         $url = $this->urlFor('aucune-organisation-ici', str_repeat('a', 64));
 
         $this->get($url)->assertNotFound();
+    }
+
+    public function test_un_sous_domaine_inconnu_n_ecrit_pas_d_erreur_au_journal(): void
+    {
+        // Un 404 attendu : un robot qui essaie des sous-domaines ne doit pas remplir le journal.
+        Exceptions::fake();
+
+        $this->get($this->urlFor('aucune-organisation-ici', str_repeat('a', 64)))->assertNotFound();
+
+        Exceptions::assertNothingReported();
     }
 
     public function test_un_evenement_jamais_publie_recoit_404(): void

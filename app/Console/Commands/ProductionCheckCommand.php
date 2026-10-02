@@ -27,6 +27,8 @@ class ProductionCheckCommand extends Command
             'Le cookie de session doit rester HttpOnly.' => config('session.http_only') !== true,
             'TRUSTED_PROXIES ne doit jamais contenir * : X-Forwarded-For deviendrait falsifiable (SECURITY.md C3).' => str_contains((string) config('convive.security.trusted_proxies'), '*'),
             'MAIL_MAILER ne doit pas ecrire les emails dans le journal ni les jeter.' => in_array(config('mail.default'), ['log', 'array'], true),
+            'LOG_LEVEL ne doit pas valoir debug : le journal porterait des details internes et grossirait vite.' => config('logging.channels.'.config('logging.default').'.level') === 'debug' || config('logging.channels.daily.level') === 'debug',
+            'LOG_STACK ne doit pas contenir single : un fichier de journal unique grossit jusqu\'a remplir le disque. Utilisez daily.' => in_array('single', (array) config('logging.channels.stack.channels'), true),
             'CONVIVE_ENFORCE_TWO_FACTOR doit rester actif en production.' => config('convive.two_factor.enforced') !== true,
             'Les pages juridiques sont incompletes : renseignez l\'identite de l\'editeur ('.implode(', ', LegalDocument::missingIdentity()).').' => LegalDocument::missingIdentity() !== [],
             'CONVIVE_LEGAL_REVIEWED doit valoir true : les pages juridiques n\'ont pas ete validees par un juriste.' => ! LegalDocument::isReviewed(),

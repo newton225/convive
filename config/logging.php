@@ -54,7 +54,9 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            // Un fichier par jour (`daily`), purge au bout de `LOG_DAILY_DAYS` : le canal `single`
+            // ecrit dans un seul fichier qui grossit jusqu'a remplir le disque.
+            'channels' => explode(',', (string) env('LOG_STACK', 'daily')),
             'ignore_exceptions' => false,
         ],
 
