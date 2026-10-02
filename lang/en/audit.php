@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Audit log',
+    'title' => 'Action history',
     'description' => "The organisation's sensitive actions : who, what, when, from which address.",
     'retention' => 'This history is kept for 24 months. Nobody can change or erase it.',
     'system_actor' => 'Scheduled task',

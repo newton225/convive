@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Journalisation',
+    'title' => 'Historique des actions',
     'description' => 'Les actions sensibles de l\'organisation : qui, quoi, quand, depuis quelle adresse.',
     'retention' => 'Cet historique est gardé 24 mois. Personne ne peut le modifier ni l’effacer.',
     'system_actor' => 'Tâche planifiée',

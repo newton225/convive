@@ -27,7 +27,7 @@ return [
         'events' => 'Événements',
         'registrations' => 'Base d’inscrits',
         'proofs' => 'Preuves à vérifier',
-        'audit' => 'Journalisation',
+        'audit' => 'Historique des actions',
         'organisation' => 'Espace et marque',
         'dashboard' => 'Tableau de bord',
         'seating' => 'Plan de salle',

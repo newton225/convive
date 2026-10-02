@@ -19,7 +19,7 @@ return [
     'logout' => 'Log out',
 
     'billing' => 'Subscription',
-    'audit' => 'Audit log',
+    'audit' => 'Action history',
     'entry_control' => 'Entry control',
     'ticket_template' => 'Ticket template',
     'profiles' => 'Profiles and permissions',

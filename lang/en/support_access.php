@@ -27,7 +27,7 @@ return [
         'events' => 'Events',
         'registrations' => 'Registrations',
         'proofs' => 'Proofs to check',
-        'audit' => 'Audit log',
+        'audit' => 'Action history',
         'organisation' => 'Space and brand',
         'dashboard' => 'Dashboard',
         'seating' => 'Seating plan',

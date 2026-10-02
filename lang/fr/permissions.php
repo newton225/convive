@@ -17,7 +17,7 @@ return [
         'team' => 'Équipe',
         'profiles' => 'Profils et permissions',
         'billing' => 'Abonnement',
-        'audit' => 'Journal',
+        'audit' => 'Historique des actions',
     ],
 
     'items' => [

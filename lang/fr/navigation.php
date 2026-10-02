@@ -19,7 +19,7 @@ return [
     'logout' => 'Se déconnecter',
 
     'billing' => 'Abonnement',
-    'audit' => 'Journalisation',
+    'audit' => 'Historique des actions',
     'entry_control' => "Contrôle à l'entrée",
     'ticket_template' => 'Gabarit du billet',
     'profiles' => 'Profils et permissions',
