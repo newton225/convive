@@ -23,7 +23,8 @@ enum ConsoleProfile: string
     {
         return match ($this) {
             self::Founder => ConsoleArea::cases(),
-            self::Support => [ConsoleArea::Organisations, ConsoleArea::Support],
+            // Le Support repond a « le message est-il parti ? » : il lit le releve des envois.
+            self::Support => [ConsoleArea::Organisations, ConsoleArea::Support, ConsoleArea::Messages],
             self::Accounting => [
                 ConsoleArea::Organisations, ConsoleArea::OrganisationActions,
                 ConsoleArea::Recovery, ConsoleArea::Plans,

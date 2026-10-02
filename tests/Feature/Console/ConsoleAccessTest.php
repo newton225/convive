@@ -30,6 +30,8 @@ class ConsoleAccessTest extends TestCase
             'vitrine' => ['console.showcase', [], 'console/showcase'],
             'journal central' => ['console.audit', [], 'console/audit'],
             'securite' => ['console.security', [], 'console/security'],
+            'envois' => ['console.messages', [], 'console/messages'],
+            'comptes' => ['console.accounts.index', [], 'console/accounts'],
             'equipe editeur' => ['console.team', [], 'console/team'],
         ];
     }

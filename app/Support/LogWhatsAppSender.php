@@ -31,6 +31,11 @@ class LogWhatsAppSender implements WhatsAppSender
         Log::info('WhatsApp (simule)', ['to' => $to, 'message' => $message]);
     }
 
+    public function delivers(): bool
+    {
+        return false;
+    }
+
     /**
      * Keep only the last two digits, enough to tell two sends apart without identifying anyone.
      */

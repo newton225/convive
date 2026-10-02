@@ -5,6 +5,7 @@ use App\Http\Controllers\Console\AuditLogController;
 use App\Http\Controllers\Console\FailedJobController;
 use App\Http\Controllers\Console\FinishSupportAccessController;
 use App\Http\Controllers\Console\HealthController;
+use App\Http\Controllers\Console\MessageController;
 use App\Http\Controllers\Console\OrganisationActionController;
 use App\Http\Controllers\Console\OrganisationController;
 use App\Http\Controllers\Console\PlanController;
@@ -59,6 +60,7 @@ Route::prefix('console')
         Route::get('showcase', [ShowcaseController::class, 'index'])->middleware('can:console.area,"showcase"')->name('showcase');
         Route::post('showcase/{announcement}/withdraw', [ShowcaseController::class, 'withdraw'])->name('showcase.withdraw');
         Route::get('security', SecurityController::class)->middleware('can:console.area,"security"')->name('security');
+        Route::get('messages', MessageController::class)->middleware('can:console.area,"messages"')->name('messages');
         // Les comptes : recherche, blocage, reinitialisation de la double authentification.
         Route::get('accounts', [AccountController::class, 'index'])->middleware('can:console.area,"accounts"')->name('accounts.index');
         Route::post('accounts/{user}/block', [AccountController::class, 'block'])->middleware('can:console.area,"accounts"')->name('accounts.block');

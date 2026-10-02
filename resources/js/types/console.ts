@@ -168,6 +168,31 @@ export type ConsoleQueue = {
     failed: ConsoleFailedJob[];
 };
 
+// Un canal d'envoi : `simulated` est vrai quand il n'envoie pas encore reellement.
+export type ConsoleMessageChannel = {
+    channel: 'mail' | 'whatsapp';
+    simulated: boolean;
+    lastDay: number;
+    lastWeek: number;
+};
+
+export type ConsoleMessageType = {
+    type: string;
+    label: string;
+    count: number;
+};
+
+// Un envoi releve : jamais son contenu, et un destinataire masque.
+export type ConsoleMessage = {
+    id: number;
+    at: string;
+    channel: 'mail' | 'whatsapp';
+    type: string;
+    organisation: string | null;
+    recipient: string | null;
+    simulated: boolean;
+};
+
 // Un compte tel que la console le montre : jamais son mot de passe ni le contenu de ses
 // organisations.
 export type ConsoleAccount = {

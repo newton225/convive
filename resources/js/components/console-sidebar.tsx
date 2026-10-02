@@ -5,6 +5,7 @@ import {
     HandCoins,
     HeartPulse,
     Megaphone,
+    Send,
     Package,
     ScrollText,
     ShieldAlert,
@@ -29,6 +30,7 @@ import { dashboard } from '@/routes';
 import {
     audit,
     health,
+    messages,
     plans,
     recovery,
     security,
@@ -84,6 +86,12 @@ export function ConsoleSidebar() {
             href: health(),
             icon: HeartPulse,
             area: 'health',
+        },
+        {
+            title: t('console.nav.messages'),
+            href: messages(),
+            icon: Send,
+            area: 'messages',
         },
         {
             title: t('console.nav.security'),

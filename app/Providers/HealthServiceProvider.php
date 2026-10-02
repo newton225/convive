@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Support\Console\MessageJournal;
 use App\Support\Console\SecurityJournal;
 use App\Support\Health\Checks\AuditChainCheck;
 use App\Support\Health\Checks\FailedJobsCheck;
 use App\Support\Health\Checks\ScheduledTasksCheck;
 use App\Support\Health\ScheduledTaskRecorder;
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
@@ -32,6 +34,9 @@ class HealthServiceProvider extends ServiceProvider
 
         // Une connexion verrouillee apres trop d'echecs : montree par l'ecran Securite.
         Event::listen(Lockout::class, fn (Lockout $event) => SecurityJournal::lockout($event->request));
+
+        // Chaque courriel ou message WhatsApp parti est releve pour l'ecran « Envois ».
+        Event::listen(NotificationSent::class, fn (NotificationSent $event) => MessageJournal::sent($event));
 
         Health::checks([
             // Le planificateur lui-meme : s'il s'arrete, plus rien ne tourne, ni purge ni rappel.

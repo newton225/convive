@@ -22,6 +22,7 @@ use App\Models\Tenant;
 use App\Models\TenantInvitation;
 use App\Models\Ticket;
 use App\Models\WaitlistEntry;
+use App\Support\Console\MessageJournal;
 use App\Support\Console\SecurityJournal;
 use App\Support\Console\TenantUsageRecorder;
 use Illuminate\Support\Facades\Schedule;
@@ -256,6 +257,8 @@ Schedule::call(function () {
     SecurityJournal::checkAuditChain();
     Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(fn () => SecurityJournal::checkAuditChain($tenant)));
     SecurityJournal::purge();
+    // Le releve des envois ne se garde que trente jours.
+    MessageJournal::purge();
 })->daily()->description('Verify the audit log hash chains');
 
 /*

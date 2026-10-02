@@ -19,4 +19,5 @@ enum ConsoleArea: string
     case Support = 'support';
     case Security = 'security';
     case Accounts = 'accounts';
+    case Messages = 'messages';
 }
