@@ -287,7 +287,7 @@ les profils etant ses roles et le catalogue ses permissions. La table pivot port
 | Preuves             | `proofs.view`, `proofs.approve`, `proofs.reject`                                            |
 | Rapprochement       | `reconciliation.import`, `reconciliation.resolve`                                           |
 | Plan de salle       | `seating.view`, `seating.assign`, `seating.constraints`                                     |
-| Controle a l'entree | `scan.perform`, `scan.force`, `scan.log.view`                                               |
+| Controle a l'entree | `scan.perform`, `scan.force`, `scan.manual`, `scan.log.view`                                |
 | Envois              | `messages.schedule`, `messages.send`, `messages.templates`                                  |
 | Rapports            | `reports.view`, `reports.export`                                                            |
 | Espace et marque    | `tenant.branding`, `tenant.legal`, `tenant.domain`                                          |
@@ -306,6 +306,7 @@ Point de depart modifiable, pas une contrainte.
 | Voir la base d'inscrits complète |      ✓       |     ✓     |         |    ✓    |
 | Exporter Excel / PDF             |      ✓       |     ✓     |         |         |
 | Scanner à l'entrée               |      ✓       |           |    ✓    |         |
+| Faire entrer sans scan           |      ✓       |           |         |         |
 | Modifier le plan de salle        |      ✓       |           |         |         |
 | Gérer l'abonnement et la marque  |      ✓       |           |         |         |
 
@@ -459,6 +460,12 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 26. **Scan** — viseur, compteur de personnes entrées sur les attendues, trois résultats : valide
     (nom de la personne, unité, table, « accompagnateur de … » le cas échéant), déjà scanné
     (heure et agent du premier passage, forçage possible), refusé ; hors ligne ; derniers passages.
+    **Entrée sans scan** quand le billet ne peut pas être lu (écran cassé, téléphone éteint,
+    billet oublié) : recherche de l'invité par la référence de son dossier ou par son nom, puis
+    validation après confirmation. Réservée à la permission `scan.manual`, que seul le
+    Propriétaire détient au départ et qu'il confie à qui il veut ; en ligne seulement ; l'entrée
+    est notée « sans scan » au nom de l'agent et les responsables en sont prévenus à chaque fois.
+    Un agent sans cette permission oriente l'invité vers un responsable.
 
 ### Console d'exploitation (éditeur)
 
