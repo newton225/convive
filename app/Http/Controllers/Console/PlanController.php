@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Console;
 
 use App\Actions\Console\UpdatePlan;
+use App\Actions\Console\UpdateTrialSettings;
 use App\Enums\PlanCode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Console\UpdatePlanRequest;
@@ -21,10 +22,12 @@ class PlanController extends Controller
     /**
      * Display the plans.
      */
-    public function index(): Response
+    public function index(UpdateTrialSettings $trial): Response
     {
         return Inertia::render('console/plans', [
             'isSample' => false,
+            // La periode d'essai offerte aux organisations neuves, reglee depuis cet ecran.
+            'trial' => $trial->current(),
             'plans' => collect(PlanCode::cases())
                 ->map(fn (PlanCode $code) => Plan::ensure($code))
                 ->map(fn (Plan $plan) => [

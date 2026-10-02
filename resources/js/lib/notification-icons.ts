@@ -6,6 +6,7 @@ import {
     FileCheck,
     FileX,
     Gauge,
+    Hourglass,
     MessageSquareWarning,
     ScanSearch,
     ShieldAlert,
@@ -33,6 +34,8 @@ const icons: Record<string, LucideIcon> = {
     large_export: FileDown,
     message_quota_reached: MessageSquareWarning,
     plan_limits_lowered: Gauge,
+    trial_ending: Hourglass,
+    trial_ended: Hourglass,
 };
 
 export function notificationIcon(type: string | null): LucideIcon {

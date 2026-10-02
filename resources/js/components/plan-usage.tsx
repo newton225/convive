@@ -32,6 +32,13 @@ export function PlanUsage() {
                 {t('billing.sidebar.plan', { name: currentPlan.name })}
             </span>
             <span className="text-muted-foreground block">{usage}</span>
+            {currentPlan.trialDaysLeft !== null ? (
+                <span className="block" data-test="sidebar-trial-days">
+                    {t('billing.sidebar.trial_days', {
+                        count: currentPlan.trialDaysLeft,
+                    })}
+                </span>
+            ) : null}
         </>
     );
 

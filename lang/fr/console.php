@@ -226,6 +226,26 @@ return [
         ],
     ],
 
+    'trial' => [
+        'title' => 'Période d’essai',
+        'description' => 'Ce que reçoit toute organisation qui vient d’ouvrir son espace, avant de s’abonner.',
+        'dialog' => 'La durée vaut pour les organisations ouvertes à partir de maintenant : une organisation déjà ouverte garde sa date de fin, qui se change sur sa fiche. Fermer l’essai ou changer le plan offert s’applique tout de suite à toutes les organisations à l’essai.',
+        'fields' => [
+            'enabled' => 'Période d’essai ouverte',
+            'days' => 'Durée en jours',
+            'days_hint' => 'Laissez vide pour un essai sans date de fin. À l’échéance, l’organisation retombe sur le plan gratuit ; rien n’est supprimé, et elle est prévenue 7 jours avant puis la veille.',
+            'plan' => 'Plan offert pendant l’essai',
+        ],
+        'summary' => [
+            'disabled' => 'Essai fermé : une nouvelle organisation démarre sur le plan gratuit, et les essais en cours sont arrêtés.',
+            'unlimited' => 'Essai sans date de fin, sur le plan :plan.',
+            'days' => '{1} Essai de 1 jour, sur le plan :plan.|[2,*] Essai de :count jours, sur le plan :plan.',
+        ],
+        'flash' => [
+            'updated' => 'La période d’essai est mise à jour.',
+        ],
+    ],
+
     'plans' => [
         'title' => 'Plans',
         'description' => 'Prix et quotas des trois plans. Une modification ne touche pas les abonnements en cours avant leur renouvellement.',
@@ -490,6 +510,7 @@ return [
             'send_the_j_1_missing_proof_reminder' => 'Rappel de preuve à J-1',
             'send_the_j_3h_reminder_to_valid_tickets' => 'Rappel du jour J, trois heures avant',
             'remind_and_suspend_subscriptions_left_unpaid' => 'Relance et suspension des abonnements impayés',
+            'warn_organisations_whose_trial_is_ending' => 'Rappels de fin de période d’essai',
             'purge_the_central_audit_log_entries_older_than_24_months' => 'Purge du journal central au-delà de 24 mois',
             'purge_each_tenants_audit_log_entries_older_than_24_months' => 'Purge du journal des organisations au-delà de 24 mois',
             'verify_the_audit_log_hash_chains' => 'Vérification de l’intégrité des journaux',
@@ -614,6 +635,7 @@ return [
             'operator_invited' => 'Invitation éditeur',
             'operator_removed' => 'Retrait éditeur',
             'plan_updated' => 'Plan modifié',
+            'trial_settings_updated' => 'Période d’essai réglée',
             'database_repaired' => 'Base réparée',
             'deletion_cancelled' => 'Suppression annulée',
             'tenant_erased' => 'Organisation effacée',
@@ -642,6 +664,7 @@ return [
             'operator_invited' => ":actor a invité un membre dans l'équipe éditeur",
             'operator_removed' => ':actor a retiré un membre de l’équipe éditeur',
             'plan_updated' => ':actor a modifié les prix ou les quotas d’un plan',
+            'trial_settings_updated' => ':actor a modifié les réglages de la période d’essai',
             'database_repaired' => ':actor a rejoué les migrations de :organisation',
             'deletion_cancelled' => ':actor a annulé la suppression de :organisation',
             'tenant_erased' => ':organisation a été effacée à l’échéance de sa suppression programmée',

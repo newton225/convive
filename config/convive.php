@@ -69,13 +69,14 @@ return [
     |
     */
 
-    // La periode d'essai (README section 3). Tout espace neuf est a l'essai sur le plan ci-dessous.
-    // Sans duree, l'essai n'a pas de date de fin : c'est la regle du moment (decision du
-    // proprietaire du projet, 2026-10-01), l'editeur en pose une depuis la console au besoin.
+    // La periode d'essai (README section 3) : trente jours sur le plan Association (decision du
+    // proprietaire du projet, 2026-10-02). Ce ne sont que les valeurs de DEPART : la migration des
+    // reglages les pose une fois dans `App\Settings\TrialSettings`, que la console regle ensuite.
+    // Une duree vide (`CONVIVE_TRIAL_DAYS=`) veut dire un essai sans date de fin.
     'trial' => [
         'enabled' => (bool) env('CONVIVE_TRIAL_ENABLED', true),
         'plan' => env('CONVIVE_TRIAL_PLAN', 'association'),
-        'days' => env('CONVIVE_TRIAL_DAYS'),
+        'days' => env('CONVIVE_TRIAL_DAYS', 30),
     ],
 
     // L'adresse ou une organisation ecrit a l'equipe Convive (restauration, aide). Vide tant que

@@ -15,6 +15,8 @@ export type CurrentPlan = {
     name: string;
     activeEvents: number;
     maxActiveEvents: number | null;
+    // Jours d'essai restants ; null hors essai, ou pour un essai sans date de fin.
+    trialDaysLeft: number | null;
 };
 
 export type TenantMember = {

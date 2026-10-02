@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Audit\PurgeAuditLog;
+use App\Actions\Billing\NotifyTrialDeadlines;
 use App\Actions\Billing\ProcessOverdueSubscriptions;
 use App\Actions\Events\PurgeDeletedEvents;
 use App\Actions\Notifications\NotifyUpcomingPurge;
@@ -232,6 +233,14 @@ Schedule::call(function (SendTicketReminder $send) {
 Schedule::call(fn (ProcessOverdueSubscriptions $process) => $process->handle())
     ->daily()
     ->description('Remind and suspend subscriptions left unpaid');
+
+/*
+ * Fin de la periode d'essai (README section 3) : rappel sept jours avant, la veille, puis le jour
+ * ou l'essai a pris fin. Une passe par jour, le matin ; chaque rappel ne part qu'une fois.
+ */
+Schedule::call(fn (NotifyTrialDeadlines $notify) => $notify->handle())
+    ->dailyAt('08:00')
+    ->description('Warn organisations whose trial is ending');
 
 /*
  * Conservation du journal d'audit a 24 mois (CLAUDE.md, « Securite » : « ecriture seule...

@@ -17,6 +17,7 @@ use App\Http\Controllers\Console\ShowcaseController;
 use App\Http\Controllers\Console\SupportAvailabilityController;
 use App\Http\Controllers\Console\TakeSupportRequestController;
 use App\Http\Controllers\Console\TeamController;
+use App\Http\Controllers\Console\TrialSettingsController;
 use App\Http\Middleware\EnsureConsoleOperator;
 use Illuminate\Support\Facades\Route;
 
@@ -53,6 +54,7 @@ Route::prefix('console')
         Route::post('recovery/{tenant}/remind', [RecoveryController::class, 'remind'])->middleware('can:console.area,"recovery"')->name('recovery.remind');
         Route::get('plans', [PlanController::class, 'index'])->middleware('can:console.area,"plans"')->name('plans');
         Route::patch('plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
+        Route::put('trial', TrialSettingsController::class)->name('trial.update');
         Route::get('health', HealthController::class)->middleware('can:console.area,"health"')->name('health');
         Route::post('health/databases/{tenant}/migrate', RepairTenantDatabaseController::class)->middleware('can:console.area,"health"')->name('health.databases.migrate');
         Route::post('health/backup', RunBackupController::class)->middleware('can:console.area,"health"')->name('health.backup');

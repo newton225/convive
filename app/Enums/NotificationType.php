@@ -22,6 +22,8 @@ enum NotificationType: string
     case LargeExport = 'large_export';
     case MessageQuotaReached = 'message_quota_reached';
     case PlanLimitsLowered = 'plan_limits_lowered';
+    case TrialEnding = 'trial_ending';
+    case TrialEnded = 'trial_ended';
 
     /**
      * Get the permission a member must hold to be told about this type, or null when the alert is
@@ -41,7 +43,8 @@ enum NotificationType: string
             // SECURITY.md M3 : ceux qui surveillent le journal, le Proprietaire en tete. Une
             // entree sans scan les regarde aussi : c'est la parole d'un agent, pas un billet lu.
             self::LargeExport, self::EntryWithoutScan => TenantPermission::AuditView,
-            self::MessageQuotaReached, self::PlanLimitsLowered => TenantPermission::BillingView,
+            self::MessageQuotaReached, self::PlanLimitsLowered,
+            self::TrialEnding, self::TrialEnded => TenantPermission::BillingView,
             self::TeamInvitationPending => null,
         };
     }

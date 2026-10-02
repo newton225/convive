@@ -129,7 +129,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{name: string, activeEvents: int, maxActiveEvents: int|null}
+     * @return array{name: string, activeEvents: int, maxActiveEvents: int|null, trialDaysLeft: int|null}
      */
     private function currentPlan(Tenant $tenant): array
     {
@@ -139,6 +139,8 @@ class HandleInertiaRequests extends Middleware
             'name' => $plan->name,
             'activeEvents' => PlanLimits::for($tenant)->activeEvents(),
             'maxActiveEvents' => $tenant->limit('max_active_events'),
+            // Jours d'essai restants, nul hors essai ou pour un essai sans date de fin.
+            'trialDaysLeft' => $tenant->trialDaysLeft(),
         ];
     }
 

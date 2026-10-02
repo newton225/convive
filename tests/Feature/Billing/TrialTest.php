@@ -10,6 +10,7 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Settings\TrialSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -31,10 +32,22 @@ class TrialTest extends TestCase
     {
         parent::setUp();
 
-        config(['convive.trial.enabled' => true, 'convive.console.operators' => ['fondateur@convive.test']]);
+        config(['convive.console.operators' => ['fondateur@convive.test']]);
+        // Un essai ouvert, sans date de fin : le cas que ces tests decrivent. La duree reglee et
+        // ses rappels sont dans `TrialSettingsTest`.
+        $this->trial(enabled: true);
 
         $this->founder = User::factory()->withTwoFactor()->create(['email' => 'fondateur@convive.test']);
         $this->tenant = app(CreateTenant::class)->handle(User::factory()->withTwoFactor()->create(), 'Association Convive');
+    }
+
+    private function trial(bool $enabled): void
+    {
+        $settings = app(TrialSettings::class);
+        $settings->enabled = $enabled;
+        $settings->days = null;
+        $settings->plan = 'association';
+        $settings->save();
     }
 
     public function test_un_espace_neuf_est_a_l_essai_sans_date_de_fin_sur_le_plan_association(): void
@@ -68,7 +81,7 @@ class TrialTest extends TestCase
 
     public function test_sans_essai_active_le_plan_par_defaut_s_applique(): void
     {
-        config(['convive.trial.enabled' => false]);
+        $this->trial(enabled: false);
 
         $this->assertFalse($this->tenant->isOnTrial());
         $this->assertSame(PlanCode::default()->value, $this->tenant->plan()->code);

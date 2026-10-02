@@ -133,6 +133,10 @@ class ManageOrganisation
         $tenant->forceFill([
             'trial_started_at' => $tenant->trial_started_at ?? now(),
             'trial_ends_at' => $endsAt,
+            // Une nouvelle echeance : ses rappels repartent de zero.
+            'trial_ending_notified_at' => null,
+            'trial_last_day_notified_at' => null,
+            'trial_ended_notified_at' => null,
         ])->save();
 
         ConsoleJournal::record('trial_extended', $actor, $tenant, [

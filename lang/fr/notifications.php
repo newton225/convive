@@ -23,6 +23,8 @@ return [
         'large_export' => ':name a exporté :count inscrits de :event (:format).',
         'message_quota_reached' => 'Le quota d\'envois du plan :plan est atteint (:count messages ce mois-ci) : les cartes et rappels aux invités reprendront le mois prochain, ou dès un changement de plan.',
         'plan_limits_lowered' => 'Les limites du plan :plan ont été abaissées et votre organisation en dépasse au moins une. Rien n’est fermé ni supprimé, mais vous ne pourrez plus publier d’événement, accueillir de nouvelle inscription ou inviter de membre au-delà de la limite. Votre consommation est sur l’écran Abonnement.',
+        'trial_ending' => '{1} Votre période d’essai se termine demain. Sans abonnement, votre organisation passera sur le plan gratuit : rien ne sera supprimé, mais ses limites s’appliqueront.|[2,*] Votre période d’essai se termine dans :count jours. Sans abonnement, votre organisation passera sur le plan gratuit : rien ne sera supprimé, mais ses limites s’appliqueront.',
+        'trial_ended' => 'Votre période d’essai a pris fin : votre organisation est maintenant sur le plan :plan. Rien n’a été supprimé. Pour retrouver ce que l’essai permettait, choisissez un abonnement.',
     ],
 
     'preferences' => [
@@ -44,6 +46,8 @@ return [
             'large_export' => 'Export volumineux de la base d\'inscrits',
             'message_quota_reached' => 'Quota d\'envois atteint',
             'plan_limits_lowered' => 'Limites du plan abaissées',
+            'trial_ending' => 'Fin de la période d’essai dans quelques jours',
+            'trial_ended' => 'Période d’essai terminée',
         ],
         'channels' => [
             'app' => 'Dans l\'application',

@@ -6,6 +6,7 @@ use App\Concerns\GeneratesUniqueTenantSlugs;
 use App\Enums\PlanCode;
 use App\Enums\SubscriptionStatus;
 use App\Enums\TenantPermission;
+use App\Settings\TrialSettings;
 use App\Support\Subdomain;
 use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -47,6 +48,9 @@ use Stancl\Tenancy\Events;
  * @property Carbon|null $deletion_scheduled_at
  * @property Carbon|null $trial_started_at
  * @property Carbon|null $trial_ends_at
+ * @property Carbon|null $trial_ending_notified_at
+ * @property Carbon|null $trial_last_day_notified_at
+ * @property Carbon|null $trial_ended_notified_at
  * @property-read Domain|null $domain
  * @property-read Collection<int, TenantInvitation> $invitations
  * @property-read Collection<int, Membership> $memberships
@@ -82,12 +86,17 @@ class Tenant extends Model implements TenantWithDatabase
                 $tenant->slug = static::generateUniqueTenantSlug($tenant->name);
             }
 
-            // Tout espace neuf s'ouvre a l'essai (README section 3). Sans duree configuree,
-            // l'essai n'a pas de date de fin.
-            $tenant->trial_started_at ??= Carbon::now();
+            // Tout espace neuf s'ouvre a l'essai (README section 3), pour la duree reglee depuis
+            // la console. Sans duree, l'essai n'a pas de date de fin. Essai ferme : l'organisation
+            // n'en commence aucun, et n'en recevra pas un sans fin le jour ou l'essai rouvre.
+            $trial = app(TrialSettings::class);
 
-            if ($tenant->trial_ends_at === null && is_numeric(config('convive.trial.days'))) {
-                $tenant->trial_ends_at = Carbon::now()->addDays((int) config('convive.trial.days'));
+            if ($trial->enabled) {
+                $tenant->trial_started_at ??= Carbon::now();
+
+                if ($tenant->trial_ends_at === null && $trial->days !== null) {
+                    $tenant->trial_ends_at = Carbon::now()->addDays($trial->days);
+                }
             }
         });
 
@@ -338,10 +347,23 @@ class Tenant extends Model implements TenantWithDatabase
      */
     public function isOnTrial(): bool
     {
-        return config('convive.trial.enabled')
+        return app(TrialSettings::class)->enabled
             && $this->trial_started_at !== null
             && ($this->trial_ends_at === null || $this->trial_ends_at->isFuture())
             && $this->subscription === null;
+    }
+
+    /**
+     * Get how many days of trial are left, rounded up, or null when the tenant is not on trial or
+     * its trial has no end date.
+     */
+    public function trialDaysLeft(): ?int
+    {
+        if (! $this->isOnTrial() || $this->trial_ends_at === null) {
+            return null;
+        }
+
+        return max(1, (int) ceil(now()->diffInHours($this->trial_ends_at) / 24));
     }
 
     /**
@@ -349,7 +371,7 @@ class Tenant extends Model implements TenantWithDatabase
      */
     public static function trialPlanCode(): PlanCode
     {
-        return PlanCode::tryFrom((string) config('convive.trial.plan')) ?? PlanCode::default();
+        return app(TrialSettings::class)->planCode();
     }
 
     /**
@@ -518,6 +540,9 @@ class Tenant extends Model implements TenantWithDatabase
             'deletion_scheduled_at' => 'datetime',
             'trial_started_at' => 'datetime',
             'trial_ends_at' => 'datetime',
+            'trial_ending_notified_at' => 'datetime',
+            'trial_last_day_notified_at' => 'datetime',
+            'trial_ended_notified_at' => 'datetime',
         ];
     }
 

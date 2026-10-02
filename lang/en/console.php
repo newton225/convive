@@ -226,6 +226,26 @@ return [
         ],
     ],
 
+    'trial' => [
+        'title' => 'Trial period',
+        'description' => 'What every organisation gets when it opens its space, before subscribing.',
+        'dialog' => 'The length applies to organisations opened from now on: an organisation already open keeps its end date, which is changed on its sheet. Closing the trial or changing the plan offered applies at once to every organisation on trial.',
+        'fields' => [
+            'enabled' => 'Trial period open',
+            'days' => 'Length in days',
+            'days_hint' => 'Leave empty for a trial with no end date. When it ends, the organisation falls back to the free plan; nothing is removed, and it is told 7 days before and again the day before.',
+            'plan' => 'Plan offered during the trial',
+        ],
+        'summary' => [
+            'disabled' => 'Trial closed: a new organisation starts on the free plan, and running trials are stopped.',
+            'unlimited' => 'Trial with no end date, on the :plan plan.',
+            'days' => '{1} 1-day trial, on the :plan plan.|[2,*] :count-day trial, on the :plan plan.',
+        ],
+        'flash' => [
+            'updated' => 'The trial period is updated.',
+        ],
+    ],
+
     'plans' => [
         'title' => 'Plans',
         'description' => 'Prices and quotas of the three plans. A change does not affect running subscriptions before their renewal.',
@@ -490,6 +510,7 @@ return [
             'send_the_j_1_missing_proof_reminder' => 'Proof reminder, 1 day before',
             'send_the_j_3h_reminder_to_valid_tickets' => 'Day-of reminder, three hours before',
             'remind_and_suspend_subscriptions_left_unpaid' => 'Reminders and suspension of unpaid subscriptions',
+            'warn_organisations_whose_trial_is_ending' => 'End of trial reminders',
             'purge_the_central_audit_log_entries_older_than_24_months' => 'Purge of the central log beyond 24 months',
             'purge_each_tenants_audit_log_entries_older_than_24_months' => 'Purge of organisation logs beyond 24 months',
             'verify_the_audit_log_hash_chains' => 'Audit log integrity check',
@@ -614,6 +635,7 @@ return [
             'operator_invited' => 'Publisher invitation',
             'operator_removed' => 'Team member removed',
             'plan_updated' => 'Plan edited',
+            'trial_settings_updated' => 'Trial period set',
             'database_repaired' => 'Database repaired',
             'deletion_cancelled' => 'Deletion cancelled',
             'tenant_erased' => 'Organisation erased',
@@ -642,6 +664,7 @@ return [
             'operator_invited' => ':actor invited someone to the publisher team',
             'operator_removed' => ':actor removed a member from the publisher team',
             'plan_updated' => ':actor changed the prices or quotas of a plan',
+            'trial_settings_updated' => ':actor changed the trial period settings',
             'database_repaired' => ':actor ran the migrations of :organisation again',
             'deletion_cancelled' => ':actor cancelled the deletion of :organisation',
             'tenant_erased' => ':organisation was erased when its scheduled deletion came due',

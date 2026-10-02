@@ -11,20 +11,22 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { translate, useTranslation } from '@/hooks/use-translation';
+import { TrialSettingsDialog } from '@/components/console/trial-settings-dialog';
 import { formatAmount, formatMoney } from '@/lib/format-currency';
 import { plans as plansRoute } from '@/routes/console';
-import type { ConsolePlan, Translations } from '@/types';
+import type { ConsolePlan, ConsoleTrialSettings, Translations } from '@/types';
 
 type Props = {
     isSample: boolean;
     plans: ConsolePlan[];
+    trial: ConsoleTrialSettings;
 };
 
 /**
  * README ecran 30 : le catalogue des plans, prix et quotas. Les vrais plans de la base centrale,
  * que la console regle.
  */
-export default function Plans({ isSample, plans }: Props) {
+export default function Plans({ isSample, plans, trial }: Props) {
     const { t, locale } = useTranslation();
 
     const price = (plan: ConsolePlan) => {
@@ -97,6 +99,40 @@ export default function Plans({ isSample, plans }: Props) {
                     <Info className="mt-0.5 size-4 shrink-0" />
                     <p>{t('console.plans.read_only')}</p>
                 </div>
+
+                <Card data-test="console-trial">
+                    <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+                        <div className="space-y-1">
+                            <CardTitle>{t('console.trial.title')}</CardTitle>
+                            <p className="text-muted-foreground text-sm">
+                                {t('console.trial.description')}
+                            </p>
+                        </div>
+                        <TrialSettingsDialog trial={trial} plans={plans} />
+                    </CardHeader>
+                    <CardContent className="text-sm">
+                        <p className="font-medium">
+                            {!trial.enabled
+                                ? t('console.trial.summary.disabled')
+                                : trial.days === null
+                                  ? t('console.trial.summary.unlimited', {
+                                        plan:
+                                            plans.find(
+                                                (plan) =>
+                                                    plan.code === trial.plan,
+                                            )?.name ?? trial.plan,
+                                    })
+                                  : t('console.trial.summary.days', {
+                                        count: trial.days,
+                                        plan:
+                                            plans.find(
+                                                (plan) =>
+                                                    plan.code === trial.plan,
+                                            )?.name ?? trial.plan,
+                                    })}
+                        </p>
+                    </CardContent>
+                </Card>
 
                 <div className="grid gap-4 md:grid-cols-3">
                     {plans.map((plan) => (

@@ -308,7 +308,7 @@ choix par defaut, pour la coherence et la maintenance.
 | Journal d'audit                                | `spatie/laravel-activitylog`                 |
 | Fichiers deposes, conversions, URL signees     | `spatie/laravel-medialibrary`                |
 | Rendu PDF (billets, recus, listes de controle) | `spatie/laravel-pdf`                         |
-| Reglages de locataire et d'evenement           | `spatie/laravel-settings`                    |
+| Reglages de la plateforme, de locataire et d'evenement | `spatie/laravel-settings`            |
 | Enums riches                                   | `spatie/laravel-data` et `spatie/enum`       |
 | Objets de transfert vers Inertia               | `spatie/laravel-data`                        |
 | Sauvegardes                                    | `spatie/laravel-backup`                      |
@@ -803,6 +803,28 @@ Decision du proprietaire du projet (2026-10-02) : toute recherche ignore les acc
   Ne jamais lire `$tenant->plan()->max_...` pour appliquer ou afficher une limite : ce serait
   ignorer la limite propre a l'organisation.
 - Une limite propre ne sait pas dire « illimite » sur un plan limite : on y met un grand nombre.
+
+### Periode d'essai
+
+Decision du proprietaire du projet (2026-10-02) : trente jours sur le plan Association, et tout
+reste reglable, jusqu'a un essai sans fin.
+
+- **Reglages dans `App\Settings\TrialSettings`** (`spatie/laravel-settings`, table `settings` de la
+  base centrale) : ouvert ou ferme, duree en jours (nulle : sans fin), plan offert. Regles depuis
+  l'ecran des plans de la console, journal central. `config('convive.trial')` ne donne que les
+  valeurs de depart, posees une fois par `database/settings/`. Ne plus lire cette configuration
+  ailleurs.
+- **La duree ne vaut que pour les organisations ouvertes ensuite** : la date de fin est ecrite sur
+  l'organisation a son ouverture (`tenants.trial_ends_at`) et se change sur sa fiche. Fermer l'essai
+  ou changer le plan offert s'applique en revanche tout de suite a toutes les organisations a
+  l'essai. Les organisations ouvertes avant le 2026-10-02 gardent un essai sans date de fin.
+- **A l'echeance rien n'est supprime** : l'organisation retombe sur le plan par defaut, ses limites
+  s'appliquent. `NotifyTrialDeadlines` (chaque jour a 8 h) previent les porteurs de `billing.view`
+  sept jours avant, la veille, puis une fois l'essai echu ; une colonne « envoye a » par rappel,
+  remises a zero quand l'editeur change la date.
+- **Le menu du back-office affiche les jours restants** (`currentPlan.trialDaysLeft`).
+- **En test** l'essai est ferme (`CONVIVE_TRIAL_ENABLED=false` dans `phpunit.xml`) ; un test qui en
+  a besoin regle `TrialSettings` lui-meme.
 
 ---
 

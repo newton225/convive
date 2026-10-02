@@ -23,6 +23,8 @@ return [
         'large_export' => ':name exported :count registrations of :event (:format).',
         'message_quota_reached' => 'The :plan plan sending quota is reached (:count messages this month): cards and reminders to guests will resume next month, or as soon as the plan changes.',
         'plan_limits_lowered' => 'The limits of the :plan plan have been lowered and your organisation exceeds at least one of them. Nothing is closed or removed, but you can no longer publish an event, take a new registration or invite a member beyond the limit. Your usage is on the Subscription screen.',
+        'trial_ending' => '{1} Your trial period ends tomorrow. Without a subscription, your organisation will move to the free plan: nothing will be removed, but its limits will apply.|[2,*] Your trial period ends in :count days. Without a subscription, your organisation will move to the free plan: nothing will be removed, but its limits will apply.',
+        'trial_ended' => 'Your trial period has ended: your organisation is now on the :plan plan. Nothing was removed. To get back what the trial allowed, choose a subscription.',
     ],
 
     'preferences' => [
@@ -44,6 +46,8 @@ return [
             'large_export' => 'Large export of the registration base',
             'message_quota_reached' => 'Sending quota reached',
             'plan_limits_lowered' => 'Plan limits lowered',
+            'trial_ending' => 'Trial period ending in a few days',
+            'trial_ended' => 'Trial period ended',
         ],
         'channels' => [
             'app' => 'In the app',

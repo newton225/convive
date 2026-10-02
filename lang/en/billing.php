@@ -5,6 +5,7 @@ return [
         'plan' => ':name plan',
         'events' => '{0} No active event out of :max|{1} 1 active event out of :max|[2,*] :count active events out of :max',
         'events_unlimited' => '{0} No active event|{1} 1 active event|[2,*] :count active events',
+        'trial_days' => '{1} Trial: last day|[2,*] Trial: :count days left',
     ],
 
     'title' => 'Subscription',

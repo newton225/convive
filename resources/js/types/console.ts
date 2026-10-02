@@ -124,6 +124,13 @@ export type ConsolePlanOption = {
     name: string;
 };
 
+// La periode d'essai offerte aux organisations neuves ; `days` nul : sans date de fin.
+export type ConsoleTrialSettings = {
+    enabled: boolean;
+    days: number | null;
+    plan: string;
+};
+
 export type ConsolePlan = {
     code: string;
     name: string;
