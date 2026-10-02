@@ -29,6 +29,7 @@ return [
     ],
 
     'errors' => [
+        'in_use' => 'Guests have already chosen this unit: it cannot be deleted. Deactivate it to remove it from the registration form.',
         'last_one' => 'An organisation keeps at least one unit: without it, the registration form can no longer be filled in.',
     ],
 

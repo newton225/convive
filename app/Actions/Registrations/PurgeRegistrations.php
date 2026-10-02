@@ -7,6 +7,7 @@ use App\Actions\Waitlist\PromoteNextWaitlistEntry;
 use App\Enums\NotificationType;
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
+use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\Tenant;
 
@@ -37,6 +38,14 @@ class PurgeRegistrations
             ->where('status', RegistrationStatus::Held)
             ->where('held_until', '>', now())
             ->sum('party_size');
+
+        // Les preuves d'abord, une par une : la suppression d'un modele retire sa capture du
+        // disque. La suppression groupee ci-dessous emporte bien leurs lignes (cle etrangere en
+        // cascade), mais sans passer par le modele : les captures, qui portent le nom, le numero et
+        // le montant de l'invite, resteraient sur le disque sans plus rien pour les retrouver.
+        PaymentProof::whereIn('registration_id', (clone $query)->select('id'))
+            ->get()
+            ->each(fn (PaymentProof $proof) => $proof->delete());
 
         $query->delete();
 

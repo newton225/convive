@@ -29,6 +29,7 @@ return [
     ],
 
     'errors' => [
+        'in_use' => 'Cette unité a déjà été choisie par des invités : elle ne peut pas être supprimée. Désactivez-la pour la retirer du formulaire d’inscription.',
         'last_one' => "Une organisation conserve au moins une unité : sans elle, le formulaire d'inscription ne peut plus être rempli.",
     ],
 

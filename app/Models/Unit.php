@@ -26,6 +26,34 @@ use Illuminate\Support\Carbon;
 #[Fillable(['name', 'position', 'is_active'])]
 class Unit extends Model
 {
+    /**
+     * Tables qui designent une unite. Tant que l'une d'elles la porte, l'unite ne se supprime pas :
+     * elle se desactive (`is_active`), pour ne pas casser l'historique des inscriptions.
+     *
+     * @var array<string, string>
+     */
+    private const References = [
+        'registrations' => 'unit_id',
+        'registration_companions' => 'unit_id',
+        'waitlist_entries' => 'unit_id',
+        'seating_tables' => 'reserved_unit_id',
+    ];
+
+    /**
+     * Determine whether a registration, a companion, a waitlist entry or a table still carries
+     * the unit.
+     */
+    public function isInUse(): bool
+    {
+        foreach (self::References as $table => $column) {
+            if ($this->getConnection()->table($table)->where($column, $this->id)->exists()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** @use HasFactory<UnitFactory> */
     use HasFactory;
 

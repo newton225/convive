@@ -69,6 +69,7 @@ return [
     ],
 
     'errors' => [
+        'has_proofs' => 'Guests have already paid into this account: it cannot be deleted. Deactivate it so that it is no longer offered.',
         'account_number_required' => 'This channel requires an account number.',
         'number_invalid' => 'Enter a 10-digit Ivorian number, for example 07 07 12 34 56.',
         'number_network' => 'A :channel number starts with :prefixes. Check the number or the channel chosen.',

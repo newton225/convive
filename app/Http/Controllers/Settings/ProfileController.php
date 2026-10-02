@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Actions\Tenants\DeleteTenant;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
@@ -46,9 +47,16 @@ class ProfileController extends Controller
     /**
      * Delete the user's profile.
      */
-    public function destroy(ProfileDeleteRequest $request): RedirectResponse
+    public function destroy(ProfileDeleteRequest $request, DeleteTenant $delete): RedirectResponse
     {
         $user = $request->user();
+
+        // L'espace personnel suit le circuit de toute organisation supprimee : effacement reel a
+        // trente jours. Sans cela, sa base resterait sur le serveur sans plus personne pour
+        // l'atteindre. Fait avant la deconnexion et la suppression du compte, qui en est l'acteur.
+        if ($personal = $user->personalTenant()) {
+            $delete->handle($personal, $user, notifyOwners: false);
+        }
 
         Auth::logout();
 

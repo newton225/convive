@@ -7,6 +7,7 @@ use App\Enums\PaymentChannel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenants\SavePaymentAccountRequest;
 use App\Models\PaymentAccount;
+use App\Models\PaymentProof;
 use App\Models\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -125,6 +126,12 @@ class PaymentAccountController extends Controller
     public function destroy(Tenant $tenant, PaymentAccount $paymentAccount): RedirectResponse
     {
         Gate::authorize('delete', [$paymentAccount, $tenant]);
+
+        // Des preuves designent ce compte : le supprimer effacerait ou l'argent a ete verse. Il se
+        // desactive, ce qui le retire des liens publics sans toucher a l'historique.
+        if (PaymentProof::where('payment_account_id', $paymentAccount->id)->exists()) {
+            return back()->withErrors(['payment_account' => __('payment_accounts.errors.has_proofs')]);
+        }
 
         activity()
             ->event('deleted')

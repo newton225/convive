@@ -103,6 +103,12 @@ class UnitController extends Controller
             return back()->withErrors(['unit' => __('units.errors.last_one')]);
         }
 
+        // Une unite deja choisie par un invite ne se supprime pas (CLAUDE.md, « Unites ») : elle se
+        // desactive, et l'historique des inscriptions reste lisible.
+        if ($unit->isInUse()) {
+            return back()->withErrors(['unit' => __('units.errors.in_use')]);
+        }
+
         $before = $unit->only(['name', 'position', 'is_active']);
 
         $unit->delete();

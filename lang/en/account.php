@@ -157,6 +157,7 @@ return [
         'confirm' => 'Delete account',
         'title' => 'Delete account',
         'description' => 'Delete your account and all of its data',
+        'last_owner' => 'You are the last owner of: :organisations. First give the Owner profile to another member, or delete the organisation, then come back to delete your account.',
     ],
 
     'passkeys' => [

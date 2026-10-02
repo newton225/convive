@@ -23,7 +23,11 @@ use Throwable;
  */
 class DeleteTenant
 {
-    public function handle(Tenant $tenant, User $actor): void
+    /**
+     * @param  bool  $notifyOwners  faux quand le compte du seul Proprietaire part avec son espace
+     *                              personnel : il n'y a plus personne a prevenir
+     */
+    public function handle(Tenant $tenant, User $actor, bool $notifyOwners = true): void
     {
         // Releves avant de retirer les appartenances : ce sont eux qu'on previent.
         $owners = $tenant->owners();
@@ -53,7 +57,9 @@ class DeleteTenant
             'subscription_cancelled' => $this->cancelSubscription($tenant),
         ]);
 
-        Notification::send($owners, new TenantDeletionScheduled($tenant->name, $actor->name, $eraseAt->toISOString()));
+        if ($notifyOwners) {
+            Notification::send($owners, new TenantDeletionScheduled($tenant->name, $actor->name, $eraseAt->toISOString()));
+        }
     }
 
     /**

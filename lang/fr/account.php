@@ -157,6 +157,7 @@ return [
         'confirm_description' => 'Une fois le compte supprimé, toutes ses ressources et ses données seront aussi supprimées définitivement. Saisissez votre mot de passe pour confirmer.',
         'password_label' => 'Mot de passe',
         'confirm' => 'Supprimer le compte',
+        'last_owner' => 'Vous êtes le dernier Propriétaire de : :organisations. Donnez d’abord le profil Propriétaire à un autre membre, ou supprimez l’organisation, puis revenez supprimer votre compte.',
     ],
 
     'passkeys' => [
