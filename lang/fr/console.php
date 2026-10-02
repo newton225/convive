@@ -395,6 +395,14 @@ return [
     ],
 
     'security' => [
+        'export_limit' => [
+            'title' => 'Limite d’exports',
+            'hint' => 'Combien d’exports (liste des inscrits, rapports, listes de contrôle) et d’imports de relevé une même personne peut lancer par heure, dans toutes les organisations. C’est ce qui empêche d’aspirer une base entière.',
+            'current' => '{1} 1 export par heure et par personne.|[2,*] :count exports par heure et par personne.',
+            'dialog' => 'Le changement vaut tout de suite, pour toutes les organisations. Une limite trop basse bloque un trésorier qui exporte plusieurs événements le même jour ; trop haute, elle ne protège plus. Chaque export reste inscrit à l’historique de l’organisation.',
+            'field' => 'Exports par heure et par personne',
+            'flash' => 'La limite d’exports est mise à jour.',
+        ],
         'title' => 'Sécurité',
         'description' => 'Intégrité des journaux d’audit, limites de débit atteintes et connexions verrouillées.',
         'chains' => 'Intégrité des journaux d’audit',
@@ -636,6 +644,7 @@ return [
             'operator_removed' => 'Retrait éditeur',
             'plan_updated' => 'Plan modifié',
             'trial_settings_updated' => 'Période d’essai réglée',
+            'export_limit_updated' => 'Limite d’exports réglée',
             'database_repaired' => 'Base réparée',
             'deletion_cancelled' => 'Suppression annulée',
             'tenant_erased' => 'Organisation effacée',
@@ -665,6 +674,7 @@ return [
             'operator_removed' => ':actor a retiré un membre de l’équipe éditeur',
             'plan_updated' => ':actor a modifié les prix ou les quotas d’un plan',
             'trial_settings_updated' => ':actor a modifié les réglages de la période d’essai',
+            'export_limit_updated' => ':actor a modifié la limite d’exports par heure',
             'database_repaired' => ':actor a rejoué les migrations de :organisation',
             'deletion_cancelled' => ':actor a annulé la suppression de :organisation',
             'tenant_erased' => ':organisation a été effacée à l’échéance de sa suppression programmée',

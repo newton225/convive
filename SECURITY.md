@@ -394,8 +394,10 @@ automatise avec un jeu de valeurs hostiles.
 Un profil Lecture exporte la base complete, ou un ancien membre le fait avant son depart.
 L'action est autorisee, ce n'est pas une intrusion, mais c'est une fuite.
 
-**Controles.** Permission d'export distincte de la permission de consultation. Limitation a 5
-exports par heure et par utilisateur. Journalisation avec le nombre de lignes et les filtres
+**Controles.** Permission d'export distincte de la permission de consultation. Limitation a 30
+exports par heure et par utilisateur par defaut, reglable par l'editeur depuis l'ecran Securite
+de la console (jamais retirable, chaque reglage journalise) : 5 bloquait un tresorier qui exporte
+plusieurs evenements le meme jour. Journalisation avec le nombre de lignes et les filtres
 appliques. Notification au Proprietaire au dela d'un seuil. Filigrane portant l'identite du
 demandeur et l'horodatage sur les exports PDF.
 

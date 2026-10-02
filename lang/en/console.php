@@ -395,6 +395,14 @@ return [
     ],
 
     'security' => [
+        'export_limit' => [
+            'title' => 'Export limit',
+            'hint' => 'How many exports (registration list, reports, checklists) and statement imports one person can run per hour, in every organisation. This is what prevents a whole base from being siphoned off.',
+            'current' => '{1} 1 export per hour and per person.|[2,*] :count exports per hour and per person.',
+            'dialog' => 'The change applies at once, to every organisation. Too low a limit blocks a treasurer exporting several events on the same day; too high, it no longer protects. Every export stays recorded in the organisation’s history.',
+            'field' => 'Exports per hour and per person',
+            'flash' => 'The export limit is updated.',
+        ],
         'title' => 'Security',
         'description' => 'Integrity of the audit logs, rate limits reached and locked sign-ins.',
         'chains' => 'Integrity of the audit logs',
@@ -636,6 +644,7 @@ return [
             'operator_removed' => 'Team member removed',
             'plan_updated' => 'Plan edited',
             'trial_settings_updated' => 'Trial period set',
+            'export_limit_updated' => 'Export limit set',
             'database_repaired' => 'Database repaired',
             'deletion_cancelled' => 'Deletion cancelled',
             'tenant_erased' => 'Organisation erased',
@@ -665,6 +674,7 @@ return [
             'operator_removed' => ':actor removed a member from the publisher team',
             'plan_updated' => ':actor changed the prices or quotas of a plan',
             'trial_settings_updated' => ':actor changed the trial period settings',
+            'export_limit_updated' => ':actor changed the hourly export limit',
             'database_repaired' => ':actor ran the migrations of :organisation again',
             'deletion_cancelled' => ':actor cancelled the deletion of :organisation',
             'tenant_erased' => ':organisation was erased when its scheduled deletion came due',

@@ -200,7 +200,10 @@ possible, avec des limiteurs nommes et non le seul reglage par defaut.
 | Soumission de preuve        | 5 par heure             | inscription plus adresse IP |
 | Lien de reprise             | 10 par heure            | jeton plus adresse IP       |
 | Scan a l'entree             | 60 par minute           | utilisateur agent           |
-| Exports et import de releve | 30 par heure            | utilisateur                 |
+| Exports et import de releve | 30 par heure, reglable  | utilisateur                 |
+
+La limite d'exports se regle depuis l'ecran Securite de la console (`App\Settings\ProtectionSettings`,
+decision du 2026-10-02) : trente au depart, jamais retirable, chaque reglage au journal central.
 
 Verrouillage progressif apres echecs repetes sur la connexion et la 2FA. Chaque blocage est
 journalise. Les reponses limitees renvoient un message utile, jamais un code technique brut.

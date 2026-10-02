@@ -398,7 +398,8 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 
 1. **Site produit** — hero, bénéfices, quatre étapes, tarifs, appel à l'action.
 2. **Connexion** — identifiants → code 2FA à 6 chiffres → espace ; création d'un espace
-   (essai 14 jours) qui redirige vers le formulaire d'organisation.
+   (essai de 30 jours, durée réglable depuis la console) qui redirige vers le formulaire
+   d'organisation.
 
 ### Invité (PWA, bilingue FR/EN, mobile d'abord)
 

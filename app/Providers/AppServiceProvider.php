@@ -13,6 +13,7 @@ use App\Notifications\Channels\WhatsAppChannel;
 use App\Policies\AuditPolicy;
 use App\Policies\ReportPolicy;
 use App\Policies\ScanPolicy;
+use App\Settings\ProtectionSettings;
 use App\Support\AuditChain;
 use App\Support\AuditTrail;
 use App\Support\Console\ConsoleAccess;
@@ -217,9 +218,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('support-request', fn ($request) => Limit::perHour(5)->by($request->user()?->id));
 
         // Exports (Excel/CSV/PDF/listes de controle) et import de releve (table de CLAUDE.md).
-        // 30 par heure : un organisateur qui imprime les listes de controle de plusieurs
-        // evenements le meme jour atteignait l'ancienne limite de 5 sans rien faire d'anormal.
-        RateLimiter::for('exports', fn ($request) => Limit::perHour(self::ExportsPerHour)->by($request->user()?->id));
+        // 30 par heure au depart : un organisateur qui imprime les listes de controle de plusieurs
+        // evenements le meme jour atteignait l'ancienne limite de 5 sans rien faire d'anormal. La
+        // valeur en vigueur se regle depuis la console (`ProtectionSettings`), lue a chaque requete.
+        RateLimiter::for('exports', fn ($request) => Limit::perHour(app(ProtectionSettings::class)->exports_per_hour)
+            ->by($request->user()?->id));
 
         // Renvoi du code de verification du telephone (SECURITY.md C3) : chaque envoi coute un
         // message, 3 par tranche de 10 minutes et par inscription plus IP.

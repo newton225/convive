@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { CircleAlert, CircleCheck } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
+import { ExportLimitDialog } from '@/components/console/export-limit-dialog';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,7 @@ type Props = {
     chains: ConsoleAuditChains;
     counts: { rateLimited: number; lockouts: number };
     events: ConsoleSecurityEvent[];
+    exportsPerHour: number;
 };
 
 /**
@@ -25,7 +27,12 @@ type Props = {
  * verifiee chaque nuit, puis les limites de debit atteintes et les connexions verrouillees. Ces
  * faits n'existaient qu'au journal du serveur.
  */
-export default function ConsoleSecurity({ chains, counts, events }: Props) {
+export default function ConsoleSecurity({
+    chains,
+    counts,
+    events,
+    exportsPerHour,
+}: Props) {
     const { t, locale } = useTranslation();
 
     const columns: ColumnDef<ConsoleSecurityEvent>[] = [
@@ -69,6 +76,25 @@ export default function ConsoleSecurity({ chains, counts, events }: Props) {
                     title={t('console.security.title')}
                     description={t('console.security.description')}
                 />
+
+                <Card data-test="console-export-limit">
+                    <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+                        <div className="space-y-1">
+                            <CardTitle>
+                                {t('console.security.export_limit.title')}
+                            </CardTitle>
+                            <p className="text-muted-foreground text-sm">
+                                {t('console.security.export_limit.hint')}
+                            </p>
+                        </div>
+                        <ExportLimitDialog exportsPerHour={exportsPerHour} />
+                    </CardHeader>
+                    <CardContent className="text-sm font-medium">
+                        {t('console.security.export_limit.current', {
+                            count: exportsPerHour,
+                        })}
+                    </CardContent>
+                </Card>
 
                 <Card data-test="console-audit-chains">
                     <CardHeader>
