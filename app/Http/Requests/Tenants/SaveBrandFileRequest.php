@@ -4,6 +4,7 @@ namespace App\Http\Requests\Tenants;
 
 use App\Enums\BrandFile;
 use App\Models\Tenant;
+use App\Rules\ImagePixelBudget;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -41,6 +42,8 @@ class SaveBrandFileRequest extends FormRequest
                 // qui porte le nom et le type d'une image sans en etre une est refuse ici,
                 // avant que le reencodage n'echoue.
                 'dimensions:min_width=1,min_height=1',
+                // Une image trop grande epuiserait la memoire au reencodage.
+                new ImagePixelBudget,
             ],
             // La zone de rognage (en pixels de l'image redressee) : seulement pour les fonds du
             // billet, les seuls fichiers dont les proportions sont imposees.

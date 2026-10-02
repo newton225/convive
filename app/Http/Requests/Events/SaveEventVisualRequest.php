@@ -4,6 +4,7 @@ namespace App\Http\Requests\Events;
 
 use App\Models\Event;
 use App\Models\Tenant;
+use App\Rules\ImagePixelBudget;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -36,6 +37,8 @@ class SaveEventVisualRequest extends FormRequest
             'file' => [
                 'required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120',
                 'dimensions:min_width=1,min_height=1',
+                // Une image trop grande epuiserait la memoire au reencodage.
+                new ImagePixelBudget,
             ],
         ];
     }

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Public;
 use App\Enums\PaymentChannel;
 use App\Models\Event;
 use App\Models\PaymentAccount;
+use App\Rules\ImagePixelBudget;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Collection;
@@ -54,7 +55,9 @@ class StorePaymentProofRequest extends FormRequest
                 // Plafond haut, pas seulement un plancher (SECURITY.md H1, « limites de pixels
                 // imposees ») : un fichier de quelques kilo-octets peut declarer des dimensions
                 // demesurees et epuiser la memoire au reencodage GD sans jamais depasser 5 Mo.
+                // Borner chaque cote ne suffit pas, c'est leur produit qui compte : `ImagePixelBudget`.
                 'dimensions:min_width=100,min_height=100,max_width=8000,max_height=8000',
+                new ImagePixelBudget,
             ],
             'idempotency_key' => ['required', 'uuid'],
         ];

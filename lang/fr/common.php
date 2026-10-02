@@ -77,6 +77,10 @@ return [
         'network_error' => 'Le réseau ne répond pas. Vérifiez votre connexion, puis réessayez.',
     ],
 
+    'errors' => [
+        'image_too_large' => 'Cette image est trop grande (plus de 16 mégapixels). Envoyez plutôt une capture d’écran, ou une photo prise en qualité normale.',
+    ],
+
     'rate_limit' => [
         'title' => 'Un peu de patience',
         'retry_in' => '{1} Cette action a été répétée trop souvent en peu de temps. Réessayez dans 1 minute.|[2,*] Cette action a été répétée trop souvent en peu de temps. Réessayez dans :minutes minutes.',
