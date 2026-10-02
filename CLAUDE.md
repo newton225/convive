@@ -974,7 +974,8 @@ compte et le formulaire d'inscription de l'invite.
   texte en dur. Une valeur vide s'affiche « [a completer] », et `convive:production-check` refuse
   de partir en production tant qu'il en reste une ou que `CONVIVE_LEGAL_REVIEWED` n'est pas vrai.
 - **Ces textes ne sont pas un avis juridique** : rediges a partir du fonctionnement du service, ils
-  portent un bandeau « en cours de validation » jusqu'a leur relecture par un juriste.
+  restent a faire relire par un juriste. Aucun bandeau ne le dit sur les pages (decision du
+  proprietaire du projet, 2026-10-02) ; seule la verification de production le rappelle.
 - **L'acceptation est gardee** : `users.terms_accepted_at` et `users.terms_version`, poses a la
   creation du compte, case obligatoire.
 - **Roles** : l'organisation est responsable du traitement des donnees de ses invites, l'editeur

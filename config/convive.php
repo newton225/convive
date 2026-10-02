@@ -87,7 +87,9 @@ return [
     | confidentialite, les conditions d'utilisation et les mentions legales
     | (`App\Support\LegalDocument`). Une valeur vide s'affiche « [a completer] », et
     | `convive:production-check` refuse de partir en production tant qu'il en reste une.
-    | `reviewed` passe a vrai quand un juriste a valide les textes : d'ici la, chaque page le dit.
+    | `reviewed` passe a vrai quand un juriste a valide les textes : rien ne s'affiche a ce sujet
+    | sur les pages (decision du proprietaire du projet, 2026-10-02), seule la verification de
+    | production le rappelle.
     */
     'legal' => [
         'editor_name' => env('CONVIVE_LEGAL_EDITOR_NAME'),

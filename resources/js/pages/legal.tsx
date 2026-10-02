@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import { TriangleAlert } from 'lucide-react';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
 import { useTranslation } from '@/hooks/use-translation';
@@ -11,8 +10,6 @@ type Props = {
     document: LegalDocument;
     // Date de la version en vigueur, celle qu'un compte accepte a sa creation.
     version: string;
-    // Faux tant qu'un juriste n'a pas valide les textes : la page le dit.
-    reviewed: boolean;
     labels: LegalLabels;
 };
 
@@ -22,7 +19,7 @@ type Props = {
  * la page ne fait que le mettre en forme, avec un sommaire et les liens vers les deux autres
  * documents.
  */
-export default function Legal({ document, version, reviewed, labels }: Props) {
+export default function Legal({ document, version, labels }: Props) {
     const { locale } = useTranslation();
 
     const documents = [
@@ -74,20 +71,6 @@ export default function Legal({ document, version, reviewed, labels }: Props) {
                         )}
                     </p>
                 </header>
-
-                {reviewed ? null : (
-                    <p
-                        className="bg-muted mt-6 flex gap-3 rounded-xl p-4 text-sm"
-                        role="note"
-                        data-test="legal-not-reviewed"
-                    >
-                        <TriangleAlert
-                            className="mt-0.5 size-4 shrink-0"
-                            aria-hidden
-                        />
-                        <span>{labels.notReviewed}</span>
-                    </p>
-                )}
 
                 <nav
                     aria-label={labels.contents}

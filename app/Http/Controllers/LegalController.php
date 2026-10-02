@@ -26,11 +26,9 @@ class LegalController extends Controller
         return Inertia::render('legal', [
             'document' => LegalDocument::get($document),
             'version' => LegalDocument::Version,
-            'reviewed' => LegalDocument::isReviewed(),
             'labels' => [
                 'updated' => __('legal.updated'),
                 'contents' => __('legal.contents'),
-                'notReviewed' => __('legal.not_reviewed'),
                 'nav' => __('legal.nav'),
             ],
         ]);

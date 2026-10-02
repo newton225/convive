@@ -21,7 +21,6 @@ export type LegalDocument = {
 export type LegalLabels = {
     updated: string;
     contents: string;
-    notReviewed: string;
     nav: {
         title: string;
         privacy: string;

@@ -12,7 +12,6 @@ return [
     'updated' => 'Last updated: :date',
     'contents' => 'Contents',
     'placeholder' => '[to be completed]',
-    'not_reviewed' => 'This document is undergoing legal review. It describes how the service really works, but has not yet been checked by a lawyer.',
 
     'nav' => [
         'title' => 'Legal information',

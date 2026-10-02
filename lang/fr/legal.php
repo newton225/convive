@@ -14,7 +14,6 @@ return [
     'updated' => 'Dernière mise à jour : :date',
     'contents' => 'Sommaire',
     'placeholder' => '[à compléter]',
-    'not_reviewed' => 'Document en cours de validation juridique. Il décrit le fonctionnement réel du service, mais n’a pas encore été relu par un juriste.',
 
     'nav' => [
         'title' => 'Informations légales',

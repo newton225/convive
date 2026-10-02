@@ -99,15 +99,6 @@ class LegalPagesTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/:[a-z_]{4,}/', (string) $text);
     }
 
-    public function test_la_page_dit_qu_elle_n_a_pas_ete_validee_par_un_juriste(): void
-    {
-        config(['convive.legal.reviewed' => false]);
-        $this->get(route('legal.privacy'))->assertInertia(fn (Assert $page) => $page->where('reviewed', false));
-
-        config(['convive.legal.reviewed' => true]);
-        $this->get(route('legal.privacy'))->assertInertia(fn (Assert $page) => $page->where('reviewed', true));
-    }
-
     public function test_la_politique_annonce_les_durees_que_l_application_applique(): void
     {
         $text = json_encode(LegalDocument::get('privacy'), JSON_UNESCAPED_UNICODE);
