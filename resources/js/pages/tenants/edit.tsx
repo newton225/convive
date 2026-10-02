@@ -45,10 +45,13 @@ type Props = {
     invitations: TenantInvitation[];
     permissions: TenantPermissions;
     availableProfiles: ProfileOption[];
+    // Vrai pour un Proprietaire d'une organisation non personnelle : lui seul la supprime.
+    canDelete: boolean;
 };
 
 export default function TenantEdit({
     tenant,
+    canDelete,
     members,
     invitations,
     permissions,
@@ -343,8 +346,7 @@ export default function TenantEdit({
                     </div>
                 ) : null}
 
-                {can(permissions, Permission.TenantLegal) &&
-                !tenant.isPersonal ? (
+                {canDelete ? (
                     <div className="space-y-6">
                         <Heading
                             variant="small"
@@ -395,7 +397,7 @@ export default function TenantEdit({
                 onOpenChange={setCancelInvitationDialogOpen}
             />
 
-            {can(permissions, Permission.TenantLegal) && !tenant.isPersonal ? (
+            {canDelete ? (
                 <DeleteTenantModal
                     tenant={tenant}
                     open={deleteDialogOpen}

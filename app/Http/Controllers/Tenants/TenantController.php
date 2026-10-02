@@ -57,6 +57,8 @@ class TenantController extends Controller
                 'slug' => $tenant->slug,
                 'isPersonal' => $tenant->is_personal,
             ],
+            // Reservee aux Proprietaires : l'ecran ne montre le bloc qu'a qui peut s'en servir.
+            'canDelete' => $user->can('delete', $tenant),
             'members' => $tenant->members()->get()->map(function (User $member) use ($tenant) {
                 $profile = $member->tenantProfile($tenant);
 

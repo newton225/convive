@@ -128,9 +128,13 @@ class TenantPolicy
 
     /**
      * Determine whether the user can delete the model.
+     *
+     * Reservee aux Proprietaires (decision du proprietaire du projet, 2026-10-02), et non a qui
+     * detient `tenant.legal` : la suppression mene a l'effacement reel de l'organisation au bout
+     * de trente jours, et corriger une identite legale n'est pas decider de sa fin.
      */
     public function delete(User $user, Tenant $tenant): bool
     {
-        return ! $tenant->is_personal && $user->hasTenantPermission($tenant, TenantPermission::TenantLegal);
+        return ! $tenant->is_personal && $user->ownsTenant($tenant);
     }
 }

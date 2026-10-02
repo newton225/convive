@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Tenants;
 
+use App\Enums\TenantPermission;
 use App\Models\Profile;
 use App\Models\Tenant;
 use App\Models\User;
@@ -401,6 +402,31 @@ class TenantTest extends TestCase
             ]);
 
         $response->assertForbidden();
+    }
+
+    public function test_un_membre_qui_gere_l_identite_legale_sans_etre_proprietaire_ne_supprime_pas_l_organisation(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $treasurer = User::factory()->withTwoFactor()->create();
+        $tenant = Tenant::factory()->create();
+
+        $this->joinAsOwner($tenant, $owner);
+        // Corriger un numero de contribuable n'est pas decider de la fin de l'organisation.
+        $this->joinWithPermissions($tenant, $treasurer, [TenantPermission::TenantLegal]);
+
+        $this->actingAs($treasurer)
+            ->delete(route('tenants.destroy', $tenant), ['name' => $tenant->name])
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('tenants', ['id' => $tenant->id, 'deleted_at' => null]);
+
+        $this->actingAs($treasurer)
+            ->get(route('tenants.edit', $tenant))
+            ->assertInertia(fn ($page) => $page->where('canDelete', false));
+
+        $this->actingAs($owner)
+            ->get(route('tenants.edit', $tenant))
+            ->assertInertia(fn ($page) => $page->where('canDelete', true));
     }
 
     public function test_users_can_switch_tenants()
