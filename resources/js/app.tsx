@@ -2,6 +2,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
+import { documentCspNonce } from '@/lib/csp-nonce';
 import { registerServiceWorker } from '@/lib/register-service-worker';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
@@ -67,8 +68,14 @@ void createInertiaApp({
             </TooltipProvider>
         );
     },
+    // La barre qui avance en haut de l'ecran pendant une navigation. Inertia pose ses styles dans
+    // une balise `<style>` : sans le nonce du document, la politique de securite du contenu (CSP)
+    // la refuse et la barre reste invisible.
+    nonce: documentCspNonce(''),
     progress: {
-        color: '#4B5563',
+        // La couleur d'accent de la charte, qui suit le theme clair ou sombre. Un gris fonce ne
+        // se voyait pas sur le fond sombre.
+        color: 'var(--primary)',
     },
 });
 
