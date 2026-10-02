@@ -363,8 +363,14 @@ clientes, pas leurs événements**.
 
 - L'éditeur ne lit le contenu d'une organisation que si **un Propriétaire de cette
   organisation lui a ouvert un accès de support** depuis son propre back-office (écran 25).
-- Accès limité à **24 heures au plus**, révocable à tout moment, en **lecture seule**,
-  nominatif (un compte éditeur précis).
+- Accès **temporaire**, pour l'une des durées proposées (1, 4, 12 ou 24 heures au départ,
+  réglables depuis la console), révocable à tout moment, en **lecture seule**, nominatif (un
+  compte éditeur précis).
+- L'organisation choisit **ce que l'accès ouvre** : tout son espace, ou **un seul événement**.
+  Limité à un événement, l'accès n'ouvre que ses écrans (inscrits, preuves, plan de salle,
+  rapport) : ni les autres événements, ni le tableau de bord, ni l'historique des actions.
+- Un accès en cours **se prolonge** sans être rouvert : le temps choisi s'ajoute à l'échéance,
+  sans jamais laisser à l'accès plus que la durée la plus longue proposée devant lui.
 - Tant qu'il est ouvert, l'organisation voit un bandeau permanent.
 - Chaque page consultée est journalisée **dans le journal de l'organisation**, qu'elle peut
   relire, et dans le journal central.
@@ -458,10 +464,14 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 24. **Réglages événement** — identité visuelle, places totales, échéances, rappels, règles
     (envoi programmé, attribution automatique, inscription sans preuve, lisibilité de la preuve,
     purge à l'épuisement, réservation temporaire).
-25. **Profil & équipe** — profil, 2FA, matrice de permissions, préférences de notification par
-    type d'alerte (appli / email / les deux), membres et invitations, **accès du support** :
-    ouvrir un accès à l'équipe Convive (compte concerné, durée de 24 h au plus), le révoquer,
-    relire ce qui a été consulté.
+25. **Profil & équipe** — réparti en pages séparées, chacune avec son lien dans le menu, pour
+    que chacun ne voie que ce qu'il a le droit de voir et que l'ensemble reste lisible sur
+    téléphone : **profil** ; **sécurité** (mot de passe, 2FA, codes de secours affichés une
+    seule fois, appareils connectés, code de scan) ; **notifications** (préférences par type
+    d'alerte : appli / email / les deux) ; **organisations** ; **équipe et profils** (membres,
+    invitations, matrice de permissions) ; **accès du support** : ouvrir un accès à l'équipe
+    Convive (compte concerné, durée, toute l'organisation ou un seul événement), le prolonger,
+    le révoquer, relire ce qui a été consulté.
 
 ### Agent d'accueil (mobile)
 
