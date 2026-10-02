@@ -27,7 +27,9 @@ class ScopedSqliteDatabaseManager extends SQLiteDatabaseManager
      */
     public static function directory(): string
     {
-        return app()->environment('testing')
+        // `e2e` : l'application lancee pour les tests de bout en bout (`e2e/environment.ts`). Comme
+        // la suite de tests, elle range ses bases a l'ecart de celles du developpement.
+        return app()->environment('testing', 'e2e')
             ? storage_path('framework/testing/tenant-databases')
             : database_path();
     }

@@ -135,6 +135,11 @@ preuves et du plan de salle avant l'etape 7), plutot que de n'y penser que pour 
   `npm test` (`vp test run`, environnement `jsdom`, reglage dans `vite.config.ts`). Un composant
   qui lit ses textes par `useTranslation()` se teste avec ce hook simule : la traduction rend la
   cle, le test porte sur ce que le composant affiche.
+- Tests de bout en bout : **Playwright** (choix du proprietaire du projet, 2026-10-02, pour le scan
+  hors connexion et Safari d'iPhone), dossier `e2e/`, `npm run test:e2e`. Ils tournent contre une
+  application lancee a part, sur ses propres bases et fichiers sous `storage/e2e`
+  (`e2e/environment.ts`, environnement `e2e`), remise a zero et semee a chaque execution : jamais
+  contre les donnees de developpement. Les elements se designent par leur `data-test`.
 
 ---
 

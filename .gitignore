@@ -53,3 +53,8 @@ yarn-error.log
 # Etat local de l'outil (verrou de tache planifiee d'une session Claude Code), pas du code du
 # projet.
 /.claude/
+
+# Tests de bout en bout : l'application de test et les rapports de Playwright.
+/storage/e2e/
+/playwright-report/
+/test-results/
