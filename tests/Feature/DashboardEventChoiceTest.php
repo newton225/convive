@@ -50,7 +50,11 @@ class DashboardEventChoiceTest extends TestCase
      */
     private function dashboard(?int $eventId = null): TestResponse
     {
-        return $this->actingAs($this->owner)->get(route('dashboard', $eventId === null ? [] : ['event' => $eventId]));
+        // L'organisation dite explicitement : creer celle d'un autre compte change l'organisation
+        // par defaut des adresses dans le processus de test.
+        $parameters = ['current_tenant' => $this->tenant->slug, ...($eventId === null ? [] : ['event' => $eventId])];
+
+        return $this->actingAs($this->owner)->get(route('dashboard', $parameters));
     }
 
     public function test_par_defaut_le_tableau_de_bord_resume_l_evenement_ouvert_le_plus_proche(): void
