@@ -35,12 +35,17 @@ class DashboardController extends Controller
                 ],
             ]);
 
-        $event = DashboardOverview::relevantEvent();
+        // L'evenement choisi dans le selecteur, sinon celui que retient la regle automatique.
+        $chosenId = $request->integer('event') ?: null;
+        $event = DashboardOverview::chosenEvent($chosenId);
 
         return Inertia::render('dashboard', [
             'pendingInvitations' => $pendingInvitations,
             'paymentAccountNotice' => $this->paymentAccountNotice($request),
             'overview' => $event ? DashboardOverview::for($event) : null,
+            'eventChoices' => $event ? DashboardOverview::choices() : [],
+            // Nul quand le choix est automatique, ou qu'un evenement inconnu a ete demande.
+            'selectedEventId' => $chosenId !== null && $event?->id === $chosenId ? $chosenId : null,
             'gettingStarted' => $request->user()->currentTenant
                 ? GettingStarted::for($request->user()->currentTenant, $request->user())
                 : null,

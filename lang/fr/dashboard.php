@@ -3,6 +3,10 @@
 return [
     'title' => 'Tableau de bord',
     'event_label' => 'Événement',
+    'event_picker' => [
+        'label' => 'Événement affiché',
+        'automatic' => 'Le plus proche (automatique)',
+    ],
 
     'kpis' => [
         'registrations' => 'Inscrits',
@@ -12,7 +16,7 @@ return [
         'seats_left' => 'Places restantes',
     ],
 
-    'countdown' => '{0} Aujourd\'hui|[1,*] J-:days',
+    'countdown' => '{0} Aujourd\'hui|{1} Demain|[2,*] Dans :days jours',
     'check_proofs' => 'Vérifier les preuves (:count)',
 
     'refunds_due' => '{1} 1 inscription annulée attend son remboursement : :amount à rendre.|[2,*] :count inscriptions annulées attendent leur remboursement : :amount à rendre.',

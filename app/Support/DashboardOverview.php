@@ -45,6 +45,45 @@ class DashboardOverview
     }
 
     /**
+     * Get the event chosen in the dashboard's picker, or the automatic one when none (or one that
+     * does not exist in this organisation) was chosen.
+     *
+     * La base lue est celle de l'organisation courante : l'identifiant d'un evenement d'une autre
+     * organisation n'y designe rien, ou un autre evenement de celle-ci.
+     */
+    public static function chosenEvent(?int $eventId): ?Event
+    {
+        return ($eventId !== null ? Event::find($eventId) : null) ?? self::relevantEvent();
+    }
+
+    /**
+     * Get the events the picker offers : ouverts et en cours d'abord, du plus proche au plus
+     * lointain, puis les autres (brouillons, termines), du plus recent au plus ancien.
+     *
+     * @return array<int, array{id: int, name: string, startsAt: string|null}>
+     */
+    public static function choices(): array
+    {
+        $active = Event::whereIn('status', ['open', 'ongoing'])
+            ->orderByRaw('starts_at is null')
+            ->orderBy('starts_at')
+            ->get();
+
+        $others = Event::whereNotIn('status', ['open', 'ongoing'])
+            ->latest('created_at')
+            ->get();
+
+        return $active->concat($others)
+            ->map(fn (Event $event) => [
+                'id' => $event->id,
+                'name' => $event->name,
+                'startsAt' => $event->starts_at?->toISOString(),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public static function for(Event $event): array

@@ -2,6 +2,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 import { ChannelsChart } from '@/components/dashboard/channels-chart';
+import { DashboardEventPicker } from '@/components/dashboard/dashboard-event-picker';
 import { GettingStartedCard } from '@/components/dashboard/getting-started-card';
 import { HoldExpiryCard } from '@/components/dashboard/hold-expiry-card';
 import { KpiCard } from '@/components/dashboard/kpi-card';
@@ -22,6 +23,7 @@ import { create as createEvent } from '@/routes/tenants/events';
 import { index as proofsIndex } from '@/routes/tenants/events/proofs';
 import { index as registrationsIndex } from '@/routes/tenants/events/registrations';
 import type {
+    DashboardEventChoice,
     DashboardInvitation,
     DashboardOverview,
     GettingStarted,
@@ -35,6 +37,9 @@ type Props = {
     paymentAccountNotice?: { changed: boolean; days: number } | null;
     overview?: DashboardOverview | null;
     gettingStarted?: GettingStarted | null;
+    // Les evenements que le selecteur propose, et celui choisi a la main (null : automatique).
+    eventChoices?: DashboardEventChoice[];
+    selectedEventId?: number | null;
 };
 
 const Kpis = [
@@ -116,6 +121,8 @@ export default function Dashboard({
     paymentAccountNotice = null,
     overview = null,
     gettingStarted = null,
+    eventChoices = [],
+    selectedEventId = null,
 }: Props) {
     const { t, locale } = useTranslation();
     const { currentTenant, tenantPermissions } = usePage().props;
@@ -149,6 +156,13 @@ export default function Dashboard({
                         }
                     />
                     <div className="flex flex-wrap items-center gap-2">
+                        {currentTenant && overview ? (
+                            <DashboardEventPicker
+                                tenantSlug={currentTenant.slug}
+                                choices={eventChoices}
+                                selectedEventId={selectedEventId}
+                            />
+                        ) : null}
                         {currentTenant ? (
                             <ProductTourButton tour="welcome" />
                         ) : null}

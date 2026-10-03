@@ -3,6 +3,10 @@
 return [
     'title' => 'Dashboard',
     'event_label' => 'Event',
+    'event_picker' => [
+        'label' => 'Event shown',
+        'automatic' => 'The nearest one (automatic)',
+    ],
 
     'kpis' => [
         'registrations' => 'Registered',
@@ -12,7 +16,7 @@ return [
         'seats_left' => 'Seats left',
     ],
 
-    'countdown' => '{0} Today|[1,*] D-:days',
+    'countdown' => '{0} Today|{1} Tomorrow|[2,*] In :days days',
     'check_proofs' => 'Check proofs (:count)',
 
     'refunds_due' => '{1} 1 cancelled registration is awaiting its refund: :amount to return.|[2,*] :count cancelled registrations are awaiting their refund: :amount to return.',

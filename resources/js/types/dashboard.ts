@@ -46,6 +46,13 @@ export type DashboardContext = {
     daysUntilEvent: number | null;
 };
 
+// Un evenement propose par le selecteur du tableau de bord.
+export type DashboardEventChoice = {
+    id: number;
+    name: string;
+    startsAt: string | null;
+};
+
 export type DashboardOverview = {
     eventId: number;
     eventName: string;
