@@ -359,7 +359,8 @@ class Tenant extends Model implements TenantWithDatabase
      */
     public function trialDaysLeft(): ?int
     {
-        if (! $this->isOnTrial() || $this->trial_ends_at === null) {
+        // L'espace personnel ne publie rien : un decompte d'essai n'y dirait rien d'utile.
+        if ($this->is_personal || ! $this->isOnTrial() || $this->trial_ends_at === null) {
             return null;
         }
 

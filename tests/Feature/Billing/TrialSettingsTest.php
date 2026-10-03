@@ -259,6 +259,22 @@ class TrialSettingsTest extends TestCase
         Notification::assertNothingSent();
     }
 
+    public function test_un_espace_personnel_ne_recoit_aucun_rappel_d_essai(): void
+    {
+        // Bogue trouve a la premiere execution : chaque compte cree recoit un espace personnel, qui
+        // ne publie rien ; il recevait quand meme « votre essai se termine ».
+        Notification::fake();
+        $owner = User::factory()->withTwoFactor()->create();
+        $personal = $owner->fresh()->personalTenant();
+
+        $this->assertNotNull($personal);
+
+        $this->travel(40)->days();
+        app(NotifyTrialDeadlines::class)->handle();
+
+        Notification::assertNothingSent();
+    }
+
     public function test_prolonger_l_essai_depuis_la_console_relance_les_rappels(): void
     {
         Notification::fake();

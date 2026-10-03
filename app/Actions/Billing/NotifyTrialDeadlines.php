@@ -15,7 +15,8 @@ use Stancl\Tenancy\Exceptions\TenantDatabaseDoesNotExistException;
  * en voyant une publication refusee.
  *
  * Jouee chaque jour par le planificateur. Une organisation abonnee n'est pas concernee, son
- * abonnement l'emporte sur l'essai ; un essai sans date de fin non plus.
+ * abonnement l'emporte sur l'essai ; un essai sans date de fin non plus, ni l'espace personnel de
+ * chaque compte, qui ne publie rien.
  */
 class NotifyTrialDeadlines
 {
@@ -38,6 +39,8 @@ class NotifyTrialDeadlines
 
         Tenant::query()
             ->whereNotNull('trial_ends_at')
+            // L'espace personnel ne publie rien : la fin de son essai ne change rien a ce qu'il permet.
+            ->where('is_personal', false)
             ->whereNull('trial_ended_notified_at')
             ->doesntHave('subscription')
             ->each(function (Tenant $tenant) {
