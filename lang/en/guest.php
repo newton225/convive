@@ -39,6 +39,11 @@ return [
     ],
 
     'registration' => [
+        'ongoing' => [
+            'title' => 'You already have a reservation in progress',
+            'description' => 'Your seat is held for this event. Resume your reservation rather than starting a new one.',
+            'action' => 'Resume my reservation',
+        ],
         'privacy_notice' => 'This information is passed on to :organisation, which organises this event, to manage your registration.',
         'privacy_link' => 'How your data is handled',
         'errors' => [

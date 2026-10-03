@@ -39,6 +39,11 @@ return [
     ],
 
     'registration' => [
+        'ongoing' => [
+            'title' => 'Vous avez déjà une réservation en cours',
+            'description' => "Votre place est retenue pour cet événement. Reprenez votre réservation plutôt que d'en recommencer une.",
+            'action' => 'Reprendre ma réservation',
+        ],
         'privacy_notice' => 'Ces informations sont transmises à :organisation, qui organise cet événement, pour gérer votre inscription.',
         'privacy_link' => 'Comment vos données sont traitées',
         'errors' => [

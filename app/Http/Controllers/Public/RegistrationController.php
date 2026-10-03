@@ -19,6 +19,7 @@ use App\Models\Ticket;
 use App\Models\Unit;
 use App\Support\BotCheck;
 use App\Support\LegalDocument;
+use App\Support\OngoingReservation;
 use App\Support\PlanLimits;
 use App\Support\TicketCard;
 use App\Support\TicketQrCode;
@@ -52,6 +53,11 @@ class RegistrationController extends Controller
 
         $tenant = Tenant::current();
 
+        // La copie de ce formulaire gardee par le navigateur est chiffree : l'inscription efface ces
+        // copies (`clearHistory()` dans `store()`), et le bouton « retour » redemande alors la page au
+        // serveur, avec la proposition de reprendre la reservation (mecanisme officiel d'Inertia).
+        Inertia::encryptHistory();
+
         return Inertia::render('public/registration', [
             'token' => $token,
             // L'invite lit comment ses donnees sont traitees avant de les envoyer.
@@ -59,6 +65,8 @@ class RegistrationController extends Controller
             'defaultCountry' => VisitorCountry::from(request()),
             // La cle publique du widget anti-robot quand l'evenement le demande, sinon rien a afficher.
             'botCheckSiteKey' => BotCheck::appliesTo($event) ? BotCheck::siteKey() : null,
+            // L'invite revenu ici par le bouton « retour » reprend sa reservation en cours.
+            'ongoingReservationUrl' => $this->ongoingReservationUrl($event, $token),
             'event' => [
                 'name' => $event->name,
                 'pricePerPerson' => $event->price_per_person,
@@ -119,6 +127,8 @@ class RegistrationController extends Controller
         ]);
 
         $registration = $created['registration'];
+        OngoingReservation::remember($event, $created['resumeToken']);
+        Inertia::clearHistory();
 
         // Le brouillon ne bloque aucune place tant que le code n'est pas saisi.
         if ($verifyPhone) {
@@ -476,6 +486,23 @@ class RegistrationController extends Controller
      *
      * La recherche compare l'empreinte, jamais le jeton en clair (CLAUDE.md, « Securite »).
      */
+    /**
+     * Get the address of this browser's reservation under way on the event, if any.
+     */
+    private function ongoingReservationUrl(Event $event, string $token): ?string
+    {
+        $ongoing = OngoingReservation::find($event);
+
+        if ($ongoing === null) {
+            return null;
+        }
+
+        return route($ongoing['status'] === RegistrationStatus::Draft ? 'public.registrations.verify.show' : 'public.registrations.show', [
+            'token' => $token,
+            'resume' => $ongoing['resume'],
+        ]);
+    }
+
     private function registrationForResumeToken(Event $event, string $resume): Registration
     {
         $registration = Registration::where('event_id', $event->id)

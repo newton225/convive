@@ -4,6 +4,7 @@ import { BrandColorStyle } from '@/components/brand-color-style';
 import type { Country } from 'react-phone-number-input';
 import { OfflineBanner } from '@/components/offline-banner';
 import { BotCheck } from '@/components/public/bot-check';
+import { OngoingReservationNotice } from '@/components/public/ongoing-reservation-notice';
 import { PhoneField } from '@/components/phone/phone-field';
 import { useRef, useState } from 'react';
 import {
@@ -35,6 +36,8 @@ type Props = {
     privacyUrl: string;
     // La cle publique du widget anti-robot, quand l'evenement le demande.
     botCheckSiteKey: string | null;
+    // La reservation encore en cours de ce navigateur sur cet evenement, a reprendre.
+    ongoingReservationUrl: string | null;
 };
 
 /**
@@ -54,6 +57,7 @@ export default function PublicRegistration({
     defaultCountry,
     privacyUrl,
     botCheckSiteKey,
+    ongoingReservationUrl,
 }: Props) {
     const { t, locale } = useTranslation();
     const [companionIds, setCompanionIds] = useState<number[]>([]);
@@ -93,6 +97,10 @@ export default function PublicRegistration({
                         {event.name}
                     </p>
                 </div>
+
+                {ongoingReservationUrl ? (
+                    <OngoingReservationNotice href={ongoingReservationUrl} />
+                ) : null}
 
                 <Form
                     {...store.form(token)}
