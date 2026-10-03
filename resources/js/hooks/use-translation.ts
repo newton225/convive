@@ -89,7 +89,11 @@ const choose = (message: string, count: number): string => {
         return count === 1 ? plain[0] : plain[1];
     }
 
-    return segments[segments.length - 1];
+    // La derniere forme, sans sa borne : « [2,*] 0 migrations » s'afficherait tel quel.
+    return segments[segments.length - 1].replace(
+        /^(\{\d+\}|\[\d+,(\d+|\*)\])\s*/,
+        '',
+    );
 };
 
 // Une cle absente rend la cle elle-meme : le trou est visible a l'ecran et en test,
