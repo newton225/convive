@@ -18,6 +18,9 @@ void createInertiaApp({
         switch (true) {
             case name === 'welcome':
             case name === 'showcase':
+            // Les pages juridiques se lisent sans compte : meme piege, page blanche pour tout visiteur
+            // anonyme, trouve le 2026-10-03 par les tests de bout en bout.
+            case name === 'legal':
             // Le parcours invite (README ecrans 3 a 11) n'est jamais authentifie : l'envelopper
             // dans `AppLayout` par defaut plantait au rendu (`UserInfo` lit `user.avatar` sur un
             // `auth.user` qui vaut `null` pour un visiteur anonyme), page blanche silencieuse,
