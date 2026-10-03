@@ -81,6 +81,28 @@ class PhoneNumber
     }
 
     /**
+     * Format any stored number for a person to read, whatever its country : `+225 07 07 12 34 56`,
+     * `+33 6 12 34 56 78`. Une ecriture qui n'est pas un numero valide est rendue telle quelle.
+     *
+     * Separe par des espaces, le numero n'est pas pris pour un nombre par un tableur, qui en
+     * retirerait le « + » (bogue de l'export CSV, 2026-10-03).
+     */
+    public static function display(string $value): string
+    {
+        $normalized = self::normalize($value);
+
+        if ($normalized === null) {
+            return $value;
+        }
+
+        if (str_starts_with($normalized, '+'.self::CountryCode)) {
+            return self::format($normalized);
+        }
+
+        return (new LibPhoneNumber($normalized))->formatInternational();
+    }
+
+    /**
      * Get the two-digit prefix that designates the operator (`07` for Orange, for instance).
      */
     public static function prefix(string $normalized): string

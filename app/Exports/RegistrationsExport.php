@@ -3,9 +3,11 @@
 namespace App\Exports;
 
 use App\Models\Registration;
+use App\Support\PhoneNumber;
 use App\Support\SpreadsheetSafe;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
@@ -19,7 +21,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
  *
  * @implements WithMapping<Registration>
  */
-class RegistrationsExport implements FromQuery, WithHeadings, WithMapping
+class RegistrationsExport implements FromQuery, WithCustomCsvSettings, WithHeadings, WithMapping
 {
     /**
      * @param  Builder<Registration>  $query
@@ -34,6 +36,18 @@ class RegistrationsExport implements FromQuery, WithHeadings, WithMapping
         // Tri deterministe (identifiant en repli) : FromQuery pagine par lots avec LIMIT/OFFSET,
         // un ORDER BY non unique peut sauter ou dupliquer des lignes entre deux lots.
         return $this->query->orderBy('id');
+    }
+
+    /**
+     * Un CSV qu'Excel ouvre tel quel, regle en francais (bogue signale le 2026-10-03) : la marque
+     * d'encodage (BOM) lui dit de lire l'UTF-8, sans quoi « Téléphone » devient « TÃ©lÃ©phone » ;
+     * le point-virgule est le separateur qu'il attend la ou la virgule sert aux decimales.
+     *
+     * @return array<string, mixed>
+     */
+    public function getCsvSettings(): array
+    {
+        return ['delimiter' => ';', 'use_bom' => true];
     }
 
     /**
@@ -61,10 +75,11 @@ class RegistrationsExport implements FromQuery, WithHeadings, WithMapping
     public function map(mixed $row): array
     {
         // Texte libre saisi par l'invite ou l'equipe : neutralise contre l'injection de formules
-        // (SECURITY.md M2). Le telephone n'y passe pas, voir `SpreadsheetSafe`.
+        // (SECURITY.md M2). Le telephone n'y passe pas, voir `SpreadsheetSafe` ; il est ecrit avec
+        // ses espaces, sans quoi le tableur le prend pour un nombre et perd le « + ».
         return [
             SpreadsheetSafe::cell($row->name),
-            $row->phone,
+            PhoneNumber::display((string) $row->phone),
             SpreadsheetSafe::cell($row->email),
             SpreadsheetSafe::cell($row->unit->name),
             $row->party_size,
