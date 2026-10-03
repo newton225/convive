@@ -55,6 +55,7 @@ return [
         'purge_on_exhaustion' => 'Purge as soon as seats run out',
         'phone_verification' => 'Verify the phone with a code before booking',
         'show_remaining_seats' => 'Show guests how many seats are left',
+        'bot_protection' => 'Protect the registration form against robots',
         'temporary_hold' => 'Hold the seat during the reservation',
         'not_enforced' => 'Saved, but does not act on the event yet.',
     ],
@@ -65,6 +66,7 @@ return [
         'purge_on_exhaustion' => 'As soon as approved registrations fill every seat, unfinished registrations are deleted without waiting for the purge date: they no longer had any chance of getting a seat.',
         'phone_verification' => 'The guest gets a code by SMS and must enter it before booking. It stops a bot from blocking every seat, at the cost of one more step for the guest and one paid SMS per code. Only Ivorian numbers get a code: a foreign guest books without one.',
         'show_remaining_seats' => 'Checked, the public link shows how many seats are left and the gauge of seats taken. Unchecked, guests see no figure: only “Full” once no seat is left.',
+        'bot_protection' => 'An invisible Cloudflare check makes sure a person fills in the form, not a robot that would block every seat. Most guests see nothing; when in doubt, a checkbox appears. Free.',
     ],
 
     'flash' => [

@@ -73,6 +73,7 @@ return [
                         'Our hosting provider: :host.',
                         'Stripe, for the payment of the subscription.',
                         'Our email delivery provider (:mail_provider), WhatsApp (Meta) and Orange Côte d’Ivoire (SMS for the verification code), to carry the messages.',
+                        'Cloudflare, for the anti-robot check of the registration form: it receives the IP address and technical information about the browser, never the content of the form.',
                         'Google Analytics, only if you accepted audience measurement.',
                         'The authorities, when the law requires it.',
                     ],

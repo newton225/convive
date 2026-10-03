@@ -17,6 +17,7 @@ use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\Ticket;
 use App\Models\Unit;
+use App\Support\BotCheck;
 use App\Support\LegalDocument;
 use App\Support\PlanLimits;
 use App\Support\TicketCard;
@@ -56,6 +57,8 @@ class RegistrationController extends Controller
             // L'invite lit comment ses donnees sont traitees avant de les envoyer.
             'privacyUrl' => LegalDocument::url('privacy'),
             'defaultCountry' => VisitorCountry::from(request()),
+            // La cle publique du widget anti-robot quand l'evenement le demande, sinon rien a afficher.
+            'botCheckSiteKey' => BotCheck::appliesTo($event) ? BotCheck::siteKey() : null,
             'event' => [
                 'name' => $event->name,
                 'pricePerPerson' => $event->price_per_person,

@@ -64,6 +64,15 @@ return [
     ],
 
     /*
+     * Protection anti-robot du formulaire d'inscription : Cloudflare Turnstile (decision du
+     * proprietaire du projet, 2026-10-03), gratuit. Sans les deux cles, rien n'est demande.
+     */
+    'turnstile' => [
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
+    /*
      * SMS : le code de verification du telephone seulement (decision du proprietaire du projet,
      * 2026-10-03), Meta refusant ce modele en WhatsApp a une entreprise non verifiee. `SMS_DRIVER`
      * vaut `orange` (API SMS d'Orange Cote d'Ivoire) ; vide ou sans identifiants, le journal.

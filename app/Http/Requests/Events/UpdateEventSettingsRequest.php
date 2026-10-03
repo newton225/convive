@@ -46,6 +46,7 @@ class UpdateEventSettingsRequest extends FormRequest
             'rule_temporary_hold' => ['boolean'],
             'rule_phone_verification' => ['boolean'],
             'rule_show_remaining_seats' => ['boolean'],
+            'rule_bot_protection' => ['boolean'],
         ];
     }
 

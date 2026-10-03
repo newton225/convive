@@ -4,6 +4,8 @@ namespace App\Http\Requests\Public;
 
 use App\Models\Event;
 use App\Rules\GuestPhoneNumber;
+use App\Rules\PassesBotCheck;
+use App\Support\BotCheck;
 use App\Support\PhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -57,6 +59,23 @@ class StoreRegistrationRequest extends FormRequest
             'companions' => ['array', 'max:'.$this->event()->companion_limit],
             'companions.*.name' => ['required', 'string', 'max:255'],
             'companions.*.unit_id' => ['required', 'integer', $activeUnit],
+
+            // Protection anti-robot, quand l'evenement la demande et que les cles sont reglees.
+            ...(BotCheck::appliesTo($this->event())
+                ? [BotCheck::Field => ['bail', 'required', 'string', new PassesBotCheck($this->ip())]]
+                : []),
+        ];
+    }
+
+    /**
+     * Get the custom messages for the validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            BotCheck::Field.'.required' => __('guest.registration.errors.bot_check'),
         ];
     }
 

@@ -56,6 +56,7 @@ return [
         'temporary_hold' => 'Retenir la place pendant la réservation',
         'phone_verification' => 'Vérifier le téléphone par un code avant de réserver',
         'show_remaining_seats' => 'Afficher le nombre de places restantes aux invités',
+        'bot_protection' => 'Protéger le formulaire d'inscription contre les robots',
         'not_enforced' => 'Enregistrée, mais n\'agit pas encore sur le fonctionnement de l\'événement.',
     ],
 
@@ -65,6 +66,7 @@ return [
         'purge_on_exhaustion' => "Dès que les inscriptions validées remplissent toutes les places, les dossiers non finalisés sont supprimés sans attendre la date de purge : ils n'avaient plus aucune chance d'obtenir une place.",
         'phone_verification' => "L'invité reçoit un code par SMS et doit le saisir avant de réserver. Cela empêche un robot de bloquer toutes les places, au prix d'une étape de plus pour l'invité et d'un SMS payé par code. Seuls les numéros ivoiriens reçoivent un code : un invité étranger réserve sans.",
         'show_remaining_seats' => "Cochée, le lien public montre combien de places restent et la jauge des places prises. Décochée, les invités ne voient aucun chiffre : seulement « Complet » quand il n'y a plus de place.",
+        'bot_protection' => "Une vérification invisible de Cloudflare s'assure qu'une personne remplit le formulaire, et non un robot qui bloquerait toutes les places. La plupart des invités ne voient rien ; en cas de doute, une case à cocher s'affiche. Gratuit.",
     ],
 
     'flash' => [

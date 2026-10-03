@@ -75,6 +75,7 @@ return [
                         'Notre hébergeur : :host.',
                         'Stripe, pour le paiement de l’abonnement.',
                         'Notre prestataire d’envoi d’emails (:mail_provider), WhatsApp (Meta) et Orange Côte d’Ivoire (SMS du code de vérification), pour acheminer les messages.',
+                        'Cloudflare, pour la vérification anti-robot du formulaire d’inscription : elle reçoit l’adresse IP et des informations techniques sur le navigateur, jamais le contenu du formulaire.',
                         'Google Analytics, seulement si vous avez accepté la mesure d’audience.',
                         'Les autorités, lorsque la loi nous y oblige.',
                     ],

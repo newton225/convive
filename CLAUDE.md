@@ -782,6 +782,25 @@ est trop long.
 - **Un refus sans scan n'alerte pas** comme une fraude : c'est une inscription annulee ou un
   evenement clos entre la recherche et la validation, pas un faux billet.
 
+### Protection anti-robot du formulaire d'inscription
+
+Decision du proprietaire du projet (2026-10-03), a la place du code par SMS mis de cote :
+**Cloudflare Turnstile**, gratuit, contre les robots qui rempliraient le formulaire pour bloquer
+toutes les places (SECURITY.md C3). Ce n'est pas une protection contre le DDoS, qui se traite en
+amont du serveur.
+
+- **Reglage par evenement** `rule_bot_protection`, **active par defaut**, y compris sur les
+  evenements existants. Sans les cles `TURNSTILE_SITE_KEY` et `TURNSTILE_SECRET_KEY`, rien n'est
+  demande (`App\Support\BotCheck::appliesTo()`).
+- **Le serveur verifie le jeton** (`App\Rules\PassesBotCheck`, champ `cf-turnstile-response`) aupres
+  de Cloudflare. Un refus bloque l'inscription ; **Cloudflare injoignable la laisse passer**,
+  journalise : une panne chez lui ne ferme pas les inscriptions, les autres protections restent.
+- **CSP** : `https://challenges.cloudflare.com` n'entre dans `script-src` et `frame-src` que si les
+  cles sont reglees. Un seul nom de domaine declare chez Cloudflare couvre tous les sous-domaines des
+  organisations.
+- Cloudflare figure dans la politique de confidentialite (adresse IP et informations techniques du
+  navigateur).
+
 ### Recherche : sans accents, partout
 
 Decision du proprietaire du projet (2026-10-02) : toute recherche ignore les accents et la casse.

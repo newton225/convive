@@ -49,6 +49,7 @@ const RuleKeys = [
     'temporaryHold',
     'phoneVerification',
     'showRemainingSeats',
+    'botProtection',
 ] as const;
 
 const ReminderLabels = {
@@ -67,6 +68,7 @@ const RuleLabels = {
     temporaryHold: 'event_settings.rules.temporary_hold',
     phoneVerification: 'event_settings.rules.phone_verification',
     showRemainingSeats: 'event_settings.rules.show_remaining_seats',
+    botProtection: 'event_settings.rules.bot_protection',
 } as const;
 
 // Seules les regles appliquees ont une aide : expliquer une regle qui n'agit pas encore, dont le
@@ -77,6 +79,7 @@ const RuleHelp: Partial<Record<keyof typeof RuleLabels, string>> = {
     purgeOnExhaustion: 'event_settings.rules_help.purge_on_exhaustion',
     phoneVerification: 'event_settings.rules_help.phone_verification',
     showRemainingSeats: 'event_settings.rules_help.show_remaining_seats',
+    botProtection: 'event_settings.rules_help.bot_protection',
 };
 
 const ReminderFields: Record<(typeof ReminderKeys)[number], string> = {
@@ -95,6 +98,7 @@ const RuleFields: Record<(typeof RuleKeys)[number], string> = {
     temporaryHold: 'rule_temporary_hold',
     phoneVerification: 'rule_phone_verification',
     showRemainingSeats: 'rule_show_remaining_seats',
+    botProtection: 'rule_bot_protection',
 };
 
 function Row({ label, value }: { label: string; value: string }) {

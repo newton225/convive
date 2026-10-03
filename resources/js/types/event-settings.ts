@@ -29,5 +29,6 @@ export type EventRules = {
     purgeOnExhaustion: boolean;
     temporaryHold: boolean;
     phoneVerification: boolean;
+    botProtection: boolean;
     showRemainingSeats: boolean;
 };

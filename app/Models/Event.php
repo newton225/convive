@@ -62,6 +62,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property bool $rule_temporary_hold
  * @property bool $rule_phone_verification
  * @property bool $rule_show_remaining_seats
+ * @property bool $rule_bot_protection
  * @property bool $ticket_template_enabled
  * @property TicketModel|null $ticket_model
  * @property bool $ticket_element_logo
@@ -81,7 +82,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
     'reminder_j7_enabled', 'reminder_j2_enabled', 'reminder_j1_enabled', 'reminder_day_of_enabled',
     'rule_scheduled_send', 'rule_auto_seating', 'rule_allow_without_proof',
     'rule_proof_legibility', 'rule_purge_on_exhaustion', 'rule_temporary_hold', 'rule_phone_verification',
-    'rule_show_remaining_seats',
+    'rule_show_remaining_seats', 'rule_bot_protection',
     'ticket_template_enabled', 'ticket_model', 'ticket_element_logo', 'ticket_element_stamp',
     'ticket_element_signature', 'ticket_element_companions',
 ])]
@@ -615,6 +616,7 @@ class Event extends Model implements HasMedia
             'rule_temporary_hold' => 'boolean',
             'rule_phone_verification' => 'boolean',
             'rule_show_remaining_seats' => 'boolean',
+            'rule_bot_protection' => 'boolean',
             'ticket_template_enabled' => 'boolean',
             'ticket_model' => TicketModel::class,
             'ticket_element_logo' => 'boolean',

@@ -3,6 +3,7 @@ import { AlertCircle } from 'lucide-react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import type { Country } from 'react-phone-number-input';
 import { OfflineBanner } from '@/components/offline-banner';
+import { BotCheck } from '@/components/public/bot-check';
 import { PhoneField } from '@/components/phone/phone-field';
 import { useRef, useState } from 'react';
 import {
@@ -32,6 +33,8 @@ type Props = {
     defaultCountry: Country;
     // La politique de confidentialite, sur le site de l'editeur.
     privacyUrl: string;
+    // La cle publique du widget anti-robot, quand l'evenement le demande.
+    botCheckSiteKey: string | null;
 };
 
 /**
@@ -50,10 +53,12 @@ export default function PublicRegistration({
     token,
     defaultCountry,
     privacyUrl,
+    botCheckSiteKey,
 }: Props) {
     const { t, locale } = useTranslation();
     const [companionIds, setCompanionIds] = useState<number[]>([]);
     const nextId = useRef(0);
+    const [botCheckReset, setBotCheckReset] = useState(0);
 
     const total = event.pricePerPerson * (1 + companionIds.length);
 
@@ -93,6 +98,7 @@ export default function PublicRegistration({
                     {...store.form(token)}
                     className="space-y-6"
                     data-test="registration-form"
+                    onError={() => setBotCheckReset((count) => count + 1)}
                 >
                     {({ errors, processing }) => (
                         <>
@@ -210,6 +216,14 @@ export default function PublicRegistration({
                                     </span>
                                 </CardContent>
                             </Card>
+
+                            {botCheckSiteKey ? (
+                                <BotCheck
+                                    siteKey={botCheckSiteKey}
+                                    resetKey={botCheckReset}
+                                    error={errors['cf-turnstile-response']}
+                                />
+                            ) : null}
 
                             <SubmitButton
                                 className="w-full"

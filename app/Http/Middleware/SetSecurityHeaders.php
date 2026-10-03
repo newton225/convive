@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\BotCheck;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Vite;
@@ -83,9 +84,14 @@ class SetSecurityHeaders
             ]
             : ['script' => '', 'connect' => '', 'img' => ''];
 
+        // Le widget anti-robot de Cloudflare (`BotCheck`) : un script et un cadre, seulement quand
+        // ses cles sont reglees. Meme raison que plus haut pour l'ouvrir sur tout le document.
+        $botCheck = BotCheck::siteKey() !== null ? BotCheck::ScriptOrigin : '';
+
         $directives = [
             "default-src 'self'",
-            trim("script-src 'self' 'nonce-{$nonce}' {$analytics['script']} {$devOrigin}"),
+            trim("script-src 'self' 'nonce-{$nonce}' {$analytics['script']} {$botCheck} {$devOrigin}"),
+            trim("frame-src 'self' {$botCheck}"),
             trim("style-src 'self' 'nonce-{$nonce}' {$devOrigin}"),
             trim("font-src 'self' {$devOrigin}"),
             // `blob:` pour l'apercu des recus dans le back-office : le fichier arrive en piece jointe

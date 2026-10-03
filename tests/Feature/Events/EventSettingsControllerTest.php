@@ -117,6 +117,23 @@ class EventSettingsControllerTest extends TestCase
         $this->assertTrue($this->tenant->asCurrent(fn () => $this->event->fresh()->rule_show_remaining_seats));
     }
 
+    public function test_la_protection_anti_robot_est_active_par_defaut_et_se_desactive(): void
+    {
+        $this->assertTrue($this->tenant->asCurrent(fn () => $this->event->fresh()->rule_bot_protection));
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.settings.edit', [$this->tenant, $this->event]))
+            ->assertInertia(fn ($page) => $page->where('rules.botProtection', true));
+
+        $this->actingAs($this->owner)
+            ->patch(route('tenants.events.settings.update', [$this->tenant, $this->event]), [
+                'rule_bot_protection' => false,
+            ])
+            ->assertRedirect();
+
+        $this->assertFalse($this->tenant->asCurrent(fn () => $this->event->fresh()->rule_bot_protection));
+    }
+
     public function test_une_case_decochee_absente_de_la_requete_vaut_faux(): void
     {
         // Une case a cocher HTML decochee n'envoie aucune valeur : le controleur doit lire

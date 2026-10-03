@@ -68,6 +68,7 @@ class EventSettingsController extends Controller
                 'temporaryHold' => $event->rule_temporary_hold,
                 'phoneVerification' => $event->rule_phone_verification,
                 'showRemainingSeats' => $event->rule_show_remaining_seats,
+                'botProtection' => $event->rule_bot_protection,
             ],
             // README ecran 24 : ces trois regles s'enregistrent mais ne gouvernent encore rien
             // (voir le commentaire de classe). L'ecran l'affiche plutot que de laisser croire
@@ -94,6 +95,7 @@ class EventSettingsController extends Controller
             'rule_temporary_hold' => $request->boolean('rule_temporary_hold'),
             'rule_phone_verification' => $request->boolean('rule_phone_verification'),
             'rule_show_remaining_seats' => $request->boolean('rule_show_remaining_seats'),
+            'rule_bot_protection' => $request->boolean('rule_bot_protection'),
         ]);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('event_settings.flash.updated')]);
