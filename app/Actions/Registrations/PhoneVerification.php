@@ -26,15 +26,15 @@ class PhoneVerification
 
     /**
      * Codes envoyes au meme numero en une heure, toutes inscriptions confondues : chaque SMS est
-     * paye, et un robot qui recommencerait l'inscription en boucle viderait le credit SMS en
+     * paye, et un robot qui recommencerait l'inscription en boucle viderait le credit d'Orange en
      * inondant le telephone d'un tiers.
      */
     public const MaxCodesPerHour = 5;
 
     /**
      * Determine whether a number gets a code at all. Ivoirien seulement (decision du proprietaire
-     * du projet, 2026-10-03) : les services SMS retenus ne garantissent pas l'envoi a l'etranger
-     * (Orange l'exclut), et un invite etranger ne doit pas rester bloque devant un code qui n'arrive pas.
+     * du projet, 2026-10-03) : le SMS part par Orange Cote d'Ivoire, qui ne garantit pas l'envoi a
+     * l'etranger, et un invite etranger ne doit pas rester bloque devant un code qui n'arrive pas.
      */
     public static function appliesTo(string $phone): bool
     {

@@ -74,7 +74,7 @@ return [
                         'L’équipe de :editor n’a pas accès au contenu d’une organisation. Elle n’y entre que si un Propriétaire lui ouvre un accès de support : nominatif, en lecture seule, limité à 24 heures, révocable à tout moment, et dont chaque page consultée est inscrite au journal de l’organisation.',
                         'Notre hébergeur : :host.',
                         'Stripe, pour le paiement de l’abonnement.',
-                        'Notre prestataire d’envoi d’emails (:mail_provider) WhatsApp (Meta) et HSMS (SMS du code de vérification), pour acheminer les messages.',
+                        'Notre prestataire d’envoi d’emails (:mail_provider), WhatsApp (Meta) et Orange Côte d’Ivoire (SMS du code de vérification), pour acheminer les messages.',
                         'Google Analytics, seulement si vous avez accepté la mesure d’audience.',
                         'Les autorités, lorsque la loi nous y oblige.',
                     ],

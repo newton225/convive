@@ -360,7 +360,7 @@ return [
         'simulated' => [
             'mail' => 'Les emails ne partent pas réellement : ils sont seulement écrits dans le journal du serveur. Aucun destinataire ne les reçoit tant qu’un service d’envoi n’est pas configuré.',
             'whatsapp' => 'Les messages WhatsApp ne partent pas réellement : ils sont seulement écrits dans le journal du serveur. Aucun invité ne les reçoit tant que les identifiants WhatsApp Business ne sont pas fournis.',
-            'sms' => 'Les SMS ne partent pas réellement : ils sont seulement écrits dans le journal du serveur. Aucun invité ne reçoit son code de vérification tant que les identifiants du service SMS ne sont pas fournis.',
+            'sms' => 'Les SMS ne partent pas réellement : ils sont seulement écrits dans le journal du serveur. Aucun invité ne reçoit son code de vérification tant que les identifiants de l’API SMS d’Orange ne sont pas fournis.',
         ],
         'by_type' => 'Par type, sur sept jours',
         'latest' => 'Derniers envois',

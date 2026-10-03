@@ -22,7 +22,6 @@ use App\Support\Console\ConsoleAccess;
 use App\Support\EventReport;
 use App\Support\LogWhatsAppSender;
 use App\Support\Search\UnaccentedSearch;
-use App\Support\Sms\HsmsSmsSender;
 use App\Support\Sms\LogSmsSender;
 use App\Support\Sms\OrangeSmsSender;
 use App\Support\Stripe\StripeApi;
@@ -93,17 +92,10 @@ class AppServiceProvider extends ServiceProvider
         // ou sans ses identifiants, le journal.
         $this->app->bind(SmsSender::class, function () {
             $orange = (array) config('services.sms.orange');
-            $hsms = (array) config('services.sms.hsms');
 
-            return match (config('services.sms.driver')) {
-                'hsms' => filled($hsms['email'] ?? null) && filled($hsms['password'] ?? null) && filled($hsms['client_id'] ?? null) && filled($hsms['client_secret'] ?? null)
-                    ? new HsmsSmsSender((string) $hsms['email'], (string) $hsms['password'], (string) $hsms['client_id'], (string) $hsms['client_secret'])
-                    : new LogSmsSender,
-                'orange' => filled($orange['client_id'] ?? null) && filled($orange['client_secret'] ?? null)
-                    ? new OrangeSmsSender((string) $orange['client_id'], (string) $orange['client_secret'], filled($orange['sender_name'] ?? null) ? (string) $orange['sender_name'] : null)
-                    : new LogSmsSender,
-                default => new LogSmsSender,
-            };
+            return config('services.sms.driver') === 'orange' && filled($orange['client_id'] ?? null) && filled($orange['client_secret'] ?? null)
+                ? new OrangeSmsSender((string) $orange['client_id'], (string) $orange['client_secret'], filled($orange['sender_name'] ?? null) ? (string) $orange['sender_name'] : null)
+                : new LogSmsSender;
         });
 
         // Le fournisseur de paiement de l'abonnement : Stripe des que `STRIPE_SECRET` est renseigne,

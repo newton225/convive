@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Contracts\SmsSender;
-use App\Support\Sms\HsmsSmsSender;
 use App\Support\Sms\LogSmsSender;
 use App\Support\Sms\OrangeSmsSender;
 use Illuminate\Http\Client\Request;
@@ -12,14 +11,12 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
-use RuntimeException;
 use Tests\TestCase;
 
 /**
  * L'envoi de SMS (decision du proprietaire du projet, 2026-10-03) : le code de verification du
- * telephone, que Meta refuse en WhatsApp tant que l'entreprise n'est pas verifiee, part par SMS :
- * HSMS (choix du proprietaire du projet) ou l'API d'Orange Cote d'Ivoire, au choix du reglage. Sans
- * reglage, le journal, comme pour WhatsApp.
+ * telephone, que Meta refuse en WhatsApp tant que l'entreprise n'est pas verifiee, part par l'API
+ * SMS d'Orange Cote d'Ivoire. Sans reglage, le journal, comme pour WhatsApp.
  */
 class SmsSendersTest extends TestCase
 {
@@ -121,105 +118,6 @@ class SmsSendersTest extends TestCase
         $this->expectException(RequestException::class);
 
         app(SmsSender::class)->send('+2250707123456', 'Convive : votre code est 482915.');
-    }
-
-    private function hsms(): void
-    {
-        config([
-            'services.sms.driver' => 'hsms',
-            'services.sms.hsms' => [
-                'email' => 'compte@devultraapp.com',
-                'password' => 'mot-de-passe-hsms',
-                'client_id' => 'client-hsms',
-                'client_secret' => 'secret-hsms',
-            ],
-        ]);
-        $this->app->forgetInstance(SmsSender::class);
-        Cache::forget(HsmsSmsSender::TokenCacheKey);
-    }
-
-    public function test_hsms_sans_ses_identifiants_retombe_sur_le_journal(): void
-    {
-        config(['services.sms.driver' => 'hsms', 'services.sms.hsms.client_secret' => null]);
-        $this->app->forgetInstance(SmsSender::class);
-
-        $this->assertInstanceOf(LogSmsSender::class, app(SmsSender::class));
-    }
-
-    public function test_hsms_obtient_un_jeton_puis_envoie_le_sms(): void
-    {
-        Http::fake([
-            'hsms.ci/api/token/' => Http::response(['success' => true, 'message' => 'OK', 'token' => 'jeton-hsms'], 202),
-            'hsms.ci/api/envoi-sms' => Http::response(['success' => true, 'message' => 'OK', 'data' => []]),
-        ]);
-        $this->hsms();
-
-        $sender = app(SmsSender::class);
-        $this->assertInstanceOf(HsmsSmsSender::class, $sender);
-        $this->assertTrue($sender->delivers());
-
-        $sender->send('+2250707123456', 'Convive : votre code est 482915.');
-
-        Http::assertSent(fn (Request $request) => $request->url() === 'https://hsms.ci/api/token/'
-            && $request['email'] === 'compte@devultraapp.com'
-            && $request['password'] === 'mot-de-passe-hsms');
-
-        // Le numero avec son indicatif, sans le « + », comme dans l'exemple de HSMS.
-        Http::assertSent(fn (Request $request) => $request->url() === 'https://hsms.ci/api/envoi-sms'
-            && $request->hasHeader('Authorization', 'Bearer jeton-hsms')
-            && $request['clientid'] === 'client-hsms'
-            && $request['clientsecret'] === 'secret-hsms'
-            && $request['telephone'] === '2250707123456'
-            && $request['message'] === 'Convive : votre code est 482915.');
-    }
-
-    public function test_hsms_garde_son_jeton_entre_deux_envois(): void
-    {
-        Http::fake([
-            'hsms.ci/api/token/' => Http::response(['success' => true, 'token' => 'jeton-hsms'], 202),
-            'hsms.ci/api/envoi-sms' => Http::response(['success' => true, 'message' => 'OK']),
-        ]);
-        $this->hsms();
-
-        app(SmsSender::class)->send('+2250707123456', 'Premier');
-        app(SmsSender::class)->send('+2250707123456', 'Second');
-
-        Http::assertSentCount(3);
-    }
-
-    public function test_hsms_redemande_un_jeton_quand_le_sien_est_refuse(): void
-    {
-        // HSMS ne dit pas combien de temps son jeton vaut : un refus d'authentification en
-        // redemande un, une seule fois, plutot que de faire echouer le code.
-        Http::fake([
-            'hsms.ci/api/token/' => Http::sequence()
-                ->push(['success' => true, 'token' => 'ancien-jeton'], 202)
-                ->push(['success' => true, 'token' => 'nouveau-jeton'], 202),
-            'hsms.ci/api/envoi-sms' => Http::sequence()
-                ->push(['success' => false, 'message' => 'Unauthenticated.'], 401)
-                ->push(['success' => true, 'message' => 'OK']),
-        ]);
-        $this->hsms();
-
-        app(SmsSender::class)->send('+2250707123456', 'Code');
-
-        Http::assertSent(fn (Request $request) => $request->url() === 'https://hsms.ci/api/envoi-sms'
-            && $request->hasHeader('Authorization', 'Bearer nouveau-jeton'));
-    }
-
-    public function test_un_refus_de_hsms_fait_echouer_l_envoi(): void
-    {
-        // HSMS peut repondre 200 avec « success: false » (credit epuise...) : c'est un echec.
-        Http::fake([
-            'hsms.ci/api/token/' => Http::response(['success' => true, 'token' => 'jeton-hsms'], 202),
-            'hsms.ci/api/envoi-sms' => Http::response(['success' => false, 'message' => 'Solde insuffisant']),
-        ]);
-        $this->hsms();
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Solde insuffisant');
-
-        app(SmsSender::class)->send('+2250707123456', 'Code');
     }
 
     public function test_le_canal_sms_transmet_le_texte_de_la_notification(): void
