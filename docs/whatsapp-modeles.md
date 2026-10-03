@@ -22,6 +22,13 @@ demanderait de retenir la langue de chaque invité et de créer chaque modèle u
 
 Textes vérifiés le 2026-10-03 contre les messages que l'application envoie réellement.
 
+**Soumis chez Meta le 2026-10-03** (compte de test, par l'API) : `convive_carte_invitation`,
+`convive_rappel_preuve`, `convive_rappel_jour_j`, `convive_inscription_annulee`,
+`convive_remboursement`, `convive_alerte_compte`. Le modèle du code de vérification est **refusé** :
+Meta réserve la catégorie « authentification » aux entreprises vérifiées. Le code passera par SMS
+(décision du propriétaire du projet, même jour) ; d'ici là, la règle « vérification du téléphone »
+d'un événement reste à désactiver.
+
 ## Carte d'invitation
 
 - Réglage : `WHATSAPP_TEMPLATE_INVITATION_CARD`
