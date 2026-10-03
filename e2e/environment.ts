@@ -27,9 +27,16 @@ export const environment: Record<string, string> = {
     APP_URL: baseUrl,
     LARAVEL_STORAGE_PATH: storagePath,
     DB_CENTRAL_DATABASE: centralDatabase,
-    // Tout se joue dans la requete : pas de file a faire tourner, pas de Redis a demarrer.
+    // Tout se joue dans la requete : pas de file a faire tourner.
     QUEUE_CONNECTION: 'sync',
-    CACHE_STORE: 'file',
+    // Redis, comme en developpement : le cache par organisation de `stancl/tenancy` exige un
+    // cache a etiquettes, ce que le cache sur fichiers n'est pas (« This cache store does not
+    // support tagging », premiere execution). Des bases Redis a part (7 et 8) et un prefixe
+    // propre : rien ne se melange avec le cache du developpement.
+    CACHE_STORE: 'redis',
+    CACHE_PREFIX: 'convive-e2e-',
+    REDIS_DB: '7',
+    REDIS_CACHE_DB: '8',
     SESSION_DRIVER: 'file',
     MAIL_MAILER: 'array',
     // Le compte de demonstration n'a pas de double authentification (CLAUDE.md, « Compte principal

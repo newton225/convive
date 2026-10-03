@@ -48,6 +48,8 @@ export default function globalSetup(): void {
     const php = (args: string[]) =>
         execFileSync('php', args, { cwd: root, env, encoding: 'utf8' });
 
+    // Le cache de l'execution precedente (limites de debit, verrous) fausserait celle-ci.
+    php(['artisan', 'cache:clear']);
     php(['artisan', 'migrate:fresh', '--seed', '--force']);
 
     fs.writeFileSync(statePath, php(['e2e/support/state.php']));

@@ -44,7 +44,13 @@ export default defineConfig({
     webServer: {
         // Le serveur integre de PHP, lance directement : `artisan serve` retire une partie des
         // variables d'environnement avant de le demarrer, dont celles qui isolent cet environnement.
-        command: `php -S 127.0.0.1:${port} -t public vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php`,
+        // Lance depuis `public` : le routeur de Laravel cherche `index.php` dans le dossier courant
+        // (premiere execution : « Failed opening required .../index.php »).
+        // `variables_order=EGPCS` : sans lui, le serveur integre ne remet pas les variables du
+        // processus dans `$_ENV`, et Laravel ignore `LARAVEL_STORAGE_PATH` pour les pages servies
+        // (premiere execution : les bases d'organisation cherchees dans le stockage du developpement).
+        command: `php -d variables_order=EGPCS -S 127.0.0.1:${port} ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php`,
+        cwd: 'public',
         url: `${baseUrl}/up`,
         env: environment,
         reuseExistingServer: false,
