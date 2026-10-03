@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\Support\WhatsApp\WhatsAppTemplate;
+
 /**
  * Interface dediee au canal WhatsApp Business (CLAUDE.md, « Pile imposee »), pour rester
  * remplacable : la carte d'invitation et les rappels (README 2.7) ne connaissent que ce
@@ -10,9 +12,10 @@ namespace App\Contracts;
 interface WhatsAppSender
 {
     /**
-     * Send a WhatsApp text message to the given phone number.
+     * Send a WhatsApp message to the given phone number : the template declared for this kind of
+     * message when there is one, the text otherwise.
      */
-    public function send(string $to, string $message): void;
+    public function send(string $to, string $message, ?WhatsAppTemplate $template = null): void;
 
     /**
      * Determine whether messages really reach their recipient. Faux pour le palliatif qui ecrit au

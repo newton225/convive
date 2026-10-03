@@ -5,6 +5,7 @@ namespace App\Notifications\Registrations;
 use App\Mail\GuestNotificationMail;
 use App\Models\Registration;
 use App\Support\GuestNotificationBranding;
+use App\Support\WhatsApp\WhatsAppTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -55,6 +56,18 @@ class TicketReminder extends Notification implements ShouldQueue
             actionText: __('guest.mail.ticket_reminder.action'),
             actionUrl: $this->link,
         ))->to($notifiable->routeNotificationFor('mail', $this));
+    }
+
+    /**
+     * Get the WhatsApp template of this message and its variables, in the template's order.
+     */
+    public function whatsAppTemplate(mixed $notifiable): WhatsAppTemplate
+    {
+        return new WhatsAppTemplate('ticket_reminder', [
+            $this->registration->name,
+            $this->registration->event->name,
+            $this->link,
+        ]);
     }
 
     public function toWhatsApp(mixed $notifiable): string

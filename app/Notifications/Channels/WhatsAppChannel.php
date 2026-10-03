@@ -3,6 +3,7 @@
 namespace App\Notifications\Channels;
 
 use App\Contracts\WhatsAppSender;
+use App\Support\WhatsApp\WhatsAppTemplate;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -31,6 +32,10 @@ class WhatsAppChannel
             return;
         }
 
-        $this->sender->send($to, $notification->toWhatsApp($notifiable));
+        // Le modele qui correspond a ce message, quand la notification en declare un : c'est lui
+        // que WhatsApp exige hors des 24 heures qui suivent un message de la personne.
+        $template = method_exists($notification, 'whatsAppTemplate') ? $notification->whatsAppTemplate($notifiable) : null;
+
+        $this->sender->send($to, $notification->toWhatsApp($notifiable), $template instanceof WhatsAppTemplate ? $template : null);
     }
 }

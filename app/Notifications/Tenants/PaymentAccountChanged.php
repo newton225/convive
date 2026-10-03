@@ -5,6 +5,7 @@ namespace App\Notifications\Tenants;
 use App\Models\PaymentAccount;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\WhatsApp\WhatsAppTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -54,6 +55,19 @@ class PaymentAccountChanged extends Notification implements ShouldQueue
      *
      * Message court, sans mise en forme : c'est ce que porte le contrat `WhatsAppSender`.
      */
+    /**
+     * Get the WhatsApp template of this message and its variables, in the template's order.
+     */
+    public function whatsAppTemplate(mixed $notifiable): WhatsAppTemplate
+    {
+        return new WhatsAppTemplate('payment_account_changed', [
+            $this->tenant->name,
+            $this->account->label,
+            (string) ($this->before['account_number'] ?? __('payment_accounts.mail.none')),
+            (string) ($this->account->pending_account_number ?? __('payment_accounts.mail.none')),
+        ]);
+    }
+
     public function toWhatsApp(object $notifiable): string
     {
         return __('payment_accounts.whatsapp.alert', [

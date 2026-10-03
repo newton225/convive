@@ -971,6 +971,17 @@ disponible, et aucun paquet n'est installe pour une implementation qui n'appelle
 Le jour ou l'organisation fournit ses identifiants, seule cette liaison change, jamais les
 Actions ni les notifications qui s'adressent au contrat.
 
+**Services reels (decision du proprietaire du projet, 2026-10-03)** : `WHATSAPP_DRIVER` choisit
+`twilio` (pour commencer) ou `meta` (API Cloud, en direct, le jour ou son compte Meta est pret),
+sans toucher au code ; vide ou sans identifiants, le journal. Les deux connecteurs
+(`App\Support\WhatsApp\TwilioWhatsAppSender`, `MetaWhatsAppSender`) passent par le client HTTP de
+Laravel, aucun paquet. Hors des 24 heures qui suivent un message de la personne, WhatsApp exige un
+modele approuve : chaque notification declare le sien (`whatsAppTemplate()`, une cle et ses
+variables dans l'ordre), et le modele reel se declare par reglage (`WHATSAPP_TEMPLATE_*` : identifiant
+`HX...` chez Twilio, nom chez Meta). Textes a faire approuver : `docs/whatsapp-modeles.md`. Un refus
+du service leve une exception : l'envoi echoue et se relance depuis la console. Un nouveau message
+WhatsApp ajoute sa cle dans `config('services.whatsapp.templates')`, son texte dans ce document.
+
 Un canal de notification `whatsapp` (`App\Notifications\Channels\WhatsAppChannel`), enregistre
 par `Notification::extend()` dans `AppServiceProvider` : point d'extension prevu par Laravel,
 pas un envoi ad hoc depuis les Actions. Chaque notification qui veut ce canal expose une methode

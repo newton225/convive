@@ -6,6 +6,7 @@ use App\Mail\GuestNotificationMail;
 use App\Models\Registration;
 use App\Support\GuestNotificationBranding;
 use App\Support\Money;
+use App\Support\WhatsApp\WhatsAppTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -56,6 +57,17 @@ class RefundSent extends Notification implements ShouldQueue
                 $this->refundLine(),
             ],
         ))->to($notifiable->routeNotificationFor('mail', $this));
+    }
+
+    /**
+     * Get the WhatsApp template of this message and its variables, in the template's order.
+     */
+    public function whatsAppTemplate(mixed $notifiable): WhatsAppTemplate
+    {
+        return new WhatsAppTemplate('refund_sent', [
+            $this->registration->name,
+            $this->registration->event->name,
+        ]);
     }
 
     public function toWhatsApp(mixed $notifiable): string

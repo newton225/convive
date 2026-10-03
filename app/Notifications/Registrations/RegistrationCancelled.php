@@ -7,6 +7,7 @@ use App\Mail\GuestNotificationMail;
 use App\Models\Registration;
 use App\Support\GuestNotificationBranding;
 use App\Support\Money;
+use App\Support\WhatsApp\WhatsAppTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -57,6 +58,18 @@ class RegistrationCancelled extends Notification implements ShouldQueue
                 $this->paymentLine(),
             ])),
         ))->to($notifiable->routeNotificationFor('mail', $this));
+    }
+
+    /**
+     * Get the WhatsApp template of this message and its variables, in the template's order.
+     */
+    public function whatsAppTemplate(mixed $notifiable): WhatsAppTemplate
+    {
+        return new WhatsAppTemplate('registration_cancelled', [
+            $this->registration->name,
+            $this->registration->event->name,
+            (string) $this->registration->cancellation_reason,
+        ]);
     }
 
     public function toWhatsApp(mixed $notifiable): string

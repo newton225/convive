@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Contracts\WhatsAppSender;
+use App\Support\WhatsApp\WhatsAppTemplate;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\Log;
  */
 class LogWhatsAppSender implements WhatsAppSender
 {
-    public function send(string $to, string $message): void
+    public function send(string $to, string $message, ?WhatsAppTemplate $template = null): void
     {
         if (app()->isProduction()) {
             Log::info('WhatsApp (simule)', ['to' => self::mask($to), 'length' => mb_strlen($message)]);

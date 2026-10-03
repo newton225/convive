@@ -23,6 +23,8 @@ use App\Support\Search\UnaccentedSearch;
 use App\Support\Stripe\StripeApi;
 use App\Support\Stripe\StripeSubscriptionBillingGateway;
 use App\Support\UnconfiguredBillingGateway;
+use App\Support\WhatsApp\MetaWhatsAppSender;
+use App\Support\WhatsApp\TwilioWhatsAppSender;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -59,7 +61,28 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(WhatsAppSender::class, LogWhatsAppSender::class);
+        // Le service choisi par `WHATSAPP_DRIVER` (decision du proprietaire du projet, 2026-10-03) :
+        // Twilio pour commencer, Meta en direct ensuite, sans toucher au code. Sans service, ou sans
+        // ses identifiants, le journal : rien ne part, et la console le dit.
+        $this->app->bind(WhatsAppSender::class, function () {
+            $twilio = (array) config('services.whatsapp.twilio');
+            $meta = (array) config('services.whatsapp.meta');
+
+            return match (config('services.whatsapp.driver')) {
+                'twilio' => filled($twilio['account_sid'] ?? null) && filled($twilio['auth_token'] ?? null) && filled($twilio['from'] ?? null)
+                    ? new TwilioWhatsAppSender((string) $twilio['account_sid'], (string) $twilio['auth_token'], (string) $twilio['from'])
+                    : new LogWhatsAppSender,
+                'meta' => filled($meta['access_token'] ?? null) && filled($meta['phone_number_id'] ?? null)
+                    ? new MetaWhatsAppSender(
+                        (string) $meta['access_token'],
+                        (string) $meta['phone_number_id'],
+                        (string) ($meta['api_version'] ?? 'v23.0'),
+                        (string) ($meta['template_language'] ?? 'fr'),
+                    )
+                    : new LogWhatsAppSender,
+                default => new LogWhatsAppSender,
+            };
+        });
 
         // Le fournisseur de paiement de l'abonnement : Stripe des que `STRIPE_SECRET` est renseigne,
         // sinon chaque operation refuse explicitement (l'ecran d'abonnement affiche un message clair).
