@@ -56,7 +56,7 @@ return [
         'temporary_hold' => 'Retenir la place pendant la réservation',
         'phone_verification' => 'Vérifier le téléphone par un code avant de réserver',
         'show_remaining_seats' => 'Afficher le nombre de places restantes aux invités',
-        'bot_protection' => 'Protéger le formulaire d'inscription contre les robots',
+        'bot_protection' => "Protéger le formulaire d'inscription contre les robots",
         'not_enforced' => 'Enregistrée, mais n\'agit pas encore sur le fonctionnement de l\'événement.',
     ],
 
