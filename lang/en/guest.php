@@ -193,6 +193,7 @@ return [
         'due' => 'Your :amount payment will be refunded: the organisation will let you know once it is done.',
         'refunded' => 'You received :amount on :date by :channel (transaction fees of :fee deducted).',
         'kept' => 'Your payment is not refunded. Reason: :reason',
+        'none' => 'No payment had been collected for this registration.',
     ],
 
     'proof' => [

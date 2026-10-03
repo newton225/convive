@@ -144,6 +144,39 @@ class WhatsAppSendersTest extends TestCase
             && array_column($request['template']['components'][0]['parameters'], 'text') === ['Aya Kouassi', 'Diner de gala', 'https://convive.test/l']);
     }
 
+    public function test_meta_envoie_le_code_une_seconde_fois_pour_le_bouton_copier_du_modele_d_authentification(): void
+    {
+        // Chez Meta, un modele d'authentification porte un bouton « copier le code » qui attend le
+        // code en parametre : sans lui, Meta refuse le message et l'invite ne recoit jamais son code.
+        Http::fake(['graph.facebook.com/*' => Http::response(['messages' => [['id' => 'wamid.1']]])]);
+        $this->meta(['phone_code' => 'convive_code']);
+
+        app(WhatsAppSender::class)->send('+2250707123456', 'Votre code', WhatsAppTemplate::authentication('phone_code', '482915'));
+
+        Http::assertSent(fn (Request $request) => $request['template']['components'] === [
+            ['type' => 'body', 'parameters' => [['type' => 'text', 'text' => '482915']]],
+            ['type' => 'button', 'sub_type' => 'url', 'index' => '0', 'parameters' => [['type' => 'text', 'text' => '482915']]],
+        ]);
+    }
+
+    public function test_twilio_envoie_le_code_comme_unique_variable_du_modele_d_authentification(): void
+    {
+        Http::fake(['api.twilio.com/*' => Http::response(['sid' => 'SM1'], 201)]);
+        $this->twilio(['phone_code' => 'HX0999']);
+
+        app(WhatsAppSender::class)->send('+2250707123456', 'Votre code', WhatsAppTemplate::authentication('phone_code', '482915'));
+
+        Http::assertSent(fn (Request $request) => json_decode($request['ContentVariables'], true) === ['1' => '482915']);
+    }
+
+    public function test_une_variable_de_modele_tient_sur_une_seule_ligne(): void
+    {
+        // Meta refuse une variable avec retour a la ligne, tabulation ou plus de quatre espaces.
+        $template = new WhatsAppTemplate('registration_cancelled', ["Aya\nKouassi", "Diner\tde   gala", "  Salle\r\n\r\nfermee      ce soir  "]);
+
+        $this->assertSame(['Aya Kouassi', 'Diner de gala', 'Salle fermee ce soir'], $template->parameters);
+    }
+
     public function test_passer_de_twilio_a_meta_ne_demande_qu_un_reglage(): void
     {
         Http::fake();

@@ -13,7 +13,14 @@ avec les mêmes textes, puis changer `WHATSAPP_DRIVER` et les réglages ci-desso
 
 Les variables `{{1}}`, `{{2}}`... doivent rester **dans cet ordre** : c'est l'ordre dans lequel
 l'application les envoie. Meta refuse un modèle qui commence ou finit par une variable ; les textes
-ci-dessous en tiennent compte.
+ci-dessous en tiennent compte. Il refuse aussi une variable vide ou sur plusieurs lignes :
+l'application ramène chaque variable sur une seule ligne et n'en laisse aucune vide.
+
+**Langue : français** (décision du propriétaire du projet, 2026-10-03). Chaque modèle se crée en
+français (`fr`) seulement, y compris pour les invités inscrits en anglais. Ajouter l'anglais
+demanderait de retenir la langue de chaque invité et de créer chaque modèle une seconde fois.
+
+Textes vérifiés le 2026-10-03 contre les messages que l'application envoie réellement.
 
 ## Carte d'invitation
 
@@ -21,10 +28,10 @@ ci-dessous en tiennent compte.
 - Catégorie : utilitaire
 - Variables : `{{1}}` nom de l'invité, `{{2}}` nom de l'événement, `{{3}}` lien du billet
 
-> Bonjour {{1}}, votre inscription à {{2}} est confirmée. Votre billet : {{3}} À bientôt !
+> Bonjour {{1}}, votre inscription à {{2}} est confirmée. Votre billet : {{3}} Les billets de vos éventuels accompagnateurs sont sur la même page. À bientôt !
 
-Les billets des accompagnateurs ne figurent pas dans ce modèle (leur nombre varie) : l'invité les
-retrouve sur sa page, et chacun peut les transmettre depuis le lien de son billet.
+Les billets des accompagnateurs ne peuvent pas figurer dans le modèle (leur nombre varie) : l'invité
+les retrouve sur la page de son billet, d'où il peut les transmettre.
 
 ## Code de vérification du téléphone
 
@@ -33,8 +40,12 @@ retrouve sur sa page, et chacun peut les transmettre depuis le lien de son bille
 - Variable : `{{1}}` le code
 
 Meta et Twilio imposent leur propre texte pour cette catégorie (« {{1}} est votre code de
-vérification »), avec un bouton pour copier le code. Réglez la durée de validité à 10 minutes dans
-les options du modèle.
+vérification »). Options à choisir à la création chez Meta :
+
+- bouton **« Copier le code »** (pas « remplissage automatique ») : l'application envoie le code
+  pour ce bouton ;
+- **délai d'expiration : 10 minutes**, la durée de validité du code dans l'application ;
+- avertissement de sécurité (« Pour votre sécurité, ne communiquez pas ce code ») : à cocher.
 
 ## Rappel de preuve de paiement
 
@@ -56,17 +67,24 @@ les options du modèle.
 
 - Réglage : `WHATSAPP_TEMPLATE_REGISTRATION_CANCELLED`
 - Catégorie : utilitaire
-- Variables : `{{1}}` nom de l'invité, `{{2}}` nom de l'événement, `{{3}}` motif de l'annulation
+- Variables : `{{1}}` nom de l'invité, `{{2}}` nom de l'événement, `{{3}}` motif de l'annulation,
+  `{{4}}` ce que devient le paiement
 
-> Bonjour {{1}}, votre inscription à {{2}} a été annulée par l'organisation. Motif : {{3}}. Pour toute question, contactez l'organisateur.
+> Bonjour {{1}}, votre inscription à {{2}} a été annulée par l'organisation. Motif : {{3}}. {{4}} Pour toute question, contactez l'organisateur.
+
+`{{4}}` est l'une de ces phrases : « Votre paiement de 60 000 F CFA vous sera remboursé :
+l'organisation vous préviendra dès que ce sera fait. », « Vous avez reçu ... le ... par ... (frais de
+transaction de ... déduits). », « Votre paiement n'est pas remboursé. Motif : ... », ou « Aucun
+paiement n'avait été encaissé pour cette inscription. »
 
 ## Remboursement envoyé
 
 - Réglage : `WHATSAPP_TEMPLATE_REFUND_SENT`
 - Catégorie : utilitaire
-- Variables : `{{1}}` nom de l'invité, `{{2}}` nom de l'événement
+- Variables : `{{1}}` nom de l'invité, `{{2}}` nom de l'événement, `{{3}}` montant reçu, `{{4}}` date,
+  `{{5}}` moyen (Wave, Orange Money...), `{{6}}` frais de transaction déduits
 
-> Bonjour {{1}}, votre remboursement pour {{2}} est parti. Le détail est sur votre page d'inscription.
+> Bonjour {{1}}, votre remboursement pour {{2}} est parti : vous avez reçu {{3}} le {{4}} par {{5}}, frais de transaction de {{6}} déduits. Merci de votre compréhension.
 
 ## Alerte : compte de versement modifié
 

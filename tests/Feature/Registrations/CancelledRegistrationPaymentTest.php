@@ -14,6 +14,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\Registrations\RefundSent;
 use App\Notifications\Registrations\RegistrationCancelled;
+use App\Support\Money;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -323,5 +324,78 @@ class CancelledRegistrationPaymentTest extends TestCase
         ));
 
         Notification::assertSentOnDemand(RefundSent::class);
+    }
+
+    public function test_le_modele_whatsapp_d_annulation_dit_ce_que_devient_le_paiement(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(fn () => Event::factory()->open()->create());
+        $registration = $this->confirmedRegistration($tenant, $event);
+
+        $tenant->asCurrent(fn () => app(CancelRegistration::class)->handle($registration, 'Motif.', $owner));
+
+        Notification::assertSentOnDemand(RegistrationCancelled::class, fn (RegistrationCancelled $notification) => $notification->whatsAppTemplate(null)->parameters[3]
+            === __('guest.refund.due', ['amount' => Money::format(60000)]));
+    }
+
+    public function test_le_modele_whatsapp_d_annulation_sans_paiement_ne_laisse_aucune_variable_vide(): void
+    {
+        // Meta refuse un modele dont une variable est vide : la phrase sur le paiement en a une a
+        // dire meme quand rien n'a ete encaisse.
+        Notification::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(fn () => Event::factory()->open()->create());
+        $registration = $this->confirmedRegistration($tenant, $event, 0);
+
+        $tenant->asCurrent(fn () => app(CancelRegistration::class)->handle($registration, 'Motif.', $owner));
+
+        Notification::assertSentOnDemand(RegistrationCancelled::class, fn (RegistrationCancelled $notification) => $notification->whatsAppTemplate(null)->parameters[3]
+            === __('guest.refund.none'));
+    }
+
+    public function test_le_motif_d_annulation_sur_plusieurs_lignes_tient_sur_une_seule_dans_le_modele(): void
+    {
+        // Meta refuse une variable qui porte un retour a la ligne, une tabulation ou plus de quatre
+        // espaces de suite : le motif saisi dans une zone de texte en porte souvent.
+        Notification::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(fn () => Event::factory()->open()->create());
+        $registration = $this->confirmedRegistration($tenant, $event);
+
+        $tenant->asCurrent(fn () => app(CancelRegistration::class)->handle($registration, "Salle annulee.\r\n\r\nNous\tsommes      desoles.", $owner));
+
+        Notification::assertSentOnDemand(RegistrationCancelled::class, fn (RegistrationCancelled $notification) => $notification->whatsAppTemplate(null)->parameters[2]
+            === 'Salle annulee. Nous sommes desoles.');
+    }
+
+    public function test_le_modele_whatsapp_du_remboursement_donne_montant_date_moyen_et_frais(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(fn () => Event::factory()->open()->create());
+        $registration = $this->confirmedRegistration($tenant, $event);
+        $tenant->asCurrent(fn () => app(CancelRegistration::class)->handle($registration, 'Motif.', $owner));
+
+        $tenant->asCurrent(fn () => app(RecordRefund::class)->handle(
+            $registration->fresh(),
+            RefundDecision::refunded(PaymentChannel::Wave, Carbon::parse('2026-09-29'), 600),
+            $owner,
+        ));
+
+        Notification::assertSentOnDemand(RefundSent::class, fn (RefundSent $notification) => array_slice($notification->whatsAppTemplate(null)->parameters, 2) === [
+            Money::format(59400),
+            Carbon::parse('2026-09-29')->isoFormat('LL'),
+            PaymentChannel::Wave->label(),
+            Money::format(600),
+        ]);
     }
 }

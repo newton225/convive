@@ -193,6 +193,7 @@ return [
         'due' => 'Votre paiement de :amount vous sera remboursé : l\'organisation vous préviendra dès que ce sera fait.',
         'refunded' => 'Vous avez reçu :amount le :date par :channel (frais de transaction de :fee déduits).',
         'kept' => 'Votre paiement n\'est pas remboursé. Motif : :reason',
+        'none' => 'Aucun paiement n\'avait été encaissé pour cette inscription.',
     ],
 
     'proof' => [

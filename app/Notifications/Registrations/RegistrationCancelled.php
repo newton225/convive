@@ -69,6 +69,8 @@ class RegistrationCancelled extends Notification implements ShouldQueue
             $this->registration->name,
             $this->registration->event->name,
             (string) $this->registration->cancellation_reason,
+            // Meta refuse une variable vide : rien d'encaisse se dit aussi.
+            $this->paymentLine() ?? __('guest.refund.none'),
         ]);
     }
 

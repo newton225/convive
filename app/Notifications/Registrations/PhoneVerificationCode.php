@@ -32,7 +32,7 @@ class PhoneVerificationCode extends Notification
     {
         // Un modele d'authentification ne porte que le code, chez Meta comme chez Twilio : sa duree
         // de validite se regle dans le modele lui-meme.
-        return new WhatsAppTemplate('phone_code', [$this->code]);
+        return WhatsAppTemplate::authentication('phone_code', $this->code);
     }
 
     public function toWhatsApp(mixed $notifiable): string

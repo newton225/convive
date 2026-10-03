@@ -40,13 +40,7 @@ class MetaWhatsAppSender implements WhatsAppSender
                     'template' => [
                         'name' => $name,
                         'language' => ['code' => $this->templateLanguage],
-                        'components' => [[
-                            'type' => 'body',
-                            'parameters' => array_map(
-                                fn (string $value) => ['type' => 'text', 'text' => $value],
-                                array_values($template->parameters),
-                            ),
-                        ]],
+                        'components' => self::components($template),
                     ],
                 ]
                 : ['type' => 'text', 'text' => ['body' => $message]]),
@@ -61,5 +55,22 @@ class MetaWhatsAppSender implements WhatsAppSender
     public function delivers(): bool
     {
         return true;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private static function components(WhatsAppTemplate $template): array
+    {
+        $parameters = array_map(fn (string $value) => ['type' => 'text', 'text' => $value], $template->parameters);
+        $components = [['type' => 'body', 'parameters' => $parameters]];
+
+        // Le bouton « copier le code » d'un modele d'authentification se declare chez Meta comme un
+        // bouton de lien, et attend le code en parametre, en plus du corps du message.
+        if ($template->copyCodeButton) {
+            $components[] = ['type' => 'button', 'sub_type' => 'url', 'index' => '0', 'parameters' => [$parameters[0]]];
+        }
+
+        return $components;
     }
 }

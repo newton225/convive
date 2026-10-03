@@ -67,6 +67,7 @@ class RefundSent extends Notification implements ShouldQueue
         return new WhatsAppTemplate('refund_sent', [
             $this->registration->name,
             $this->registration->event->name,
+            ...array_values($this->refundDetails()),
         ]);
     }
 
@@ -80,13 +81,23 @@ class RefundSent extends Notification implements ShouldQueue
 
     private function refundLine(): string
     {
+        return __('guest.refund.refunded', $this->refundDetails());
+    }
+
+    /**
+     * Le montant recu, la date, le moyen et les frais, dans l'ordre des variables du modele.
+     *
+     * @return array{amount: string, date: string, channel: string, fee: string}
+     */
+    private function refundDetails(): array
+    {
         $registration = $this->registration;
 
-        return __('guest.refund.refunded', [
+        return [
             'amount' => Money::format($registration->netRefund() ?? 0),
             'date' => $registration->refunded_on?->isoFormat('LL') ?? '',
             'channel' => $registration->refund_channel?->label() ?? '',
             'fee' => Money::format($registration->refund_fee ?? 0),
-        ]);
+        ];
     }
 }
