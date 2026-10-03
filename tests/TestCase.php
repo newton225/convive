@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\ScopedSqliteDatabaseManager;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Http;
 use Laravel\Fortify\Features;
 
 abstract class TestCase extends BaseTestCase
@@ -28,6 +29,11 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Aucun test n'atteint un service reel (WhatsApp, SMS...) : une requete HTTP non simulee
+        // par `Http::fake()` echoue au lieu de partir. Incident du 2026-10-03 : avec de vrais
+        // identifiants dans le .env, des tests ont appele Twilio pour de bon.
+        Http::preventStrayRequests();
 
         // Sous Windows, un fichier SQLite reste verrouille tant que le PDO du test precedent
         // n'a pas ete reellement libere : `purgeTenantConnection()` (stancl/tenancy) le

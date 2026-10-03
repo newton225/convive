@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Notifications\Registrations\RefundSent;
 use App\Notifications\Registrations\RegistrationCancelled;
 use App\Support\Money;
+use App\Support\WhatsApp\WhatsAppTemplate;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -33,6 +34,15 @@ class CancelledRegistrationPaymentTest extends TestCase
     private function tenantOwnedBy(User $user): Tenant
     {
         return app(CreateTenant::class)->handle($user, 'Association Convive');
+    }
+
+    /**
+     * The text as a WhatsApp template variable carries it : sur une ligne, espaces ordinaires (les
+     * montants s'ecrivent avec une espace fine insecable).
+     */
+    private static function asTemplateText(string $text): string
+    {
+        return (new WhatsAppTemplate('test', [$text]))->parameters[0];
     }
 
     private function confirmedRegistration(Tenant $tenant, Event $event, int $amountDue = 60000): Registration
@@ -337,8 +347,8 @@ class CancelledRegistrationPaymentTest extends TestCase
 
         $tenant->asCurrent(fn () => app(CancelRegistration::class)->handle($registration, 'Motif.', $owner));
 
-        Notification::assertSentOnDemand(RegistrationCancelled::class, fn (RegistrationCancelled $notification) => $notification->whatsAppTemplate(null)->parameters[3]
-            === __('guest.refund.due', ['amount' => Money::format(60000)]));
+        $tenant->asCurrent(fn () => Notification::assertSentOnDemand(RegistrationCancelled::class, fn (RegistrationCancelled $notification) => $notification->whatsAppTemplate(null)->parameters[3]
+            === self::asTemplateText(__('guest.refund.due', ['amount' => Money::format(60000)]))));
     }
 
     public function test_le_modele_whatsapp_d_annulation_sans_paiement_ne_laisse_aucune_variable_vide(): void
@@ -354,8 +364,8 @@ class CancelledRegistrationPaymentTest extends TestCase
 
         $tenant->asCurrent(fn () => app(CancelRegistration::class)->handle($registration, 'Motif.', $owner));
 
-        Notification::assertSentOnDemand(RegistrationCancelled::class, fn (RegistrationCancelled $notification) => $notification->whatsAppTemplate(null)->parameters[3]
-            === __('guest.refund.none'));
+        $tenant->asCurrent(fn () => Notification::assertSentOnDemand(RegistrationCancelled::class, fn (RegistrationCancelled $notification) => $notification->whatsAppTemplate(null)->parameters[3]
+            === __('guest.refund.none')));
     }
 
     public function test_le_motif_d_annulation_sur_plusieurs_lignes_tient_sur_une_seule_dans_le_modele(): void
@@ -371,8 +381,8 @@ class CancelledRegistrationPaymentTest extends TestCase
 
         $tenant->asCurrent(fn () => app(CancelRegistration::class)->handle($registration, "Salle annulee.\r\n\r\nNous\tsommes      desoles.", $owner));
 
-        Notification::assertSentOnDemand(RegistrationCancelled::class, fn (RegistrationCancelled $notification) => $notification->whatsAppTemplate(null)->parameters[2]
-            === 'Salle annulee. Nous sommes desoles.');
+        $tenant->asCurrent(fn () => Notification::assertSentOnDemand(RegistrationCancelled::class, fn (RegistrationCancelled $notification) => $notification->whatsAppTemplate(null)->parameters[2]
+            === 'Salle annulee. Nous sommes desoles.'));
     }
 
     public function test_le_modele_whatsapp_du_remboursement_donne_montant_date_moyen_et_frais(): void
@@ -391,11 +401,11 @@ class CancelledRegistrationPaymentTest extends TestCase
             $owner,
         ));
 
-        Notification::assertSentOnDemand(RefundSent::class, fn (RefundSent $notification) => array_slice($notification->whatsAppTemplate(null)->parameters, 2) === [
+        $tenant->asCurrent(fn () => Notification::assertSentOnDemand(RefundSent::class, fn (RefundSent $notification) => array_slice($notification->whatsAppTemplate(null)->parameters, 2) === array_map(self::asTemplateText(...), [
             Money::format(59400),
             Carbon::parse('2026-09-29')->isoFormat('LL'),
             PaymentChannel::Wave->label(),
             Money::format(600),
-        ]);
+        ])));
     }
 }

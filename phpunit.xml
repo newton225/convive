@@ -33,6 +33,10 @@
         <env name="DB_CENTRAL_DATABASE" value=":memory:"/>
         <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
+        <!-- Jamais de vrai envoi depuis les tests, quels que soient les identifiants du .env. -->
+        <env name="WHATSAPP_DRIVER" value=""/>
+        <env name="SMS_DRIVER" value=""/>
+        <env name="INERTIA_SSR_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
