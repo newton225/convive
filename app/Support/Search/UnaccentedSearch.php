@@ -84,6 +84,14 @@ class UnaccentedSearch
         $connection->beforeExecuting(function (string $query, array $bindings, Connection $connection): void {
             self::$prepared ??= new WeakMap;
 
+            // Connexion fermee (base d'une organisation qu'on efface, deconnexion d'un processus de
+            // longue duree) : Laravel la rouvre juste apres ce passage, et la requete suivante pose
+            // la fonction. Bogue trouve par `EraseScheduledTenantsTest` : il n'y a alors aucun PDO,
+            // et `getPdo()` rendait nul malgre son type annonce.
+            if ($connection->getRawPdo() === null) {
+                return;
+            }
+
             $pdo = $connection->getPdo();
 
             if (isset(self::$prepared[$pdo])) {
