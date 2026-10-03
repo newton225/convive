@@ -104,6 +104,12 @@ class RegistrationController extends Controller
             return back()->withInput()->withErrors(['phone' => __('guest.registration.errors.phone_already_active')]);
         }
 
+        // Une inscription confirmee existe deja pour ce numero : la nouvelle n'est possible que comme
+        // inscription additionnelle, apres que l'invite l'a confirme.
+        if (! $request->boolean('confirm_additional') && Registration::phoneHasConfirmed($event, (string) $request->validated('phone'))) {
+            return back()->withInput()->withErrors(['additional_registration' => __('guest.registration.errors.already_confirmed')]);
+        }
+
         if (($waitUntil = Registration::phoneBackoffUntil($event, (string) $request->validated('phone'))) !== null) {
             return back()->withInput()->withErrors(['phone' => $this->backoffMessage($waitUntil)]);
         }

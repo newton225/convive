@@ -3,6 +3,7 @@ import { AlertCircle } from 'lucide-react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import type { Country } from 'react-phone-number-input';
 import { OfflineBanner } from '@/components/offline-banner';
+import { AdditionalRegistrationNotice } from '@/components/public/additional-registration-notice';
 import { BotCheck } from '@/components/public/bot-check';
 import { OngoingReservationNotice } from '@/components/public/ongoing-reservation-notice';
 import { PhoneField } from '@/components/phone/phone-field';
@@ -230,6 +231,13 @@ export default function PublicRegistration({
                                     siteKey={botCheckSiteKey}
                                     resetKey={botCheckReset}
                                     error={errors['cf-turnstile-response']}
+                                />
+                            ) : null}
+
+                            {errors.additional_registration ? (
+                                <AdditionalRegistrationNotice
+                                    message={errors.additional_registration}
+                                    processing={processing}
                                 />
                             ) : null}
 

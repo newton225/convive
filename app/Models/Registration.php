@@ -322,6 +322,20 @@ class Registration extends Model
     }
 
     /**
+     * Determine whether this phone already has a confirmed registration on the event : une
+     * nouvelle inscription n'est alors qu'additionnelle, l'invite doit le confirmer (decision du
+     * proprietaire du projet, 2026-10-03).
+     */
+    public static function phoneHasConfirmed(Event $event, string $phone): bool
+    {
+        return self::query()
+            ->where('event_id', $event->id)
+            ->where('status', RegistrationStatus::Confirmed)
+            ->pluck('phone')
+            ->contains(fn (string $other) => PhoneNumber::same($other, $phone));
+    }
+
+    /**
      * Premiere attente imposee apres des reservations expirees repetees, en minutes (SECURITY.md
      * C3). Elle double a chaque expiration supplementaire, jusqu'a `BackoffMaxMinutes`.
      */

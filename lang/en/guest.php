@@ -39,6 +39,9 @@ return [
     ],
 
     'registration' => [
+        'additional' => [
+            'confirm' => "Yes, create an additional registration",
+        ],
         'ongoing' => [
             'title' => 'You already have a reservation in progress',
             'description' => 'Your seat is held for this event. Resume your reservation rather than starting a new one.',
@@ -50,6 +53,7 @@ return [
             'phone_invalid' => 'This number is not valid for the selected country. Check the country chosen in front of the field, then the number.',
             'phone_already_active' => 'A reservation is already in progress for this number. Finish it, or wait for its time limit to end before creating another.',
             'bot_check' => 'The anti-robot check did not complete. Wait a moment for it to finish, then send the form again.',
+            'already_confirmed' => 'This number already has a confirmed registration for this event. If you want to register other people, you can create an additional registration: it will have its own payment and its own tickets.',
             'too_many_codes' => 'Too many codes were sent to this number. Please try again in an hour.',
             'registrations_paused' => 'Online registration is temporarily paused for this event. Contact the organiser to book your seat.',
             'phone_backoff' => '{1} Several reservations expired for this number without a payment proof. Try again in 1 minute.|[2,*] Several reservations expired for this number without a payment proof. Try again in :minutes minutes.',
