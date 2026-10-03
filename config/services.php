@@ -66,10 +66,19 @@ return [
     /*
      * SMS : le code de verification du telephone seulement (decision du proprietaire du projet,
      * 2026-10-03), Meta refusant ce modele en WhatsApp a une entreprise non verifiee. `SMS_DRIVER`
-     * vaut `orange` (API SMS d'Orange Cote d'Ivoire) ; vide ou sans identifiants, le journal.
+     * vaut `hsms` (choix du proprietaire du projet) ou `orange` (API SMS d'Orange Cote d'Ivoire) ;
+     * vide ou sans identifiants, le journal.
      */
     'sms' => [
         'driver' => env('SMS_DRIVER'),
+        'hsms' => [
+            // Le compte HSMS lui-meme : son API demande l'adresse et le mot de passe pour donner un
+            // jeton, puis l'identifiant et le secret de l'application a chaque envoi.
+            'email' => env('HSMS_EMAIL'),
+            'password' => env('HSMS_PASSWORD'),
+            'client_id' => env('HSMS_CLIENT_ID'),
+            'client_secret' => env('HSMS_CLIENT_SECRET'),
+        ],
         'orange' => [
             'client_id' => env('ORANGE_SMS_CLIENT_ID'),
             'client_secret' => env('ORANGE_SMS_CLIENT_SECRET'),

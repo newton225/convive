@@ -72,7 +72,7 @@ return [
                         'The team of :editor has no access to the content of an organisation. It only enters when an owner opens a support access: named, read-only, limited to 24 hours, revocable at any time, and every page viewed is written to the log of the organisation.',
                         'Our hosting provider: :host.',
                         'Stripe, for the payment of the subscription.',
-                        'Our email delivery provider (:mail_provider) WhatsApp (Meta) and Orange Côte d’Ivoire (SMS for the verification code), to carry the messages.',
+                        'Our email delivery provider (:mail_provider) WhatsApp (Meta) and HSMS (SMS for the verification code), to carry the messages.',
                         'Google Analytics, only if you accepted audience measurement.',
                         'The authorities, when the law requires it.',
                     ],

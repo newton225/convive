@@ -198,7 +198,7 @@ class PhoneVerificationTest extends TestCase
 
     public function test_un_numero_etranger_reserve_sans_code(): void
     {
-        // Decision du 2026-10-03 (option a) : le SMS part par Orange Cote d'Ivoire, qui ne garantit
+        // Decision du 2026-10-03 (option a) : les services SMS retenus ne garantissent
         // pas l'envoi a l'etranger. Un invite etranger ne doit pas rester bloque devant un code qui
         // n'arrivera jamais : la verification ne vaut que pour les numeros ivoiriens.
         Notification::fake();
@@ -211,7 +211,7 @@ class PhoneVerificationTest extends TestCase
 
     public function test_le_code_tient_en_un_seul_sms(): void
     {
-        // Au-dela de 160 caracteres, Orange facture deux SMS par code.
+        // Au-dela de 160 caracteres, le service SMS facture deux SMS par code.
         $message = (new PhoneVerificationCode('482915'))->toSms(null);
 
         $this->assertStringContainsString('482915', $message);
@@ -221,7 +221,7 @@ class PhoneVerificationTest extends TestCase
     public function test_un_meme_numero_ne_recoit_pas_plus_de_cinq_codes_par_heure(): void
     {
         // Chaque SMS est paye : sans plafond par numero, un robot qui recommence l'inscription en
-        // boucle viderait le credit d'Orange et inonderait le telephone d'un tiers.
+        // boucle viderait le credit SMS et inonderait le telephone d'un tiers.
         Notification::fake();
         $event = $this->event(true);
 

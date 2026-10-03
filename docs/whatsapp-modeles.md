@@ -42,7 +42,7 @@ les retrouve sur la page de son billet, d'où il peut les transmettre.
 
 ## Code de vérification du téléphone : par SMS, pas par WhatsApp
 
-Le code part **par SMS** (API SMS d'Orange Côte d'Ivoire, réglages `SMS_DRIVER` et `ORANGE_SMS_*`),
+Le code part **par SMS** (HSMS, réglages `SMS_DRIVER=hsms` et `HSMS_*` ; Orange en réserve),
 décision du propriétaire du projet du 2026-10-03 : Meta refuse les modèles « authentification » à
 une entreprise non vérifiée. Aucun modèle WhatsApp n'est donc à créer pour lui.
 
