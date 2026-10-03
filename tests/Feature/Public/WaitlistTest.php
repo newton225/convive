@@ -136,8 +136,13 @@ class WaitlistTest extends TestCase
         $this->assertSame(WaitlistStatus::Waiting, $entry->status);
         $this->assertSame('Aya Kouassi', $entry->name);
 
+        // Le segment entier, pas un prefixe : un jeton aleatoire peut commencer par « 1 » (le test
+        // echouait au hasard, environ une fois sur soixante).
+        $segment = (string) str($response->headers->get('Location'))->after('/waitlist/')->before('?');
+
         $this->assertStringContainsString('/waitlist/', $response->headers->get('Location'));
-        $this->assertStringNotContainsString("/waitlist/{$entry->id}", $response->headers->get('Location'));
+        $this->assertNotSame((string) $entry->id, $segment);
+        $this->assertGreaterThanOrEqual(32, strlen($segment));
     }
 
     public function test_la_position_reflete_l_ordre_d_arrivee(): void
