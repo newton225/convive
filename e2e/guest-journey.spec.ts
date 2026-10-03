@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
     decideProof,
+    distinctGuestAddress,
     phoneFor,
     register,
     state,
@@ -12,6 +13,10 @@ import {
  * lien public, depose sa preuve de paiement, l'organisateur la valide ou la rejette, et l'invite
  * retrouve son billet ou la possibilite de recommencer. Rejoue sur iPhone.
  */
+test.beforeEach(async ({ context }, testInfo) => {
+    await distinctGuestAddress(context, testInfo);
+});
+
 test('un invite s inscrit, depose sa preuve et recoit son billet apres validation', async ({
     page,
     browser,

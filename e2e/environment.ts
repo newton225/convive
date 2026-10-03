@@ -44,6 +44,11 @@ export const environment: Record<string, string> = {
     CONVIVE_ENFORCE_TWO_FACTOR: 'false',
     CONVIVE_CONSOLE_OPERATORS: 'admin@convive.com',
     CONVIVE_TRIAL_ENABLED: 'true',
+    // Chaque invite simule se presente avec sa propre adresse (`distinctGuestAddress`) : la machine
+    // de test est donc traitee comme le proxy qui la transmet. Sans cela, tous les invites
+    // partageaient l'adresse locale et les limites par adresse (5 inscriptions en 10 minutes) les
+    // bloquaient, comme elles bloqueraient un vrai abus.
+    TRUSTED_PROXIES: '127.0.0.1',
 };
 
 export const account = {

@@ -6,6 +6,7 @@
  * organisation etrangere a un compte).
  */
 
+use App\Enums\ProductTour;
 use App\Models\Event;
 use App\Models\PaymentAccount;
 use App\Models\Tenant;
@@ -30,6 +31,12 @@ $tenant = Tenant::where('name', TenantSeeder::TenantName)->first() ?? $fail("L'o
 // personnel du compte principal.
 $foreign = User::where('email', 'admin@convive.com')->first()?->personalTenant()
     ?? $fail("Le compte principal n'a pas d'espace personnel.");
+
+// Les visites guidees s'ouvrent d'elles-memes a la premiere visite d'un ecran et couvrent ses
+// boutons : pour le compte de test, elles sont deja vues.
+User::where('email', 'admin@convive.com')->first()?->forceFill([
+    'completed_tours' => array_map(fn (ProductTour $tour) => $tour->value, ProductTour::cases()),
+])->save();
 
 $state = $tenant->run(function () use ($tenant, $foreign, $fail) {
     $published = Event::query()->whereNotNull('public_token')->get();

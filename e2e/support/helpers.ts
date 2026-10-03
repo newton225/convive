@@ -1,7 +1,13 @@
 import fs from 'node:fs';
 import zlib from 'node:zlib';
 import { expect } from '@playwright/test';
-import type { Browser, Locator, Page, TestInfo } from '@playwright/test';
+import type {
+    Browser,
+    BrowserContext,
+    Locator,
+    Page,
+    TestInfo,
+} from '@playwright/test';
 import { account, statePath } from '../environment';
 import type { State } from '../environment';
 
@@ -42,6 +48,25 @@ export function phoneFor(testInfo: TestInfo, sequence: number): string {
  * Remplit le formulaire d'inscription du lien public et l'envoie. Rend l'adresse de la page de
  * reservation, celle sur laquelle l'invite revient.
  */
+/**
+ * Donner a l'invite de ce test sa propre adresse, comme deux vrais invites n'ont pas la meme.
+ * L'adresse varie aussi par sous-reseau : la limite par sous-reseau est de 20 inscriptions.
+ */
+export async function distinctGuestAddress(
+    context: BrowserContext,
+    testInfo: TestInfo,
+): Promise<void> {
+    let hash = 0;
+
+    for (const character of `${testInfo.project.name}|${testInfo.titlePath.join('|')}|${testInfo.retry}`) {
+        hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+    }
+
+    const address = `10.${(hash >>> 16) & 255}.${(hash >>> 8) & 255}.${(hash & 254) + 1}`;
+
+    await context.setExtraHTTPHeaders({ 'X-Forwarded-For': address });
+}
+
 /**
  * Le bouton d'action de la page publique qui est visible : celui de la page sur ordinateur, celui de
  * la barre du bas sur telephone (`-mobile`). Les deux existent, un seul se voit.

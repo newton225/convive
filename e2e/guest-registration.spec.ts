@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
     digitsOf,
+    distinctGuestAddress,
     phoneFor,
     register,
     state,
@@ -12,6 +13,10 @@ import {
  * liste d'attente d'un evenement complet, langue de l'invite. Rejoue sur iPhone.
  */
 test.describe('inscription par le lien public', () => {
+    test.beforeEach(async ({ context }, testInfo) => {
+        await distinctGuestAddress(context, testInfo);
+    });
+
     test('le montant suit le nombre d accompagnateurs', async ({ page }) => {
         const { publicUrl, pricePerPerson } = state();
 
