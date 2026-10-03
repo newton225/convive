@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Support\Release;
+use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
@@ -38,7 +40,33 @@ class ProductionCheckCommandTest extends TestCase
                 'mail_provider' => 'Resend',
                 'reviewed' => true,
             ],
+            // Une livraison estampillee (`convive:release`), dans un fichier propre au test.
+            'convive.release_path' => $this->releasePath(),
         ]);
+
+        Release::stamp('0741e99');
+    }
+
+    private function releasePath(): string
+    {
+        return storage_path('framework/testing/release-production-check.json');
+    }
+
+    protected function tearDown(): void
+    {
+        File::delete($this->releasePath());
+
+        parent::tearDown();
+    }
+
+    public function test_une_livraison_non_estampillee_fait_echouer_la_verification(): void
+    {
+        $this->safeConfiguration();
+        File::delete($this->releasePath());
+
+        $this->artisan('convive:production-check')
+            ->expectsOutputToContain('convive:release')
+            ->assertFailed();
     }
 
     public function test_un_journal_sans_rotation_fait_echouer_la_verification(): void

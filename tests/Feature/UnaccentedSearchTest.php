@@ -44,7 +44,8 @@ class UnaccentedSearchTest extends TestCase
                 Registration::factory()->create(['event_id' => $event->id, 'name' => $name]);
             }
 
-            $query = Registration::query();
+            // Seulement cet evenement : chaque appel cree le sien dans la meme organisation.
+            $query = Registration::where('event_id', $event->id);
             UnaccentedSearch::apply($query, ['name'], $term);
 
             return $query->orderBy('id')->pluck('name')->all();
