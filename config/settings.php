@@ -1,7 +1,5 @@
 <?php
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelSettings\SettingsCasts\DataCast;
 use Spatie\LaravelSettings\SettingsCasts\DateTimeInterfaceCast;
 use Spatie\LaravelSettings\SettingsCasts\DateTimeZoneCast;
 use Spatie\LaravelSettings\SettingsRepositories\DatabaseSettingsRepository;
@@ -88,8 +86,8 @@ return [
     'global_casts' => [
         DateTimeInterface::class => DateTimeInterfaceCast::class,
         DateTimeZone::class => DateTimeZoneCast::class,
-        //        Spatie\DataTransferObject\DataTransferObject::class => Spatie\LaravelSettings\SettingsCasts\DtoCast::class,
-        Data::class => DataCast::class,
+        // Pas de conversion pour `spatie/laravel-data` : le paquet n'est pas installe, et aucun
+        // reglage ne porte d'objet de donnees.
     ],
 
     /*
