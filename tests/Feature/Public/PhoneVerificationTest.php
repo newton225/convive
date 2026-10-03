@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Public;
 
+use App\Actions\Registrations\PhoneVerification;
 use App\Actions\Tenants\CreateTenant;
 use App\Enums\LegalForm;
 use App\Enums\RegistrationStatus;
@@ -15,13 +16,15 @@ use App\Notifications\Registrations\PhoneVerificationCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Testing\TestResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 /**
  * Verification du telephone par code avant la reservation (SECURITY.md C3, decision du
  * 2026-09-27) : reglage par evenement, desactive par defaut. Active, le formulaire enregistre un
- * brouillon qui ne bloque aucune place, envoie un code par WhatsApp, et ne reserve qu'une fois le
+ * brouillon qui ne bloque aucune place, envoie un code par SMS, et ne reserve qu'une fois le
  * code saisi : un robot sans vrais telephones ne peut plus bloquer la salle.
  */
 class PhoneVerificationTest extends TestCase
@@ -72,11 +75,14 @@ class PhoneVerificationTest extends TestCase
             .'/e/'.$event->public_token.$suffix;
     }
 
-    private function register(Event $event): TestResponse
+    /**
+     * @return TestResponse<Response>
+     */
+    private function register(Event $event, string $phone = '+225 07 07 12 34 56'): TestResponse
     {
         return $this->post($this->url($event, '/register'), [
             'name' => 'Aya Kouassi',
-            'phone' => '+225 07 07 12 34 56',
+            'phone' => $phone,
             'unit_id' => $this->tenant->asCurrent(fn () => Unit::where('name', 'QODESH')->value('id')),
             'companions' => [],
         ]);
@@ -89,8 +95,8 @@ class PhoneVerificationTest extends TestCase
         Notification::assertSentOnDemand(PhoneVerificationCode::class, function (PhoneVerificationCode $notification, array $channels, AnonymousNotifiable $notifiable) use (&$code) {
             $code = $notification->code;
 
-            // Le numero sous sa forme unique (`PhoneNumber`), celle qu'attend l'API WhatsApp.
-            return $notifiable->routeNotificationFor('whatsapp') === '+2250707123456';
+            // Par SMS seulement (decision du 2026-10-03), au numero sous sa forme unique.
+            return $channels === ['sms'] && $notifiable->routeNotificationFor('sms') === '+2250707123456';
         });
 
         return (string) $code;
@@ -188,5 +194,65 @@ class PhoneVerificationTest extends TestCase
         $this->post($verifyUrl.'/resend')->assertRedirect();
 
         Notification::assertSentOnDemandTimes(PhoneVerificationCode::class, 2);
+    }
+
+    public function test_un_numero_etranger_reserve_sans_code(): void
+    {
+        // Decision du 2026-10-03 (option a) : le SMS part par Orange Cote d'Ivoire, qui ne garantit
+        // pas l'envoi a l'etranger. Un invite etranger ne doit pas rester bloque devant un code qui
+        // n'arrivera jamais : la verification ne vaut que pour les numeros ivoiriens.
+        Notification::fake();
+
+        $this->register($this->event(true), '+33 6 12 34 56 78')->assertSessionHasNoErrors();
+
+        $this->assertSame(RegistrationStatus::Held, $this->registration()->status);
+        Notification::assertNothingSent();
+    }
+
+    public function test_le_code_tient_en_un_seul_sms(): void
+    {
+        // Au-dela de 160 caracteres, Orange facture deux SMS par code.
+        $message = (new PhoneVerificationCode('482915'))->toSms(null);
+
+        $this->assertStringContainsString('482915', $message);
+        $this->assertLessThanOrEqual(160, mb_strlen($message));
+    }
+
+    public function test_un_meme_numero_ne_recoit_pas_plus_de_cinq_codes_par_heure(): void
+    {
+        // Chaque SMS est paye : sans plafond par numero, un robot qui recommence l'inscription en
+        // boucle viderait le credit d'Orange et inonderait le telephone d'un tiers.
+        Notification::fake();
+        $event = $this->event(true);
+
+        $this->tenant->asCurrent(function () use ($event) {
+            $verification = app(PhoneVerification::class);
+
+            for ($i = 0; $i < 6; $i++) {
+                $registration = Registration::factory()->create(['event_id' => $event->id, 'phone' => '+2250707123456', 'status' => RegistrationStatus::Draft]);
+                $sent = $verification->send($registration);
+
+                $this->assertSame($i < PhoneVerification::MaxCodesPerHour, $sent);
+            }
+        });
+
+        Notification::assertSentOnDemandTimes(PhoneVerificationCode::class, PhoneVerification::MaxCodesPerHour);
+    }
+
+    public function test_au_dela_du_plafond_l_invite_est_prevenu_au_lieu_d_attendre_un_code(): void
+    {
+        Notification::fake();
+        $event = $this->event(true);
+
+        $this->tenant->asCurrent(function () {
+            for ($i = 0; $i < PhoneVerification::MaxCodesPerHour; $i++) {
+                RateLimiter::hit(PhoneVerification::limiterKey('+2250707123456'), 3600);
+            }
+        });
+
+        $this->register($event)->assertSessionHasErrors('phone');
+
+        $this->assertSame(0, $this->tenant->asCurrent(fn () => Registration::count()));
+        Notification::assertNothingSent();
     }
 }

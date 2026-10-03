@@ -40,19 +40,16 @@ d'un événement reste à désactiver.
 Les billets des accompagnateurs ne peuvent pas figurer dans le modèle (leur nombre varie) : l'invité
 les retrouve sur la page de son billet, d'où il peut les transmettre.
 
-## Code de vérification du téléphone
+## Code de vérification du téléphone : par SMS, pas par WhatsApp
 
-- Réglage : `WHATSAPP_TEMPLATE_PHONE_CODE`
-- Catégorie : authentification
-- Variable : `{{1}}` le code
+Le code part **par SMS** (API SMS d'Orange Côte d'Ivoire, réglages `SMS_DRIVER` et `ORANGE_SMS_*`),
+décision du propriétaire du projet du 2026-10-03 : Meta refuse les modèles « authentification » à
+une entreprise non vérifiée. Aucun modèle WhatsApp n'est donc à créer pour lui.
 
-Meta et Twilio imposent leur propre texte pour cette catégorie (« {{1}} est votre code de
-vérification »). Options à choisir à la création chez Meta :
-
-- bouton **« Copier le code »** (pas « remplissage automatique ») : l'application envoie le code
-  pour ce bouton ;
-- **délai d'expiration : 10 minutes**, la durée de validité du code dans l'application ;
-- avertissement de sécurité (« Pour votre sécurité, ne communiquez pas ce code ») : à cocher.
+Si l'entreprise est un jour vérifiée chez Meta et que le code revient sur WhatsApp, l'application
+sait déjà envoyer un modèle d'authentification (`WhatsAppTemplate::authentication()`, code repris
+pour le bouton « Copier le code ») ; options à choisir alors chez Meta : « Copier le code »,
+expiration 10 minutes, avertissement de sécurité.
 
 ## Rappel de preuve de paiement
 

@@ -2,6 +2,7 @@
 
 namespace App\Support\Console;
 
+use App\Contracts\SmsSender;
 use App\Contracts\WhatsAppSender;
 use App\Models\MessageLog;
 use App\Models\Tenant;
@@ -9,8 +10,8 @@ use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Lang;
 
 /**
- * Le releve des envois pour la console (README section 3) : chaque courriel et chaque message
- * WhatsApp parti y laisse son canal, son type et son destinataire masque. Il repond a deux
+ * Le releve des envois pour la console (README section 3) : chaque courriel, chaque message
+ * WhatsApp et chaque SMS parti y laisse son canal, son type et son destinataire masque. Il repond a deux
  * questions que rien ne permettait de poser : des messages partent-ils, et partent-ils vraiment
  * (un canal encore simule est signale comme tel).
  *
@@ -23,7 +24,7 @@ class MessageJournal
      * Les canaux releves : ceux qui sortent de l'application. Les alertes internes (cloche) n'en
      * font pas partie.
      */
-    private const Channels = ['mail', 'whatsapp'];
+    private const Channels = ['mail', 'whatsapp', 'sms'];
 
     private const MessagesShown = 50;
 
@@ -64,6 +65,7 @@ class MessageJournal
     {
         return match ($channel) {
             'whatsapp' => ! app(WhatsAppSender::class)->delivers(),
+            'sms' => ! app(SmsSender::class)->delivers(),
             'mail' => in_array(config('mail.default'), ['log', 'array'], true),
             default => false,
         };

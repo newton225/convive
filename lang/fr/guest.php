@@ -44,6 +44,7 @@ return [
         'errors' => [
             'phone_invalid' => "Ce numéro n'est pas valide pour le pays choisi. Vérifiez le pays sélectionné devant le champ, puis le numéro.",
             'phone_already_active' => 'Une réservation est déjà en cours pour ce numéro. Terminez-la, ou attendez la fin de son délai avant d\'en créer une autre.',
+            'too_many_codes' => 'Trop de codes ont été envoyés à ce numéro. Réessayez dans une heure.',
             'registrations_paused' => "Les inscriptions en ligne sont momentanément suspendues pour cet événement. Contactez l'organisateur pour réserver votre place.",
             'phone_backoff' => '{1} Plusieurs réservations ont expiré pour ce numéro sans preuve de paiement. Réessayez dans 1 minute.|[2,*] Plusieurs réservations ont expiré pour ce numéro sans preuve de paiement. Réessayez dans :minutes minutes.',
         ],
@@ -98,7 +99,7 @@ return [
 
     'flash' => [
         'phone_verified' => 'Numéro vérifié : votre place est réservée.',
-        'code_resent' => 'Un nouveau code vous a été envoyé sur WhatsApp.',
+        'code_resent' => 'Un nouveau code vous a été envoyé par SMS.',
         'proof_sent' => 'Preuve envoyée. Elle va être vérifiée par l\'organisation.',
         'proof_too_late' => "Le délai de réservation était écoulé : la preuve n'a pas été enregistrée. Vérifiez les places et relancez votre réservation.",
         'no_seats_left' => "Il ne reste plus assez de places pour votre inscription. Vous pouvez rejoindre la liste d'attente si elle est ouverte.",
@@ -110,13 +111,13 @@ return [
 
     'phone_verification' => [
         'title' => 'Vérifiez votre numéro',
-        'description' => 'Nous avons envoyé un code à 6 chiffres sur WhatsApp au :phone. Saisissez-le pour réserver votre place.',
+        'description' => 'Nous avons envoyé un code à 6 chiffres par SMS au :phone. Saisissez-le pour réserver votre place.',
         'code_label' => 'Code de vérification',
         'expires' => 'Le code expire dans :minutes minutes.',
         'submit' => 'Vérifier et réserver',
         'resend' => 'Renvoyer le code',
         'errors' => [
-            'invalid' => 'Ce code ne correspond pas. Vérifiez le message WhatsApp et réessayez.',
+            'invalid' => 'Ce code ne correspond pas. Vérifiez le SMS et réessayez.',
             'expired' => 'Ce code a expiré. Demandez-en un nouveau.',
             'too_many_attempts' => 'Trop d\'essais. Demandez un nouveau code.',
         ],
@@ -177,8 +178,10 @@ return [
         ],
     ],
 
-    'whatsapp' => [
+    'sms' => [
         'phone_code' => 'Votre code Convive : :code. Il expire dans :minutes minutes. Ne le communiquez à personne.',
+    ],
+    'whatsapp' => [
         'invitation_card' => 'Bonjour :name, votre inscription à :event est confirmée. Votre billet : :link',
         'proof_reminder' => 'Bonjour :name, il manque votre preuve de paiement pour :event. Envoyez-la ici : :link',
         'ticket_reminder' => 'Bonjour :name, :event a lieu dans trois heures. Votre billet : :link',

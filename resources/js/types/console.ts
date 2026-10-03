@@ -193,7 +193,7 @@ export type ConsoleQueue = {
 
 // Un canal d'envoi : `simulated` est vrai quand il n'envoie pas encore reellement.
 export type ConsoleMessageChannel = {
-    channel: 'mail' | 'whatsapp';
+    channel: 'mail' | 'whatsapp' | 'sms';
     simulated: boolean;
     lastDay: number;
     lastWeek: number;
@@ -209,7 +209,7 @@ export type ConsoleMessageType = {
 export type ConsoleMessage = {
     id: number;
     at: string;
-    channel: 'mail' | 'whatsapp';
+    channel: 'mail' | 'whatsapp' | 'sms';
     type: string;
     organisation: string | null;
     recipient: string | null;

@@ -56,7 +56,7 @@ return [
                     'title' => 'Why we handle it',
                     'items' => [
                         'To provide the service: create an account, manage events, registrations, payment proofs, tickets and entry control. This is the performance of the contract between us and the organisation.',
-                        'To send the messages tied to a registration: invitation card, reminders, verification code, ticket. They go out by WhatsApp and, when an address was provided, by email.',
+                        'To send the messages tied to a registration: invitation card, reminders, ticket. They go out by WhatsApp and, when an address was provided, by email. The phone verification code, when the organisation requires it, goes out by SMS.',
                         'To protect the service and the money of organisations: two-factor authentication, action log, rate limiting, detection of doubtful proofs. This is our legitimate interest and that of the organisations.',
                         'To invoice the subscription and keep our accounts: this is a legal obligation.',
                         'To measure traffic on the commercial site: only with your consent.',
@@ -72,7 +72,7 @@ return [
                         'The team of :editor has no access to the content of an organisation. It only enters when an owner opens a support access: named, read-only, limited to 24 hours, revocable at any time, and every page viewed is written to the log of the organisation.',
                         'Our hosting provider: :host.',
                         'Stripe, for the payment of the subscription.',
-                        'Our email delivery provider (:mail_provider) and WhatsApp (Meta), to carry the messages.',
+                        'Our email delivery provider (:mail_provider) WhatsApp (Meta) and Orange Côte d’Ivoire (SMS for the verification code), to carry the messages.',
                         'Google Analytics, only if you accepted audience measurement.',
                         'The authorities, when the law requires it.',
                     ],

@@ -982,6 +982,15 @@ variables dans l'ordre), et le modele reel se declare par reglage (`WHATSAPP_TEM
 du service leve une exception : l'envoi echoue et se relance depuis la console. Un nouveau message
 WhatsApp ajoute sa cle dans `config('services.whatsapp.templates')`, son texte dans ce document.
 
+**SMS, pour le code de verification du telephone seulement** (decision du proprietaire du projet,
+2026-10-03, Meta refusant les modeles d'authentification a une entreprise non verifiee) :
+`App\Contracts\SmsSender`, canal `sms` (`App\Notifications\Channels\SmsChannel`, methode `toSms()`),
+`SMS_DRIVER=orange` pour l'API SMS d'Orange Cote d'Ivoire (`App\Support\Sms\OrangeSmsSender`, client
+HTTP de Laravel, jeton garde en cache), le journal sinon. Le code ne s'applique qu'aux numeros
+ivoiriens (`PhoneVerification::appliesTo()`), et un meme numero n'en recoit que cinq par heure
+(`PhoneVerification::MaxCodesPerHour`) : chaque SMS est paye. Aucun autre message ne passe par SMS
+sans nouvelle decision.
+
 Un canal de notification `whatsapp` (`App\Notifications\Channels\WhatsAppChannel`), enregistre
 par `Notification::extend()` dans `AppServiceProvider` : point d'extension prevu par Laravel,
 pas un envoi ad hoc depuis les Actions. Chaque notification qui veut ce canal expose une methode

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\SmsSender;
 use App\Contracts\SubscriptionBillingGateway;
 use App\Contracts\WhatsAppSender;
 use App\Enums\ConsoleArea;
@@ -9,6 +10,7 @@ use App\Http\Middleware\EnforceAbsoluteSessionLifetime;
 use App\Models\AuditEntry;
 use App\Models\ScanEvent;
 use App\Models\User;
+use App\Notifications\Channels\SmsChannel;
 use App\Notifications\Channels\WhatsAppChannel;
 use App\Policies\AuditPolicy;
 use App\Policies\ReportPolicy;
@@ -20,6 +22,8 @@ use App\Support\Console\ConsoleAccess;
 use App\Support\EventReport;
 use App\Support\LogWhatsAppSender;
 use App\Support\Search\UnaccentedSearch;
+use App\Support\Sms\LogSmsSender;
+use App\Support\Sms\OrangeSmsSender;
 use App\Support\Stripe\StripeApi;
 use App\Support\Stripe\StripeSubscriptionBillingGateway;
 use App\Support\UnconfiguredBillingGateway;
@@ -84,6 +88,16 @@ class AppServiceProvider extends ServiceProvider
             };
         });
 
+        // Le service SMS choisi par `SMS_DRIVER` (code de verification du telephone) ; sans service,
+        // ou sans ses identifiants, le journal.
+        $this->app->bind(SmsSender::class, function () {
+            $orange = (array) config('services.sms.orange');
+
+            return config('services.sms.driver') === 'orange' && filled($orange['client_id'] ?? null) && filled($orange['client_secret'] ?? null)
+                ? new OrangeSmsSender((string) $orange['client_id'], (string) $orange['client_secret'], filled($orange['sender_name'] ?? null) ? (string) $orange['sender_name'] : null)
+                : new LogSmsSender;
+        });
+
         // Le fournisseur de paiement de l'abonnement : Stripe des que `STRIPE_SECRET` est renseigne,
         // sinon chaque operation refuse explicitement (l'ecran d'abonnement affiche un message clair).
         $this->app->bind(StripeApi::class, fn () => new StripeApi(new StripeClient((string) config('services.stripe.secret'))));
@@ -103,6 +117,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureSessionsAndProxies();
 
         Notification::extend('whatsapp', fn ($app) => $app->make(WhatsAppChannel::class));
+        Notification::extend('sms', fn ($app) => $app->make(SmsChannel::class));
 
         // Recherche sans accents : la base centrale et celle de chaque organisation la recoivent a
         // leur ouverture (`UnaccentedSearch`).

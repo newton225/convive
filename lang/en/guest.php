@@ -44,6 +44,7 @@ return [
         'errors' => [
             'phone_invalid' => 'This number is not valid for the selected country. Check the country chosen in front of the field, then the number.',
             'phone_already_active' => 'A reservation is already in progress for this number. Finish it, or wait for its time limit to end before creating another.',
+            'too_many_codes' => 'Too many codes were sent to this number. Please try again in an hour.',
             'registrations_paused' => 'Online registration is temporarily paused for this event. Contact the organiser to book your seat.',
             'phone_backoff' => '{1} Several reservations expired for this number without a payment proof. Try again in 1 minute.|[2,*] Several reservations expired for this number without a payment proof. Try again in :minutes minutes.',
         ],
@@ -98,7 +99,7 @@ return [
 
     'flash' => [
         'phone_verified' => 'Number verified: your seat is booked.',
-        'code_resent' => 'A new code has been sent to you on WhatsApp.',
+        'code_resent' => 'A new code has been sent to you by SMS.',
         'proof_sent' => 'Proof sent. The organisation will verify it.',
         'proof_too_late' => 'The reservation window had closed: the proof was not saved. Check availability and restart your reservation.',
         'no_seats_left' => 'There are not enough seats left for your registration. You can join the waitlist if it is open.',
@@ -110,13 +111,13 @@ return [
 
     'phone_verification' => [
         'title' => 'Verify your number',
-        'description' => 'We sent a 6-digit code on WhatsApp to :phone. Enter it to book your seat.',
+        'description' => 'We sent a 6-digit code by SMS to :phone. Enter it to book your seat.',
         'code_label' => 'Verification code',
         'expires' => 'The code expires in :minutes minutes.',
         'submit' => 'Verify and book',
         'resend' => 'Resend the code',
         'errors' => [
-            'invalid' => 'This code does not match. Check the WhatsApp message and try again.',
+            'invalid' => 'This code does not match. Check the text message and try again.',
             'expired' => 'This code has expired. Ask for a new one.',
             'too_many_attempts' => 'Too many attempts. Ask for a new code.',
         ],
@@ -177,8 +178,10 @@ return [
         ],
     ],
 
-    'whatsapp' => [
+    'sms' => [
         'phone_code' => 'Your Convive code: :code. It expires in :minutes minutes. Do not share it with anyone.',
+    ],
+    'whatsapp' => [
         'invitation_card' => 'Hello :name, your registration for :event is confirmed. Your ticket: :link',
         'proof_reminder' => 'Hello :name, your payment proof for :event is still missing. Send it here: :link',
         'ticket_reminder' => 'Hello :name, :event starts in three hours. Your ticket: :link',

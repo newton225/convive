@@ -55,12 +55,27 @@ return [
         ],
         'templates' => [
             'invitation_card' => env('WHATSAPP_TEMPLATE_INVITATION_CARD'),
-            'phone_code' => env('WHATSAPP_TEMPLATE_PHONE_CODE'),
             'proof_reminder' => env('WHATSAPP_TEMPLATE_PROOF_REMINDER'),
             'ticket_reminder' => env('WHATSAPP_TEMPLATE_TICKET_REMINDER'),
             'registration_cancelled' => env('WHATSAPP_TEMPLATE_REGISTRATION_CANCELLED'),
             'refund_sent' => env('WHATSAPP_TEMPLATE_REFUND_SENT'),
             'payment_account_changed' => env('WHATSAPP_TEMPLATE_PAYMENT_ACCOUNT_CHANGED'),
+        ],
+    ],
+
+    /*
+     * SMS : le code de verification du telephone seulement (decision du proprietaire du projet,
+     * 2026-10-03), Meta refusant ce modele en WhatsApp a une entreprise non verifiee. `SMS_DRIVER`
+     * vaut `orange` (API SMS d'Orange Cote d'Ivoire) ; vide ou sans identifiants, le journal.
+     */
+    'sms' => [
+        'driver' => env('SMS_DRIVER'),
+        'orange' => [
+            'client_id' => env('ORANGE_SMS_CLIENT_ID'),
+            'client_secret' => env('ORANGE_SMS_CLIENT_SECRET'),
+            // Le nom d'expediteur, une fois accorde par Orange (11 caracteres au plus) ; vide, le
+            // numero generique d'Orange.
+            'sender_name' => env('ORANGE_SMS_SENDER_NAME'),
         ],
     ],
 

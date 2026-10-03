@@ -58,7 +58,7 @@ return [
                     'title' => 'Pourquoi nous les traitons',
                     'items' => [
                         'Fournir le service : créer un compte, gérer les événements, les inscriptions, les preuves de paiement, les billets et le contrôle à l’entrée. C’est l’exécution du contrat qui nous lie à l’organisation.',
-                        'Envoyer les messages liés à une inscription : carte d’invitation, rappels, code de vérification, billet. Ils partent par WhatsApp et, si une adresse a été fournie, par email.',
+                        'Envoyer les messages liés à une inscription : carte d’invitation, rappels, billet. Ils partent par WhatsApp et, si une adresse a été fournie, par email. Le code de vérification du téléphone, quand l’organisation l’exige, part par SMS.',
                         'Protéger le service et l’argent des organisations : double authentification, journal des actions, limitation des tentatives, détection des preuves douteuses. C’est notre intérêt légitime et celui des organisations.',
                         'Facturer l’abonnement et tenir notre comptabilité : c’est une obligation légale.',
                         'Mesurer la fréquentation du site commercial : uniquement avec votre accord.',
@@ -74,7 +74,7 @@ return [
                         'L’équipe de :editor n’a pas accès au contenu d’une organisation. Elle n’y entre que si un Propriétaire lui ouvre un accès de support : nominatif, en lecture seule, limité à 24 heures, révocable à tout moment, et dont chaque page consultée est inscrite au journal de l’organisation.',
                         'Notre hébergeur : :host.',
                         'Stripe, pour le paiement de l’abonnement.',
-                        'Notre prestataire d’envoi d’emails (:mail_provider) et WhatsApp (Meta), pour acheminer les messages.',
+                        'Notre prestataire d’envoi d’emails (:mail_provider) WhatsApp (Meta) et Orange Côte d’Ivoire (SMS du code de vérification), pour acheminer les messages.',
                         'Google Analytics, seulement si vous avez accepté la mesure d’audience.',
                         'Les autorités, lorsque la loi nous y oblige.',
                     ],

@@ -97,6 +97,16 @@ class RegistrationController extends Controller
             return back()->withInput()->withErrors(['phone' => $this->backoffMessage($waitUntil)]);
         }
 
+        // Verification du telephone exigee par l'evenement (SECURITY.md C3), pour un numero ivoirien
+        // seulement (`PhoneVerification::appliesTo()`).
+        $verifyPhone = $event->rule_phone_verification && PhoneVerification::appliesTo((string) $request->validated('phone'));
+
+        // Plafond de codes du numero atteint : le dire tout de suite, plutot que de laisser l'invite
+        // attendre un SMS qui ne partira pas.
+        if ($verifyPhone && PhoneVerification::exhausted((string) $request->validated('phone'))) {
+            return back()->withInput()->withErrors(['phone' => __('guest.registration.errors.too_many_codes')]);
+        }
+
         $created = app(CreateRegistration::class)->handle($event, [
             'name' => $request->validated('name'),
             'phone' => $request->validated('phone'),
@@ -107,10 +117,13 @@ class RegistrationController extends Controller
 
         $registration = $created['registration'];
 
-        // Verification du telephone exigee par l'evenement (SECURITY.md C3) : le brouillon ne
-        // bloque aucune place tant que le code n'est pas saisi.
-        if ($event->rule_phone_verification) {
-            app(PhoneVerification::class)->send($registration);
+        // Le brouillon ne bloque aucune place tant que le code n'est pas saisi.
+        if ($verifyPhone) {
+            if (! app(PhoneVerification::class)->send($registration)) {
+                $registration->delete();
+
+                return back()->withInput()->withErrors(['phone' => __('guest.registration.errors.too_many_codes')]);
+            }
 
             return to_route('public.registrations.verify.show', [
                 'token' => $token,
@@ -222,8 +235,9 @@ class RegistrationController extends Controller
         $registration = $this->registrationForResumeToken($event, $resume);
 
         if ($registration->status === RegistrationStatus::Draft && $registration->phone_verified_at === null) {
-            $verification->send($registration);
-            Inertia::flash('toast', ['type' => 'success', 'message' => __('guest.flash.code_resent')]);
+            Inertia::flash('toast', $verification->send($registration)
+                ? ['type' => 'success', 'message' => __('guest.flash.code_resent')]
+                : ['type' => 'error', 'message' => __('guest.registration.errors.too_many_codes')]);
         }
 
         return to_route('public.registrations.verify.show', ['token' => $token, 'resume' => $resume]);

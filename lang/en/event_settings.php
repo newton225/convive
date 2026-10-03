@@ -63,7 +63,7 @@ return [
         'scheduled_send' => "Invitation cards go out on their own on the event's sending date, then with each approval made after that date. Unticked, no card goes out automatically.",
         'auto_seating' => 'With each approved proof, the guest and their companions get a table, in approval order and with units grouped. You can always move someone by hand.',
         'purge_on_exhaustion' => 'As soon as approved registrations fill every seat, unfinished registrations are deleted without waiting for the purge date: they no longer had any chance of getting a seat.',
-        'phone_verification' => 'The guest gets a code by WhatsApp and must enter it before booking. It stops a bot from blocking every seat, at the cost of one more step for the guest and one message sent per code.',
+        'phone_verification' => 'The guest gets a code by SMS and must enter it before booking. It stops a bot from blocking every seat, at the cost of one more step for the guest and one paid SMS per code. Only Ivorian numbers get a code: a foreign guest books without one.',
         'show_remaining_seats' => 'Checked, the public link shows how many seats are left and the gauge of seats taken. Unchecked, guests see no figure: only “Full” once no seat is left.',
     ],
 

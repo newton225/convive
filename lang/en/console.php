@@ -353,12 +353,14 @@ return [
         'channels' => [
             'mail' => 'Email',
             'whatsapp' => 'WhatsApp',
+            'sms' => 'SMS',
         ],
         'counts' => ':day over the last 24 hours, :week over the last seven days.',
         'simulated_badge' => 'Simulated',
         'simulated' => [
             'mail' => 'Emails are not really sent: they are only written to the server log. No recipient gets them until a delivery service is configured.',
             'whatsapp' => 'WhatsApp messages are not really sent: they are only written to the server log. No guest gets them until the WhatsApp Business credentials are provided.',
+            'sms' => 'Text messages are not really sent: they are only written to the server log. No guest gets a verification code until the Orange SMS API credentials are provided.',
         ],
         'by_type' => 'By type, over seven days',
         'latest' => 'Latest messages',

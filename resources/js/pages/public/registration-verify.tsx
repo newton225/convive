@@ -32,7 +32,7 @@ const CodeLength = 6;
 
 /**
  * Verification du telephone avant la reservation (SECURITY.md C3), quand l'evenement l'exige : une
- * etape, une decision, saisir le code recu sur WhatsApp. Aucune place n'est bloquee avant.
+ * etape, une decision, saisir le code recu par SMS. Aucune place n'est bloquee avant.
  */
 export default function RegistrationVerify({
     token,

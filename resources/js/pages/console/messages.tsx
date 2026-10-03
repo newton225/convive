@@ -76,7 +76,7 @@ export default function ConsoleMessages({ channels, types, messages }: Props) {
                     description={t('console.messages.description')}
                 />
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {channels.map((channel) => (
                         <Card
                             key={channel.channel}
