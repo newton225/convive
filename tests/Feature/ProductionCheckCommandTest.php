@@ -25,6 +25,7 @@ class ProductionCheckCommandTest extends TestCase
             'convive.security.trusted_proxies' => '10.0.0.1',
             'logging.channels.stack.channels' => ['daily'],
             'logging.channels.daily.level' => 'warning',
+            'services.turnstile' => ['site_key' => '0x4AAAAAAAAbCdEfGhIjKlMn', 'secret_key' => '0x4AAAAAAAAbCdEfGhIjKlMnOpQrStUvWxYz'],
             'convive.legal' => [
                 'editor_name' => 'Convive SARL',
                 'legal_form' => 'SARL',
@@ -66,6 +67,30 @@ class ProductionCheckCommandTest extends TestCase
 
         $this->artisan('convive:production-check')
             ->expectsOutputToContain('convive:release')
+            ->assertFailed();
+    }
+
+    public function test_les_cles_d_essai_cloudflare_font_echouer_la_verification(): void
+    {
+        // Les cles d'essai acceptent tout le monde, robots compris, et affichent un bandeau rouge
+        // « a des fins de test » aux invites.
+        $this->safeConfiguration();
+        config(['services.turnstile' => ['site_key' => '1x00000000000000000000AA', 'secret_key' => '1x0000000000000000000000000000000AA']]);
+
+        $this->artisan('convive:production-check')
+            ->expectsOutputToContain('TURNSTILE')
+            ->assertFailed();
+    }
+
+    public function test_sans_cles_cloudflare_la_verification_echoue(): void
+    {
+        // Sans cles, la protection anti-robot, active par defaut sur chaque evenement, ne
+        // s'applique nulle part.
+        $this->safeConfiguration();
+        config(['services.turnstile' => ['site_key' => null, 'secret_key' => null]]);
+
+        $this->artisan('convive:production-check')
+            ->expectsOutputToContain('TURNSTILE')
             ->assertFailed();
     }
 

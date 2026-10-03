@@ -37,6 +37,17 @@ final class BotCheck
     }
 
     /**
+     * Determine whether the configured keys are Cloudflare's test keys (`1x...`, `2x...`, `3x...`),
+     * faites pour le developpement : elles acceptent ou refusent tout le monde, et le widget affiche
+     * un bandeau « a des fins de test ».
+     */
+    public static function usesTestKeys(): bool
+    {
+        return (bool) preg_match('/^[123]x0+/', (string) config('services.turnstile.site_key'))
+            || (bool) preg_match('/^[123]x0+/', (string) config('services.turnstile.secret_key'));
+    }
+
+    /**
      * Determine whether the registration form of this event asks for the check.
      */
     public static function appliesTo(Event $event): bool

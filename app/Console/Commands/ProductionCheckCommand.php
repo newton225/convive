@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\BotCheck;
 use App\Support\LegalDocument;
 use App\Support\Release;
 use Illuminate\Console\Attributes\Description;
@@ -33,6 +34,7 @@ class ProductionCheckCommand extends Command
             'CONVIVE_ENFORCE_TWO_FACTOR doit rester actif en production.' => config('convive.two_factor.enforced') !== true,
             'Les pages juridiques sont incompletes : renseignez l\'identite de l\'editeur ('.implode(', ', LegalDocument::missingIdentity()).').' => LegalDocument::missingIdentity() !== [],
             'La livraison n\'est pas estampillee : jouez php artisan convive:release apres chaque mise a jour du code, pour que la version affichee dise ce qui tourne.' => Release::current() === null,
+            'TURNSTILE_SITE_KEY et TURNSTILE_SECRET_KEY doivent porter les vraies cles Cloudflare : vides, la protection anti-robot ne s\'applique nulle part ; cles d\'essai (1x..., 2x..., 3x...), elle laisse passer les robots et affiche un bandeau de test aux invites.' => BotCheck::siteKey() === null || BotCheck::usesTestKeys(),
             'CONVIVE_LEGAL_REVIEWED doit valoir true : les pages juridiques n\'ont pas ete validees par un juriste.' => ! LegalDocument::isReviewed(),
         ]));
 
