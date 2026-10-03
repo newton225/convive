@@ -9,7 +9,8 @@ import type { PublicEvent } from '@/types';
 type Props = {
     event: PublicEvent;
     token: string;
-    // Le bouton de la barre fixe du bas d'ecran : meme action, sans reperes de test en double.
+    // Le bouton de la barre fixe du bas d'ecran, sur telephone : meme action, son propre repere de
+    // test (`-mobile`), pour qu'un test clique celui qui est visible.
     compact?: boolean;
 };
 
@@ -36,7 +37,9 @@ export function EventRegistrationState({
             >
                 <Link
                     href={create(token)}
-                    data-test={compact ? undefined : 'register-link'}
+                    data-test={
+                        compact ? 'register-link-mobile' : 'register-link'
+                    }
                 >
                     {t('guest.event.register')}
                     <ArrowRight className="transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -61,7 +64,9 @@ export function EventRegistrationState({
                 >
                     <Link
                         href={createWaitlistEntry(token)}
-                        data-test={compact ? undefined : 'waitlist-link'}
+                        data-test={
+                            compact ? 'waitlist-link-mobile' : 'waitlist-link'
+                        }
                     >
                         {t('guest.waitlist.join')}
                     </Link>

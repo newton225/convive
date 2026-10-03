@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { digitsOf, phoneFor, register, state } from './support/helpers';
+import {
+    digitsOf,
+    phoneFor,
+    register,
+    state,
+    visibleAction,
+} from './support/helpers';
 
 /**
  * Le formulaire d'inscription et ce qui l'entoure sur le lien public : accompagnateurs et montant,
@@ -10,7 +16,7 @@ test.describe('inscription par le lien public', () => {
         const { publicUrl, pricePerPerson } = state();
 
         await page.goto(publicUrl);
-        await page.getByTestId('register-link').click();
+        await visibleAction(page, 'register-link').click();
 
         // Seul, puis avec deux accompagnateurs : le total se recalcule sans recharger la page.
         await expect(page.getByTestId('registration-total')).toBeVisible();
@@ -65,7 +71,7 @@ test.describe('inscription par le lien public', () => {
         const { publicUrl } = state();
 
         await page.goto(publicUrl);
-        await page.getByTestId('register-link').click();
+        await visibleAction(page, 'register-link').click();
         await page.getByTestId('registration-submit').click();
 
         // Le navigateur ou le serveur retient l'envoi : on reste sur le formulaire.
@@ -81,7 +87,7 @@ test.describe('inscription par le lien public', () => {
         await page.goto(fullEventUrl);
 
         await expect(page.getByTestId('register-link')).toBeHidden();
-        await page.getByTestId('waitlist-link').click();
+        await visibleAction(page, 'waitlist-link').click();
 
         await expect(page.getByTestId('waitlist-form')).toBeVisible();
         await page

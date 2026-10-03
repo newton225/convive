@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import zlib from 'node:zlib';
 import { expect } from '@playwright/test';
-import type { Browser, Page, TestInfo } from '@playwright/test';
+import type { Browser, Locator, Page, TestInfo } from '@playwright/test';
 import { account, statePath } from '../environment';
 import type { State } from '../environment';
 
@@ -42,6 +42,17 @@ export function phoneFor(testInfo: TestInfo, sequence: number): string {
  * Remplit le formulaire d'inscription du lien public et l'envoie. Rend l'adresse de la page de
  * reservation, celle sur laquelle l'invite revient.
  */
+/**
+ * Le bouton d'action de la page publique qui est visible : celui de la page sur ordinateur, celui de
+ * la barre du bas sur telephone (`-mobile`). Les deux existent, un seul se voit.
+ */
+export function visibleAction(page: Page, testId: string): Locator {
+    return page
+        .getByTestId(new RegExp(`^${testId}(-mobile)?$`))
+        .filter({ visible: true })
+        .first();
+}
+
 export async function register(
     page: Page,
     guest: {
@@ -53,7 +64,7 @@ export async function register(
     },
 ): Promise<string> {
     await page.goto(guest.eventUrl);
-    await page.getByTestId('register-link').click();
+    await visibleAction(page, 'register-link').click();
 
     await expect(page.getByTestId('registration-form')).toBeVisible();
     await page.getByTestId('registration-name').fill(guest.name);
