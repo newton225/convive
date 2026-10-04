@@ -9,6 +9,7 @@ use App\Http\Requests\Settings\ScanPinRequest;
 use App\Http\Requests\Settings\TwoFactorAuthenticationRequest;
 use App\Support\Auth\RecoveryCodes;
 use App\Support\ConnectedDevices;
+use App\Support\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
@@ -43,6 +44,7 @@ class SecurityController extends Controller
                     ->all()
                 : [],
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
+            'passwordPolicy' => PasswordPolicy::forDisplay(),
             'devices' => ConnectedDevices::for($request->user(), $request->session()->getId()),
             'hasScanPin' => $request->user()->scan_pin_verifier !== null,
         ];

@@ -35,6 +35,24 @@ return [
         'sign_up' => 'Créer un compte',
     ],
 
+    'password_strength' => [
+        'label' => 'Solidité du mot de passe',
+        'levels' => [
+            'weak' => 'Faible',
+            'medium' => 'Moyen',
+            'strong' => 'Fort',
+        ],
+        'rules' => [
+            'min' => ':min caractères au moins',
+            'mixedCase' => 'Une majuscule et une minuscule',
+            'numbers' => 'Un chiffre',
+            'symbols' => 'Un symbole (! ? - @ # …)',
+        ],
+        'met' => '(fait)',
+        'missing' => '(manquant)',
+        'uncompromised' => 'Il ne doit pas déjà circuler sur Internet après une fuite de données : c’est vérifié à l’envoi.',
+    ],
+
     'register' => [
         'head' => 'Créer un compte',
         'title' => 'Créer un compte',

@@ -1,26 +1,41 @@
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
+import { useState } from 'react';
 import PasswordInput from '@/components/password-input';
+import { PasswordStrength } from '@/components/password-strength';
+import type { PasswordPolicy } from '@/lib/password-strength';
 import TenantInvitationAlert from '@/components/tenant-invitation-alert';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { PhoneField } from '@/components/phone/phone-field';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { privacy, terms } from '@/routes/legal';
 import { store } from '@/routes/register';
 import { translate, useTranslation } from '@/hooks/use-translation';
+import type { Country } from 'react-phone-number-input';
 import type { TenantInvitationContext, Translations } from '@/types';
 
 type Props = {
     passwordRules: string;
     tenantInvitation?: TenantInvitationContext | null;
+    // Le pays propose devant le telephone, deduit de l'adresse IP.
+    defaultCountry: Country;
+    // Les regles du serveur, cochees pendant la saisie du mot de passe.
+    passwordPolicy: PasswordPolicy;
 };
 
-export default function Register({ passwordRules, tenantInvitation }: Props) {
+export default function Register({
+    passwordRules,
+    tenantInvitation,
+    defaultCountry,
+    passwordPolicy,
+}: Props) {
     const { t } = useTranslation();
+    const [password, setPassword] = useState('');
 
     return (
         <>
@@ -105,16 +120,11 @@ export default function Register({ passwordRules, tenantInvitation }: Props) {
                                 <Label htmlFor="phone">
                                     {t('account.fields.phone')}
                                 </Label>
-                                <Input
+                                <PhoneField
                                     id="phone"
-                                    type="tel"
-                                    required
-                                    tabIndex={2}
-                                    autoComplete="tel"
                                     name="phone"
-                                    placeholder={t(
-                                        'account.placeholders.phone',
-                                    )}
+                                    defaultCountry={defaultCountry}
+                                    required
                                 />
                                 <InputError message={errors.phone} />
                             </div>
@@ -133,6 +143,13 @@ export default function Register({ passwordRules, tenantInvitation }: Props) {
                                         'account.placeholders.password',
                                     )}
                                     passwordrules={passwordRules}
+                                    onChange={(event) =>
+                                        setPassword(event.target.value)
+                                    }
+                                />
+                                <PasswordStrength
+                                    password={password}
+                                    policy={passwordPolicy}
                                 />
                                 <InputError message={errors.password} />
                             </div>

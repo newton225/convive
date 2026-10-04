@@ -3,6 +3,7 @@
 namespace App\Concerns;
 
 use App\Models\User;
+use App\Rules\GuestPhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
@@ -60,6 +61,9 @@ trait ProfileValidationRules
      */
     protected function phoneRules(bool $required = false): array
     {
-        return [$required ? 'required' : 'nullable', 'string', 'max:32', 'regex:/^\+?[0-9 ().-]{8,32}$/'];
+        // Meme regle que le telephone d'un invite : tout pays, un numero sans indicatif etant lu comme
+        // ivoirien. Le numero est ensuite enregistre sous sa forme unique (`PhoneNumber::normalize`),
+        // celle qu'attend WhatsApp pour les alertes des membres.
+        return [$required ? 'required' : 'nullable', 'string', 'max:32', new GuestPhoneNumber];
     }
 }

@@ -1,6 +1,9 @@
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
+import { useState } from 'react';
 import PasswordInput from '@/components/password-input';
+import { PasswordStrength } from '@/components/password-strength';
+import type { PasswordPolicy } from '@/lib/password-strength';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,10 +16,18 @@ type Props = {
     token: string;
     email: string;
     passwordRules: string;
+    // Les regles du serveur, cochees pendant la saisie du mot de passe.
+    passwordPolicy: PasswordPolicy;
 };
 
-export default function ResetPassword({ token, email, passwordRules }: Props) {
+export default function ResetPassword({
+    token,
+    email,
+    passwordRules,
+    passwordPolicy,
+}: Props) {
     const { t } = useTranslation();
+    const [password, setPassword] = useState('');
 
     return (
         <>
@@ -60,6 +71,13 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                                 autoFocus
                                 placeholder={t('account.placeholders.password')}
                                 passwordrules={passwordRules}
+                                onChange={(event) =>
+                                    setPassword(event.target.value)
+                                }
+                            />
+                            <PasswordStrength
+                                password={password}
+                                policy={passwordPolicy}
                             />
                             <InputError message={errors.password} />
                         </div>

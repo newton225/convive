@@ -35,6 +35,24 @@ return [
         'sign_up' => 'Sign up',
     ],
 
+    'password_strength' => [
+        'label' => 'Password strength',
+        'levels' => [
+            'weak' => 'Weak',
+            'medium' => 'Medium',
+            'strong' => 'Strong',
+        ],
+        'rules' => [
+            'min' => 'At least :min characters',
+            'mixedCase' => 'An uppercase and a lowercase letter',
+            'numbers' => 'A number',
+            'symbols' => 'A symbol (! ? - @ # …)',
+        ],
+        'met' => '(done)',
+        'missing' => '(missing)',
+        'uncompromised' => 'It must not already circulate on the Internet after a data leak: this is checked when you send it.',
+    ],
+
     'register' => [
         'head' => 'Create an account',
         'title' => 'Create an account',

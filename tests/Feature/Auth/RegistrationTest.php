@@ -7,6 +7,7 @@ use App\Models\TenantInvitation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
@@ -49,8 +50,8 @@ class RegistrationTest extends TestCase
             'organisation_name' => 'Soldats du Palais',
             'email' => 'test@example.com',
             'phone' => '+225 07 07 12 34 56',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Convive-2026!',
+            'password_confirmation' => 'Convive-2026!',
             'terms' => 'on',
         ]);
 
@@ -72,15 +73,92 @@ class RegistrationTest extends TestCase
             'organisation_name' => 'Soldats du Palais',
             'email' => 'amara@example.com',
             'phone' => '+225 07 07 12 34 56',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Convive-2026!',
+            'password_confirmation' => 'Convive-2026!',
             'terms' => 'on',
         ]);
 
         $user = User::where('email', 'amara@example.com')->firstOrFail();
 
         $this->assertSame('Soldats du Palais', $user->personalTenant()->name);
-        $this->assertSame('+225 07 07 12 34 56', $user->phone);
+        // Enregistre sous sa forme unique (E.164), comme celui d'un invite : c'est elle qu'attend
+        // WhatsApp pour les alertes des membres.
+        $this->assertSame('+2250707123456', $user->phone);
+    }
+
+    public function test_un_numero_etranger_est_accepte_et_garde_son_indicatif()
+    {
+        $this->post(route('register.store'), [
+            'name' => 'Amara Kone',
+            'email' => 'amara@example.com',
+            'phone' => '+33 6 12 34 56 78',
+            'password' => 'Convive-2026!',
+            'password_confirmation' => 'Convive-2026!',
+            'terms' => 'on',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame('+33612345678', User::where('email', 'amara@example.com')->firstOrFail()->phone);
+    }
+
+    public function test_un_numero_invalide_est_refuse_a_l_inscription()
+    {
+        $this->post(route('register.store'), [
+            'name' => 'Amara Kone',
+            'email' => 'amara@example.com',
+            'phone' => '12345',
+            'password' => 'Convive-2026!',
+            'password_confirmation' => 'Convive-2026!',
+            'terms' => 'on',
+        ])->assertSessionHasErrors('phone');
+
+        $this->assertGuest();
+    }
+
+    public function test_l_ecran_d_inscription_propose_le_pays_du_visiteur()
+    {
+        $this->get(route('register'))->assertInertia(fn (Assert $page) => $page->where('defaultCountry', 'CI'));
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function weakPasswords(): array
+    {
+        return [
+            'moins de 8 caracteres' => ['Co-26!a'],
+            'sans majuscule' => ['convive-2026!'],
+            'sans minuscule' => ['CONVIVE-2026!'],
+            'sans chiffre' => ['Convive-deux!'],
+            'sans symbole' => ['Convive2026'],
+        ];
+    }
+
+    /**
+     * Les memes regles partout, developpement compris (decision du proprietaire du projet,
+     * 2026-10-04) : 8 caracteres, majuscule et minuscule, chiffre, symbole.
+     */
+    #[DataProvider('weakPasswords')]
+    public function test_un_mot_de_passe_trop_faible_est_refuse(string $password)
+    {
+        $this->post(route('register.store'), [
+            'name' => 'Amara Kone',
+            'email' => 'amara@example.com',
+            'phone' => '+225 07 07 12 34 56',
+            'password' => $password,
+            'password_confirmation' => $password,
+            'terms' => 'on',
+        ])->assertSessionHasErrors('password');
+
+        $this->assertGuest();
+    }
+
+    public function test_l_ecran_d_inscription_recoit_les_regles_du_mot_de_passe()
+    {
+        $this->get(route('register'))->assertInertia(fn (Assert $page) => $page
+            ->where('passwordPolicy.min', 8)
+            ->where('passwordPolicy.mixedCase', true)
+            ->where('passwordPolicy.numbers', true)
+            ->where('passwordPolicy.symbols', true));
     }
 
     public function test_le_telephone_est_obligatoire_a_l_inscription()
@@ -89,8 +167,8 @@ class RegistrationTest extends TestCase
             'name' => 'Amara Kone',
             'organisation_name' => 'Soldats du Palais',
             'email' => 'amara@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Convive-2026!',
+            'password_confirmation' => 'Convive-2026!',
             'terms' => 'on',
         ])->assertSessionHasErrors('phone');
 
@@ -105,8 +183,8 @@ class RegistrationTest extends TestCase
             'name' => 'Fatou Diallo',
             'email' => 'fatou@example.com',
             'phone' => '+225 05 05 11 22 33',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Convive-2026!',
+            'password_confirmation' => 'Convive-2026!',
             'terms' => 'on',
         ]);
 

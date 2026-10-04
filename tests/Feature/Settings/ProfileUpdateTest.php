@@ -55,7 +55,14 @@ class ProfileUpdateTest extends TestCase
             ])
             ->assertSessionHasNoErrors();
 
-        $this->assertSame('+225 07 00 00 00 01', $user->fresh()->phone);
+        $this->assertSame('+2250700000001', $user->fresh()->phone);
+    }
+
+    public function test_le_profil_propose_le_pays_du_visiteur_pour_le_telephone()
+    {
+        $this->actingAs(User::factory()->create())
+            ->get(route('profile.edit'))
+            ->assertInertia(fn ($page) => $page->where('defaultCountry', 'CI'));
     }
 
     public function test_le_numero_de_telephone_reste_facultatif()

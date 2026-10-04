@@ -9,6 +9,21 @@ Maquette interactive de reference : **`Convive.dc.html`** (prototype, donnees fa
 
 ---
 
+## Suivre la logique, signaler ce qui ne colle pas
+
+Consigne du proprietaire du projet (2026-10-04) : « il faut suivre la logique dans tout ce que je te
+dis et me le dire quand quelque chose ne colle pas pour que je tranche ».
+
+- Avant d'executer une demande, la confronter aux decisions deja prises (ce fichier, `README.md`,
+  `SECURITY.md`) et a ce que le code fait reellement.
+- Une demande large (« partout », « tous les autres ») se decompose d'abord : lister les cas
+  concernes, signaler ceux qui heurtent une decision ou n'ont pas le meme sens, et attendre sa
+  decision sur ceux-la avant de toucher au code.
+- Ce qui ne colle pas se dit clairement, avec ce que chaque option implique ; le proprietaire
+  tranche, jamais un choix fait en silence.
+
+---
+
 ## Pile imposee
 
 - **Laravel 13** avec **React integre via Inertia.js** et TypeScript. Pas d'API REST separee

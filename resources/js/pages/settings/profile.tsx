@@ -7,6 +7,8 @@ import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PhoneField } from '@/components/phone/phone-field';
+import type { Country } from 'react-phone-number-input';
 import { edit } from '@/routes/profile';
 import type { Auth, Translations } from '@/types';
 import { send } from '@/routes/verification';
@@ -19,9 +21,12 @@ type PageProps = {
 export default function Profile({
     mustVerifyEmail,
     status,
+    defaultCountry,
 }: {
     mustVerifyEmail: boolean;
     status?: string;
+    // Le pays propose devant le telephone, deduit de l'adresse IP.
+    defaultCountry: Country;
 }) {
     const { auth } = usePage<PageProps>().props;
     const { t } = useTranslation();
@@ -99,16 +104,11 @@ export default function Profile({
                                     {t('account.fields.phone')}
                                 </Label>
 
-                                <Input
+                                <PhoneField
                                     id="phone"
-                                    type="tel"
-                                    className="mt-1 block w-full"
-                                    defaultValue={auth.user.phone ?? ''}
                                     name="phone"
-                                    autoComplete="tel"
-                                    placeholder={t(
-                                        'account.placeholders.phone',
-                                    )}
+                                    defaultCountry={defaultCountry}
+                                    defaultValue={auth.user.phone}
                                 />
 
                                 <p className="text-muted-foreground text-sm">

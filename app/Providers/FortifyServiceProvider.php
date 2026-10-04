@@ -11,11 +11,14 @@ use App\Http\Responses\RegisterResponse;
 use App\Http\Responses\TwoFactorLoginResponse;
 use App\Http\Responses\VerifyEmailResponse;
 use App\Models\TenantInvitation;
+use App\Support\PasswordPolicy;
+use App\Support\VisitorCountry;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
@@ -77,6 +80,8 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/reset-password', [
             'email' => $request->email,
             'token' => $request->route('token'),
+            'passwordRules' => Password::defaults()->toPasswordRulesString(),
+            'passwordPolicy' => PasswordPolicy::forDisplay(),
         ]));
 
         Fortify::requestPasswordResetLinkView(fn (Request $request) => Inertia::render('auth/forgot-password', [
@@ -89,6 +94,12 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::registerView(fn (Request $request) => Inertia::render('auth/register', [
             'tenantInvitation' => $this->tenantInvitation($request),
+            // Le pays propose devant le telephone, deduit de l'adresse IP (Cote d'Ivoire a defaut).
+            'defaultCountry' => VisitorCountry::from($request),
+            // Les regles du mot de passe, pour le gestionnaire de mots de passe du navigateur et
+            // pour l'indicateur qui les coche pendant la saisie.
+            'passwordRules' => Password::defaults()->toPasswordRulesString(),
+            'passwordPolicy' => PasswordPolicy::forDisplay(),
         ]));
 
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/two-factor-challenge'));

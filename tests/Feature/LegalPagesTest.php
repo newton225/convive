@@ -117,8 +117,8 @@ class LegalPagesTest extends TestCase
             'name' => 'Amara Kone',
             'email' => 'amara@example.com',
             'phone' => '+225 07 07 12 34 56',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Convive-2026!',
+            'password_confirmation' => 'Convive-2026!',
         ])->assertSessionHasErrors('terms');
 
         $this->assertGuest();
@@ -133,8 +133,8 @@ class LegalPagesTest extends TestCase
             'name' => 'Amara Kone',
             'email' => 'amara@example.com',
             'phone' => '+225 07 07 12 34 56',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Convive-2026!',
+            'password_confirmation' => 'Convive-2026!',
             'terms' => 'on',
         ]);
 

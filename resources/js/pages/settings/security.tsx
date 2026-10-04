@@ -1,11 +1,13 @@
 import { Form, Head } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import ConnectedDevices from '@/components/connected-devices';
 import { ScanPinForm } from '@/components/scan/scan-pin-form';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
+import { PasswordStrength } from '@/components/password-strength';
+import type { PasswordPolicy } from '@/lib/password-strength';
 import { SubmitButton } from '@/components/submit-button';
 import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/security';
@@ -19,6 +21,7 @@ import type { ConnectedDevice, Translations } from '@/types';
 // oxfmt-ignore
 type Props = {
     passwordRules: string;
+    passwordPolicy: PasswordPolicy;
     devices: ConnectedDevice[];
     hasScanPin: boolean;
 } & ManagePasskeysProps &
@@ -28,6 +31,7 @@ export default function Security(props: Props) {
     const { t } = useTranslation();
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
+    const [newPassword, setNewPassword] = useState('');
 
     return (
         <>
@@ -100,6 +104,14 @@ export default function Security(props: Props) {
                                         'account.placeholders.new_password',
                                     )}
                                     passwordrules={props.passwordRules}
+                                    onChange={(event) =>
+                                        setNewPassword(event.target.value)
+                                    }
+                                />
+
+                                <PasswordStrength
+                                    password={newPassword}
+                                    policy={props.passwordPolicy}
                                 />
 
                                 <InputError message={errors.password} />

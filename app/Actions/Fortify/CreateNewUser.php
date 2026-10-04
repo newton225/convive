@@ -7,6 +7,7 @@ use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
 use App\Support\LegalDocument;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -31,6 +32,11 @@ class CreateNewUser implements CreatesNewUsers
         // 2026-09-27). Le nom reste facultatif pour une personne invitee, qui rejoint une
         // organisation existante ; le telephone, facultatif dans le profil, est demande ici pour
         // les alertes WhatsApp.
+        // Le telephone sous sa forme unique avant validation, comme celui d'un invite.
+        if (is_string($input['phone'] ?? null) && ($normalized = PhoneNumber::normalize($input['phone']))) {
+            $input['phone'] = $normalized;
+        }
+
         Validator::make($input, [
             ...$this->profileRules(),
             'phone' => $this->phoneRules(required: true),

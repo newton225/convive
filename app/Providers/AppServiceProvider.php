@@ -21,6 +21,7 @@ use App\Support\AuditTrail;
 use App\Support\Console\ConsoleAccess;
 use App\Support\EventReport;
 use App\Support\LogWhatsAppSender;
+use App\Support\PasswordPolicy;
 use App\Support\Search\UnaccentedSearch;
 use App\Support\Sms\LogSmsSender;
 use App\Support\Sms\OrangeSmsSender;
@@ -221,15 +222,9 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)
-                ->mixedCase()
-                ->letters()
-                ->numbers()
-                ->symbols()
-                ->uncompromised()
-            : null,
-        );
+        // Les memes regles partout, developpement compris (decision du 2026-10-04) : voir
+        // `PasswordPolicy`, que l'indicateur de l'ecran lit aussi.
+        Password::defaults(fn (): Password => PasswordPolicy::rule());
     }
 
     /**
