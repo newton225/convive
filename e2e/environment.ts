@@ -39,6 +39,17 @@ export const environment: Record<string, string> = {
     REDIS_CACHE_DB: '8',
     SESSION_DRIVER: 'file',
     MAIL_MAILER: 'array',
+    // Aucun service exterieur, quels que soient les identifiants du .env de developpement : pas de
+    // vrai envoi WhatsApp ni SMS, et pas de captcha Cloudflare, dont le widget se charge depuis
+    // Internet et retenait le formulaire (« verification anti-robot », premiere execution apres son
+    // ajout). Le captcha a ses propres tests cote serveur (`BotCheckTest`).
+    WHATSAPP_DRIVER: '',
+    WHATSAPP_BUSINESS_NUMBER: '',
+    WHATSAPP_WEBHOOK_VERIFY_TOKEN: '',
+    WHATSAPP_META_APP_SECRET: '',
+    SMS_DRIVER: '',
+    TURNSTILE_SITE_KEY: '',
+    TURNSTILE_SECRET_KEY: '',
     // Le compte de demonstration n'a pas de double authentification (CLAUDE.md, « Compte principal
     // de developpement ») : hors de l'environnement local, il faut le dire.
     CONVIVE_ENFORCE_TWO_FACTOR: 'false',
