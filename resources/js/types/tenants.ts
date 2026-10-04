@@ -169,6 +169,8 @@ export type PaymentAccount = {
     instructions: string | null;
     isActive: boolean;
     isPubliclyVisible: boolean;
+    // Cree et pas encore actif : sa demande en attente est sa creation.
+    neverActive: boolean;
     changedRecently: boolean;
     pending: PaymentAccountPendingChange | null;
 };

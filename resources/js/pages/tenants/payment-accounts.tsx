@@ -66,6 +66,8 @@ export default function PaymentAccounts({
     const [deleting, setDeleting] = useState<PaymentAccount | null>(null);
     const [approving, setApproving] = useState<PaymentAccount | null>(null);
     const [approveProcessing, setApproveProcessing] = useState(false);
+    const [cancelling, setCancelling] = useState<PaymentAccount | null>(null);
+    const [cancelProcessing, setCancelProcessing] = useState(false);
 
     const recentlyChanged = accounts.some((account) => account.changedRecently);
 
@@ -166,16 +168,36 @@ export default function PaymentAccounts({
                                     <p className="font-medium">
                                         {t('payment_accounts.pending.title')}
                                     </p>
-                                    <p>
-                                        {t(
-                                            'payment_accounts.pending.new_number',
-                                            {
-                                                value:
-                                                    account.pending
-                                                        .accountNumber ?? '',
-                                            },
-                                        )}
-                                    </p>
+                                    {/* Toute la demande, pas seulement le numero : les champs du
+                                        formulaire montrent les valeurs actives, vides pour un
+                                        compte neuf. */}
+                                    <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5">
+                                        <dt className="text-muted-foreground">
+                                            {t('payment_accounts.fields.channel')}
+                                        </dt>
+                                        <dd>
+                                            {account.pending.channelLabel ??
+                                                ''}
+                                        </dd>
+                                        <dt className="text-muted-foreground">
+                                            {t(
+                                                'payment_accounts.fields.account_number',
+                                            )}
+                                        </dt>
+                                        <dd>
+                                            {account.pending.accountNumber ??
+                                                t('payment_accounts.pending.none')}
+                                        </dd>
+                                        <dt className="text-muted-foreground">
+                                            {t(
+                                                'payment_accounts.fields.holder_name',
+                                            )}
+                                        </dt>
+                                        <dd>
+                                            {account.pending.holderName ??
+                                                t('payment_accounts.pending.none')}
+                                        </dd>
+                                    </dl>
                                     <p className="text-muted-foreground">
                                         {t(
                                             'payment_accounts.pending.requested_by',
@@ -186,7 +208,9 @@ export default function PaymentAccounts({
                                             },
                                         )}{' '}
                                         {t(
-                                            'payment_accounts.pending.activates_at',
+                                            account.neverActive
+                                                ? 'payment_accounts.pending.activates_at_new'
+                                                : 'payment_accounts.pending.activates_at',
                                             {
                                                 date: formatDateTime(
                                                     account.pending
@@ -223,16 +247,13 @@ export default function PaymentAccounts({
                                             variant="secondary"
                                             data-test="payment-account-cancel"
                                             onClick={() =>
-                                                router.post(
-                                                    cancel([
-                                                        tenant.slug,
-                                                        account.id,
-                                                    ]).url,
-                                                )
+                                                setCancelling(account)
                                             }
                                         >
                                             {t(
-                                                'payment_accounts.actions.cancel_change',
+                                                account.neverActive
+                                                    ? 'payment_accounts.actions.cancel_creation'
+                                                    : 'payment_accounts.actions.cancel_change',
                                             )}
                                         </Button>
                                     </div>
@@ -274,6 +295,48 @@ export default function PaymentAccounts({
             </div>
 
             <TwoFactorReconfirmDialog />
+
+            <ConfirmActionDialog
+                open={cancelling !== null}
+                onOpenChange={(open) => !open && setCancelling(null)}
+                title={t(
+                    cancelling?.neverActive
+                        ? 'payment_accounts.confirm_cancel.creation_title'
+                        : 'payment_accounts.confirm_cancel.change_title',
+                )}
+                description={t(
+                    cancelling?.neverActive
+                        ? 'payment_accounts.confirm_cancel.creation_description'
+                        : 'payment_accounts.confirm_cancel.change_description',
+                    {
+                        label: cancelling?.label ?? '',
+                        number: cancelling?.pending?.accountNumber ?? '',
+                    },
+                )}
+                confirmLabel={t(
+                    cancelling?.neverActive
+                        ? 'payment_accounts.actions.cancel_creation'
+                        : 'payment_accounts.actions.cancel_change',
+                )}
+                destructive
+                processing={cancelProcessing}
+                testId="payment-account-cancel-confirm"
+                onConfirm={() => {
+                    if (cancelling) {
+                        router.post(
+                            cancel([tenant.slug, cancelling.id]).url,
+                            {},
+                            {
+                                onStart: () => setCancelProcessing(true),
+                                onFinish: () => {
+                                    setCancelProcessing(false);
+                                    setCancelling(null);
+                                },
+                            },
+                        );
+                    }
+                }}
+            />
 
             <ConfirmActionDialog
                 open={approving !== null}

@@ -37,6 +37,7 @@ return [
         'save' => 'Demander la modification',
         'approve' => 'Valider et appliquer maintenant',
         'cancel_change' => 'Annuler la modification',
+        'cancel_creation' => 'Annuler la création',
         'delete' => 'Supprimer le compte',
     ],
 
@@ -52,6 +53,8 @@ return [
         'requested_by' => 'Demandée par :name.',
         'activates_at' => "Elle s'appliquera le :date. D'ici là, l'ancien numéro reste affiché.",
         'new_number' => 'Nouveau numéro : :value',
+        'activates_at_new' => 'Il sera proposé aux invités le :date.',
+        'none' => 'aucun',
         'approve_hint' => "Un second Propriétaire peut l'appliquer immédiatement.",
         'not_the_requester' => 'Vous ne pouvez pas valider une modification que vous avez demandée vous-même.',
     ],
@@ -65,6 +68,7 @@ return [
         'updated' => 'Compte mis à jour.',
         'change_approved' => 'Modification appliquée.',
         'change_cancelled' => 'Modification annulée.',
+        'creation_cancelled' => 'Création du compte annulée.',
         'deleted' => 'Compte supprimé.',
     ],
 
@@ -78,6 +82,13 @@ return [
     'confirm_approve' => [
         'title' => 'Activer ce changement maintenant ?',
         'description' => "Le nouveau numéro du compte \":label\" s'affichera tout de suite sur les liens publics, sans attendre la fin du délai de 24 heures. Vérifiez-le auprès de la personne qui l'a demandé, par un autre canal, avant de confirmer.",
+    ],
+
+    'confirm_cancel' => [
+        'change_title' => 'Annuler la modification ?',
+        'change_description' => 'Le nouveau numéro :number ne sera jamais appliqué au compte ":label". L\'ancien numéro reste affiché à vos invités.',
+        'creation_title' => 'Annuler la création du compte ?',
+        'creation_description' => 'Le compte ":label" n\'a encore jamais été proposé à vos invités : il sera supprimé. Pour un autre numéro, ajoutez un nouveau compte.',
     ],
 
     'confirm' => [

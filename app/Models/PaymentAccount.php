@@ -87,6 +87,15 @@ class PaymentAccount extends Model
     }
 
     /**
+     * Determine whether the account never had a live value : created, still waiting for its
+     * activation delay. Its pending change is its creation.
+     */
+    public function neverActive(): bool
+    {
+        return $this->channel === null;
+    }
+
+    /**
      * Determine whether the pending change is now due.
      */
     public function pendingChangeIsDue(): bool

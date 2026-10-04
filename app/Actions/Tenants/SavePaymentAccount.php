@@ -131,12 +131,28 @@ class SavePaymentAccount
     }
 
     /**
-     * Drop a pending change without applying it.
+     * Drop a pending change without applying it. For an account that was never active, the pending
+     * change is its creation : cancelling it deletes the account, rather than leaving a shell with
+     * no channel and no number. Returns whether the account was deleted.
      */
-    public function cancel(PaymentAccount $account, User $actor): void
+    public function cancel(PaymentAccount $account, User $actor): bool
     {
-        DB::transaction(function () use ($account, $actor) {
+        return DB::transaction(function () use ($account, $actor) {
             $discarded = $this->pendingValues($account);
+
+            if ($account->neverActive()) {
+                activity()
+                    ->event('deleted')
+                    ->withProperties([
+                        'old' => ['label' => $account->label, ...$discarded],
+                        'cancelled_by' => $actor->id,
+                    ])
+                    ->log('payment_account.creation_cancelled');
+
+                $account->delete();
+
+                return true;
+            }
 
             $account->pending_channel = null;
             $account->pending_account_number = null;
@@ -154,6 +170,8 @@ class SavePaymentAccount
                     'cancelled_by' => $actor->id,
                 ])
                 ->log('payment_account.change_cancelled');
+
+            return false;
         });
     }
 

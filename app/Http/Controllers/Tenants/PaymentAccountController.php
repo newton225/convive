@@ -43,6 +43,7 @@ class PaymentAccountController extends Controller
                     'instructions' => $account->instructions,
                     'isActive' => $account->is_active,
                     'isPubliclyVisible' => $account->isPubliclyVisible(),
+                    'neverActive' => $account->neverActive(),
                     'changedRecently' => $account->changedRecently(),
                     'pending' => $account->hasPendingChange() ? [
                         'channelLabel' => $account->pending_channel?->label(),
@@ -116,9 +117,9 @@ class PaymentAccountController extends Controller
     {
         Gate::authorize('cancel', [$paymentAccount, $tenant]);
 
-        $save->cancel($paymentAccount, $request->user());
+        $deleted = $save->cancel($paymentAccount, $request->user());
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('payment_accounts.flash.change_cancelled')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __($deleted ? 'payment_accounts.flash.creation_cancelled' : 'payment_accounts.flash.change_cancelled')]);
 
         return to_route('tenants.payment-accounts.index', $tenant);
     }

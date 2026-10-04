@@ -232,11 +232,16 @@ class PaymentAccountTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_une_modification_en_attente_peut_etre_annulee(): void
+    public function test_une_modification_en_attente_peut_etre_annulee_et_l_ancien_numero_reste(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
         $account = $this->createAccount($tenant, $owner);
+
+        $this->travel(25)->hours();
+        $this->artisan('schedule:run');
+
+        $this->requestChange($tenant, $owner, $account, '+225 07 00 00 00 99');
 
         $this->actingAsConfirmed($owner)
             ->post(route('tenants.payment-accounts.cancel', [$tenant, $account]))
@@ -245,7 +250,37 @@ class PaymentAccountTest extends TestCase
         $account = $this->fresh($tenant, $account);
 
         $this->assertFalse($account->hasPendingChange());
-        $this->assertNull($account->account_number);
+        $this->assertSame('+225 07 00 00 00 01', $account->account_number);
+    }
+
+    public function test_annuler_la_demande_d_un_compte_jamais_actif_annule_sa_creation(): void
+    {
+        // Sans cela, le compte restait une coquille vide : ni canal, ni numero, jamais visible
+        // (constate le 2026-10-04).
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $account = $this->createAccount($tenant, $owner);
+
+        $this->actingAsConfirmed($owner)
+            ->post(route('tenants.payment-accounts.cancel', [$tenant, $account]))
+            ->assertRedirect(route('tenants.payment-accounts.index', $tenant));
+
+        $this->assertSame(0, $tenant->asCurrent(fn () => PaymentAccount::count()));
+        $this->assertTrue($tenant->asCurrent(fn () => Activity::where('description', 'payment_account.creation_cancelled')->exists()));
+    }
+
+    public function test_la_page_distingue_un_compte_jamais_actif_et_montre_toute_la_demande(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $this->createAccount($tenant, $owner);
+
+        $this->actingAsConfirmed($owner)
+            ->get(route('tenants.payment-accounts.index', $tenant))
+            ->assertInertia(fn ($page) => $page
+                ->where('accounts.0.neverActive', true)
+                ->where('accounts.0.pending.channelLabel', PaymentChannel::Wave->label())
+                ->where('accounts.0.pending.holderName', 'Association Convive'));
     }
 
     public function test_le_libelle_et_la_consigne_prennent_effet_immediatement(): void
