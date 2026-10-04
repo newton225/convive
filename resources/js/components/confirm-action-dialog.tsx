@@ -18,6 +18,9 @@ type Props = {
     title: string;
     description: string;
     confirmLabel: string;
+    // Le bouton qui renonce, « Annuler » par defaut : a renommer quand l'action confirmee est elle-meme
+    // un abandon, ou « Annuler » ne dirait plus ce qu'il annule.
+    cancelLabel?: string;
     onConfirm: () => void;
     processing?: boolean;
     destructive?: boolean;
@@ -40,6 +43,7 @@ export function ConfirmActionDialog({
     title,
     description,
     confirmLabel,
+    cancelLabel,
     onConfirm,
     processing = false,
     destructive = false,
@@ -62,7 +66,7 @@ export function ConfirmActionDialog({
                 <DialogFooter className="gap-2">
                     <DialogClose asChild>
                         <Button variant="secondary">
-                            {t('common.actions.cancel')}
+                            {cancelLabel ?? t('common.actions.cancel')}
                         </Button>
                     </DialogClose>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Tenant;
+use App\Support\Auth\TwoFactorDetour;
 use Closure;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -38,6 +39,12 @@ class EnsureTwoFactorForProfile
 
         if (! $user->tenantProfile($tenant)?->demandsTwoFactor()) {
             return $next($request);
+        }
+
+        // L'ecran de securite dit pourquoi on y arrive, et ramene ici une fois la double
+        // authentification activee.
+        if ($request->isMethod('GET')) {
+            TwoFactorDetour::remember($request, TwoFactorDetour::Profile, $request->getRequestUri());
         }
 
         Inertia::flash('toast', [

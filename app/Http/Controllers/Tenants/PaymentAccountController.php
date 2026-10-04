@@ -60,6 +60,9 @@ class PaymentAccountController extends Controller
             ], PaymentChannel::cases()),
             'activationDelayHours' => PaymentAccount::ActivationDelayHours,
             'isOwner' => $user->ownsTenant($tenant),
+            // Toute modification exige le code a deux facteurs : sans double authentification, la
+            // page le dit avant la saisie plutot qu'apres.
+            'twoFactorEnabled' => $user->hasEnabledTwoFactorAuthentication(),
         ]);
     }
 

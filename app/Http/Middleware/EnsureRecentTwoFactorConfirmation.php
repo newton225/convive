@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Tenant;
+use App\Support\Auth\TwoFactorDetour;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -31,12 +33,26 @@ class EnsureRecentTwoFactorConfirmation
             return $next($request);
         }
 
+        // Depuis une page de l'application, on y reste : partir vers un autre ecran ferait perdre
+        // ce qui vient d'etre saisi. La page demande le code dans une fenetre, puis on renvoie.
+        $stayOnPage = $request->hasHeader('X-Inertia') && ! $request->isMethod('GET');
+
         if (! $user->hasEnabledTwoFactorAuthentication()) {
+            if ($stayOnPage) {
+                return back()->withErrors(['two_factor_setup' => __('account.two_factor_reconfirm.setup_required')]);
+            }
+
+            if (($tenant = Tenant::current()) !== null) {
+                TwoFactorDetour::remember($request, TwoFactorDetour::PaymentAccounts, route('tenants.payment-accounts.index', $tenant, absolute: false));
+            }
+
             return redirect()->route('security.edit');
         }
 
         if ($this->shouldReconfirm($request)) {
-            return redirect()->guest(route('two-factor.reconfirm.show'));
+            return $stayOnPage
+                ? back()->withErrors(['two_factor_reconfirm' => __('account.two_factor_reconfirm.description')])
+                : redirect()->guest(route('two-factor.reconfirm.show'));
         }
 
         return $next($request);

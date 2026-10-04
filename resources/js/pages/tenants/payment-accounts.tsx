@@ -1,6 +1,6 @@
-import { Form, Head, router } from '@inertiajs/react';
+import { Form, Head, Link, router } from '@inertiajs/react';
 import { AlertTriangle, Clock, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ConfirmSummary } from '@/components/confirm-summary';
 import Heading from '@/components/heading';
@@ -8,6 +8,8 @@ import InputError from '@/components/input-error';
 import { LabelWithHelp } from '@/components/label-with-help';
 import { Badge } from '@/components/ui/badge';
 import { SubmitButton } from '@/components/submit-button';
+import { TwoFactorReconfirmDialog } from '@/components/two-factor-reconfirm-dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -37,6 +39,7 @@ import {
     store,
     update,
 } from '@/routes/tenants/payment-accounts';
+import { edit as securityEdit } from '@/routes/security';
 import type {
     PaymentAccount,
     PaymentChannelOption,
@@ -49,6 +52,7 @@ type Props = {
     accounts: PaymentAccount[];
     channels: PaymentChannelOption[];
     activationDelayHours: number;
+    twoFactorEnabled: boolean;
 };
 
 export default function PaymentAccounts({
@@ -56,6 +60,7 @@ export default function PaymentAccounts({
     accounts,
     channels,
     activationDelayHours,
+    twoFactorEnabled,
 }: Props) {
     const { t, locale } = useTranslation();
     const [deleting, setDeleting] = useState<PaymentAccount | null>(null);
@@ -63,6 +68,14 @@ export default function PaymentAccounts({
     const [approveProcessing, setApproveProcessing] = useState(false);
 
     const recentlyChanged = accounts.some((account) => account.changedRecently);
+
+    // Le bouton retour du navigateur reaffiche la page telle qu'elle etait, sans la redemander : apres
+    // avoir active la double authentification, l'encadre qui la reclame resterait affiche a tort.
+    useEffect(() => {
+        if (!twoFactorEnabled) {
+            router.reload({ only: ['twoFactorEnabled'] });
+        }
+    }, [twoFactorEnabled]);
 
     return (
         <>
@@ -78,6 +91,30 @@ export default function PaymentAccounts({
                         hours: activationDelayHours,
                     })}
                 />
+
+                {twoFactorEnabled ? null : (
+                    <Alert data-test="payment-account-two-factor-required">
+                        <AlertTriangle />
+                        <AlertDescription>
+                            <p>
+                                {t(
+                                    'account.two_factor_reconfirm.setup_required',
+                                )}
+                            </p>
+                            <Link
+                                href={securityEdit({
+                                    query: {
+                                        for: 'payment-accounts',
+                                        tenant: tenant.slug,
+                                    },
+                                })}
+                                className="font-medium underline underline-offset-4"
+                            >
+                                {t('account.two_factor_reconfirm.setup_link')}
+                            </Link>
+                        </AlertDescription>
+                    </Alert>
+                )}
 
                 {recentlyChanged ? (
                     <p
@@ -235,6 +272,8 @@ export default function PaymentAccounts({
                     />
                 </div>
             </div>
+
+            <TwoFactorReconfirmDialog />
 
             <ConfirmActionDialog
                 open={approving !== null}
@@ -418,7 +457,7 @@ function AccountForm({
         <Form {...action} setDefaultsOnSuccess className="space-y-4">
             {({ errors, processing, isDirty }) => (
                 <>
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid items-start gap-4 sm:grid-cols-2">
                         <div className="grid gap-2">
                             <LabelWithHelp
                                 htmlFor={`label-${suffix}`}

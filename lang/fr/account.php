@@ -121,6 +121,32 @@ return [
         'title' => 'Confirmer votre identité',
         'description' => 'Cette action touche un compte de versement : ressaisissez le code de votre application d\'authentification pour continuer.',
         'submit' => 'Confirmer',
+        'confirmed' => 'Code accepté : cliquez à nouveau pour enregistrer.',
+        'setup_required' => 'Activez d\'abord la double authentification dans vos réglages de sécurité : elle est exigée pour ajouter ou modifier un compte de versement.',
+        'setup_link' => 'Ouvrir les réglages de sécurité',
+        'cancel' => 'Annuler',
+    ],
+
+    'two_factor_detour' => [
+        'reasons' => [
+            'payment_accounts' => [
+                'title' => 'Activez la double authentification pour vos comptes de versement',
+                'why' => 'Ajouter ou modifier un compte de versement exige un code de votre téléphone en plus du mot de passe : c\'est ce qui empêche quelqu\'un qui aurait volé votre mot de passe de détourner l\'argent de vos invités.',
+                'back' => 'Revenir aux comptes de versement',
+            ],
+            'profile' => [
+                'title' => 'Activez la double authentification pour accéder à votre organisation',
+                'why' => 'Votre profil dans cette organisation touche à l\'argent : il exige un code de votre téléphone en plus du mot de passe.',
+                'back' => 'Revenir à l\'organisation',
+            ],
+        ],
+        'steps' => [
+            'enable' => 'Plus bas sur cette page, cliquez sur « Activer la double authentification ».',
+            'scan' => 'Scannez le code affiché avec une application d\'authentification (Google Authenticator, Microsoft Authenticator...), puis saisissez le code à 6 chiffres qu\'elle donne.',
+            'back' => 'Un bouton apparaîtra ici pour revenir là où vous étiez.',
+        ],
+        'show_zone' => 'Me montrer où',
+        'done' => 'Double authentification activée. Gardez vos codes de secours en lieu sûr.',
     ],
 
     'settings_description' => 'Gérez votre profil et les réglages de votre compte',
@@ -208,15 +234,22 @@ return [
         'enabled_title' => 'Authentification à deux facteurs activée',
         'enabled_description' => "L'authentification à deux facteurs est active. Scannez le QR code ou saisissez la clé de configuration dans votre application d'authentification.",
         'verify_title' => "Vérifier le code d'authentification",
-        'verify_description' => "Saisissez le code à 6 chiffres de votre application d'authentification",
+        'verify_description' => "Étape 2 sur 2 : saisissez le code à 6 chiffres de votre application d'authentification. La double authentification n'est en service qu'après cette étape.",
         'enable_title' => "Activer l'authentification à deux facteurs",
-        'enable_description' => "Pour terminer l'activation, scannez le QR code ou saisissez la clé de configuration dans votre application d'authentification",
+        'enable_description' => "Étape 1 sur 2 : scannez le QR code ou saisissez la clé de configuration dans votre application d'authentification, puis cliquez sur « Continuer ».",
         'manual_entry_separator' => 'Ou saisissez le code manuellement',
         'enabled_hint' => "Un code à six chiffres vous sera demandé à la connexion, généré par votre application d'authentification.",
         'disabled_hint' => "Une fois activée, un code à six chiffres vous sera demandé à la connexion, généré par une application d'authentification compatible TOTP.",
         'disable' => 'Désactiver la double authentification',
         'enable' => 'Activer la double authentification',
         'continue_setup' => 'Reprendre la configuration',
+        'abort' => [
+            'title' => 'Abandonner l\'activation ?',
+            'description' => 'La double authentification n\'est pas encore en service. Pour la terminer : scannez le QR code (ou saisissez la clé) dans votre application d\'authentification, cliquez sur « Continuer », puis saisissez le code à 6 chiffres qu\'elle affiche.',
+            'confirm' => 'Abandonner',
+            'resume' => 'Reprendre l\'activation',
+        ],
+        'unfinished' => 'Activation pas terminée : la double authentification n\'est pas encore en service. Cliquez sur « Reprendre la configuration », puis saisissez le code à 6 chiffres affiché par votre application.',
     ],
 
     'recovery_codes' => [

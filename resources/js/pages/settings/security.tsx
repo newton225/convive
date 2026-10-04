@@ -15,8 +15,11 @@ import type { Props as ManagePasskeysProps } from '@/components/manage-passkeys'
 import ManagePasskeys from '@/components/manage-passkeys';
 import type { Props as ManageTwoFactorProps } from '@/components/manage-two-factor';
 import ManageTwoFactor from '@/components/manage-two-factor';
+import { useTemporaryHighlight } from '@/hooks/use-temporary-highlight';
 import { translate, useTranslation } from '@/hooks/use-translation';
-import type { ConnectedDevice, Translations } from '@/types';
+import { cn } from '@/lib/utils';
+import { TwoFactorDetourNotice } from '@/components/two-factor-detour-notice';
+import type { ConnectedDevice, Translations, TwoFactorDetour } from '@/types';
 
 // oxfmt-ignore
 type Props = {
@@ -24,6 +27,7 @@ type Props = {
     passwordPolicy: PasswordPolicy;
     devices: ConnectedDevice[];
     hasScanPin: boolean;
+    twoFactorDetour: TwoFactorDetour | null;
 } & ManagePasskeysProps &
     ManageTwoFactorProps;
 
@@ -32,12 +36,26 @@ export default function Security(props: Props) {
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
     const [newPassword, setNewPassword] = useState('');
+    // Envoye ici pour activer la double authentification : sa zone est encadree quelques secondes.
+    const twoFactorZone = useTemporaryHighlight<HTMLDivElement>(
+        props.twoFactorDetour !== null && !props.twoFactorEnabled,
+    );
 
     return (
         <>
             <Head title={t('account.security.head')} />
 
             <h1 className="sr-only">{t('account.security.head')}</h1>
+
+            {props.twoFactorDetour ? (
+                <div className="mb-8">
+                    <TwoFactorDetourNotice
+                        detour={props.twoFactorDetour}
+                        twoFactorEnabled={props.twoFactorEnabled ?? false}
+                        onShowZone={twoFactorZone.show}
+                    />
+                </div>
+            ) : null}
 
             <div className="space-y-6">
                 <Heading
@@ -152,13 +170,23 @@ export default function Security(props: Props) {
                 </Form>
             </div>
 
-            <ManageTwoFactor
-                canManageTwoFactor={props.canManageTwoFactor}
-                requiresConfirmation={props.requiresConfirmation}
-                twoFactorEnabled={props.twoFactorEnabled}
-                freshRecoveryCodes={props.freshRecoveryCodes}
-                recoveryCodesRemaining={props.recoveryCodesRemaining}
-            />
+            <div
+                ref={twoFactorZone.ref}
+                data-test="two-factor-zone"
+                className={cn(
+                    'rounded-lg transition-shadow duration-300',
+                    twoFactorZone.active &&
+                        'ring-primary ring-offset-background ring-2 ring-offset-8',
+                )}
+            >
+                <ManageTwoFactor
+                    canManageTwoFactor={props.canManageTwoFactor}
+                    requiresConfirmation={props.requiresConfirmation}
+                    twoFactorEnabled={props.twoFactorEnabled}
+                    freshRecoveryCodes={props.freshRecoveryCodes}
+                    recoveryCodesRemaining={props.recoveryCodesRemaining}
+                />
+            </div>
 
             <ManagePasskeys
                 canManagePasskeys={props.canManagePasskeys}

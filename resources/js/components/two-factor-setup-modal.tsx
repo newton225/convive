@@ -23,6 +23,7 @@ import { useAppearance } from '@/hooks/use-appearance';
 import { useClipboard } from '@/hooks/use-clipboard';
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
 import { confirm } from '@/routes/two-factor';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 
@@ -86,9 +87,8 @@ function TwoFactorSetupStep({
                                             alt=""
                                             className={cn(
                                                 'size-full',
-                                                resolvedAppearance ===
-                                                    'dark' &&
-                                                    'invert brightness-150',
+                                                resolvedAppearance === 'dark' &&
+                                                    'brightness-150 invert',
                                             )}
                                         />
                                     </div>
@@ -260,6 +260,7 @@ export default function TwoFactorSetupModal({
     const { t } = useTranslation();
     const [showVerificationStep, setShowVerificationStep] =
         useState<boolean>(false);
+    const [confirmingAbort, setConfirmingAbort] = useState(false);
 
     const modalConfig = useMemo<{
         title: string;
@@ -326,33 +327,70 @@ export default function TwoFactorSetupModal({
     }, [isOpen, qrCodeSvg]);
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader className="flex items-center justify-center">
-                    <GridScanIcon />
-                    <DialogTitle>{modalConfig.title}</DialogTitle>
-                    <DialogDescription className="text-center">
-                        {modalConfig.description}
-                    </DialogDescription>
-                </DialogHeader>
+        <>
+            <Dialog
+                open={isOpen}
+                onOpenChange={(open) => {
+                    if (open) {
+                        return;
+                    }
 
-                <div className="flex flex-col items-center space-y-5">
-                    {showVerificationStep ? (
-                        <TwoFactorVerificationStep
-                            onClose={handleClose}
-                            onBack={() => setShowVerificationStep(false)}
-                        />
-                    ) : (
-                        <TwoFactorSetupStep
-                            qrCodeSvg={qrCodeSvg}
-                            manualSetupKey={manualSetupKey}
-                            buttonText={modalConfig.buttonText}
-                            onNextStep={handleModalNextStep}
-                            errors={errors}
-                        />
-                    )}
-                </div>
-            </DialogContent>
-        </Dialog>
+                    // Fermer avant le code laisse l'activation a moitie faite : on demande d'abord.
+                    if (twoFactorEnabled) {
+                        handleClose();
+                    } else {
+                        setConfirmingAbort(true);
+                    }
+                }}
+            >
+                {/* Un clic a cote ne ferme pas la fenetre : la fermer entre le scan et le code laisse
+                l'activation a moitie faite, sans que rien ne soit en service. La croix et la
+                touche Echap la quittent, apres confirmation. */}
+                <DialogContent
+                    className="sm:max-w-md"
+                    onInteractOutside={(event) => event.preventDefault()}
+                >
+                    <DialogHeader className="flex items-center justify-center">
+                        <GridScanIcon />
+                        <DialogTitle>{modalConfig.title}</DialogTitle>
+                        <DialogDescription className="text-center">
+                            {modalConfig.description}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex flex-col items-center space-y-5">
+                        {showVerificationStep ? (
+                            <TwoFactorVerificationStep
+                                onClose={handleClose}
+                                onBack={() => setShowVerificationStep(false)}
+                            />
+                        ) : (
+                            <TwoFactorSetupStep
+                                qrCodeSvg={qrCodeSvg}
+                                manualSetupKey={manualSetupKey}
+                                buttonText={modalConfig.buttonText}
+                                onNextStep={handleModalNextStep}
+                                errors={errors}
+                            />
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <ConfirmActionDialog
+                open={confirmingAbort}
+                onOpenChange={setConfirmingAbort}
+                title={t('account.two_factor_setup.abort.title')}
+                description={t('account.two_factor_setup.abort.description')}
+                confirmLabel={t('account.two_factor_setup.abort.confirm')}
+                cancelLabel={t('account.two_factor_setup.abort.resume')}
+                destructive
+                testId="two-factor-setup-abort"
+                onConfirm={() => {
+                    setConfirmingAbort(false);
+                    handleClose();
+                }}
+            />
+        </>
     );
 }

@@ -8,6 +8,7 @@ use App\Http\Requests\Settings\PasswordUpdateRequest;
 use App\Http\Requests\Settings\ScanPinRequest;
 use App\Http\Requests\Settings\TwoFactorAuthenticationRequest;
 use App\Support\Auth\RecoveryCodes;
+use App\Support\Auth\TwoFactorDetour;
 use App\Support\ConnectedDevices;
 use App\Support\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
@@ -24,6 +25,8 @@ class SecurityController extends Controller
      */
     public function edit(TwoFactorAuthenticationRequest $request): Response
     {
+        TwoFactorDetour::rememberFromQuery($request);
+
         $props = [
             'canManageTwoFactor' => Features::canManageTwoFactorAuthentication(),
             'canManagePasskeys' => Features::canManagePasskeys(),
@@ -47,6 +50,7 @@ class SecurityController extends Controller
             'passwordPolicy' => PasswordPolicy::forDisplay(),
             'devices' => ConnectedDevices::for($request->user(), $request->session()->getId()),
             'hasScanPin' => $request->user()->scan_pin_verifier !== null,
+            'twoFactorDetour' => TwoFactorDetour::forDisplay($request, $request->user()->hasEnabledTwoFactorAuthentication()),
         ];
 
         if (Features::canManageTwoFactorAuthentication()) {

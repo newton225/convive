@@ -42,3 +42,9 @@ export type ConnectedDevice = {
     lastActiveAt: string;
     isCurrent: boolean;
 };
+
+// Le detour par l'ecran de securite pour activer la double authentification (`TwoFactorDetour`).
+export type TwoFactorDetour = {
+    reason: 'payment_accounts' | 'profile';
+    returnUrl: string;
+};

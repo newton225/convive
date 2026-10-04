@@ -1,10 +1,11 @@
 import { Form } from '@inertiajs/react';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, TriangleAlert } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Heading from '@/components/heading';
 import { SubmitButton } from '@/components/submit-button';
 import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
 import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
 import { disable, enable } from '@/routes/two-factor';
@@ -83,6 +84,17 @@ export default function ManageTwoFactor(props: Props) {
                     <p className="text-muted-foreground text-sm">
                         {t('account.two_factor_setup.disabled_hint')}
                     </p>
+
+                    {/* Le code scanne mais pas encore saisi : rien n'est active tant que le code
+                        a 6 chiffres n'a pas ete confirme, et c'est facile a croire termine. */}
+                    {hasSetupData ? (
+                        <Alert data-test="two-factor-setup-unfinished">
+                            <TriangleAlert />
+                            <AlertDescription>
+                                {t('account.two_factor_setup.unfinished')}
+                            </AlertDescription>
+                        </Alert>
+                    ) : null}
 
                     <div>
                         {hasSetupData ? (
