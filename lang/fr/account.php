@@ -63,6 +63,7 @@ return [
         'terms_joiner' => 'et la',
         'privacy_link' => 'politique de confidentialité',
         'terms_required' => 'Acceptez les conditions d’utilisation et la politique de confidentialité pour créer votre compte.',
+        'creation_failed' => 'Votre espace n’a pas pu être créé. Réessayez dans quelques minutes : notre équipe est prévenue.',
         'have_account' => 'Vous avez déjà un compte ?',
         'sign_in' => 'Se connecter',
     ],

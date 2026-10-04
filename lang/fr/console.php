@@ -454,6 +454,7 @@ return [
         ],
         'flash' => [
             'migrated' => 'La base de :organisation est à jour.',
+            'orphan_deleted' => 'Le fichier :file est supprimé : les créations d’organisation ne sont plus bloquées.',
             'migration_failed' => 'Les migrations de :organisation n’ont pas abouti. Le détail est au journal du serveur.',
             'backed_up' => 'Sauvegarde terminée.',
             'job_retried' => 'Envoi remis dans la file.',
@@ -601,8 +602,25 @@ return [
             'title' => 'Lancer une sauvegarde maintenant ?',
             'description' => 'Une archive complète est créée tout de suite, en plus de celle de la nuit. Cela peut prendre quelques instants ; le geste est inscrit au journal central.',
         ],
+        'orphans' => [
+            'title' => 'Bases orphelines',
+            'description' => 'Ces fichiers de base n’appartiennent à aucune organisation, ni active ni en corbeille. Ils peuvent bloquer la création des suivantes.',
+            'delete' => 'Supprimer',
+            'confirm' => [
+                'title' => 'Supprimer :file ?',
+                'description' => 'Ce fichier n’appartient à aucune organisation. Sa suppression est définitive et inscrite au journal de la console. Il reste dans les sauvegardes des douze derniers mois.',
+            ],
+        ],
         'healthy' => 'Saine',
         'unhealthy' => 'À vérifier',
+    ],
+
+    'alerts' => [
+        'tenant_creation_failed' => [
+            'subject' => 'Convive : un espace n’a pas pu être créé',
+            'intro' => 'La création de l’organisation « :organisation » (:email) a échoué. Rien n’a été gardé, et la personne a été invitée à réessayer.',
+            'action' => 'Le détail technique est dans le journal du serveur. Vérifiez aussi l’écran de santé technique de la console.',
+        ],
     ],
 
     'showcase' => [
@@ -665,6 +683,7 @@ return [
             'export_limit_updated' => 'Limite d’exports réglée',
             'support_durations_updated' => 'Durées d’accès du support réglées',
             'database_repaired' => 'Base réparée',
+            'orphan_database_deleted' => 'Base orpheline supprimée',
             'deletion_cancelled' => 'Suppression annulée',
             'tenant_erased' => 'Organisation effacée',
             'payment_reminder_sent' => 'Relance d’impayé',
@@ -696,6 +715,7 @@ return [
             'export_limit_updated' => ':actor a modifié la limite d’exports par heure',
             'support_durations_updated' => ':actor a modifié les durées proposées pour un accès de support',
             'database_repaired' => ':actor a rejoué les migrations de :organisation',
+            'orphan_database_deleted' => ':actor a supprimé une base orpheline',
             'deletion_cancelled' => ':actor a annulé la suppression de :organisation',
             'tenant_erased' => ':organisation a été effacée à l’échéance de sa suppression programmée',
             'payment_reminder_sent' => ':actor a relancé :organisation pour un impayé',

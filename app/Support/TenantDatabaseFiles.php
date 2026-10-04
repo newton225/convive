@@ -5,11 +5,15 @@ namespace App\Support;
 use App\Models\Tenant;
 
 /**
- * Les fichiers de base des organisations (`tenant{id}.sqlite`), et ceux qui n'appartiennent a aucune.
+ * Les fichiers de base des organisations, et ceux qui n'appartiennent a aucune.
  *
- * Un orphelin bloque toute creation d'organisation : SQLite reprend le numero de la derniere
- * organisation supprimee de la table, et la nouvelle tombe sur un fichier deja present (incident du
- * 2026-10-04). Une organisation en corbeille garde sa base : elle reste recuperable trente jours.
+ * Deux formes de nom : `tenant<numero>.sqlite` pour les organisations ouvertes avant le 2026-10-04,
+ * `tenant_<ULID>.sqlite` ensuite (`TenantDatabaseName`). Un fichier appartient a une organisation
+ * quand son nom est celui qu'elle a enregistre (`tenancy_db_name`) ; une organisation en corbeille
+ * garde sa base, elle reste recuperable trente jours.
+ *
+ * Un orphelin pouvait bloquer toute creation d'organisation, SQLite reprenant le numero de la
+ * derniere organisation disparue (incident du 2026-10-04).
  */
 final class TenantDatabaseFiles
 {
@@ -20,15 +24,21 @@ final class TenantDatabaseFiles
      */
     public static function orphans(): array
     {
-        $prefix = (string) config('tenancy.database.prefix');
-        $suffix = (string) config('tenancy.database.suffix');
-        $pattern = '/^'.preg_quote($prefix, '/').'(\d+)'.preg_quote($suffix, '/').'$/';
+        $prefix = preg_quote((string) config('tenancy.database.prefix'), '/');
+        $suffix = preg_quote((string) config('tenancy.database.suffix'), '/');
+        $pattern = '/^'.$prefix.'(\d+|_[0-9a-z]{26})'.$suffix.'$/';
 
-        $known = Tenant::withTrashed()->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $known = Tenant::withTrashed()->get()
+            // Sans nom enregistre (cas que la migration du 2026-10-04 a comble), l'ancienne regle :
+            // jamais le generateur, qui tirerait un nom au hasard.
+            ->map(fn (Tenant $tenant) => $tenant->tenancy_db_name
+                ?? config('tenancy.database.prefix').$tenant->id.config('tenancy.database.suffix'))
+            ->all();
+
         $orphans = [];
 
         foreach (scandir(ScopedSqliteDatabaseManager::directory()) ?: [] as $file) {
-            if (preg_match($pattern, $file, $match) === 1 && ! in_array($match[1], $known, true)) {
+            if (preg_match($pattern, $file) === 1 && ! in_array($file, $known, true)) {
                 $orphans[] = $file;
             }
         }

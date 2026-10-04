@@ -63,6 +63,7 @@ return [
         'terms_joiner' => 'and the',
         'privacy_link' => 'privacy policy',
         'terms_required' => 'Accept the terms of use and the privacy policy to create your account.',
+        'creation_failed' => 'Your space could not be created. Please try again in a few minutes: our team has been notified.',
         'have_account' => 'Already have an account?',
         'sign_in' => 'Log in',
     ],

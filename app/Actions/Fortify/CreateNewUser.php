@@ -8,9 +8,12 @@ use App\Concerns\ProfileValidationRules;
 use App\Models\User;
 use App\Support\LegalDocument;
 use App\Support\PhoneNumber;
+use App\Support\TenantCreationFailure;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Throwable;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -47,7 +50,25 @@ class CreateNewUser implements CreatesNewUsers
             'terms' => ['accepted'],
         ], ['terms.accepted' => __('account.register.terms_required')])->validate();
 
-        return DB::transaction(function () use ($input) {
+        $organisationName = trim((string) ($input['organisation_name'] ?? ''));
+
+        try {
+            return $this->createAccount($input, $organisationName);
+        } catch (Throwable $exception) {
+            // L'espace n'a pas pu etre ouvert : rien n'est garde (transaction annulee, base effacee
+            // par `CreateTenant`), la personne lit un message clair et l'equipe est prevenue.
+            TenantCreationFailure::report($exception, $organisationName, (string) $input['email']);
+
+            throw ValidationException::withMessages(['registration' => __('account.register.creation_failed')]);
+        }
+    }
+
+    /**
+     * @param  array<string, string>  $input
+     */
+    private function createAccount(array $input, string $organisationName): User
+    {
+        return DB::transaction(function () use ($input, $organisationName) {
             $user = User::create([
                 'name' => $input['name'],
                 'email' => $input['email'],
@@ -56,8 +77,6 @@ class CreateNewUser implements CreatesNewUsers
                 'terms_accepted_at' => now(),
                 'terms_version' => LegalDocument::Version,
             ]);
-
-            $organisationName = trim((string) ($input['organisation_name'] ?? ''));
 
             $this->createTenant->handle(
                 $user,

@@ -18,6 +18,7 @@ return [
     ],
 
     'errors' => [
+        'creation_failed' => "L'organisation n'a pas pu être créée. Réessayez dans quelques minutes : notre équipe est prévenue.",
         'owner_cannot_be_removed' => 'Le propriétaire de l\'organisation ne peut pas être retiré.',
         'name_mismatch' => 'Le nom de l\'organisation ne correspond pas.',
         'name_reserved' => 'Ce nom d\'organisation est réservé et ne peut pas être utilisé.',

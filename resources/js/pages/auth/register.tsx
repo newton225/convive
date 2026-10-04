@@ -1,4 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import InputError from '@/components/input-error';
 import { useState } from 'react';
 import PasswordInput from '@/components/password-input';
@@ -54,6 +56,19 @@ export default function Register({
                                 action="register"
                             />
                         )}
+
+                        {errors.registration ? (
+                            <Alert
+                                variant="destructive"
+                                data-test="register-failed"
+                                data-error-for="registration"
+                            >
+                                <AlertCircle />
+                                <AlertDescription>
+                                    {errors.registration}
+                                </AlertDescription>
+                            </Alert>
+                        ) : null}
 
                         <div className="grid gap-6">
                             <div className="grid gap-2">

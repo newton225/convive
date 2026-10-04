@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Console\AccountController;
 use App\Http\Controllers\Console\AuditLogController;
+use App\Http\Controllers\Console\DestroyOrphanDatabaseController;
 use App\Http\Controllers\Console\ExportLimitController;
 use App\Http\Controllers\Console\FailedJobController;
 use App\Http\Controllers\Console\FinishSupportAccessController;
@@ -59,6 +60,8 @@ Route::prefix('console')
         Route::put('trial', TrialSettingsController::class)->name('trial.update');
         Route::get('health', HealthController::class)->middleware('can:console.area,"health"')->name('health');
         Route::post('health/databases/{tenant}/migrate', RepairTenantDatabaseController::class)->middleware('can:console.area,"health"')->name('health.databases.migrate');
+        // Le nom de fichier ne peut porter ni barre ni point de remontee : il reste dans le dossier des bases.
+        Route::delete('health/orphan-databases/{file}', DestroyOrphanDatabaseController::class)->middleware('can:console.area,"health"')->where('file', '[A-Za-z0-9_]+\.sqlite')->name('health.orphan-databases.destroy');
         Route::post('health/backup', RunBackupController::class)->middleware('can:console.area,"health"')->name('health.backup');
         Route::post('health/failed-jobs/{job}/retry', [FailedJobController::class, 'retry'])->middleware('can:console.area,"health"')->name('health.failed-jobs.retry');
         Route::delete('health/failed-jobs/{job}', [FailedJobController::class, 'destroy'])->middleware('can:console.area,"health"')->name('health.failed-jobs.destroy');

@@ -57,7 +57,7 @@ class DatabaseSnapshotsTest extends TestCase
         $this->assertSame(1 + Tenant::count(), $count);
         $this->assertFileExists(DatabaseSnapshots::directory().DIRECTORY_SEPARATOR.'central.sqlite');
 
-        $copy = new PDO('sqlite:'.DatabaseSnapshots::directory().DIRECTORY_SEPARATOR."tenant{$this->tenant->id}.sqlite");
+        $copy = new PDO('sqlite:'.DatabaseSnapshots::directory().DIRECTORY_SEPARATOR.$this->tenant->database()->getName());
 
         $this->assertSame('ok', $this->scalar($copy, 'PRAGMA integrity_check'));
         // Une copie qui s'ouvre et porte le schema de l'organisation, pas un fichier vide.
@@ -71,7 +71,7 @@ class DatabaseSnapshotsTest extends TestCase
         $count = DatabaseSnapshots::take();
 
         $this->assertSame(Tenant::count(), $count);
-        $this->assertFileDoesNotExist(DatabaseSnapshots::directory().DIRECTORY_SEPARATOR."tenant{$this->tenant->id}.sqlite");
+        $this->assertFileDoesNotExist(DatabaseSnapshots::directory().DIRECTORY_SEPARATOR.$this->tenant->database()->getName());
     }
 
     public function test_les_copies_ne_restent_pas_sur_le_serveur_apres_la_sauvegarde(): void

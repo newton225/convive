@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Support\TenantDatabaseName;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Stancl\JobPipeline\JobPipeline;
+use Stancl\Tenancy\DatabaseConfig;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
@@ -105,6 +107,10 @@ class TenancyServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Un nom de fichier tire au hasard pour chaque nouvelle organisation, garde ensuite sur elle,
+        // plutot que son numero, que SQLite peut redonner (point d'extension prevu par le paquet).
+        DatabaseConfig::generateDatabaseNamesUsing(fn () => TenantDatabaseName::generate());
+
         $this->bootEvents();
         $this->mapRoutes();
 

@@ -8,6 +8,7 @@ use App\Support\Console\TenantDatabaseHealth;
 use App\Support\Health\HealthChecks;
 use App\Support\Health\QueueOverview;
 use App\Support\Health\ScheduledTasks;
+use App\Support\TenantDatabaseFiles;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,6 +31,7 @@ class HealthController extends Controller
                 'failed' => QueueOverview::failed(),
             ],
             'databases' => TenantDatabaseHealth::issues(),
+            'orphanDatabases' => TenantDatabaseFiles::orphans(),
             'backup' => BackupStatus::current(),
         ]);
     }

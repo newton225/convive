@@ -155,6 +155,10 @@ return [
     |
     */
 
+    // L'adresse de l'equipe qui recoit les alertes techniques (controles de sante, sauvegardes,
+    // espace qui n'a pas pu etre ouvert). Vide : rien ne part, l'etat se lit sur l'ecran de sante.
+    'alert_email' => env('CONVIVE_ALERT_EMAIL'),
+
     'alerts' => [
         'seats_low_ratio' => (float) env('CONVIVE_SEATS_LOW_RATIO', 0.25),
     ],

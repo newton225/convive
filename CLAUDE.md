@@ -451,7 +451,8 @@ requetes qui les touchent, et les memes regles qu'avant : Policy qui verifie l'a
 ### Etat de la migration
 
 **Migration terminee.** `App\Models\Tenant` implemente `TenantWithDatabase` : chaque
-organisation a sa propre base (`tenant{id}.sqlite` aujourd'hui). Le mecanisme provisoire ecrit
+organisation a sa propre base (un fichier SQLite aujourd'hui, voir « Nom du fichier de base » plus
+bas). Le mecanisme provisoire ecrit
 avant cette decision (`App\Concerns\BelongsToTenant`, `App\Support\TenantContext`,
 `App\Http\Middleware\ResolveCurrentTenant`, scope global et `tenant_id` sur les tables metier) a
 ete retire du code. Les mentions qui en subsistent ailleurs dans ce document decrivent cet ancien
@@ -475,6 +476,25 @@ Ce qui est en place :
   ou un catalogue de permissions en retard ; puis `php artisan convive:release`, qui estampille
   la livraison (date et identifiant de la modification, affiches a cote du numero de version que
   le proprietaire du projet choisit dans `APP_VERSION`).
+
+### Nom du fichier de base, orphelins
+
+Incident du 2026-10-04 : une creation d'organisation echouee avait laisse `tenant16.sqlite` sans
+organisation ; SQLite reprenant le numero 16, toute creation de compte echouait ensuite.
+
+- **Nom tire au hasard** (decision du proprietaire du projet) : `tenant_<ULID>.sqlite`, genere par
+  `App\Support\TenantDatabaseName` via le point d'extension du paquet
+  (`DatabaseConfig::generateDatabaseNamesUsing`), garde pour toujours dans `tenants.tenancy_db_name`
+  (index unique). Un nom deja pris (fichier present ou nom enregistre) est tire de nouveau. Les
+  organisations ouvertes avant gardent `tenant<numero>.sqlite`. Ne jamais recalculer un nom a partir
+  du numero.
+- **Creation echouee** : `CreateTenant` efface la base creee par la tentative (jamais un fichier
+  trouve en place) ; la personne lit un message clair et l'equipe est prevenue a
+  `CONVIVE_ALERT_EMAIL` (`TenantCreationFailure`).
+- **Orphelin** : `TenantDatabaseFiles::orphans()`, controle `orphan_databases` de la sante
+  technique (alerte par courriel), bouton « Supprimer » reserve a la zone `health` de la console,
+  journalise. Une organisation en corbeille n'est jamais un orphelin.
+- **Sauvegardes** : chaque base est copiee sous son nom reel.
 
 ### Nommage du locataire
 
@@ -1116,7 +1136,8 @@ archiverait les fichiers sans aucune base.
 - **Alertes** : seuls les echecs previennent, a l'adresse `CONVIVE_ALERT_EMAIL`. Sans elle, aucun
   courriel ne part et l'etat ne se lit que sur l'ecran de sante technique.
 - **Restauration** : a la main, application arretee. Extraire l'archive, remettre `central.sqlite`
-  et les `tenant{id}.sqlite` dans `database/`, `tenant-media/` et `payment-proofs/` dans
+  et les fichiers de base des organisations (`tenant<numero>.sqlite` et `tenant_<ULID>.sqlite`, sous
+  le nom enregistre sur chacune) dans `database/`, `tenant-media/` et `payment-proofs/` dans
   `storage/app/`, puis `php artisan tenants:migrate`. Aucun bouton de restauration dans la
   console : ecraser toutes les bases ne se fait pas d'un clic.
 

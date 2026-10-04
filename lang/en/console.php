@@ -454,6 +454,7 @@ return [
         ],
         'flash' => [
             'migrated' => 'The database of :organisation is up to date.',
+            'orphan_deleted' => 'The file :file is deleted: organisation creation is no longer blocked.',
             'migration_failed' => 'The migrations of :organisation did not complete. The detail is in the server log.',
             'backed_up' => 'Backup completed.',
             'job_retried' => 'Message put back on the queue.',
@@ -601,8 +602,25 @@ return [
             'title' => 'Run a backup now?',
             'description' => 'A full archive is created right away, on top of the nightly one. It may take a moment; the action is written to the central log.',
         ],
+        'orphans' => [
+            'title' => 'Orphan databases',
+            'description' => 'These database files belong to no organisation, active or in the trash. They can block the creation of the next ones.',
+            'delete' => 'Delete',
+            'confirm' => [
+                'title' => 'Delete :file?',
+                'description' => 'This file belongs to no organisation. Deleting it is final and written to the console log. It remains in the backups of the last twelve months.',
+            ],
+        ],
         'healthy' => 'Healthy',
         'unhealthy' => 'Needs checking',
+    ],
+
+    'alerts' => [
+        'tenant_creation_failed' => [
+            'subject' => 'Convive: a space could not be created',
+            'intro' => 'Creating the organisation “:organisation” (:email) failed. Nothing was kept, and the person was asked to try again.',
+            'action' => 'The technical detail is in the server log. Also check the technical health screen of the console.',
+        ],
     ],
 
     'showcase' => [
@@ -665,6 +683,7 @@ return [
             'export_limit_updated' => 'Export limit set',
             'support_durations_updated' => 'Support access durations set',
             'database_repaired' => 'Database repaired',
+            'orphan_database_deleted' => 'Orphan database deleted',
             'deletion_cancelled' => 'Deletion cancelled',
             'tenant_erased' => 'Organisation erased',
             'payment_reminder_sent' => 'Overdue reminder',
@@ -696,6 +715,7 @@ return [
             'export_limit_updated' => ':actor changed the hourly export limit',
             'support_durations_updated' => ':actor changed the durations offered for a support access',
             'database_repaired' => ':actor ran the migrations of :organisation again',
+            'orphan_database_deleted' => ':actor deleted an orphan database',
             'deletion_cancelled' => ':actor cancelled the deletion of :organisation',
             'tenant_erased' => ':organisation was erased when its scheduled deletion came due',
             'payment_reminder_sent' => ':actor reminded :organisation about an overdue payment',

@@ -58,7 +58,9 @@ class DatabaseSnapshots
 
             $tenant->run(fn () => self::snapshot(
                 DB::connection(),
-                $directory.DIRECTORY_SEPARATOR."tenant{$tenant->id}.sqlite",
+                // Sous le nom reel du fichier : la restauration le remet tel quel dans le dossier des
+                // bases (`tenant_<ULID>.sqlite` pour les organisations ouvertes depuis le 2026-10-04).
+                $directory.DIRECTORY_SEPARATOR.$database->getName(),
             ));
 
             $count++;

@@ -3,6 +3,7 @@ import { CircleAlert, CircleCheck } from 'lucide-react';
 import { BackupCard } from '@/components/console/backup-card';
 import { HealthChecksCard } from '@/components/console/health-checks-card';
 import { QueueCard } from '@/components/console/queue-card';
+import { DeleteOrphanDatabaseButton } from '@/components/console/delete-orphan-database-button';
 import { RepairDatabaseButton } from '@/components/console/repair-database-button';
 import { ScheduledTasksTable } from '@/components/console/scheduled-tasks-table';
 import Heading from '@/components/heading';
@@ -23,6 +24,8 @@ type Props = {
     tasks: ConsoleScheduledTask[];
     queue: ConsoleQueue;
     databases: ConsoleDatabaseIssue[];
+    // Fichiers de base sans organisation : ils bloquent la creation des suivantes.
+    orphanDatabases: string[];
     backup: ConsoleBackup;
 };
 
@@ -37,6 +40,7 @@ export default function Health({
     tasks,
     queue,
     databases,
+    orphanDatabases,
     backup,
 }: Props) {
     const { t } = useTranslation();
@@ -102,6 +106,39 @@ export default function Health({
                         )}
                     </CardContent>
                 </Card>
+
+                {orphanDatabases.length > 0 ? (
+                    <Card data-test="console-orphan-databases">
+                        <CardHeader>
+                            <CardTitle>
+                                {t('console.health.orphans.title')}
+                            </CardTitle>
+                            <p className="text-muted-foreground text-sm">
+                                {t('console.health.orphans.description')}
+                            </p>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="divide-y text-sm">
+                                {orphanDatabases.map((file) => (
+                                    <li
+                                        key={file}
+                                        className="flex flex-wrap items-center justify-between gap-2 py-2"
+                                    >
+                                        <span className="flex items-center gap-2">
+                                            <CircleAlert className="size-4 shrink-0" />
+                                            <code className="break-all">
+                                                {file}
+                                            </code>
+                                        </span>
+                                        <DeleteOrphanDatabaseButton
+                                            file={file}
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                ) : null}
 
                 <BackupCard backup={backup} />
 

@@ -10,12 +10,14 @@ use App\Http\Requests\Tenants\SaveTenantRequest;
 use App\Models\Profile;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\TenantCreationFailure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class TenantController extends Controller
 {
@@ -36,7 +38,14 @@ class TenantController extends Controller
      */
     public function store(SaveTenantRequest $request, CreateTenant $createTenant): RedirectResponse
     {
-        $tenant = $createTenant->handle($request->user(), $request->validated('name'));
+        try {
+            $tenant = $createTenant->handle($request->user(), $request->validated('name'));
+        } catch (Throwable $exception) {
+            // Meme traitement qu'a l'inscription : un message clair, l'equipe prevenue, rien de garde.
+            TenantCreationFailure::report($exception, (string) $request->validated('name'), (string) $request->user()->email);
+
+            return back()->withInput()->withErrors(['name' => __('tenants.errors.creation_failed')]);
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('tenants.flash.created')]);
 
