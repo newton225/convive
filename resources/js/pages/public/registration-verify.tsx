@@ -1,10 +1,11 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import type { FormEvent } from 'react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import InputError from '@/components/input-error';
 import LocaleSwitcher from '@/components/locale-switcher';
 import { OfflineBanner } from '@/components/offline-banner';
+import { WhatsAppVerificationCard } from '@/components/public/whatsapp-verification-card';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,13 +27,20 @@ type Props = {
     tenant: PublicRegistrationTenant;
     maskedPhone: string;
     codeMinutes: number;
+    // WhatsApp des que le numero de Convive recoit les messages des invites, sinon SMS.
+    method: 'whatsapp' | 'sms';
+    whatsappLink: string | null;
+    whatsappCode: string | null;
+    whatsappNumber: string | null;
+    whatsappVerified: boolean;
 };
 
 const CodeLength = 6;
 
 /**
  * Verification du telephone avant la reservation (SECURITY.md C3), quand l'evenement l'exige : une
- * etape, une decision, saisir le code recu par SMS. Aucune place n'est bloquee avant.
+ * etape, une decision : envoyer un message WhatsApp, ou saisir le code recu par SMS. Aucune place
+ * n'est bloquee avant.
  */
 export default function RegistrationVerify({
     token,
@@ -41,8 +49,14 @@ export default function RegistrationVerify({
     tenant,
     maskedPhone,
     codeMinutes,
+    method,
+    whatsappLink,
+    whatsappCode,
+    whatsappNumber,
+    whatsappVerified,
 }: Props) {
     const { t } = useTranslation();
+    const { errors } = usePage<{ errors: Record<string, string> }>().props;
     const form = useForm({ code: '' });
 
     const submit = (submitEvent: FormEvent) => {
@@ -73,79 +87,98 @@ export default function RegistrationVerify({
                     </p>
                 </div>
 
-                <Card>
-                    <CardContent className="pt-6">
-                        <form
-                            onSubmit={submit}
-                            className="space-y-5"
-                            data-test="phone-verification-form"
-                        >
-                            <p className="text-sm">
-                                {t('guest.phone_verification.description', {
-                                    phone: maskedPhone,
-                                })}
-                            </p>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="code">
-                                    {t('guest.phone_verification.code_label')}
-                                </Label>
-                                <InputOTP
-                                    id="code"
-                                    name="code"
-                                    maxLength={CodeLength}
-                                    value={form.data.code}
-                                    onChange={(value) =>
-                                        form.setData('code', value)
-                                    }
-                                    pattern={REGEXP_ONLY_DIGITS}
-                                    inputMode="numeric"
-                                    autoComplete="one-time-code"
-                                    autoFocus
-                                >
-                                    <InputOTPGroup>
-                                        {Array.from(
-                                            { length: CodeLength },
-                                            (_, index) => (
-                                                <InputOTPSlot
-                                                    key={index}
-                                                    index={index}
-                                                />
-                                            ),
-                                        )}
-                                    </InputOTPGroup>
-                                </InputOTP>
-                                <InputError message={form.errors.code} />
-                                <p className="text-muted-foreground text-xs">
-                                    {t('guest.phone_verification.expires', {
-                                        minutes: codeMinutes,
+                {method === 'whatsapp' ? (
+                    <WhatsAppVerificationCard
+                        token={token}
+                        resume={resume}
+                        maskedPhone={maskedPhone}
+                        link={whatsappLink}
+                        code={whatsappCode}
+                        number={whatsappNumber}
+                        verified={whatsappVerified}
+                        error={errors.whatsapp}
+                    />
+                ) : (
+                    <Card>
+                        <CardContent className="pt-6">
+                            <form
+                                onSubmit={submit}
+                                className="space-y-5"
+                                data-test="phone-verification-form"
+                            >
+                                <p className="text-sm">
+                                    {t('guest.phone_verification.description', {
+                                        phone: maskedPhone,
                                     })}
                                 </p>
-                            </div>
 
-                            <SubmitButton
-                                className="w-full"
-                                processing={form.processing}
-                                disabled={form.data.code.length !== CodeLength}
-                                data-test="phone-verification-submit"
-                            >
-                                {t('guest.phone_verification.submit')}
-                            </SubmitButton>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="code">
+                                        {t(
+                                            'guest.phone_verification.code_label',
+                                        )}
+                                    </Label>
+                                    <InputOTP
+                                        id="code"
+                                        name="code"
+                                        maxLength={CodeLength}
+                                        value={form.data.code}
+                                        onChange={(value) =>
+                                            form.setData('code', value)
+                                        }
+                                        pattern={REGEXP_ONLY_DIGITS}
+                                        inputMode="numeric"
+                                        autoComplete="one-time-code"
+                                        autoFocus
+                                    >
+                                        <InputOTPGroup>
+                                            {Array.from(
+                                                { length: CodeLength },
+                                                (_, index) => (
+                                                    <InputOTPSlot
+                                                        key={index}
+                                                        index={index}
+                                                    />
+                                                ),
+                                            )}
+                                        </InputOTPGroup>
+                                    </InputOTP>
+                                    <InputError message={form.errors.code} />
+                                    <p className="text-muted-foreground text-xs">
+                                        {t('guest.phone_verification.expires', {
+                                            minutes: codeMinutes,
+                                        })}
+                                    </p>
+                                </div>
 
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                className="w-full"
-                                data-test="phone-verification-resend"
-                                onClick={() =>
-                                    router.post(resend({ token, resume }).url)
-                                }
-                            >
-                                {t('guest.phone_verification.resend')}
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+                                <SubmitButton
+                                    className="w-full"
+                                    processing={form.processing}
+                                    disabled={
+                                        form.data.code.length !== CodeLength
+                                    }
+                                    data-test="phone-verification-submit"
+                                >
+                                    {t('guest.phone_verification.submit')}
+                                </SubmitButton>
+
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="w-full"
+                                    data-test="phone-verification-resend"
+                                    onClick={() =>
+                                        router.post(
+                                            resend({ token, resume }).url,
+                                        )
+                                    }
+                                >
+                                    {t('guest.phone_verification.resend')}
+                                </Button>
+                            </form>
+                        </CardContent>
+                    </Card>
+                )}
             </main>
         </div>
     );

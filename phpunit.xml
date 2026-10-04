@@ -39,6 +39,9 @@
         <env name="INERTIA_SSR_ENABLED" value="false"/>
         <env name="TURNSTILE_SITE_KEY" value=""/>
         <env name="TURNSTILE_SECRET_KEY" value=""/>
+        <env name="WHATSAPP_BUSINESS_NUMBER" value=""/>
+        <env name="WHATSAPP_WEBHOOK_VERIFY_TOKEN" value=""/>
+        <env name="WHATSAPP_META_APP_SECRET" value=""/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>

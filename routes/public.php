@@ -58,6 +58,10 @@ Route::middleware([
     Route::post('/e/{token}/register/{resume}/verify', [PublicRegistrationController::class, 'verify'])
         ->middleware('throttle:resume')
         ->name('public.registrations.verify');
+    // Verification par un message WhatsApp de l'invite : continuer une fois le message recu.
+    Route::post('/e/{token}/register/{resume}/verify/whatsapp', [PublicRegistrationController::class, 'completeWhatsApp'])
+        ->middleware('throttle:resume')
+        ->name('public.registrations.verify.whatsapp');
     Route::post('/e/{token}/register/{resume}/verify/resend', [PublicRegistrationController::class, 'resendCode'])
         ->middleware('throttle:phone-code')
         ->name('public.registrations.verify.resend');

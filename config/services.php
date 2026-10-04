@@ -53,6 +53,17 @@ return [
             'api_version' => env('WHATSAPP_META_API_VERSION', 'v23.0'),
             'template_language' => env('WHATSAPP_META_TEMPLATE_LANGUAGE', 'fr'),
         ],
+        // Les messages que les invites envoient au numero de Convive (Meta seulement), pour verifier
+        // leur telephone (`PhoneVerification`). Les trois valeurs sont necessaires : sans elles, la
+        // verification passe par SMS.
+        'inbound' => [
+            // Le numero WhatsApp Business de Convive, au format international.
+            'number' => env('WHATSAPP_BUSINESS_NUMBER'),
+            // Le jeton que Meta renvoie pour valider l'adresse du webhook, choisi librement.
+            'verify_token' => env('WHATSAPP_WEBHOOK_VERIFY_TOKEN'),
+            // Le secret de l'application Meta, qui signe chaque message transmis.
+            'app_secret' => env('WHATSAPP_META_APP_SECRET'),
+        ],
         'templates' => [
             'invitation_card' => env('WHATSAPP_TEMPLATE_INVITATION_CARD'),
             'proof_reminder' => env('WHATSAPP_TEMPLATE_PROOF_REMINDER'),

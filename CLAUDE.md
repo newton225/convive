@@ -1010,6 +1010,22 @@ ivoiriens (`PhoneVerification::appliesTo()`), et un meme numero n'en recoit que 
 (`PhoneVerification::MaxCodesPerHour`) : chaque SMS est paye. Aucun autre message ne passe par SMS
 sans nouvelle decision.
 
+**Verification du telephone par un message WhatsApp de l'invite** (decision du proprietaire du
+projet, 2026-10-04), a la place du code envoye : Meta refuse le modele d'authentification a une
+entreprise non verifiee, et le SMS est mis de cote. L'invite envoie, depuis son WhatsApp, un message
+pre-rempli (`https://wa.me/<numero>?text=Code Convive : XXXXXXXX`) au numero de Convive ; Meta le
+transmet a `webhooks/whatsapp` (`spatie/laravel-webhook-client`, configuration `whatsapp`, signature
+`X-Hub-Signature-256` verifiee par `App\Support\WhatsApp\MetaSignatureValidator`) ; 
+`App\Actions\Registrations\ConfirmPhoneByWhatsApp` verifie que le code est en attente (table centrale
+`whatsapp_phone_checks`, 8 caracteres, 10 minutes) **et que l'expediteur est le numero saisi**
+(`PhoneNumber::sameAsWhatsAppId()`, ancien format ivoirien a 8 chiffres compris), puis repond a
+l'invite dans la fenetre de 24 heures. La page de verification interroge le serveur toutes les trois
+secondes (`usePoll`) et continue seule. Actif des que `WHATSAPP_BUSINESS_NUMBER`,
+`WHATSAPP_WEBHOOK_VERIFY_TOKEN` et `WHATSAPP_META_APP_SECRET` sont regles
+(`PhoneVerification::viaWhatsApp()`), le SMS sinon ; WhatsApp joint tous les pays, l'exemption des
+numeros etrangers ne vaut que pour le SMS. L'appel recu est efface des qu'il est traite ; les appels en
+echec partent avec `model:prune` apres trente jours.
+
 Un canal de notification `whatsapp` (`App\Notifications\Channels\WhatsAppChannel`), enregistre
 par `Notification::extend()` dans `AppServiceProvider` : point d'extension prevu par Laravel,
 pas un envoi ad hoc depuis les Actions. Chaque notification qui veut ce canal expose une methode

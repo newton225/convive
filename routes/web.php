@@ -7,6 +7,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProductTourController;
 use App\Http\Controllers\ShowcaseController;
 use App\Http\Controllers\Tenants\TenantInvitationController;
+use App\Http\Controllers\WhatsAppWebhookChallengeController;
 use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Middleware\EnsureTwoFactorForProfile;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,13 @@ Route::put('locale', [LocaleController::class, 'update'])->name('locale.update')
 // central, sans session ni organisation : la signature de la requete fait foi (voir
 // `spatie/laravel-stripe-webhooks`), pas un jeton CSRF.
 Route::stripeWebhooks('webhooks/stripe');
+
+// Les messages que les invites envoient au numero WhatsApp de Convive, transmis par Meta : la
+// verification de leur telephone (`PhoneVerification`). Meme principe que Stripe : signature de Meta,
+// `spatie/laravel-webhook-client`. Meta valide d'abord l'adresse par une requete GET.
+Route::get('webhooks/whatsapp', WhatsAppWebhookChallengeController::class)->name('webhooks.whatsapp.challenge');
+// Nom de route impose par le paquet (`webhook-client-whatsapp`) : il en tire la configuration.
+Route::webhooks('webhooks/whatsapp', 'whatsapp');
 
 Route::prefix('{current_tenant}')
     ->middleware(['auth', 'verified', EnsureTenantMembership::class, EnsureTwoFactorForProfile::class])

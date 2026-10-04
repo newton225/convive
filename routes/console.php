@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Schedule;
 use Spatie\Health\Commands\DispatchQueueCheckJobsCommand;
 use Spatie\Health\Commands\RunHealthChecksCommand;
 use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
+use Spatie\WebhookClient\Models\WebhookCall;
 
 Schedule::call(function () {
     TenantInvitation::query()
@@ -350,3 +351,12 @@ Schedule::command('tenants:erase-scheduled --force')
 Schedule::call(function (PurgeDeletedEvents $purge) {
     Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(fn () => $purge->handle()));
 })->daily()->description('Erase events deleted more than thirty days ago');
+
+/*
+ * Efface les appels de webhook (Stripe, WhatsApp) gardes depuis plus de trente jours
+ * (`config/webhook-client.php`). Un message WhatsApp traite est deja efface aussitot ; il ne reste
+ * ici que les appels dont le traitement a echoue, et ceux de Stripe.
+ */
+Schedule::command('model:prune', ['--model' => [WebhookCall::class]])
+    ->daily()
+    ->description('Delete webhook calls older than thirty days');

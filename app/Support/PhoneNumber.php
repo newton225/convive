@@ -111,6 +111,32 @@ class PhoneNumber
     }
 
     /**
+     * Determine whether the sender id WhatsApp gives (`wa_id`, digits without `+`) is this phone.
+     */
+    public static function sameAsWhatsAppId(string $waId, string $phone): bool
+    {
+        $digits = preg_replace('/\D+/', '', $waId) ?? '';
+
+        if ($digits === '') {
+            return false;
+        }
+
+        if (self::same('+'.$digits, $phone)) {
+            return true;
+        }
+
+        // WhatsApp connait encore bien des numeros ivoiriens sous leur forme d'avant le passage a
+        // dix chiffres (2021) : 225 suivi des huit derniers chiffres (vu le 2026-10-03 sur un vrai
+        // envoi, `22589290398` pour le 07 89 29 03 98).
+        $ivorian = self::normalizeIvorian($phone);
+
+        return $ivorian !== null
+            && strlen($digits) === 11
+            && str_starts_with($digits, self::CountryCode)
+            && substr($ivorian, -8) === substr($digits, 3);
+    }
+
+    /**
      * Determine whether two writings designate the same telephone.
      *
      * Les lignes enregistrees avant la normalisation gardent leur ecriture d'origine : on

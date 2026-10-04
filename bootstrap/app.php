@@ -43,7 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // Stripe ne porte pas de jeton CSRF : sa signature est verifiee par le paquet.
-        $middleware->validateCsrfTokens(except: ['webhooks/stripe']);
+        $middleware->validateCsrfTokens(except: ['webhooks/stripe', 'webhooks/whatsapp']);
 
         // AuthenticateSession invalide la session d'un appareil des que le mot de passe a change
         // ailleurs (`Auth::logoutOtherDevices()`, voir `SecurityController::update()`).

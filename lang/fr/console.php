@@ -518,6 +518,7 @@ return [
         'tasks_empty' => 'Aucune tâche relevée : le planificateur n’a encore jamais tourné sur ce serveur.',
         'task_labels' => [
             'delete_expired_tenant_invitations' => 'Suppression des invitations expirées',
+            'delete_webhook_calls_older_than_thirty_days' => 'Suppression des notifications reçues (Stripe, WhatsApp) de plus de trente jours',
             'activate_due_payment_account_changes' => 'Activation des changements de compte de versement',
             'mark_expired_holds_as_such_and_advance_the_waitlist' => 'Expiration des réservations et avancée de la liste d’attente',
             'expire_unanswered_waitlist_invites_and_advance_the_queue' => 'Expiration des invitations de liste d’attente sans réponse',

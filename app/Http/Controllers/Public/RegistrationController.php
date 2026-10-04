@@ -20,6 +20,7 @@ use App\Models\Unit;
 use App\Support\BotCheck;
 use App\Support\LegalDocument;
 use App\Support\OngoingReservation;
+use App\Support\PhoneNumber;
 use App\Support\PlanLimits;
 use App\Support\TicketCard;
 use App\Support\TicketQrCode;
@@ -179,8 +180,11 @@ class RegistrationController extends Controller
         $event = $this->publishedEvent($token);
         $registration = $this->registrationForResumeToken($event, $resume);
 
-        // Deja verifiee ou deja au-dela du brouillon : rien a saisir ici.
-        if ($registration->status !== RegistrationStatus::Draft || $registration->phone_verified_at !== null) {
+        $viaWhatsApp = PhoneVerification::viaWhatsApp();
+
+        // Deja au-dela du brouillon, ou deja verifiee par code SMS : rien a faire ici. Verifiee par
+        // WhatsApp, la page reste : elle continue d'elle-meme vers la reservation.
+        if ($registration->status !== RegistrationStatus::Draft || ($registration->phone_verified_at !== null && ! $viaWhatsApp)) {
             return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
         }
 
@@ -199,7 +203,47 @@ class RegistrationController extends Controller
             // tomberait sur la page n'apprend rien.
             'maskedPhone' => '•• •• •• '.substr((string) preg_replace('/\D+/', '', $registration->phone), -2),
             'codeMinutes' => PhoneVerification::CodeMinutes,
+            'method' => $viaWhatsApp ? 'whatsapp' : 'sms',
+            ...$this->whatsAppVerificationProps($registration, $viaWhatsApp),
         ]);
+    }
+
+    /**
+     * The WhatsApp side of the verification page : le lien pret a envoyer, le code, et si le message
+     * est deja arrive (la page interroge ce drapeau toutes les quelques secondes).
+     *
+     * @return array{whatsappLink: string|null, whatsappCode: string|null, whatsappNumber: string|null, whatsappVerified: bool}
+     */
+    private function whatsAppVerificationProps(Registration $registration, bool $viaWhatsApp): array
+    {
+        $check = $viaWhatsApp ? PhoneVerification::whatsAppCheck($registration) : null;
+
+        return [
+            'whatsappLink' => $check ? PhoneVerification::whatsAppLink($check->code) : null,
+            'whatsappCode' => $check?->code,
+            'whatsappNumber' => $viaWhatsApp ? PhoneNumber::display((string) config('services.whatsapp.inbound.number')) : null,
+            'whatsappVerified' => $viaWhatsApp && $registration->phone_verified_at !== null,
+        ];
+    }
+
+    /**
+     * Continue once the guest's WhatsApp message has verified the phone : les places se retiennent
+     * comme apres un code SMS.
+     */
+    public function completeWhatsApp(string $token, string $resume): RedirectResponse
+    {
+        $event = $this->publishedEvent($token);
+        $registration = $this->registrationForResumeToken($event, $resume);
+
+        if ($registration->status !== RegistrationStatus::Draft) {
+            return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
+        }
+
+        if ($registration->phone_verified_at === null) {
+            return back()->withErrors(['whatsapp' => __('guest.phone_verification.whatsapp_not_received')]);
+        }
+
+        return $this->holdVerified($event, $registration, $token, $resume);
     }
 
     /**
@@ -222,6 +266,14 @@ class RegistrationController extends Controller
             return back()->withErrors(['code' => $result->message()]);
         }
 
+        return $this->holdVerified($event, $registration, $token, $resume);
+    }
+
+    /**
+     * Hold the seats of a registration whose phone was just verified.
+     */
+    private function holdVerified(Event $event, Registration $registration, string $token, string $resume): RedirectResponse
+    {
         // Les regles verifiees au formulaire se rejouent : le code a pu etre saisi longtemps
         // apres, une autre reservation du meme numero a pu etre prise entre-temps.
         if (! $event->acceptsRegistrations() || Registration::phoneHoldsSeats($event, $registration->phone, $registration->id)) {
@@ -255,7 +307,7 @@ class RegistrationController extends Controller
 
         if ($registration->status === RegistrationStatus::Draft && $registration->phone_verified_at === null) {
             Inertia::flash('toast', $verification->send($registration)
-                ? ['type' => 'success', 'message' => __('guest.flash.code_resent')]
+                ? ['type' => 'success', 'message' => __(PhoneVerification::viaWhatsApp() ? 'guest.flash.whatsapp_code_renewed' : 'guest.flash.code_resent')]
                 : ['type' => 'error', 'message' => __('guest.registration.errors.too_many_codes')]);
         }
 
