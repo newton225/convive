@@ -194,7 +194,7 @@ export default function EventForm({
                                 title={t('events.steps.identity')}
                                 description={t('events.sections.identity')}
                             >
-                                <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="grid items-start gap-4 sm:grid-cols-2">
                                     <Field
                                         name="name"
                                         label={t('events.fields.name')}
@@ -255,7 +255,7 @@ export default function EventForm({
                                     </label>
 
                                     {overrideColors ? (
-                                        <div className="grid gap-4 sm:grid-cols-2">
+                                        <div className="grid items-start gap-4 sm:grid-cols-2">
                                             <Field
                                                 name="primary_color"
                                                 type="color"
@@ -319,7 +319,7 @@ export default function EventForm({
                                     errors={errors}
                                 />
 
-                                <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="grid items-start gap-4 sm:grid-cols-2">
                                     <Field
                                         name="price_per_person"
                                         type="number"
@@ -400,7 +400,7 @@ export default function EventForm({
                                 title={t('events.steps.deadlines')}
                                 description={t('events.sections.deadlines')}
                             >
-                                <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="grid items-start gap-4 sm:grid-cols-2">
                                     <Field
                                         name="registration_deadline"
                                         type="datetime-local"

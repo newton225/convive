@@ -55,7 +55,7 @@ export function RefundFields({
         fee < amountPaid;
 
     return (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid items-start gap-3 sm:grid-cols-2">
             <div className="grid content-start gap-2">
                 <Label htmlFor={`${idPrefix}-channel`}>
                     {t('registrations.refund.fields.channel')}

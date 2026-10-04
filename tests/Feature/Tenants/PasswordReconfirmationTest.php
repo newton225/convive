@@ -49,6 +49,32 @@ class PasswordReconfirmationTest extends TestCase
             ->assertRedirect(route('password.confirm'));
     }
 
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function pagesWithSensitiveActions(): array
+    {
+        return [
+            'organisation' => ['tenants.organisation.edit'],
+            'membres' => ['tenants.edit'],
+            'abonnement' => ['tenants.billing.show'],
+            'acces du support' => ['tenants.support-access.show'],
+        ];
+    }
+
+    #[DataProvider('pagesWithSensitiveActions')]
+    public function test_l_ecran_demande_le_mot_de_passe_avant_la_saisie(string $route): void
+    {
+        // Demande a l'envoi seulement, la confirmation ramenait a un ecran vide : tout ce qui
+        // avait ete saisi etait perdu (constate le 2026-10-04).
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->get(route($route, $tenant))
+            ->assertRedirect(route('password.confirm'));
+    }
+
     #[DataProvider('sensitiveRoutes')]
     public function test_le_mot_de_passe_recent_laisse_passer_jusqu_a_la_validation(string $method, string $route): void
     {

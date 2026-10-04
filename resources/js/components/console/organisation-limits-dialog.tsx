@@ -88,7 +88,7 @@ export function OrganisationLimitsDialog({ slug, limits }: Props) {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid items-start gap-4 sm:grid-cols-2">
                         {Quotas.map((quota) => {
                             const planLimit = limits[quota].plan;
 

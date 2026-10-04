@@ -300,7 +300,7 @@ export default function SupportAccess({
                                   ? t('support_access.grant.no_operator')
                                   : t('support_access.grant.none_active')}
                         </p>
-                        <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid items-start gap-4 sm:grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="support-operator">
                                     {t('support_access.grant.operator')}

@@ -1,5 +1,6 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import BrandFileField from '@/components/brand-file-field';
+import { CountryField } from '@/components/country-field';
 import Heading from '@/components/heading';
 import { LabelWithHelp } from '@/components/label-with-help';
 import InputError from '@/components/input-error';
@@ -86,7 +87,7 @@ export default function Organisation({
                         >
                             {({ errors, processing, isDirty }) => (
                                 <>
-                                    <div className="grid gap-4 sm:grid-cols-2">
+                                    <div className="grid items-start gap-4 sm:grid-cols-2">
                                         <Field
                                             name="display_name"
                                             label={t(
@@ -206,14 +207,23 @@ export default function Organisation({
                                             error={errors.city}
                                         />
 
-                                        <Field
-                                            name="country"
-                                            label={t(
-                                                'organisation.fields.country',
-                                            )}
-                                            defaultValue={branding.country}
-                                            error={errors.country}
-                                        />
+                                        <div className="grid gap-2">
+                                            <LabelWithHelp
+                                                htmlFor="country"
+                                                label={t(
+                                                    'organisation.fields.country',
+                                                )}
+                                            />
+                                            <CountryField
+                                                id="country"
+                                                name="country"
+                                                defaultValue={branding.country}
+                                                testId="organisation-country"
+                                            />
+                                            <InputError
+                                                message={errors.country}
+                                            />
+                                        </div>
 
                                         <Field
                                             name="email"
@@ -265,7 +275,7 @@ export default function Organisation({
                         >
                             {({ errors, processing, isDirty }) => (
                                 <>
-                                    <div className="grid gap-4 sm:grid-cols-2">
+                                    <div className="grid items-start gap-4 sm:grid-cols-2">
                                         <Field
                                             name="primary_color"
                                             type="color"
@@ -310,7 +320,7 @@ export default function Organisation({
                             )}
                         />
 
-                        <div className="grid gap-6 sm:grid-cols-2">
+                        <div className="grid items-start gap-6 sm:grid-cols-2">
                             {brandFiles.map((file) => (
                                 <BrandFileField
                                     key={file.value}

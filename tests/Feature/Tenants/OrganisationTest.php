@@ -115,6 +115,26 @@ class OrganisationTest extends TestCase
         $this->assertSame('CI-ABJ-2020-B-12345', $branding->registration_number);
     }
 
+    public function test_le_pays_s_enregistre_sous_son_code_et_un_nom_libre_est_refuse(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.organisation.legal', $tenant), $this->completeLegalIdentity(['country' => 'sn']))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('SN', $tenant->fresh()->branding->country);
+
+        foreach (["Cote d'Ivoire", 'ZZ'] as $country) {
+            $this->actingAs($owner)
+                ->patch(route('tenants.organisation.legal', $tenant), $this->completeLegalIdentity(['country' => $country]))
+                ->assertSessionHasErrors('country');
+        }
+
+        $this->assertSame('SN', $tenant->fresh()->branding->country);
+    }
+
     public function test_sans_la_permission_legale_l_identite_n_est_pas_modifiable(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

@@ -7,6 +7,7 @@ use App\Models\Tenant;
 use App\Models\TenantBranding;
 use finfo;
 use Illuminate\Support\Facades\Storage;
+use Locale;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
@@ -39,7 +40,7 @@ class PdfLetterhead
         $contactLine = collect([
             $branding?->address,
             $branding?->city,
-            $branding?->country,
+            self::countryName($branding?->country),
             $branding?->phone,
         ])->filter()->implode(' · ');
 
@@ -75,6 +76,21 @@ class PdfLetterhead
     public static function mediaDataUri(Media $media, string $conversion = ''): ?string
     {
         return self::dataUri($media, $conversion);
+    }
+
+    /**
+     * Le nom du pays dans la langue du document (`CI` : « Côte d'Ivoire »). Il vient de l'extension
+     * `intl` de PHP ; sans elle, le code reste lisible plutot que de ne rien imprimer.
+     */
+    private static function countryName(?string $code): ?string
+    {
+        if ($code === null || $code === '' || ! class_exists(Locale::class)) {
+            return $code;
+        }
+
+        $name = Locale::getDisplayRegion('-'.$code, app()->getLocale());
+
+        return $name !== '' && $name !== $code ? $name : $code;
     }
 
     private static function dataUri(?Media $media, string $conversion = ''): ?string

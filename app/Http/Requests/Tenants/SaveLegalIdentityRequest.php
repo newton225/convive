@@ -8,6 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use libphonenumber\PhoneNumberUtil;
 
 class SaveLegalIdentityRequest extends FormRequest
 {
@@ -43,10 +44,19 @@ class SaveLegalIdentityRequest extends FormRequest
             'tax_number' => ['nullable', 'string', 'max:40', 'regex:/^[A-Za-z0-9][A-Za-z0-9\- ]*$/'],
             'address' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:120'],
-            'country' => ['nullable', 'string', 'max:2'],
+            // Le code du pays (`CI`), choisi dans une liste : c'est lui qui donne le nom du pays dans
+            // la langue du document.
+            'country' => ['nullable', 'string', Rule::in(PhoneNumberUtil::getInstance()->getSupportedRegions())],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:32', 'regex:/^\+?[0-9 ().-]{8,32}$/'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('country'))) {
+            $this->merge(['country' => strtoupper(trim($this->input('country')))]);
+        }
     }
 
     /**

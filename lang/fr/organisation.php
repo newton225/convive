@@ -44,6 +44,12 @@ return [
         'subdomain' => 'Sous-domaine',
     ],
 
+    'country' => [
+        'placeholder' => 'Choisir un pays',
+        'search' => 'Rechercher un pays',
+        'empty' => 'Aucun pays ne correspond.',
+    ],
+
     'help' => [
         'legal_form' => 'Elle figure sur vos reçus. Elle se choisit dans une liste plutôt que de se saisir, pour que chaque reçu reste conforme.',
         'registration_number' => 'Votre numéro au Registre du commerce et du crédit mobilier. Saisissez-le tel qu’il figure sur vos documents : le format change d’un pays à l’autre. Il apparaît sur les reçus.',

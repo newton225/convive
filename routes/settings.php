@@ -82,7 +82,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('settings/tenants/{tenant}/leave', [TenantController::class, 'leave'])->name('tenants.leave');
 
         Route::middleware(EnsureTwoFactorForProfile::class)->group(function () {
-            Route::get('settings/tenants/{tenant}', [TenantController::class, 'edit'])->name('tenants.edit');
+            // Le mot de passe se redemande a l'ouverture des ecrans dont une action l'exige (membres,
+            // abonnement, acces du support, organisation) : demande seulement a l'envoi, la confirmation
+            // ramenait a l'ecran et la saisie etait perdue (constate le 2026-10-04).
+            Route::get('settings/tenants/{tenant}', [TenantController::class, 'edit'])->middleware(RequirePassword::class)->name('tenants.edit');
             Route::patch('settings/tenants/{tenant}', [TenantController::class, 'update'])->name('tenants.update');
             Route::delete('settings/tenants/{tenant}', [TenantController::class, 'destroy'])->name('tenants.destroy');
 
@@ -92,7 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('settings/tenants/{tenant}/invitations', [TenantInvitationController::class, 'store'])->name('tenants.invitations.store');
             Route::delete('settings/tenants/{tenant}/invitations/{invitation}', [TenantInvitationController::class, 'destroy'])->name('tenants.invitations.destroy');
 
-            Route::get('settings/tenants/{tenant}/organisation', [OrganisationController::class, 'edit'])->name('tenants.organisation.edit');
+            Route::get('settings/tenants/{tenant}/organisation', [OrganisationController::class, 'edit'])->middleware(RequirePassword::class)->name('tenants.organisation.edit');
             Route::patch('settings/tenants/{tenant}/organisation/legal', [OrganisationController::class, 'updateLegalIdentity'])->middleware(RequirePassword::class)->name('tenants.organisation.legal');
             Route::patch('settings/tenants/{tenant}/organisation/brand', [OrganisationController::class, 'updateBrand'])->name('tenants.organisation.branding');
             Route::patch('settings/tenants/{tenant}/organisation/subdomain', [OrganisationController::class, 'updateSubdomain'])->middleware(RequirePassword::class)->name('tenants.organisation.subdomain');
@@ -118,13 +121,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // L'abonnement (README ecran 16), etape 10 : reste hors de `EnsureTenantIsNotSuspended`,
             // une organisation suspendue regularise par cet ecran.
-            Route::get('settings/tenants/{tenant}/billing', [BillingController::class, 'show'])->name('tenants.billing.show');
+            Route::get('settings/tenants/{tenant}/billing', [BillingController::class, 'show'])->middleware(RequirePassword::class)->name('tenants.billing.show');
             Route::post('settings/tenants/{tenant}/billing/checkout/{plan}', [BillingController::class, 'checkout'])->middleware(RequirePassword::class)->name('tenants.billing.checkout');
             Route::post('settings/tenants/{tenant}/billing/payment-method', [BillingController::class, 'paymentMethod'])->middleware(RequirePassword::class)->name('tenants.billing.payment-method');
             Route::post('settings/tenants/{tenant}/billing/cancel', [BillingController::class, 'cancel'])->middleware(RequirePassword::class)->name('tenants.billing.cancel');
 
             // Acces du support (README ecran 25) : reserve au Proprietaire, voir `TenantPolicy`.
-            Route::get('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'show'])->name('tenants.support-access.show');
+            Route::get('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'show'])->middleware(RequirePassword::class)->name('tenants.support-access.show');
             // Ouvrir le contenu de l'organisation a l'editeur engage l'organisation entiere : mot de
             // passe redemande. Revoquer referme, et ne l'exige pas.
             Route::post('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'store'])->middleware(RequirePassword::class)->name('tenants.support-access.store');
