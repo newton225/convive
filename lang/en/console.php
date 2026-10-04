@@ -497,6 +497,11 @@ return [
                 'ok' => 'No failed message.',
                 'failed' => 'Some messages failed for good: see the list below.',
             ],
+            'orphan_databases' => [
+                'label' => 'Orphan organisation databases',
+                'ok' => 'Every database file belongs to an organisation.',
+                'failed' => 'A database file belongs to no organisation: it blocks the creation of the next ones. Check it, then delete it from the databases folder.',
+            ],
             'database' => [
                 'label' => 'Central database',
                 'ok' => 'It responds.',

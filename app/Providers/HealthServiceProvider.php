@@ -6,6 +6,7 @@ use App\Support\Console\MessageJournal;
 use App\Support\Console\SecurityJournal;
 use App\Support\Health\Checks\AuditChainCheck;
 use App\Support\Health\Checks\FailedJobsCheck;
+use App\Support\Health\Checks\OrphanTenantDatabasesCheck;
 use App\Support\Health\Checks\ScheduledTasksCheck;
 use App\Support\Health\ScheduledTaskRecorder;
 use Illuminate\Auth\Events\Lockout;
@@ -46,6 +47,9 @@ class HealthServiceProvider extends ServiceProvider
             QueueCheck::new()->name('queue')->failWhenHealthJobTakesLongerThanMinutes(5),
             FailedJobsCheck::new()->name('failed_jobs'),
             AuditChainCheck::new()->name('audit_chain'),
+            // Un fichier de base sans organisation bloque toute creation suivante (incident du
+            // 2026-10-04).
+            OrphanTenantDatabasesCheck::new()->name('orphan_databases'),
             DatabaseCheck::new()->name('database')->connectionName('central'),
             RedisCheck::new()->name('redis')->if(fn () => in_array('redis', [config('queue.default'), config('cache.default')], true)),
             // Le controle lit la commande `df`, absente d'un poste Windows de developpement.

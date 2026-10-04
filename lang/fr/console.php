@@ -497,6 +497,11 @@ return [
                 'ok' => 'Aucun envoi en échec.',
                 'failed' => 'Des envois ont échoué pour de bon : voir la liste ci-dessous.',
             ],
+            'orphan_databases' => [
+                'label' => 'Bases d’organisation orphelines',
+                'ok' => 'Chaque fichier de base appartient à une organisation.',
+                'failed' => 'Un fichier de base n’appartient à aucune organisation : il bloque la création des suivantes. Vérifiez-le, puis supprimez-le du dossier des bases.',
+            ],
             'database' => [
                 'label' => 'Base centrale',
                 'ok' => 'Elle répond.',
