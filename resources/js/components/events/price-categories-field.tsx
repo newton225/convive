@@ -14,6 +14,15 @@ export type EventPriceCategoryInput = {
     quota: number | null;
 };
 
+// La saisie reste une chaine tant qu'elle est en cours : la convertir a chaque frappe
+// transformait un champ vide en 0, qui restait affiche devant le chiffre suivant (« 0100000 »).
+type Row = {
+    id?: number;
+    name: string;
+    price: string;
+    quota: string;
+};
+
 type Props = {
     defaultCategories: EventPriceCategoryInput[];
     defaultPrice: number;
@@ -26,8 +35,8 @@ export function PriceCategoriesField({
     errors,
 }: Props) {
     const { t, locale } = useTranslation();
-    const [categories, setCategories] = useState<EventPriceCategoryInput[]>(
-        defaultCategories.length > 0
+    const [categories, setCategories] = useState<Row[]>(() =>
+        (defaultCategories.length > 0
             ? defaultCategories
             : [
                   {
@@ -35,13 +44,16 @@ export function PriceCategoriesField({
                       price: defaultPrice,
                       quota: null,
                   },
-              ],
+              ]
+        ).map((category) => ({
+            id: category.id,
+            name: category.name,
+            price: String(category.price),
+            quota: category.quota === null ? '' : String(category.quota),
+        })),
     );
 
-    const update = (
-        index: number,
-        values: Partial<EventPriceCategoryInput>,
-    ) => {
+    const update = (index: number, values: Partial<Row>) => {
         setCategories((current) =>
             current.map((category, categoryIndex) =>
                 categoryIndex === index ? { ...category, ...values } : category,
@@ -49,7 +61,9 @@ export function PriceCategoriesField({
         );
     };
 
-    const minimumPrice = Math.min(...categories.map(({ price }) => price));
+    const minimumPrice = Math.min(
+        ...categories.map(({ price }) => Math.max(0, Number(price) || 0)),
+    );
 
     return (
         <div className="space-y-4" data-test="price-categories-field">
@@ -110,7 +124,10 @@ export function PriceCategoriesField({
                             value={category.price}
                             onChange={(event) =>
                                 update(index, {
-                                    price: Number(event.target.value),
+                                    price: event.target.value.replace(
+                                        /^0+(?=\d)/,
+                                        '',
+                                    ),
                                 })
                             }
                             required
@@ -129,13 +146,9 @@ export function PriceCategoriesField({
                             name={`price_categories[${index}][quota]`}
                             type="number"
                             min={1}
-                            value={category.quota ?? ''}
+                            value={category.quota}
                             onChange={(event) =>
-                                update(index, {
-                                    quota: event.target.value
-                                        ? Number(event.target.value)
-                                        : null,
-                                })
+                                update(index, { quota: event.target.value })
                             }
                             data-test="price-category-quota"
                         />
@@ -147,6 +160,7 @@ export function PriceCategoriesField({
                         type="button"
                         variant="ghost"
                         size="icon"
+                        className="mt-6 size-11"
                         aria-label={t('events.price_categories.remove', {
                             name: category.name,
                         })}
@@ -173,7 +187,7 @@ export function PriceCategoriesField({
                 onClick={() =>
                     setCategories((current) => [
                         ...current,
-                        { name: '', price: 0, quota: null },
+                        { name: '', price: '0', quota: '' },
                     ])
                 }
             >
