@@ -51,6 +51,10 @@ vi.mock('@/hooks/use-translation', () => ({
     useTranslation: () => ({ t: (key: string) => key, locale: 'fr' }),
 }));
 
+// Le projet designe ses elements par `data-test`, pas `data-testid` (CLAUDE.md).
+const dialog = () =>
+    document.querySelector('[data-test="two-factor-reconfirm-dialog"]');
+
 const emit = (name: string, detail: Parameters<Listener>[0]['detail']) =>
     act(() => {
         (listeners[name] ?? []).forEach((listener) => listener({ detail }));
@@ -77,20 +81,16 @@ describe('TwoFactorReconfirmDialog', () => {
         render(<TwoFactorReconfirmDialog />);
 
         submitAndRefuse(action);
-        expect(
-            screen.queryByTestId('two-factor-reconfirm-dialog'),
-        ).not.toBeNull();
+        expect(dialog()).not.toBeNull();
 
         fireEvent.click(
             screen.getByText('account.two_factor_reconfirm.cancel'),
         );
-        expect(screen.queryByTestId('two-factor-reconfirm-dialog')).toBeNull();
+        expect(dialog()).toBeNull();
 
         // Bogue du 2026-10-07 : le second refus, porteur de la meme erreur, ne rouvrait rien.
         submitAndRefuse(action);
-        expect(
-            screen.queryByTestId('two-factor-reconfirm-dialog'),
-        ).not.toBeNull();
+        expect(dialog()).not.toBeNull();
     });
 
     it('rejoue l envoi refuse des que le code est accepte', () => {
@@ -102,11 +102,7 @@ describe('TwoFactorReconfirmDialog', () => {
         render(<TwoFactorReconfirmDialog />);
 
         submitAndRefuse(action);
-        fireEvent.submit(
-            screen
-                .getByTestId('two-factor-reconfirm-dialog')
-                .querySelector('form')!,
-        );
+        fireEvent.submit(dialog()!.querySelector('form')!);
 
         expect(clicked).toHaveBeenCalledTimes(1);
         expect(toastInfo).not.toHaveBeenCalled();
@@ -120,11 +116,7 @@ describe('TwoFactorReconfirmDialog', () => {
 
         submitAndRefuse(action);
         action.remove();
-        fireEvent.submit(
-            screen
-                .getByTestId('two-factor-reconfirm-dialog')
-                .querySelector('form')!,
-        );
+        fireEvent.submit(dialog()!.querySelector('form')!);
 
         expect(toastInfo).toHaveBeenCalledWith(
             'account.two_factor_reconfirm.confirmed',
