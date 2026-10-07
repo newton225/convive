@@ -5,6 +5,7 @@ import { CopyButton } from '@/components/copy-button';
 import { AnnouncementButton } from '@/components/events/announcement-button';
 import { TemplatePicker } from '@/components/events/template-picker';
 import Heading from '@/components/heading';
+import { CompanionLimitField } from '@/components/events/companion-limit-field';
 import { TableGroupsField } from '@/components/events/table-groups-field';
 import { HelpTip } from '@/components/help-tip';
 import { LabelWithHelp } from '@/components/label-with-help';
@@ -428,20 +429,13 @@ export default function EventForm({
                                                 errors={errors}
                                             />
                                         </div>
-                                        <Field
-                                            name="companion_limit"
-                                            type="number"
-                                            label={t(
-                                                'events.fields.companion_limit',
-                                            )}
-                                            defaultValue={String(
+                                        <CompanionLimitField
+                                            defaultValue={
                                                 prefill?.companionLimit ??
-                                                    defaults.companionLimit,
-                                            )}
+                                                defaults.companionLimit
+                                            }
+                                            max={defaults.companionLimit}
                                             error={errors.companion_limit}
-                                            help={t(
-                                                'events.help.companion_limit',
-                                            )}
                                         />
                                     </div>
 

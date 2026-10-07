@@ -171,6 +171,10 @@ return [
         'frozen_subdomain' => 'Once the link is handed out, the subdomain of the organisation can no longer change.',
     ],
 
+    'companion_limit' => [
+        'value' => '{0} No companion|{1} 1 companion|[2,*] :count companions',
+    ],
+
     'hold_duration' => [
         'value' => '{1} 1 minute|[2,*] :count minutes',
         'bounds' => 'Between :min and :max minutes.',

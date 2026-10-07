@@ -171,6 +171,10 @@ return [
         'frozen_subdomain' => "Une fois le lien distribué, le sous-domaine de l'organisation ne peut plus changer.",
     ],
 
+    'companion_limit' => [
+        'value' => '{0} Aucun accompagnateur|{1} 1 accompagnateur|[2,*] :count accompagnateurs',
+    ],
+
     'hold_duration' => [
         'value' => '{1} 1 minute|[2,*] :count minutes',
         'bounds' => 'Entre :min et :max minutes.',
