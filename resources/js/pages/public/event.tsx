@@ -163,10 +163,12 @@ export default function PublicEvent({ event, tenant, token }: Props) {
                                         >
                                             <span>{category.name}</span>
                                             <span className="text-right font-medium tabular-nums">
-                                                {formatAmount(
-                                                    category.price,
-                                                    locale,
-                                                )}
+                                                {category.price === 0
+                                                    ? t('guest.event.free')
+                                                    : formatAmount(
+                                                          category.price,
+                                                          locale,
+                                                      )}
                                                 {category.remainingQuota ===
                                                 0 ? (
                                                     <span className="text-muted-foreground ml-2 font-normal">

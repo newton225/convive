@@ -84,6 +84,8 @@ return [
         'add' => 'Ajouter un tarif',
         'remove' => 'Retirer le tarif :name',
         'minimum' => 'Le tarif affiché sur le lien public sera « à partir de :price ».',
+        'free' => 'Gratuit',
+        'free_hint' => 'Un prix à 0 équivaut à gratuit.',
         'capacity_hint' => 'La salle compte :count places : un quota ne peut pas la dépasser.',
         'quotas_exceed' => 'Les quotas additionnés (:total) dépassent la salle (:capacity places) : la salle se remplira avant que chaque tarif atteigne son quota.',
     ],

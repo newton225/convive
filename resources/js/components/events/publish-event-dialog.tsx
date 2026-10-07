@@ -76,10 +76,12 @@ export function PublishEventDialog({
                     ? event.priceCategories
                           .map(
                               (category) =>
-                                  `${category.name}: ${formatAmount(category.price, locale)}`,
+                                  `${category.name}: ${category.price === 0 ? t('events.price_categories.free') : formatAmount(category.price, locale)}`,
                           )
                           .join(' · ')
-                    : formatAmount(event.pricePerPerson, locale),
+                    : event.pricePerPerson === 0
+                      ? t('events.price_categories.free')
+                      : formatAmount(event.pricePerPerson, locale),
         },
         {
             label: t('events.confirm_publish.capacity'),

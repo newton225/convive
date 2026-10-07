@@ -84,6 +84,8 @@ return [
         'add' => 'Add a price',
         'remove' => 'Remove the :name price',
         'minimum' => 'The public event page will show “from :price”.',
+        'free' => 'Free',
+        'free_hint' => 'A price of 0 means free.',
         'capacity_hint' => 'The room has :count seats: a quota cannot exceed it.',
         'quotas_exceed' => 'The quotas add up to :total, more than the room (:capacity seats): the room will fill up before every price reaches its quota.',
     ],

@@ -134,7 +134,9 @@ export function PriceCategorySelect({
                             disabled={category.remainingQuota === 0}
                         >
                             {category.name} ·{' '}
-                            {formatAmount(category.price, locale)}
+                            {category.price === 0
+                                ? t('guest.event.free')
+                                : formatAmount(category.price, locale)}
                             {category.remainingQuota === 0
                                 ? ` · ${t('guest.event.category_sold_out')}`
                                 : ''}

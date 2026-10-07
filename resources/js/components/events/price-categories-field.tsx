@@ -141,6 +141,11 @@ export function PriceCategoriesField({
                             required
                             data-test="price-category-price"
                         />
+                        {Number(category.price) === 0 ? (
+                            <p className="text-muted-foreground text-xs">
+                                {t('events.price_categories.free_hint')}
+                            </p>
+                        ) : null}
                         <InputError
                             message={errors[`price_categories.${index}.price`]}
                         />
@@ -219,7 +224,10 @@ export function PriceCategoriesField({
             ) : null}
             <p className="text-muted-foreground text-sm">
                 {t('events.price_categories.minimum', {
-                    price: formatAmount(minimumPrice, locale),
+                    price:
+                        minimumPrice === 0
+                            ? t('events.price_categories.free')
+                            : formatAmount(minimumPrice, locale),
                 })}
             </p>
         </div>
