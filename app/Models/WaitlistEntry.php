@@ -25,8 +25,9 @@ use Illuminate\Support\Str;
  * @property string $name
  * @property string $phone
  * @property int $unit_id
+ * @property int|null $price_category_id
  * @property int $party_size
- * @property array<int, array{name: string, unit_id: int}> $companions
+ * @property array<int, array{name: string, unit_id: int, price_category_id?: int|null}> $companions
  * @property string $resume_token_hash
  * @property Carbon|null $invited_at
  * @property Carbon|null $expires_at
@@ -35,7 +36,7 @@ use Illuminate\Support\Str;
  * @property-read Event $event
  * @property-read Unit $unit
  */
-#[Fillable(['event_id', 'status', 'name', 'phone', 'unit_id', 'party_size', 'companions', 'resume_token_hash', 'invited_at', 'expires_at'])]
+#[Fillable(['event_id', 'status', 'name', 'phone', 'unit_id', 'price_category_id', 'party_size', 'companions', 'resume_token_hash', 'invited_at', 'expires_at'])]
 class WaitlistEntry extends Model
 {
     /** @use HasFactory<WaitlistEntryFactory> */

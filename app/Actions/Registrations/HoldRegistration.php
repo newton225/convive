@@ -6,6 +6,7 @@ use App\Actions\Notifications\SendAlert;
 use App\Enums\NotificationType;
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
+use App\Models\EventPriceCategory;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Support\PlanLimits;
@@ -60,7 +61,7 @@ class HoldRegistration
 
         return $lock->block(5, function () use ($event, $registration, $lapsedBefore) {
             for ($attempt = 0; $attempt < self::MaxAttempts; $attempt++) {
-                if ($registration->party_size > $event->remainingSeats()) {
+                if ($registration->party_size > $event->remainingSeats() || $this->exceedsCategoryQuota($registration)) {
                     return false;
                 }
 
@@ -68,11 +69,13 @@ class HoldRegistration
                     $held = DB::transaction(function () use ($event, $registration, $lapsedBefore) {
                         $nextSequence = 1 + (int) Registration::where('event_id', $event->id)->max('hold_sequence');
 
-                        // Evenement gratuit (decision du 2026-10-07) : rien a verser, la place
-                        // est confirmee sous le meme verrou, sans decompte ni preuve.
+                        // Rien a verser (decision du 2026-10-07) : la place est confirmee sous le
+                        // meme verrou, sans decompte ni preuve.
+                        $free = $registration->isFreeOfCharge();
+
                         $registration->update([
-                            'status' => $event->isFree() ? RegistrationStatus::Confirmed : RegistrationStatus::Held,
-                            'held_until' => $event->isFree() ? null : now()->addMinutes($event->hold_duration_minutes),
+                            'status' => $free ? RegistrationStatus::Confirmed : RegistrationStatus::Held,
+                            'held_until' => $free ? null : now()->addMinutes($event->hold_duration_minutes),
                             'hold_sequence' => $nextSequence,
                             'lapsed_holds_count' => $registration->lapsed_holds_count + ($lapsedBefore ? 1 : 0),
                         ]);
@@ -91,7 +94,7 @@ class HoldRegistration
                 $this->alertIfSeatsExhausted($event);
                 $this->alertIfSeatsLow($event);
 
-                if ($event->isFree()) {
+                if ($registration->isFreeOfCharge()) {
                     $this->confirmFree($registration);
                 }
 
@@ -100,6 +103,42 @@ class HoldRegistration
 
             return false;
         });
+    }
+
+    /**
+     * Determine whether the people of this registration would overflow the quota of a price
+     * category (decision du 2026-10-07). Verifie sous le meme verrou que la capacite : deux
+     * inscriptions simultanees ne prennent pas la derniere place VIP a deux.
+     */
+    private function exceedsCategoryQuota(Registration $registration): bool
+    {
+        $wanted = $registration->companions()
+            ->pluck('price_category_id')
+            ->push($registration->price_category_id)
+            ->filter()
+            ->countBy();
+
+        foreach ($wanted as $categoryId => $count) {
+            $category = EventPriceCategory::query()
+                ->where('event_id', $registration->event_id)
+                ->whereKey($categoryId)
+                ->first();
+
+            if ($category === null) {
+                return true;
+            }
+
+            $remaining = $category?->remaining();
+
+            // Une reservation deja tenue par cette inscription compte deja dans `seatsTaken()`.
+            $alreadyCounted = $registration->status === RegistrationStatus::Held && ! $registration->holdHasExpired();
+
+            if ($remaining !== null && ! $alreadyCounted && $count > $remaining) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

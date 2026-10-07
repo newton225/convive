@@ -49,7 +49,7 @@ class FreeEventRegistrationTest extends TestCase
             'event_id' => $event->id,
             'status' => RegistrationStatus::Draft,
             'party_size' => $partySize,
-            'amount_due' => 0,
+            'amount_due' => $event->price_per_person * $partySize,
         ]));
     }
 

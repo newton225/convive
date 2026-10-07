@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/select';
 import { useTranslation } from '@/hooks/use-translation';
 import { Duration, EaseOut } from '@/lib/motion';
-import type { PublicUnitOption } from '@/types';
+import { formatAmount } from '@/lib/format-currency';
+import type { PublicPriceCategory, PublicUnitOption } from '@/types';
 
 /**
  * Champs partages entre le formulaire d'inscription (README ecran 4) et celui de la liste
@@ -84,8 +85,72 @@ export function UnitSelect({
     );
 }
 
+export function PriceCategorySelect({
+    id,
+    name,
+    categories,
+    value,
+    onValueChange,
+    error,
+    testId,
+}: {
+    id: string;
+    name: string;
+    categories: PublicPriceCategory[];
+    value: number | undefined;
+    onValueChange: (categoryId: number) => void;
+    error?: string;
+    testId: string;
+}) {
+    const { t, locale } = useTranslation();
+
+    return (
+        <Field
+            id={id}
+            required
+            label={t('guest.registration.fields.price_category')}
+            error={error}
+        >
+            <Select
+                name={name}
+                value={value === undefined ? undefined : String(value)}
+                onValueChange={(categoryId) =>
+                    onValueChange(Number(categoryId))
+                }
+            >
+                <SelectTrigger
+                    id={id}
+                    className="w-full"
+                    data-test={testId}
+                    aria-invalid={Boolean(error)}
+                >
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                    {categories.map((category) => (
+                        <SelectItem
+                            key={category.id}
+                            value={String(category.id)}
+                            disabled={category.remainingQuota === 0}
+                        >
+                            {category.name} ·{' '}
+                            {formatAmount(category.price, locale)}
+                            {category.remainingQuota === 0
+                                ? ` · ${t('guest.event.category_sold_out')}`
+                                : ''}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </Field>
+    );
+}
+
 export function CompanionFields({
     units,
+    priceCategories,
+    priceCategoryIds,
+    onPriceCategoryChange,
     companionLimit,
     companionIds,
     onAdd,
@@ -93,6 +158,9 @@ export function CompanionFields({
     errors,
 }: {
     units: PublicUnitOption[];
+    priceCategories?: PublicPriceCategory[];
+    priceCategoryIds?: Record<number, number | undefined>;
+    onPriceCategoryChange?: (id: number, categoryId: number) => void;
     companionLimit: number;
     companionIds: number[];
     onAdd: () => void;
@@ -203,6 +271,25 @@ export function CompanionFields({
                         <InputError
                             message={errors[`companions.${index}.unit_id`]}
                         />
+                        {priceCategories &&
+                        priceCategoryIds &&
+                        onPriceCategoryChange ? (
+                            <PriceCategorySelect
+                                id={`companion-price-category-${id}`}
+                                name={`companions[${index}][price_category_id]`}
+                                categories={priceCategories}
+                                value={priceCategoryIds[id]}
+                                onValueChange={(categoryId) =>
+                                    onPriceCategoryChange(id, categoryId)
+                                }
+                                error={
+                                    errors[
+                                        `companions.${index}.price_category_id`
+                                    ]
+                                }
+                                testId="companion-price-category"
+                            />
+                        ) : null}
                     </motion.div>
                 ))}
 

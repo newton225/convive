@@ -145,6 +145,71 @@ class WaitlistTest extends TestCase
         $this->assertGreaterThanOrEqual(32, strlen($segment));
     }
 
+    public function test_la_liste_d_attente_conserve_les_tarifs_choisis_jusqu_a_la_reservation(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant, ['tables' => [2, 1]]);
+        $unitId = $tenant->asCurrent(fn () => Unit::where('name', 'QODESH')->value('id'));
+
+        $tenant->asCurrent(function () use ($event) {
+            Registration::factory()->confirmed()->create([
+                'event_id' => $event->id,
+                'party_size' => 2,
+            ]);
+            $event->priceCategories()->delete();
+            $event->priceCategories()->createMany([
+                ['name' => 'Standard', 'price' => 15000, 'position' => 0],
+                ['name' => 'VIP', 'price' => 30000, 'position' => 1],
+            ]);
+        });
+
+        $categories = $tenant->asCurrent(fn () => $event->priceCategories()->get()->keyBy('name'));
+        $payload = [
+            ...$this->validPayload($tenant),
+            'price_category_id' => $categories['Standard']->id,
+            'companions' => [
+                [
+                    'name' => 'Kofi Diallo',
+                    'unit_id' => $unitId,
+                    'price_category_id' => $categories['VIP']->id,
+                ],
+            ],
+        ];
+
+        $response = $this->post(
+            $this->urlFor($tenant->subdomain, $event->public_token, '/waitlist'),
+            $payload,
+        );
+        $resume = (string) str($response->headers->get('Location'))->after('/waitlist/')->before('?');
+        $response->assertRedirect();
+
+        $entry = $tenant->asCurrent(fn () => WaitlistEntry::firstOrFail());
+        $this->assertSame($categories['Standard']->id, $entry->price_category_id);
+        $this->assertSame($categories['VIP']->id, $entry->companions[0]['price_category_id']);
+
+        $tenant->asCurrent(function () use ($entry) {
+            Registration::where('party_size', 2)->delete();
+            $entry->update([
+                'status' => WaitlistStatus::Invited,
+                'invited_at' => now(),
+                'expires_at' => now()->addHours(1),
+            ]);
+        });
+
+        $this->post($this->urlFor($tenant->subdomain, $event->public_token, "/waitlist/{$resume}/finalize"))
+            ->assertRedirect();
+
+        $tenant->asCurrent(function () use ($categories, $event) {
+            $registration = Registration::with('companions')->where('event_id', $event->id)->firstOrFail();
+            $this->assertSame($categories['Standard']->id, $registration->price_category_id);
+            $this->assertSame($categories['VIP']->id, $registration->companions->first()->price_category_id);
+            $this->assertSame(45000, $registration->amount_due);
+            $this->assertSame(RegistrationStatus::Held, $registration->status);
+            $this->assertSame(WaitlistStatus::Converted, WaitlistEntry::firstOrFail()->status);
+        });
+    }
+
     public function test_la_position_reflete_l_ordre_d_arrivee(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

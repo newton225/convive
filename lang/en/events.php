@@ -42,6 +42,10 @@ return [
         'table_count' => 'Number of tables',
         'seats_per_table' => 'Seats per table',
         'price_per_person' => 'Price per person (CFA francs)',
+        'price_categories' => 'Available prices',
+        'price_category_name' => 'Price name',
+        'price_category_price' => 'Price per person (CFA francs)',
+        'price_category_quota' => 'Limit seats to',
         'companion_limit' => 'Companion limit',
         'registration_deadline' => 'Registration deadline',
         'purge_at' => 'Purge of unfinished registrations',
@@ -66,12 +70,20 @@ return [
         'secondary_color' => 'A quieter supporting colour: the action button in emails sent to guests, and the glow of the banner when the event has no visual.',
         'table_groups' => 'Describe the room in groups of tables of the same size, for example 3 tables of 12 then 20 tables of 8. The event capacity is the sum of the seats of every table, and a given table can then be adjusted in the seating plan. A guest and their companions always sit at the same table.',
         'price_per_person' => 'Amount in CFA francs, with no decimals; 0 for a free event. Each companion pays this price too: the guest pays the price times the number of people registered.',
+        'price_categories' => 'Add the available prices. Each person chooses one; the seat quota is optional and counts people in that category.',
         'companion_limit' => 'Maximum number of people a guest can register with them (10 at most). Each one takes a seat and gets their own ticket.',
         'payment_accounts' => 'The accounts your guests pay into. You create them under Organisation, Payment accounts. A new or changed account only shows after a 24-hour security delay.',
         'registration_deadline' => 'After this date, the public link no longer accepts registrations. Registrations already made carry on as usual.',
         'purge_at' => 'On this date, unfinished registrations (no proof, expired, or with a rejected proof) are deleted and their seats released. Approved registrations are never touched.',
         'invitations_send_at' => 'When invitation cards are sent, by WhatsApp and email, to every approved registration. A registration approved after this date gets its card right away.',
         'hold_duration_minutes' => 'Time the guest has to upload their payment proof. Their seats are held meanwhile, then go back to the pool. 10 minutes by default.',
+    ],
+
+    'price_categories' => [
+        'default_name' => 'Standard price',
+        'add' => 'Add a price',
+        'remove' => 'Remove the :name price',
+        'minimum' => 'The public event page will show “from :price”.',
     ],
 
     'visual' => [
@@ -203,6 +215,10 @@ return [
         'visual' => 'a visual',
     ],
     'errors' => [
+        'price_category_unknown' => 'This price does not belong to this event.',
+        'price_category_duplicate' => 'Each price must have a different name.',
+        'price_category_quota_below_taken' => 'The quota cannot be lower than the :count seats already taken in this price category.',
+        'price_category_in_use' => 'A price already chosen by guests or waitlisted people cannot be removed.',
         'venue_map_url' => 'Paste a Google Maps, Apple Maps, OpenStreetMap or Waze link (https), or coordinates such as "5.3364, -4.0267".',
         'deadline_after_event' => 'The registration deadline cannot be later than the event itself.',
         'unknown_payment_account' => 'One of the selected payment accounts does not belong to this organisation.',

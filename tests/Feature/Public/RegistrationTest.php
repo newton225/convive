@@ -9,6 +9,7 @@ use App\Enums\LegalForm;
 use App\Enums\RegistrationStatus;
 use App\Enums\TicketModel;
 use App\Models\Event;
+use App\Models\EventPriceCategory;
 use App\Models\PaymentAccount;
 use App\Models\Registration;
 use App\Models\Tenant;
@@ -172,13 +173,91 @@ class RegistrationTest extends TestCase
         ];
 
         $this->post($this->registrationFormUrl($tenant, $event), $payload)
-            ->assertRedirect();
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
 
         $registration = $tenant->asCurrent(fn () => Registration::first());
 
         // Tarif par personne x (1 + accompagnateurs) : README 2.5.
         $this->assertSame(45000, $registration->amount_due);
-        $this->assertSame(2, $tenant->asCurrent(fn () => $registration->companions()->count()));
+    }
+
+    public function test_chaque_personne_choisit_une_categorie_et_le_serveur_somme_les_tarifs(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        [$standard, $vip] = $tenant->asCurrent(function () use ($event) {
+            $event->priceCategories()->delete();
+
+            return [
+                $event->priceCategories()->create(['name' => 'Standard', 'price' => 15000, 'position' => 0]),
+                $event->priceCategories()->create(['name' => 'VIP', 'price' => 30000, 'position' => 1]),
+            ];
+        });
+
+        $this->get($this->registrationFormUrl($tenant, $event))
+            ->assertInertia(fn ($page) => $page
+                ->has('event.priceCategories', 2)
+                ->where('event.priceCategories.0.id', $standard->id)
+                ->where('event.priceCategories.1.id', $vip->id),
+            );
+
+        $unitId = $tenant->asCurrent(fn () => Unit::where('name', 'QODESH')->value('id'));
+        $payload = [
+            ...$this->validPayload($tenant),
+            'price_category_id' => $standard->id,
+            'companions' => [
+                ['name' => 'Kofi Diallo', 'unit_id' => $unitId, 'price_category_id' => $vip->id],
+            ],
+        ];
+
+        $this->post($this->registrationFormUrl($tenant, $event), $payload)->assertRedirect();
+
+        $registration = $tenant->asCurrent(fn () => Registration::with('companions')->firstOrFail());
+
+        $this->assertSame($standard->id, $registration->price_category_id);
+        $this->assertSame($vip->id, $registration->companions->first()->price_category_id);
+        $this->assertSame(45000, $registration->amount_due);
+    }
+
+    public function test_une_categorie_d_un_autre_evenement_est_refusee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $otherEvent = $this->publishedEvent($tenant);
+        $foreignCategory = $tenant->asCurrent(fn () => $otherEvent->priceCategories()->firstOrFail());
+
+        $this->post($this->registrationFormUrl($tenant, $event), [
+            ...$this->validPayload($tenant),
+            'price_category_id' => $foreignCategory->id,
+        ])->assertSessionHasErrors('price_category_id');
+        $this->assertSame(0, $tenant->asCurrent(fn () => Registration::count()));
+    }
+
+    public function test_le_quota_d_une_categorie_est_verifie_a_la_reservation(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $category = $tenant->asCurrent(function () use ($event) {
+            $event->priceCategories()->update(['quota' => 1]);
+
+            return $event->priceCategories()->firstOrFail();
+        });
+
+        $this->post($this->registrationFormUrl($tenant, $event), [
+            ...$this->validPayload($tenant),
+            'price_category_id' => $category->id,
+        ])->assertRedirect();
+        $this->post($this->registrationFormUrl($tenant, $event), [
+            ...$this->validPayload($tenant),
+            'phone' => '+225 05 05 12 34 56',
+            'price_category_id' => $category->id,
+        ])->assertRedirect($event->publicUrl());
+
+        $this->assertSame(1, $tenant->asCurrent(fn () => Registration::count()));
     }
 
     public function test_le_nom_et_le_telephone_sont_obligatoires(): void

@@ -28,10 +28,11 @@ class SaveEvent
      * @param  array<int, int>  $paymentAccountIds
      * @param  array<int, int>|null  $tablePlan  capacite de chaque table par numero, `null` pour
      *                                           laisser le plan de salle tel quel
+     * @param  array<int, array{id?: int|null, name: string, price: int, quota: int|null}>|null  $priceCategories
      */
-    public function handle(?Event $event, array $attributes, array $paymentAccountIds, ?array $tablePlan = null): Event
+    public function handle(?Event $event, array $attributes, array $paymentAccountIds, ?array $tablePlan = null, ?array $priceCategories = null): Event
     {
-        return DB::transaction(function () use ($event, $attributes, $paymentAccountIds, $tablePlan) {
+        return DB::transaction(function () use ($event, $attributes, $paymentAccountIds, $tablePlan, $priceCategories) {
             $creating = $event === null;
 
             $event ??= new Event;
@@ -43,6 +44,10 @@ class SaveEvent
 
             $event->paymentAccounts()->sync($paymentAccountIds);
             $event->load('paymentAccounts');
+
+            if ($priceCategories !== null) {
+                $this->syncPriceCategories($event, $priceCategories);
+            }
 
             // Les tables existent des l'enregistrement : c'est leur capacite, table par table, qui
             // fait celle de l'evenement (decision du 2026-09-29). Les conflits avec des invites
@@ -69,6 +74,38 @@ class SaveEvent
 
             return $event;
         });
+    }
+
+    /**
+     * Persist ordered price categories and keep the legacy amount equal to their minimum.
+     *
+     * @param  array<int, array{id?: int|null, name: string, price: int, quota: int|null}>  $categories
+     */
+    private function syncPriceCategories(Event $event, array $categories): void
+    {
+        $existing = $event->priceCategories()->get()->keyBy('id');
+        $keptIds = [];
+
+        foreach ($categories as $position => $attributes) {
+            $category = isset($attributes['id'])
+                ? $existing->get((int) $attributes['id'])
+                : null;
+
+            $category ??= $event->priceCategories()->make();
+            $category->fill([
+                'name' => $attributes['name'],
+                'price' => $attributes['price'],
+                'quota' => $attributes['quota'] ?? null,
+                'position' => $position,
+            ]);
+            $category->save();
+            $keptIds[] = $category->id;
+        }
+
+        $event->priceCategories()->whereNotIn('id', $keptIds)->delete();
+        $event->forceFill([
+            'price_per_person' => min(array_column($categories, 'price')),
+        ])->save();
     }
 
     /**
@@ -238,6 +275,13 @@ class SaveEvent
                     'capacity' => $table->capacity,
                     'reserved_unit_id' => $table->reserved_unit_id,
                 ]));
+
+            $event->priceCategories()->get()->each(fn ($category) => $copy->priceCategories()->create([
+                'name' => $category->name,
+                'price' => $category->price,
+                'quota' => $category->quota,
+                'position' => $category->position,
+            ]));
 
             activity()
                 ->performedOn($copy)
@@ -442,6 +486,12 @@ class SaveEvent
             'tables' => $event->seatingTables()->count(),
             'capacity' => $event->capacity(),
             'price_per_person' => $event->price_per_person,
+            'price_categories' => $event->priceCategories()->get()->map(fn ($category) => [
+                'name' => $category->name,
+                'price' => $category->price,
+                'quota' => $category->quota,
+                'position' => $category->position,
+            ])->all(),
             'companion_limit' => $event->companion_limit,
             'hold_duration_minutes' => $event->hold_duration_minutes,
             'payment_accounts' => $event->paymentAccounts->pluck('id')->all(),

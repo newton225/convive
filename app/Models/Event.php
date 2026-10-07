@@ -259,6 +259,17 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Get the price categories of the event, in the order the organiser set (decision du
+     * 2026-10-07).
+     *
+     * @return HasMany<EventPriceCategory, $this>
+     */
+    public function priceCategories(): HasMany
+    {
+        return $this->hasMany(EventPriceCategory::class)->orderBy('position')->orderBy('id');
+    }
+
+    /**
      * Get the registrations made for this event.
      *
      * @return HasMany<Registration, $this>
@@ -494,12 +505,17 @@ class Event extends Model implements HasMedia
     }
 
     /**
-     * Determine whether the event is free : a price of 0 (decision du 2026-10-07). Une inscription
-     * y est confirmee a la reservation, sans preuve ni decompte (`HoldRegistration`).
+     * Determine whether the event is free : every price category at 0 (decision du 2026-10-07).
+     * Aucun compte de versement n'est alors exige pour publier. Sans categorie (cas d'avant leur
+     * creation), le tarif unique de l'evenement decide.
      */
     public function isFree(): bool
     {
-        return (int) $this->price_per_person === 0;
+        if (! $this->priceCategories()->exists()) {
+            return (int) $this->price_per_person === 0;
+        }
+
+        return ! $this->priceCategories()->where('price', '>', 0)->exists();
     }
 
     /**

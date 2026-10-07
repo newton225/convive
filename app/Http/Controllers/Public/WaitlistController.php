@@ -42,6 +42,7 @@ class WaitlistController extends Controller
             'name' => $request->validated('name'),
             'phone' => $request->validated('phone'),
             'unit_id' => (int) $request->validated('unit_id'),
+            'price_category_id' => $request->validated('price_category_id'),
             'companions' => $request->companions(),
         ]);
 
@@ -129,6 +130,13 @@ class WaitlistController extends Controller
             'defaultCountry' => VisitorCountry::from(request()),
             'event' => [
                 'name' => $event->name,
+                'priceCategories' => $event->priceCategories()->get()->map(fn ($category) => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'price' => $category->price,
+                    'quota' => $category->quota,
+                    'remainingQuota' => $category->remaining(),
+                ])->all(),
                 'companionLimit' => $event->companion_limit,
             ],
             'tenant' => [

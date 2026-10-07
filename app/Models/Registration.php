@@ -36,6 +36,7 @@ use Illuminate\Support\Str;
  * @property string $phone
  * @property string|null $email
  * @property int $unit_id
+ * @property int|null $price_category_id
  * @property int $amount_due
  * @property int $party_size
  * @property Carbon|null $held_until
@@ -68,7 +69,7 @@ use Illuminate\Support\Str;
  * @property-read Collection<int, RegistrationCompanion> $companions
  */
 #[Fillable([
-    'event_id', 'reference', 'status', 'name', 'phone', 'email', 'unit_id', 'amount_due', 'party_size',
+    'event_id', 'reference', 'status', 'name', 'phone', 'email', 'unit_id', 'price_category_id', 'amount_due', 'party_size',
     'held_until', 'hold_sequence', 'resume_token_hash', 'card_sent_at',
     'proof_reminder_j7_sent_at', 'proof_reminder_j2_sent_at', 'proof_reminder_j1_sent_at',
     'cancelled_at', 'cancellation_reason', 'cancelled_by_user_id', 'lapsed_holds_count',
@@ -206,6 +207,25 @@ class Registration extends Model
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
+    }
+
+    /**
+     * Get the price category chosen by the participant themself (decision du 2026-10-07).
+     *
+     * @return BelongsTo<EventPriceCategory, $this>
+     */
+    public function priceCategory(): BelongsTo
+    {
+        return $this->belongsTo(EventPriceCategory::class, 'price_category_id');
+    }
+
+    /**
+     * Determine whether nothing is to be paid. Une telle inscription est confirmee a la
+     * reservation, sans preuve (decision du 2026-10-07).
+     */
+    public function isFreeOfCharge(): bool
+    {
+        return (int) $this->amount_due === 0;
     }
 
     /**

@@ -132,7 +132,7 @@ class EventController extends Controller
      */
     public function store(SaveEventRequest $request, Tenant $tenant, SaveEvent $save): RedirectResponse
     {
-        $event = $save->handle(null, $this->attributes($request), $this->accountIds($request), $request->tablePlan());
+        $event = $save->handle(null, $this->attributes($request), $this->accountIds($request), $request->tablePlan(), $request->priceCategories());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('events.flash.created')]);
 
@@ -165,7 +165,7 @@ class EventController extends Controller
      */
     public function update(SaveEventRequest $request, Tenant $tenant, Event $event, SaveEvent $save): RedirectResponse
     {
-        $save->handle($event, $this->attributes($request), $this->accountIds($request), $request->tablePlan());
+        $save->handle($event, $this->attributes($request), $this->accountIds($request), $request->tablePlan(), $request->priceCategories());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('events.flash.updated')]);
 
@@ -364,6 +364,12 @@ class EventController extends Controller
             'visualUrl' => $event->visualUrl(),
             // La salle telle que le formulaire la decrit : groupes de tables de meme taille.
             'tableGroups' => SyncSeatingTables::groupsOf($event),
+            'priceCategories' => $event->priceCategories()->get()->map(fn ($category) => [
+                'id' => $category->id,
+                'name' => $category->name,
+                'price' => $category->price,
+                'quota' => $category->quota,
+            ])->all(),
             'companionLimit' => $event->companion_limit,
             'registrationDeadline' => $event->registration_deadline?->toDateTimeLocalString(),
             'purgeAt' => $event->purge_at?->toDateTimeLocalString(),
@@ -422,6 +428,11 @@ class EventController extends Controller
             'secondaryColor' => $source->secondary_color,
             'tableGroups' => SyncSeatingTables::groupsOf($source),
             'pricePerPerson' => $source->price_per_person,
+            'priceCategories' => $source->priceCategories()->get()->map(fn ($category) => [
+                'name' => $category->name,
+                'price' => $category->price,
+                'quota' => $category->quota,
+            ])->all(),
             'companionLimit' => $source->companion_limit,
             'holdDurationMinutes' => $source->hold_duration_minutes,
             'paymentAccountIds' => $source->paymentAccounts->pluck('id')->intersect($visibleAccountIds)->values()->all(),

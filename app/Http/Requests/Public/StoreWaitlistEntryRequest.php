@@ -29,6 +29,25 @@ class StoreWaitlistEntryRequest extends FormRequest
         if ($normalized = PhoneNumber::normalize($this->input('phone'))) {
             $this->merge(['phone' => $normalized]);
         }
+
+        $categories = $this->event()->priceCategories()->get();
+
+        if ($categories->count() === 1) {
+            $categoryId = $categories->first()->id;
+            $companions = $this->input('companions', []);
+
+            $this->merge([
+                'price_category_id' => $this->input('price_category_id') ?? $categoryId,
+                'companions' => is_array($companions)
+                    ? array_map(
+                        fn (mixed $companion) => is_array($companion)
+                            ? ['price_category_id' => $categoryId, ...$companion]
+                            : $companion,
+                        $companions,
+                    )
+                    : $companions,
+            ]);
+        }
     }
 
     /**
@@ -42,15 +61,20 @@ class StoreWaitlistEntryRequest extends FormRequest
     public function rules(): array
     {
         $activeUnit = Rule::exists('units', 'id')->where('is_active', true);
+        $categoryRule = $this->event()->priceCategories()->exists()
+            ? ['required', 'integer', Rule::exists('event_price_categories', 'id')->where('event_id', $this->event()->id)]
+            : ['nullable', 'integer'];
 
         return [
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:32', new GuestPhoneNumber],
             'unit_id' => ['required', 'integer', $activeUnit],
+            'price_category_id' => $categoryRule,
 
             'companions' => ['array', 'max:'.$this->event()->companion_limit],
             'companions.*.name' => ['required', 'string', 'max:255'],
             'companions.*.unit_id' => ['required', 'integer', $activeUnit],
+            'companions.*.price_category_id' => $categoryRule,
         ];
     }
 
@@ -65,8 +89,10 @@ class StoreWaitlistEntryRequest extends FormRequest
             'name' => __('guest.registration.fields.name'),
             'phone' => __('guest.registration.fields.phone'),
             'unit_id' => __('guest.registration.fields.unit'),
+            'price_category_id' => __('guest.registration.fields.price_category'),
             'companions.*.name' => __('guest.registration.fields.companion_name'),
             'companions.*.unit_id' => __('guest.registration.fields.unit'),
+            'companions.*.price_category_id' => __('guest.registration.fields.price_category'),
         ];
     }
 
@@ -81,7 +107,7 @@ class StoreWaitlistEntryRequest extends FormRequest
     /**
      * Get the validated companions, ready to persist.
      *
-     * @return array<int, array{name: string, unit_id: int}>
+     * @return array<int, array{name: string, unit_id: int, price_category_id?: int|null}>
      */
     public function companions(): array
     {

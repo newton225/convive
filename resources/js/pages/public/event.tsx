@@ -37,20 +37,33 @@ export default function PublicEvent({ event, tenant, token }: Props) {
     const { t, locale } = useTranslation();
     const hasAction = event.acceptsRegistrations || event.isFull;
 
-    // Tarif 0 : un evenement gratuit (decision du 2026-10-07), dit en toutes lettres.
-    const isFree = event.pricePerPerson === 0;
+    const isFree =
+        event.priceCategories.length > 0
+            ? event.priceCategories.every((category) => category.price === 0)
+            : event.pricePerPerson === 0;
+    const hasMultipleCategories = event.priceCategories.length > 1;
 
     const price = (
         <p>
-            <span className="text-3xl font-semibold tracking-tight tabular-nums">
-                {isFree
-                    ? t('guest.event.free')
-                    : formatAmount(event.pricePerPerson, locale)}
-            </span>{' '}
-            {isFree ? null : (
+            {hasMultipleCategories && !isFree ? (
                 <span className="text-muted-foreground text-sm">
-                    {t('guest.event.per_person')}
+                    {t('guest.event.price_from', {
+                        price: formatAmount(event.pricePerPerson, locale),
+                    })}
                 </span>
+            ) : (
+                <>
+                    <span className="text-3xl font-semibold tracking-tight tabular-nums">
+                        {isFree
+                            ? t('guest.event.free')
+                            : formatAmount(event.pricePerPerson, locale)}
+                    </span>{' '}
+                    {isFree ? null : (
+                        <span className="text-muted-foreground text-sm">
+                            {t('guest.event.per_person')}
+                        </span>
+                    )}
+                </>
             )}
         </p>
     );
@@ -133,6 +146,41 @@ export default function PublicEvent({ event, tenant, token }: Props) {
                                 ) : null}
                             </div>
                         </Reveal>
+
+                        {hasMultipleCategories ? (
+                            <Reveal
+                                delay={0.025}
+                                className="bg-card space-y-3 rounded-3xl p-5"
+                            >
+                                <h2 className="font-medium">
+                                    {t('guest.event.price_categories')}
+                                </h2>
+                                <ul className="space-y-2">
+                                    {event.priceCategories.map((category) => (
+                                        <li
+                                            key={category.id}
+                                            className="flex items-center justify-between gap-4 text-sm"
+                                        >
+                                            <span>{category.name}</span>
+                                            <span className="text-right font-medium tabular-nums">
+                                                {formatAmount(
+                                                    category.price,
+                                                    locale,
+                                                )}
+                                                {category.remainingQuota ===
+                                                0 ? (
+                                                    <span className="text-muted-foreground ml-2 font-normal">
+                                                        {t(
+                                                            'guest.event.category_sold_out',
+                                                        )}
+                                                    </span>
+                                                ) : null}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </Reveal>
+                        ) : null}
 
                         <EventHowItWorks />
                     </div>

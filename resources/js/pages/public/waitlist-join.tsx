@@ -8,6 +8,7 @@ import LocaleSwitcher from '@/components/locale-switcher';
 import {
     CompanionFields,
     Field,
+    PriceCategorySelect,
     UnitSelect,
 } from '@/components/registration-fields';
 import { RequiredFieldsNote } from '@/components/required-fields-note';
@@ -16,10 +17,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/hooks/use-translation';
 import { store } from '@/routes/public/waitlist';
-import type { PublicRegistrationTenant, PublicUnitOption } from '@/types';
+import type {
+    PublicPriceCategory,
+    PublicRegistrationTenant,
+    PublicUnitOption,
+} from '@/types';
 
 type Props = {
-    event: { name: string; companionLimit: number };
+    event: {
+        name: string;
+        companionLimit: number;
+        priceCategories: PublicPriceCategory[];
+    };
     tenant: PublicRegistrationTenant;
     units: PublicUnitOption[];
     token: string;
@@ -40,6 +49,15 @@ export default function PublicWaitlistJoin({
 }: Props) {
     const { t } = useTranslation();
     const [companionIds, setCompanionIds] = useState<number[]>([]);
+    const defaultCategoryId = event.priceCategories.find(
+        (category) => category.remainingQuota !== 0,
+    )?.id;
+    const [priceCategoryId, setPriceCategoryId] = useState<number | undefined>(
+        defaultCategoryId,
+    );
+    const [companionPriceCategoryIds, setCompanionPriceCategoryIds] = useState<
+        Record<number, number | undefined>
+    >({});
     const nextId = useRef(0);
 
     return (
@@ -136,26 +154,52 @@ export default function PublicWaitlistJoin({
                                             testId="waitlist-unit"
                                         />
                                     </Field>
+                                    {event.priceCategories.length > 0 ? (
+                                        <PriceCategorySelect
+                                            id="price_category_id"
+                                            name="price_category_id"
+                                            categories={event.priceCategories}
+                                            value={priceCategoryId}
+                                            onValueChange={setPriceCategoryId}
+                                            error={errors.price_category_id}
+                                            testId="waitlist-price-category"
+                                        />
+                                    ) : null}
                                 </CardContent>
                             </Card>
 
                             <CompanionFields
                                 units={units}
+                                priceCategories={event.priceCategories}
+                                priceCategoryIds={companionPriceCategoryIds}
+                                onPriceCategoryChange={(id, categoryId) =>
+                                    setCompanionPriceCategoryIds((current) => ({
+                                        ...current,
+                                        [id]: categoryId,
+                                    }))
+                                }
                                 companionLimit={event.companionLimit}
                                 companionIds={companionIds}
-                                onAdd={() =>
-                                    setCompanionIds((ids) => [
-                                        ...ids,
-                                        nextId.current++,
-                                    ])
-                                }
-                                onRemove={(id) =>
+                                onAdd={() => {
+                                    const id = nextId.current++;
+                                    setCompanionIds((ids) => [...ids, id]);
+                                    setCompanionPriceCategoryIds((current) => ({
+                                        ...current,
+                                        [id]: defaultCategoryId,
+                                    }));
+                                }}
+                                onRemove={(id) => {
                                     setCompanionIds((ids) =>
                                         ids.filter(
                                             (existing) => existing !== id,
                                         ),
-                                    )
-                                }
+                                    );
+                                    setCompanionPriceCategoryIds((current) => {
+                                        const next = { ...current };
+                                        delete next[id];
+                                        return next;
+                                    });
+                                }}
                                 errors={errors}
                             />
 

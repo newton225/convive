@@ -11,6 +11,7 @@ import { useRef, useState } from 'react';
 import {
     CompanionFields,
     Field,
+    PriceCategorySelect,
     UnitSelect,
 } from '@/components/registration-fields';
 import { RequiredFieldsNote } from '@/components/required-fields-note';
@@ -63,10 +64,31 @@ export default function PublicRegistration({
 }: Props) {
     const { t, locale } = useTranslation();
     const [companionIds, setCompanionIds] = useState<number[]>([]);
+    const defaultCategoryId = event.priceCategories.find(
+        (category) => category.remainingQuota !== 0,
+    )?.id;
+    const [priceCategoryId, setPriceCategoryId] = useState<number | undefined>(
+        defaultCategoryId,
+    );
+    const [companionPriceCategoryIds, setCompanionPriceCategoryIds] = useState<
+        Record<number, number | undefined>
+    >({});
     const nextId = useRef(0);
     const [botCheckReset, setBotCheckReset] = useState(0);
 
-    const total = event.pricePerPerson * (1 + companionIds.length);
+    const prices = new Map(
+        event.priceCategories.map((category) => [category.id, category.price]),
+    );
+    const total =
+        event.priceCategories.length === 0
+            ? event.pricePerPerson * (1 + companionIds.length)
+            : (prices.get(priceCategoryId ?? -1) ?? 0) +
+              companionIds.reduce(
+                  (amount, id) =>
+                      amount +
+                      (prices.get(companionPriceCategoryIds[id] ?? -1) ?? 0),
+                  0,
+              );
 
     return (
         <div className="bg-background flex min-h-screen flex-col">
@@ -194,26 +216,52 @@ export default function PublicRegistration({
                                             testId="registration-unit"
                                         />
                                     </Field>
+                                    {event.priceCategories.length > 0 ? (
+                                        <PriceCategorySelect
+                                            id="price_category_id"
+                                            name="price_category_id"
+                                            categories={event.priceCategories}
+                                            value={priceCategoryId}
+                                            onValueChange={setPriceCategoryId}
+                                            error={errors.price_category_id}
+                                            testId="registration-price-category"
+                                        />
+                                    ) : null}
                                 </CardContent>
                             </Card>
 
                             <CompanionFields
                                 units={units}
+                                priceCategories={event.priceCategories}
+                                priceCategoryIds={companionPriceCategoryIds}
+                                onPriceCategoryChange={(id, categoryId) =>
+                                    setCompanionPriceCategoryIds((current) => ({
+                                        ...current,
+                                        [id]: categoryId,
+                                    }))
+                                }
                                 companionLimit={event.companionLimit}
                                 companionIds={companionIds}
-                                onAdd={() =>
-                                    setCompanionIds((ids) => [
-                                        ...ids,
-                                        nextId.current++,
-                                    ])
-                                }
-                                onRemove={(id) =>
+                                onAdd={() => {
+                                    const id = nextId.current++;
+                                    setCompanionIds((ids) => [...ids, id]);
+                                    setCompanionPriceCategoryIds((current) => ({
+                                        ...current,
+                                        [id]: defaultCategoryId,
+                                    }));
+                                }}
+                                onRemove={(id) => {
                                     setCompanionIds((ids) =>
                                         ids.filter(
                                             (existing) => existing !== id,
                                         ),
-                                    )
-                                }
+                                    );
+                                    setCompanionPriceCategoryIds((current) => {
+                                        const next = { ...current };
+                                        delete next[id];
+                                        return next;
+                                    });
+                                }}
                                 errors={errors}
                             />
 

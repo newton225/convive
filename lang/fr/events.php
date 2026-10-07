@@ -42,6 +42,10 @@ return [
         'table_count' => 'Nombre de tables',
         'seats_per_table' => 'Places par table',
         'price_per_person' => 'Tarif par personne (F CFA)',
+        'price_categories' => 'Tarifs proposés',
+        'price_category_name' => 'Nom du tarif',
+        'price_category_price' => 'Prix par personne (F CFA)',
+        'price_category_quota' => 'Nombre de places limité à',
         'companion_limit' => "Plafond d'accompagnateurs",
         'registration_deadline' => 'Date limite des inscriptions',
         'purge_at' => 'Purge des dossiers non finalisés',
@@ -66,12 +70,20 @@ return [
         'secondary_color' => 'Une couleur d’accompagnement, plus discrète : le bouton d’action des emails envoyés aux invités, et le halo du bandeau quand l’événement n’a pas de visuel.',
         'table_groups' => 'Décrivez la salle par groupes de tables de même taille, par exemple 3 tables de 12 puis 20 tables de 8. La capacité de l’événement est la somme des places de toutes les tables, et une table précise s’ajuste ensuite dans le plan de salle. Un invité et ses accompagnateurs sont toujours assis à la même table.',
         'price_per_person' => 'Montant en francs CFA, sans décimale ; 0 pour un événement gratuit. Chaque accompagnateur paie aussi ce tarif : l’invité doit verser le tarif multiplié par le nombre de personnes inscrites.',
+        'price_categories' => 'Ajoutez les tarifs proposés. Chaque personne choisit son tarif ; le quota est facultatif et compte les places de cette catégorie.',
         'companion_limit' => 'Nombre maximal de personnes qu’un invité peut inscrire avec lui (10 au plus). Chacune occupe une place et reçoit son propre billet.',
         'payment_accounts' => 'Les comptes sur lesquels vos invités vous versent l’argent. Ils se créent dans Organisation, Comptes de versement. Un compte nouveau ou modifié n’apparaît qu’après un délai de sécurité de 24 heures.',
         'registration_deadline' => 'Après cette date, le lien public n’accepte plus d’inscription. Les inscriptions déjà faites continuent normalement.',
         'purge_at' => 'À cette date, les dossiers non finalisés (sans preuve, expirés ou dont la preuve a été rejetée) sont supprimés et leurs places rendues. Les inscriptions validées ne sont jamais touchées.',
         'invitations_send_at' => 'Date d’envoi des cartes d’invitation, par WhatsApp et par email, à toutes les inscriptions validées. Une inscription validée après cette date reçoit sa carte tout de suite.',
         'hold_duration_minutes' => 'Temps laissé à l’invité pour déposer sa preuve de paiement. Pendant ce délai, ses places sont retenues ; ensuite, elles reviennent au stock. 10 minutes par défaut.',
+    ],
+
+    'price_categories' => [
+        'default_name' => 'Tarif unique',
+        'add' => 'Ajouter un tarif',
+        'remove' => 'Retirer le tarif :name',
+        'minimum' => 'Le tarif affiché sur le lien public sera « à partir de :price ».',
     ],
 
     'visual' => [
@@ -203,6 +215,10 @@ return [
         'visual' => 'un visuel',
     ],
     'errors' => [
+        'price_category_unknown' => 'Ce tarif ne correspond pas à cet événement.',
+        'price_category_duplicate' => 'Chaque tarif doit avoir un nom différent.',
+        'price_category_quota_below_taken' => 'Le quota ne peut pas être inférieur aux :count places déjà prises dans ce tarif.',
+        'price_category_in_use' => 'Un tarif déjà choisi par des inscrits ou des personnes en attente ne peut pas être retiré.',
         'venue_map_url' => 'Collez un lien Google Maps, Apple Plans, OpenStreetMap ou Waze (en https), ou des coordonnées comme « 5.3364, -4.0267 ».',
         'deadline_after_event' => "La date limite des inscriptions ne peut pas être postérieure à l'événement.",
         'unknown_payment_account' => "Un des comptes de versement retenus n'appartient pas à cette organisation.",

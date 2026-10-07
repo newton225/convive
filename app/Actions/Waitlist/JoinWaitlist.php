@@ -12,7 +12,7 @@ use App\Models\WaitlistEntry;
 class JoinWaitlist
 {
     /**
-     * @param  array{name: string, phone: string, unit_id: int, companions: array<int, array{name: string, unit_id: int}>}  $data
+     * @param  array{name: string, phone: string, unit_id: int, price_category_id: int|null, companions: array<int, array{name: string, unit_id: int, price_category_id: int|null}>}  $data
      * @return array{entry: WaitlistEntry, resumeToken: string}
      */
     public function handle(Event $event, array $data): array
@@ -25,6 +25,7 @@ class JoinWaitlist
             'name' => $data['name'],
             'phone' => $data['phone'],
             'unit_id' => $data['unit_id'],
+            'price_category_id' => $data['price_category_id'],
             'party_size' => 1 + count($data['companions']),
             'companions' => $data['companions'],
             'resume_token_hash' => WaitlistEntry::hashResumeToken($resumeToken),

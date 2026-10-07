@@ -13,6 +13,7 @@ import { ProductTourButton } from '@/components/product-tour-button';
 import EventVisualField from '@/components/events/event-visual-field';
 import { EventShowcasePreview } from '@/components/events/event-showcase-preview';
 import { HoldDurationField } from '@/components/events/hold-duration-field';
+import { PriceCategoriesField } from '@/components/events/price-categories-field';
 import { PublishEventDialog } from '@/components/events/publish-event-dialog';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -400,21 +401,30 @@ export default function EventForm({
                                     />
 
                                     <div className="grid items-start gap-4 sm:grid-cols-2">
-                                        <Field
-                                            name="price_per_person"
-                                            type="number"
-                                            label={t(
-                                                'events.fields.price_per_person',
-                                            )}
-                                            defaultValue={String(
-                                                prefill?.pricePerPerson ?? 0,
-                                            )}
-                                            error={errors.price_per_person}
-                                            help={t(
-                                                'events.help.price_per_person',
-                                            )}
-                                            required
-                                        />
+                                        <div className="space-y-2 sm:col-span-2">
+                                            <div>
+                                                <p className="text-sm font-medium">
+                                                    {t(
+                                                        'events.fields.price_categories',
+                                                    )}
+                                                </p>
+                                                <p className="text-muted-foreground text-sm">
+                                                    {t(
+                                                        'events.help.price_categories',
+                                                    )}
+                                                </p>
+                                            </div>
+                                            <PriceCategoriesField
+                                                defaultCategories={
+                                                    prefill?.priceCategories ??
+                                                    []
+                                                }
+                                                defaultPrice={
+                                                    prefill?.pricePerPerson ?? 0
+                                                }
+                                                errors={errors}
+                                            />
+                                        </div>
                                         <Field
                                             name="companion_limit"
                                             type="number"

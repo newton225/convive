@@ -3,10 +3,12 @@ import type {
     TicketCardEvent,
     TicketDesign,
 } from './ticket-template';
+import type { PublicPriceCategory } from './events';
 
 export type PublicRegistrationEvent = {
     name: string;
     pricePerPerson: number;
+    priceCategories: PublicPriceCategory[];
     companionLimit: number;
     remainingSeats: number | null;
 };

@@ -54,6 +54,13 @@ class EventController extends Controller
                 'remainingSeats' => $event->publicRemainingSeats(),
                 'isFull' => $event->isFull(),
                 'pricePerPerson' => $event->price_per_person,
+                'priceCategories' => $event->priceCategories()->get()->map(fn ($category) => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'price' => $category->price,
+                    'quota' => $category->quota,
+                    'remainingQuota' => $category->remaining(),
+                ])->all(),
                 'companionLimit' => $event->companion_limit,
                 'registrationDeadline' => $event->registration_deadline?->toISOString(),
                 'registrationDeadlineHasPassed' => $event->registrationDeadlineHasPassed(),

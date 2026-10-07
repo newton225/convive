@@ -30,6 +30,7 @@ class FinalizeWaitlistEntry
             // carte et les rappels partiront par WhatsApp seulement.
             'email' => null,
             'unit_id' => $entry->unit_id,
+            'price_category_id' => $entry->price_category_id,
             'companions' => $entry->companions,
         ]);
 

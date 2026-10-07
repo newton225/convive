@@ -17,13 +17,14 @@ use Illuminate\Support\Carbon;
  * @property int $registration_id
  * @property string $name
  * @property int $unit_id
+ * @property int|null $price_category_id
  * @property int $position
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Registration $registration
  * @property-read Unit $unit
  */
-#[Fillable(['name', 'unit_id', 'position'])]
+#[Fillable(['name', 'unit_id', 'price_category_id', 'position'])]
 class RegistrationCompanion extends Model
 {
     /** @use HasFactory<RegistrationCompanionFactory> */
@@ -65,5 +66,15 @@ class RegistrationCompanion extends Model
         return [
             'position' => 'integer',
         ];
+    }
+
+    /**
+     * Get the price category this companion chose.
+     *
+     * @return BelongsTo<EventPriceCategory, $this>
+     */
+    public function priceCategory(): BelongsTo
+    {
+        return $this->belongsTo(EventPriceCategory::class, 'price_category_id');
     }
 }

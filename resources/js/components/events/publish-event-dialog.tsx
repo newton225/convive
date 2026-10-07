@@ -67,8 +67,19 @@ export function PublishEventDialog({
             value: event.venueMapUrl ?? notSet,
         },
         {
-            label: t('events.fields.price_per_person'),
-            value: formatAmount(event.pricePerPerson, locale),
+            label:
+                event.priceCategories.length > 0
+                    ? t('events.fields.price_categories')
+                    : t('events.fields.price_per_person'),
+            value:
+                event.priceCategories.length > 0
+                    ? event.priceCategories
+                          .map(
+                              (category) =>
+                                  `${category.name}: ${formatAmount(category.price, locale)}`,
+                          )
+                          .join(' · ')
+                    : formatAmount(event.pricePerPerson, locale),
         },
         {
             label: t('events.confirm_publish.capacity'),

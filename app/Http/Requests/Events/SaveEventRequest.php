@@ -4,8 +4,12 @@ namespace App\Http\Requests\Events;
 
 use App\Actions\Seating\SyncSeatingTables;
 use App\Models\Event;
+use App\Models\EventPriceCategory;
 use App\Models\PaymentAccount;
+use App\Models\Registration;
+use App\Models\RegistrationCompanion;
 use App\Models\Tenant;
+use App\Models\WaitlistEntry;
 use App\Settings\ReservationSettings;
 use App\Support\MapLink;
 use Closure;
@@ -37,6 +41,23 @@ class SaveEventRequest extends FormRequest
     {
         if ($this->has('venue_map_url')) {
             $this->merge(['venue_map_url' => MapLink::normalize($this->input('venue_map_url'))]);
+        }
+
+        if (! $this->has('price_categories')) {
+            $event = $this->route('event');
+            $existing = $event instanceof Event ? $event->priceCategories()->get() : collect();
+            $price = (int) $this->input('price_per_person', 0);
+
+            $this->merge([
+                'price_categories' => $existing->isEmpty()
+                    ? [['name' => 'Tarif unique', 'price' => $price, 'quota' => null]]
+                    : $existing->map(fn (EventPriceCategory $category) => [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'price' => $existing->count() === 1 ? $price : $category->price,
+                        'quota' => $category->quota,
+                    ])->all(),
+            ]);
         }
     }
 
@@ -80,6 +101,23 @@ class SaveEventRequest extends FormRequest
             // Toujours renseigne : 0 dit qu'un evenement est gratuit, un champ vide ne dit rien
             // (decision du proprietaire du projet, 2026-10-07).
             'price_per_person' => ['required', 'integer', 'min:0', 'max:100000000'],
+            'price_categories' => ['required', 'array', 'min:1', 'max:20'],
+            'price_categories.*.id' => [
+                'nullable',
+                'integer',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    $event = $this->route('event');
+
+                    if ($value !== null
+                        && (! $event instanceof Event
+                            || ! $event->priceCategories()->whereKey($value)->exists())) {
+                        $fail(__('events.errors.price_category_unknown'));
+                    }
+                },
+            ],
+            'price_categories.*.name' => ['required', 'string', 'max:60'],
+            'price_categories.*.price' => ['required', 'integer', 'min:0', 'max:100000000'],
+            'price_categories.*.quota' => ['nullable', 'integer', 'min:1'],
             'companion_limit' => ['nullable', 'integer', 'min:0', 'max:'.Event::MaximumCompanionLimit],
 
             'registration_deadline' => ['nullable', 'date'],
@@ -114,8 +152,17 @@ class SaveEventRequest extends FormRequest
                 $this->rejectDeadlineAfterTheEvent($validator);
                 $this->rejectPaymentAccountsOfAnotherTenant($validator);
                 $this->rejectTablePlanThatUnseatsGuests($validator);
+                $this->validatePriceCategories($validator);
             },
         ];
+    }
+
+    /**
+     * @return array<int, array{id?: int|null, name: string, price: int, quota: int|null}>
+     */
+    public function priceCategories(): array
+    {
+        return $this->validated('price_categories');
     }
 
     /**
@@ -210,6 +257,79 @@ class SaveEventRequest extends FormRequest
         }
     }
 
+    private function validatePriceCategories(Validator $validator): void
+    {
+        if ($validator->errors()->hasAny([
+            'price_categories',
+            'price_categories.*.id',
+            'price_categories.*.name',
+            'price_categories.*.price',
+            'price_categories.*.quota',
+        ])) {
+            return;
+        }
+
+        $categories = array_values((array) $this->input('price_categories', []));
+        $names = array_map(fn (array $category) => mb_strtolower(trim($category['name'])), $categories);
+
+        if (count($names) !== count(array_unique($names))) {
+            $validator->errors()->add('price_categories', __('events.errors.price_category_duplicate'));
+
+            return;
+        }
+
+        $event = $this->route('event');
+
+        if (! $event instanceof Event) {
+            return;
+        }
+
+        $keptIds = [];
+
+        foreach ($categories as $index => $attributes) {
+            if (empty($attributes['id'])) {
+                continue;
+            }
+
+            $category = $event->priceCategories()->find((int) $attributes['id']);
+            if (! $category) {
+                continue;
+            }
+
+            $keptIds[] = $category->id;
+            $taken = $category->seatsTaken();
+
+            if (($attributes['quota'] ?? null) !== null && (int) $attributes['quota'] < $taken) {
+                $validator->errors()->add(
+                    "price_categories.{$index}.quota",
+                    __('events.errors.price_category_quota_below_taken', ['count' => $taken]),
+                );
+            }
+        }
+
+        foreach ($event->priceCategories()->whereNotIn('id', $keptIds)->get() as $removed) {
+            $hasRegistration = Registration::withTrashed()
+                ->where('price_category_id', $removed->id)
+                ->exists();
+            $hasCompanion = RegistrationCompanion::where('price_category_id', $removed->id)->exists();
+            $hasWaitlistEntry = WaitlistEntry::query()
+                ->where('event_id', $event->id)
+                ->where('price_category_id', $removed->id)
+                ->exists();
+            $hasWaitlistCompanion = WaitlistEntry::query()
+                ->where('event_id', $event->id)
+                ->get()
+                ->contains(fn (WaitlistEntry $entry) => collect($entry->companions)
+                    ->contains(fn (array $companion) => (int) ($companion['price_category_id'] ?? 0) === $removed->id));
+
+            if ($hasRegistration || $hasCompanion || $hasWaitlistEntry || $hasWaitlistCompanion) {
+                $validator->errors()->add('price_categories', __('events.errors.price_category_in_use'));
+
+                return;
+            }
+        }
+    }
+
     /**
      * @return array<string, string>
      */
@@ -238,6 +358,10 @@ class SaveEventRequest extends FormRequest
             'table_groups.*.count' => __('events.fields.table_count'),
             'table_groups.*.seats' => __('events.fields.seats_per_table'),
             'price_per_person' => __('events.fields.price_per_person'),
+            'price_categories' => __('events.fields.price_categories'),
+            'price_categories.*.name' => __('events.fields.price_category_name'),
+            'price_categories.*.price' => __('events.fields.price_category_price'),
+            'price_categories.*.quota' => __('events.fields.price_category_quota'),
             'companion_limit' => __('events.fields.companion_limit'),
             'registration_deadline' => __('events.fields.registration_deadline'),
             'hold_duration_minutes' => __('events.fields.hold_duration_minutes'),

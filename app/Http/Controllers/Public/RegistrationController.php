@@ -71,6 +71,13 @@ class RegistrationController extends Controller
             'event' => [
                 'name' => $event->name,
                 'pricePerPerson' => $event->price_per_person,
+                'priceCategories' => $event->priceCategories()->get()->map(fn ($category) => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'price' => $category->price,
+                    'quota' => $category->quota,
+                    'remainingQuota' => $category->remaining(),
+                ])->all(),
                 'companionLimit' => $event->companion_limit,
                 'remainingSeats' => $event->publicRemainingSeats(),
             ],
@@ -130,6 +137,7 @@ class RegistrationController extends Controller
             'phone' => $request->validated('phone'),
             'email' => $request->validated('email'),
             'unit_id' => (int) $request->validated('unit_id'),
+            'price_category_id' => $request->validated('price_category_id'),
             'companions' => $request->companions(),
         ]);
 

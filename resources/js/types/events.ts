@@ -46,6 +46,7 @@ export type EventDetails = EventSummary & {
     secondaryColor: string | null;
     visualUrl: string | null;
     tableGroups: EventTableGroup[];
+    priceCategories: EventPriceCategory[];
     companionLimit: number;
     registrationDeadline: string | null;
     purgeAt: string | null;
@@ -74,10 +75,22 @@ export type EventTemplate = {
     primaryColor: string | null;
     secondaryColor: string | null;
     tableGroups: EventTableGroup[];
+    priceCategories: Omit<EventPriceCategory, 'id'>[];
     pricePerPerson: number;
     companionLimit: number;
     holdDurationMinutes: number;
     paymentAccountIds: number[];
+};
+
+export type EventPriceCategory = {
+    id: number;
+    name: string;
+    price: number;
+    quota: number | null;
+};
+
+export type PublicPriceCategory = EventPriceCategory & {
+    remainingQuota: number | null;
 };
 
 export type EventPaymentAccountOption = {
@@ -101,6 +114,7 @@ export type PublicEvent = {
     remainingSeats: number | null;
     isFull: boolean;
     pricePerPerson: number;
+    priceCategories: PublicPriceCategory[];
     companionLimit: number;
     registrationDeadline: string | null;
     registrationDeadlineHasPassed: boolean;

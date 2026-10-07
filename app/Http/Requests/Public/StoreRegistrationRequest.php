@@ -34,6 +34,26 @@ class StoreRegistrationRequest extends FormRequest
         if ($normalized = PhoneNumber::normalize($this->input('phone'))) {
             $this->merge(['phone' => $normalized]);
         }
+
+        $categories = $this->event()->priceCategories()->get();
+
+        if ($categories->count() === 1) {
+            $categoryId = $categories->first()->id;
+            $companions = $this->input('companions', []);
+
+            if (! $this->filled('price_category_id')) {
+                $this->merge(['price_category_id' => $categoryId]);
+            }
+
+            if (is_array($companions)) {
+                $this->merge(['companions' => array_map(
+                    fn (mixed $companion) => is_array($companion)
+                        ? ['price_category_id' => $categoryId, ...$companion]
+                        : $companion,
+                    $companions,
+                )]);
+            }
+        }
     }
 
     /**
@@ -47,6 +67,9 @@ class StoreRegistrationRequest extends FormRequest
         // verifier l'existence ici revient a verifier qu'elle appartient a ce locataire, et
         // `active()` ecarte celles retirees de la liste (voir CLAUDE.md, « Unites »).
         $activeUnit = Rule::exists('units', 'id')->where('is_active', true);
+        $categoryRule = $this->event()->priceCategories()->exists()
+            ? ['required', 'integer', Rule::exists('event_price_categories', 'id')->where('event_id', $this->event()->id)]
+            : ['nullable', 'integer'];
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -55,10 +78,12 @@ class StoreRegistrationRequest extends FormRequest
             // systematique de la carte d'invitation (2.7), l'email s'y ajoute quand fourni.
             'email' => ['nullable', 'string', 'email', 'max:255'],
             'unit_id' => ['required', 'integer', $activeUnit],
+            'price_category_id' => $categoryRule,
 
             'companions' => ['array', 'max:'.$this->event()->companion_limit],
             'companions.*.name' => ['required', 'string', 'max:255'],
             'companions.*.unit_id' => ['required', 'integer', $activeUnit],
+            'companions.*.price_category_id' => $categoryRule,
 
             // Protection anti-robot, quand l'evenement la demande et que les cles sont reglees.
             ...(BotCheck::appliesTo($this->event())
@@ -91,8 +116,10 @@ class StoreRegistrationRequest extends FormRequest
             'phone' => __('guest.registration.fields.phone'),
             'email' => __('guest.registration.fields.email'),
             'unit_id' => __('guest.registration.fields.unit'),
+            'price_category_id' => __('guest.registration.fields.price_category'),
             'companions.*.name' => __('guest.registration.fields.companion_name'),
             'companions.*.unit_id' => __('guest.registration.fields.unit'),
+            'companions.*.price_category_id' => __('guest.registration.fields.price_category'),
         ];
     }
 
@@ -110,7 +137,7 @@ class StoreRegistrationRequest extends FormRequest
     /**
      * Get the validated companions, ready to persist.
      *
-     * @return array<int, array{name: string, unit_id: int}>
+     * @return array<int, array{name: string, unit_id: int, price_category_id?: int|null}>
      */
     public function companions(): array
     {

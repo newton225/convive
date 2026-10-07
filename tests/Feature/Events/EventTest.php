@@ -120,6 +120,30 @@ class EventTest extends TestCase
         $this->assertSame(EventStatus::Draft, $event->status);
     }
 
+    public function test_un_evenement_enregistre_ses_categories_de_tarif(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $this->payload([
+                'price_categories' => [
+                    ['name' => 'Standard', 'price' => 15000, 'quota' => null],
+                    ['name' => 'VIP', 'price' => 30000, 'quota' => 20],
+                ],
+            ]))
+            ->assertRedirect();
+
+        $event = $this->eventOf($tenant);
+        $categories = $tenant->asCurrent(fn () => $event->priceCategories()->get());
+
+        $this->assertSame(
+            [['Standard', 15000, null], ['VIP', 30000, 20]],
+            $categories->map(fn ($category) => [$category->name, $category->price, $category->quota])->all(),
+        );
+        $this->assertSame(15000, $event->price_per_person);
+    }
+
     public function test_un_evenement_nait_en_brouillon_et_sans_lien_public(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
@@ -203,7 +227,7 @@ class EventTest extends TestCase
             'tables' => [0, 0],
         ]));
 
-        $this->assertFalse($event->isReadyToPublish());
+        $this->assertFalse($tenant->asCurrent(fn () => $event->isReadyToPublish()));
     }
 
     public function test_un_evenement_sans_compte_de_versement_visible_n_est_pas_publiable(): void
@@ -216,7 +240,7 @@ class EventTest extends TestCase
         // Un compte tout juste cree n'a pas encore de valeur vivante : il ne compte pas.
         $tenant->asCurrent(fn () => PaymentAccount::factory()->neverActivated()->create());
 
-        $this->assertFalse($tenant->asCurrent(fn () => $event->fresh())->isReadyToPublish());
+        $this->assertFalse($tenant->asCurrent(fn () => $event->fresh()->isReadyToPublish()));
     }
 
     public function test_la_publication_donne_un_jeton_aleatoire_et_non_devinable(): void

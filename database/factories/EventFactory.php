@@ -74,6 +74,23 @@ class EventFactory extends Factory
         return $instance;
     }
 
+    /**
+     * Tout evenement a au moins une categorie de tarif (decision du 2026-10-07) : la fabrique en
+     * pose une, « Tarif unique », au prix de l'evenement, sauf si le test pose deja les siennes.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Event $event) {
+            if (! $event->priceCategories()->exists()) {
+                $event->priceCategories()->create([
+                    'name' => 'Tarif unique',
+                    'price' => $event->price_per_person,
+                    'position' => 0,
+                ]);
+            }
+        });
+    }
+
     private static function furnish(Event $event, int $tables, int $seats): void
     {
         SeatingTable::insert(array_map(fn (int $number) => [
