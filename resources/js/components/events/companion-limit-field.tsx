@@ -39,7 +39,7 @@ export function CompanionLimitField({ defaultValue, max, error }: Props) {
                     data-test="event-companion_limit"
                     className="flex-1"
                 />
-                <span className="w-32 shrink-0 text-right text-sm font-medium tabular-nums">
+                <span className="min-w-36 shrink-0 text-right text-sm font-medium whitespace-nowrap tabular-nums">
                     {t('events.companion_limit.value', { count: limit })}
                 </span>
             </div>
