@@ -32,6 +32,8 @@ return [
         'starts_at' => 'Date and time',
         'venue' => 'Venue',
         'venue_address' => 'Address',
+        'venue_map_url' => 'Location on a map',
+        'venue_map_url_placeholder' => 'Google Maps link, or coordinates "5.3364, -4.0267"',
         'primary_color' => 'Primary colour',
         'secondary_color' => 'Secondary colour',
         'override_colors' => 'Customise this event\'s colours',
@@ -59,10 +61,11 @@ return [
     ],
 
     'help' => [
+        'venue_map_url' => 'Optional. In Google Maps, tap the place, then "Share", and paste the link here; coordinates work too. Your guests will see a "Get directions" button. Accepted links: Google Maps, Apple Maps, OpenStreetMap, Waze.',
         'primary_color' => 'The dominant colour of this event’s guest journey: the “Register” button, date, seat gauge, steps and email header. It applies from the public link through to the ticket.',
         'secondary_color' => 'A quieter supporting colour: the action button in emails sent to guests, and the glow of the banner when the event has no visual.',
         'table_groups' => 'Describe the room in groups of tables of the same size, for example 3 tables of 12 then 20 tables of 8. The event capacity is the sum of the seats of every table, and a given table can then be adjusted in the seating plan. A guest and their companions always sit at the same table.',
-        'price_per_person' => 'Amount in CFA francs, with no decimals. Each companion pays this price too: the guest pays the price times the number of people registered.',
+        'price_per_person' => 'Amount in CFA francs, with no decimals; 0 for a free event. Each companion pays this price too: the guest pays the price times the number of people registered.',
         'companion_limit' => 'Maximum number of people a guest can register with them (10 at most). Each one takes a seat and gets their own ticket.',
         'payment_accounts' => 'The accounts your guests pay into. You create them under Organisation, Payment accounts. A new or changed account only shows after a 24-hour security delay.',
         'registration_deadline' => 'After this date, the public link no longer accepts registrations. Registrations already made carry on as usual.',
@@ -150,11 +153,23 @@ return [
 
     'publishing' => [
         'ready' => 'This event can be published.',
-        'blocked' => 'Complete the legal identity of the organisation, the capacity, the date and at least one visible payment account before publishing.',
+        'blocked' => 'Before publishing, still missing: :items.',
         'frozen_subdomain' => 'Once the link is handed out, the subdomain of the organisation can no longer change.',
     ],
 
+    'hold_duration' => [
+        'value' => '{1} 1 minute|[2,*] :count minutes',
+        'bounds' => 'Between :min and :max minutes.',
+    ],
+
+    'preview' => [
+        'title' => 'Showcase preview',
+        'description' => 'The card as it will appear on the product site if you announce the event. It follows what you type; the visual is uploaded below.',
+        'untitled' => 'Event name',
+    ],
+
     'announcing' => [
+        'blocked' => 'To appear on the showcase, still missing: :items.',
         'description' => 'Make this event appear on the product site showcase, to reach an audience that never received the link.',
         'announced' => 'This event appears on the product site showcase.',
     ],
@@ -172,10 +187,27 @@ return [
         'visual_deleted' => 'Event visual removed.',
     ],
 
+    'missing_publish' => [
+        'organisation' => 'the organisation identity (Space and brand page)',
+        'capacity' => 'at least one table with seats',
+        'date' => 'the date and time',
+        'date_past' => 'a date still to come',
+        'venue' => 'the venue',
+        'payment_account' => 'a visible payment account linked to the event',
+    ],
+
+    'missing_announce' => [
+        'not_published' => 'publishing the link',
+        'closed' => 'an open event (it is closed)',
+        'past' => 'a date still to come',
+        'visual' => 'a visual',
+    ],
     'errors' => [
+        'venue_map_url' => 'Paste a Google Maps, Apple Maps, OpenStreetMap or Waze link (https), or coordinates such as "5.3364, -4.0267".',
         'deadline_after_event' => 'The registration deadline cannot be later than the event itself.',
         'unknown_payment_account' => 'One of the selected payment accounts does not belong to this organisation.',
-        'not_ready_to_publish' => 'This event cannot be published yet: legal identity, capacity, date and a visible payment account are required.',
+        'not_ready_to_publish' => 'This event cannot be published yet. Missing: :items.',
+        'not_ready_to_announce' => 'This event cannot appear on the showcase yet. Missing: :items.',
         'not_published_yet' => 'This event must be published first before it can appear on the showcase.',
     ],
 

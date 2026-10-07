@@ -226,7 +226,9 @@ export default function PublicRegistration({
                                         className="text-2xl font-semibold text-[color:var(--brand-primary)]"
                                         data-test="registration-total"
                                     >
-                                        {formatAmount(total, locale)}
+                                        {total === 0
+                                            ? t('guest.event.free')
+                                            : formatAmount(total, locale)}
                                     </span>
                                 </CardContent>
                             </Card>

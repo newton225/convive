@@ -6,6 +6,8 @@ use App\Actions\Seating\SyncSeatingTables;
 use App\Models\Event;
 use App\Models\PaymentAccount;
 use App\Models\Tenant;
+use App\Settings\ReservationSettings;
+use App\Support\MapLink;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,6 +31,16 @@ class SaveEventRequest extends FormRequest
     }
 
     /**
+     * Des coordonnees collees (« 5.3364, -4.0267 ») deviennent un lien de carte avant validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('venue_map_url')) {
+            $this->merge(['venue_map_url' => MapLink::normalize($this->input('venue_map_url'))]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * Rien n'est obligatoire au-dela du nom : l'assistant s'enregistre a chaque etape, et un
@@ -46,6 +58,15 @@ class SaveEventRequest extends FormRequest
             'starts_at' => ['nullable', 'date'],
             'venue' => ['nullable', 'string', 'max:150'],
             'venue_address' => ['nullable', 'string', 'max:255'],
+            // Presente aux invites : un service de cartes connu, jamais un site quelconque.
+            'venue_map_url' => [
+                'nullable', 'string', 'max:500',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if (! MapLink::isAllowed((string) $value)) {
+                        $fail(__('events.errors.venue_map_url'));
+                    }
+                },
+            ],
 
             // Hexadecimal, meme raison que les couleurs de marque de l'organisation
             // (CLAUDE.md, « Organisation ») : c'est ce que produit un `input[type=color]`.
@@ -56,13 +77,20 @@ class SaveEventRequest extends FormRequest
             'table_groups' => ['sometimes', 'nullable', 'array', 'max:20'],
             'table_groups.*.count' => ['required', 'integer', 'min:1', 'max:500'],
             'table_groups.*.seats' => ['required', 'integer', 'min:1', 'max:100'],
-            'price_per_person' => ['nullable', 'integer', 'min:0', 'max:100000000'],
+            // Toujours renseigne : 0 dit qu'un evenement est gratuit, un champ vide ne dit rien
+            // (decision du proprietaire du projet, 2026-10-07).
+            'price_per_person' => ['required', 'integer', 'min:0', 'max:100000000'],
             'companion_limit' => ['nullable', 'integer', 'min:0', 'max:'.Event::MaximumCompanionLimit],
 
             'registration_deadline' => ['nullable', 'date'],
             'purge_at' => ['nullable', 'date'],
             'invitations_send_at' => ['nullable', 'date'],
-            'hold_duration_minutes' => ['nullable', 'integer', 'min:1', 'max:1440'],
+            // Entre les bornes reglees depuis la console (`ReservationSettings`, decision du 2026-10-07).
+            'hold_duration_minutes' => [
+                'nullable', 'integer',
+                'min:'.app(ReservationSettings::class)->hold_min_minutes,
+                'max:'.app(ReservationSettings::class)->hold_max_minutes,
+            ],
 
             'payment_accounts' => ['present', 'array'],
             'payment_accounts.*' => [
@@ -205,6 +233,7 @@ class SaveEventRequest extends FormRequest
             'subtitle' => __('events.fields.subtitle'),
             'starts_at' => __('events.fields.starts_at'),
             'venue' => __('events.fields.venue'),
+            'venue_map_url' => __('events.fields.venue_map_url'),
             'table_groups' => __('events.fields.table_groups'),
             'table_groups.*.count' => __('events.fields.table_count'),
             'table_groups.*.seats' => __('events.fields.seats_per_table'),

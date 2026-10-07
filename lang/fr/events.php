@@ -32,6 +32,8 @@ return [
         'starts_at' => 'Date et heure',
         'venue' => 'Lieu',
         'venue_address' => 'Adresse',
+        'venue_map_url' => 'Localisation sur une carte',
+        'venue_map_url_placeholder' => 'Lien Google Maps, ou coordonnées « 5.3364, -4.0267 »',
         'primary_color' => 'Couleur principale',
         'secondary_color' => 'Couleur secondaire',
         'override_colors' => 'Personnaliser les couleurs de cet événement',
@@ -59,10 +61,11 @@ return [
     ],
 
     'help' => [
+        'venue_map_url' => "Facultatif. Dans Google Maps, touchez le lieu puis « Partager » et collez le lien ici ; des coordonnées marchent aussi. Vos invités verront un bouton « Voir l'itinéraire ». Liens acceptés : Google Maps, Apple Plans, OpenStreetMap, Waze.",
         'primary_color' => 'La couleur dominante du parcours invité de cet événement : bouton « S’inscrire », date, jauge des places, étapes, bandeau des emails. Elle s’applique du lien public jusqu’au billet.',
         'secondary_color' => 'Une couleur d’accompagnement, plus discrète : le bouton d’action des emails envoyés aux invités, et le halo du bandeau quand l’événement n’a pas de visuel.',
         'table_groups' => 'Décrivez la salle par groupes de tables de même taille, par exemple 3 tables de 12 puis 20 tables de 8. La capacité de l’événement est la somme des places de toutes les tables, et une table précise s’ajuste ensuite dans le plan de salle. Un invité et ses accompagnateurs sont toujours assis à la même table.',
-        'price_per_person' => 'Montant en francs CFA, sans décimale. Chaque accompagnateur paie aussi ce tarif : l’invité doit verser le tarif multiplié par le nombre de personnes inscrites.',
+        'price_per_person' => 'Montant en francs CFA, sans décimale ; 0 pour un événement gratuit. Chaque accompagnateur paie aussi ce tarif : l’invité doit verser le tarif multiplié par le nombre de personnes inscrites.',
         'companion_limit' => 'Nombre maximal de personnes qu’un invité peut inscrire avec lui (10 au plus). Chacune occupe une place et reçoit son propre billet.',
         'payment_accounts' => 'Les comptes sur lesquels vos invités vous versent l’argent. Ils se créent dans Organisation, Comptes de versement. Un compte nouveau ou modifié n’apparaît qu’après un délai de sécurité de 24 heures.',
         'registration_deadline' => 'Après cette date, le lien public n’accepte plus d’inscription. Les inscriptions déjà faites continuent normalement.',
@@ -150,11 +153,23 @@ return [
 
     'publishing' => [
         'ready' => 'Cet événement peut être publié.',
-        'blocked' => "Complétez l'identité légale de l'organisation, la capacité, la date et au moins un compte de versement visible avant de publier.",
+        'blocked' => 'Avant de publier, il manque : :items.',
         'frozen_subdomain' => "Une fois le lien distribué, le sous-domaine de l'organisation ne peut plus changer.",
     ],
 
+    'hold_duration' => [
+        'value' => '{1} 1 minute|[2,*] :count minutes',
+        'bounds' => 'Entre :min et :max minutes.',
+    ],
+
+    'preview' => [
+        'title' => 'Aperçu dans la vitrine',
+        'description' => 'La carte telle qu\'elle apparaîtra sur le site produit si vous annoncez l\'événement. Elle suit votre saisie ; le visuel se dépose plus bas.',
+        'untitled' => 'Nom de l\'événement',
+    ],
+
     'announcing' => [
+        'blocked' => 'Pour apparaître sur la vitrine, il manque : :items.',
         'description' => "Faites apparaître cet événement dans la vitrine du site produit, pour toucher un public qui n'a jamais reçu le lien.",
         'announced' => 'Cet événement apparaît sur la vitrine du site produit.',
     ],
@@ -172,10 +187,27 @@ return [
         'visual_deleted' => "Visuel de l'événement retiré.",
     ],
 
+    'missing_publish' => [
+        'organisation' => "l'identité de l'organisation (page Espace et marque)",
+        'capacity' => 'au moins une table avec des places',
+        'date' => 'la date et l\'heure',
+        'date_past' => 'une date à venir',
+        'venue' => 'le lieu',
+        'payment_account' => 'un compte de versement visible, rattaché à l\'événement',
+    ],
+
+    'missing_announce' => [
+        'not_published' => 'la publication du lien',
+        'closed' => 'un événement ouvert (il est clos)',
+        'past' => 'une date à venir',
+        'visual' => 'un visuel',
+    ],
     'errors' => [
+        'venue_map_url' => 'Collez un lien Google Maps, Apple Plans, OpenStreetMap ou Waze (en https), ou des coordonnées comme « 5.3364, -4.0267 ».',
         'deadline_after_event' => "La date limite des inscriptions ne peut pas être postérieure à l'événement.",
         'unknown_payment_account' => "Un des comptes de versement retenus n'appartient pas à cette organisation.",
-        'not_ready_to_publish' => 'Cet événement ne peut pas encore être publié : identité légale, capacité, date et compte de versement visible sont requis.',
+        'not_ready_to_publish' => 'Cet événement ne peut pas encore être publié. Il manque : :items.',
+        'not_ready_to_announce' => 'Cet événement ne peut pas encore apparaître sur la vitrine. Il manque : :items.',
         'not_published_yet' => "Cet événement doit d'abord être publié avant de pouvoir apparaître sur la vitrine.",
     ],
 

@@ -11,6 +11,8 @@ import { LabelWithHelp } from '@/components/label-with-help';
 import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { ProductTourButton } from '@/components/product-tour-button';
 import EventVisualField from '@/components/events/event-visual-field';
+import { EventShowcasePreview } from '@/components/events/event-showcase-preview';
+import { HoldDurationField } from '@/components/events/hold-duration-field';
 import { PublishEventDialog } from '@/components/events/publish-event-dialog';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -34,7 +36,13 @@ type Props = {
     tenant: TenantSummary;
     event: EventDetails | null;
     paymentAccounts: EventPaymentAccountOption[];
-    defaults: { companionLimit: number; holdDurationMinutes: number };
+    defaults: {
+        companionLimit: number;
+        holdDurationMinutes: number;
+        // Bornes de la duree de reservation, reglees depuis la console.
+        holdDurationMin: number;
+        holdDurationMax: number;
+    };
     tenantColors: { primary: string; secondary: string };
     // Creation seulement : les modeles proposes et celui applique.
     templates?: EventTemplateOption[];
@@ -53,6 +61,12 @@ export default function EventForm({
     const { t } = useTranslation();
     const gettingStartedReturn = useGettingStartedReturn();
     const [confirmingPublish, setConfirmingPublish] = useState(false);
+    // L'apercu de la carte de vitrine suit la saisie : les champs ne sont pas controles, on relit
+    // le formulaire a chaque changement.
+    const [previewName, setPreviewName] = useState(event?.name ?? '');
+    const [previewStartsAt, setPreviewStartsAt] = useState<string | null>(
+        event?.startsAtLocal ?? null,
+    );
     // Valeurs de depart des champs : l'evenement edite, sinon le modele choisi a la creation.
     const prefill = event ?? template;
     const [overrideColors, setOverrideColors] = useState<boolean>(
@@ -152,13 +166,36 @@ export default function EventForm({
                         data-test="event-publish-blocked"
                     >
                         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                        {t('events.publishing.blocked')}
+                        {t('events.publishing.blocked', {
+                            items: event.missingBeforePublishing
+                                .map((key) =>
+                                    t(`events.missing_publish.${key}`),
+                                )
+                                .join(', '),
+                        })}
                     </p>
                 ) : null}
 
                 {event?.isPublished ? (
                     <p className="text-muted-foreground text-sm">
                         {t('events.publishing.frozen_subdomain')}
+                    </p>
+                ) : null}
+
+                {event?.isPublished &&
+                !event.isAnnounced &&
+                event.missingBeforeAnnouncing.length > 0 ? (
+                    <p
+                        className="text-muted-foreground text-sm"
+                        data-test="event-announce-blocked"
+                    >
+                        {t('events.announcing.blocked', {
+                            items: event.missingBeforeAnnouncing
+                                .map((key) =>
+                                    t(`events.missing_announce.${key}`),
+                                )
+                                .join(', '),
+                        })}
                     </p>
                 ) : null}
 
@@ -185,294 +222,343 @@ export default function EventForm({
 
                 {/* Cle par modele : les champs ne sont pas controles, ils doivent repartir des
                     valeurs du modele choisi plutot que garder celles du precedent. */}
-                <Form
-                    key={
-                        event?.id ?? `template-${template?.sourceId ?? 'blank'}`
-                    }
-                    {...action}
-                    setDefaultsOnSuccess
-                    className="space-y-8"
-                >
-                    {({ errors, processing, isDirty }) => (
-                        <>
-                            <RequiredFieldsNote />
-                            <Step
-                                index={1}
-                                title={t('events.steps.identity')}
-                                description={t('events.sections.identity')}
-                            >
-                                <div className="grid items-start gap-4 sm:grid-cols-2">
-                                    <Field
-                                        name="name"
-                                        label={t('events.fields.name')}
-                                        placeholder={t(
-                                            'events.fields.name_placeholder',
-                                        )}
-                                        defaultValue={event?.name ?? ''}
-                                        error={errors.name}
-                                        required
-                                    />
-                                    <Field
-                                        name="subtitle"
-                                        label={t('events.fields.subtitle')}
-                                        defaultValue={prefill?.subtitle ?? ''}
-                                        error={errors.subtitle}
-                                    />
-                                    <Field
-                                        name="starts_at"
-                                        type="datetime-local"
-                                        label={t('events.fields.starts_at')}
-                                        defaultValue={
-                                            event?.startsAtLocal ?? ''
-                                        }
-                                        error={errors.starts_at}
-                                    />
-                                    <Field
-                                        name="venue"
-                                        label={t('events.fields.venue')}
-                                        defaultValue={prefill?.venue ?? ''}
-                                        error={errors.venue}
-                                    />
-                                    <div className="sm:col-span-2">
+                <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+                    <Form
+                        key={
+                            event?.id ??
+                            `template-${template?.sourceId ?? 'blank'}`
+                        }
+                        {...action}
+                        setDefaultsOnSuccess
+                        className="space-y-8"
+                        onChange={(changed) => {
+                            const data = new FormData(changed.currentTarget);
+                            const text = (field: string) => {
+                                const value = data.get(field);
+
+                                return typeof value === 'string' ? value : '';
+                            };
+                            setPreviewName(text('name'));
+                            setPreviewStartsAt(text('starts_at') || null);
+                        }}
+                    >
+                        {({ errors, processing, isDirty }) => (
+                            <>
+                                <RequiredFieldsNote />
+                                <Step
+                                    index={1}
+                                    title={t('events.steps.identity')}
+                                    description={t('events.sections.identity')}
+                                >
+                                    <div className="grid items-start gap-4 sm:grid-cols-2">
                                         <Field
-                                            name="venue_address"
-                                            label={t(
-                                                'events.fields.venue_address',
+                                            name="name"
+                                            label={t('events.fields.name')}
+                                            placeholder={t(
+                                                'events.fields.name_placeholder',
                                             )}
+                                            defaultValue={event?.name ?? ''}
+                                            error={errors.name}
+                                            required
+                                        />
+                                        <Field
+                                            name="subtitle"
+                                            label={t('events.fields.subtitle')}
                                             defaultValue={
-                                                prefill?.venueAddress ?? ''
+                                                prefill?.subtitle ?? ''
                                             }
-                                            error={errors.venue_address}
+                                            error={errors.subtitle}
                                         />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <Checkbox
-                                            checked={overrideColors}
-                                            data-test="event-override-colors"
-                                            onCheckedChange={(checked) =>
-                                                setOverrideColors(
-                                                    checked === true,
-                                                )
+                                        <Field
+                                            name="starts_at"
+                                            type="datetime-local"
+                                            label={t('events.fields.starts_at')}
+                                            defaultValue={
+                                                event?.startsAtLocal ?? ''
                                             }
+                                            error={errors.starts_at}
                                         />
-                                        {t('events.fields.override_colors')}
-                                    </label>
-
-                                    {overrideColors ? (
-                                        <div className="grid items-start gap-4 sm:grid-cols-2">
+                                        <Field
+                                            name="venue"
+                                            label={t('events.fields.venue')}
+                                            defaultValue={prefill?.venue ?? ''}
+                                            error={errors.venue}
+                                        />
+                                        <div className="sm:col-span-2">
                                             <Field
-                                                name="primary_color"
-                                                type="color"
+                                                name="venue_address"
                                                 label={t(
-                                                    'events.fields.primary_color',
+                                                    'events.fields.venue_address',
                                                 )}
                                                 defaultValue={
-                                                    prefill?.primaryColor ??
-                                                    tenantColors.primary
+                                                    prefill?.venueAddress ?? ''
                                                 }
-                                                error={errors.primary_color}
-                                                help={t(
-                                                    'events.help.primary_color',
-                                                )}
-                                            />
-                                            <Field
-                                                name="secondary_color"
-                                                type="color"
-                                                label={t(
-                                                    'events.fields.secondary_color',
-                                                )}
-                                                defaultValue={
-                                                    prefill?.secondaryColor ??
-                                                    tenantColors.secondary
-                                                }
-                                                error={errors.secondary_color}
-                                                help={t(
-                                                    'events.help.secondary_color',
-                                                )}
+                                                error={errors.venue_address}
                                             />
                                         </div>
+                                        <div className="sm:col-span-2">
+                                            <Field
+                                                name="venue_map_url"
+                                                label={t(
+                                                    'events.fields.venue_map_url',
+                                                )}
+                                                help={t(
+                                                    'events.help.venue_map_url',
+                                                )}
+                                                placeholder={t(
+                                                    'events.fields.venue_map_url_placeholder',
+                                                )}
+                                                defaultValue={
+                                                    prefill?.venueMapUrl ?? ''
+                                                }
+                                                error={errors.venue_map_url}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <label className="flex items-center gap-2 text-sm">
+                                            <Checkbox
+                                                checked={overrideColors}
+                                                data-test="event-override-colors"
+                                                onCheckedChange={(checked) =>
+                                                    setOverrideColors(
+                                                        checked === true,
+                                                    )
+                                                }
+                                            />
+                                            {t('events.fields.override_colors')}
+                                        </label>
+
+                                        {overrideColors ? (
+                                            <div className="grid items-start gap-4 sm:grid-cols-2">
+                                                <Field
+                                                    name="primary_color"
+                                                    type="color"
+                                                    label={t(
+                                                        'events.fields.primary_color',
+                                                    )}
+                                                    defaultValue={
+                                                        prefill?.primaryColor ??
+                                                        tenantColors.primary
+                                                    }
+                                                    error={errors.primary_color}
+                                                    help={t(
+                                                        'events.help.primary_color',
+                                                    )}
+                                                />
+                                                <Field
+                                                    name="secondary_color"
+                                                    type="color"
+                                                    label={t(
+                                                        'events.fields.secondary_color',
+                                                    )}
+                                                    defaultValue={
+                                                        prefill?.secondaryColor ??
+                                                        tenantColors.secondary
+                                                    }
+                                                    error={
+                                                        errors.secondary_color
+                                                    }
+                                                    help={t(
+                                                        'events.help.secondary_color',
+                                                    )}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <p className="text-muted-foreground text-xs">
+                                                {t(
+                                                    'events.fields.override_colors_hint',
+                                                )}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {event ? (
+                                        <EventVisualField
+                                            tenantSlug={tenant.slug}
+                                            eventId={event.id}
+                                            url={event.visualUrl}
+                                        />
                                     ) : (
                                         <p className="text-muted-foreground text-xs">
-                                            {t(
-                                                'events.fields.override_colors_hint',
-                                            )}
+                                            {t('events.visual.hint')}
                                         </p>
                                     )}
-                                </div>
+                                </Step>
 
-                                {event ? (
-                                    <EventVisualField
-                                        tenantSlug={tenant.slug}
-                                        eventId={event.id}
-                                        url={event.visualUrl}
-                                    />
-                                ) : (
-                                    <p className="text-muted-foreground text-xs">
-                                        {t('events.visual.hint')}
-                                    </p>
-                                )}
-                            </Step>
-
-                            <Step
-                                index={2}
-                                title={t('events.steps.seating')}
-                                description={t('events.sections.seating')}
-                            >
-                                <TableGroupsField
-                                    defaultGroups={prefill?.tableGroups ?? []}
-                                    errors={errors}
-                                />
-
-                                <div className="grid items-start gap-4 sm:grid-cols-2">
-                                    <Field
-                                        name="price_per_person"
-                                        type="number"
-                                        label={t(
-                                            'events.fields.price_per_person',
-                                        )}
-                                        defaultValue={String(
-                                            prefill?.pricePerPerson ?? 0,
-                                        )}
-                                        error={errors.price_per_person}
-                                        help={t('events.help.price_per_person')}
-                                    />
-                                    <Field
-                                        name="companion_limit"
-                                        type="number"
-                                        label={t(
-                                            'events.fields.companion_limit',
-                                        )}
-                                        defaultValue={String(
-                                            prefill?.companionLimit ??
-                                                defaults.companionLimit,
-                                        )}
-                                        error={errors.companion_limit}
-                                        help={t('events.help.companion_limit')}
-                                    />
-                                </div>
-
-                                <fieldset
-                                    className="space-y-2"
-                                    data-tour="event-payment-accounts"
+                                <Step
+                                    index={2}
+                                    title={t('events.steps.seating')}
+                                    description={t('events.sections.seating')}
                                 >
-                                    <legend className="flex items-center gap-1.5 text-sm font-medium">
-                                        {t('events.fields.payment_accounts')}
-                                        <HelpTip
-                                            subject={t(
+                                    <TableGroupsField
+                                        defaultGroups={
+                                            prefill?.tableGroups ?? []
+                                        }
+                                        errors={errors}
+                                    />
+
+                                    <div className="grid items-start gap-4 sm:grid-cols-2">
+                                        <Field
+                                            name="price_per_person"
+                                            type="number"
+                                            label={t(
+                                                'events.fields.price_per_person',
+                                            )}
+                                            defaultValue={String(
+                                                prefill?.pricePerPerson ?? 0,
+                                            )}
+                                            error={errors.price_per_person}
+                                            help={t(
+                                                'events.help.price_per_person',
+                                            )}
+                                            required
+                                        />
+                                        <Field
+                                            name="companion_limit"
+                                            type="number"
+                                            label={t(
+                                                'events.fields.companion_limit',
+                                            )}
+                                            defaultValue={String(
+                                                prefill?.companionLimit ??
+                                                    defaults.companionLimit,
+                                            )}
+                                            error={errors.companion_limit}
+                                            help={t(
+                                                'events.help.companion_limit',
+                                            )}
+                                        />
+                                    </div>
+
+                                    <fieldset
+                                        className="space-y-2"
+                                        data-tour="event-payment-accounts"
+                                    >
+                                        <legend className="flex items-center gap-1.5 text-sm font-medium">
+                                            {t(
                                                 'events.fields.payment_accounts',
                                             )}
-                                        >
-                                            {t('events.help.payment_accounts')}
-                                        </HelpTip>
-                                    </legend>
-
-                                    {paymentAccounts.map((account) => (
-                                        <label
-                                            key={account.id}
-                                            className="flex items-start gap-2 text-sm"
-                                        >
-                                            <Checkbox
-                                                name="payment_accounts[]"
-                                                value={String(account.id)}
-                                                data-test="event-payment-account"
-                                                defaultChecked={prefill?.paymentAccountIds.includes(
-                                                    account.id,
+                                            <HelpTip
+                                                subject={t(
+                                                    'events.fields.payment_accounts',
                                                 )}
-                                            />
-                                            {account.channelLabel && (
-                                                <Badge variant="secondary">
-                                                    {account.channelLabel}
-                                                </Badge>
+                                            >
+                                                {t(
+                                                    'events.help.payment_accounts',
+                                                )}
+                                            </HelpTip>
+                                        </legend>
+
+                                        {paymentAccounts.map((account) => (
+                                            <label
+                                                key={account.id}
+                                                className="flex items-start gap-2 text-sm"
+                                            >
+                                                <Checkbox
+                                                    name="payment_accounts[]"
+                                                    value={String(account.id)}
+                                                    data-test="event-payment-account"
+                                                    defaultChecked={prefill?.paymentAccountIds.includes(
+                                                        account.id,
+                                                    )}
+                                                />
+                                                {account.channelLabel && (
+                                                    <Badge variant="secondary">
+                                                        {account.channelLabel}
+                                                    </Badge>
+                                                )}
+                                                <span>
+                                                    {account.label}
+                                                    {account.accountNumber
+                                                        ? ` · ${account.accountNumber}`
+                                                        : ''}
+                                                </span>
+                                            </label>
+                                        ))}
+
+                                        <InputError
+                                            message={errors.payment_accounts}
+                                        />
+                                    </fieldset>
+                                </Step>
+
+                                <Step
+                                    index={3}
+                                    title={t('events.steps.deadlines')}
+                                    description={t('events.sections.deadlines')}
+                                >
+                                    <div className="grid items-start gap-4 sm:grid-cols-2">
+                                        <Field
+                                            name="registration_deadline"
+                                            type="datetime-local"
+                                            label={t(
+                                                'events.fields.registration_deadline',
                                             )}
-                                            <span>
-                                                {account.label}
-                                                {account.accountNumber
-                                                    ? ` · ${account.accountNumber}`
-                                                    : ''}
-                                            </span>
-                                        </label>
-                                    ))}
+                                            defaultValue={
+                                                event?.registrationDeadline ??
+                                                ''
+                                            }
+                                            error={errors.registration_deadline}
+                                            help={t(
+                                                'events.help.registration_deadline',
+                                            )}
+                                        />
+                                        <Field
+                                            name="purge_at"
+                                            type="datetime-local"
+                                            label={t('events.fields.purge_at')}
+                                            defaultValue={event?.purgeAt ?? ''}
+                                            error={errors.purge_at}
+                                            help={t('events.help.purge_at')}
+                                        />
+                                        <Field
+                                            name="invitations_send_at"
+                                            type="datetime-local"
+                                            label={t(
+                                                'events.fields.invitations_send_at',
+                                            )}
+                                            defaultValue={
+                                                event?.invitationsSendAt ?? ''
+                                            }
+                                            error={errors.invitations_send_at}
+                                            help={t(
+                                                'events.help.invitations_send_at',
+                                            )}
+                                        />
+                                        <HoldDurationField
+                                            defaultValue={
+                                                prefill?.holdDurationMinutes ??
+                                                defaults.holdDurationMinutes
+                                            }
+                                            min={defaults.holdDurationMin}
+                                            max={defaults.holdDurationMax}
+                                            error={errors.hold_duration_minutes}
+                                        />
+                                    </div>
+                                </Step>
 
-                                    <InputError
-                                        message={errors.payment_accounts}
-                                    />
-                                </fieldset>
-                            </Step>
-
-                            <Step
-                                index={3}
-                                title={t('events.steps.deadlines')}
-                                description={t('events.sections.deadlines')}
-                            >
-                                <div className="grid items-start gap-4 sm:grid-cols-2">
-                                    <Field
-                                        name="registration_deadline"
-                                        type="datetime-local"
-                                        label={t(
-                                            'events.fields.registration_deadline',
-                                        )}
-                                        defaultValue={
-                                            event?.registrationDeadline ?? ''
-                                        }
-                                        error={errors.registration_deadline}
-                                        help={t(
-                                            'events.help.registration_deadline',
-                                        )}
-                                    />
-                                    <Field
-                                        name="purge_at"
-                                        type="datetime-local"
-                                        label={t('events.fields.purge_at')}
-                                        defaultValue={event?.purgeAt ?? ''}
-                                        error={errors.purge_at}
-                                        help={t('events.help.purge_at')}
-                                    />
-                                    <Field
-                                        name="invitations_send_at"
-                                        type="datetime-local"
-                                        label={t(
-                                            'events.fields.invitations_send_at',
-                                        )}
-                                        defaultValue={
-                                            event?.invitationsSendAt ?? ''
-                                        }
-                                        error={errors.invitations_send_at}
-                                        help={t(
-                                            'events.help.invitations_send_at',
-                                        )}
-                                    />
-                                    <Field
-                                        name="hold_duration_minutes"
-                                        type="number"
-                                        label={t(
-                                            'events.fields.hold_duration_minutes',
-                                        )}
-                                        defaultValue={String(
-                                            prefill?.holdDurationMinutes ??
-                                                defaults.holdDurationMinutes,
-                                        )}
-                                        error={errors.hold_duration_minutes}
-                                        help={t(
-                                            'events.help.hold_duration_minutes',
-                                        )}
-                                    />
-                                </div>
-                            </Step>
-
-                            <SubmitButton
-                                data-test="event-submit"
-                                data-tour="event-submit"
-                                processing={processing}
-                                dirty={isDirty}
-                            >
-                                {t('common.actions.save')}
-                            </SubmitButton>
-                        </>
-                    )}
-                </Form>
+                                <SubmitButton
+                                    data-test="event-submit"
+                                    data-tour="event-submit"
+                                    processing={processing}
+                                    dirty={isDirty}
+                                >
+                                    {t('common.actions.save')}
+                                </SubmitButton>
+                            </>
+                        )}
+                    </Form>
+                    <aside className="lg:sticky lg:top-4">
+                        <EventShowcasePreview
+                            name={previewName}
+                            organisationName={tenant.displayName}
+                            startsAt={previewStartsAt}
+                            visualUrl={event?.visualUrl ?? null}
+                        />
+                    </aside>
+                </div>
             </div>
         </>
     );

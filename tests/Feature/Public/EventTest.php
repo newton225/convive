@@ -281,4 +281,13 @@ class EventTest extends TestCase
         // refusee.
         $this->get($url)->assertStatus(429);
     }
+
+    public function test_la_page_publique_donne_le_lien_de_localisation(): void
+    {
+        $tenant = $this->publishableTenant(User::factory()->withTwoFactor()->create());
+        $event = $this->publishedEvent($tenant, ['venue_map_url' => 'https://maps.app.goo.gl/AbCdEf123']);
+
+        $this->get($this->publicUrl($tenant, $event))
+            ->assertInertia(fn ($page) => $page->where('event.venueMapUrl', 'https://maps.app.goo.gl/AbCdEf123'));
+    }
 }

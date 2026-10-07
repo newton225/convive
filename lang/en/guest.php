@@ -4,6 +4,8 @@ return [
     'event' => [
         'no_date' => 'Date to be announced',
         'venue' => 'Venue',
+        'directions' => 'Get directions',
+        'free' => 'Free',
         'price_per_person' => 'Price per person',
         'capacity' => 'Capacity',
         'seats' => [

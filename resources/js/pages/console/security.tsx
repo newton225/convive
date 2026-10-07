@@ -4,6 +4,7 @@ import { CircleAlert, CircleCheck } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
 import type { PaginationMeta } from '@/components/list-pagination';
 import { ExportLimitDialog } from '@/components/console/export-limit-dialog';
+import { ReservationBoundsDialog } from '@/components/console/reservation-bounds-dialog';
 import { SupportDurationsDialog } from '@/components/console/support-durations-dialog';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +27,7 @@ type Props = {
     eventsMeta: PaginationMeta;
     exportsPerHour: number;
     supportDurations: number[];
+    reservationBounds: { min: number; max: number };
 };
 
 /**
@@ -40,6 +42,7 @@ export default function ConsoleSecurity({
     eventsMeta,
     exportsPerHour,
     supportDurations,
+    reservationBounds,
 }: Props) {
     const { t, locale } = useTranslation();
     const { visit } = useServerList({ url: security().url });
@@ -125,6 +128,29 @@ export default function ConsoleSecurity({
                                 }),
                             )
                             .join(', ')}
+                    </CardContent>
+                </Card>
+
+                <Card data-test="console-reservation-bounds">
+                    <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+                        <div className="space-y-1">
+                            <CardTitle>
+                                {t('console.security.reservation_bounds.title')}
+                            </CardTitle>
+                            <p className="text-muted-foreground text-sm">
+                                {t('console.security.reservation_bounds.hint')}
+                            </p>
+                        </div>
+                        <ReservationBoundsDialog
+                            min={reservationBounds.min}
+                            max={reservationBounds.max}
+                        />
+                    </CardHeader>
+                    <CardContent className="text-sm font-medium">
+                        {t('console.security.reservation_bounds.current', {
+                            min: reservationBounds.min,
+                            max: reservationBounds.max,
+                        })}
                     </CardContent>
                 </Card>
 

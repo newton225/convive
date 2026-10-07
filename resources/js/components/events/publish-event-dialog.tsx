@@ -63,6 +63,10 @@ export function PublishEventDialog({
         },
         { label: t('events.fields.venue'), value: event.venue ?? notSet },
         {
+            label: t('events.fields.venue_map_url'),
+            value: event.venueMapUrl ?? notSet,
+        },
+        {
             label: t('events.fields.price_per_person'),
             value: formatAmount(event.pricePerPerson, locale),
         },

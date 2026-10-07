@@ -25,6 +25,9 @@ export function AnnouncementButton({ tenantSlug, event }: Props) {
     const [processing, setProcessing] = useState(false);
 
     const withdrawing = event.isAnnounced;
+    // La vitrine n'accepte qu'un evenement publie, ouvert, a venir et illustre : la fiche dit ce qui
+    // manque, le bouton attend. Retirer l'annonce reste toujours possible.
+    const blocked = !withdrawing && event.missingBeforeAnnouncing.length > 0;
     const label = t(
         withdrawing
             ? 'events.actions.withdraw_announcement'
@@ -41,7 +44,7 @@ export function AnnouncementButton({ tenantSlug, event }: Props) {
         <>
             <Button
                 variant="outline"
-                disabled={processing}
+                disabled={processing || blocked}
                 aria-busy={processing}
                 data-test={
                     withdrawing

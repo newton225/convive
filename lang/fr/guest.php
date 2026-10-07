@@ -4,6 +4,8 @@ return [
     'event' => [
         'no_date' => 'Date à venir',
         'venue' => 'Lieu',
+        'directions' => "Voir l'itinéraire",
+        'free' => 'Gratuit',
         'price_per_person' => 'Tarif par personne',
         'capacity' => 'Capacité',
         'seats' => [

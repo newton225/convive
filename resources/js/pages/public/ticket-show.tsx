@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import { OfflineBanner } from '@/components/offline-banner';
+import { DirectionsLink } from '@/components/public/directions-link';
 import { TicketPdfDownload } from '@/components/public/ticket-pdf-download';
 import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
 import { useTranslation } from '@/hooks/use-translation';
@@ -14,7 +15,12 @@ import type {
 } from '@/types';
 
 type Props = {
-    event: { name: string; startsAt: string | null };
+    event: {
+        name: string;
+        startsAt: string | null;
+        venue: string | null;
+        venueMapUrl: string | null;
+    };
     tenant: PublicRegistrationTenant;
     ticket: PublicTicketPass;
     card: TicketCardData;
@@ -57,6 +63,14 @@ export default function PublicTicketShow({
                         <p className="text-muted-foreground text-sm">
                             {formatDateTime(event.startsAt, locale)}
                         </p>
+                    ) : null}
+                    {event.venue ? (
+                        <p className="text-muted-foreground text-sm">
+                            {event.venue}
+                        </p>
+                    ) : null}
+                    {event.venueMapUrl ? (
+                        <DirectionsLink href={event.venueMapUrl} />
                     ) : null}
                 </div>
 

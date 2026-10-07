@@ -397,6 +397,15 @@ return [
     ],
 
     'security' => [
+        'reservation_bounds' => [
+            'title' => 'Reservation time',
+            'hint' => 'The bounds within which an organiser chooses how long a seat stays reserved while waiting for payment.',
+            'current' => 'From :min to :max minutes',
+            'dialog' => 'No effect on current reservations. An event\'s time is brought within these bounds the next time it is edited.',
+            'min' => 'Minimum (minutes)',
+            'max' => 'Maximum (minutes)',
+            'flash' => 'Reservation time saved.',
+        ],
         'support_durations' => [
             'title' => 'Support access: durations offered',
             'hint' => 'The durations an organisation can choose when it opens its space to a member of the team. The longest is also the most an access can have ahead of it, extensions included.',
@@ -682,6 +691,7 @@ return [
             'trial_settings_updated' => 'Trial period set',
             'export_limit_updated' => 'Export limit set',
             'support_durations_updated' => 'Support access durations set',
+            'reservation_bounds_updated' => 'Reservation time set',
             'database_repaired' => 'Database repaired',
             'orphan_database_deleted' => 'Orphan database deleted',
             'deletion_cancelled' => 'Deletion cancelled',
@@ -714,6 +724,7 @@ return [
             'trial_settings_updated' => ':actor changed the trial period settings',
             'export_limit_updated' => ':actor changed the hourly export limit',
             'support_durations_updated' => ':actor changed the durations offered for a support access',
+            'reservation_bounds_updated' => ':actor changed the reservation time bounds',
             'database_repaired' => ':actor ran the migrations of :organisation again',
             'orphan_database_deleted' => ':actor deleted an orphan database',
             'deletion_cancelled' => ':actor cancelled the deletion of :organisation',

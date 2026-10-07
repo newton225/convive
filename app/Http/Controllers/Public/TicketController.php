@@ -54,6 +54,8 @@ class TicketController extends Controller
             'event' => [
                 'name' => $event->name,
                 'startsAt' => $event->starts_at?->toISOString(),
+                'venue' => $event->venue,
+                'venueMapUrl' => $event->venue_map_url,
             ],
             'tenant' => [
                 'displayName' => $branding->display_name ?? $tenant->name,

@@ -13,6 +13,7 @@ use App\Http\Controllers\Console\OrganisationController;
 use App\Http\Controllers\Console\PlanController;
 use App\Http\Controllers\Console\RecoveryController;
 use App\Http\Controllers\Console\RepairTenantDatabaseController;
+use App\Http\Controllers\Console\ReservationBoundsController;
 use App\Http\Controllers\Console\RunBackupController;
 use App\Http\Controllers\Console\SecurityController;
 use App\Http\Controllers\Console\ShowcaseController;
@@ -70,6 +71,7 @@ Route::prefix('console')
         Route::get('security', SecurityController::class)->middleware('can:console.area,"security"')->name('security');
         Route::put('security/export-limit', ExportLimitController::class)->name('security.export-limit.update');
         Route::put('security/support-durations', SupportDurationsController::class)->name('security.support-durations.update');
+        Route::put('security/reservation-bounds', ReservationBoundsController::class)->name('security.reservation-bounds.update');
         Route::get('messages', MessageController::class)->middleware('can:console.area,"messages"')->name('messages');
         // Les comptes : recherche, blocage, reinitialisation de la double authentification.
         Route::get('accounts', [AccountController::class, 'index'])->middleware('can:console.area,"accounts"')->name('accounts.index');

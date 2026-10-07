@@ -63,6 +63,17 @@ class ShowcaseEvent extends Model
     }
 
     /**
+     * Scope the query to the events still to come : a past event leaves the public showcase on its
+     * own, without the organiser having to withdraw it (decision du 2026-10-07).
+     *
+     * @param  Builder<ShowcaseEvent>  $query
+     */
+    public function scopeUpcoming(Builder $query): void
+    {
+        $query->where('starts_at', '>=', now());
+    }
+
+    /**
      * Scope the query to the display order of the showcase : most recently announced first.
      *
      * @param  Builder<ShowcaseEvent>  $query

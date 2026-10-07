@@ -50,7 +50,8 @@ Tout état sauf DELETED ──▶ CANCELLED (annulation par l'organisation)
 
 - `DRAFT` — formulaire rempli, aucune place consommée fermement.
 - `HELD` — décompte de réservation en cours (**10 min par défaut, paramétrable par
-  événement**). Les places sont bloquées pendant ce temps, y compris si le transfert est déjà
+  événement** au curseur, entre un minimum et un maximum réglés depuis la console : 5 et 60 min
+  au départ). Les places sont bloquées pendant ce temps, y compris si le transfert est déjà
   validé sur le téléphone de l'invité.
 - `PROOF_SUBMITTED` — preuve déposée, en file de vérification.
 - `CONFIRMED` — preuve validée : la table est attribuée, le billet et le QR sont générés.
@@ -100,7 +101,10 @@ Chaque purge écrit une entrée dans le journal (nombre de dossiers, places lib�
   Cette liste doit être **paramétrable par organisation** (ce sont des données de tenant, pas
   des constantes du code), à une exception près : `Aucune` reste toujours en dernière position
   et ne se renomme, ne se désactive ni ne se supprime.
-- Montant dû = `tarif_par_personne × (1 + nombre d'accompagnateurs)`.
+- Montant dû = `tarif_par_personne × (1 + nombre d'accompagnateurs)`. Le tarif est toujours
+  renseigné : **0 signifie un événement gratuit**, dont l'inscription est confirmée dès la
+  réservation, sans preuve ni décompte, dans la limite des places ; il se publie sans compte de
+  versement.
 
 ### 2.6 Attribution des tables
 

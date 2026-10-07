@@ -397,6 +397,15 @@ return [
     ],
 
     'security' => [
+        'reservation_bounds' => [
+            'title' => 'Durée de réservation',
+            'hint' => "Les bornes entre lesquelles un organisateur choisit la durée pendant laquelle une place reste réservée en attendant le paiement.",
+            'current' => 'De :min à :max minutes',
+            'dialog' => "Sans effet sur les réservations en cours. La durée d'un événement est ramenée entre ces bornes à sa prochaine modification.",
+            'min' => 'Minimum (minutes)',
+            'max' => 'Maximum (minutes)',
+            'flash' => 'Durée de réservation réglée.',
+        ],
         'support_durations' => [
             'title' => 'Accès du support : durées proposées',
             'hint' => 'Les durées qu’une organisation peut choisir quand elle ouvre son espace à une personne de l’équipe. La plus longue est aussi le maximum qu’un accès peut avoir devant lui, prolongations comprises.',
@@ -682,6 +691,7 @@ return [
             'trial_settings_updated' => 'Période d’essai réglée',
             'export_limit_updated' => 'Limite d’exports réglée',
             'support_durations_updated' => 'Durées d’accès du support réglées',
+            'reservation_bounds_updated' => 'Durée de réservation réglée',
             'database_repaired' => 'Base réparée',
             'orphan_database_deleted' => 'Base orpheline supprimée',
             'deletion_cancelled' => 'Suppression annulée',
@@ -714,6 +724,7 @@ return [
             'trial_settings_updated' => ':actor a modifié les réglages de la période d’essai',
             'export_limit_updated' => ':actor a modifié la limite d’exports par heure',
             'support_durations_updated' => ':actor a modifié les durées proposées pour un accès de support',
+            'reservation_bounds_updated' => ':actor a modifié les bornes de la durée de réservation',
             'database_repaired' => ':actor a rejoué les migrations de :organisation',
             'orphan_database_deleted' => ':actor a supprimé une base orpheline',
             'deletion_cancelled' => ':actor a annulé la suppression de :organisation',

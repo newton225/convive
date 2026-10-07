@@ -733,10 +733,23 @@ change.
   etre mis a jour par quelqu'un, et ce quelqu'un se tromperait au pire moment. Les statuts
   reellement stockes sont brouillon, ouvert, en cours, termine.
 - **Publier est un acte separe de la modification.** `Event::isReadyToPublish()` en est le
-  gardien : identite legale de l'organisation complete, sous-domaine, capacite non nulle, date,
-  et **au moins un compte de versement visible rattache a l'evenement**. Un evenement qui
-  n'offre aucun compte ne dit pas a l'invite ou verser ; un recu emis sans raison sociale n'a
-  aucune valeur.
+  gardien : identite legale de l'organisation complete, sous-domaine, capacite non nulle, date
+  **a venir**, **lieu** (decision du 2026-10-07), et **au moins un compte de versement visible
+  rattache a l'evenement**. Un evenement qui n'offre aucun compte ne dit pas a l'invite ou verser ;
+  un recu emis sans raison sociale n'a aucune valeur. `Event::missingBeforePublishing()` nomme ce qui
+  manque : la fiche l'affiche, le refus du serveur aussi.
+- **Le tarif est toujours renseigne** : 0 veut dire gratuit, un champ vide est refuse.
+- **Duree de reservation bornee** (decision du 2026-10-07) : curseur entre un minimum et un maximum
+  regles depuis l'ecran Securite de la console (`App\Settings\ReservationSettings`, 5 et 60 minutes
+  au depart, jamais hors de 1 a 1 440), revalides par `SaveEventRequest`.
+- **Evenement gratuit** (tarif 0, `Event::isFree()`, decision du 2026-10-07) : l'inscription est
+  confirmee a la reservation, sous le meme verrou que les places (`HoldRegistration`), sans decompte
+  ni preuve ; table, billet et carte suivent comme apres une preuve validee
+  (`FinalizeConfirmedRegistration`). Aucun compte de versement n'est exige pour publier.
+- **Localisation sur une carte, facultative** (`events.venue_map_url`) : un lien vers un service de
+  cartes connu (`App\Support\MapLink` : Google Maps, Apple Plans, OpenStreetMap, Waze, en https), ou
+  des coordonnees converties en lien. Bouton « Voir l'itineraire » sur la page publique et le
+  billet. Aucune carte chargee dans nos pages.
 - **Le jeton du lien public** fait 32 octets d'aleatoire et **ne tourne jamais** : il est
   l'adresse de l'evenement pour tous ceux qui l'ont recue. Aucun identifiant sequentiel
   devinable dans une URL publique.
@@ -810,9 +823,11 @@ jamais recu le lien. **Ceci est la decision retenue, le code n'est pas encore ec
 - **`announced_at`, pas un booleen.** Meme raison que `published_at` : savoir depuis quand
   l'evenement est annonce importe (tri par recence de la vitrine), et retirer l'annonce se lit
   comme le vider, pas comme le renverser. Colonne sur `events`, base du locataire.
-- **Retirer l'annonce est toujours possible**, y compris apres publication et independamment de
-  la cloture : l'organisateur garde la main sur sa visibilite a tout moment, pas seulement au
-  moment de publier.
+- **Retirer l'annonce est toujours possible**, y compris apres publication : l'organisateur garde
+  la main sur sa visibilite a tout moment, pas seulement au moment de publier.
+- **Ce que la vitrine accepte** (decision du 2026-10-07) : un evenement publie, ouvert, a venir et
+  illustre (`Event::missingBeforeAnnouncing()`). **Cloturer un evenement le retire de la vitrine**
+  (`SaveEvent::close()`), et un evenement passe n'y apparait plus (`ShowcaseEvent::upcoming()`).
 - **La vitrine ne lit pas les bases des locataires a chaque affichage.** Boucler sur chaque
   organisation et initialiser sa tenancy a chaque requete d'un visiteur anonyme ne passerait pas
   a l'echelle (CLAUDE.md, « Multi-locataire », le meme risque que pour une tache planifiee, ici

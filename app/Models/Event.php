@@ -34,6 +34,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property CarbonImmutable|null $starts_at
  * @property string|null $venue
  * @property string|null $venue_address
+ * @property string|null $venue_map_url
  * @property string|null $primary_color
  * @property string|null $secondary_color
  * @property int $price_per_person
@@ -75,7 +76,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read Collection<int, PaymentAccount> $paymentAccounts
  */
 #[Fillable([
-    'name', 'subtitle', 'starts_at', 'venue', 'venue_address',
+    'name', 'subtitle', 'starts_at', 'venue', 'venue_address', 'venue_map_url',
     'primary_color', 'secondary_color',
     'price_per_person', 'companion_limit',
     'registration_deadline', 'purge_at', 'invitations_send_at', 'hold_duration_minutes',
@@ -443,15 +444,62 @@ class Event extends Model implements HasMedia
     /**
      * Determine whether the event may be published on a public link.
      *
-     * L'identite legale de l'organisation en fait partie : un recu emis sans raison sociale ni
-     * numero de contribuable n'a aucune valeur.
+     * L'identite legale de l'organisation en fait partie : un recu emis sans raison sociale n'a
+     * aucune valeur.
      */
     public function isReadyToPublish(): bool
     {
-        return (Tenant::current()?->isReadyToPublish() ?? false)
-            && $this->capacity() > 0
-            && $this->starts_at !== null
-            && $this->paymentAccounts()->publiclyVisible()->exists();
+        return $this->missingBeforePublishing() === [];
+    }
+
+    /**
+     * Get what the event still lacks before it can be published : `organisation`, `capacity`,
+     * `date`, `date_past`, `venue`, `payment_account`.
+     *
+     * Le lieu et une date a venir en font partie (decision du proprietaire du projet, 2026-10-07) :
+     * un lien public sans lieu ne dit pas ou venir, une date passee n'a plus d'invites a accueillir.
+     *
+     * @return array<int, string>
+     */
+    public function missingBeforePublishing(): array
+    {
+        return array_keys(array_filter([
+            'organisation' => ! (Tenant::current()?->isReadyToPublish() ?? false),
+            'capacity' => $this->capacity() <= 0,
+            'date' => $this->starts_at === null,
+            'date_past' => $this->starts_at !== null && $this->starts_at->isPast(),
+            'venue' => blank($this->venue),
+            // Un evenement gratuit n'a rien a faire verser : aucun compte exige.
+            'payment_account' => ! $this->isFree() && ! $this->paymentAccounts()->publiclyVisible()->exists(),
+        ]));
+    }
+
+    /**
+     * Get what the event still lacks before it can be announced on the product site's showcase :
+     * `not_published`, `closed`, `past`, `visual`.
+     *
+     * La vitrine est une page commerciale (decision du 2026-10-07) : seulement des evenements
+     * publies, ouverts, a venir et illustres.
+     *
+     * @return array<int, string>
+     */
+    public function missingBeforeAnnouncing(): array
+    {
+        return array_keys(array_filter([
+            'not_published' => ! $this->isPublished(),
+            'closed' => $this->status === EventStatus::Closed,
+            'past' => $this->starts_at === null || $this->starts_at->isPast(),
+            'visual' => $this->getFirstMedia(self::VisualCollection) === null,
+        ]));
+    }
+
+    /**
+     * Determine whether the event is free : a price of 0 (decision du 2026-10-07). Une inscription
+     * y est confirmee a la reservation, sans preuve ni decompte (`HoldRegistration`).
+     */
+    public function isFree(): bool
+    {
+        return (int) $this->price_per_person === 0;
     }
 
     /**

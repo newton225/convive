@@ -48,6 +48,7 @@ class EventController extends Controller
                 'startsAt' => $event->starts_at?->toISOString(),
                 'venue' => $event->venue,
                 'venueAddress' => $event->venue_address,
+                'venueMapUrl' => $event->venue_map_url,
                 'capacity' => $event->capacity(),
                 'showRemainingSeats' => $event->rule_show_remaining_seats,
                 'remainingSeats' => $event->publicRemainingSeats(),

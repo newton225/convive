@@ -14,6 +14,7 @@ use App\Models\Event;
 use App\Models\PaymentAccount;
 use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
+use App\Settings\ReservationSettings;
 use App\Support\GettingStarted;
 use App\Support\ListPage;
 use App\Support\PlanLimits;
@@ -84,6 +85,16 @@ class EventController extends Controller
     }
 
     /**
+     * The translated names of what is missing, as a sentence fragment.
+     *
+     * @param  array<int, string>  $keys
+     */
+    private function listOf(string $group, array $keys): string
+    {
+        return implode(', ', array_map(fn (string $key) => __("{$group}.{$key}"), $keys));
+    }
+
+    /**
      * Get the only event a limited support access may read, or null for a member or a full access.
      */
     private function supportEventId(Request $request): ?int
@@ -106,7 +117,9 @@ class EventController extends Controller
             'paymentAccounts' => $this->paymentAccounts(),
             'defaults' => [
                 'companionLimit' => Event::MaximumCompanionLimit,
-                'holdDurationMinutes' => Event::DefaultHoldDurationMinutes,
+                'holdDurationMinutes' => app(ReservationSettings::class)->clamp(Event::DefaultHoldDurationMinutes),
+                'holdDurationMin' => app(ReservationSettings::class)->hold_min_minutes,
+                'holdDurationMax' => app(ReservationSettings::class)->hold_max_minutes,
             ],
             'tenantColors' => $tenant->brandingOrCreate()->colors(),
             'templates' => $this->templates(),
@@ -139,7 +152,9 @@ class EventController extends Controller
             'paymentAccounts' => $this->paymentAccounts(),
             'defaults' => [
                 'companionLimit' => Event::MaximumCompanionLimit,
-                'holdDurationMinutes' => Event::DefaultHoldDurationMinutes,
+                'holdDurationMinutes' => app(ReservationSettings::class)->clamp(Event::DefaultHoldDurationMinutes),
+                'holdDurationMin' => app(ReservationSettings::class)->hold_min_minutes,
+                'holdDurationMax' => app(ReservationSettings::class)->hold_max_minutes,
             ],
             'tenantColors' => $tenant->brandingOrCreate()->colors(),
         ]);
@@ -170,8 +185,10 @@ class EventController extends Controller
             return back()->withErrors(['event' => __('billing.errors.event_quota', ['plan' => $tenant->plan()->name])]);
         }
 
-        if (! $event->isReadyToPublish()) {
-            return back()->withErrors(['event' => __('events.errors.not_ready_to_publish')]);
+        if ($missing = $event->missingBeforePublishing()) {
+            return back()->withErrors(['event' => __('events.errors.not_ready_to_publish', [
+                'items' => $this->listOf('events.missing_publish', $missing),
+            ])]);
         }
 
         $save->publish($event);
@@ -203,9 +220,12 @@ class EventController extends Controller
     {
         Gate::authorize('announce', [$event, $tenant]);
 
-        // Aucun lien public a montrer sur la vitrine tant que l'evenement n'en a pas un.
-        if (! $event->isPublished()) {
-            return back()->withErrors(['event' => __('events.errors.not_published_yet')]);
+        // La vitrine ne montre que des evenements publies, ouverts, a venir et illustres (decision
+        // du 2026-10-07) : le refus nomme ce qui manque.
+        if ($missing = $event->missingBeforeAnnouncing()) {
+            return back()->withErrors(['event' => __('events.errors.not_ready_to_announce', [
+                'items' => $this->listOf('events.missing_announce', $missing),
+            ])]);
         }
 
         $save->announce($event);
@@ -298,6 +318,8 @@ class EventController extends Controller
             'name' => $tenant->name,
             'slug' => $tenant->slug,
             'subdomain' => $tenant->subdomain,
+            // Le nom de la carte de vitrine, dans l'apercu de la fiche.
+            'displayName' => $tenant->branding->display_name ?? $tenant->name,
             'isReadyToPublish' => $tenant->isReadyToPublish(),
             // Faux jusqu'a la premiere publication : sa confirmation annonce le delai des comptes.
             'paymentDelayActive' => $tenant->paymentAccountDelayApplies(),
@@ -333,6 +355,10 @@ class EventController extends Controller
     {
         return array_merge($this->summary($event), [
             'venueAddress' => $event->venue_address,
+            'venueMapUrl' => $event->venue_map_url,
+            // Ce qui manque pour publier, puis pour annoncer : la fiche le nomme.
+            'missingBeforePublishing' => $event->missingBeforePublishing(),
+            'missingBeforeAnnouncing' => $event->missingBeforeAnnouncing(),
             'primaryColor' => $event->primary_color,
             'secondaryColor' => $event->secondary_color,
             'visualUrl' => $event->visualUrl(),
@@ -391,6 +417,7 @@ class EventController extends Controller
             'subtitle' => $source->subtitle,
             'venue' => $source->venue,
             'venueAddress' => $source->venue_address,
+            'venueMapUrl' => $source->venue_map_url,
             'primaryColor' => $source->primary_color,
             'secondaryColor' => $source->secondary_color,
             'tableGroups' => SyncSeatingTables::groupsOf($source),
@@ -430,9 +457,10 @@ class EventController extends Controller
             'starts_at' => $request->validated('starts_at'),
             'venue' => $request->validated('venue'),
             'venue_address' => $request->validated('venue_address'),
+            'venue_map_url' => $request->validated('venue_map_url'),
             'primary_color' => $request->validated('primary_color'),
             'secondary_color' => $request->validated('secondary_color'),
-            'price_per_person' => $request->validated('price_per_person') ?? 0,
+            'price_per_person' => $request->validated('price_per_person'),
             'companion_limit' => $request->validated('companion_limit') ?? Event::MaximumCompanionLimit,
             'registration_deadline' => $request->validated('registration_deadline'),
             'purge_at' => $request->validated('purge_at'),

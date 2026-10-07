@@ -194,6 +194,12 @@ class SaveEvent
                 ])
                 ->log('event.closed');
 
+            // Un evenement clos quitte la vitrine (decision du 2026-10-07) : elle ne montre que ce
+            // qui accueille encore des inscriptions.
+            if ($event->isAnnounced()) {
+                $this->withdraw($event);
+            }
+
             return $event;
         });
     }

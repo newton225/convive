@@ -12,6 +12,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Support\GettingStarted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
@@ -692,5 +693,77 @@ class EventTest extends TestCase
         $this->actingAs($owner)
             ->post(route('tenants.events.publish', [$tenant, $event]))
             ->assertRedirect(route('tenants.events.edit', [$tenant, $event]));
+    }
+
+    public function test_un_lien_de_localisation_est_facultatif_et_s_enregistre(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $this->payload())
+            ->assertSessionHasNoErrors();
+        $this->assertNull($this->eventOf($tenant)->venue_map_url);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $this->payload(['venue_map_url' => 'https://maps.app.goo.gl/AbCdEf123']))
+            ->assertSessionHasNoErrors();
+        $this->assertSame('https://maps.app.goo.gl/AbCdEf123', $this->eventOf($tenant)->venue_map_url);
+    }
+
+    public function test_des_coordonnees_deviennent_un_lien_de_carte(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $this->payload(['venue_map_url' => ' 5.3364, -4.0267 ']))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(
+            'https://www.google.com/maps/search/?api=1&query=5.3364,-4.0267',
+            $this->eventOf($tenant)->venue_map_url,
+        );
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function liensRefuses(): array
+    {
+        return [
+            'autre site' => ['https://exemple-douteux.com/maps'],
+            'sans https' => ['http://maps.app.goo.gl/AbCdEf123'],
+            'google hors cartes' => ['https://www.google.com/search?q=gala'],
+            'coordonnees impossibles' => ['95.0, 200.0'],
+            'texte libre' => ['derriere la pharmacie'],
+        ];
+    }
+
+    #[DataProvider('liensRefuses')]
+    public function test_un_lien_qui_ne_mene_pas_a_un_service_de_cartes_est_refuse(string $link): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $this->payload(['venue_map_url' => $link]))
+            ->assertSessionHasErrors('venue_map_url');
+    }
+
+    public function test_le_tarif_est_obligatoire_et_zero_veut_dire_gratuit(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $this->payload(['price_per_person' => '']))
+            ->assertSessionHasErrors('price_per_person');
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $this->payload(['price_per_person' => 0]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(0, $this->eventOf($tenant)->price_per_person);
     }
 }

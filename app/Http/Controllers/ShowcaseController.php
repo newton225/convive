@@ -29,7 +29,8 @@ class ShowcaseController extends Controller
         $search = trim((string) $request->input('filter.search', ''));
 
         $events = ListPage::of(
-            ShowcaseEvent::recentlyAnnounced()
+            ShowcaseEvent::upcoming()
+                ->recentlyAnnounced()
                 ->when($search !== '', fn (Builder $query) => UnaccentedSearch::apply($query, ['name', 'organisation_name'], $search)),
             $request,
             ListPage::CardsPerPage,
@@ -50,7 +51,7 @@ class ShowcaseController extends Controller
                 ->all(),
             'meta' => ListPage::meta($events),
             'filters' => ['search' => $search !== '' ? $search : null],
-            'hasEvents' => ShowcaseEvent::query()->exists(),
+            'hasEvents' => ShowcaseEvent::upcoming()->exists(),
         ]);
     }
 }

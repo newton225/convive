@@ -10,6 +10,7 @@ import { EventHowItWorks } from '@/components/public/event-how-it-works';
 import { EventRegistrationState } from '@/components/public/event-registration-state';
 import { SeatsMeter } from '@/components/public/seats-meter';
 import { Reveal } from '@/components/site/reveal';
+import { DirectionsLink } from '@/components/public/directions-link';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
@@ -36,14 +37,21 @@ export default function PublicEvent({ event, tenant, token }: Props) {
     const { t, locale } = useTranslation();
     const hasAction = event.acceptsRegistrations || event.isFull;
 
+    // Tarif 0 : un evenement gratuit (decision du 2026-10-07), dit en toutes lettres.
+    const isFree = event.pricePerPerson === 0;
+
     const price = (
         <p>
             <span className="text-3xl font-semibold tracking-tight tabular-nums">
-                {formatAmount(event.pricePerPerson, locale)}
+                {isFree
+                    ? t('guest.event.free')
+                    : formatAmount(event.pricePerPerson, locale)}
             </span>{' '}
-            <span className="text-muted-foreground text-sm">
-                {t('guest.event.per_person')}
-            </span>
+            {isFree ? null : (
+                <span className="text-muted-foreground text-sm">
+                    {t('guest.event.per_person')}
+                </span>
+            )}
         </p>
     );
 
@@ -84,6 +92,13 @@ export default function PublicEvent({ event, tenant, token }: Props) {
                                             <p className="text-muted-foreground text-sm">
                                                 {event.venueAddress}
                                             </p>
+                                        ) : null}
+                                        {event.venueMapUrl ? (
+                                            <div className="mt-2">
+                                                <DirectionsLink
+                                                    href={event.venueMapUrl}
+                                                />
+                                            </div>
                                         ) : null}
                                     </div>
                                 </div>
@@ -151,11 +166,18 @@ export default function PublicEvent({ event, tenant, token }: Props) {
                     <div className="mx-auto flex max-w-lg items-center gap-3">
                         <div className="shrink-0">
                             <p className="text-lg leading-tight font-semibold tabular-nums">
-                                {formatAmount(event.pricePerPerson, locale)}
+                                {isFree
+                                    ? t('guest.event.free')
+                                    : formatAmount(
+                                          event.pricePerPerson,
+                                          locale,
+                                      )}
                             </p>
-                            <p className="text-muted-foreground text-xs">
-                                {t('guest.event.per_person')}
-                            </p>
+                            {isFree ? null : (
+                                <p className="text-muted-foreground text-xs">
+                                    {t('guest.event.per_person')}
+                                </p>
+                            )}
                         </div>
                         <div className="min-w-0 flex-1">
                             <EventRegistrationState

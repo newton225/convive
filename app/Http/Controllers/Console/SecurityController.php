@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Console;
 
 use App\Http\Controllers\Controller;
 use App\Settings\ProtectionSettings;
+use App\Settings\ReservationSettings;
 use App\Settings\SupportSettings;
 use App\Support\Console\SecurityJournal;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ use Inertia\Response;
  */
 class SecurityController extends Controller
 {
-    public function __invoke(Request $request, ProtectionSettings $protection, SupportSettings $support): Response
+    public function __invoke(Request $request, ProtectionSettings $protection, SupportSettings $support, ReservationSettings $reservation): Response
     {
         return Inertia::render('console/security', [
             'isSample' => false,
@@ -25,6 +26,8 @@ class SecurityController extends Controller
             'exportsPerHour' => $protection->exports_per_hour,
             // Les durees qu'une organisation peut choisir pour un acces de support.
             'supportDurations' => $support->durations,
+            // Les bornes de la duree de reservation proposee aux organisateurs.
+            'reservationBounds' => ['min' => $reservation->hold_min_minutes, 'max' => $reservation->hold_max_minutes],
             ...SecurityJournal::overview($request),
         ]);
     }

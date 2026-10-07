@@ -3,6 +3,8 @@ export type TenantSummary = {
     name: string;
     slug: string;
     subdomain: string | null;
+    // Le nom que voient les invites (`tenant_brandings.display_name`, sinon le nom de l'organisation).
+    displayName: string;
     isReadyToPublish: boolean;
     // Faux tant que l'organisation n'a rien publie : la premiere publication demarre le delai
     // de 24 heures des comptes de versement.
@@ -35,6 +37,11 @@ export type EventListItem = EventSummary & {
 
 export type EventDetails = EventSummary & {
     venueAddress: string | null;
+    // Lien vers un service de cartes, verifie par le serveur (`MapLink`).
+    venueMapUrl: string | null;
+    // Ce qui manque encore pour publier, puis pour annoncer sur la vitrine (cles du serveur).
+    missingBeforePublishing: string[];
+    missingBeforeAnnouncing: string[];
     primaryColor: string | null;
     secondaryColor: string | null;
     visualUrl: string | null;
@@ -62,6 +69,8 @@ export type EventTemplate = {
     subtitle: string | null;
     venue: string | null;
     venueAddress: string | null;
+    // Lien vers un service de cartes, verifie par le serveur (`MapLink`).
+    venueMapUrl: string | null;
     primaryColor: string | null;
     secondaryColor: string | null;
     tableGroups: EventTableGroup[];
@@ -84,6 +93,8 @@ export type PublicEvent = {
     startsAt: string | null;
     venue: string | null;
     venueAddress: string | null;
+    // Lien vers un service de cartes, verifie par le serveur (`MapLink`).
+    venueMapUrl: string | null;
     capacity: number;
     // Null quand l'organisateur masque le nombre de places (le defaut) : seul « Complet » se voit.
     showRemainingSeats: boolean;

@@ -3,7 +3,6 @@
 namespace Tests\Feature\Events;
 
 use App\Actions\Tenants\CreateTenant;
-use App\Enums\EventStatus;
 use App\Enums\LegalForm;
 use App\Enums\TenantPermission;
 use App\Models\Event;
@@ -12,6 +11,7 @@ use App\Models\ShowcaseEvent;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
@@ -66,6 +66,10 @@ class ShowcaseAnnouncementTest extends TestCase
             return $event->fresh();
         });
 
+        // La vitrine n'accepte qu'un evenement illustre (decision du 2026-10-07).
+        $this->actingAs($tenant->owner())->post(route('tenants.events.visual.store', [$tenant, $event]), [
+            'file' => UploadedFile::fake()->image('visuel.png', 800, 400),
+        ]);
         $this->actingAs($tenant->owner())->post(route('tenants.events.publish', [$tenant, $event]));
 
         return $tenant->asCurrent(fn () => $event->fresh());
@@ -145,19 +149,6 @@ class ShowcaseAnnouncementTest extends TestCase
             ->assertRedirect();
 
         $this->assertSame(0, ShowcaseEvent::where('tenant_id', $tenant->id)->count());
-    }
-
-    public function test_cloturer_ne_retire_pas_automatiquement_de_la_vitrine(): void
-    {
-        $owner = User::factory()->withTwoFactor()->create();
-        $tenant = $this->publishableTenant($owner);
-        $event = $this->publishedEvent($tenant);
-
-        $this->actingAs($owner)->post(route('tenants.events.announce', [$tenant, $event]));
-        $this->actingAs($owner)->post(route('tenants.events.close', [$tenant, $event]));
-
-        $this->assertSame(1, ShowcaseEvent::where('tenant_id', $tenant->id)->count());
-        $this->assertSame(EventStatus::Closed, $tenant->asCurrent(fn () => $event->fresh())->status);
     }
 
     public function test_renommer_un_evenement_annonce_met_a_jour_la_vitrine(): void

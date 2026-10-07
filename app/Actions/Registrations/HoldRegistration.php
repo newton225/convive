@@ -68,9 +68,11 @@ class HoldRegistration
                     $held = DB::transaction(function () use ($event, $registration, $lapsedBefore) {
                         $nextSequence = 1 + (int) Registration::where('event_id', $event->id)->max('hold_sequence');
 
+                        // Evenement gratuit (decision du 2026-10-07) : rien a verser, la place
+                        // est confirmee sous le meme verrou, sans decompte ni preuve.
                         $registration->update([
-                            'status' => RegistrationStatus::Held,
-                            'held_until' => now()->addMinutes($event->hold_duration_minutes),
+                            'status' => $event->isFree() ? RegistrationStatus::Confirmed : RegistrationStatus::Held,
+                            'held_until' => $event->isFree() ? null : now()->addMinutes($event->hold_duration_minutes),
                             'hold_sequence' => $nextSequence,
                             'lapsed_holds_count' => $registration->lapsed_holds_count + ($lapsedBefore ? 1 : 0),
                         ]);
@@ -89,11 +91,30 @@ class HoldRegistration
                 $this->alertIfSeatsExhausted($event);
                 $this->alertIfSeatsLow($event);
 
+                if ($event->isFree()) {
+                    $this->confirmFree($registration);
+                }
+
                 return $held;
             }
 
             return false;
         });
+    }
+
+    /**
+     * Journal and follow-up of a free registration, confirmed at once : table, ticket and card,
+     * exactly as after a validated proof (`FinalizeConfirmedRegistration`).
+     */
+    private function confirmFree(Registration $registration): void
+    {
+        activity()
+            ->performedOn($registration)
+            ->event('updated')
+            ->withProperties(['attributes' => ['status' => RegistrationStatus::Confirmed->value]])
+            ->log('registration.confirmed_free');
+
+        app(FinalizeConfirmedRegistration::class)->handle($registration->fresh() ?? $registration);
     }
 
     /**
