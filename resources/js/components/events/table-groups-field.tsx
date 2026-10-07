@@ -43,7 +43,7 @@ export function TableGroupsField({ defaultGroups, errors }: Props) {
     const add = () => {
         setRows((current) => [
             ...current,
-            { key: nextKey, count: '1', seats: '8' },
+            { key: nextKey, count: '1', seats: '4' },
         ]);
         setNextKey((key) => key + 1);
     };
