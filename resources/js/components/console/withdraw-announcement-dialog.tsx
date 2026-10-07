@@ -71,7 +71,7 @@ export function WithdrawAnnouncementDialog({ id, eventName }: Props) {
                     </DialogHeader>
 
                     <div className="grid gap-2">
-                        <Label htmlFor={`withdraw-reason-${id}`}>
+                        <Label htmlFor={`withdraw-reason-${id}`} required>
                             {t('console.showcase.fields.reason')}
                         </Label>
                         <Textarea

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Events;
 
 use App\Actions\Events\SaveEvent;
 use App\Actions\Seating\SyncSeatingTables;
+use App\Enums\EventStatus;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureTenantMembership;
@@ -13,7 +14,11 @@ use App\Models\Event;
 use App\Models\PaymentAccount;
 use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
+use App\Support\GettingStarted;
+use App\Support\ListPage;
 use App\Support\PlanLimits;
+use App\Support\Search\UnaccentedSearch;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -29,12 +34,27 @@ class EventController extends Controller
     {
         Gate::authorize('viewAny', [Event::class, $tenant]);
 
+        // Pagination, recherche et filtre cote serveur (TODO du 2026-10-07, point 11) : en cours et
+        // a venir par defaut, un evenement termine ne demande plus rien.
+        $status = in_array($request->input('filter.status'), ['active', 'closed', 'all'], true)
+            ? $request->input('filter.status')
+            : 'active';
+        $search = trim((string) $request->input('filter.search', ''));
+
+        $events = ListPage::of($this->listedEvents($request, $search, $status)->ordered()->with('paymentAccounts'), $request, ListPage::CardsPerPage);
+
         return Inertia::render('events/index', [
             'tenant' => $this->tenantPayload($tenant),
-            'events' => Event::ordered()
-                // Un acces de support limite a un evenement ne voit que lui (README ecran 25).
-                ->when($this->supportEventId($request), fn ($query, int $eventId) => $query->whereKey($eventId))
-                ->with('paymentAccounts')->get()
+            'meta' => ListPage::meta($events),
+            'filters' => ['status' => $status, 'search' => $search !== '' ? $search : null],
+            // Les compteurs suivent la recherche : ils disent ou se trouvent les resultats.
+            'counts' => [
+                'active' => $this->listedEvents($request, $search, 'active')->count(),
+                'closed' => $this->listedEvents($request, $search, 'closed')->count(),
+                'all' => $this->listedEvents($request, $search, 'all')->count(),
+            ],
+            'hasEvents' => $this->listedEvents($request, '', 'all')->exists(),
+            'events' => $events->getCollection()
                 ->map(fn (Event $event) => [
                     ...$this->summary($event),
                     // README ecran 12 : de quoi juger d'un coup d'oeil ou agir, sans ouvrir l'evenement.
@@ -42,9 +62,25 @@ class EventController extends Controller
                     'occupiedSeats' => $event->occupiedSeats(),
                     'collectedAmount' => $event->collectedAmount(),
                     'proofsToCheck' => $event->registrations()->where('status', RegistrationStatus::ProofSubmitted)->count(),
-                ]),
+                ])->values(),
             'permissions' => $request->user()->toTenantPermissions($tenant),
         ]);
+    }
+
+    /**
+     * The events of the list, for a search and a status filter (active, closed or all).
+     *
+     * @return Builder<Event>
+     */
+    private function listedEvents(Request $request, string $search, string $status): Builder
+    {
+        return Event::query()
+            // Un acces de support limite a un evenement ne voit que lui (README ecran 25).
+            ->when($this->supportEventId($request), fn (Builder $query, int $eventId) => $query->whereKey($eventId))
+            // Le nom, le sous-titre et le lieu : ce qu'on se rappelle d'un evenement qu'on cherche.
+            ->when($search !== '', fn (Builder $query) => UnaccentedSearch::apply($query, ['name', 'subtitle', 'venue'], $search))
+            ->when($status === 'closed', fn (Builder $query) => $query->where('status', EventStatus::Closed))
+            ->when($status === 'active', fn (Builder $query) => $query->where('status', '!=', EventStatus::Closed));
     }
 
     /**
@@ -87,7 +123,7 @@ class EventController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('events.flash.created')]);
 
-        return to_route('tenants.events.edit', [$tenant, $event]);
+        return GettingStarted::redirect($request, $tenant, to_route('tenants.events.edit', [$tenant, $event]));
     }
 
     /**
@@ -124,7 +160,7 @@ class EventController extends Controller
     /**
      * Hand out the public link of the event.
      */
-    public function publish(Tenant $tenant, Event $event, SaveEvent $save): RedirectResponse
+    public function publish(Request $request, Tenant $tenant, Event $event, SaveEvent $save): RedirectResponse
     {
         Gate::authorize('publish', [$event, $tenant]);
 
@@ -142,7 +178,7 @@ class EventController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('events.flash.published')]);
 
-        return to_route('tenants.events.edit', [$tenant, $event]);
+        return GettingStarted::redirect($request, $tenant, to_route('tenants.events.edit', [$tenant, $event]));
     }
 
     /**
@@ -263,6 +299,8 @@ class EventController extends Controller
             'slug' => $tenant->slug,
             'subdomain' => $tenant->subdomain,
             'isReadyToPublish' => $tenant->isReadyToPublish(),
+            // Faux jusqu'a la premiere publication : sa confirmation annonce le delai des comptes.
+            'paymentDelayActive' => $tenant->paymentAccountDelayApplies(),
         ];
     }
 

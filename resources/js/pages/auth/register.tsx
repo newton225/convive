@@ -20,6 +20,7 @@ import { store } from '@/routes/register';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import type { Country } from 'react-phone-number-input';
 import type { TenantInvitationContext, Translations } from '@/types';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 
 type Props = {
     passwordRules: string;
@@ -70,9 +71,10 @@ export default function Register({
                             </Alert>
                         ) : null}
 
+                        <RequiredFieldsNote />
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">
+                                <Label htmlFor="name" required>
                                     {t('account.fields.name')}
                                 </Label>
                                 <Input
@@ -91,32 +93,41 @@ export default function Register({
                                 />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="organisation_name">
-                                    {t('account.fields.organisation_name')}
-                                </Label>
-                                {/* Facultatif pour une personne invitee : elle rejoint une
-                                    organisation existante. */}
-                                <Input
-                                    id="organisation_name"
-                                    type="text"
-                                    required={!tenantInvitation}
-                                    tabIndex={1}
-                                    autoComplete="organization"
-                                    name="organisation_name"
-                                    placeholder={t(
-                                        'account.placeholders.organisation_name',
-                                    )}
+                            {/* Une personne invitee rejoint une organisation existante : aucune
+                                organisation n'est ouverte pour elle a l'inscription. */}
+                            {tenantInvitation ? (
+                                <input
+                                    type="hidden"
+                                    name="invitation"
+                                    value={tenantInvitation.code}
                                 />
-                                <InputError
-                                    message={errors.organisation_name}
-                                />
-                            </div>
+                            ) : (
+                                <div className="grid gap-2">
+                                    <Label htmlFor="organisation_name" required>
+                                        {t('account.fields.organisation_name')}
+                                    </Label>
+                                    <Input
+                                        id="organisation_name"
+                                        type="text"
+                                        required
+                                        tabIndex={1}
+                                        autoComplete="organization"
+                                        name="organisation_name"
+                                        placeholder={t(
+                                            'account.placeholders.organisation_name',
+                                        )}
+                                    />
+                                    <InputError
+                                        message={errors.organisation_name}
+                                    />
+                                </div>
+                            )}
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">
+                                <Label htmlFor="email" required>
                                     {t('account.fields.email')}
                                 </Label>
+                                {/* L'adresse de l'invitation, la seule acceptee par le serveur. */}
                                 <Input
                                     id="email"
                                     type="email"
@@ -124,6 +135,11 @@ export default function Register({
                                     tabIndex={2}
                                     autoComplete="email"
                                     name="email"
+                                    defaultValue={tenantInvitation?.email}
+                                    readOnly={
+                                        tenantInvitation !== null &&
+                                        tenantInvitation !== undefined
+                                    }
                                     placeholder={t(
                                         'account.placeholders.email',
                                     )}
@@ -132,7 +148,7 @@ export default function Register({
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="phone">
+                                <Label htmlFor="phone" required>
                                     {t('account.fields.phone')}
                                 </Label>
                                 <PhoneField
@@ -145,7 +161,7 @@ export default function Register({
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">
+                                <Label htmlFor="password" required>
                                     {t('account.fields.password')}
                                 </Label>
                                 <PasswordInput
@@ -170,7 +186,7 @@ export default function Register({
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">
+                                <Label htmlFor="password_confirmation" required>
                                     {t('account.fields.password_confirmation')}
                                 </Label>
                                 <PasswordInput
@@ -203,6 +219,7 @@ export default function Register({
                                     />
                                     <Label
                                         htmlFor="terms"
+                                        required
                                         className="block text-sm leading-relaxed font-normal"
                                     >
                                         {t('account.register.terms_prefix')}{' '}

@@ -70,6 +70,7 @@ export default function DeleteUser() {
                                     <div className="grid gap-2">
                                         <Label
                                             htmlFor="password"
+                                            required
                                             className="sr-only"
                                         >
                                             {t(

@@ -120,7 +120,10 @@ export function AccountActions({ account }: Props) {
                         </DialogHeader>
 
                         <div className="grid gap-2">
-                            <Label htmlFor={`block-reason-${account.id}`}>
+                            <Label
+                                htmlFor={`block-reason-${account.id}`}
+                                required
+                            >
                                 {t('console.accounts.fields.reason')}
                             </Label>
                             <Textarea

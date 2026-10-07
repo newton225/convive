@@ -43,18 +43,26 @@ plateforme.
   independamment de la session en cours.
 - Notification immediate au Proprietaire et a tous les Tresoriers, par email et WhatsApp, avec
   l'ancien et le nouveau numero.
-- Delai d'activation de 24 h, ou validation par un second Proprietaire, avant que le nouveau
-  numero apparaisse sur un lien public. L'ancien reste affiche pendant ce delai.
+- Tant qu'aucun evenement n'a jamais ete publie, creation et modification du canal, du numero
+  et du titulaire prennent effet apres un apercu et une confirmation explicite : aucun invite ne
+  peut encore voir ces coordonnees ni y verser.
+- Des la premiere publication (`tenants.first_published_at`, pose a la publication et jamais
+  retire), le delai d'activation de 24 h
+  s'applique a toute creation ou modification du canal, du numero et du titulaire. L'ancien
+  numero reste affiche pendant ce delai. Le delai reste actif apres la cloture de l'evenement.
+  Un second Proprietaire peut toujours l'ecourter, jamais la personne qui a demande le changement.
 - Entree d'audit non modifiable, et bandeau sur le tableau de bord pendant sept jours apres
   tout changement.
 - Aucun numero de versement modifiable par import, par API ou par un webhook.
 
-**Etat.** Permission dediee, delai de 24 h, validation par un second Proprietaire qui ne peut
-pas etre le demandeur, re-authentification par mot de passe, alerte email a tous les porteurs
-de la permission avec l'ancien et le nouveau numero, signalement pendant sept jours, journal
-avec l'avant et l'apres : en place et couverts par des tests. **Restent a faire** : le second
-facteur TOTP rejoue juste avant la modification, l'alerte WhatsApp, et le bandeau sur le
-tableau de bord.
+**Etat.** La regle d'activation immediate avant la premiere publication, avec apercu et
+confirmation (`confirmed` exige par `SavePaymentAccount`), est implementee le 2026-10-07 ; la
+confirmation de la premiere publication annonce le delai qui commence. Permission dediee,
+delai de 24 h, validation anticipee par un second Proprietaire qui ne peut pas etre le demandeur,
+re-authentification par mot de passe, alerte email a tous les porteurs de la permission avec
+l'ancien et le nouveau numero, signalement pendant sept jours, journal avec l'avant et l'apres :
+en place et couverts par des tests. Restent aussi a faire : le second facteur TOTP rejoue juste
+avant la modification, l'alerte WhatsApp, et le bandeau sur le tableau de bord.
 
 ### C2. Contrefacon de billets par extraction de la cle sur un appareil hors ligne
 
@@ -499,11 +507,12 @@ compromis, incapable de forger un jeton. Billet revoque, refuse apres synchronis
 Polyglotte image et HTML, refuse. Image a decompression explosive, refusee. Extension
 falsifiee, refusee. Metadonnees presentes apres reencodage, attendu absentes.
 
-**Argent.** Modification d'un compte de versement sans re-authentification, refusee. Nouveau
-compte visible publiquement avant la fin du delai, attendu invisible. Validation du delai par
-le demandeur lui-meme, refusee. Validation par un non-Proprietaire, refusee. Sans la
-permission dediee, refusee. Notification et delai d'activation effectifs. Double validation
-d'une preuve, une seule prise en compte.
+**Argent.** Modification d'un compte de versement sans re-authentification, refusee. Avant
+toute premiere publication, compte cree ou modifie actif apres confirmation. Apres publication,
+un nouveau compte reste invisible et une modification conserve l'ancien numero jusqu'a la fin
+du delai. Validation du delai par le demandeur lui-meme, refusee. Validation par un
+non-Proprietaire, refusee. Sans la permission dediee, refusee. Notification et delai
+d'activation effectifs. Double validation d'une preuve, une seule prise en compte.
 
 **Profils.** Attribution d'une permission non detenue, refusee. Modification de son propre
 profil, refusee. Suppression du dernier Proprietaire, refusee. Profil d'un autre locataire
@@ -530,14 +539,11 @@ securite presents. CSP sans `unsafe-inline`.
 
 ## Ce qui reste a decider
 
-Trois points demandent un arbitrage du proprietaire du projet avant developpement.
+Deux points demandent un arbitrage du proprietaire du projet avant developpement.
 
-1. **Delai d'activation d'un changement de compte de versement.** 24 h protege contre le
-   detournement mais gene une correction legitime la veille d'un evenement. Alternative :
-   validation par un second Proprietaire, sans delai.
-2. **Verification du numero de telephone par code avant reservation.** C'est la meilleure
+1. **Verification du numero de telephone par code avant reservation.** C'est la meilleure
    protection contre l'epuisement automatise des places, mais cela ajoute une etape au parcours
    invite et un cout d'envoi. A trancher explicitement.
-3. **Acceptation des PDF comme preuve.** Les refuser au profit des captures d'ecran supprime
+2. **Acceptation des PDF comme preuve.** Les refuser au profit des captures d'ecran supprime
    une classe entiere de vulnerabilites, au prix d'un inconvenient pour les virements
    bancaires.

@@ -66,7 +66,7 @@ export function FinishSupportAccessDialog({ grantId, organisation }: Props) {
                     </DialogHeader>
 
                     <div className="grid gap-2">
-                        <Label htmlFor={`finish-note-${grantId}`}>
+                        <Label htmlFor={`finish-note-${grantId}`} required>
                             {t('support_access.finish.note')}
                         </Label>
                         <Textarea

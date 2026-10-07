@@ -41,7 +41,9 @@ export function ScanPinForm({ submitLabel }: Props) {
         value: string,
     ) => (
         <div className="grid gap-2">
-            <Label htmlFor={id}>{label}</Label>
+            <Label htmlFor={id} required>
+                {label}
+            </Label>
             <InputOTP
                 id={id}
                 name={id}

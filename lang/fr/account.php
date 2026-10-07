@@ -63,6 +63,7 @@ return [
         'terms_joiner' => 'et la',
         'privacy_link' => 'politique de confidentialité',
         'terms_required' => 'Acceptez les conditions d’utilisation et la politique de confidentialité pour créer votre compte.',
+        'invitation_email_mismatch' => 'L’invitation a été envoyée à :email : créez votre compte avec cette adresse.',
         'creation_failed' => 'Votre espace n’a pas pu être créé. Réessayez dans quelques minutes : notre équipe est prévenue.',
         'have_account' => 'Vous avez déjà un compte ?',
         'sign_in' => 'Se connecter',

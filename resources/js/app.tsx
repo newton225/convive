@@ -28,6 +28,9 @@ void createInertiaApp({
             case name.startsWith('public/'):
                 return null;
             case name.startsWith('auth/'):
+            // L'accueil des invitations sert aussi a un compte sans organisation : rien dans son
+            // habillage ne doit supposer une organisation courante (TODO du 2026-10-07).
+            case name === 'invitations':
                 return AuthLayout;
             // Console d'exploitation de l'editeur : son propre menu, pas celui d'une organisation.
             case name.startsWith('console/'):

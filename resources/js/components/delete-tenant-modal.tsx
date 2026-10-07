@@ -66,7 +66,7 @@ export default function DeleteTenantModal({
 
                             <div className="space-y-4 py-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="confirmation-name">
+                                    <Label htmlFor="confirmation-name" required>
                                         {t(
                                             'tenants.modals.delete.confirmation_label',
                                             { name: tenant.name },

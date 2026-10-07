@@ -77,7 +77,7 @@ export function ChangePlanDialog({ slug, currentPlan, plans }: Props) {
                     </DialogHeader>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="organisation-plan">
+                        <Label htmlFor="organisation-plan" required>
                             {t('console.organisation.fields.plan')}
                         </Label>
                         <Select

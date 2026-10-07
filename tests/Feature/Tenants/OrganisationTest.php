@@ -7,6 +7,7 @@ use App\Enums\LegalForm;
 use App\Enums\TenantPermission;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\GettingStarted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
@@ -356,5 +357,38 @@ class OrganisationTest extends TestCase
 
         $this->assertNotNull($activity);
         $this->assertSame('convive-ci', $activity->properties['attributes']['subdomain']);
+    }
+
+    public function test_l_identite_legale_enregistree_depuis_les_premiers_pas_ramene_au_tableau_de_bord(): void
+    {
+        $user = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($user);
+
+        $this->actingAs($user)
+            ->withSession(['auth.password_confirmed_at' => now()->getTimestamp()])
+            ->patch(route('tenants.organisation.legal', [$tenant, ...GettingStarted::ReturnQuery]), $this->completeLegalIdentity())
+            ->assertRedirect(route('dashboard', $tenant));
+    }
+
+    public function test_le_sous_domaine_enregistre_depuis_les_premiers_pas_ramene_au_tableau_de_bord(): void
+    {
+        $user = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($user);
+
+        $this->actingAs($user)
+            ->withSession(['auth.password_confirmed_at' => now()->getTimestamp()])
+            ->patch(route('tenants.organisation.subdomain', [$tenant, ...GettingStarted::ReturnQuery]), ['subdomain' => 'convive-ci'])
+            ->assertRedirect(route('dashboard', $tenant));
+    }
+
+    public function test_l_identite_legale_enregistree_depuis_le_menu_reste_sur_le_formulaire(): void
+    {
+        $user = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($user);
+
+        $this->actingAs($user)
+            ->withSession(['auth.password_confirmed_at' => now()->getTimestamp()])
+            ->patch(route('tenants.organisation.legal', $tenant), $this->completeLegalIdentity())
+            ->assertRedirect(route('tenants.organisation.edit', $tenant));
     }
 }

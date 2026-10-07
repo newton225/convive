@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProductTourController;
@@ -44,7 +45,15 @@ Route::prefix('{current_tenant}')
         Route::get('dashboard', DashboardController::class)->name('dashboard');
     });
 
-Route::middleware(['auth'])->group(function () {
+// L'accueil des invitations : hors de tout prefixe d'organisation, puisqu'il sert aussi a qui n'en a
+// encore aucune (TODO du 2026-10-07). L'adresse doit etre verifiee, comme pour tout espace.
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');
+    // Avant `invitations/{invitation}` : ce chemin fixe ne doit pas etre pris pour un code.
+    Route::delete('invitations/followed', [InvitationController::class, 'forget'])->name('invitations.forget');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('invitations/{invitation}/accept', [TenantInvitationController::class, 'accept'])->name('invitations.accept');
     Route::delete('invitations/{invitation}', [TenantInvitationController::class, 'decline'])->name('invitations.decline');
     Route::post('tours/{tour}/complete', [ProductTourController::class, 'complete'])->name('product-tours.complete');

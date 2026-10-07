@@ -59,7 +59,7 @@ class SeatingController extends Controller
             'permissions' => $request->user()->toTenantPermissions($tenant),
             'tables' => $tables->map(fn (SeatingTable $table) => $this->tableRow($table))->all(),
             'unseated' => $unseated->map(fn (Registration $registration) => $this->registrationRow($registration))->all(),
-            'units' => Unit::active()->orderBy('position')->get()
+            'units' => Unit::active()->ordered()->get()
                 ->map(fn (Unit $unit) => ['id' => $unit->id, 'name' => $unit->name])
                 ->all(),
             'constraints' => $constraints->map(fn (UnitSeparationRule $rule) => [

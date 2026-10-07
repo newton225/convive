@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Tenants;
 
+use App\Actions\Tenants\ChangeProfileVisibility;
 use App\Actions\Tenants\DeleteTenantProfile;
 use App\Actions\Tenants\SaveTenantProfile;
 use App\Enums\TenantPermission;
 use App\Enums\TenantPermissionDomain;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Tenants\ChangeProfileVisibilityRequest;
 use App\Http\Requests\Tenants\SaveProfileRequest;
 use App\Models\Profile;
 use App\Models\Tenant;
@@ -118,6 +120,20 @@ class ProfileController extends Controller
     }
 
     /**
+     * Hide a starter profile from every choice, or offer it again.
+     */
+    public function visibility(ChangeProfileVisibilityRequest $request, Tenant $tenant, Profile $profile, ChangeProfileVisibility $change): RedirectResponse
+    {
+        $hidden = $request->boolean('hidden');
+
+        $change->handle($profile, $hidden);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __($hidden ? 'profiles.flash.hidden' : 'profiles.flash.shown')]);
+
+        return to_route('tenants.profiles.index', $tenant);
+    }
+
+    /**
      * Delete the specified profile.
      */
     public function destroy(Tenant $tenant, Profile $profile, DeleteTenantProfile $deleteProfile): RedirectResponse
@@ -173,6 +189,8 @@ class ProfileController extends Controller
                 'name' => $profile->name,
                 'description' => $profile->description,
                 'isSystem' => $profile->is_system,
+                'isStarter' => $profile->isStarter(),
+                'isHidden' => $profile->isHidden(),
                 'requiresTwoFactor' => $profile->demandsTwoFactor(),
                 'permissions' => $profile->permissionValues(),
                 'memberCount' => $profile->members()->count(),

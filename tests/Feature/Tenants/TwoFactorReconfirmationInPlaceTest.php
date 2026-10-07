@@ -34,7 +34,11 @@ class TwoFactorReconfirmationInPlaceTest extends TestCase
 
     private function tenantOwnedBy(User $user): Tenant
     {
-        return app(CreateTenant::class)->handle($user, 'Association Convive');
+        $tenant = app(CreateTenant::class)->handle($user, 'Association Convive');
+        // Delai d'activation en vigueur : la demande part sans la confirmation d'apercu.
+        $tenant->forceFill(['first_published_at' => now()])->save();
+
+        return $tenant;
     }
 
     /**

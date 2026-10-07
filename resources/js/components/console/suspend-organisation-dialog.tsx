@@ -72,7 +72,7 @@ export function SuspendOrganisationDialog({ slug, name }: Props) {
                     </DialogHeader>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="suspension-reason">
+                        <Label htmlFor="suspension-reason" required>
                             {t('console.organisation.fields.reason')}
                         </Label>
                         <Textarea

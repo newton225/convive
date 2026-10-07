@@ -16,6 +16,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -89,6 +90,7 @@ export function TrialSettingsDialog({ trial, plans }: Props) {
                         onChange={(checked) => form.setData('enabled', checked)}
                     />
 
+                    <RequiredFieldsNote />
                     <div className="grid gap-2">
                         <Label htmlFor="trial-days">
                             {t('console.trial.fields.days')}
@@ -114,7 +116,7 @@ export function TrialSettingsDialog({ trial, plans }: Props) {
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="trial-plan">
+                        <Label htmlFor="trial-plan" required>
                             {t('console.trial.fields.plan')}
                         </Label>
                         <Select

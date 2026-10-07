@@ -22,6 +22,8 @@ return [
         'none' => 'Choix « aucune »',
     ],
 
+    'none_locked' => "Toujours proposée en dernier, pour qui n'appartient à aucune unité. Elle ne se renomme pas, ne se désactive pas et ne se supprime pas.",
+
     'flash' => [
         'created' => 'Unité ajoutée.',
         'updated' => 'Unité mise à jour.',

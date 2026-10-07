@@ -11,6 +11,7 @@ use App\Http\Middleware\SetSecurityHeaders;
 use App\Http\Middleware\SetTenantUrlDefaults;
 use App\Http\Responses\RateLimitedResponse;
 use App\Support\Console\SecurityJournal;
+use App\Support\PendingTenantInvitation;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -37,9 +38,15 @@ return Application::configure(basePath: dirname(__DIR__))
         // connexion, voir `RedirectsToCurrentTenant`). Pour revoir la vitrine, il se deconnecte.
         $middleware->redirectUsersTo(function (Request $request) {
             $user = $request->user();
-            $tenant = $user->currentTenant ?? $user?->personalTenant();
+            $tenant = $user->currentTenant ?? $user?->personalTenant() ?? $user?->tenants()->first();
 
-            return $tenant ? "/{$tenant->slug}/dashboard" : '/settings/tenants';
+            // Une invitation suivie et pas encore tranchee, ou aucune organisation : l'accueil des
+            // invitations, la seule page qui ait du sens pour ce compte (TODO du 2026-10-07).
+            if ($tenant === null || PendingTenantInvitation::current($request) !== null) {
+                return route('invitations.index', absolute: false);
+            }
+
+            return "/{$tenant->slug}/dashboard";
         });
 
         // Stripe ne porte pas de jeton CSRF : sa signature est verifiee par le paquet.

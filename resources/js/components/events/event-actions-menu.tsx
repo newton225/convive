@@ -11,6 +11,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { useTranslation } from '@/hooks/use-translation';
 import { can, Permission } from '@/lib/permissions';
 import { duplicate, edit } from '@/routes/tenants/events';
@@ -42,6 +43,8 @@ export function EventActionsMenu({
     onClose,
 }: Props) {
     const { t } = useTranslation();
+    // Venu de la carte « Premiers pas » : la publication depuis la fiche ramene au tableau de bord.
+    const gettingStartedReturn = useGettingStartedReturn();
     const target: [string, number] = [tenantSlug, event.id];
     const allowed = (permission: Parameters<typeof can>[1]) =>
         can(permissions, permission);
@@ -93,7 +96,7 @@ export function EventActionsMenu({
 
     const sheet = [
         {
-            href: edit(target).url,
+            href: edit(target, gettingStartedReturn).url,
             label: t('events.actions.edit'),
             test: 'event-edit',
         },

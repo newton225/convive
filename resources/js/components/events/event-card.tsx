@@ -5,6 +5,7 @@ import { EventFillBar } from '@/components/events/event-fill-bar';
 import { FadeInImage } from '@/components/fade-in-image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
@@ -31,12 +32,14 @@ type PrimaryAction = { href: string; label: string };
  */
 export function EventCard({ tenantSlug, event, permissions, onClose }: Props) {
     const { t, locale } = useTranslation();
+    // Venu de la carte « Premiers pas » : la publication depuis la fiche ramene au tableau de bord.
+    const gettingStartedReturn = useGettingStartedReturn();
     const target: [string, number] = [tenantSlug, event.id];
 
     const primary = ((): PrimaryAction => {
         if (event.status === 'draft') {
             return {
-                href: edit(target).url,
+                href: edit(target, gettingStartedReturn).url,
                 label: t('events.card.continue'),
             };
         }
@@ -73,7 +76,10 @@ export function EventCard({ tenantSlug, event, permissions, onClose }: Props) {
             };
         }
 
-        return { href: edit(target).url, label: t('events.card.open') };
+        return {
+            href: edit(target, gettingStartedReturn).url,
+            label: t('events.card.open'),
+        };
     })();
 
     return (
@@ -81,7 +87,11 @@ export function EventCard({ tenantSlug, event, permissions, onClose }: Props) {
             className="bg-card flex flex-col overflow-hidden rounded-xl border"
             data-test="event-row"
         >
-            <Link href={edit(target).url} tabIndex={-1} aria-hidden="true">
+            <Link
+                href={edit(target, gettingStartedReturn).url}
+                tabIndex={-1}
+                aria-hidden="true"
+            >
                 {event.visualUrl ? (
                     <div className="relative aspect-[5/2] w-full overflow-hidden">
                         <FadeInImage
@@ -105,7 +115,7 @@ export function EventCard({ tenantSlug, event, permissions, onClose }: Props) {
                 <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
                         <Link
-                            href={edit(target).url}
+                            href={edit(target, gettingStartedReturn).url}
                             className="line-clamp-2 font-medium underline-offset-4 hover:underline"
                         >
                             {event.name}

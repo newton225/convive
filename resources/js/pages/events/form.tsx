@@ -8,6 +8,7 @@ import Heading from '@/components/heading';
 import { TableGroupsField } from '@/components/events/table-groups-field';
 import { HelpTip } from '@/components/help-tip';
 import { LabelWithHelp } from '@/components/label-with-help';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { ProductTourButton } from '@/components/product-tour-button';
 import EventVisualField from '@/components/events/event-visual-field';
 import { PublishEventDialog } from '@/components/events/publish-event-dialog';
@@ -17,6 +18,7 @@ import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { edit, index, store, update } from '@/routes/tenants/events';
 import type {
@@ -49,6 +51,7 @@ export default function EventForm({
     template = null,
 }: Props) {
     const { t } = useTranslation();
+    const gettingStartedReturn = useGettingStartedReturn();
     const [confirmingPublish, setConfirmingPublish] = useState(false);
     // Valeurs de depart des champs : l'evenement edite, sinon le modele choisi a la creation.
     const prefill = event ?? template;
@@ -58,7 +61,7 @@ export default function EventForm({
 
     const action = event
         ? update.form([tenant.slug, event.id])
-        : store.form(tenant.slug);
+        : store.form(tenant.slug, gettingStartedReturn);
 
     return (
         <>
@@ -127,6 +130,9 @@ export default function EventForm({
                                         tenantSlug={tenant.slug}
                                         event={event}
                                         paymentAccounts={paymentAccounts}
+                                        firstPublication={
+                                            !tenant.paymentDelayActive
+                                        }
                                     />
                                 </>
                             )}
@@ -189,6 +195,7 @@ export default function EventForm({
                 >
                     {({ errors, processing, isDirty }) => (
                         <>
+                            <RequiredFieldsNote />
                             <Step
                                 index={1}
                                 title={t('events.steps.identity')}
@@ -518,7 +525,12 @@ function Field({
 }) {
     return (
         <div className="grid gap-2">
-            <LabelWithHelp htmlFor={name} label={label} help={help} />
+            <LabelWithHelp
+                htmlFor={name}
+                label={label}
+                help={help}
+                required={required}
+            />
             <Input
                 id={name}
                 name={name}

@@ -2,6 +2,8 @@ import { Head, router } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { AccountList } from '@/components/console/account-list';
+import { ListPagination } from '@/components/list-pagination';
+import type { PaginationMeta } from '@/components/list-pagination';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +15,9 @@ import type { ConsoleAccount, Translations } from '@/types';
 type Props = {
     search: string;
     minimumSearchLength: number;
+    // La page de resultats affichee ; `meta` est nul tant qu'aucune recherche n'est faite.
     results: ConsoleAccount[];
+    meta: PaginationMeta | null;
     blocked: ConsoleAccount[];
 };
 
@@ -26,6 +30,7 @@ export default function ConsoleAccounts({
     search,
     minimumSearchLength,
     results,
+    meta,
     blocked,
 }: Props) {
     const { t } = useTranslation();
@@ -87,7 +92,24 @@ export default function ConsoleAccounts({
                             {t('console.accounts.no_result', { search })}
                         </p>
                     ) : (
-                        <AccountList accounts={results} />
+                        <>
+                            <AccountList accounts={results} />
+                            {meta ? (
+                                <ListPagination
+                                    meta={meta}
+                                    onPageChange={(page) =>
+                                        router.get(
+                                            index().url,
+                                            { q: search, page },
+                                            {
+                                                preserveState: true,
+                                                preserveScroll: true,
+                                            },
+                                        )
+                                    }
+                                />
+                            ) : null}
+                        </>
                     )
                 ) : (
                     <p className="text-muted-foreground text-sm">

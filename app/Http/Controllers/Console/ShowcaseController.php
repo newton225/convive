@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Console\WithdrawAnnouncementRequest;
 use App\Models\ConsoleActionLog;
 use App\Models\ShowcaseEvent;
+use App\Support\ListPage;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,20 +21,22 @@ use Inertia\Response;
 class ShowcaseController extends Controller
 {
     /**
-     * Nombre de retraits relus a l'ecran.
-     */
-    private const WithdrawnShown = 50;
-
-    /**
      * Display the announcements in the showcase and the ones already withdrawn.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        // Deux listes paginees par le serveur (TODO du 2026-10-07, point 11), chacune avec sa page :
+        // les annonces en ligne, et les retraits, qui ne sont plus tronques aux derniers.
+        $announcements = ListPage::of(ShowcaseEvent::query()->latest('announced_at'), $request);
+        $withdrawn = ListPage::of(
+            ConsoleActionLog::query()->where('type', 'announcement_withdrawn')->latest('created_at'),
+            $request,
+            pageName: 'withdrawn_page',
+        );
+
         return Inertia::render('console/showcase', [
             'isSample' => false,
-            'announcements' => ShowcaseEvent::query()
-                ->latest('announced_at')
-                ->get()
+            'announcements' => $announcements->getCollection()
                 ->map(fn (ShowcaseEvent $announcement) => [
                     'id' => $announcement->id,
                     'eventName' => $announcement->name,
@@ -41,12 +45,10 @@ class ShowcaseController extends Controller
                     'startsAt' => $announcement->starts_at?->toISOString(),
                     'publicUrl' => $announcement->public_url,
                 ])
+                ->values()
                 ->all(),
-            'withdrawn' => ConsoleActionLog::query()
-                ->where('type', 'announcement_withdrawn')
-                ->latest('created_at')
-                ->limit(self::WithdrawnShown)
-                ->get()
+            'announcementsMeta' => ListPage::meta($announcements),
+            'withdrawn' => $withdrawn->getCollection()
                 ->map(fn (ConsoleActionLog $entry) => [
                     'id' => $entry->id,
                     'eventName' => $entry->properties['event_name'] ?? '',
@@ -55,7 +57,9 @@ class ShowcaseController extends Controller
                     'actor' => $entry->actor_name,
                     'reason' => $entry->properties['reason'] ?? '',
                 ])
+                ->values()
                 ->all(),
+            'withdrawnMeta' => ListPage::meta($withdrawn),
         ]);
     }
 

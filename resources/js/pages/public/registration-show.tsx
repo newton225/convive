@@ -10,6 +10,7 @@ import { ShareAllTicketsButton } from '@/components/public/share-all-tickets-but
 import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
 import { TicketPdfDownload } from '@/components/public/ticket-pdf-download';
 import InputError from '@/components/input-error';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { LabelWithHelp } from '@/components/label-with-help';
 import { SubmitButton } from '@/components/submit-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -346,6 +347,7 @@ export default function PublicRegistrationShow({
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
+                                            <RequiredFieldsNote />
                                             <input
                                                 type="hidden"
                                                 name="idempotency_key"
@@ -353,7 +355,10 @@ export default function PublicRegistrationShow({
                                             />
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="payment_account_id">
+                                                <Label
+                                                    htmlFor="payment_account_id"
+                                                    required
+                                                >
                                                     {t(
                                                         'guest.proof.fields.payment_account',
                                                     )}
@@ -405,6 +410,7 @@ export default function PublicRegistrationShow({
                                                 <div className="space-y-2">
                                                     <LabelWithHelp
                                                         htmlFor="reference"
+                                                        required
                                                         label={t(
                                                             'guest.proof.fields.reference',
                                                         )}
@@ -452,7 +458,10 @@ export default function PublicRegistrationShow({
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="receipt">
+                                                <Label
+                                                    htmlFor="receipt"
+                                                    required
+                                                >
                                                     {t(
                                                         'guest.proof.fields.receipt',
                                                     )}

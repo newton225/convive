@@ -10,6 +10,7 @@ use App\Models\Event;
 use App\Models\PaymentAccount;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\GettingStarted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
@@ -659,5 +660,37 @@ class EventTest extends TestCase
 
             $this->assertSame(['primary' => '#00ff00', 'secondary' => '#ff00ff'], $event->colors());
         });
+    }
+
+    public function test_creer_un_evenement_depuis_les_premiers_pas_ramene_au_tableau_de_bord(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', [$tenant, ...GettingStarted::ReturnQuery]), $this->payload())
+            ->assertRedirect(route('dashboard', $tenant));
+    }
+
+    public function test_publier_depuis_les_premiers_pas_ramene_au_tableau_de_bord(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishableEvent($tenant);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.publish', [$tenant, $event, ...GettingStarted::ReturnQuery]))
+            ->assertRedirect(route('dashboard', $tenant));
+    }
+
+    public function test_publier_hors_des_premiers_pas_garde_la_fiche_de_l_evenement(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishableEvent($tenant);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.publish', [$tenant, $event]))
+            ->assertRedirect(route('tenants.events.edit', [$tenant, $event]));
     }
 }

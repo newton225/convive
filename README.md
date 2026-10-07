@@ -98,7 +98,8 @@ Chaque purge écrit une entrée dans le journal (nombre de dossiers, places lib�
   Liste fermée : `ÉLIAKIM`, `QODESH`, `SENTINELLES`, `ELISHAMA`, `CHOSEN`, `ÉTAT MAJOR`,
   `Aucune`. La valeur `Aucune` est un choix valide ; un champ vide bloque la validation.
   Cette liste doit être **paramétrable par organisation** (ce sont des données de tenant, pas
-  des constantes du code).
+  des constantes du code), à une exception près : `Aucune` reste toujours en dernière position
+  et ne se renomme, ne se désactive ni ne se supprime.
 - Montant dû = `tarif_par_personne × (1 + nombre d'accompagnateurs)`.
 
 ### 2.6 Attribution des tables
@@ -251,7 +252,8 @@ permissions, immediatement.
 - creer un profil, le nommer, le decrire ;
 - cocher les permissions parmi le catalogue de l'application, groupees par domaine ;
 - dupliquer un profil existant pour en deriver une variante ;
-- renommer un profil, modifier ses permissions, le desactiver ;
+- renommer un profil qu'il a cree, modifier ses permissions, le supprimer ;
+- masquer un profil de base pour ne plus le proposer ;
 - affecter un profil a un membre, en changer a tout moment ;
 - voir, pour chaque profil, le nombre de membres concernes avant d'enregistrer une
   modification.
@@ -266,8 +268,10 @@ permissions, immediatement.
 - Un profil systeme **Proprietaire** existe par defaut, detient toutes les permissions et
   n'est ni modifiable ni supprimable. Un locataire garde toujours au moins un Proprietaire
   actif : la derniere affectation ne peut pas etre retiree.
-- Trois profils sont pre-crees a l'ouverture d'un espace, comme point de depart modifiable :
-  Tresorier, Hotesse, Lecture.
+- Trois **profils de base** sont pre-crees a l'ouverture d'un espace : Tresorier, Hotesse,
+  Lecture. Ils ne se modifient ni ne se suppriment ; l'organisation peut les masquer (ils ne sont
+  alors proposes dans aucun formulaire, ceux qui les portent les gardent) et creer ses propres
+  profils a la place.
 - Un profil affecte a des membres ne peut pas etre supprime : il faut d'abord reaffecter ces
   membres, et la confirmation indique combien ils sont.
 - Une modification de profil prend effet immediatement : les caches de permissions sont
@@ -304,7 +308,8 @@ les profils etant ses roles et le catalogue ses permissions. La table pivot port
 
 ### Profils pre-crees a l'ouverture d'un espace
 
-Point de depart modifiable, pas une contrainte.
+Profils de base, figes : une organisation qui veut une autre repartition masque celui qui ne lui
+convient pas et cree le sien.
 
 | Action                           | Proprietaire | Tresorier | Hotesse | Lecture |
 | -------------------------------- | :----------: | :-------: | :-----: | :-----: |
@@ -405,7 +410,9 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 1. **Site produit** — hero, bénéfices, quatre étapes, tarifs, appel à l'action.
 2. **Connexion** — identifiants → code 2FA à 6 chiffres → espace ; création d'un espace
    (essai de 30 jours, durée réglable depuis la console) qui redirige vers le formulaire
-   d'organisation.
+   d'organisation. L'adresse email est confirmée par un lien avant tout accès au compte ; une
+   personne qui s'inscrit depuis le lien d'une invitation reçue à cette adresse n'a pas à la
+   confirmer de nouveau.
 
 ### Invité (PWA, bilingue FR/EN, mobile d'abord)
 
@@ -507,7 +514,9 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 ## 5. Notifications
 
 Événements notifiables : preuve reçue, réservation expirée, preuve rejetée, places épuisées,
-purge effectuée, invitation d'équipe en attente, billet refusé à l'entrée, inscription annulée.
+purge effectuée, invitation d'équipe en attente, invitation d'équipe acceptée (à tous les
+Propriétaires, dans l'application et par email par défaut), billet refusé à l'entrée, inscription
+annulée.
 Canaux configurables par type : in-app, email, ou les deux. Cloche avec compteur de non-lus,
 clic → écran concerné, « tout marquer comme lu ».
 

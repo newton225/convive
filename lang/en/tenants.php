@@ -32,8 +32,10 @@ return [
     'invitation_mail' => [
         'subject' => 'You have been invited to join :tenant',
         'intro' => ':inviter has invited you to join the :tenant organisation.',
-        'instruction' => 'Log in and open your dashboard to accept or decline this invitation.',
+        'instruction' => 'Log in with the account of :email to accept or decline this invitation.',
         'action' => 'Log in',
+        'instruction_register' => 'Create your Convive account with :email, then accept the invitation.',
+        'action_register' => 'Create my account',
     ],
 
     'index' => [
@@ -148,6 +150,30 @@ return [
         'placeholder' => 'Choose an organisation',
     ],
 
+    'invitations_home' => [
+        'head' => 'Invitations',
+        'title' => 'Your invitations',
+        'description' => 'Join an organisation by accepting its invitation.',
+        'item' => ':inviter invites you to join :tenant with the :profile profile.',
+        'item_without_inviter' => 'You are invited to join :tenant with the :profile profile.',
+        'accept' => 'Accept',
+        'decline' => 'Decline',
+        'confirm_decline' => [
+            'title' => 'Decline this invitation?',
+            'description' => 'The invitation from :tenant will be deleted. To join this organisation later, it will have to invite you again.',
+        ],
+        'empty' => 'No pending invitation for your address.',
+        'no_organisation' => 'You do not belong to any organisation yet. You can create your own at any time.',
+        'create_organisation' => 'Create my organisation',
+        'to_dashboard' => 'Go to my dashboard',
+        'mismatch' => [
+            'title' => 'This invitation is addressed to another address',
+            'body' => 'The invitation from :tenant was sent to :invited, but you are logged in as :account. It cannot be attached to this account.',
+            'switch' => 'Log in as :invited',
+            'no_account' => 'No account at :invited? Ask the organiser to cancel the invitation and send it again to :account.',
+            'dismiss' => 'Ignore this invitation',
+        ],
+    ],
     'invitation_alert' => [
         'login' => 'Log in to join the ":name" organisation.',
         'register' => 'Create your account to join the ":name" organisation.',

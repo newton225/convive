@@ -10,6 +10,7 @@ import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import { SupportRequestCard } from '@/components/support-request-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -301,8 +302,9 @@ export default function SupportAccess({
                                   : t('support_access.grant.none_active')}
                         </p>
                         <div className="grid items-start gap-4 sm:grid-cols-2">
+                            <RequiredFieldsNote />
                             <div className="grid gap-2">
-                                <Label htmlFor="support-operator">
+                                <Label htmlFor="support-operator" required>
                                     {t('support_access.grant.operator')}
                                 </Label>
                                 <Select
@@ -336,7 +338,7 @@ export default function SupportAccess({
                                 <InputError message={form.errors.operator_id} />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="support-duration">
+                                <Label htmlFor="support-duration" required>
                                     {t('support_access.grant.duration')}
                                 </Label>
                                 <Select
@@ -408,7 +410,7 @@ export default function SupportAccess({
                             <InputError message={form.errors.event_id} />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="support-reason">
+                            <Label htmlFor="support-reason" required>
                                 {t('support_access.grant.reason')}
                             </Label>
                             <Textarea

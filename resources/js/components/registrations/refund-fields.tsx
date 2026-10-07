@@ -57,7 +57,7 @@ export function RefundFields({
     return (
         <div className="grid items-start gap-3 sm:grid-cols-2">
             <div className="grid content-start gap-2">
-                <Label htmlFor={`${idPrefix}-channel`}>
+                <Label htmlFor={`${idPrefix}-channel`} required>
                     {t('registrations.refund.fields.channel')}
                 </Label>
                 <Select
@@ -93,7 +93,7 @@ export function RefundFields({
             </div>
 
             <div className="grid content-start gap-2">
-                <Label htmlFor={`${idPrefix}-refunded-on`}>
+                <Label htmlFor={`${idPrefix}-refunded-on`} required>
                     {t('registrations.refund.fields.refunded_on')}
                 </Label>
                 <Input
@@ -112,7 +112,7 @@ export function RefundFields({
             </div>
 
             <div className="grid content-start gap-2">
-                <Label htmlFor={`${idPrefix}-fee`}>
+                <Label htmlFor={`${idPrefix}-fee`} required>
                     {t('registrations.refund.fields.fee')}
                 </Label>
                 <Input

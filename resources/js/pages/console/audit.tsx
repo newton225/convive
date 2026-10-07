@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
 import { ConsoleTable } from '@/components/console/console-table';
+import type { PaginationMeta } from '@/components/list-pagination';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useServerList } from '@/hooks/use-server-list';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
 import { audit } from '@/routes/console';
@@ -24,7 +25,10 @@ import type {
 
 type Props = {
     isSample: boolean;
+    // La page affichee seulement : recherche, filtre et pagination se font cote serveur.
     entries: ConsoleAuditEntry[];
+    meta: PaginationMeta;
+    filters: { search: string | null; type: string };
 };
 
 const AllTypes = 'all';
@@ -62,29 +66,22 @@ const types: ConsoleAuditType[] = [
  * organisations ; conservation 24 mois, en ecriture seule. Meme presentation que la
  * journalisation d'une organisation (ecran 23).
  */
-export default function ConsoleAudit({ isSample, entries }: Props) {
+export default function ConsoleAudit({
+    isSample,
+    entries,
+    meta,
+    filters,
+}: Props) {
     const { t, locale } = useTranslation();
-    const [search, setSearch] = useState('');
-    const [type, setType] = useState<string>(AllTypes);
+    const { search, setSearch, visit } = useServerList({
+        url: audit().url,
+        filters,
+    });
+    const type = filters.type;
+    const setType = (value: string) => visit({ filter: { type: value } });
 
     const actorLabel = (entry: ConsoleAuditEntry) =>
         entry.actor ?? t('console.system_actor');
-
-    // Filtre en memoire sur les entrees recentes que le serveur envoie ; a passer cote serveur
-    // (`spatie/laravel-query-builder`) quand le journal depassera cette fenetre.
-    const visible = useMemo(() => {
-        const needle = search.trim().toLocaleLowerCase(locale);
-
-        return entries.filter(
-            (entry) =>
-                (type === AllTypes || entry.type === type) &&
-                (needle === '' ||
-                    [entry.actor ?? '', entry.organisation ?? ''].some(
-                        (value) =>
-                            value.toLocaleLowerCase(locale).includes(needle),
-                    )),
-        );
-    }, [entries, search, type, locale]);
 
     const columns: ColumnDef<ConsoleAuditEntry>[] = [
         {
@@ -169,9 +166,13 @@ export default function ConsoleAudit({ isSample, entries }: Props) {
 
                 <ConsoleTable
                     columns={columns}
-                    data={visible}
+                    data={entries}
+                    meta={meta}
+                    onPageChange={(page) => visit({ page })}
                     emptyState={
-                        entries.length === 0 ? (
+                        meta.total === 0 &&
+                        (filters.search ?? '') === '' &&
+                        type === AllTypes ? (
                             <>
                                 <p className="font-medium">
                                     {t('console.audit.empty.title')}

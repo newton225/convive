@@ -159,6 +159,9 @@ class SaveEvent
             $event->published_at ??= now();
             $event->save();
 
+            // Des la premiere publication, un changement de compte de versement attend 24 heures.
+            Tenant::current()?->markFirstPublication();
+
             activity()
                 ->performedOn($event)
                 ->event('updated')

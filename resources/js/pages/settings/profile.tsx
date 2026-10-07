@@ -6,6 +6,7 @@ import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import { Input } from '@/components/ui/input';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { Label } from '@/components/ui/label';
 import { PhoneField } from '@/components/phone/phone-field';
 import type { Country } from 'react-phone-number-input';
@@ -54,8 +55,9 @@ export default function Profile({
                 >
                     {({ processing, errors, isDirty }) => (
                         <>
+                            <RequiredFieldsNote />
                             <div className="grid gap-2">
-                                <Label htmlFor="name">
+                                <Label htmlFor="name" required>
                                     {t('account.fields.name')}
                                 </Label>
 
@@ -76,7 +78,7 @@ export default function Profile({
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">
+                                <Label htmlFor="email" required>
                                     {t('account.fields.email')}
                                 </Label>
 

@@ -2,6 +2,8 @@
 
 return [
     'unsaved_changes' => 'Modifications non enregistrées',
+    'required' => 'obligatoire',
+    'required_note' => "Les champs marqués d'un * sont obligatoires.",
 
     'actions' => [
         'save' => 'Enregistrer',
@@ -36,6 +38,10 @@ return [
         'page_of' => 'Page :current sur :last',
         'previous' => 'Précédent',
         'next' => 'Suivant',
+        'first' => 'Premier',
+        'last' => 'Dernier',
+        'label' => 'Pages',
+        'go_to_page' => 'Aller à la page :page',
     ],
 
     'sort' => [

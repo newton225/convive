@@ -85,7 +85,7 @@ export function SupportRequestCard({ tenantSlug, pendingRequest }: Props) {
                         {t('support_access.request.intro')}
                     </p>
                     <div className="grid gap-2">
-                        <Label htmlFor="support-request-reason">
+                        <Label htmlFor="support-request-reason" required>
                             {t('support_access.request.reason')}
                         </Label>
                         <Textarea

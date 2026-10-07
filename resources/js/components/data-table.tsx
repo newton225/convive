@@ -10,7 +10,6 @@ import {
 } from '@tanstack/react-table';
 import { useState } from 'react';
 import { DataTableSortHeader } from '@/components/data-table-sort-header';
-import { Button } from '@/components/ui/button';
 import {
     Table,
     TableBody,
@@ -19,7 +18,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { useTranslation } from '@/hooks/use-translation';
+import { ListPagination } from '@/components/list-pagination';
 
 export type DataTableMeta = {
     currentPage: number;
@@ -66,7 +65,6 @@ type Props<TData> = {
  */
 export default function DataTable<TData>(props: Props<TData>) {
     const { columns, data, emptyState, rowTestId } = props;
-    const { t } = useTranslation();
     const isClient = props.mode === 'client';
     const [clientSorting, setClientSorting] = useState<SortingState>(
         props.mode === 'client' ? (props.initialSorting ?? []) : [],
@@ -206,34 +204,7 @@ export default function DataTable<TData>(props: Props<TData>) {
                 </Table>
             </div>
 
-            {meta.lastPage > 1 ? (
-                <div className="flex items-center justify-between">
-                    <p className="text-muted-foreground text-sm">
-                        {t('common.pagination.page_of', {
-                            current: String(meta.currentPage),
-                            last: String(meta.lastPage),
-                        })}
-                    </p>
-                    <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={meta.currentPage <= 1}
-                            onClick={() => goToPage(meta.currentPage - 1)}
-                        >
-                            {t('common.pagination.previous')}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={meta.currentPage >= meta.lastPage}
-                            onClick={() => goToPage(meta.currentPage + 1)}
-                        >
-                            {t('common.pagination.next')}
-                        </Button>
-                    </div>
-                </div>
-            ) : null}
+            <ListPagination meta={meta} onPageChange={goToPage} />
         </div>
     );
 }

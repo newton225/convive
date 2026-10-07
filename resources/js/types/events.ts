@@ -4,6 +4,9 @@ export type TenantSummary = {
     slug: string;
     subdomain: string | null;
     isReadyToPublish: boolean;
+    // Faux tant que l'organisation n'a rien publie : la premiere publication demarre le delai
+    // de 24 heures des comptes de versement.
+    paymentDelayActive: boolean;
 };
 
 export type EventSummary = {

@@ -9,6 +9,7 @@ import PasswordInput from '@/components/password-input';
 import { PasswordStrength } from '@/components/password-strength';
 import type { PasswordPolicy } from '@/lib/password-strength';
 import { SubmitButton } from '@/components/submit-button';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/security';
 import type { Props as ManagePasskeysProps } from '@/components/manage-passkeys';
@@ -88,8 +89,9 @@ export default function Security(props: Props) {
                 >
                     {({ errors, processing, isDirty }) => (
                         <>
+                            <RequiredFieldsNote />
                             <div className="grid gap-2">
-                                <Label htmlFor="current_password">
+                                <Label htmlFor="current_password" required>
                                     {t('account.fields.current_password')}
                                 </Label>
 
@@ -108,7 +110,7 @@ export default function Security(props: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">
+                                <Label htmlFor="password" required>
                                     {t('account.fields.new_password')}
                                 </Label>
 
@@ -136,7 +138,7 @@ export default function Security(props: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">
+                                <Label htmlFor="password_confirmation" required>
                                     {t('account.fields.password_confirmation')}
                                 </Label>
 

@@ -15,6 +15,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
 import { schedule } from '@/routes/console/organisations/deletion';
@@ -71,8 +72,9 @@ export function ScheduleDeletionDialog({ slug, name }: Props) {
                         </DialogDescription>
                     </DialogHeader>
 
+                    <RequiredFieldsNote />
                     <div className="grid gap-2">
-                        <Label htmlFor="deletion-request-reference">
+                        <Label htmlFor="deletion-request-reference" required>
                             {t('console.organisation.fields.request_reference')}
                         </Label>
                         <Input
@@ -96,7 +98,7 @@ export function ScheduleDeletionDialog({ slug, name }: Props) {
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="deletion-confirmation">
+                        <Label htmlFor="deletion-confirmation" required>
                             {t(
                                 'console.organisation.fields.confirmation_named',
                                 {

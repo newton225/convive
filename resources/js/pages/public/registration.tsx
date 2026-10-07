@@ -13,6 +13,7 @@ import {
     Field,
     UnitSelect,
 } from '@/components/registration-fields';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import LocaleSwitcher from '@/components/locale-switcher';
 import { SubmitButton } from '@/components/submit-button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -126,8 +127,10 @@ export default function PublicRegistration({
 
                             <Card>
                                 <CardContent className="space-y-4 pt-6">
+                                    <RequiredFieldsNote />
                                     <Field
                                         id="name"
+                                        required
                                         label={t(
                                             'guest.registration.fields.name',
                                         )}
@@ -143,6 +146,7 @@ export default function PublicRegistration({
 
                                     <Field
                                         id="phone"
+                                        required
                                         label={t(
                                             'guest.registration.fields.phone',
                                         )}
@@ -177,6 +181,7 @@ export default function PublicRegistration({
 
                                     <Field
                                         id="unit_id"
+                                        required
                                         label={t(
                                             'guest.registration.fields.unit',
                                         )}

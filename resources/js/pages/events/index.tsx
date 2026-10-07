@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { EventGrid } from '@/components/events/event-grid';
 import { ConfirmSummary } from '@/components/confirm-summary';
 import Heading from '@/components/heading';
+import { ListPagination } from '@/components/list-pagination';
+import type { PaginationMeta } from '@/components/list-pagination';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -16,11 +18,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { useServerList } from '@/hooks/use-server-list';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
-import { normalizeForSearch } from '@/lib/search';
 import { close, create, index } from '@/routes/tenants/events';
 import type {
     EventListItem,
@@ -36,32 +38,35 @@ type EventFilter = (typeof EventFilters)[number];
 
 type Props = {
     tenant: TenantSummary;
+    // La page affichee seulement : recherche, filtre et pagination se font cote serveur.
     events: EventListItem[];
+    meta: PaginationMeta;
+    filters: { status: EventFilter; search: string | null };
+    // Les compteurs suivent la recherche : ils disent ou se trouvent les resultats.
+    counts: Record<EventFilter, number>;
+    hasEvents: boolean;
     permissions: TenantPermissions;
 };
 
-export default function EventsIndex({ tenant, events, permissions }: Props) {
+export default function EventsIndex({
+    tenant,
+    events,
+    meta,
+    filters,
+    counts,
+    hasEvents,
+    permissions,
+}: Props) {
     const { t, locale } = useTranslation();
-    const [filter, setFilter] = useState<EventFilter>('active');
-    const matches = (event: EventListItem, value: EventFilter) =>
-        value === 'all' ||
-        (value === 'closed'
-            ? event.status === 'closed'
-            : event.status !== 'closed');
-    const [search, setSearch] = useState('');
-    const needle = normalizeForSearch(search);
-    // Le nom, le sous-titre et le lieu : ce qu'on se rappelle d'un evenement qu'on cherche.
-    const found = events.filter(
-        (event) =>
-            needle === '' ||
-            normalizeForSearch(
-                [event.name, event.subtitle, event.venue].join(' '),
-            ).includes(needle),
-    );
-    // Les compteurs suivent la recherche : ils disent ou se trouvent les resultats.
-    const countFor = (value: EventFilter) =>
-        found.filter((event) => matches(event, value)).length;
-    const visible = found.filter((event) => matches(event, filter));
+    const filter = filters.status;
+    const { search, setSearch, visit } = useServerList({
+        url: index(tenant.slug).url,
+        filters,
+        // « En cours » est le filtre par defaut du serveur : « Tous » doit s'ecrire dans l'adresse.
+        neutral: null,
+    });
+    const setFilter = (value: EventFilter) =>
+        visit({ filter: { status: value } });
     const [closing, setClosing] = useState<EventListItem | null>(null);
 
     return (
@@ -87,7 +92,7 @@ export default function EventsIndex({ tenant, events, permissions }: Props) {
                     ) : null}
                 </div>
 
-                {events.length === 0 ? (
+                {!hasEvents ? (
                     <div className="rounded-xl border border-dashed p-10 text-center">
                         <p className="text-muted-foreground text-sm">
                             {t('events.empty')}
@@ -121,7 +126,7 @@ export default function EventsIndex({ tenant, events, permissions }: Props) {
                                     >
                                         {t(`events.filters.${value}`)}
                                         <span className="text-muted-foreground ml-1 tabular-nums">
-                                            {countFor(value)}
+                                            {counts[value]}
                                         </span>
                                     </ToggleGroupItem>
                                 ))}
@@ -143,19 +148,25 @@ export default function EventsIndex({ tenant, events, permissions }: Props) {
                             </div>
                         </div>
 
-                        {visible.length === 0 ? (
+                        {events.length === 0 ? (
                             <p className="text-muted-foreground text-sm">
-                                {needle === ''
+                                {(filters.search ?? '') === ''
                                     ? t('events.filters.empty')
                                     : t('events.search.empty', { search })}
                             </p>
                         ) : (
-                            <EventGrid
-                                tenantSlug={tenant.slug}
-                                events={visible}
-                                permissions={permissions}
-                                onClose={setClosing}
-                            />
+                            <>
+                                <EventGrid
+                                    tenantSlug={tenant.slug}
+                                    events={events}
+                                    permissions={permissions}
+                                    onClose={setClosing}
+                                />
+                                <ListPagination
+                                    meta={meta}
+                                    onPageChange={(page) => visit({ page })}
+                                />
+                            </>
                         )}
                     </>
                 )}

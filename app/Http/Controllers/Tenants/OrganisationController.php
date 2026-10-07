@@ -13,6 +13,7 @@ use App\Http\Requests\Tenants\SaveLegalIdentityRequest;
 use App\Http\Requests\Tenants\SaveSubdomainRequest;
 use App\Models\Tenant;
 use App\Models\TenantBranding;
+use App\Support\GettingStarted;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -76,7 +77,7 @@ class OrganisationController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('organisation.flash.legal_updated')]);
 
-        return to_route('tenants.organisation.edit', $tenant);
+        return GettingStarted::redirect($request, $tenant, to_route('tenants.organisation.edit', $tenant));
     }
 
     /**
@@ -130,7 +131,7 @@ class OrganisationController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('organisation.flash.subdomain_updated')]);
 
-        return to_route('tenants.organisation.edit', $tenant);
+        return GettingStarted::redirect($request, $tenant, to_route('tenants.organisation.edit', $tenant));
     }
 
     /**

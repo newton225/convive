@@ -113,7 +113,7 @@ export default function RegistrationVerify({
                                 </p>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="code">
+                                    <Label htmlFor="code" required>
                                         {t(
                                             'guest.phone_verification.code_label',
                                         )}

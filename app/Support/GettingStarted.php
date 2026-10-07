@@ -7,6 +7,8 @@ use App\Models\Event;
 use App\Models\PaymentAccount;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 /**
  * La carte « Premiers pas » du tableau de bord : les etapes qui menent une organisation neuve
@@ -18,6 +20,14 @@ use App\Models\User;
  */
 final class GettingStarted
 {
+    /**
+     * Ajoute par la carte a l'adresse du formulaire de chaque etape, puis a celle de son envoi : il
+     * dit que la personne vient de la carte et doit y revenir. Porte par l'adresse plutot que par la
+     * session, il ne survit pas a une visite abandonnee : le meme formulaire ouvert ensuite depuis
+     * le menu garde son comportement habituel.
+     */
+    public const ReturnQuery = ['via' => 'getting-started'];
+
     /**
      * @return array{steps: array<int, array{key: string, done: bool}>, completed: int}|null
      */
@@ -40,5 +50,16 @@ final class GettingStarted
         $completed = count(array_filter($steps, fn (array $step) => $step['done']));
 
         return $completed === count($steps) ? null : ['steps' => $steps, 'completed' => $completed];
+    }
+
+    /**
+     * Apres l'enregistrement d'une etape ouverte depuis la carte, le tableau de bord, qui montre la
+     * progression et l'etape suivante ; sinon la destination habituelle du formulaire.
+     */
+    public static function redirect(Request $request, Tenant $tenant, RedirectResponse $default): RedirectResponse
+    {
+        return $request->query('via') === self::ReturnQuery['via']
+            ? to_route('dashboard', $tenant)
+            : $default;
     }
 }

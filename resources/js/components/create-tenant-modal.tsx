@@ -45,7 +45,7 @@ export default function CreateTenantModal({ children }: PropsWithChildren) {
                             </DialogHeader>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="name">
+                                <Label htmlFor="name" required>
                                     {t('tenants.settings.name_label')}
                                 </Label>
                                 <Input

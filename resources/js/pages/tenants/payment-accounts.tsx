@@ -1,17 +1,14 @@
-import { Form, Head, Link, router } from '@inertiajs/react';
-import { AlertTriangle, Clock, Plus, Trash2 } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { AlertTriangle, Clock, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ConfirmSummary } from '@/components/confirm-summary';
+import { AccountForm } from '@/components/payment-accounts/account-form';
 import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
-import { LabelWithHelp } from '@/components/label-with-help';
 import { Badge } from '@/components/ui/badge';
-import { SubmitButton } from '@/components/submit-button';
 import { TwoFactorReconfirmDialog } from '@/components/two-factor-reconfirm-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogClose,
@@ -21,14 +18,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
 import {
@@ -52,6 +42,7 @@ type Props = {
     accounts: PaymentAccount[];
     channels: PaymentChannelOption[];
     activationDelayHours: number;
+    delayActive: boolean;
     twoFactorEnabled: boolean;
 };
 
@@ -60,9 +51,11 @@ export default function PaymentAccounts({
     accounts,
     channels,
     activationDelayHours,
+    delayActive,
     twoFactorEnabled,
 }: Props) {
     const { t, locale } = useTranslation();
+    const gettingStartedReturn = useGettingStartedReturn();
     const [deleting, setDeleting] = useState<PaymentAccount | null>(null);
     const [approving, setApproving] = useState<PaymentAccount | null>(null);
     const [approveProcessing, setApproveProcessing] = useState(false);
@@ -89,9 +82,12 @@ export default function PaymentAccounts({
                 <Heading
                     variant="small"
                     title={t('payment_accounts.title')}
-                    description={t('payment_accounts.description', {
-                        hours: activationDelayHours,
-                    })}
+                    description={t(
+                        delayActive
+                            ? 'payment_accounts.description'
+                            : 'payment_accounts.description_before_publication',
+                        { hours: activationDelayHours },
+                    )}
                 />
 
                 {twoFactorEnabled ? null : (
@@ -173,11 +169,12 @@ export default function PaymentAccounts({
                                         compte neuf. */}
                                     <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5">
                                         <dt className="text-muted-foreground">
-                                            {t('payment_accounts.fields.channel')}
+                                            {t(
+                                                'payment_accounts.fields.channel',
+                                            )}
                                         </dt>
                                         <dd>
-                                            {account.pending.channelLabel ??
-                                                ''}
+                                            {account.pending.channelLabel ?? ''}
                                         </dd>
                                         <dt className="text-muted-foreground">
                                             {t(
@@ -186,7 +183,9 @@ export default function PaymentAccounts({
                                         </dt>
                                         <dd>
                                             {account.pending.accountNumber ??
-                                                t('payment_accounts.pending.none')}
+                                                t(
+                                                    'payment_accounts.pending.none',
+                                                )}
                                         </dd>
                                         <dt className="text-muted-foreground">
                                             {t(
@@ -195,7 +194,9 @@ export default function PaymentAccounts({
                                         </dt>
                                         <dd>
                                             {account.pending.holderName ??
-                                                t('payment_accounts.pending.none')}
+                                                t(
+                                                    'payment_accounts.pending.none',
+                                                )}
                                         </dd>
                                     </dl>
                                     <p className="text-muted-foreground">
@@ -264,6 +265,7 @@ export default function PaymentAccounts({
                                 action={update.form([tenant.slug, account.id])}
                                 account={account}
                                 channels={channels}
+                                delayActive={delayActive}
                             />
 
                             <Button
@@ -287,9 +289,10 @@ export default function PaymentAccounts({
                     />
 
                     <AccountForm
-                        action={store.form(tenant.slug)}
+                        action={store.form(tenant.slug, gettingStartedReturn)}
                         account={null}
                         channels={channels}
+                        delayActive={delayActive}
                     />
                 </div>
             </div>
@@ -502,149 +505,6 @@ function accountLine(
     holder: string | null,
 ): string {
     return [channel, number, holder].filter(Boolean).join(' · ') || '-';
-}
-
-function AccountForm({
-    action,
-    account,
-    channels,
-}: {
-    action: { action: string; method: 'post' | 'patch' };
-    account: PaymentAccount | null;
-    channels: PaymentChannelOption[];
-}) {
-    const { t } = useTranslation();
-    const suffix = account?.id ?? 'new';
-
-    return (
-        <Form {...action} setDefaultsOnSuccess className="space-y-4">
-            {({ errors, processing, isDirty }) => (
-                <>
-                    <div className="grid items-start gap-4 sm:grid-cols-2">
-                        <div className="grid gap-2">
-                            <LabelWithHelp
-                                htmlFor={`label-${suffix}`}
-                                label={t('payment_accounts.fields.label')}
-                                help={t('payment_accounts.help.label')}
-                            />
-                            <Input
-                                id={`label-${suffix}`}
-                                name="label"
-                                data-test="payment-account-label"
-                                defaultValue={account?.label ?? ''}
-                                placeholder={t(
-                                    'payment_accounts.fields.label_placeholder',
-                                )}
-                                required
-                            />
-                            <InputError message={errors.label} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <LabelWithHelp
-                                htmlFor={`channel-${suffix}`}
-                                label={t('payment_accounts.fields.channel')}
-                                help={t('payment_accounts.help.channel')}
-                            />
-                            <Select
-                                name="channel"
-                                defaultValue={account?.channel ?? undefined}
-                            >
-                                <SelectTrigger
-                                    id={`channel-${suffix}`}
-                                    className="w-full"
-                                    data-test="payment-account-channel"
-                                >
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {channels.map((channel) => (
-                                        <SelectItem
-                                            key={channel.value}
-                                            value={channel.value}
-                                        >
-                                            {channel.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <InputError message={errors.channel} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <LabelWithHelp
-                                htmlFor={`number-${suffix}`}
-                                label={t(
-                                    'payment_accounts.fields.account_number',
-                                )}
-                                help={t('payment_accounts.help.account_number')}
-                            />
-                            <Input
-                                id={`number-${suffix}`}
-                                name="account_number"
-                                data-test="payment-account-number"
-                                defaultValue={account?.accountNumber ?? ''}
-                            />
-                            <InputError message={errors.account_number} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <LabelWithHelp
-                                htmlFor={`holder-${suffix}`}
-                                label={t('payment_accounts.fields.holder_name')}
-                                help={t('payment_accounts.help.holder_name')}
-                            />
-                            <Input
-                                id={`holder-${suffix}`}
-                                name="holder_name"
-                                defaultValue={account?.holderName ?? ''}
-                            />
-                            <InputError message={errors.holder_name} />
-                        </div>
-
-                        <div className="grid gap-2 sm:col-span-2">
-                            <LabelWithHelp
-                                htmlFor={`instructions-${suffix}`}
-                                label={t(
-                                    'payment_accounts.fields.instructions',
-                                )}
-                                help={t('payment_accounts.help.instructions')}
-                            />
-                            <Input
-                                id={`instructions-${suffix}`}
-                                name="instructions"
-                                defaultValue={account?.instructions ?? ''}
-                                placeholder={t(
-                                    'payment_accounts.fields.instructions_placeholder',
-                                )}
-                            />
-                            <InputError message={errors.instructions} />
-                        </div>
-                    </div>
-
-                    <label className="flex items-center gap-2 text-sm">
-                        <Checkbox
-                            name="is_active"
-                            value="1"
-                            defaultChecked={account?.isActive ?? true}
-                        />
-                        {t('payment_accounts.fields.is_active')}
-                    </label>
-
-                    <SubmitButton
-                        data-test="payment-account-submit"
-                        processing={processing}
-                        dirty={isDirty}
-                    >
-                        {account ? null : <Plus />}
-                        {account
-                            ? t('payment_accounts.actions.save')
-                            : t('payment_accounts.actions.create')}
-                    </SubmitButton>
-                </>
-            )}
-        </Form>
-    );
 }
 
 PaymentAccounts.layout = (props: {

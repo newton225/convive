@@ -14,13 +14,14 @@ class CreateStarterUnits
     /**
      * Create the units a tenant starts with.
      *
-     * Comme les profils, c'est un point de depart : l'exploitant renomme, ajoute et desactive
-     * a sa guise. `Aucune` arrive en dernier, parce qu'elle se choisit par defaut.
+     * Un point de depart : l'exploitant renomme, ajoute et desactive a sa guise, sauf `Aucune`,
+     * protegee et toujours en dernier (voir `Unit::isNone()`).
      */
     public function handle(): void
     {
         foreach (Unit::Starters as $position => $name) {
             $unit = new Unit(['name' => $name, 'position' => $position]);
+            $unit->is_none = $name === Unit::None;
             $unit->save();
         }
     }

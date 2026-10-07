@@ -6,6 +6,7 @@ use App\Actions\Console\ManageAccount;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\ListPage;
 use App\Support\Search\UnaccentedSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -28,27 +29,29 @@ class AccountController extends Controller
      */
     private const MinimumSearchLength = 3;
 
-    private const ResultsShown = 25;
-
     public function index(Request $request): Response
     {
         // Les jokers de recherche sont retires : « %%% » ne doit pas ramener tous les comptes.
         $search = trim(str_replace(['%', '_'], '', (string) $request->query('q', '')));
         $searchable = mb_strlen($search) >= self::MinimumSearchLength;
 
+        // Les resultats sont pagines par le serveur (TODO du 2026-10-07, point 11) plutot que
+        // tronques : un nom courant ne cache plus les comptes au-dela des premiers.
+        $results = $searchable
+            ? ListPage::of(
+                User::query()
+                    ->tap(fn (Builder $query) => UnaccentedSearch::apply($query, ['name', 'email', 'phone'], $search))
+                    ->orderBy('name'),
+                $request,
+            )
+            : null;
+
         return Inertia::render('console/accounts', [
             'isSample' => false,
             'search' => $search,
             'minimumSearchLength' => self::MinimumSearchLength,
-            'results' => $searchable
-                ? User::query()
-                    ->tap(fn (Builder $query) => UnaccentedSearch::apply($query, ['name', 'email', 'phone'], $search))
-                    ->orderBy('name')
-                    ->limit(self::ResultsShown)
-                    ->get()
-                    ->map(fn (User $user) => $this->summary($user))
-                    ->all()
-                : [],
+            'results' => $results?->getCollection()->map(fn (User $user) => $this->summary($user))->values()->all() ?? [],
+            'meta' => $results !== null ? ListPage::meta($results) : null,
             'blocked' => User::query()
                 ->whereNotNull('blocked_at')
                 ->orderByDesc('blocked_at')

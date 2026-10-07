@@ -3,6 +3,7 @@
 namespace App\Notifications\Tenants;
 
 use App\Models\TenantInvitation as TenantInvitationModel;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -38,16 +39,23 @@ class TenantInvitation extends Notification implements ShouldQueue
         $tenant = $this->invitation->tenant;
         $inviter = $this->invitation->inviter;
 
+        // Sans compte a cette adresse, le lien mene droit a l'inscription ; sinon a la connexion
+        // (TODO du 2026-10-07). Les deux pages gardent l'invitation pendant tout le parcours.
+        $hasAccount = User::query()->whereRaw('lower(email) = ?', [strtolower($this->invitation->email)])->exists();
+        $page = $hasAccount ? 'login' : 'register';
+
         return (new MailMessage)
             ->subject(__('tenants.invitation_mail.subject', ['tenant' => $tenant->name]))
             ->line(__('tenants.invitation_mail.intro', [
                 'inviter' => $inviter->name,
                 'tenant' => $tenant->name,
             ]))
-            ->line(__('tenants.invitation_mail.instruction'))
+            ->line(__($hasAccount ? 'tenants.invitation_mail.instruction' : 'tenants.invitation_mail.instruction_register', [
+                'email' => $this->invitation->email,
+            ]))
             ->action(
-                __('tenants.invitation_mail.action'),
-                route('login', ['invitation' => $this->invitation->code]),
+                __($hasAccount ? 'tenants.invitation_mail.action' : 'tenants.invitation_mail.action_register'),
+                route($page, ['invitation' => $this->invitation->code]),
             );
     }
 

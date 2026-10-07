@@ -9,6 +9,7 @@ use App\Http\Requests\Tenants\SavePaymentAccountRequest;
 use App\Models\PaymentAccount;
 use App\Models\PaymentProof;
 use App\Models\Tenant;
+use App\Support\GettingStarted;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -46,6 +47,8 @@ class PaymentAccountController extends Controller
                     'neverActive' => $account->neverActive(),
                     'changedRecently' => $account->changedRecently(),
                     'pending' => $account->hasPendingChange() ? [
+                        // La valeur, pas seulement le libelle : le formulaire reprend la demande.
+                        'channel' => $account->pending_channel?->value,
                         'channelLabel' => $account->pending_channel?->label(),
                         'accountNumber' => $account->pending_account_number,
                         'holderName' => $account->pending_holder_name,
@@ -60,6 +63,8 @@ class PaymentAccountController extends Controller
                 'hasAccountNumber' => $channel->hasAccountNumber(),
             ], PaymentChannel::cases()),
             'activationDelayHours' => PaymentAccount::ActivationDelayHours,
+            // Avant la premiere publication, un changement s'applique tout de suite apres confirmation.
+            'delayActive' => $tenant->paymentAccountDelayApplies(),
             'isOwner' => $user->ownsTenant($tenant),
             // Toute modification exige le code a deux facteurs : sans double authentification, la
             // page le dit avant la saisie plutot qu'apres.
@@ -76,7 +81,7 @@ class PaymentAccountController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('payment_accounts.flash.change_requested')]);
 
-        return to_route('tenants.payment-accounts.index', $tenant);
+        return GettingStarted::redirect($request, $tenant, to_route('tenants.payment-accounts.index', $tenant));
     }
 
     /**
@@ -156,7 +161,7 @@ class PaymentAccountController extends Controller
     }
 
     /**
-     * @return array{label: string, channel: string, account_number: ?string, holder_name: ?string, instructions: ?string, is_active: bool}
+     * @return array{label: string, channel: string, account_number: ?string, holder_name: ?string, instructions: ?string, is_active: bool, confirmed: bool}
      */
     private function attributes(SavePaymentAccountRequest $request): array
     {
@@ -167,6 +172,7 @@ class PaymentAccountController extends Controller
             'holder_name' => $request->validated('holder_name'),
             'instructions' => $request->validated('instructions'),
             'is_active' => $request->boolean('is_active'),
+            'confirmed' => $request->boolean('confirmed'),
         ];
     }
 }

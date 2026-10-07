@@ -32,8 +32,10 @@ return [
     'invitation_mail' => [
         'subject' => 'Vous êtes invité à rejoindre :tenant',
         'intro' => ':inviter vous invite à rejoindre l\'organisation :tenant.',
-        'instruction' => 'Connectez-vous et ouvrez votre tableau de bord pour accepter ou refuser cette invitation.',
+        'instruction' => 'Connectez-vous avec le compte de l\'adresse :email pour accepter ou refuser cette invitation.',
         'action' => 'Se connecter',
+        'instruction_register' => 'Créez votre compte Convive avec l\'adresse :email, puis acceptez l\'invitation.',
+        'action_register' => 'Créer mon compte',
     ],
 
     'index' => [
@@ -148,6 +150,30 @@ return [
         'placeholder' => 'Choisir une organisation',
     ],
 
+    'invitations_home' => [
+        'head' => 'Invitations',
+        'title' => 'Vos invitations',
+        'description' => 'Rejoignez une organisation en acceptant son invitation.',
+        'item' => ':inviter vous invite à rejoindre :tenant avec le profil :profile.',
+        'item_without_inviter' => 'Vous êtes invité à rejoindre :tenant avec le profil :profile.',
+        'accept' => 'Accepter',
+        'decline' => 'Refuser',
+        'confirm_decline' => [
+            'title' => 'Refuser cette invitation ?',
+            'description' => "L'invitation de :tenant sera supprimée. Pour rejoindre cette organisation plus tard, il faudra qu'elle vous invite de nouveau.",
+        ],
+        'empty' => 'Aucune invitation en attente pour votre adresse.',
+        'no_organisation' => "Vous n'appartenez encore à aucune organisation. Vous pouvez créer la vôtre à tout moment.",
+        'create_organisation' => 'Créer mon organisation',
+        'to_dashboard' => 'Aller à mon tableau de bord',
+        'mismatch' => [
+            'title' => 'Cette invitation est adressée à une autre adresse',
+            'body' => "L'invitation de :tenant a été envoyée à :invited, mais vous êtes connecté avec :account. Elle ne peut pas être rattachée à ce compte.",
+            'switch' => 'Me connecter avec :invited',
+            'no_account' => "Vous n'avez pas de compte à l'adresse :invited ? Demandez à l'organisateur d'annuler l'invitation et de la renvoyer à :account.",
+            'dismiss' => 'Ignorer cette invitation',
+        ],
+    ],
     'invitation_alert' => [
         'login' => 'Connectez-vous pour rejoindre l\'organisation ":name".',
         'register' => 'Créez votre compte pour rejoindre l\'organisation ":name".',

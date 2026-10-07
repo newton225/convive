@@ -6,6 +6,7 @@ use App\Models\AuditChainCheck;
 use App\Models\SecurityEvent;
 use App\Models\Tenant;
 use App\Support\AuditChain;
+use App\Support\ListPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -18,11 +19,6 @@ use Illuminate\Support\Facades\Log;
  */
 class SecurityJournal
 {
-    /**
-     * Nombre de faits relus a l'ecran.
-     */
-    private const EventsShown = 50;
-
     /**
      * Record that a request hit a rate limit. Une meme adresse qui insiste sur la meme route
      * n'ecrit qu'une ligne par minute : celui qui martele une limite ne doit pas, en plus, remplir
@@ -75,12 +71,16 @@ class SecurityJournal
     /**
      * Get what the security screen shows.
      *
-     * @return array{chains: array{checkedAt: string|null, count: int, broken: array<int, array{scope: string, organisation: string|null, entryId: int, checkedAt: string}>}, counts: array{rateLimited: int, lockouts: int}, events: array<int, array{id: int, at: string, type: string, subject: string|null, ip: string|null}>}
+     * Les faits sont pagines par le serveur (TODO du 2026-10-07, point 11) : plus de fenetre des
+     * derniers, tous restent atteignables.
+     *
+     * @return array{chains: array{checkedAt: string|null, count: int, broken: array<int, array{scope: string, organisation: string|null, entryId: int, checkedAt: string}>}, counts: array{rateLimited: int, lockouts: int}, events: array<int, array{id: int, at: string, type: string, subject: string|null, ip: string|null}>, eventsMeta: array{currentPage: int, lastPage: int, total: int}}
      */
-    public static function overview(): array
+    public static function overview(Request $request): array
     {
         $checks = AuditChainCheck::query()->get();
         $since = now()->subDay();
+        $events = ListPage::of(SecurityEvent::query()->latest('created_at')->latest('id'), $request);
 
         return [
             'chains' => [
@@ -102,11 +102,7 @@ class SecurityJournal
                 'rateLimited' => SecurityEvent::where('type', SecurityEvent::RateLimited)->where('created_at', '>=', $since)->count(),
                 'lockouts' => SecurityEvent::where('type', SecurityEvent::LoginLockout)->where('created_at', '>=', $since)->count(),
             ],
-            'events' => SecurityEvent::query()
-                ->latest('created_at')
-                ->latest('id')
-                ->limit(self::EventsShown)
-                ->get()
+            'events' => $events->getCollection()
                 ->map(fn (SecurityEvent $event) => [
                     'id' => $event->id,
                     'at' => $event->created_at->toISOString(),
@@ -114,7 +110,9 @@ class SecurityJournal
                     'subject' => $event->subject,
                     'ip' => $event->ip,
                 ])
+                ->values()
                 ->all(),
+            'eventsMeta' => ListPage::meta($events),
         ];
     }
 

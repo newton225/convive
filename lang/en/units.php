@@ -22,6 +22,8 @@ return [
         'none' => '"None" choice',
     ],
 
+    'none_locked' => 'Always offered last, for people who belong to no unit. It cannot be renamed, deactivated or deleted.',
+
     'flash' => [
         'created' => 'Unit added.',
         'updated' => 'Unit updated.',

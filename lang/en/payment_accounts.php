@@ -4,6 +4,18 @@ return [
     'title' => 'Payment accounts',
     'description' => 'The accounts your guests pay into. Any change only becomes public after a :hours hour delay.',
 
+    'description_before_publication' => 'The accounts your guests will pay into. Until an event is published, a change applies straight away, after review. From the first publication on, any new account or change will wait :hours hours before becoming visible.',
+
+    'confirm_immediate' => [
+        'title' => 'Check the details',
+        'description' => 'No event is published yet: these details apply right now. Check them, they are what your guests will see when paying.',
+        'confirm' => 'Confirm and save',
+    ],
+
+    'form' => [
+        'pending_hint' => 'The form shows your pending request. Correct it here without touching the details your guests still see; putting the previous values back cancels the request.',
+    ],
+
     'channels' => [
         'wave' => 'Wave',
         'orange_money' => 'Orange Money',
@@ -69,6 +81,7 @@ return [
     ],
 
     'errors' => [
+        'confirmation_required' => 'Review the details and confirm them: your guests will see them straight away.',
         'has_proofs' => 'Guests have already paid into this account: it cannot be deleted. Deactivate it so that it is no longer offered.',
         'account_number_required' => 'This channel requires an account number.',
         'number_invalid' => 'Enter a 10-digit Ivorian number, for example 07 07 12 34 56.',
@@ -101,6 +114,8 @@ return [
         'activates_at' => 'This change will take effect on :date.',
         'none' => 'none',
         'outro' => 'If you did not request this, cancel it immediately and review who has access to your organisation.',
+        'applied_now' => 'Your organisation has not published any event yet: this change applies straight away.',
+        'outro_immediate' => 'If you did not make this change, correct the account and review who has access to your organisation.',
     ],
 
     'whatsapp' => [

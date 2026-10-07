@@ -51,6 +51,7 @@ use Stancl\Tenancy\Events;
  * @property Carbon|null $trial_ending_notified_at
  * @property Carbon|null $trial_last_day_notified_at
  * @property Carbon|null $trial_ended_notified_at
+ * @property Carbon|null $first_published_at
  * @property-read Domain|null $domain
  * @property-read Collection<int, TenantInvitation> $invitations
  * @property-read Collection<int, Membership> $memberships
@@ -481,6 +482,44 @@ class Tenant extends Model implements TenantWithDatabase
     }
 
     /**
+     * Determine whether a change of payment account waits for the activation delay.
+     *
+     * Le delai part de la premiere publication d'un evenement et ne s'arrete plus ensuite, meme
+     * une fois tous les evenements clotures (decision du proprietaire du projet, 2026-10-07) :
+     * avant, aucun invite ne voit de compte, il n'y a rien a detourner. Une organisation qui avait
+     * deja publie avant que la date ne soit retenue la retrouve sur ses evenements, corbeille
+     * comprise, et la garde.
+     */
+    public function paymentAccountDelayApplies(): bool
+    {
+        if ($this->first_published_at !== null) {
+            return true;
+        }
+
+        $firstPublication = $this->run(
+            fn () => Event::withTrashed()->whereNotNull('published_at')->min('published_at'),
+        );
+
+        if ($firstPublication === null) {
+            return false;
+        }
+
+        $this->forceFill(['first_published_at' => $firstPublication])->save();
+
+        return true;
+    }
+
+    /**
+     * Remember the first publication of an event : from now on, payment account changes wait.
+     */
+    public function markFirstPublication(): void
+    {
+        if ($this->first_published_at === null) {
+            $this->forceFill(['first_published_at' => now()])->save();
+        }
+    }
+
+    /**
      * Get all members of this tenant.
      *
      * @return BelongsToMany<User, $this, Membership, 'pivot'>
@@ -544,6 +583,7 @@ class Tenant extends Model implements TenantWithDatabase
             'trial_ending_notified_at' => 'datetime',
             'trial_last_day_notified_at' => 'datetime',
             'trial_ended_notified_at' => 'datetime',
+            'first_published_at' => 'datetime',
         ];
     }
 

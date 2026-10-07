@@ -11,6 +11,9 @@ use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\RegistrationCompanion;
 use App\Models\Tenant;
+use App\Support\ListPage;
+use App\Support\Search\UnaccentedSearch;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -34,18 +37,99 @@ class PaymentProofController extends Controller
     {
         Gate::authorize('viewAny', [PaymentProof::class, $tenant]);
 
-        $registrations = Registration::where('event_id', $event->id)
-            ->where('status', RegistrationStatus::ProofSubmitted)
-            ->with(['unit', 'companions.unit', 'latestProof.paymentAccount'])
-            ->orderBy('created_at')
-            ->get();
+        // Pagination, recherche, filtre et tri cote serveur (TODO du 2026-10-07, point 11). Par
+        // defaut, les plus anciennes en tete : une file se traite dans l'ordre d'arrivee.
+        $search = trim((string) $request->input('filter.search', ''));
+        $signal = in_array($request->input('filter.signal'), self::SignalFilters, true) ? $request->input('filter.signal') : 'all';
+        $sort = in_array($request->input('sort'), self::Sorts, true) ? $request->input('sort') : 'submitted_at';
+
+        $query = $this->queue($event, $search, $sort)
+            ->with(['unit', 'companions.unit', 'latestProof.paymentAccount']);
+
+        // Les signaux (reference ou capture deja vues, ecart avec le releve) se calculent en PHP :
+        // la comparaison des captures n'a pas d'equivalent SQL. Filtrer sur eux passe donc par la
+        // file de l'evenement, bornee par sa capacite ; le navigateur ne recoit toujours qu'une page.
+        $page = $signal === 'all'
+            ? ListPage::of($query, $request)->through(fn (Registration $registration) => $this->row($registration))
+            : ListPage::ofCollection(
+                $query->get()
+                    ->map(fn (Registration $registration) => $this->row($registration))
+                    ->filter(fn (array $row) => $this->matchesSignal($row['signals'], $signal))
+                    ->values(),
+                $request,
+            );
 
         return Inertia::render('events/proofs', [
             'tenant' => ['slug' => $tenant->slug],
             'event' => ['id' => $event->id, 'name' => $event->name],
             'permissions' => $request->user()->toTenantPermissions($tenant),
-            'rows' => $registrations->map(fn (Registration $registration) => $this->row($registration)),
+            'rows' => collect($page->items())->values(),
+            'meta' => ListPage::meta($page),
+            'filters' => [
+                'search' => $search !== '' ? $search : null,
+                'signal' => $signal,
+                'sort' => $sort,
+            ],
+            'hasProofs' => $this->queue($event, '', 'submitted_at')->exists(),
         ]);
+    }
+
+    /**
+     * Les filtres de signal de la file. Une anomalie est un soupcon ; la precision de l'invite n'en
+     * est pas une, c'est une information a lire : les deux filtres restent distincts.
+     */
+    private const SignalFilters = ['all', 'anomaly', 'clean', 'note'];
+
+    private const Sorts = ['submitted_at', '-submitted_at', 'name', '-name', 'amount_due', '-amount_due', 'party_size', '-party_size'];
+
+    /**
+     * The registrations waiting for their proof to be checked, searched and sorted.
+     *
+     * @return Builder<Registration>
+     */
+    private function queue(Event $event, string $search, string $sort): Builder
+    {
+        $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
+        $column = ltrim($sort, '-');
+
+        return Registration::query()
+            ->where('event_id', $event->id)
+            ->where('status', RegistrationStatus::ProofSubmitted)
+            // Tout ce qui identifie une preuve : nom, reference du dossier et de la transaction,
+            // telephone, unite, accompagnateurs.
+            ->when($search !== '', fn (Builder $query) => $query->where(fn (Builder $any) => $any
+                ->where(fn (Builder $own) => UnaccentedSearch::apply($own, ['name', 'reference', 'phone'], $search))
+                ->orWhereHas('latestProof', fn (Builder $proof) => UnaccentedSearch::apply($proof, ['reference'], $search))
+                ->orWhereHas('unit', fn (Builder $unit) => UnaccentedSearch::apply($unit, ['name'], $search))
+                ->orWhereHas('companions', fn (Builder $companion) => UnaccentedSearch::apply($companion, ['name'], $search))))
+            ->when(
+                $column === 'submitted_at',
+                fn (Builder $query) => $query->orderBy(
+                    PaymentProof::query()
+                        ->select('created_at')
+                        ->whereColumn('registration_id', 'registrations.id')
+                        ->latest('created_at')
+                        ->limit(1),
+                    $direction,
+                ),
+                fn (Builder $query) => $query->orderBy($column, $direction),
+            )
+            ->orderBy('id');
+    }
+
+    /**
+     * @param  array<string, bool>  $signals
+     */
+    private function matchesSignal(array $signals, string $filter): bool
+    {
+        $anomaly = collect($signals)->except('guestNote')->contains(true);
+
+        return match ($filter) {
+            'anomaly' => $anomaly,
+            'clean' => ! $anomaly,
+            'note' => $signals['guestNote'],
+            default => true,
+        };
     }
 
     /**

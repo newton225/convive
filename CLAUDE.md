@@ -56,9 +56,18 @@ Aucune primitive d'interface ne doit etre codee a la main.
 - Tableaux de donnees : **TanStack Table** (`@tanstack/react-table`) pour tout tableau du
   back-office : base d'inscrits, file de preuves, lignes de releve, factures, journal, equipe.
   Colonnes typees, tri, filtres, pagination et selection viennent de la bibliotheque, jamais
-  d'une implementation maison. Le rendu utilise les primitives de table shadcn/ui. Au dela de
-  quelques milliers de lignes, pagination et tri passent cote serveur, exposes par
-  `spatie/laravel-query-builder`, et la virtualisation se fait avec `@tanstack/react-virtual`.
+  d'une implementation maison. Le rendu utilise les primitives de table shadcn/ui.
+- **Listes paginees : tout cote serveur** (decision du proprietaire du projet, 2026-10-07). Toute
+  liste qui grandit (inscrits, preuves, releve, evenements, journaux, organisations et comptes de
+  la console, vitrine) pagine, cherche, filtre et trie cote serveur : le navigateur ne recoit que
+  la page affichee. `App\Support\ListPage` (25 lignes, 24 pour les cartes ; une page au-dela de la
+  derniere ramene a la derniere ; `ofCollection` pour un filtre qui ne s'ecrit pas en SQL, comme
+  les signaux des preuves ou l'etat d'une organisation), `useServerList` cote client (recherche,
+  filtres, tri et page dans l'adresse ; changer un filtre ramene a la page 1) et `ListPagination`
+  (Premier, Precedent, `1 … 49 [50] 51 … 100`, Suivant, Dernier). Exceptions voulues : les listes
+  courtes par nature (unites, profils, comptes de versement, membres, operateurs, plans), sans
+  pagination, et la recherche « sans scan » de l'entree, bornee a dix resultats et jamais paginee
+  (decision du 2026-10-02 : elle ne doit pas permettre de parcourir la liste des invites).
 - Formulaires : le `useForm` **natif d'Inertia** (`@inertiajs/react`), avec les memes regles
   cote serveur dans les Form Requests. Decision actee a l'etape 4 (formulaire d'inscription) :
   tous les formulaires du projet (tenants, profils, organisation, unites) etaient deja ecrits
@@ -545,8 +554,15 @@ pour qu'il n'y ait qu'une seule source de verite localement.
 ### Regles a ne pas contourner
 
 - Quatre profils sont crees a l'ouverture d'un espace : **Proprietaire**, systeme, qui detient
-  tout le catalogue et n'est ni modifiable ni supprimable ; puis Tresorier, Hotesse et Lecture,
-  point de depart librement remaniable.
+  tout le catalogue et n'est ni modifiable ni supprimable ; puis les **profils de base**
+  Tresorier, Hotesse et Lecture (`App\Enums\StarterProfile`, colonne `profiles.starter`).
+- **Les profils de base sont figes** (decision du proprietaire du projet, 2026-10-07) : ni
+  modifiables ni supprimables (`Profile::isLocked()`, `ProfilePolicy`), pour qu'un meme nom veuille
+  dire la meme chose dans toutes les organisations. `tenants:sync-permissions` leur rend leurs
+  reglages d'origine et les recree s'ils manquent. L'organisation peut les **masquer**
+  (`hidden_at`) : un profil masque n'est propose dans aucun formulaire (`Profile::scopeAssignable()`,
+  regles `exists` des Form Requests), ceux qui le portent le gardent avec ses droits. Pour une
+  variante, elle duplique le profil ou cree le sien.
 - Un locataire conserve toujours au moins un Proprietaire actif : le dernier ne peut pas perdre
   son profil.
 - `profiles.manage` ne permet pas d'accorder une permission que l'acteur ne detient pas
@@ -559,6 +575,28 @@ pour qu'il n'y ait qu'une seule source de verite localement.
 - Toute creation, modification, suppression et affectation est **journalisee** avec l'acteur,
   l'avant et l'apres, via `spatie/laravel-activitylog`.
 
+### Invitations d'equipe : le parcours de la personne invitee
+
+Decisions du proprietaire du projet (2026-10-07) :
+
+- **Le lien du courriel** mene a l'inscription quand aucun compte n'existe a l'adresse invitee, a
+  la connexion sinon (`App\Notifications\Tenants\TenantInvitation`). Les deux pages se renvoient
+  l'une a l'autre (« J'ai deja un compte »).
+- **L'invitation suit tout le parcours** : son code est garde en session
+  (`App\Support\PendingTenantInvitation`) jusqu'a ce que la personne accepte, refuse ou l'ecarte.
+- **Inscription par invitation** : l'adresse est celle de l'invitation (refusee sinon), elle vaut
+  verification, et **aucune organisation personnelle n'est ouverte** (`CreateNewUser`). La personne
+  en ouvrira une plus tard depuis Reglages > Organisations si elle le souhaite.
+- **Acceptation explicite**, depuis l'accueil des invitations (`invitations.index`, page
+  `invitations`, habillage `AuthLayout` : elle sert aussi a un compte sans organisation). La
+  connexion, l'inscription et le logo y menent tant qu'une invitation suivie n'est pas tranchee, ou
+  quand le compte n'a aucune organisation. Jamais une erreur 403 a la place.
+- **Adresse differente** : l'invitation n'est jamais rattachee ; l'accueil l'explique et propose
+  de se connecter avec l'adresse invitee, ou de demander a l'organisateur de la renvoyer a
+  l'adresse du compte.
+- **Acceptation** : tous les Proprietaires en sont prevenus (`NotificationType::TeamInvitationAccepted`,
+  dans l'application et par courriel par defaut, `NotificationType::defaultChannel()`), avec un lien
+  vers la liste des membres.
 ### Double authentification exigee par le profil
 
 Un profil porte le drapeau `requires_two_factor`. Ses porteurs n'atteignent pas le back-office
@@ -917,8 +955,15 @@ parfaitement authentiques. Les controles sont ceux de `SECURITY.md` C1, aucun n'
   pendant le delai**.
 - **Delai d'activation de 24 h** sur le canal, le numero et le titulaire. Le libelle, la
   consigne et l'activation prennent effet tout de suite : ils ne designent pas ou va l'argent.
-- **Un compte tout juste cree n'a pas de valeur vivante** et n'apparait donc nulle part avant
-  la fin du delai. Sans cette regle, il suffirait d'ajouter un compte plutot que d'en modifier
+- **Le delai part de la premiere publication** (decision du proprietaire du projet, 2026-10-07) :
+  tant que l'organisation n'a publie aucun evenement, aucun invite ne voit de compte ; creation et
+  modification s'appliquent tout de suite, apres un apercu confirme (`confirmed`, exige par
+  `SavePaymentAccount::applyImmediately()`), et l'alerte part quand meme.
+  `Tenant::paymentAccountDelayApplies()` tranche, sur `tenants.first_published_at`, pose par
+  `SaveEvent::publish()` et jamais retire : le delai reste meme une fois tous les evenements
+  clotures. La confirmation de la premiere publication l'annonce.
+- **Un compte tout juste cree n'a pas de valeur vivante** (une fois le delai en vigueur) et
+  n'apparait donc nulle part avant la fin du delai. Sans cette regle, il suffirait d'ajouter un compte plutot que d'en modifier
   un pour contourner le delai.
 - **Un second Proprietaire peut lever le delai**, jamais celui qui a demande le changement.
   Sans cette seconde condition, un compte compromis se validerait lui-meme.
@@ -986,6 +1031,10 @@ remaniables ensuite.
 
 - `Aucune` est un **choix valide**, pas une absence de choix. Un champ vide bloque la
   validation, `Aucune` ne la bloque pas.
+- **`Aucune` est protegee** (decision du proprietaire du projet, 2026-10-07) : toujours en
+  derniere position (`Unit::scopeOrdered()`), ni renommee, ni desactivee, ni supprimee
+  (`UnitPolicy`). Elle se reconnait a la colonne `units.is_none`, posee a sa creation, jamais a
+  son nom.
 - Une organisation conserve **au moins une unite** : sans elle, le formulaire d'inscription ne
   peut plus etre rempli.
 - Une unite retiree de la liste se **desactive** (`is_active`) plutot que de se supprimer, pour
@@ -1302,6 +1351,11 @@ Principes a tenir :
   indiquent ou se passe l'action, y compris quand elle a lieu hors de l'application.
 - **Etats complets pour chaque vue** : chargement, vide, erreur, succes, permission refusee,
   hors ligne. Un ecran vide explique quoi faire.
+- **Champs obligatoires signales** (decision du proprietaire du projet, 2026-10-07) : asterisque
+  rouge par `<Label required>` (ou `required` sur `LabelWithHelp` et les `Field` des formulaires),
+  le lecteur d'ecran lisant « obligatoire » (`RequiredMark`), et la legende `RequiredFieldsNote` en
+  tete d'un formulaire de plusieurs champs. Ce qui est obligatoire se lit dans la Form Request, jamais
+  devine : un champ exige seulement a la publication n'a pas d'asterisque.
 - **Messages d'erreur utiles** : ce qui s'est passe et l'action suivante, jamais un code
   technique. Les erreurs de formulaire sont attachees au champ concerne.
 - **Retour immediat** sur chaque action : etat de chargement sur les boutons, confirmation

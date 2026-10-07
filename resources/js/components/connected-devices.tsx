@@ -124,6 +124,7 @@ export default function ConnectedDevices({ devices }: Props) {
                                     <div className="grid gap-2">
                                         <Label
                                             htmlFor="sessions-password"
+                                            required
                                             className="sr-only"
                                         >
                                             {t(

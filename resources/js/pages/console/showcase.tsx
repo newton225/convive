@@ -2,9 +2,11 @@ import { Head } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { ExternalLink } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
+import type { PaginationMeta } from '@/components/list-pagination';
 import { WithdrawAnnouncementDialog } from '@/components/console/withdraw-announcement-dialog';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
+import { useServerList } from '@/hooks/use-server-list';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDate } from '@/lib/format-date';
 import { showcase } from '@/routes/console';
@@ -16,8 +18,11 @@ import type {
 
 type Props = {
     isSample: boolean;
+    // Deux listes paginees par le serveur, chacune avec sa page.
     announcements: ConsoleAnnouncement[];
+    announcementsMeta: PaginationMeta;
     withdrawn: ConsoleWithdrawnAnnouncement[];
+    withdrawnMeta: PaginationMeta;
 };
 
 /**
@@ -27,9 +32,16 @@ type Props = {
 export default function Showcase({
     isSample,
     announcements,
+    announcementsMeta,
     withdrawn,
+    withdrawnMeta,
 }: Props) {
     const { t, locale } = useTranslation();
+    const active = useServerList({ url: showcase().url });
+    const past = useServerList({
+        url: showcase().url,
+        pageName: 'withdrawn_page',
+    });
 
     const activeColumns: ColumnDef<ConsoleAnnouncement>[] = [
         {
@@ -123,6 +135,8 @@ export default function Showcase({
                     <ConsoleTable
                         columns={activeColumns}
                         data={announcements}
+                        meta={announcementsMeta}
+                        onPageChange={(page) => active.visit({ page })}
                         emptyState={
                             <p className="text-muted-foreground text-sm">
                                 {t('console.showcase.active_empty')}
@@ -138,6 +152,8 @@ export default function Showcase({
                     <ConsoleTable
                         columns={withdrawnColumns}
                         data={withdrawn}
+                        meta={withdrawnMeta}
+                        onPageChange={(page) => past.visit({ page })}
                         emptyState={
                             <p className="text-muted-foreground text-sm">
                                 {t('console.showcase.withdrawn_empty')}

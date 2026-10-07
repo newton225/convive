@@ -155,6 +155,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('settings/tenants/{tenant}/profiles', [TenantProfileController::class, 'store'])->middleware(RequirePassword::class)->name('tenants.profiles.store');
             Route::patch('settings/tenants/{tenant}/profiles/{profile}', [TenantProfileController::class, 'update'])->middleware(RequirePassword::class)->name('tenants.profiles.update');
             Route::post('settings/tenants/{tenant}/profiles/{profile}/duplicate', [TenantProfileController::class, 'duplicate'])->middleware(RequirePassword::class)->name('tenants.profiles.duplicate');
+            Route::patch('settings/tenants/{tenant}/profiles/{profile}/visibility', [TenantProfileController::class, 'visibility'])->middleware(RequirePassword::class)->name('tenants.profiles.visibility');
             Route::delete('settings/tenants/{tenant}/profiles/{profile}', [TenantProfileController::class, 'destroy'])->middleware(RequirePassword::class)->name('tenants.profiles.destroy');
         });
     });

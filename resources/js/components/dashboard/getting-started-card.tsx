@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { gettingStartedReturnQuery } from '@/hooks/use-getting-started-return';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { edit as tenantEdit } from '@/routes/tenants';
@@ -17,12 +18,15 @@ type Props = {
     gettingStarted: GettingStarted;
 };
 
+// Chaque lien porte sa provenance : le formulaire enregistre ramene ensuite ici.
+const returnHere = { query: gettingStartedReturnQuery };
+
 const destinations: Record<GettingStartedStepKey, (slug: string) => string> = {
-    identity: (slug) => organisationEdit(slug).url,
-    payment_account: (slug) => paymentAccountsIndex(slug).url,
-    event: (slug) => createEvent(slug).url,
-    publish: (slug) => eventsIndex(slug).url,
-    team: (slug) => tenantEdit(slug).url,
+    identity: (slug) => organisationEdit(slug, returnHere).url,
+    payment_account: (slug) => paymentAccountsIndex(slug, returnHere).url,
+    event: (slug) => createEvent(slug, returnHere).url,
+    publish: (slug) => eventsIndex(slug, returnHere).url,
+    team: (slug) => tenantEdit(slug, returnHere).url,
 };
 
 /**

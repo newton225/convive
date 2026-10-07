@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Actions\Tenants\CreateTenant;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -108,5 +111,50 @@ class EmailVerificationTest extends TestCase
 
         Event::assertNotDispatched(Verified::class);
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
+    }
+
+    public function test_un_compte_non_verifie_n_atteint_pas_son_espace(): void
+    {
+        $user = User::factory()->unverified()->withTwoFactor()->create();
+        $tenant = app(CreateTenant::class)->handle($user, 'Association Convive');
+
+        $this->actingAs($user)
+            ->get(route('dashboard', $tenant))
+            ->assertRedirect(route('verification.notice'));
+
+        $this->actingAs($user)
+            ->get(route('tenants.index'))
+            ->assertRedirect(route('verification.notice'));
+    }
+
+    public function test_l_inscription_envoie_le_lien_de_confirmation(): void
+    {
+        Notification::fake();
+
+        $this->post(route('register.store'), [
+            'name' => 'Aya Kouassi',
+            'organisation_name' => 'Soldats du Palais',
+            'email' => 'aya@example.com',
+            'phone' => '+225 07 07 12 34 56',
+            'password' => 'Convive-2026!',
+            'password_confirmation' => 'Convive-2026!',
+            'terms' => 'on',
+        ]);
+
+        $user = User::where('email', 'aya@example.com')->firstOrFail();
+
+        $this->assertFalse($user->hasVerifiedEmail());
+        Notification::assertSentTo($user, VerifyEmail::class);
+    }
+
+    public function test_un_compte_verifie_atteint_son_espace(): void
+    {
+        $user = User::factory()->withTwoFactor()->create();
+        $tenant = app(CreateTenant::class)->handle($user, 'Association Convive');
+        $user->switchTenant($tenant);
+
+        $this->actingAs($user)
+            ->get(route('dashboard', $tenant))
+            ->assertOk();
     }
 }

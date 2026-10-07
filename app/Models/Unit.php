@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property int $position
  * @property bool $is_active
+ * @property bool $is_none
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -95,21 +96,25 @@ class Unit extends Model
     }
 
     /**
-     * Scope the query to the display order chosen by the operator.
+     * Scope the query to the display order chosen by the operator, « Aucune » always last
+     * whatever the positions given to the other units.
      *
      * @param  Builder<Unit>  $query
      */
     public function scopeOrdered(Builder $query): void
     {
-        $query->orderBy('position')->orderBy('name');
+        $query->orderBy('is_none')->orderBy('position')->orderBy('name');
     }
 
     /**
      * Determine whether this unit is the "no unit" choice.
+     *
+     * Reconnue a sa colonne, posee a sa creation et jamais par un formulaire : c'est elle qui la
+     * protege (ni renommee, ni desactivee, ni supprimee, voir `UnitPolicy`).
      */
     public function isNone(): bool
     {
-        return $this->name === self::None;
+        return $this->is_none;
     }
 
     /**
@@ -121,6 +126,7 @@ class Unit extends Model
     {
         return [
             'is_active' => 'boolean',
+            'is_none' => 'boolean',
             'position' => 'integer',
         ];
     }

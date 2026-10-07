@@ -10,8 +10,8 @@ use App\Http\Responses\PasskeyLoginResponse;
 use App\Http\Responses\RegisterResponse;
 use App\Http\Responses\TwoFactorLoginResponse;
 use App\Http\Responses\VerifyEmailResponse;
-use App\Models\TenantInvitation;
 use App\Support\PasswordPolicy;
+use App\Support\PendingTenantInvitation;
 use App\Support\VisitorCountry;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -134,24 +134,18 @@ class FortifyServiceProvider extends ServiceProvider
     /**
      * Get the pending tenant invitation context for auth pages.
      *
-     * @return array{code: string, tenantName: string}|null
+     * L'invitation suivie depuis le courriel est gardee en session (`PendingTenantInvitation`) : elle
+     * survit a la connexion comme a l'inscription, et a un aller-retour entre les deux pages.
+     *
+     * @return array{code: string, tenantName: string, email: string}|null
      */
     private function tenantInvitation(Request $request): ?array
     {
-        $invitationCode = $request->query('invitation');
+        $code = $request->query('invitation');
 
-        if (! is_string($invitationCode)) {
-            return null;
-        }
-
-        $invitation = TenantInvitation::query()
-            ->with('tenant')
-            ->where('code', $invitationCode)
-            ->whereNull('accepted_at')
-            ->where(fn ($query) => $query
-                ->whereNull('expires_at')
-                ->orWhere('expires_at', '>=', now()))
-            ->first();
+        $invitation = is_string($code)
+            ? PendingTenantInvitation::remember($request, $code)
+            : PendingTenantInvitation::current($request);
 
         if (! $invitation) {
             return null;
@@ -160,6 +154,7 @@ class FortifyServiceProvider extends ServiceProvider
         return [
             'code' => $invitation->code,
             'tenantName' => $invitation->tenant->name,
+            'email' => $invitation->email,
         ];
     }
 }

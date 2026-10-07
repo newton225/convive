@@ -2,6 +2,8 @@
 
 return [
     'unsaved_changes' => 'Unsaved changes',
+    'required' => 'required',
+    'required_note' => 'Fields marked with * are required.',
 
     'actions' => [
         'save' => 'Save',
@@ -36,6 +38,10 @@ return [
         'page_of' => 'Page :current of :last',
         'previous' => 'Previous',
         'next' => 'Next',
+        'first' => 'First',
+        'last' => 'Last',
+        'label' => 'Pages',
+        'go_to_page' => 'Go to page :page',
     ],
 
     'sort' => [

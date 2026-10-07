@@ -253,7 +253,7 @@ export default function EventReconciliation({
                     >
                         {({ errors, processing }) => (
                             <>
-                                <Label htmlFor="statement-file">
+                                <Label htmlFor="statement-file" required>
                                     {t('reconciliation.import.file_label')}
                                 </Label>
                                 <div className="flex flex-wrap items-center gap-2">

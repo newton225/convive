@@ -2,11 +2,13 @@ import { Head } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { CircleAlert, CircleCheck } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
+import type { PaginationMeta } from '@/components/list-pagination';
 import { ExportLimitDialog } from '@/components/console/export-limit-dialog';
 import { SupportDurationsDialog } from '@/components/console/support-durations-dialog';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useServerList } from '@/hooks/use-server-list';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
 import { security } from '@/routes/console';
@@ -19,7 +21,9 @@ import type {
 type Props = {
     chains: ConsoleAuditChains;
     counts: { rateLimited: number; lockouts: number };
+    // La page affichee seulement : le journal est pagine par le serveur.
     events: ConsoleSecurityEvent[];
+    eventsMeta: PaginationMeta;
     exportsPerHour: number;
     supportDurations: number[];
 };
@@ -33,10 +37,12 @@ export default function ConsoleSecurity({
     chains,
     counts,
     events,
+    eventsMeta,
     exportsPerHour,
     supportDurations,
 }: Props) {
     const { t, locale } = useTranslation();
+    const { visit } = useServerList({ url: security().url });
 
     const columns: ColumnDef<ConsoleSecurityEvent>[] = [
         {
@@ -192,6 +198,8 @@ export default function ConsoleSecurity({
                     <ConsoleTable
                         columns={columns}
                         data={events}
+                        meta={eventsMeta}
+                        onPageChange={(page) => visit({ page })}
                         emptyState={
                             <p className="text-muted-foreground text-sm">
                                 {t('console.security.events_empty')}

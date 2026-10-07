@@ -204,6 +204,7 @@ return [
         'consequence_link' => 'The public link opens for registration and stays the same for good.',
         'consequence_subdomain' => "The organisation's subdomain is locked.",
         'consequence_delete' => 'The event can no longer be deleted, only closed.',
+        'consequence_payment_delay' => 'This is your first publication: from now on, any new payment account or change to one will wait 24 hours before becoming visible, even once your events are closed.',
         'acknowledge' => 'I have checked this information and want to open registration.',
     ],
 

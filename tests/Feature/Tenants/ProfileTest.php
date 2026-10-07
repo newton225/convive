@@ -135,29 +135,29 @@ class ProfileTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $treasurer = $this->profileOf($tenant, 'Tresorier');
+        $cashier = $this->makeProfile($tenant, 'Caisse', [TenantPermission::ProofsView]);
 
         $member = User::factory()->withTwoFactor()->create();
-        $tenant->addMember($member, $treasurer);
+        $tenant->addMember($member, $cashier);
 
         $this->actingAs($owner)
-            ->delete(route('tenants.profiles.destroy', [$tenant, $treasurer]))
+            ->delete(route('tenants.profiles.destroy', [$tenant, $cashier]))
             ->assertSessionHasErrors('profile');
 
-        $tenant->asCurrent(fn () => $this->assertDatabaseHas('profiles', ['id' => $treasurer->id]));
+        $tenant->asCurrent(fn () => $this->assertDatabaseHas('profiles', ['id' => $cashier->id]));
     }
 
     public function test_un_profil_sans_membre_peut_etre_supprime(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $reader = $this->profileOf($tenant, 'Lecture');
+        $cashier = $this->makeProfile($tenant, 'Caisse', [TenantPermission::ProofsView]);
 
         $this->actingAs($owner)
-            ->delete(route('tenants.profiles.destroy', [$tenant, $reader]))
+            ->delete(route('tenants.profiles.destroy', [$tenant, $cashier]))
             ->assertRedirect();
 
-        $tenant->asCurrent(fn () => $this->assertDatabaseMissing('profiles', ['id' => $reader->id]));
+        $tenant->asCurrent(fn () => $this->assertDatabaseMissing('profiles', ['id' => $cashier->id]));
     }
 
     public function test_le_dernier_proprietaire_ne_peut_pas_perdre_son_profil(): void
@@ -187,11 +187,11 @@ class ProfileTest extends TestCase
         ]);
         $tenant->addMember($manager, $limited);
 
-        $target = $this->profileOf($tenant, 'Lecture');
+        $target = $this->makeProfile($tenant, 'Accueil', [TenantPermission::EventsView]);
 
         $this->actingAs($manager)
             ->patch(route('tenants.profiles.update', [$tenant, $target]), [
-                'name' => 'Lecture',
+                'name' => 'Accueil',
                 'permissions' => [TenantPermission::BillingManage->value],
             ])
             ->assertSessionHasErrors('permissions');
@@ -271,14 +271,14 @@ class ProfileTest extends TestCase
         $tenant = $this->tenantOwnedBy($owner);
 
         $member = User::factory()->withTwoFactor()->create();
-        $reader = $this->profileOf($tenant, 'Lecture');
+        $reader = $this->makeProfile($tenant, 'Consultation', [TenantPermission::RegistrationsView]);
         $tenant->addMember($member, $reader);
 
         $this->assertFalse($member->hasTenantPermission($tenant, TenantPermission::EventsCreate));
 
         $this->actingAs($owner)
             ->patch(route('tenants.profiles.update', [$tenant, $reader]), [
-                'name' => 'Lecture',
+                'name' => 'Consultation',
                 'permissions' => [
                     TenantPermission::RegistrationsView->value,
                     TenantPermission::EventsCreate->value,

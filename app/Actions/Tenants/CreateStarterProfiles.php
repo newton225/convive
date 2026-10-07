@@ -2,14 +2,15 @@
 
 namespace App\Actions\Tenants;
 
+use App\Enums\StarterProfile;
 use App\Enums\TenantPermission;
 use App\Models\Profile;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
  * Opere sur les profils de l'organisation dont la base est active au moment de l'appel : voir
- * CLAUDE.md, « Multi-locataire ». Le seul appelant, `CreateTenant`, l'invoque a l'interieur de
- * `$tenant->run()`.
+ * CLAUDE.md, « Multi-locataire ». Appele par `CreateTenant` a l'interieur de `$tenant->run()`, et
+ * par `SyncPermissionCatalogue` pour remettre les profils de base a leurs reglages d'origine.
  */
 class CreateStarterProfiles
 {
@@ -22,7 +23,8 @@ class CreateStarterProfiles
      * Create the profiles a tenant starts with.
      *
      * Proprietaire est un profil systeme : il detient tout le catalogue et ne se modifie pas.
-     * Les trois autres sont un point de depart que l'exploitant remanie a sa guise.
+     * Tresorier, Hotesse et Lecture sont des profils de base, figes eux aussi
+     * (`StarterProfile`) : une organisation qui veut une variante cree son propre profil.
      *
      * Proprietaire et Tresorier exigent la double authentification : ce sont les deux profils
      * qui touchent a l'argent, aux comptes de versement et a la facturation.
@@ -31,11 +33,19 @@ class CreateStarterProfiles
     {
         $this->ensureCatalogue->handle();
 
-        $owner = $this->make(Profile::Owner, __('profiles.starters.owner'), TenantPermission::values(), isSystem: true, requiresTwoFactor: true);
+        $owner = new Profile([
+            'name' => Profile::Owner,
+            'description' => __('profiles.starters.owner'),
+            'guard_name' => 'web',
+        ]);
+        $owner->is_system = true;
+        $owner->requires_two_factor = true;
+        $owner->save();
+        $owner->syncPermissions(TenantPermission::values());
 
-        $this->make('Tresorier', __('profiles.starters.treasurer'), $this->treasurerPermissions(), requiresTwoFactor: true);
-        $this->make('Hotesse', __('profiles.starters.host'), $this->hostPermissions());
-        $this->make('Lecture', __('profiles.starters.reader'), $this->readerPermissions());
+        foreach (StarterProfile::cases() as $starter) {
+            $this->restore($starter);
+        }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
@@ -43,78 +53,28 @@ class CreateStarterProfiles
     }
 
     /**
-     * @param  array<int, string>  $permissions
+     * Create the starter profile, or give it back its original settings.
+     *
+     * Le profil est retrouve par sa colonne `starter`, puis par son nom pour une organisation
+     * ouverte avant que la colonne n'existe. Seul le masquage, choix de l'organisation, est garde.
      */
-    private function make(string $name, string $description, array $permissions, bool $isSystem = false, bool $requiresTwoFactor = false): Profile
+    public function restore(StarterProfile $starter): Profile
     {
-        $profile = new Profile([
-            'name' => $name,
-            'description' => $description,
-            'guard_name' => 'web',
-        ]);
+        $profile = Profile::query()->where('starter', $starter->value)->first()
+            ?? Profile::query()->where('is_system', false)->where('name', $starter->profileName())->first()
+            ?? new Profile(['guard_name' => 'web']);
 
-        $profile->is_system = $isSystem;
-        $profile->requires_two_factor = $requiresTwoFactor;
+        $profile->fill([
+            'name' => $starter->profileName(),
+            'description' => $starter->description(),
+        ]);
+        $profile->guard_name = 'web';
+        $profile->is_system = false;
+        $profile->starter = $starter;
+        $profile->requires_two_factor = $starter->requiresTwoFactor();
         $profile->save();
-        $profile->syncPermissions($permissions);
+        $profile->syncPermissions($starter->permissionValues());
 
         return $profile;
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function treasurerPermissions(): array
-    {
-        return $this->values([
-            TenantPermission::EventsView,
-            TenantPermission::RegistrationsView,
-            TenantPermission::RegistrationsExport,
-            TenantPermission::RegistrationsRefund,
-            TenantPermission::ProofsView,
-            TenantPermission::ProofsApprove,
-            TenantPermission::ProofsReject,
-            TenantPermission::ReconciliationImport,
-            TenantPermission::ReconciliationResolve,
-            TenantPermission::ReportsView,
-            TenantPermission::ReportsExport,
-        ]);
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function hostPermissions(): array
-    {
-        // Le forcage d'entree fait partie du poste d'accueil : il est autorise, et journalise.
-        // Pas l'entree sans scan (`scan.manual`) : faire entrer quelqu'un sur son seul nom est une
-        // decision de responsable, a lui de la confier a qui il veut depuis l'ecran des profils.
-        return $this->values([
-            TenantPermission::EventsView,
-            TenantPermission::ScanPerform,
-            TenantPermission::ScanForce,
-            TenantPermission::ScanLogView,
-        ]);
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function readerPermissions(): array
-    {
-        return $this->values([
-            TenantPermission::EventsView,
-            TenantPermission::RegistrationsView,
-            TenantPermission::ReportsView,
-        ]);
-    }
-
-    /**
-     * @param  array<int, TenantPermission>  $permissions
-     * @return array<int, string>
-     */
-    private function values(array $permissions): array
-    {
-        return array_map(fn (TenantPermission $permission) => $permission->value, $permissions);
     }
 }

@@ -84,6 +84,7 @@ export function TableGroupsField({ defaultGroups, errors }: Props) {
                         <Input
                             type="number"
                             min={1}
+                            required
                             name={`table_groups[${index}][count]`}
                             value={row.count}
                             onChange={(event) =>
@@ -99,6 +100,7 @@ export function TableGroupsField({ defaultGroups, errors }: Props) {
                         <Input
                             type="number"
                             min={1}
+                            required
                             name={`table_groups[${index}][seats]`}
                             value={row.seats}
                             onChange={(event) =>

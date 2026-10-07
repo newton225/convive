@@ -1,5 +1,5 @@
 import { Form, Head, router } from '@inertiajs/react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Lock, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -52,7 +52,11 @@ export default function Units({ tenant, units }: Props) {
                     {({ errors, processing }) => (
                         <>
                             <div className="grid min-w-64 flex-1 gap-2">
-                                <Label htmlFor="unit-name" className="sr-only">
+                                <Label
+                                    htmlFor="unit-name"
+                                    required
+                                    className="sr-only"
+                                >
                                     {t('units.fields.name')}
                                 </Label>
                                 <Input
@@ -78,73 +82,87 @@ export default function Units({ tenant, units }: Props) {
                 </Form>
 
                 <div className="space-y-2">
-                    {units.map((unit) => (
-                        <Form
-                            key={unit.id}
-                            {...update.form([tenant.slug, unit.id])}
-                            className="flex flex-wrap items-center gap-3 rounded-lg border p-3"
-                            data-test="unit-row"
-                            setDefaultsOnSuccess
-                        >
-                            {({ errors, processing, isDirty }) => (
-                                <>
-                                    <Input
-                                        name="name"
-                                        aria-label={t('units.fields.name')}
-                                        defaultValue={unit.name}
-                                        className="min-w-48 flex-1"
-                                        data-test="unit-row-name"
-                                    />
-
-                                    <input
-                                        type="hidden"
-                                        name="position"
-                                        value={unit.position}
-                                    />
-
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <Checkbox
-                                            name="is_active"
-                                            value="1"
-                                            defaultChecked={unit.isActive}
-                                            data-test="unit-row-active"
+                    {units.map((unit) =>
+                        unit.isNone ? (
+                            <div
+                                key={unit.id}
+                                className="flex flex-wrap items-center gap-3 rounded-lg border p-3"
+                                data-test="unit-row-none"
+                            >
+                                <Lock
+                                    className="text-muted-foreground size-4"
+                                    aria-hidden
+                                />
+                                <span className="font-medium">{unit.name}</span>
+                                <Badge variant="secondary">
+                                    {t('units.badges.none')}
+                                </Badge>
+                                <p className="text-muted-foreground w-full text-sm">
+                                    {t('units.none_locked')}
+                                </p>
+                            </div>
+                        ) : (
+                            <Form
+                                key={unit.id}
+                                {...update.form([tenant.slug, unit.id])}
+                                className="flex flex-wrap items-center gap-3 rounded-lg border p-3"
+                                data-test="unit-row"
+                                setDefaultsOnSuccess
+                            >
+                                {({ errors, processing, isDirty }) => (
+                                    <>
+                                        <Input
+                                            name="name"
+                                            aria-label={t('units.fields.name')}
+                                            defaultValue={unit.name}
+                                            className="min-w-48 flex-1"
+                                            data-test="unit-row-name"
                                         />
-                                        {t('units.fields.is_active')}
-                                    </label>
 
-                                    {unit.isNone ? (
-                                        <Badge variant="secondary">
-                                            {t('units.badges.none')}
-                                        </Badge>
-                                    ) : null}
+                                        <input
+                                            type="hidden"
+                                            name="position"
+                                            value={unit.position}
+                                        />
 
-                                    <SubmitButton
-                                        variant="secondary"
-                                        size="sm"
-                                        processing={processing}
-                                        dirty={isDirty}
-                                    >
-                                        {t('common.actions.save')}
-                                    </SubmitButton>
+                                        <label className="flex items-center gap-2 text-sm">
+                                            <Checkbox
+                                                name="is_active"
+                                                value="1"
+                                                defaultChecked={unit.isActive}
+                                                data-test="unit-row-active"
+                                            />
+                                            {t('units.fields.is_active')}
+                                        </label>
 
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        data-test="unit-row-delete"
-                                        onClick={() => setDeleting(unit)}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
+                                        <SubmitButton
+                                            variant="secondary"
+                                            size="sm"
+                                            processing={processing}
+                                            dirty={isDirty}
+                                        >
+                                            {t('common.actions.save')}
+                                        </SubmitButton>
 
-                                    <InputError
-                                        message={errors.name}
-                                        className="w-full"
-                                    />
-                                </>
-                            )}
-                        </Form>
-                    ))}
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            data-test="unit-row-delete"
+                                            onClick={() => setDeleting(unit)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+
+                                        <InputError
+                                            message={errors.name}
+                                            className="w-full"
+                                        />
+                                    </>
+                                )}
+                            </Form>
+                        ),
+                    )}
                 </div>
             </div>
 

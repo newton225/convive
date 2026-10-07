@@ -95,6 +95,7 @@ class TenantController extends Controller
             // La tenancy est deja active pour ce locataire (EnsureTenantMembership) : Profile
             // se resout directement, sans relation a poser depuis $tenant.
             'availableProfiles' => Profile::query()
+                ->assignable()
                 ->orderByDesc('is_system')
                 ->orderBy('name')
                 ->get()

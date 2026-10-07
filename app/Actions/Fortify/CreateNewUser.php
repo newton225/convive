@@ -7,6 +7,7 @@ use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
 use App\Support\LegalDocument;
+use App\Support\PendingTenantInvitation;
 use App\Support\PhoneNumber;
 use App\Support\TenantCreationFailure;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +41,10 @@ class CreateNewUser implements CreatesNewUsers
             $input['phone'] = $normalized;
         }
 
+        // Inscription depuis le lien d'une invitation d'equipe (decision du 2026-10-07) : l'adresse est
+        // celle de l'invitation, et aucune organisation personnelle n'est ouverte.
+        $invitation = PendingTenantInvitation::find(is_string($input['invitation'] ?? null) ? $input['invitation'] : null);
+
         Validator::make($input, [
             ...$this->profileRules(),
             'phone' => $this->phoneRules(required: true),
@@ -48,7 +53,19 @@ class CreateNewUser implements CreatesNewUsers
             // L'acceptation des conditions et de la politique de confidentialite, gardee avec sa
             // date et la version acceptee : c'est la preuve du contrat.
             'terms' => ['accepted'],
-        ], ['terms.accepted' => __('account.register.terms_required')])->validate();
+        ], ['terms.accepted' => __('account.register.terms_required')])
+            ->after(function ($validator) use ($input, $invitation) {
+                if ($invitation !== null && strcasecmp((string) ($input['email'] ?? ''), $invitation->email) !== 0) {
+                    $validator->errors()->add('email', __('account.register.invitation_email_mismatch', ['email' => $invitation->email]));
+                }
+            })
+            ->validate();
+
+        if ($invitation !== null) {
+            PendingTenantInvitation::remember(request(), $invitation->code);
+
+            return $this->createInvitedAccount($input);
+        }
 
         $organisationName = trim((string) ($input['organisation_name'] ?? ''));
 
@@ -61,6 +78,31 @@ class CreateNewUser implements CreatesNewUsers
 
             throw ValidationException::withMessages(['registration' => __('account.register.creation_failed')]);
         }
+    }
+
+    /**
+     * Create the account of a person who joins an existing organisation.
+     *
+     * L'adresse est verifiee d'office : le lien d'invitation y a ete recu. L'invitation n'est pas
+     * acceptee ici, la personne le fait explicitement depuis l'accueil des invitations ; elle pourra
+     * ouvrir sa propre organisation plus tard, depuis Reglages > Organisations.
+     *
+     * @param  array<string, string>  $input
+     */
+    private function createInvitedAccount(array $input): User
+    {
+        $user = new User([
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'phone' => $input['phone'],
+            'password' => $input['password'],
+            'terms_accepted_at' => now(),
+            'terms_version' => LegalDocument::Version,
+        ]);
+        $user->email_verified_at = now();
+        $user->save();
+
+        return $user;
     }
 
     /**

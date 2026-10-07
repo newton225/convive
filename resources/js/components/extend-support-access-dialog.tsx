@@ -79,7 +79,7 @@ export function ExtendSupportAccessDialog({
                     </DialogHeader>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="support-extension">
+                        <Label htmlFor="support-extension" required>
                             {t('support_access.extend.duration')}
                         </Label>
                         <Select

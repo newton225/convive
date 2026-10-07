@@ -13,6 +13,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -23,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { store as storeInvitation } from '@/routes/tenants/invitations';
 import type { ProfileOption, Tenant } from '@/types';
+import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { useTranslation } from '@/hooks/use-translation';
 
 type Props = {
@@ -39,6 +41,7 @@ export default function InviteMemberModal({
     onOpenChange,
 }: Props) {
     const { t } = useTranslation();
+    const gettingStartedReturn = useGettingStartedReturn();
     const [inviteProfileId, setInviteProfileId] = useState<string>(
         String(
             availableProfiles.find((profile) => !profile.isSystem)?.id ?? '',
@@ -63,7 +66,7 @@ export default function InviteMemberModal({
             <DialogContent>
                 <Form
                     key={String(open)}
-                    {...storeInvitation.form(tenant.slug)}
+                    {...storeInvitation.form(tenant.slug, gettingStartedReturn)}
                     className="space-y-6"
                     onSuccess={() => onOpenChange(false)}
                 >
@@ -79,8 +82,9 @@ export default function InviteMemberModal({
                             </DialogHeader>
 
                             <div className="grid gap-4">
+                                <RequiredFieldsNote />
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">
+                                    <Label htmlFor="email" required>
                                         {t('tenants.modals.invite.email_label')}
                                     </Label>
                                     <Input
@@ -97,7 +101,7 @@ export default function InviteMemberModal({
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="profile_id">
+                                    <Label htmlFor="profile_id" required>
                                         {t('tenants.modals.invite.role_label')}
                                     </Label>
                                     <Select

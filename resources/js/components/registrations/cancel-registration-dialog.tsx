@@ -200,7 +200,7 @@ export function CancelRegistrationDialog({
                     />
 
                     <div className="grid gap-2">
-                        <Label htmlFor="cancel-reason">
+                        <Label htmlFor="cancel-reason" required>
                             {t('registrations.modals.cancel.reason_label')}
                         </Label>
                         <Input
@@ -305,7 +305,10 @@ export function CancelRegistrationDialog({
                                             {form.data.refund.status ===
                                             'kept' ? (
                                                 <div className="grid gap-2">
-                                                    <Label htmlFor="cancel-kept-reason">
+                                                    <Label
+                                                        htmlFor="cancel-kept-reason"
+                                                        required
+                                                    >
                                                         {t(
                                                             'registrations.refund.fields.kept_reason',
                                                         )}

@@ -65,7 +65,7 @@ export function ExportLimitDialog({ exportsPerHour }: Props) {
                     </DialogHeader>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="exports-per-hour">
+                        <Label htmlFor="exports-per-hour" required>
                             {t('console.security.export_limit.field')}
                         </Label>
                         <Input

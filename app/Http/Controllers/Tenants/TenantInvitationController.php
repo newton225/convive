@@ -11,7 +11,10 @@ use App\Models\Profile;
 use App\Models\Tenant;
 use App\Models\TenantInvitation;
 use App\Models\User;
+use App\Notifications\TenantAlert;
 use App\Notifications\Tenants\TenantInvitation as TenantInvitationNotification;
+use App\Support\GettingStarted;
+use App\Support\PendingTenantInvitation;
 use App\Support\PlanLimits;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -66,7 +69,7 @@ class TenantInvitationController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('tenants.flash.invitation_sent')]);
 
-        return to_route('tenants.edit', ['tenant' => $tenant->slug]);
+        return GettingStarted::redirect($request, $tenant, to_route('tenants.edit', ['tenant' => $tenant->slug]));
     }
 
     /**
@@ -91,10 +94,9 @@ class TenantInvitationController extends Controller
     public function accept(RespondToTenantInvitationRequest $request, TenantInvitation $invitation): RedirectResponse
     {
         $user = $request->user();
+        $tenant = $invitation->tenant;
 
-        DB::transaction(function () use ($user, $invitation) {
-            $tenant = $invitation->tenant;
-
+        $profile = DB::transaction(function () use ($user, $invitation, $tenant) {
             $profile = $tenant->run(fn () => Profile::findOrFail($invitation->profile_id));
 
             $tenant->addMember($user, $profile);
@@ -102,11 +104,28 @@ class TenantInvitationController extends Controller
             $invitation->update(['accepted_at' => now()]);
 
             $user->switchTenant($tenant);
+
+            return $profile;
         });
+
+        PendingTenantInvitation::forget($request);
+
+        // Tous les Proprietaires apprennent l'arrivee du nouveau membre, dans l'application et par
+        // courriel par defaut, chacun selon son reglage (TODO du 2026-10-07, point 9).
+        Notification::send(
+            $tenant->owners()->reject(fn (User $owner) => $owner->is($user)),
+            new TenantAlert(
+                NotificationType::TeamInvitationAccepted,
+                ['name' => $user->name, 'tenant' => $tenant->name, 'profile' => $profile->name],
+                route('tenants.edit', $tenant, absolute: false),
+                $tenant->id,
+                $tenant->name,
+            ),
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('tenants.flash.invitation_accepted')]);
 
-        return to_route('dashboard');
+        return to_route('dashboard', $tenant);
     }
 
     /**
@@ -116,8 +135,14 @@ class TenantInvitationController extends Controller
     {
         $invitation->delete();
 
+        PendingTenantInvitation::forget($request);
+
         Inertia::flash('toast', ['type' => 'success', 'message' => __('tenants.flash.invitation_declined')]);
 
-        return to_route('dashboard');
+        // Sans organisation, l'accueil des invitations propose d'en creer une.
+        $user = $request->user();
+        $tenant = $user->currentTenant ?? $user->personalTenant() ?? $user->tenants()->first();
+
+        return $tenant !== null ? to_route('dashboard', $tenant) : to_route('invitations.index');
     }
 }

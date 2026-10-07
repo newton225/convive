@@ -8,6 +8,7 @@ import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { Label } from '@/components/ui/label';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import {
@@ -103,8 +104,9 @@ export default function ProfileForm({
                 ) : null}
 
                 <div className="grid max-w-xl gap-4">
+                    <RequiredFieldsNote />
                     <div className="grid gap-2">
-                        <Label htmlFor="profile-name">
+                        <Label htmlFor="profile-name" required>
                             {t('profiles.fields.name')}
                         </Label>
                         <Input

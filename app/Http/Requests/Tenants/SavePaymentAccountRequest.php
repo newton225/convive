@@ -59,6 +59,8 @@ class SavePaymentAccountRequest extends FormRequest
             'holder_name' => ['nullable', 'string', 'max:120'],
             'instructions' => ['nullable', 'string', 'max:255'],
             'is_active' => ['boolean'],
+            // Confirmation de l'apercu, exigee par `SavePaymentAccount` tant que rien n'a ete publie.
+            'confirmed' => ['boolean'],
         ];
     }
 

@@ -11,6 +11,7 @@ use App\Models\Profile;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\Tenants\PaymentAccountChanged;
+use App\Support\GettingStarted;
 use Database\Factories\UserFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -37,9 +38,16 @@ class PaymentAccountTest extends TestCase
         $this->travelTo(now()->startOfHour());
     }
 
+    /**
+     * Une organisation qui a deja publie : le delai d'activation s'applique (avant la premiere
+     * publication, voir `PaymentAccountFirstPublicationTest`).
+     */
     private function tenantOwnedBy(User $user, string $name = 'Association Convive'): Tenant
     {
-        return app(CreateTenant::class)->handle($user, $name);
+        $tenant = app(CreateTenant::class)->handle($user, $name);
+        $tenant->forceFill(['first_published_at' => now()])->save();
+
+        return $tenant;
     }
 
     /**
@@ -689,5 +697,72 @@ class PaymentAccountTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertSame('CI008 01234 012345678901 23', $this->requestedNumber($tenant));
+    }
+
+    public function test_un_compte_cree_depuis_les_premiers_pas_ramene_au_tableau_de_bord(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAsConfirmed($owner)
+            ->post(route('tenants.payment-accounts.store', [$tenant, ...GettingStarted::ReturnQuery]), $this->payload())
+            ->assertRedirect(route('dashboard', $tenant));
+    }
+
+    public function test_la_page_fournit_les_valeurs_en_attente_pour_preremplir_le_formulaire(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $this->createAccount($tenant, $owner);
+
+        $this->actingAsConfirmed($owner)
+            ->get(route('tenants.payment-accounts.index', $tenant))
+            ->assertInertia(fn ($page) => $page
+                ->where('accounts.0.pending.channel', PaymentChannel::Wave->value)
+                ->where('accounts.0.pending.accountNumber', '+225 07 00 00 00 01')
+                ->where('accounts.0.pending.holderName', 'Association Convive'));
+    }
+
+    public function test_renvoyer_la_demande_en_attente_ne_relance_pas_le_delai(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $account = $this->createAccount($tenant, $owner);
+        $activatesAt = $account->pending_activates_at;
+
+        // Le formulaire reprend la demande en attente : seul le libelle change, le delai court
+        // toujours depuis la demande d'origine.
+        $this->travel(2)->hours();
+
+        $this->actingAsConfirmed($owner)
+            ->patch(route('tenants.payment-accounts.update', [$tenant, $account]), $this->payload(['label' => 'Wave du bureau']))
+            ->assertRedirect();
+
+        $account = $this->fresh($tenant, $account);
+
+        $this->assertSame('Wave du bureau', $account->label);
+        $this->assertTrue($account->hasPendingChange());
+        $this->assertSame($activatesAt->toIso8601String(), $account->pending_activates_at->toIso8601String());
+    }
+
+    public function test_revenir_aux_valeurs_actives_annule_la_demande_en_attente(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $account = $this->createAccount($tenant, $owner);
+
+        $this->travel(25)->hours();
+        $this->artisan('schedule:run')->assertSuccessful();
+
+        $account = $this->fresh($tenant, $account);
+        $this->requestChange($tenant, $owner, $account, '+225 07 99 99 99 99');
+
+        // Le demandeur relit sa demande et remet l'ancien numero : il n'y a plus rien a activer.
+        $this->requestChange($tenant, $owner, $this->fresh($tenant, $account), '+225 07 00 00 00 01');
+
+        $account = $this->fresh($tenant, $account);
+
+        $this->assertFalse($account->hasPendingChange());
+        $this->assertSame('+225 07 00 00 00 01', $account->account_number);
     }
 }

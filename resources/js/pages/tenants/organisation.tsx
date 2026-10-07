@@ -14,6 +14,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { can, Permission } from '@/lib/permissions';
 import {
@@ -47,6 +48,7 @@ export default function Organisation({
     permissions,
 }: Props) {
     const { t } = useTranslation();
+    const gettingStartedReturn = useGettingStartedReturn();
     // Le depot d'un fichier passe par sa propre requete : ses erreurs arrivent par les erreurs
     // partagees de la page, pas par le formulaire des couleurs.
     const pageErrors = usePage().props.errors as Record<string, string>;
@@ -82,7 +84,10 @@ export default function Organisation({
 
                         <Form
                             setDefaultsOnSuccess
-                            {...legalRoute.form(tenant.slug)}
+                            {...legalRoute.form(
+                                tenant.slug,
+                                gettingStartedReturn,
+                            )}
                             className="space-y-6"
                         >
                             {({ errors, processing, isDirty }) => (
@@ -346,7 +351,10 @@ export default function Organisation({
 
                         <Form
                             setDefaultsOnSuccess
-                            {...subdomainRoute.form(tenant.slug)}
+                            {...subdomainRoute.form(
+                                tenant.slug,
+                                gettingStartedReturn,
+                            )}
                             className="space-y-6"
                         >
                             {({ errors, processing, isDirty }) => (
@@ -354,6 +362,7 @@ export default function Organisation({
                                     <div className="grid max-w-md gap-2">
                                         <LabelWithHelp
                                             htmlFor="subdomain"
+                                            required
                                             label={t(
                                                 'organisation.fields.subdomain',
                                             )}

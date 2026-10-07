@@ -65,7 +65,7 @@ export function SupportDurationsDialog({ durations }: Props) {
                     </DialogHeader>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="support-durations">
+                        <Label htmlFor="support-durations" required>
                             {t('console.security.support_durations.field')}
                         </Label>
                         <Input

@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Concerns\HasTenants;
 use App\Enums\NotificationChannel;
 use App\Enums\NotificationType;
 use App\Enums\ProductTour;
 use App\Support\Auth\RecoveryCodes;
+use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,11 +27,15 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Stancl\Tenancy\Database\Concerns\CentralConnection;
 
 /**
+ * Adresse verifiee avant tout acces a un espace (`MustVerifyEmail`, decision du 2026-10-07) : une
+ * adresse inexistante ou inaccessible ne recevrait ni les invitations, ni les alertes, ni la
+ * facturation.
+ *
  * @property int $id
  * @property string $name
  * @property string $email
  * @property string|null $phone
- * @property Carbon|null $email_verified_at
+ * @property CarbonImmutable|null $email_verified_at
  * @property string $password
  * @property Carbon|null $blocked_at
  * @property string|null $blocked_reason
@@ -50,7 +55,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  */
 #[Fillable(['name', 'email', 'phone', 'password', 'current_tenant_id', 'terms_accepted_at', 'terms_version'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'scan_pin_verifier'])]
-class User extends Authenticatable implements PasskeyUser
+class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     // Toujours la base centrale, meme quand une tenancy est active : un utilisateur
     // appartient a plusieurs organisations, il doit rester lisible independamment de celle
@@ -104,7 +109,7 @@ class User extends Authenticatable implements PasskeyUser
     public function notificationChannelFor(NotificationType $type): NotificationChannel
     {
         return $this->notificationPreferences()->where('type', $type->value)->first()->channel
-            ?? NotificationChannel::default();
+            ?? $type->defaultChannel();
     }
 
     /**

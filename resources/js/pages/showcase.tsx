@@ -1,7 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, CalendarSearch, Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { ListPagination } from '@/components/list-pagination';
+import type { PaginationMeta } from '@/components/list-pagination';
 import { ShowcaseCard } from '@/components/showcase/showcase-card';
 import { SiteAnalytics } from '@/components/site/site-analytics';
 import { Reveal } from '@/components/site/reveal';
@@ -9,14 +10,19 @@ import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useServerList } from '@/hooks/use-server-list';
 import { useTranslation } from '@/hooks/use-translation';
-import { matchesSearch } from '@/lib/search';
 import { Duration, EaseOut } from '@/lib/motion';
 import { register } from '@/routes';
+import { index as showcaseIndex } from '@/routes/showcase';
 import type { ShowcaseEvent } from '@/types';
 
 type Props = {
+    // La page affichee seulement : recherche et pagination se font cote serveur.
     events: ShowcaseEvent[];
+    meta: PaginationMeta;
+    filters: { search: string | null };
+    hasEvents: boolean;
     analyticsId: string | null;
 };
 
@@ -28,22 +34,23 @@ type Props = {
  *
  * Chaque carte renvoie vers l'adresse complete avec jeton de l'evenement : la vitrine ne fait
  * qu'exposer un lien deja rendu public, jamais une seconde facon d'y acceder. La recherche filtre
- * la liste deja chargee, sans requete : la vitrine ne porte que les evenements annonces.
+ * le serveur, comme la pagination (TODO du 2026-10-07, point 11) : le visiteur ne recoit que la
+ * page affichee.
  */
-export default function Showcase({ events, analyticsId }: Props) {
+export default function Showcase({
+    events,
+    meta,
+    filters,
+    hasEvents,
+    analyticsId,
+}: Props) {
     const { t } = useTranslation();
     const reduceMotion = useReducedMotion() === true;
-    const [search, setSearch] = useState('');
-
-    const visible = useMemo(
-        () =>
-            events.filter((event) =>
-                [event.name, event.organisationName].some((value) =>
-                    matchesSearch(value, search),
-                ),
-            ),
-        [events, search],
-    );
+    const { search, setSearch, visit } = useServerList({
+        url: showcaseIndex().url,
+        filters,
+    });
+    const visible = events;
 
     const enter = (delay: number) =>
         reduceMotion
@@ -88,7 +95,7 @@ export default function Showcase({ events, analyticsId }: Props) {
                     >
                         {t('showcase.description')}
                     </motion.p>
-                    {events.length > 0 ? (
+                    {hasEvents ? (
                         <motion.div
                             {...enter(0.24)}
                             className="relative mx-auto mt-8 max-w-md"
@@ -110,7 +117,7 @@ export default function Showcase({ events, analyticsId }: Props) {
             </section>
 
             <main className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-                {events.length === 0 ? (
+                {!hasEvents ? (
                     <Reveal className="bg-card mx-auto flex max-w-lg flex-col items-center gap-3 rounded-3xl px-6 py-14 text-center">
                         <CalendarSearch className="text-muted-foreground size-10" />
                         <p className="font-medium" data-test="showcase-empty">
@@ -125,7 +132,7 @@ export default function Showcase({ events, analyticsId }: Props) {
                             className="text-muted-foreground mb-4 text-sm"
                             aria-live="polite"
                         >
-                            {t('showcase.results', { count: visible.length })}
+                            {t('showcase.results', { count: meta.total })}
                         </p>
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -136,7 +143,8 @@ export default function Showcase({ events, analyticsId }: Props) {
                                 {visible.map((event, index) => {
                                     const featured =
                                         index === 0 &&
-                                        search === '' &&
+                                        (filters.search ?? '') === '' &&
+                                        meta.currentPage === 1 &&
                                         visible.length > 2;
 
                                     return (
@@ -153,6 +161,12 @@ export default function Showcase({ events, analyticsId }: Props) {
                                 })}
                             </AnimatePresence>
                         </div>
+
+                        <ListPagination
+                            className="mt-8"
+                            meta={meta}
+                            onPageChange={(page) => visit({ page })}
+                        />
 
                         <AnimatePresence>
                             {visible.length === 0 ? (

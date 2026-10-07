@@ -8,6 +8,7 @@ use App\Models\Tenant;
 use App\Models\TenantInvitation;
 use App\Models\User;
 use App\Notifications\Tenants\TenantInvitation as TenantInvitationNotification;
+use App\Support\GettingStarted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -64,10 +65,10 @@ class TenantInvitationTest extends TestCase
         $mail = (new TenantInvitationNotification($invitation))->toMail($invitedUser);
 
         $this->assertSame(route('login', ['invitation' => $invitation->code]), $mail->actionUrl);
-        $this->assertStringContainsString('tableau de bord', implode(' ', $mail->introLines));
+        $this->assertStringContainsString('connectez-vous', strtolower(implode(' ', $mail->introLines)));
     }
 
-    public function test_invitation_email_for_unknown_users_uses_login_route()
+    public function test_invitation_email_for_unknown_users_uses_register_route()
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = Tenant::factory()->create();
@@ -83,8 +84,8 @@ class TenantInvitationTest extends TestCase
 
         $mail = (new TenantInvitationNotification($invitation))->toMail((object) []);
 
-        $this->assertSame(route('login', ['invitation' => $invitation->code]), $mail->actionUrl);
-        $this->assertStringContainsString('connectez-vous', strtolower(implode(' ', $mail->introLines)));
+        // Aucun compte a cette adresse : le lien mene droit a l'inscription (TODO du 2026-10-07).
+        $this->assertSame(route('register', ['invitation' => $invitation->code]), $mail->actionUrl);
     }
 
     public function test_tenant_invitations_can_be_created_by_admins()
@@ -221,7 +222,7 @@ class TenantInvitationTest extends TestCase
             ->actingAs($invitedUser)
             ->post(route('invitations.accept', $invitation));
 
-        $response->assertRedirect(route('dashboard'));
+        $response->assertRedirect(route('dashboard', $tenant));
         $response->assertInertiaFlash('toast', ['type' => 'success', 'message' => 'Invitation acceptée.']);
 
         $this->assertTrue($invitedUser->fresh()->belongsToTenant($tenant));
@@ -247,7 +248,8 @@ class TenantInvitationTest extends TestCase
             ->actingAs($invitedUser)
             ->delete(route('invitations.decline', $invitation));
 
-        $response->assertRedirect(route('dashboard'));
+        // Sans organisation, la personne revient a l'accueil des invitations, qui propose d'en creer une.
+        $response->assertRedirect(route('invitations.index'));
 
         $this->assertDatabaseMissing('tenant_invitations', [
             'id' => $invitation->id,
@@ -350,5 +352,21 @@ class TenantInvitationTest extends TestCase
         $response->assertSessionHasErrors('invitation');
 
         $this->assertFalse($invitedUser->fresh()->belongsToTenant($tenant));
+    }
+
+    public function test_une_invitation_envoyee_depuis_les_premiers_pas_ramene_au_tableau_de_bord(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = Tenant::factory()->create();
+        $this->joinAsOwner($tenant, $owner);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.invitations.store', [$tenant, ...GettingStarted::ReturnQuery]), [
+                'email' => 'invited@example.com',
+                'profile_id' => $this->profileOf($tenant, 'Lecture')->id,
+            ])
+            ->assertRedirect(route('dashboard', $tenant));
     }
 }

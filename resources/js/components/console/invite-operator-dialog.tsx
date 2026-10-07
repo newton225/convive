@@ -15,6 +15,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -74,8 +75,9 @@ export function InviteOperatorDialog({ profiles }: Props) {
                         </DialogDescription>
                     </DialogHeader>
 
+                    <RequiredFieldsNote />
                     <div className="grid gap-2">
-                        <Label htmlFor="operator-email">
+                        <Label htmlFor="operator-email" required>
                             {t('console.team.invite_dialog.email')}
                         </Label>
                         <Input
@@ -93,7 +95,7 @@ export function InviteOperatorDialog({ profiles }: Props) {
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="operator-profile">
+                        <Label htmlFor="operator-profile" required>
                             {t('console.team.invite_dialog.profile')}
                         </Label>
                         <Select

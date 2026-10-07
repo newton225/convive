@@ -34,8 +34,9 @@ class ProfilePolicy
      */
     public function update(User $user, Profile $profile, Tenant $tenant): bool
     {
-        // Un profil systeme n'est ni modifiable ni supprimable, quel que soit le porteur.
-        if ($profile->is_system) {
+        // Le profil systeme et les profils de base (Tresorier, Hotesse, Lecture) ne sont ni
+        // modifiables ni supprimables, quel que soit le porteur (decision du 2026-10-07).
+        if ($profile->isLocked()) {
             return false;
         }
 
@@ -53,6 +54,18 @@ class ProfilePolicy
     public function delete(User $user, Profile $profile, Tenant $tenant): bool
     {
         return $this->update($user, $profile, $tenant);
+    }
+
+    /**
+     * Determine whether the user can hide the given profile from every choice, or show it again.
+     *
+     * Seuls les profils de base se masquent : ils ne se suppriment pas. Un profil cree par
+     * l'organisation se supprime, et le Proprietaire reste toujours propose.
+     */
+    public function hide(User $user, Profile $profile, Tenant $tenant): bool
+    {
+        return $profile->isStarter()
+            && $user->hasTenantPermission($tenant, TenantPermission::ProfilesManage);
     }
 
     /**

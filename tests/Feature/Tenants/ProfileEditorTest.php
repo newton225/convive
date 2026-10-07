@@ -57,13 +57,25 @@ class ProfileEditorTest extends TestCase
 
     public function test_l_ecran_de_modification_charge_le_profil_et_ses_permissions(): void
     {
+        $this->tenant->run(fn () => Profile::create(['name' => 'Accueil', 'guard_name' => 'web'])
+            ->syncPermissions([TenantPermission::EventsView->value]));
+
         $this->actingAs($this->owner)
-            ->get(route('tenants.profiles.edit', [$this->tenant, $this->profileId('Hotesse')]))
+            ->get(route('tenants.profiles.edit', [$this->tenant, $this->profileId('Accueil')]))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('tenants/profile-form')
-                ->where('profile.name', 'Hotesse')
+                ->where('profile.name', 'Accueil')
                 ->has('profile.permissions'));
+    }
+
+    public function test_un_profil_de_base_ne_s_ouvre_pas_en_modification(): void
+    {
+        foreach (['Tresorier', 'Hotesse', 'Lecture'] as $name) {
+            $this->actingAs($this->owner)
+                ->get(route('tenants.profiles.edit', [$this->tenant, $this->profileId($name)]))
+                ->assertForbidden();
+        }
     }
 
     public function test_le_profil_systeme_ne_s_ouvre_pas_en_modification(): void

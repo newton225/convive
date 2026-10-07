@@ -4,6 +4,18 @@ return [
     'title' => 'Comptes de versement',
     'description' => "Les comptes sur lesquels vos invités versent. Toute modification n'apparaît publiquement qu'après un délai de :hours heures.",
 
+    'description_before_publication' => "Les comptes sur lesquels vos invités verseront. Tant qu'aucun événement n'est publié, une modification s'applique tout de suite, après relecture. Dès la première publication, toute création ou modification attendra :hours heures avant d'être visible.",
+
+    'confirm_immediate' => [
+        'title' => 'Vérifier les coordonnées',
+        'description' => "Aucun événement n'est encore publié : ces coordonnées s'appliquent dès maintenant. Vérifiez-les, ce sont celles que vos invités verront pour verser.",
+        'confirm' => 'Confirmer et enregistrer',
+    ],
+
+    'form' => [
+        'pending_hint' => "Le formulaire montre votre demande en attente. Corrigez-la ici sans toucher aux coordonnées que vos invités voient encore ; remettre les anciennes valeurs annule la demande.",
+    ],
+
     'channels' => [
         'wave' => 'Wave',
         'orange_money' => 'Orange Money',
@@ -73,6 +85,7 @@ return [
     ],
 
     'errors' => [
+        'confirmation_required' => 'Relisez les coordonnées et confirmez-les : elles seront visibles tout de suite par vos invités.',
         'has_proofs' => 'Des invités ont déjà versé sur ce compte : il ne peut pas être supprimé. Désactivez-le pour qu’il ne soit plus proposé.',
         'account_number_required' => 'Ce canal exige un numéro de compte.',
         'number_invalid' => 'Saisissez un numéro ivoirien à 10 chiffres, par exemple 07 07 12 34 56.',
@@ -112,6 +125,8 @@ return [
         'activates_at' => 'Cette modification prendra effet le :date.',
         'none' => 'aucun',
         'outro' => "Si vous n'êtes pas à l'origine de cette demande, annulez-la immédiatement et vérifiez les accès de votre organisation.",
+        'applied_now' => "Votre organisation n'a encore publié aucun événement : cette modification s'applique tout de suite.",
+        'outro_immediate' => "Si vous n'êtes pas à l'origine de cette modification, corrigez le compte et vérifiez les accès de votre organisation.",
     ],
 
     'whatsapp' => [

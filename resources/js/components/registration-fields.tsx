@@ -29,17 +29,24 @@ export function Field({
     label,
     error,
     help,
+    required = false,
     children,
 }: {
     id: string;
     label: string;
     error?: string;
     help?: string;
+    required?: boolean;
     children: React.ReactNode;
 }) {
     return (
         <div className="space-y-2">
-            <LabelWithHelp htmlFor={id} label={label} help={help} />
+            <LabelWithHelp
+                htmlFor={id}
+                label={label}
+                help={help}
+                required={required}
+            />
             {children}
             <InputError message={error} />
         </div>
@@ -152,6 +159,7 @@ export function CompanionFields({
                             <div className="flex-1 space-y-2">
                                 <Label
                                     htmlFor={`companion-name-${id}`}
+                                    required
                                     className="sr-only"
                                 >
                                     {t(

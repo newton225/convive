@@ -42,7 +42,8 @@ class UpdateTenantMemberRequest extends FormRequest
                 // `profiles` vit dans la base du locataire, deja active a ce point de la
                 // requete (EnsureTenantMembership) : verifier l'existence dans cette table
                 // revient a verifier qu'il appartient bien a ce locataire.
-                Rule::exists('profiles', 'id'),
+                // Un profil masque n'est propose nulle part (`Profile::scopeAssignable()`).
+                Rule::exists('profiles', 'id')->whereNull('hidden_at'),
             ],
         ];
     }

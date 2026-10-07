@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Console;
 
 use App\Http\Controllers\Controller;
 use App\Support\Console\MessageJournal;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,11 +15,11 @@ use Inertia\Response;
  */
 class MessageController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(Request $request): Response
     {
         return Inertia::render('console/messages', [
             'isSample' => false,
-            ...MessageJournal::overview(),
+            ...MessageJournal::overview($request),
         ]);
     }
 }

@@ -12,6 +12,9 @@ use App\Models\Tenant;
 use App\Support\Console\ConsoleAccess;
 use App\Support\Console\OrganisationOverview;
 use App\Support\Console\TenantUsageRecorder;
+use App\Support\ListPage;
+use App\Support\Search\UnaccentedSearch;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -28,16 +31,34 @@ class OrganisationController extends Controller
      */
     public function index(Request $request): Response
     {
+        // Pagination, recherche et filtre cote serveur (TODO du 2026-10-07, point 11). L'etat d'une
+        // organisation (essai, impaye, suspendue...) se deduit en PHP (`OrganisationOverview::status`) :
+        // filtrer dessus passe par les organisations trouvees, la console ne recoit qu'une page.
+        $search = trim((string) $request->input('filter.search', ''));
+        $status = (string) $request->input('filter.status', 'all');
+
+        // Avec les organisations supprimees par leur Proprietaire : elles restent restaurables
+        // jusqu'a leur effacement.
+        $query = Tenant::withTrashed()
+            ->with('subscription.plan', 'usage', 'suspension', 'limits')
+            ->when($search !== '', fn (Builder $query) => UnaccentedSearch::apply($query, ['name'], $search))
+            ->orderBy('name');
+
+        $organisations = $status === 'all'
+            ? ListPage::of($query, $request)->through(fn (Tenant $tenant) => OrganisationOverview::summary($tenant))
+            : ListPage::ofCollection(
+                $query->get()
+                    ->map(fn (Tenant $tenant) => OrganisationOverview::summary($tenant))
+                    ->filter(fn (array $summary) => $summary['status'] === $status)
+                    ->values(),
+                $request,
+            );
+
         return Inertia::render('console/organisations', [
             'isSample' => false,
-            // Avec les organisations supprimees par leur Proprietaire : elles restent restaurables
-            // jusqu'a leur effacement.
-            'organisations' => Tenant::withTrashed()
-                ->with('subscription.plan', 'usage', 'suspension', 'limits')
-                ->orderBy('name')
-                ->get()
-                ->map(fn (Tenant $tenant) => OrganisationOverview::summary($tenant))
-                ->all(),
+            'organisations' => collect($organisations->items())->values()->all(),
+            'meta' => ListPage::meta($organisations),
+            'filters' => ['search' => $search !== '' ? $search : null, 'status' => $status],
             // Chacun decide d'apparaitre ou non dans la liste proposee aux organisations.
             'supportAvailable' => ConsoleAccess::allows($request->user(), ConsoleArea::Support)
                 ? $request->user()->support_available

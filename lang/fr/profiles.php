@@ -5,6 +5,12 @@ return [
     'description' => 'Composez vos profils avec le catalogue de permissions de l\'application',
     'duplicate_name' => ':name (copie)',
 
+    'sections' => [
+        'custom' => 'Profils personnalisés',
+        'permanent' => 'Profils permanents',
+        'empty' => 'Aucun profil dans cette liste.',
+    ],
+
     'starters' => [
         'owner' => 'Accès complet à l\'espace. Profil système, non modifiable.',
         'treasurer' => 'Vérifie les preuves de paiement, exporte et rapproche les relevés.',
@@ -45,10 +51,17 @@ return [
         'duplicate' => 'Dupliquer',
         'edit' => 'Modifier le profil',
         'delete' => 'Supprimer le profil',
+        'hide' => 'Masquer',
+        'show' => 'Proposer de nouveau',
     ],
+
+    'starter_hint' => 'Profil de base : il ne se modifie pas et ne se supprime pas. Dupliquez-le pour créer une variante, ou masquez-le pour ne plus le proposer.',
+    'starter_hidden_hint' => "Masqué : il n'est plus proposé pour inviter une personne ni changer le profil d'un membre. Ceux qui le portent le gardent.",
 
     'badges' => [
         'system' => 'Profil système',
+        'starter' => 'Profil de base',
+        'hidden' => 'Masqué',
         'two_factor' => 'Double authentification exigée',
         'members' => '{0} Aucun membre|{1} 1 membre|[2,*] :count membres',
         'permissions' => '{0} Aucune permission|{1} 1 permission|[2,*] :count permissions',
@@ -59,6 +72,8 @@ return [
         'updated' => 'Profil mis à jour.',
         'duplicated' => 'Profil dupliqué.',
         'deleted' => 'Profil supprimé.',
+        'hidden' => "Profil masqué : il n'est plus proposé dans les formulaires.",
+        'shown' => 'Profil de nouveau proposé.',
     ],
 
     'errors' => [

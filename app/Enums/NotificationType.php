@@ -17,6 +17,7 @@ enum NotificationType: string
     case PurgeScheduled = 'purge_scheduled';
     case RegistrationsPurged = 'registrations_purged';
     case TeamInvitationPending = 'team_invitation_pending';
+    case TeamInvitationAccepted = 'team_invitation_accepted';
     case TicketRefused = 'ticket_refused';
     case EntryWithoutScan = 'entry_without_scan';
     case LargeExport = 'large_export';
@@ -45,7 +46,23 @@ enum NotificationType: string
             self::LargeExport, self::EntryWithoutScan => TenantPermission::AuditView,
             self::MessageQuotaReached, self::PlanLimitsLowered,
             self::TrialEnding, self::TrialEnded => TenantPermission::BillingView,
-            self::TeamInvitationPending => null,
+            // Adressees a une personne (l'invitee) ou aux Proprietaires de l'organisation, pas aux
+            // porteurs d'une permission.
+            self::TeamInvitationPending, self::TeamInvitationAccepted => null,
+        };
+    }
+
+    /**
+     * Get the channel of this type until the member chooses otherwise.
+     *
+     * L'arrivee d'un nouveau membre se dit aussi par courriel (decision du 2026-10-07) : c'est
+     * l'acces a l'organisation qui change. Chaque Proprietaire peut regler autrement.
+     */
+    public function defaultChannel(): NotificationChannel
+    {
+        return match ($this) {
+            self::TeamInvitationAccepted => NotificationChannel::Both,
+            default => NotificationChannel::default(),
         };
     }
 

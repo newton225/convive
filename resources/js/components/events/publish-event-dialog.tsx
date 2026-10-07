@@ -2,6 +2,7 @@ import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
@@ -14,6 +15,8 @@ type Props = {
     tenantSlug: string;
     event: EventDetails;
     paymentAccounts: EventPaymentAccountOption[];
+    // Premiere publication de l'organisation : elle demarre le delai des comptes de versement.
+    firstPublication: boolean;
 };
 
 /**
@@ -30,8 +33,10 @@ export function PublishEventDialog({
     tenantSlug,
     event,
     paymentAccounts,
+    firstPublication,
 }: Props) {
     const { t, locale } = useTranslation();
+    const gettingStartedReturn = useGettingStartedReturn();
     const [checked, setChecked] = useState(false);
     const [publishing, setPublishing] = useState(false);
 
@@ -87,7 +92,7 @@ export function PublishEventDialog({
             testId="event-publish-confirm"
             onConfirm={() =>
                 router.post(
-                    publish([tenantSlug, event.id]).url,
+                    publish([tenantSlug, event.id], gettingStartedReturn).url,
                     {},
                     {
                         onStart: () => setPublishing(true),
@@ -157,6 +162,16 @@ export function PublishEventDialog({
                         <li>
                             {t('events.confirm_publish.consequence_delete')}
                         </li>
+                        {firstPublication ? (
+                            <li
+                                className="text-foreground font-medium"
+                                data-test="event-publish-payment-delay"
+                            >
+                                {t(
+                                    'events.confirm_publish.consequence_payment_delay',
+                                )}
+                            </li>
+                        ) : null}
                     </ul>
                 </div>
 

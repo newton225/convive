@@ -3,9 +3,6 @@ import {
     flexRender,
     getCoreRowModel,
     getExpandedRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
     useReactTable,
     type ColumnDef,
     type ExpandedState,
@@ -13,7 +10,7 @@ import {
     type Updater,
 } from '@tanstack/react-table';
 import { ChevronRight, Eye, Images, MessageSquareText } from 'lucide-react';
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { formatPhoneNumberIntl } from 'react-phone-number-input';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { DataTableSortHeader } from '@/components/data-table-sort-header';
@@ -24,6 +21,8 @@ import { ProofConfirmSummary } from '@/components/proofs/proof-confirm-summary';
 import { ProofDetails } from '@/components/proofs/proof-details';
 import { ProofsToolbar } from '@/components/proofs/proofs-toolbar';
 import Heading from '@/components/heading';
+import { ListPagination } from '@/components/list-pagination';
+import type { PaginationMeta } from '@/components/list-pagination';
 import { ProductTourButton } from '@/components/product-tour-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,22 +49,38 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useLocalPreference } from '@/hooks/use-local-preference';
+import { useServerList } from '@/hooks/use-server-list';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime, formatRelative } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
 import type { ProofSignalFilter } from '@/lib/proof-filters';
-import { proofMatchesSearch, proofMatchesSignal } from '@/lib/proof-filters';
 import { proofReceiptFacts } from '@/lib/receipt-facts';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { approve, index, reject } from '@/routes/tenants/events/proofs';
 import type { PaymentProofRow, TenantPermissions, Translations } from '@/types';
 
+// Tris proposes par le serveur (`PaymentProofController::Sorts`) et colonne du tableau de chacun.
+const SortColumns: Record<string, string> = {
+    submitted_at: 'submittedAt',
+    name: 'name',
+    amount_due: 'amountDue',
+    party_size: 'partySize',
+};
+
 type Props = {
     tenant: { slug: string };
     event: { id: number; name: string };
     permissions: TenantPermissions;
+    // La page affichee seulement : recherche, filtre, tri et pagination se font cote serveur.
     rows: PaymentProofRow[];
+    meta: PaginationMeta;
+    filters: {
+        search: string | null;
+        signal: ProofSignalFilter;
+        sort: string;
+    };
+    hasProofs: boolean;
 };
 
 /**
@@ -78,6 +93,9 @@ export default function EventProofs({
     event,
     permissions,
     rows,
+    meta,
+    filters,
+    hasProofs,
 }: Props) {
     const { t, locale } = useTranslation();
     const [rejecting, setRejecting] = useState<PaymentProofRow | null>(null);
@@ -89,11 +107,32 @@ export default function EventProofs({
     const [duplicateImageOf, setDuplicateImageOf] =
         useState<PaymentProofRow | null>(null);
     const [expanded, setExpanded] = useState<ExpandedState>({});
-    const [sorting, setSorting] = useState<SortingState>([
-        { id: 'submittedAt', desc: false },
-    ]);
-    const [search, setSearch] = useState('');
-    const [signalFilter, setSignalFilter] = useState<ProofSignalFilter>('all');
+    const { search, setSearch, visit } = useServerList({
+        url: index([tenant.slug, event.id]).url,
+        filters: { search: filters.search, signal: filters.signal },
+        sort: filters.sort,
+    });
+    const signalFilter = filters.signal;
+    const setSignalFilter = (signal: ProofSignalFilter) =>
+        visit({ filter: { signal } });
+    // Le tri affiche se lit dans l'adresse ; un clic sur un en-tete demande un autre tri au serveur.
+    const sorting: SortingState = [
+        {
+            id: SortColumns[filters.sort.replace(/^-/, '')] ?? 'submittedAt',
+            desc: filters.sort.startsWith('-'),
+        },
+    ];
+    const setSorting = (updater: Updater<SortingState>) => {
+        const next = typeof updater === 'function' ? updater(sorting) : updater;
+        const first = next[0];
+        const key = first
+            ? Object.keys(SortColumns).find(
+                  (candidate) => SortColumns[candidate] === first.id,
+              )
+            : undefined;
+
+        visit({ sort: key ? (first?.desc ? '-' : '') + key : null });
+    };
     const [singleExpand, setSingleExpand] = useLocalPreference(
         'proofs.single-expand',
         false,
@@ -162,12 +201,8 @@ export default function EventProofs({
             ),
         },
         {
-            // La recherche passe par le filtre de cette colonne, mais porte sur toute la preuve
-            // (`proofMatchesSearch`) : reference, telephone, unite, accompagnateurs.
             id: 'name',
             accessorKey: 'name',
-            filterFn: (row, _columnId, value: string) =>
-                proofMatchesSearch(row.original, value),
             header: ({ column }) => (
                 <DataTableSortHeader
                     column={column}
@@ -199,12 +234,8 @@ export default function EventProofs({
         },
         {
             accessorKey: 'unit',
-            header: ({ column }) => (
-                <DataTableSortHeader
-                    column={column}
-                    label={t('proofs.columns.unit')}
-                />
-            ),
+            enableSorting: false,
+            header: t('proofs.columns.unit'),
         },
         {
             accessorKey: 'partySize',
@@ -274,8 +305,6 @@ export default function EventProofs({
         {
             id: 'signals',
             enableSorting: false,
-            filterFn: (row, _columnId, value: ProofSignalFilter) =>
-                proofMatchesSignal(row.original, value),
             header: t('proofs.columns.signals'),
             cell: ({ row }) => (
                 <div
@@ -424,23 +453,9 @@ export default function EventProofs({
         },
     ];
 
-    // Tout vient de TanStack Table, cote navigateur : la file ne porte que les preuves en attente
-    // d'un evenement, quelques centaines au plus, deja toutes chargees. Pagination et tri serveur
-    // (`spatie/laravel-query-builder`) ne se justifient qu'au-dela de quelques milliers (CLAUDE.md).
-    // Lignes depliables : le detail d'une preuve s'ouvre sous sa ligne plutot que d'allonger toutes
-    // les lignes. Par defaut, les plus anciennes en tete : une file se traite dans l'ordre d'arrivee.
-    // Poses par la barre d'outils ; appliques par le `filterFn` de chaque colonne. La reference
-    // doit rester stable d'un rendu a l'autre : un tableau neuf a chaque rendu fait recalculer le
-    // filtrage par TanStack, qui remet alors la pagination a zero, d'ou un nouveau rendu, et la
-    // page se figeait en boucle au premier tri ou a la premiere frappe dans la recherche.
-    const columnFilters = useMemo(
-        () => [
-            { id: 'name', value: search },
-            { id: 'signals', value: signalFilter },
-        ],
-        [search, signalFilter],
-    );
-
+    // Recherche, filtre, tri et pagination se font cote serveur (TODO du 2026-10-07, point 11) :
+    // TanStack Table n'affiche que la page recue. Lignes depliables : le detail d'une preuve
+    // s'ouvre sous sa ligne plutot que d'allonger toutes les lignes.
     const table = useReactTable({
         data: rows,
         columns,
@@ -448,21 +463,19 @@ export default function EventProofs({
         state: {
             expanded,
             sorting,
-            columnFilters,
         },
         onExpandedChange: changeExpanded,
         onSortingChange: setSorting,
         getRowCanExpand: () => true,
         getCoreRowModel: getCoreRowModel(),
         getExpandedRowModel: getExpandedRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        initialState: { pagination: { pageSize: 25 } },
+        manualSorting: true,
+        manualFiltering: true,
+        manualPagination: true,
+        pageCount: meta.lastPage,
     });
 
-    const filteredCount = table.getFilteredRowModel().rows.length;
-    const { pageIndex } = table.getState().pagination;
+    const filteredCount = meta.total;
 
     const resetFilters = () => {
         setSearch('');
@@ -486,7 +499,7 @@ export default function EventProofs({
                     />
                 </div>
 
-                {rows.length === 0 ? (
+                {!hasProofs ? (
                     <div className="rounded-lg border p-6 text-center">
                         <p className="font-medium">{t('proofs.empty.title')}</p>
                         <p className="text-muted-foreground text-sm">
@@ -614,37 +627,10 @@ export default function EventProofs({
                             </div>
                         )}
 
-                        {table.getPageCount() > 1 ? (
-                            <div
-                                className="flex items-center justify-between"
-                                data-test="proofs-pagination"
-                            >
-                                <p className="text-muted-foreground text-sm">
-                                    {t('common.pagination.page_of', {
-                                        current: String(pageIndex + 1),
-                                        last: String(table.getPageCount()),
-                                    })}
-                                </p>
-                                <div className="flex gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={!table.getCanPreviousPage()}
-                                        onClick={() => table.previousPage()}
-                                    >
-                                        {t('common.pagination.previous')}
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={!table.getCanNextPage()}
-                                        onClick={() => table.nextPage()}
-                                    >
-                                        {t('common.pagination.next')}
-                                    </Button>
-                                </div>
-                            </div>
-                        ) : null}
+                        <ListPagination
+                            meta={meta}
+                            onPageChange={(page) => visit({ page })}
+                        />
                     </div>
                 )}
             </div>

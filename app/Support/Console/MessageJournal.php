@@ -6,6 +6,8 @@ use App\Contracts\SmsSender;
 use App\Contracts\WhatsAppSender;
 use App\Models\MessageLog;
 use App\Models\Tenant;
+use App\Support\ListPage;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Lang;
 
@@ -25,8 +27,6 @@ class MessageJournal
      * font pas partie.
      */
     private const Channels = ['mail', 'whatsapp', 'sms'];
-
-    private const MessagesShown = 50;
 
     /**
      * Record a notification that just left through one of the outgoing channels.
@@ -74,14 +74,18 @@ class MessageJournal
     /**
      * Get what the messages screen shows.
      *
-     * @return array{channels: array<int, array{channel: string, simulated: bool, lastDay: int, lastWeek: int}>, types: array<int, array{type: string, label: string, count: int}>, messages: array<int, array{id: int, at: string, channel: string, type: string, organisation: string|null, recipient: string|null, simulated: bool}>}
+     * Les envois sont pagines par le serveur (TODO du 2026-10-07, point 11) : plus de fenetre des
+     * derniers, tous ceux encore conserves restent atteignables.
+     *
+     * @return array{channels: array<int, array{channel: string, simulated: bool, lastDay: int, lastWeek: int}>, types: array<int, array{type: string, label: string, count: int}>, messages: array<int, array{id: int, at: string, channel: string, type: string, organisation: string|null, recipient: string|null, simulated: bool}>, messagesMeta: array{currentPage: int, lastPage: int, total: int}}
      */
-    public static function overview(): array
+    public static function overview(Request $request): array
     {
         $week = MessageLog::where('created_at', '>=', now()->subDays(7))->get(['channel', 'type', 'created_at']);
         $day = now()->subDay();
 
-        $latest = MessageLog::query()->latest('created_at')->latest('id')->limit(self::MessagesShown)->get();
+        $page = ListPage::of(MessageLog::query()->latest('created_at')->latest('id'), $request);
+        $latest = $page->getCollection();
         $organisations = Tenant::withTrashed()->whereKey($latest->pluck('tenant_id')->filter()->unique())->pluck('name', 'id');
 
         return [
@@ -107,7 +111,9 @@ class MessageJournal
                     'recipient' => $message->recipient,
                     'simulated' => $message->simulated,
                 ])
+                ->values()
                 ->all(),
+            'messagesMeta' => ListPage::meta($page),
         ];
     }
 

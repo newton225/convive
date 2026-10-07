@@ -40,6 +40,23 @@ export type TenantInvitation = {
 export type TenantInvitationContext = {
     code: string;
     tenantName: string;
+    // L'adresse a laquelle l'invitation a ete envoyee : la seule acceptee pour s'inscrire.
+    email: string;
+};
+
+export type InvitationHomeItem = {
+    code: string;
+    tenantName: string;
+    profileName: string;
+    inviterName: string | null;
+    expiresAt: string | null;
+};
+
+export type InvitationMismatch = {
+    code: string;
+    tenantName: string;
+    invitedEmail: string;
+    accountEmail: string;
 };
 
 export type DashboardInvitation = {
@@ -67,6 +84,9 @@ export type TenantProfile = {
     name: string;
     description: string | null;
     isSystem: boolean;
+    // Tresorier, Hotesse, Lecture : figes, masquables (`isHidden`), jamais supprimes.
+    isStarter: boolean;
+    isHidden: boolean;
     requiresTwoFactor: boolean;
     permissions: string[];
     memberCount: number;
@@ -151,6 +171,7 @@ export type PaymentChannelOption = {
 };
 
 export type PaymentAccountPendingChange = {
+    channel: string | null;
     channelLabel: string | null;
     accountNumber: string | null;
     holderName: string | null;

@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
 import { ConsoleTable } from '@/components/console/console-table';
+import type { PaginationMeta } from '@/components/list-pagination';
 import { OrganisationStatusBadge } from '@/components/console/organisation-status-badge';
 import { QuotaUsage } from '@/components/console/quota-usage';
 import Heading from '@/components/heading';
@@ -15,6 +15,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useServerList } from '@/hooks/use-server-list';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDate, formatRelative } from '@/lib/format-date';
 import { index, show } from '@/routes/console/organisations';
@@ -28,7 +29,10 @@ import type {
 
 type Props = {
     isSample: boolean;
+    // La page affichee seulement : recherche, filtre et pagination se font cote serveur.
     organisations: ConsoleOrganisationSummary[];
+    meta: PaginationMeta;
+    filters: { search: string | null; status: string };
     // Reels, eux : les acces de support ouverts au compte connecte.
     supportGrants: ConsoleSupportGrant[];
     supportRequests: ConsoleSupportRequest[];
@@ -54,28 +58,19 @@ const statuses: ConsoleOrganisationStatus[] = [
 export default function Organisations({
     isSample,
     organisations,
+    meta,
+    filters,
     supportGrants,
     supportRequests,
     supportAvailable,
 }: Props) {
     const { t, locale } = useTranslation();
-    const [search, setSearch] = useState('');
-    const [status, setStatus] = useState<string>(AllStatuses);
-
-    // Filtre en memoire sur la liste que le serveur envoie ; a passer cote serveur
-    // (`spatie/laravel-query-builder`) quand la liste viendra de la base.
-    const visible = useMemo(() => {
-        const needle = search.trim().toLocaleLowerCase(locale);
-
-        return organisations.filter(
-            (organisation) =>
-                (status === AllStatuses || organisation.status === status) &&
-                (needle === '' ||
-                    organisation.name
-                        .toLocaleLowerCase(locale)
-                        .includes(needle)),
-        );
-    }, [organisations, search, status, locale]);
+    const { search, setSearch, visit } = useServerList({
+        url: index().url,
+        filters,
+    });
+    const status = filters.status;
+    const setStatus = (value: string) => visit({ filter: { status: value } });
 
     const columns: ColumnDef<ConsoleOrganisationSummary>[] = [
         {
@@ -126,7 +121,9 @@ export default function Organisations({
     ];
 
     const emptyState =
-        organisations.length === 0 ? (
+        meta.total === 0 &&
+        (filters.search ?? '') === '' &&
+        status === AllStatuses ? (
             <>
                 <p className="font-medium">
                     {t('console.organisations.empty.title')}
@@ -198,7 +195,9 @@ export default function Organisations({
 
                 <ConsoleTable
                     columns={columns}
-                    data={visible}
+                    data={organisations}
+                    meta={meta}
+                    onPageChange={(page) => visit({ page })}
                     emptyState={emptyState}
                 />
             </div>

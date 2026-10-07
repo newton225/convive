@@ -1,4 +1,4 @@
-import { useForm, usePage } from '@inertiajs/react';
+import { router, useForm, usePage } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { useEffect, useState } from 'react';
 import InputError from '@/components/input-error';
@@ -33,11 +33,25 @@ export function TwoFactorReconfirmDialog() {
     const [open, setOpen] = useState(false);
     const form = useForm({ code: '' });
 
+    // Refus present des l'affichage de la page (retour apres une redirection).
     useEffect(() => {
         if (errors.two_factor_reconfirm) {
             setOpen(true);
         }
     }, [errors]);
+
+    // Chaque refus du serveur rouvre la fenetre, meme s'il porte la meme erreur que le precedent :
+    // les erreurs de la page restant identiques, l'effet ci-dessus ne se rejouait pas, et apres une
+    // annulation seul le toast s'affichait (bogue du 2026-10-07).
+    useEffect(
+        () =>
+            router.on('error', (event) => {
+                if (event.detail.errors.two_factor_reconfirm) {
+                    setOpen(true);
+                }
+            }),
+        [],
+    );
 
     const close = () => {
         setOpen(false);

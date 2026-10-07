@@ -9,6 +9,7 @@ use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
@@ -237,19 +238,125 @@ class UnitTest extends TestCase
         $tenant->asCurrent(fn () => $this->assertDatabaseMissing('units', ['id' => $unit->id]));
     }
 
-    public function test_la_derniere_unite_ne_peut_pas_etre_supprimee(): void
+    public function test_aucune_ne_peut_pas_etre_supprimee_meme_seule(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
 
-        $tenant->asCurrent(fn () => Unit::where('name', '!=', Unit::None)->delete());
-        $last = $this->unitOf($tenant, Unit::None);
+        $tenant->asCurrent(fn () => Unit::where('is_none', false)->delete());
+        $none = $this->unitOf($tenant, Unit::None);
 
         $this->actingAs($owner)
-            ->delete(route('tenants.units.destroy', [$tenant, $last]))
-            ->assertSessionHasErrors('unit');
+            ->delete(route('tenants.units.destroy', [$tenant, $none]))
+            ->assertForbidden();
 
-        $tenant->asCurrent(fn () => $this->assertDatabaseHas('units', ['id' => $last->id]));
+        $tenant->asCurrent(fn () => $this->assertDatabaseHas('units', ['id' => $none->id]));
+    }
+
+    public function test_aucune_ne_peut_pas_etre_supprimee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $none = $this->unitOf($tenant, Unit::None);
+
+        $this->actingAs($owner)
+            ->delete(route('tenants.units.destroy', [$tenant, $none]))
+            ->assertForbidden();
+
+        $tenant->asCurrent(fn () => $this->assertDatabaseHas('units', ['id' => $none->id]));
+    }
+
+    public function test_aucune_ne_peut_pas_etre_renommee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $none = $this->unitOf($tenant, Unit::None);
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.units.update', [$tenant, $none]), [
+                'name' => 'SANS UNITE',
+                'is_active' => true,
+                'position' => 0,
+            ])
+            ->assertForbidden();
+
+        $this->assertSame(Unit::None, $tenant->asCurrent(fn () => $none->fresh())->name);
+    }
+
+    public function test_aucune_ne_peut_pas_etre_desactivee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $none = $this->unitOf($tenant, Unit::None);
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.units.update', [$tenant, $none]), [
+                'name' => Unit::None,
+                'is_active' => false,
+                'position' => 0,
+            ])
+            ->assertForbidden();
+
+        $this->assertTrue($tenant->asCurrent(fn () => $none->fresh())->is_active);
+    }
+
+    public function test_aucune_reste_en_derniere_position(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        // Une unite ajoutee apres coup, puis une autre deplacee tout au bout de la liste : ni
+        // l'une ni l'autre ne passe apres « Aucune ».
+        $this->actingAs($owner)
+            ->post(route('tenants.units.store', $tenant), ['name' => 'BETHEL'])
+            ->assertRedirect();
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.units.update', [$tenant, $this->unitOf($tenant, 'QODESH')]), [
+                'name' => 'QODESH',
+                'is_active' => true,
+                'position' => 999,
+            ])
+            ->assertRedirect();
+
+        $names = $tenant->asCurrent(fn () => Unit::ordered()->pluck('name')->all());
+
+        $this->assertSame(Unit::None, end($names));
+        $this->assertSame(Unit::None, $tenant->asCurrent(fn () => Unit::active()->ordered()->get()->last()?->name));
+    }
+
+    public function test_l_ecran_des_unites_presente_aucune_en_dernier_et_protegee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $tenant->asCurrent(fn () => Unit::where('name', 'QODESH')->update(['position' => 999]));
+
+        $this->actingAs($owner)
+            ->get(route('tenants.units.index', $tenant))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('units.'.(count(Unit::Starters) - 1).'.name', Unit::None)
+                ->where('units.'.(count(Unit::Starters) - 1).'.isNone', true));
+    }
+
+    public function test_une_unite_ordinaire_reste_modifiable_et_supprimable(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $unit = $this->unitOf($tenant, 'ELISHAMA');
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.units.update', [$tenant, $unit]), [
+                'name' => 'ELISHAMA',
+                'is_active' => false,
+                'position' => 3,
+            ])
+            ->assertRedirect();
+
+        $this->actingAs($owner)
+            ->delete(route('tenants.units.destroy', [$tenant, $unit]))
+            ->assertRedirect();
+
+        $tenant->asCurrent(fn () => $this->assertDatabaseMissing('units', ['id' => $unit->id]));
     }
 
     public function test_la_modification_d_une_unite_est_journalisee(): void

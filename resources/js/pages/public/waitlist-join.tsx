@@ -10,6 +10,7 @@ import {
     Field,
     UnitSelect,
 } from '@/components/registration-fields';
+import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { SubmitButton } from '@/components/submit-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -83,8 +84,10 @@ export default function PublicWaitlistJoin({
                         <>
                             <Card>
                                 <CardContent className="space-y-4 pt-6">
+                                    <RequiredFieldsNote />
                                     <Field
                                         id="name"
+                                        required
                                         label={t(
                                             'guest.registration.fields.name',
                                         )}
@@ -100,6 +103,7 @@ export default function PublicWaitlistJoin({
 
                                     <Field
                                         id="phone"
+                                        required
                                         label={t(
                                             'guest.registration.fields.phone',
                                         )}
@@ -119,6 +123,7 @@ export default function PublicWaitlistJoin({
 
                                     <Field
                                         id="unit_id"
+                                        required
                                         label={t(
                                             'guest.registration.fields.unit',
                                         )}

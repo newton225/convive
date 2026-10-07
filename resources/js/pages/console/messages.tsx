@@ -2,9 +2,11 @@ import { Head } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { TriangleAlert } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
+import type { PaginationMeta } from '@/components/list-pagination';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useServerList } from '@/hooks/use-server-list';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
 import { messages as messagesRoute } from '@/routes/console';
@@ -18,7 +20,9 @@ import type {
 type Props = {
     channels: ConsoleMessageChannel[];
     types: ConsoleMessageType[];
+    // La page affichee seulement : le journal est pagine par le serveur.
     messages: ConsoleMessage[];
+    messagesMeta: PaginationMeta;
 };
 
 /**
@@ -26,8 +30,14 @@ type Props = {
  * WhatsApp sont partis, de quel type, et les derniers. Un canal qui n'envoie pas encore reellement
  * est signale : ses messages sont comptes, mais personne ne les recoit.
  */
-export default function ConsoleMessages({ channels, types, messages }: Props) {
+export default function ConsoleMessages({
+    channels,
+    types,
+    messages,
+    messagesMeta,
+}: Props) {
     const { t, locale } = useTranslation();
+    const { visit } = useServerList({ url: messagesRoute().url });
 
     const columns: ColumnDef<ConsoleMessage>[] = [
         {
@@ -149,6 +159,8 @@ export default function ConsoleMessages({ channels, types, messages }: Props) {
                     <ConsoleTable
                         columns={columns}
                         data={messages}
+                        meta={messagesMeta}
+                        onPageChange={(page) => visit({ page })}
                         emptyState={
                             <p className="text-muted-foreground text-sm">
                                 {t('console.messages.empty')}

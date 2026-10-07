@@ -25,6 +25,12 @@ class RegisterResponse implements RegisterResponseContract
 
         $tenant = $this->currentTenant($request);
 
+        // Inscrite pour rejoindre une organisation, la personne n'en a pas encore : elle accepte
+        // d'abord l'invitation, depuis son accueil (TODO du 2026-10-07).
+        if ($tenant === null) {
+            return redirect()->route('invitations.index');
+        }
+
         return redirect()->intended(route('tenants.organisation.edit', $tenant));
     }
 }

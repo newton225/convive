@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\StarterProfile;
 use App\Enums\TenantPermission;
+use Carbon\CarbonImmutable;
 use Database\Factories\ProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -28,6 +31,8 @@ use Spatie\Permission\Models\Role;
  * @property string|null $description
  * @property bool $is_system
  * @property bool $requires_two_factor
+ * @property StarterProfile|null $starter
+ * @property CarbonImmutable|null $hidden_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -105,6 +110,50 @@ class Profile extends Role
     }
 
     /**
+     * Determine whether this profile is one of the starter profiles (Tresorier, Hotesse, Lecture).
+     */
+    public function isStarter(): bool
+    {
+        return $this->starter !== null;
+    }
+
+    /**
+     * Get the starter profile this profile stands for, if any.
+     */
+    public function starter(): ?StarterProfile
+    {
+        return $this->starter;
+    }
+
+    /**
+     * Determine whether the profile can neither be edited nor deleted : the system owner profile
+     * and the starter profiles.
+     */
+    public function isLocked(): bool
+    {
+        return $this->is_system || $this->isStarter();
+    }
+
+    /**
+     * Determine whether the organisation has hidden this profile from every choice.
+     */
+    public function isHidden(): bool
+    {
+        return $this->hidden_at !== null;
+    }
+
+    /**
+     * Scope the query to the profiles offered when inviting a person or changing a member's
+     * profile. Un profil masque n'est propose dans aucun formulaire ; qui le porte deja le garde.
+     *
+     * @param  Builder<Profile>  $query
+     */
+    public function scopeAssignable(Builder $query): void
+    {
+        $query->whereNull('hidden_at');
+    }
+
+    /**
      * Determine whether carriers of this profile must have two-factor authentication.
      *
      * Le profil systeme l'exige toujours : il detient tout le catalogue, y compris les
@@ -143,6 +192,8 @@ class Profile extends Role
         return [
             'is_system' => 'boolean',
             'requires_two_factor' => 'boolean',
+            'starter' => StarterProfile::class,
+            'hidden_at' => 'datetime',
         ];
     }
 }

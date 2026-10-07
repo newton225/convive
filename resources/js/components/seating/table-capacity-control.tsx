@@ -76,7 +76,7 @@ export function TableCapacityControl({
             <PopoverContent align="end" className="w-60">
                 <form onSubmit={save} className="space-y-3">
                     <div className="space-y-2">
-                        <Label htmlFor={`capacity-${tableId}`}>
+                        <Label htmlFor={`capacity-${tableId}`} required>
                             {t('seating.capacity.edit')}
                         </Label>
                         <Input

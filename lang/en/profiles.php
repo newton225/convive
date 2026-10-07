@@ -5,6 +5,12 @@ return [
     'description' => 'Build your profiles from the application permission catalogue',
     'duplicate_name' => ':name (copy)',
 
+    'sections' => [
+        'custom' => 'Custom profiles',
+        'permanent' => 'Permanent profiles',
+        'empty' => 'There are no profiles in this list.',
+    ],
+
     'starters' => [
         'owner' => 'Full access to the workspace. System profile, not editable.',
         'treasurer' => 'Checks payment proofs, exports and reconciles statements.',
@@ -45,10 +51,17 @@ return [
         'duplicate' => 'Duplicate',
         'edit' => 'Edit profile',
         'delete' => 'Delete profile',
+        'hide' => 'Hide',
+        'show' => 'Offer again',
     ],
+
+    'starter_hint' => 'Starter profile: it cannot be edited or deleted. Duplicate it to create a variant, or hide it to stop offering it.',
+    'starter_hidden_hint' => "Hidden: it is no longer offered when inviting someone or changing a member's profile. Members who carry it keep it.",
 
     'badges' => [
         'system' => 'System profile',
+        'starter' => 'Starter profile',
+        'hidden' => 'Hidden',
         'two_factor' => 'Two-factor required',
         'members' => '{0} No member|{1} 1 member|[2,*] :count members',
         'permissions' => '{0} No permission|{1} 1 permission|[2,*] :count permissions',
@@ -59,6 +72,8 @@ return [
         'updated' => 'Profile updated.',
         'duplicated' => 'Profile duplicated.',
         'deleted' => 'Profile deleted.',
+        'hidden' => 'Profile hidden: it is no longer offered in forms.',
+        'shown' => 'Profile offered again.',
     ],
 
     'errors' => [
