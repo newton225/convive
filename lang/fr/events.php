@@ -84,6 +84,8 @@ return [
         'add' => 'Ajouter un tarif',
         'remove' => 'Retirer le tarif :name',
         'minimum' => 'Le tarif affiché sur le lien public sera « à partir de :price ».',
+        'capacity_hint' => 'La salle compte :count places : un quota ne peut pas la dépasser.',
+        'quotas_exceed' => 'Les quotas additionnés (:total) dépassent la salle (:capacity places) : la salle se remplira avant que chaque tarif atteigne son quota.',
     ],
 
     'visual' => [
@@ -218,6 +220,7 @@ return [
         'price_category_unknown' => 'Ce tarif ne correspond pas à cet événement.',
         'price_category_duplicate' => 'Chaque tarif doit avoir un nom différent.',
         'price_category_quota_below_taken' => 'Le quota ne peut pas être inférieur aux :count places déjà prises dans ce tarif.',
+        'price_category_quota_above_capacity' => 'Le quota ne peut pas dépasser les :capacity places de la salle.',
         'price_category_in_use' => 'Un tarif déjà choisi par des inscrits ou des personnes en attente ne peut pas être retiré.',
         'venue_map_url' => 'Collez un lien Google Maps, Apple Plans, OpenStreetMap ou Waze (en https), ou des coordonnées comme « 5.3364, -4.0267 ».',
         'deadline_after_event' => "La date limite des inscriptions ne peut pas être postérieure à l'événement.",

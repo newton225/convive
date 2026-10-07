@@ -144,6 +144,23 @@ class EventTest extends TestCase
         $this->assertSame(15000, $event->price_per_person);
     }
 
+    public function test_un_quota_ne_peut_pas_depasser_la_capacite_de_la_salle(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $this->payload([
+                'table_groups' => [['count' => 7, 'seats' => 1]],
+                'price_categories' => [
+                    ['name' => 'VIP', 'price' => 20000, 'quota' => 5],
+                    ['name' => 'VVIP', 'price' => 30000, 'quota' => 50],
+                ],
+            ]))
+            ->assertSessionHasErrors('price_categories.1.quota')
+            ->assertSessionDoesntHaveErrors('price_categories.0.quota');
+    }
+
     public function test_un_evenement_nait_en_brouillon_et_sans_lien_public(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

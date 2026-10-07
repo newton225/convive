@@ -26,12 +26,14 @@ type Row = {
 type Props = {
     defaultCategories: EventPriceCategoryInput[];
     defaultPrice: number;
+    capacity: number;
     errors: Record<string, string | undefined>;
 };
 
 export function PriceCategoriesField({
     defaultCategories,
     defaultPrice,
+    capacity,
     errors,
 }: Props) {
     const { t, locale } = useTranslation();
@@ -64,6 +66,12 @@ export function PriceCategoriesField({
     const minimumPrice = Math.min(
         ...categories.map(({ price }) => Math.max(0, Number(price) || 0)),
     );
+
+    // Seuls les tarifs plafonnes comptent : un tarif sans quota n'a pas de limite propre.
+    const unlimited = categories.some(({ quota }) => quota === '');
+    const quotaTotal = unlimited
+        ? 0
+        : categories.reduce((sum, { quota }) => sum + (Number(quota) || 0), 0);
 
     return (
         <div className="space-y-4" data-test="price-categories-field">
@@ -146,6 +154,7 @@ export function PriceCategoriesField({
                             name={`price_categories[${index}][quota]`}
                             type="number"
                             min={1}
+                            max={capacity > 0 ? capacity : undefined}
                             value={category.quota}
                             onChange={(event) =>
                                 update(index, { quota: event.target.value })
@@ -193,6 +202,21 @@ export function PriceCategoriesField({
             >
                 <Plus /> {t('events.price_categories.add')}
             </Button>
+            {capacity > 0 ? (
+                <p className="text-muted-foreground text-sm">
+                    {t('events.price_categories.capacity_hint', {
+                        count: capacity,
+                    })}
+                </p>
+            ) : null}
+            {capacity > 0 && quotaTotal > capacity ? (
+                <p className="text-sm text-amber-600" role="status">
+                    {t('events.price_categories.quotas_exceed', {
+                        total: quotaTotal,
+                        capacity,
+                    })}
+                </p>
+            ) : null}
             <p className="text-muted-foreground text-sm">
                 {t('events.price_categories.minimum', {
                     price: formatAmount(minimumPrice, locale),

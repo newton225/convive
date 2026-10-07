@@ -84,6 +84,8 @@ return [
         'add' => 'Add a price',
         'remove' => 'Remove the :name price',
         'minimum' => 'The public event page will show “from :price”.',
+        'capacity_hint' => 'The room has :count seats: a quota cannot exceed it.',
+        'quotas_exceed' => 'The quotas add up to :total, more than the room (:capacity seats): the room will fill up before every price reaches its quota.',
     ],
 
     'visual' => [
@@ -218,6 +220,7 @@ return [
         'price_category_unknown' => 'This price does not belong to this event.',
         'price_category_duplicate' => 'Each price must have a different name.',
         'price_category_quota_below_taken' => 'The quota cannot be lower than the :count seats already taken in this price category.',
+        'price_category_quota_above_capacity' => 'The quota cannot exceed the :capacity seats of the room.',
         'price_category_in_use' => 'A price already chosen by guests or waitlisted people cannot be removed.',
         'venue_map_url' => 'Paste a Google Maps, Apple Maps, OpenStreetMap or Waze link (https), or coordinates such as "5.3364, -4.0267".',
         'deadline_after_event' => 'The registration deadline cannot be later than the event itself.',

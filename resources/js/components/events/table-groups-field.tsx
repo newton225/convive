@@ -1,5 +1,5 @@
 import { Minus, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HelpTip } from '@/components/help-tip';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ type Row = { key: number; count: string; seats: string };
 
 type Props = {
     defaultGroups: EventTableGroup[];
+    onSeatsChange?: (seats: number) => void;
     errors: Record<string, string | undefined>;
 };
 
@@ -21,7 +22,11 @@ type Props = {
  * « 3 tables de 12 places », « 20 tables de 8 places ». Le total se recalcule a chaque saisie ;
  * c'est le serveur qui cree les tables et refuse ce qui laisserait un invite place sans chaise.
  */
-export function TableGroupsField({ defaultGroups, errors }: Props) {
+export function TableGroupsField({
+    defaultGroups,
+    onSeatsChange,
+    errors,
+}: Props) {
     const { t } = useTranslation();
     const [nextKey, setNextKey] = useState(defaultGroups.length + 1);
     // Un nouvel evenement part sans table : aucune capacite inventee a la place de l'organisateur.
@@ -57,6 +62,11 @@ export function TableGroupsField({ defaultGroups, errors }: Props) {
         (total, row) => total + toCount(row.count) * toCount(row.seats),
         0,
     );
+
+    // Les quotas des tarifs se comparent a la salle telle qu'elle est saisie, pas a celle enregistree.
+    useEffect(() => {
+        onSeatsChange?.(seats);
+    }, [seats, onSeatsChange]);
 
     return (
         <fieldset className="space-y-3" data-test="event-table-groups">

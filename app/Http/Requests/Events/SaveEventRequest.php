@@ -153,6 +153,7 @@ class SaveEventRequest extends FormRequest
                 $this->rejectPaymentAccountsOfAnotherTenant($validator);
                 $this->rejectTablePlanThatUnseatsGuests($validator);
                 $this->validatePriceCategories($validator);
+                $this->rejectQuotaAboveCapacity($validator);
             },
         ];
     }
@@ -254,6 +255,39 @@ class SaveEventRequest extends FormRequest
 
         if ($known !== count(array_unique($ids))) {
             $validator->errors()->add('payment_accounts', __('events.errors.unknown_payment_account'));
+        }
+    }
+
+    /**
+     * Un quota est un plafond a l'interieur de la salle : il ne peut pas depasser la capacite
+     * (decision du 2026-10-07). La capacite est celle du plan soumis, ou celle de l'evenement
+     * quand le plan n'est pas touche ; sans aucune table, il n'y a rien a comparer.
+     */
+    private function rejectQuotaAboveCapacity(Validator $validator): void
+    {
+        if ($validator->errors()->hasAny(['table_groups', 'table_groups.*.count', 'table_groups.*.seats', 'price_categories.*.quota'])) {
+            return;
+        }
+
+        $plan = $this->tablePlan();
+        $event = $this->route('event');
+        $capacity = $plan !== null
+            ? array_sum($plan)
+            : ($event instanceof Event ? $event->capacity() : 0);
+
+        if ($capacity === 0) {
+            return;
+        }
+
+        foreach ((array) $this->input('price_categories', []) as $index => $attributes) {
+            $quota = is_array($attributes) ? ($attributes['quota'] ?? null) : null;
+
+            if ($quota !== null && $quota !== '' && (int) $quota > $capacity) {
+                $validator->errors()->add(
+                    "price_categories.{$index}.quota",
+                    __('events.errors.price_category_quota_above_capacity', ['capacity' => $capacity]),
+                );
+            }
         }
     }
 

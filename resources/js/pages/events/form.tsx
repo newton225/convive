@@ -62,6 +62,7 @@ export default function EventForm({
     const { t } = useTranslation();
     const gettingStartedReturn = useGettingStartedReturn();
     const [confirmingPublish, setConfirmingPublish] = useState(false);
+    const [roomSeats, setRoomSeats] = useState(0);
     // L'apercu de la carte de vitrine suit la saisie : les champs ne sont pas controles, on relit
     // le formulaire a chaque changement.
     const [previewName, setPreviewName] = useState(event?.name ?? '');
@@ -394,6 +395,7 @@ export default function EventForm({
                                     description={t('events.sections.seating')}
                                 >
                                     <TableGroupsField
+                                        onSeatsChange={setRoomSeats}
                                         defaultGroups={
                                             prefill?.tableGroups ?? []
                                         }
@@ -422,6 +424,7 @@ export default function EventForm({
                                                 defaultPrice={
                                                     prefill?.pricePerPerson ?? 0
                                                 }
+                                                capacity={roomSeats}
                                                 errors={errors}
                                             />
                                         </div>
