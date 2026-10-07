@@ -3,6 +3,7 @@
 return [
     'unsaved_changes' => 'Unsaved changes',
     'required' => 'required',
+    'for_publishing' => 'to publish',
     'required_note' => 'Fields marked with * are required.',
 
     'actions' => [

@@ -6,9 +6,11 @@ use App\Actions\Tenants\CreateTenant;
 use App\Enums\LegalForm;
 use App\Enums\TenantPermission;
 use App\Models\Tenant;
+use App\Models\TenantBranding;
 use App\Models\User;
 use App\Support\GettingStarted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
@@ -281,11 +283,11 @@ class OrganisationTest extends TestCase
 
         $this->actingAs($owner)
             ->patch(route('tenants.organisation.legal', $tenant), $this->completeLegalIdentity([
-                'tax_number' => '',
+                'city' => '',
             ]));
 
         $this->assertFalse($tenant->fresh()->isReadyToPublish());
-        $this->assertContains('tax_number', $tenant->fresh()->branding->missingBeforePublishing());
+        $this->assertContains('city', $tenant->fresh()->branding->missingBeforePublishing());
     }
 
     public function test_une_organisation_complete_avec_un_sous_domaine_peut_publier(): void
@@ -390,5 +392,54 @@ class OrganisationTest extends TestCase
             ->withSession(['auth.password_confirmed_at' => now()->getTimestamp()])
             ->patch(route('tenants.organisation.legal', $tenant), $this->completeLegalIdentity())
             ->assertRedirect(route('tenants.organisation.edit', $tenant));
+    }
+
+    public function test_la_page_dit_quels_champs_sont_exiges_pour_publier(): void
+    {
+        $user = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($user);
+
+        $this->actingAs($user)
+            ->get(route('tenants.organisation.edit', $tenant))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('tenant.requiredToPublish', TenantBranding::RequiredToPublish));
+    }
+
+    public function test_ce_qui_manque_pour_publier_comprend_le_sous_domaine(): void
+    {
+        $user = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($user);
+
+        $this->actingAs($user)
+            ->patch(route('tenants.organisation.legal', $tenant), $this->completeLegalIdentity(['city' => '']));
+
+        $this->actingAs($user)
+            ->get(route('tenants.organisation.edit', $tenant))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('tenant.missingBeforePublishing', ['city', 'subdomain']));
+
+        $tenant->update(['subdomain' => 'convive-ci']);
+
+        $this->actingAs($user)
+            ->get(route('tenants.organisation.edit', $tenant))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('tenant.missingBeforePublishing', ['city']));
+    }
+
+    public function test_le_rccm_le_contribuable_et_l_adresse_ne_sont_pas_exiges_pour_publier(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.organisation.legal', $tenant), $this->completeLegalIdentity([
+                'registration_number' => '',
+                'tax_number' => '',
+                'address' => '',
+            ]));
+        $tenant->update(['subdomain' => 'convive-ci']);
+
+        $this->assertSame([], $tenant->fresh()->branding->missingBeforePublishing());
+        $this->assertTrue($tenant->fresh()->isReadyToPublish());
     }
 }

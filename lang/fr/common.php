@@ -3,6 +3,7 @@
 return [
     'unsaved_changes' => 'Modifications non enregistrées',
     'required' => 'obligatoire',
+    'for_publishing' => 'pour publier',
     'required_note' => "Les champs marqués d'un * sont obligatoires.",
 
     'actions' => [

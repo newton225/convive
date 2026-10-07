@@ -69,6 +69,10 @@ class TenantBranding extends Model implements HasMedia
      * qui figurent sur un recu et sur un billet. Tant qu'ils manquent, l'espace reste un
      * espace d'essai.
      *
+     * Le numero RCCM, le numero de contribuable et l'adresse du siege ne sont pas exiges pour
+     * l'instant (decision du proprietaire du projet, 2026-10-07) : ils figurent sur les recus quand
+     * ils sont renseignes (`PdfLetterhead`), et se completent quand l'organisation les a.
+     *
      * @var array<int, string>
      */
     public const RequiredToPublish = [
@@ -76,9 +80,6 @@ class TenantBranding extends Model implements HasMedia
         'legal_name',
         'legal_form',
         'representative_name',
-        'registration_number',
-        'tax_number',
-        'address',
         'city',
         'country',
         'phone',

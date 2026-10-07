@@ -37,8 +37,14 @@ class OrganisationController extends Controller
                 'subdomain' => $tenant->subdomain,
                 'isPersonal' => $tenant->is_personal,
                 'isReadyToPublish' => $tenant->isReadyToPublish(),
-                'missingBeforePublishing' => $branding?->missingBeforePublishing()
-                    ?? TenantBranding::RequiredToPublish,
+                // Ce qui manque encore pour publier, sous-domaine compris, et ce qui est exige :
+                // l'identite legale s'enregistre par morceaux, la page dit donc lesquels comptent
+                // pour publier sans les rendre obligatoires a la saisie (decision du 2026-10-07).
+                'missingBeforePublishing' => [
+                    ...($branding?->missingBeforePublishing() ?? TenantBranding::RequiredToPublish),
+                    ...($tenant->subdomain === null ? ['subdomain'] : []),
+                ],
+                'requiredToPublish' => TenantBranding::RequiredToPublish,
             ],
             'branding' => [
                 'displayName' => $branding?->display_name,

@@ -125,6 +125,8 @@ return [
         'ready' => 'This organisation can publish a public link.',
         'incomplete' => '{1} 1 detail is still missing before you can publish a public link.|[2,*] :count details are still missing before you can publish a public link.',
         'trial' => 'Trial workspace: fill in your legal identity and public address when you are ready to publish.',
+        'missing' => 'Still missing before you can publish an event: :fields.',
+        'legend' => 'Fields marked "to publish" are needed before you publish an event. You can save without them and complete them later.',
     ],
 
     'flash' => [

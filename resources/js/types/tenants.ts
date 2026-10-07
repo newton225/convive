@@ -125,6 +125,8 @@ export type TenantOrganisation = {
     isPersonal: boolean;
     isReadyToPublish: boolean;
     missingBeforePublishing: string[];
+    // Les champs de l'identite legale exiges pour publier, pas pour enregistrer.
+    requiredToPublish: string[];
 };
 
 export type TenantBranding = {

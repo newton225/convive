@@ -663,6 +663,9 @@ et les recus. `tenants` reste ce qui est charge a chaque requete.
 - **Rien n'est obligatoire a la saisie.** L'identite legale se remplit par morceaux.
   `Tenant::isReadyToPublish()` dit si elle suffit, et c'est cette methode qui gardera la
   publication d'un lien public a l'etape 3, pas la validation du formulaire.
+  Exiges pour publier (`TenantBranding::RequiredToPublish`) : nom affiche, raison sociale, forme
+  juridique, signataire, ville, pays, telephone, plus le sous-domaine. Le RCCM, le numero de
+  contribuable et l'adresse du siege ne le sont pas pour l'instant (decision du 2026-10-07).
 - **`is_personal` est un espace d'essai.** On ne demande ni papiers ni sous-domaine a
   l'inscription : on les demande le jour ou l'organisation publie. Un espace personnel reste
   donc utilisable, simplement pas publiable.
@@ -1355,7 +1358,10 @@ Principes a tenir :
   rouge par `<Label required>` (ou `required` sur `LabelWithHelp` et les `Field` des formulaires),
   le lecteur d'ecran lisant « obligatoire » (`RequiredMark`), et la legende `RequiredFieldsNote` en
   tete d'un formulaire de plusieurs champs. Ce qui est obligatoire se lit dans la Form Request, jamais
-  devine : un champ exige seulement a la publication n'a pas d'asterisque.
+  devine : un champ exige seulement a la publication n'a pas d'asterisque, il porte la marque
+  « pour publier » (`forPublishing` de `LabelWithHelp`, `PublishMark`), et la page de l'organisation
+  nomme ce qui manque encore, sous-domaine compris (decision du 2026-10-07). Pas d'asterisque sur les
+  pages de connexion, mot de passe oublie, confirmation et reinitialisation du mot de passe.
 - **Messages d'erreur utiles** : ce qui s'est passe et l'action suivante, jamais un code
   technique. Les erreurs de formulaire sont attachees au champ concerne.
 - **Retour immediat** sur chaque action : etat de chargement sur les boutons, confirmation

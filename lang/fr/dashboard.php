@@ -84,7 +84,7 @@ return [
         'steps' => [
             'identity' => [
                 'title' => "Compléter l'identité de l'organisation",
-                'hint' => 'Raison sociale, forme juridique, numéros, adresse et sous-domaine : ils figurent sur les reçus et les billets.',
+                'hint' => 'Raison sociale, forme juridique, signataire, ville, téléphone et sous-domaine : ils figurent sur les reçus et les billets.',
                 'action' => 'Compléter',
             ],
             'payment_account' => [

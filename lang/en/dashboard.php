@@ -84,7 +84,7 @@ return [
         'steps' => [
             'identity' => [
                 'title' => "Complete your organisation's identity",
-                'hint' => 'Legal name, legal form, numbers, address and subdomain: they appear on receipts and tickets.',
+                'hint' => 'Legal name, legal form, signatory, city, phone and subdomain: they appear on receipts and tickets.',
                 'action' => 'Complete',
             ],
             'payment_account' => [

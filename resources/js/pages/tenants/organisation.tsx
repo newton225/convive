@@ -49,6 +49,10 @@ export default function Organisation({
 }: Props) {
     const { t } = useTranslation();
     const gettingStartedReturn = useGettingStartedReturn();
+    // L'identite legale s'enregistre par morceaux : ses champs exiges pour publier portent une marque
+    // distincte de l'asterisque (decision du 2026-10-07).
+    const forPublishing = (field: string) =>
+        tenant.requiredToPublish.includes(field);
     // Le depot d'un fichier passe par sa propre requete : ses erreurs arrivent par les erreurs
     // partagees de la page, pas par le formulaire des couleurs.
     const pageErrors = usePage().props.errors as Record<string, string>;
@@ -81,6 +85,9 @@ export default function Organisation({
                                 'organisation.sections.legal.description',
                             )}
                         />
+                        <p className="text-muted-foreground text-xs">
+                            {t('organisation.publishing.legend')}
+                        </p>
 
                         <Form
                             setDefaultsOnSuccess
@@ -95,6 +102,9 @@ export default function Organisation({
                                     <div className="grid items-start gap-4 sm:grid-cols-2">
                                         <Field
                                             name="display_name"
+                                            forPublishing={forPublishing(
+                                                'display_name',
+                                            )}
                                             label={t(
                                                 'organisation.fields.display_name',
                                             )}
@@ -107,6 +117,9 @@ export default function Organisation({
 
                                         <Field
                                             name="legal_name"
+                                            forPublishing={forPublishing(
+                                                'legal_name',
+                                            )}
                                             label={t(
                                                 'organisation.fields.legal_name',
                                             )}
@@ -117,6 +130,9 @@ export default function Organisation({
                                         <div className="grid gap-2">
                                             <LabelWithHelp
                                                 htmlFor="legal_form"
+                                                forPublishing={forPublishing(
+                                                    'legal_form',
+                                                )}
                                                 label={t(
                                                     'organisation.fields.legal_form',
                                                 )}
@@ -156,6 +172,9 @@ export default function Organisation({
 
                                         <Field
                                             name="representative_name"
+                                            forPublishing={forPublishing(
+                                                'representative_name',
+                                            )}
                                             label={t(
                                                 'organisation.fields.representative_name',
                                             )}
@@ -170,6 +189,9 @@ export default function Organisation({
 
                                         <Field
                                             name="registration_number"
+                                            forPublishing={forPublishing(
+                                                'registration_number',
+                                            )}
                                             label={t(
                                                 'organisation.fields.registration_number',
                                             )}
@@ -184,6 +206,9 @@ export default function Organisation({
 
                                         <Field
                                             name="tax_number"
+                                            forPublishing={forPublishing(
+                                                'tax_number',
+                                            )}
                                             label={t(
                                                 'organisation.fields.tax_number',
                                             )}
@@ -196,6 +221,9 @@ export default function Organisation({
 
                                         <Field
                                             name="address"
+                                            forPublishing={forPublishing(
+                                                'address',
+                                            )}
                                             label={t(
                                                 'organisation.fields.address',
                                             )}
@@ -205,6 +233,9 @@ export default function Organisation({
 
                                         <Field
                                             name="city"
+                                            forPublishing={forPublishing(
+                                                'city',
+                                            )}
                                             label={t(
                                                 'organisation.fields.city',
                                             )}
@@ -215,6 +246,9 @@ export default function Organisation({
                                         <div className="grid gap-2">
                                             <LabelWithHelp
                                                 htmlFor="country"
+                                                forPublishing={forPublishing(
+                                                    'country',
+                                                )}
                                                 label={t(
                                                     'organisation.fields.country',
                                                 )}
@@ -242,6 +276,9 @@ export default function Organisation({
 
                                         <Field
                                             name="phone"
+                                            forPublishing={forPublishing(
+                                                'phone',
+                                            )}
                                             label={t(
                                                 'organisation.fields.phone',
                                             )}
@@ -414,18 +451,24 @@ function PublishingState({ tenant }: { tenant: TenantOrganisation }) {
     }
 
     // Un espace personnel est un espace d'essai : on annonce ce qui manquera le jour de la
-    // publication, on ne le presente pas comme une erreur.
-    const missing = tenant.missingBeforePublishing.length;
+    // publication, on ne le presente pas comme une erreur. Les elements manquants sont nommes : sans
+    // eux, on ne savait pas quoi remplir (decision du 2026-10-07).
+    const missing = tenant.missingBeforePublishing
+        .map((field) => t(`organisation.fields.${field}`))
+        .join(', ');
 
     return (
-        <p
-            className="text-muted-foreground text-sm"
+        <div
+            className="text-muted-foreground space-y-1 text-sm"
             data-test="organisation-incomplete"
         >
-            {tenant.isPersonal
-                ? t('organisation.publishing.trial')
-                : t('organisation.publishing.incomplete', { count: missing })}
-        </p>
+            {tenant.isPersonal ? (
+                <p>{t('organisation.publishing.trial')}</p>
+            ) : null}
+            <p data-test="organisation-missing">
+                {t('organisation.publishing.missing', { fields: missing })}
+            </p>
+        </div>
     );
 }
 
@@ -437,6 +480,7 @@ function Field({
     defaultValue,
     error,
     type = 'text',
+    forPublishing = false,
 }: {
     name: string;
     label: string;
@@ -445,10 +489,16 @@ function Field({
     defaultValue: string | null;
     error?: string;
     type?: string;
+    forPublishing?: boolean;
 }) {
     return (
         <div className="grid gap-2">
-            <LabelWithHelp htmlFor={name} label={label} help={help} />
+            <LabelWithHelp
+                htmlFor={name}
+                label={label}
+                help={help}
+                forPublishing={forPublishing}
+            />
             <Input
                 id={name}
                 name={name}

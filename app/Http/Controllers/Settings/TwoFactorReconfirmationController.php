@@ -39,10 +39,9 @@ class TwoFactorReconfirmationController extends Controller
         $request->session()->put('auth.two_factor_confirmed_at', time());
 
         // Code saisi dans la fenetre d'une page (`EnsureRecentTwoFactorConfirmation`) : on y
-        // revient, la saisie en cours intacte.
+        // revient, la saisie en cours intacte. La page rejoue elle-meme l'envoi refuse, ou dit de
+        // recliquer si elle ne le peut pas (`TwoFactorReconfirmDialog`) : aucun message ici.
         if (! $request->session()->has('url.intended') && url()->previous() !== route('two-factor.reconfirm.show')) {
-            Inertia::flash('toast', ['type' => 'success', 'message' => __('account.two_factor_reconfirm.confirmed')]);
-
             return back();
         }
 

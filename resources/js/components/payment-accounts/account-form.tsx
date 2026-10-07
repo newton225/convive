@@ -69,6 +69,10 @@ export function AccountForm({ action, account, channels, delayActive }: Props) {
     const formRef = useRef<FormComponentRef<AccountFormData>>(null);
     const confirmed = useRef(false);
     const [preview, setPreview] = useState<Preview | null>(null);
+    // Le formulaire de creation repart vide apres un ajout reussi : le compte cree s'affiche dans la
+    // liste au-dessus, garder ses valeurs ici laissait croire qu'il restait a envoyer. Une nouvelle
+    // cle remonte le formulaire, champs non controles et canal choisi compris.
+    const [generation, setGeneration] = useState(0);
 
     // Avant toute publication, le canal, le numero et le titulaire s'appliquent des l'envoi : on les
     // fait relire avant de partir. Le libelle et la consigne n'ont pas besoin de cet apercu.
@@ -90,9 +94,16 @@ export function AccountForm({ action, account, channels, delayActive }: Props) {
     return (
         <>
             <Form
+                key={generation}
                 {...action}
                 ref={formRef}
-                setDefaultsOnSuccess
+                setDefaultsOnSuccess={account !== null}
+                onSuccess={() => {
+                    if (account === null) {
+                        setChannel('');
+                        setGeneration((value) => value + 1);
+                    }
+                }}
                 className="space-y-4"
                 transform={(data) =>
                     confirmed.current ? { ...data, confirmed: 1 } : data

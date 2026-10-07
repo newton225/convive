@@ -125,6 +125,8 @@ return [
         'ready' => 'Cette organisation peut publier un lien public.',
         'incomplete' => '{1} Il reste 1 information à renseigner avant de pouvoir publier un lien public.|[2,*] Il reste :count informations à renseigner avant de pouvoir publier un lien public.',
         'trial' => "Espace d'essai : renseignez votre identité légale et votre adresse publique quand vous serez prêt à publier.",
+        'missing' => 'Pour publier un événement, il manque encore : :fields.',
+        'legend' => 'Les champs marqués « pour publier » sont nécessaires avant de publier un événement. Vous pouvez enregistrer sans eux et les compléter plus tard.',
     ],
 
     'flash' => [
