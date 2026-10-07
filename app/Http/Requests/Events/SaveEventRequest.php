@@ -308,7 +308,7 @@ class SaveEventRequest extends FormRequest
         }
 
         foreach ($event->priceCategories()->whereNotIn('id', $keptIds)->get() as $removed) {
-            $hasRegistration = Registration::withTrashed()
+            $hasRegistration = Registration::query()
                 ->where('price_category_id', $removed->id)
                 ->exists();
             $hasCompanion = RegistrationCompanion::where('price_category_id', $removed->id)->exists();

@@ -45,7 +45,7 @@ return [
 
     'registration' => [
         'additional' => [
-            'confirm' => "Oui, créer une inscription additionnelle",
+            'confirm' => 'Oui, créer une inscription additionnelle',
         ],
         'ongoing' => [
             'title' => 'Vous avez déjà une réservation en cours',

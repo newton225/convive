@@ -45,7 +45,7 @@ return [
 
     'registration' => [
         'additional' => [
-            'confirm' => "Yes, create an additional registration",
+            'confirm' => 'Yes, create an additional registration',
         ],
         'ongoing' => [
             'title' => 'You already have a reservation in progress',

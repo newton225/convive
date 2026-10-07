@@ -9,7 +9,6 @@ use App\Enums\LegalForm;
 use App\Enums\RegistrationStatus;
 use App\Enums\TicketModel;
 use App\Models\Event;
-use App\Models\EventPriceCategory;
 use App\Models\PaymentAccount;
 use App\Models\Registration;
 use App\Models\Tenant;

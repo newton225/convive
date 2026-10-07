@@ -104,7 +104,7 @@ class SaveEvent
 
         $event->priceCategories()->whereNotIn('id', $keptIds)->delete();
         $event->forceFill([
-            'price_per_person' => min(array_column($categories, 'price')),
+            'price_per_person' => (int) min(array_column($categories, 'price') ?: [0]),
         ])->save();
     }
 

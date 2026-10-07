@@ -128,7 +128,7 @@ class HoldRegistration
                 return true;
             }
 
-            $remaining = $category?->remaining();
+            $remaining = $category->remaining();
 
             // Une reservation deja tenue par cette inscription compte deja dans `seatsTaken()`.
             $alreadyCounted = $registration->status === RegistrationStatus::Held && ! $registration->holdHasExpired();

@@ -191,11 +191,11 @@ devient.
 - **Sans paiement validé** (réservation, preuve en attente ou rejetée) : l'annulation ne porte
   que le motif, aucun paiement n'est à traiter.
 - **Inscription validée** : l'annulation fixe le sort du paiement, parmi trois choix.
-  - **À rembourser**, choix présélectionné : l'organisation doit la somme, qui reste visible
-    tant qu'elle n'est pas remboursée.
-  - **Remboursé** : moyen, date, référence de transaction si elle existe, et frais de
-    transaction.
-  - **Conservé** : motif obligatoire (annulation hors délai, don...).
+    - **À rembourser**, choix présélectionné : l'organisation doit la somme, qui reste visible
+      tant qu'elle n'est pas remboursée.
+    - **Remboursé** : moyen, date, référence de transaction si elle existe, et frais de
+      transaction.
+    - **Conservé** : motif obligatoire (annulation hors délai, don...).
 - **Tout ou rien** : on rembourse l'intégralité du montant payé, **moins les frais de
   transaction du remboursement**, à la charge de l'invité. Les frais sont saisis tels que
   l'opérateur les a prélevés, jamais calculés par un taux. Ils ne peuvent pas atteindre le

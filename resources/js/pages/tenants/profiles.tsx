@@ -177,9 +177,7 @@ export default function TenantProfiles({ tenant, profiles, catalogue }: Props) {
                                             <TooltipProvider>
                                                 <div className="flex shrink-0 items-center gap-2">
                                                     <Tooltip>
-                                                        <TooltipTrigger
-                                                            asChild
-                                                        >
+                                                        <TooltipTrigger asChild>
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
@@ -214,19 +212,15 @@ export default function TenantProfiles({ tenant, profiles, catalogue }: Props) {
                                                             data-test="profile-visibility-button"
                                                             onClick={() =>
                                                                 router.patch(
-                                                                    visibility(
-                                                                        [
-                                                                            tenant.slug,
-                                                                            profile.id,
-                                                                        ],
-                                                                    ).url,
+                                                                    visibility([
+                                                                        tenant.slug,
+                                                                        profile.id,
+                                                                    ]).url,
                                                                     {
-                                                                        hidden:
-                                                                            !profile.isHidden,
+                                                                        hidden: !profile.isHidden,
                                                                     },
                                                                     {
-                                                                        preserveScroll:
-                                                                            true,
+                                                                        preserveScroll: true,
                                                                     },
                                                                 )
                                                             }

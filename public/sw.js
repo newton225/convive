@@ -78,7 +78,9 @@ async function networkFirstPage(request) {
 
         return response;
     } catch {
-        return (await cache.match(request)) ?? (await caches.match(OFFLINE_URL));
+        return (
+            (await cache.match(request)) ?? (await caches.match(OFFLINE_URL))
+        );
     }
 }
 
@@ -123,7 +125,5 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    event.respondWith(
-        fetch(request).catch(() => caches.match(OFFLINE_URL)),
-    );
+    event.respondWith(fetch(request).catch(() => caches.match(OFFLINE_URL)));
 });

@@ -329,22 +329,22 @@ que de rester tu, mais n'autorise pas non plus un remplacement unilateral.
 Avant d'ecrire une brique transverse, verifier qu'un paquet Spatie la couvre. Ils sont le
 choix par defaut, pour la coherence et la maintenance.
 
-| Besoin                                         | Paquet                                       |
-| ---------------------------------------------- | -------------------------------------------- |
-| Roles et permissions                           | `spatie/laravel-permission`                  |
-| Journal d'audit                                | `spatie/laravel-activitylog`                 |
-| Fichiers deposes, conversions, URL signees     | `spatie/laravel-medialibrary`                |
-| Rendu PDF (billets, recus, listes de controle) | `spatie/laravel-pdf`                         |
-| Reglages de la plateforme, de locataire et d'evenement | `spatie/laravel-settings`            |
-| Enums riches                                   | `spatie/laravel-data` et `spatie/enum`       |
-| Objets de transfert vers Inertia               | `spatie/laravel-data`                        |
-| Sauvegardes                                    | `spatie/laravel-backup`                      |
-| Surveillance de l'etat de l'application        | `spatie/laravel-health`                      |
-| Requetes filtrables et triables                | `spatie/laravel-query-builder`               |
-| Etiquettes libres                              | `spatie/laravel-tags`                        |
-| Traduction de contenu                          | `spatie/laravel-translatable`                |
-| Webhooks entrants et sortants                  | `spatie/laravel-webhook-client` et `-server` |
-| Sitemap et robots du site produit              | `spatie/laravel-sitemap`                     |
+| Besoin                                                 | Paquet                                       |
+| ------------------------------------------------------ | -------------------------------------------- |
+| Roles et permissions                                   | `spatie/laravel-permission`                  |
+| Journal d'audit                                        | `spatie/laravel-activitylog`                 |
+| Fichiers deposes, conversions, URL signees             | `spatie/laravel-medialibrary`                |
+| Rendu PDF (billets, recus, listes de controle)         | `spatie/laravel-pdf`                         |
+| Reglages de la plateforme, de locataire et d'evenement | `spatie/laravel-settings`                    |
+| Enums riches                                           | `spatie/laravel-data` et `spatie/enum`       |
+| Objets de transfert vers Inertia                       | `spatie/laravel-data`                        |
+| Sauvegardes                                            | `spatie/laravel-backup`                      |
+| Surveillance de l'etat de l'application                | `spatie/laravel-health`                      |
+| Requetes filtrables et triables                        | `spatie/laravel-query-builder`               |
+| Etiquettes libres                                      | `spatie/laravel-tags`                        |
+| Traduction de contenu                                  | `spatie/laravel-translatable`                |
+| Webhooks entrants et sortants                          | `spatie/laravel-webhook-client` et `-server` |
+| Sitemap et robots du site produit                      | `spatie/laravel-sitemap`                     |
 
 Un paquet hors Spatie ne se justifie que si aucun equivalent Spatie n'existe : Inertia,
 maatwebsite/excel, bwip-js, les bibliotheques front, et **le multi-locataire**, couvert par
@@ -597,6 +597,7 @@ Decisions du proprietaire du projet (2026-10-07) :
 - **Acceptation** : tous les Proprietaires en sont prevenus (`NotificationType::TeamInvitationAccepted`,
   dans l'application et par courriel par defaut, `NotificationType::defaultChannel()`), avec un lien
   vers la liste des membres.
+
 ### Double authentification exigee par le profil
 
 Un profil porte le drapeau `requires_two_factor`. Ses porteurs n'atteignent pas le back-office
@@ -739,6 +740,14 @@ change.
   un recu emis sans raison sociale n'a aucune valeur. `Event::missingBeforePublishing()` nomme ce qui
   manque : la fiche l'affiche, le refus du serveur aussi.
 - **Le tarif est toujours renseigne** : 0 veut dire gratuit, un champ vide est refuse.
+- **Categories de tarifs** (`event_price_categories`, decision du 2026-10-07) : l'exploitant saisit
+  ses propres categories (nom, prix, quota facultatif), au moins une par evenement. Chaque personne,
+  l'invite et chaque accompagnateur, choisit la sienne ; le montant du est la somme des prix choisis.
+  Le quota est dans la capacite de la salle et se controle sous le verrou de reservation
+  (`HoldRegistration`). Aucun lien avec les tables. `events.price_per_person` n'est plus que le tarif
+  le plus bas (« a partir de »). Un evenement dont toutes les categories sont a 0 est gratuit
+  (`Event::isFree()`) et n'exige aucun compte de versement. Une categorie deja choisie par quelqu'un
+  ne se supprime pas.
 - **Duree de reservation bornee** (decision du 2026-10-07) : curseur entre un minimum et un maximum
   regles depuis l'ecran Securite de la console (`App\Settings\ReservationSettings`, 5 et 60 minutes
   au depart, jamais hors de 1 a 1 440), revalides par `SaveEventRequest`.
@@ -1117,7 +1126,7 @@ projet, 2026-10-04), a la place du code envoye : Meta refuse le modele d'authent
 entreprise non verifiee, et le SMS est mis de cote. L'invite envoie, depuis son WhatsApp, un message
 pre-rempli (`https://wa.me/<numero>?text=Code Convive : XXXXXXXX`) au numero de Convive ; Meta le
 transmet a `webhooks/whatsapp` (`spatie/laravel-webhook-client`, configuration `whatsapp`, signature
-`X-Hub-Signature-256` verifiee par `App\Support\WhatsApp\MetaSignatureValidator`) ; 
+`X-Hub-Signature-256` verifiee par `App\Support\WhatsApp\MetaSignatureValidator`) ;
 `App\Actions\Registrations\ConfirmPhoneByWhatsApp` verifie que le code est en attente (table centrale
 `whatsapp_phone_checks`, 8 caracteres, 10 minutes) **et que l'expediteur est le numero saisi**
 (`PhoneNumber::sameAsWhatsAppId()`, ancien format ivoirien a 8 chiffres compris), puis repond a

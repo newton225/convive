@@ -50,9 +50,7 @@ export function useServerList({
         );
         const nextSort = changes.sort === undefined ? sort : changes.sort;
         const others = Object.fromEntries(
-            [
-                ...new URL(currentUrl, 'http://localhost').searchParams,
-            ].filter(
+            [...new URL(currentUrl, 'http://localhost').searchParams].filter(
                 ([key]) =>
                     !key.startsWith('filter[') &&
                     key !== 'sort' &&

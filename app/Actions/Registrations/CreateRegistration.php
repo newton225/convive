@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Registration;
 use App\Support\RegistrationReference;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CreateRegistration
 {
@@ -44,7 +45,7 @@ class CreateRegistration
             if ($categories->isNotEmpty()
                 && (count($selectedCategoryIds) !== 1 + count($companions)
                     || $categories->only($knownCategoryIds)->count() !== count($knownCategoryIds))) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'price_category_id' => __('guest.registration.errors.price_category_unknown'),
                 ]);
             }
