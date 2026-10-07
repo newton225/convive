@@ -564,6 +564,7 @@ class RegistrationTest extends TestCase
         $plainToken = Registration::generateResumeToken();
         $tenant->asCurrent(fn () => Registration::factory()->expired()->create([
             'event_id' => $event->id,
+            'amount_due' => 5000,
             'resume_token_hash' => Registration::hashResumeToken($plainToken),
         ]));
 
