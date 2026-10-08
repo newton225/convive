@@ -175,6 +175,7 @@ return [
     ],
 
     'publishing' => [
+        'unsaved' => 'Save your changes first: publishing now would publish the previous version.',
         'ready' => 'This event can be published.',
         'blocked' => 'Before publishing, still missing: :items.',
         'frozen_subdomain' => 'Once the link is handed out, the subdomain of the organisation can no longer change.',

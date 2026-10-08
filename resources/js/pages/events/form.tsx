@@ -2,6 +2,7 @@ import { Form, Head } from '@inertiajs/react';
 import { AlertTriangle, Send } from 'lucide-react';
 import { useState } from 'react';
 import { CopyButton } from '@/components/copy-button';
+import { FormDirtyReporter } from '@/components/events/form-dirty-reporter';
 import { DisabledReason } from '@/components/disabled-reason';
 import { AnnouncementButton } from '@/components/events/announcement-button';
 import { TemplatePicker } from '@/components/events/template-picker';
@@ -78,6 +79,20 @@ export default function EventForm({
     // La case pilote un champ cache : le formulaire n'entend pas son changement sans ce signal.
     const seatingMode = useNotifyFormChange<HTMLDivElement>(seatsAtTables);
     const [allFree, setAllFree] = useState(false);
+    // Des modifications pas encore enregistrees : publier publierait l'ancienne version.
+    const [unsaved, setUnsaved] = useState(false);
+    // Pourquoi « Publier » est grise : d'abord des modifications a enregistrer, puis ce qui manque.
+    const publishBlockedReason = !event
+        ? null
+        : unsaved
+          ? t('events.publishing.unsaved')
+          : event.isReadyToPublish
+            ? null
+            : t('events.publishing.blocked', {
+                  items: event.missingBeforePublishing
+                      .map((key) => t(`events.missing_publish.${key}`))
+                      .join(', '),
+              });
     // L'apercu de la carte de vitrine suit la saisie : les champs ne sont pas controles, on relit
     // le formulaire a chaque changement.
     const [previewName, setPreviewName] = useState(event?.name ?? '');
@@ -146,27 +161,15 @@ export default function EventForm({
                             ) : (
                                 <>
                                     <DisabledReason
-                                        reason={
-                                            event.isReadyToPublish
-                                                ? null
-                                                : t(
-                                                      'events.publishing.blocked',
-                                                      {
-                                                          items: event.missingBeforePublishing
-                                                              .map((key) =>
-                                                                  t(
-                                                                      `events.missing_publish.${key}`,
-                                                                  ),
-                                                              )
-                                                              .join(', '),
-                                                      },
-                                                  )
-                                        }
+                                        reason={publishBlockedReason}
                                     >
                                         <Button
                                             data-test="event-publish"
                                             data-tour="event-publish"
-                                            disabled={!event.isReadyToPublish}
+                                            disabled={
+                                                !event.isReadyToPublish ||
+                                                unsaved
+                                            }
                                             onClick={() =>
                                                 setConfirmingPublish(true)
                                             }
@@ -282,6 +285,10 @@ export default function EventForm({
                     >
                         {({ errors, processing, isDirty }) => (
                             <>
+                                <FormDirtyReporter
+                                    dirty={isDirty}
+                                    onChange={setUnsaved}
+                                />
                                 <RequiredFieldsNote />
                                 <Step
                                     index={1}

@@ -177,6 +177,7 @@ return [
     'publishing' => [
         'ready' => 'Cet événement peut être publié.',
         'blocked' => 'Avant de publier, il manque : :items.',
+        'unsaved' => 'Enregistrez d’abord vos modifications : publier publierait la version précédente.',
         'frozen_subdomain' => "Une fois le lien distribué, le sous-domaine de l'organisation ne peut plus changer.",
     ],
 
