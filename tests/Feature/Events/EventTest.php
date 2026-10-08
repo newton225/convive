@@ -120,6 +120,23 @@ class EventTest extends TestCase
         $this->assertSame(EventStatus::Draft, $event->status);
     }
 
+    public function test_un_evenement_s_enregistre_sans_aucun_compte_de_versement_coche(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        // Un formulaire sans case cochee n'envoie pas le champ du tout.
+        $payload = $this->payload();
+        unset($payload['payment_accounts']);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $payload)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
+        $this->assertSame(0, $tenant->asCurrent(fn () => $this->eventOf($tenant)->paymentAccounts()->count()));
+    }
+
     public function test_un_evenement_enregistre_ses_categories_de_tarif(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

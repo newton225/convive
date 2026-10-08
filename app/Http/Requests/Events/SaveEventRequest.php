@@ -130,7 +130,8 @@ class SaveEventRequest extends FormRequest
                 'max:'.app(ReservationSettings::class)->hold_max_minutes,
             ],
 
-            'payment_accounts' => ['present', 'array'],
+            // Aucune case cochee n'envoie aucun champ : l'absence veut dire « aucun compte ».
+            'payment_accounts' => ['nullable', 'array'],
             'payment_accounts.*' => [
                 'integer',
                 // `payment_accounts` vit dans la base du locataire, deja active : verifier
@@ -387,6 +388,7 @@ class SaveEventRequest extends FormRequest
             'subtitle' => __('events.fields.subtitle'),
             'starts_at' => __('events.fields.starts_at'),
             'venue' => __('events.fields.venue'),
+            'payment_accounts' => __('events.fields.payment_accounts'),
             'venue_map_url' => __('events.fields.venue_map_url'),
             'table_groups' => __('events.fields.table_groups'),
             'table_groups.*.count' => __('events.fields.table_count'),
