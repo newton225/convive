@@ -271,7 +271,7 @@ return [
         'consequence_link' => "Le lien public s'ouvre aux inscriptions et reste le même pour toujours.",
         'consequence_subdomain' => "Le sous-domaine de l'organisation est figé.",
         'consequence_delete' => "L'événement ne pourra plus être supprimé, seulement clôturé.",
-        'consequence_payment_delay' => "C'est votre première publication : ensuite, toute création ou modification d'un compte de versement attendra 24 heures avant d'être visible, même une fois vos événements clôturés.",
+        'consequence_payment_delay' => "C'est votre première publication : ensuite, toute création ou modification d'un compte de versement attendra 24 heures avant d'être visible, même une fois vos événements clôturés. Un autre Propriétaire peut la valider plus tôt, jamais la personne qui l'a demandée.",
         'acknowledge' => "J'ai vérifié ces informations et je veux ouvrir les inscriptions.",
     ],
 
