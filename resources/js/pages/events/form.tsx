@@ -447,15 +447,31 @@ export default function EventForm({
                                         className="space-y-2"
                                     >
                                         <label className="flex items-center gap-2 text-sm font-medium">
-                                            <Checkbox
-                                                checked={seatsAtTables}
-                                                onCheckedChange={(checked) =>
-                                                    setSeatsAtTables(
-                                                        checked === true,
-                                                    )
+                                            <DisabledReason
+                                                reason={
+                                                    event?.seatingModeLocked
+                                                        ? t(
+                                                              'events.errors.seating_mode_locked',
+                                                          )
+                                                        : null
                                                 }
-                                                data-test="event-seats-at-tables"
-                                            />
+                                            >
+                                                <Checkbox
+                                                    checked={seatsAtTables}
+                                                    disabled={
+                                                        event?.seatingModeLocked ===
+                                                        true
+                                                    }
+                                                    onCheckedChange={(
+                                                        checked,
+                                                    ) =>
+                                                        setSeatsAtTables(
+                                                            checked === true,
+                                                        )
+                                                    }
+                                                    data-test="event-seats-at-tables"
+                                                />
+                                            </DisabledReason>
                                             {t('events.fields.seats_at_tables')}
                                             <HelpTip
                                                 subject={t(

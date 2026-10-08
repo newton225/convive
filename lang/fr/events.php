@@ -236,7 +236,7 @@ return [
         'price_category_duplicate' => 'Chaque tarif doit avoir un nom différent.',
         'price_category_quota_below_taken' => 'Le quota ne peut pas être inférieur aux :count places déjà prises dans ce tarif.',
         'price_category_quota_above_capacity' => 'Le quota ne peut pas dépasser les :capacity places de la salle.',
-        'leave_tables_while_seated' => 'Des invités sont déjà assis à des tables : retirez-les du plan de salle avant de passer à un événement sans table.',
+        'seating_mode_locked' => 'Des invités sont déjà inscrits : le choix avec ou sans tables ne change plus, car il décide de ce que dit leur billet.',
         'price_category_locked' => 'Ce tarif a déjà été choisi : son nom et son prix ne changent plus, pour que chaque invité paie ce qui lui a été annoncé. Seul son quota peut encore bouger.',
         'price_category_in_use' => 'Un tarif déjà choisi par des inscrits ou des personnes en attente ne peut pas être retiré.',
         'venue_map_url' => 'Collez un lien Google Maps, Apple Plans, OpenStreetMap ou Waze (en https), ou des coordonnées comme « 5.3364, -4.0267 ».',

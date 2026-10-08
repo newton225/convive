@@ -49,6 +49,8 @@ export type EventDetails = EventSummary & {
     visualUrl: string | null;
     // Le nombre de places d'un evenement sans table, null quand la salle est en tables.
     freeSeats: number | null;
+    // Vrai des qu'une inscription occupe une place : le mode avec ou sans tables ne change plus.
+    seatingModeLocked: boolean;
     tableGroups: EventTableGroup[];
     priceCategories: EventPriceCategory[];
     companionLimit: number;

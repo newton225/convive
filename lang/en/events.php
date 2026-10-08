@@ -236,7 +236,7 @@ return [
         'price_category_duplicate' => 'Each price must have a different name.',
         'price_category_quota_below_taken' => 'The quota cannot be lower than the :count seats already taken in this price category.',
         'price_category_quota_above_capacity' => 'The quota cannot exceed the :capacity seats of the room.',
-        'leave_tables_while_seated' => 'Guests are already seated at tables: remove them from the seating plan before switching to an event without tables.',
+        'seating_mode_locked' => 'Guests have already registered: the choice with or without tables no longer changes, as it decides what their ticket says.',
         'price_category_locked' => 'This price has already been chosen: its name and amount no longer change, so every guest pays what was announced. Only its quota can still change.',
         'price_category_in_use' => 'A price already chosen by guests or waitlisted people cannot be removed.',
         'venue_map_url' => 'Paste a Google Maps, Apple Maps, OpenStreetMap or Waze link (https), or coordinates such as "5.3364, -4.0267".',

@@ -7,8 +7,6 @@ use App\Models\Event;
 use App\Models\EventPriceCategory;
 use App\Models\PaymentAccount;
 use App\Models\Registration;
-use App\Models\RegistrationTableAssignment;
-use App\Models\SeatingTable;
 use App\Models\Tenant;
 use App\Settings\ReservationSettings;
 use App\Support\MapLink;
@@ -191,7 +189,7 @@ class SaveEventRequest extends FormRequest
             function (Validator $validator): void {
                 $this->rejectDeadlineAfterTheEvent($validator);
                 $this->rejectPaymentAccountsOfAnotherTenant($validator);
-                $this->rejectLeavingTablesWhileGuestsAreSeated($validator);
+                $this->rejectChangingSeatingModeOnceGuestsAreIn($validator);
                 $this->rejectTablePlanThatUnseatsGuests($validator);
                 $this->validatePriceCategories($validator);
                 $this->rejectQuotaAboveCapacity($validator);
@@ -241,23 +239,20 @@ class SaveEventRequest extends FormRequest
     }
 
     /**
-     * Quitter les tables est refuse tant qu'un invite est assis a l'une d'elles : il perdrait sa
-     * chaise sans que personne ne la lui retire.
+     * Le mode (avec ou sans tables) se fige des qu'une inscription occupe une place (decision du
+     * 2026-10-08) : il decide ce que dit le billet et si une table est attribuee, deux choses que
+     * les inscrits ont deja recues.
      */
-    private function rejectLeavingTablesWhileGuestsAreSeated(Validator $validator): void
+    private function rejectChangingSeatingModeOnceGuestsAreIn(Validator $validator): void
     {
         $event = $this->route('event');
 
-        if (! $event instanceof Event || ! $event->seatsAtTables() || $this->seatsAtTables()) {
+        if (! $event instanceof Event || $event->seatsAtTables() === $this->seatsAtTables()) {
             return;
         }
 
-        $seated = RegistrationTableAssignment::query()
-            ->whereIn('seating_table_id', SeatingTable::where('event_id', $event->id)->select('id'))
-            ->exists();
-
-        if ($seated) {
-            $validator->errors()->add('seats_at_tables', __('events.errors.leave_tables_while_seated'));
+        if (Registration::query()->where('event_id', $event->id)->occupyingSeats()->exists()) {
+            $validator->errors()->add('seats_at_tables', __('events.errors.seating_mode_locked'));
         }
     }
 

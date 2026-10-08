@@ -140,7 +140,7 @@ class EventWithoutTablesTest extends TestCase
         $this->assertSame(40, $this->tenant->asCurrent(fn () => $event->fresh()->capacity()));
     }
 
-    public function test_on_ne_quitte_pas_les_tables_quand_des_invites_y_sont_assis(): void
+    public function test_le_mode_ne_change_plus_des_qu_une_inscription_occupe_une_place(): void
     {
         $this->actingAs($this->owner)->post(route('tenants.events.store', $this->tenant), $this->payload([
             'seats_at_tables' => true,
