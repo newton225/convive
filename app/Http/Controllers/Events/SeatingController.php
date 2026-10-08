@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Events;
 
 use App\Actions\Seating\MoveRegistrationToTable;
 use App\Actions\Seating\SaveUnitSeparationRule;
+use App\Actions\Waitlist\InviteWaitlistAfterGrowth;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\AssignSeatingTableRequest;
@@ -155,7 +156,9 @@ class SeatingController extends Controller
         abort_if($table->event_id !== $event->id, 404);
 
         $before = $table->capacity;
+        $capacityBefore = $event->capacity();
         $table->update(['capacity' => $request->integer('capacity')]);
+        app(InviteWaitlistAfterGrowth::class)->handle($event, $capacityBefore);
 
         activity()
             ->performedOn($event)

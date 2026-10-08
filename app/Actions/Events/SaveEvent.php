@@ -3,6 +3,7 @@
 namespace App\Actions\Events;
 
 use App\Actions\Seating\SyncSeatingTables;
+use App\Actions\Waitlist\InviteWaitlistAfterGrowth;
 use App\Enums\BrandFile;
 use App\Enums\EventStatus;
 use App\Models\Event;
@@ -39,6 +40,8 @@ class SaveEvent
 
             $before = $creating ? null : $this->snapshot($event);
 
+            $capacityBefore = $creating ? 0 : $event->capacity();
+
             $event->fill($attributes);
             $event->save();
 
@@ -54,6 +57,7 @@ class SaveEvent
             // deja places ont ete refuses par `SaveEventRequest`.
             if ($tablePlan !== null) {
                 app(SyncSeatingTables::class)->handle($event, $tablePlan);
+                app(InviteWaitlistAfterGrowth::class)->handle($event, $capacityBefore);
             }
 
             activity()
