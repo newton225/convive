@@ -60,6 +60,18 @@ class UserFactory extends Factory
     }
 
     /**
+     * Indicate that the account belongs to no organisation, like one created from an invitation
+     * (decision du 2026-10-07 : aucune organisation personnelle n'est ouverte dans ce cas).
+     */
+    public function withoutOrganisation(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->tenants()->detach();
+            $user->forceFill(['current_tenant_id' => null])->save();
+        });
+    }
+
+    /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static

@@ -232,7 +232,7 @@ class TenantInvitationTest extends TestCase
     public function test_tenant_invitations_can_be_declined_by_the_invited_user()
     {
         $owner = User::factory()->withTwoFactor()->create();
-        $invitedUser = User::factory()->withTwoFactor()->create(['email' => 'invited@example.com']);
+        $invitedUser = User::factory()->withTwoFactor()->withoutOrganisation()->create(['email' => 'invited@example.com']);
         $tenant = Tenant::factory()->create();
 
         $this->joinAsOwner($tenant, $owner);

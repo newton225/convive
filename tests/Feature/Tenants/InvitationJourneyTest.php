@@ -200,7 +200,7 @@ class InvitationJourneyTest extends TestCase
 
     public function test_un_compte_sans_organisation_arrive_sur_l_accueil_des_invitations(): void
     {
-        $user = User::factory()->create(['email' => 'aya@example.com']);
+        $user = User::factory()->withoutOrganisation()->create(['email' => 'aya@example.com']);
 
         // Connexion, puis retour par le logo : jamais une erreur ni une page vide.
         $this->post(route('login.store'), ['email' => 'aya@example.com', 'password' => 'password'])
@@ -217,6 +217,8 @@ class InvitationJourneyTest extends TestCase
 
     public function test_un_membre_qui_a_deja_une_organisation_revient_a_son_tableau_de_bord_par_le_logo(): void
     {
+        $this->owner->forceFill(['current_tenant_id' => $this->tenant->id])->save();
+
         $this->actingAs($this->owner)
             ->get(route('home'))
             ->assertRedirect(route('dashboard', $this->tenant));

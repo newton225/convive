@@ -307,8 +307,8 @@ class ProfileTest extends TestCase
         $tenant = $this->tenantOwnedBy($owner);
 
         $this->actingAs($owner)
-            ->patch(route('tenants.profiles.update', [$tenant, $this->profileOf($tenant, 'Lecture')]), [
-                'name' => 'Lecture',
+            ->patch(route('tenants.profiles.update', [$tenant, $this->makeProfile($tenant, 'Accueil', [])]), [
+                'name' => 'Accueil',
                 'permissions' => ['events.invent'],
             ])
             ->assertSessionHasErrors('permissions.0');
