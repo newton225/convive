@@ -81,6 +81,8 @@ return [
         'hold_duration_minutes' => 'Time the guest has to upload their payment proof. Their seats are held meanwhile, then go back to the pool. 10 minutes by default.',
     ],
 
+    'payment_accounts_not_needed' => 'All your prices are free: no payment is expected, so you can publish without a payment account.',
+
     'price_categories' => [
         'default_name' => 'Standard price',
         'add' => 'Add a price',

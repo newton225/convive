@@ -1,5 +1,5 @@
 import { Minus, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,7 @@ type Props = {
     defaultCategories: EventPriceCategoryInput[];
     defaultPrice: number;
     capacity: number;
+    onFreeChange?: (free: boolean) => void;
     errors: Record<string, string | undefined>;
 };
 
@@ -34,6 +35,7 @@ export function PriceCategoriesField({
     defaultCategories,
     defaultPrice,
     capacity,
+    onFreeChange,
     errors,
 }: Props) {
     const { t, locale } = useTranslation();
@@ -66,6 +68,13 @@ export function PriceCategoriesField({
     const minimumPrice = Math.min(
         ...categories.map(({ price }) => Math.max(0, Number(price) || 0)),
     );
+
+    // Aucun tarif payant : aucun versement attendu, le formulaire n'exige plus de compte.
+    const free = categories.every(({ price }) => (Number(price) || 0) === 0);
+
+    useEffect(() => {
+        onFreeChange?.(free);
+    }, [free, onFreeChange]);
 
     // Seuls les tarifs plafonnes comptent : un tarif sans quota n'a pas de limite propre.
     const unlimited = categories.some(({ quota }) => quota === '');

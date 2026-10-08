@@ -81,6 +81,8 @@ return [
         'hold_duration_minutes' => 'Temps laissé à l’invité pour déposer sa preuve de paiement. Pendant ce délai, ses places sont retenues ; ensuite, elles reviennent au stock. 10 minutes par défaut.',
     ],
 
+    'payment_accounts_not_needed' => 'Tous vos tarifs sont gratuits : aucun versement n’est attendu, vous pouvez publier sans compte de versement.',
+
     'price_categories' => [
         'default_name' => 'Tarif unique',
         'add' => 'Ajouter un tarif',

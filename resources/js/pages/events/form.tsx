@@ -64,6 +64,7 @@ export default function EventForm({
     const gettingStartedReturn = useGettingStartedReturn();
     const [confirmingPublish, setConfirmingPublish] = useState(false);
     const [roomSeats, setRoomSeats] = useState(0);
+    const [allFree, setAllFree] = useState(false);
     // L'apercu de la carte de vitrine suit la saisie : les champs ne sont pas controles, on relit
     // le formulaire a chaque changement.
     const [previewName, setPreviewName] = useState(event?.name ?? '');
@@ -430,6 +431,7 @@ export default function EventForm({
                                                     prefill?.pricePerPerson ?? 0
                                                 }
                                                 capacity={roomSeats}
+                                                onFreeChange={setAllFree}
                                                 errors={errors}
                                             />
                                         </div>
@@ -461,6 +463,17 @@ export default function EventForm({
                                                 )}
                                             </HelpTip>
                                         </legend>
+
+                                        {allFree ? (
+                                            <p
+                                                className="text-muted-foreground text-sm"
+                                                data-test="event-payment-accounts-optional"
+                                            >
+                                                {t(
+                                                    'events.payment_accounts_not_needed',
+                                                )}
+                                            </p>
+                                        ) : null}
 
                                         {paymentAccounts.map((account) => (
                                             <label
