@@ -2,6 +2,7 @@ import { router } from '@inertiajs/react';
 import { Megaphone } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
+import { DisabledReason } from '@/components/disabled-reason';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useTranslation } from '@/hooks/use-translation';
@@ -42,20 +43,34 @@ export function AnnouncementButton({ tenantSlug, event }: Props) {
 
     return (
         <>
-            <Button
-                variant="outline"
-                disabled={processing || blocked}
-                aria-busy={processing}
-                data-test={
-                    withdrawing
-                        ? 'event-withdraw-announcement'
-                        : 'event-announce'
+            <DisabledReason
+                reason={
+                    blocked
+                        ? t('events.announcing.blocked', {
+                              items: event.missingBeforeAnnouncing
+                                  .map((key) =>
+                                      t(`events.missing_announce.${key}`),
+                                  )
+                                  .join(', '),
+                          })
+                        : null
                 }
-                onClick={() => setConfirming(true)}
             >
-                {processing ? <Spinner /> : <Megaphone />}
-                {label}
-            </Button>
+                <Button
+                    variant="outline"
+                    disabled={processing || blocked}
+                    aria-busy={processing}
+                    data-test={
+                        withdrawing
+                            ? 'event-withdraw-announcement'
+                            : 'event-announce'
+                    }
+                    onClick={() => setConfirming(true)}
+                >
+                    {processing ? <Spinner /> : <Megaphone />}
+                    {label}
+                </Button>
+            </DisabledReason>
             <ConfirmActionDialog
                 open={confirming}
                 onOpenChange={setConfirming}

@@ -34,7 +34,7 @@ export function LabelWithHelp({
     }
 
     return (
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 [&_button]:-my-[3px]">
             {text}
             <HelpTip subject={label}>{help}</HelpTip>
         </div>

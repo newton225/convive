@@ -2,6 +2,7 @@ import { Form, Head } from '@inertiajs/react';
 import { AlertTriangle, Send } from 'lucide-react';
 import { useState } from 'react';
 import { CopyButton } from '@/components/copy-button';
+import { DisabledReason } from '@/components/disabled-reason';
 import { AnnouncementButton } from '@/components/events/announcement-button';
 import { TemplatePicker } from '@/components/events/template-picker';
 import Heading from '@/components/heading';
@@ -132,16 +133,36 @@ export default function EventForm({
                                 </>
                             ) : (
                                 <>
-                                    <Button
-                                        data-test="event-publish"
-                                        data-tour="event-publish"
-                                        disabled={!event.isReadyToPublish}
-                                        onClick={() =>
-                                            setConfirmingPublish(true)
+                                    <DisabledReason
+                                        reason={
+                                            event.isReadyToPublish
+                                                ? null
+                                                : t(
+                                                      'events.publishing.blocked',
+                                                      {
+                                                          items: event.missingBeforePublishing
+                                                              .map((key) =>
+                                                                  t(
+                                                                      `events.missing_publish.${key}`,
+                                                                  ),
+                                                              )
+                                                              .join(', '),
+                                                      },
+                                                  )
                                         }
                                     >
-                                        <Send /> {t('events.actions.publish')}
-                                    </Button>
+                                        <Button
+                                            data-test="event-publish"
+                                            data-tour="event-publish"
+                                            disabled={!event.isReadyToPublish}
+                                            onClick={() =>
+                                                setConfirmingPublish(true)
+                                            }
+                                        >
+                                            <Send />{' '}
+                                            {t('events.actions.publish')}
+                                        </Button>
+                                    </DisabledReason>
                                     <PublishEventDialog
                                         open={confirmingPublish}
                                         onOpenChange={setConfirmingPublish}
@@ -166,10 +187,11 @@ export default function EventForm({
 
                 {event && !event.isReadyToPublish && !event.isPublished ? (
                     <p
-                        className="flex items-start gap-2 rounded-lg border p-3 text-sm"
+                        role="status"
+                        className="flex items-start gap-3 rounded-lg border border-amber-500/60 bg-amber-500/10 p-4 text-sm font-medium text-amber-700 dark:text-amber-300"
                         data-test="event-publish-blocked"
                     >
-                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
                         {t('events.publishing.blocked', {
                             items: event.missingBeforePublishing
                                 .map((key) =>
