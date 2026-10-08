@@ -218,9 +218,12 @@ export default function EventForm({
                 ) : null}
 
                 {event?.isPublished ? (
-                    <p className="text-muted-foreground text-sm">
-                        {t('events.publishing.frozen_subdomain')}
-                    </p>
+                    <div className="text-muted-foreground space-y-1 text-sm">
+                        <p>{t('events.publishing.frozen_subdomain')}</p>
+                        <p data-test="event-changes-not-notified">
+                            {t('events.publishing.changes_not_notified')}
+                        </p>
+                    </div>
                 ) : null}
 
                 {event?.isPublished &&
@@ -534,6 +537,25 @@ export default function EventForm({
                                             />
                                         </div>
                                     )}
+
+                                    {event?.isPublished &&
+                                    roomSeats > 0 &&
+                                    roomSeats < event.capacity ? (
+                                        <p
+                                            className="text-sm font-medium text-amber-600 dark:text-amber-400"
+                                            role="status"
+                                            data-test="event-capacity-reduced"
+                                        >
+                                            {t(
+                                                'events.publishing.capacity_reduced',
+                                                {
+                                                    from: event.capacity,
+                                                    to: roomSeats,
+                                                    taken: event.occupiedSeats,
+                                                },
+                                            )}
+                                        </p>
+                                    ) : null}
 
                                     <div className="grid items-start gap-4 sm:grid-cols-2">
                                         <div className="space-y-2 sm:col-span-2">

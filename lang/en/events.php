@@ -179,6 +179,8 @@ return [
         'unsaved' => 'Save your changes first: publishing now would publish the previous version.',
         'ready' => 'This event can be published.',
         'blocked' => 'Before publishing, still missing: :items.',
+        'changes_not_notified' => 'Guests who already registered are not told about a change of date, time or venue: let them know yourself.',
+        'capacity_reduced' => 'You are reducing the capacity from :from to :to seats. It cannot go below the :taken seats already taken or held.',
         'frozen_subdomain' => 'Once the link is handed out, the subdomain of the organisation can no longer change.',
     ],
 

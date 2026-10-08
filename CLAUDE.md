@@ -755,6 +755,16 @@ change.
   le plus bas (« a partir de »). Un evenement dont toutes les categories sont a 0 est gratuit
   (`Event::isFree()`) et n'exige aucun compte de versement. Une categorie deja choisie par quelqu'un
   ne se supprime pas.
+- **Ce qui se fige et ce qui bouge apres publication** (decision du 2026-10-08, rigueur sur les
+  evenements et les preuves) : le **nom et le prix d'un tarif deja choisi** ne changent plus
+  (`EventPriceCategory::isChosen()`, seul le quota bouge) ; le **mode avec ou sans tables** ne change
+  plus des qu'une inscription occupe une place ; un tarif choisi ne se retire pas. **Ajouter des
+  places invite la liste d'attente** comme une annulation (`InviteWaitlistAfterGrowth`), et la
+  capacite ne descend jamais sous les places prises. La date, le lieu et les echeances restent
+  modifiables et journalises, **sans prevenir les inscrits** : la fiche le dit. Un message aux
+  inscrits (geste « Reporter ») n'existe pas encore : WhatsApp exige un modele approuve par Meta.
+- **Une preuve ne se depose plus sur un evenement cloture** (`SubmitPaymentProof`), meme pendant un
+  decompte qui court encore : l'invite lit un message qui le dit.
 - **Duree de reservation bornee** (decision du 2026-10-07) : curseur entre un minimum et un maximum
   regles depuis l'ecran Securite de la console (`App\Settings\ReservationSettings`, 5 et 60 minutes
   au depart, jamais hors de 1 a 1 440), revalides par `SaveEventRequest`.

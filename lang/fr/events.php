@@ -179,6 +179,8 @@ return [
         'ready' => 'Cet événement peut être publié.',
         'blocked' => 'Avant de publier, il manque : :items.',
         'unsaved' => 'Enregistrez d’abord vos modifications : publier publierait la version précédente.',
+        'changes_not_notified' => 'Les invités déjà inscrits ne sont pas prévenus d’un changement de date, d’heure ou de lieu : prévenez-les vous-même.',
+        'capacity_reduced' => 'Vous réduisez la capacité de :from à :to places. Elle ne peut pas descendre sous les :taken places déjà prises ou réservées.',
         'frozen_subdomain' => "Une fois le lien distribué, le sous-domaine de l'organisation ne peut plus changer.",
     ],
 

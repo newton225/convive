@@ -51,6 +51,8 @@ export type EventDetails = EventSummary & {
     freeSeats: number | null;
     // Vrai des qu'une inscription occupe une place : le mode avec ou sans tables ne change plus.
     seatingModeLocked: boolean;
+    // Les places deja prises ou reservees : la capacite ne peut pas descendre dessous.
+    occupiedSeats: number;
     tableGroups: EventTableGroup[];
     priceCategories: EventPriceCategory[];
     companionLimit: number;

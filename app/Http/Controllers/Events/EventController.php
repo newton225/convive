@@ -366,6 +366,7 @@ class EventController extends Controller
             // La salle telle que le formulaire la decrit : groupes de tables de meme taille.
             'seatsAtTables' => $event->seatsAtTables(),
             'seatingModeLocked' => $event->registrations()->occupyingSeats()->exists(),
+            'occupiedSeats' => $event->occupiedSeats(),
             'freeSeats' => $event->seatsAtTables() ? null : $event->capacity(),
             'tableGroups' => SyncSeatingTables::groupsOf($event),
             'priceCategories' => $event->priceCategories()->get()->map(fn ($category) => [

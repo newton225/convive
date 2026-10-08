@@ -39,4 +39,23 @@ class EventListSummaryTest extends TestCase
                 ->where('events.0.proofsToCheck', 1)
                 ->where('events.0.visualUrl', null));
     }
+
+    public function test_la_fiche_donne_les_places_prises_sous_lesquelles_la_capacite_ne_descend_pas(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = app(CreateTenant::class)->handle($owner, 'Association Convive');
+
+        $event = $tenant->asCurrent(function () {
+            $event = Event::factory()->open()->create(['tables' => [2, 5]]);
+            Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 3, 'amount_due' => 45000]);
+
+            return $event;
+        });
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.edit', [$tenant, $event]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('event.capacity', 10)
+                ->where('event.occupiedSeats', 3));
+    }
 }
