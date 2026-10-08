@@ -519,7 +519,14 @@ export default function EventForm({
                                                     )}
                                                 </p>
                                             </div>
+                                            {/* Apres un enregistrement, les tarifs reviennent du serveur avec leur identifiant :
+                                                la cle recharge la liste, sinon un second envoi recreerait les memes lignes. */}
                                             <PriceCategoriesField
+                                                key={(
+                                                    event?.priceCategories ?? []
+                                                )
+                                                    .map(({ id }) => id)
+                                                    .join('-')}
                                                 defaultCategories={
                                                     prefill?.priceCategories ??
                                                     []

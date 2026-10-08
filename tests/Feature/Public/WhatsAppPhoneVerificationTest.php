@@ -13,7 +13,6 @@ use App\Models\Tenant;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\WhatsAppPhoneCheck;
-use App\Notifications\Registrations\PhoneVerificationCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;

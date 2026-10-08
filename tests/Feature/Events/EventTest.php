@@ -120,6 +120,25 @@ class EventTest extends TestCase
         $this->assertSame(EventStatus::Draft, $event->status);
     }
 
+    public function test_enregistrer_deux_fois_les_memes_tarifs_ne_cree_pas_de_doublon(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $categories = [['name' => '10Krika', 'price' => 10000, 'quota' => 25]];
+
+        $this->actingAs($owner)->post(route('tenants.events.store', $tenant), $this->payload(['price_categories' => $categories]));
+        $event = $this->eventOf($tenant);
+        $firstId = $tenant->asCurrent(fn () => $event->priceCategories()->value('id'));
+
+        // Le formulaire non recharge renvoie la meme ligne, sans identifiant.
+        $this->actingAs($owner)
+            ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload(['price_categories' => $categories]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(1, $tenant->asCurrent(fn () => $event->priceCategories()->count()));
+        $this->assertSame($firstId, $tenant->asCurrent(fn () => $event->priceCategories()->value('id')));
+    }
+
     public function test_une_categorie_retiree_puis_recreee_sous_le_meme_nom_s_enregistre(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

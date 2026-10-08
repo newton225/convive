@@ -45,6 +45,8 @@ class SaveEventRequest extends FormRequest
             $this->merge(['venue_map_url' => MapLink::normalize($this->input('venue_map_url'))]);
         }
 
+        $this->matchPriceCategoriesByName();
+
         if (! $this->has('price_categories')) {
             $event = $this->route('event');
             $existing = $event instanceof Event ? $event->priceCategories()->get() : collect();
@@ -61,6 +63,40 @@ class SaveEventRequest extends FormRequest
                     ])->all(),
             ]);
         }
+    }
+
+    /**
+     * Une ligne sans identifiant dont le nom est celui d'un tarif existant est ce tarif : un
+     * formulaire reenvoye tel quel (double enregistrement, page pas rechargee) ne cree pas de doublon
+     * et ne retire pas le tarif existant, qui peut deja avoir ete choisi par des inscrits.
+     */
+    private function matchPriceCategoriesByName(): void
+    {
+        $event = $this->route('event');
+        $rows = $this->input('price_categories');
+
+        if (! $event instanceof Event || ! is_array($rows)) {
+            return;
+        }
+
+        $existing = $event->priceCategories()->get();
+        $claimed = collect($rows)->pluck('id')->filter()->map(fn ($id) => (int) $id)->all();
+
+        foreach ($rows as $index => $row) {
+            if (! is_array($row) || ! empty($row['id'])) {
+                continue;
+            }
+
+            $match = $existing->first(fn (EventPriceCategory $category) => ! in_array($category->id, $claimed, true)
+                && mb_strtolower($category->name) === mb_strtolower(trim((string) ($row['name'] ?? ''))));
+
+            if ($match !== null) {
+                $claimed[] = $match->id;
+                $rows[$index]['id'] = $match->id;
+            }
+        }
+
+        $this->merge(['price_categories' => $rows]);
     }
 
     /**
