@@ -4,6 +4,7 @@ import { HelpTip } from '@/components/help-tip';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useNotifyFormChange } from '@/hooks/use-notify-form-change';
 import { useTranslation } from '@/hooks/use-translation';
 import type { EventTableGroup } from '@/types';
 
@@ -68,8 +69,14 @@ export function TableGroupsField({
         onSeatsChange?.(seats);
     }, [seats, onSeatsChange]);
 
+    const field = useNotifyFormChange<HTMLFieldSetElement>(rows.length);
+
     return (
-        <fieldset className="space-y-3" data-test="event-table-groups">
+        <fieldset
+            ref={field}
+            className="space-y-3"
+            data-test="event-table-groups"
+        >
             <legend className="flex items-center gap-1.5 text-sm font-medium">
                 {t('events.fields.table_groups')}
                 <HelpTip subject={t('events.fields.table_groups')}>

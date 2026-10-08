@@ -2,6 +2,7 @@ import { useState } from 'react';
 import InputError from '@/components/input-error';
 import { LabelWithHelp } from '@/components/label-with-help';
 import { Slider } from '@/components/ui/slider';
+import { useNotifyFormChange } from '@/hooks/use-notify-form-change';
 import { useTranslation } from '@/hooks/use-translation';
 
 type Props = {
@@ -20,8 +21,10 @@ export function CompanionLimitField({ defaultValue, max, error }: Props) {
         Math.min(Math.max(defaultValue, 0), max),
     );
 
+    const field = useNotifyFormChange<HTMLDivElement>(limit);
+
     return (
-        <div className="grid gap-2">
+        <div ref={field} className="grid gap-2">
             <LabelWithHelp
                 htmlFor="companion_limit"
                 label={t('events.fields.companion_limit')}

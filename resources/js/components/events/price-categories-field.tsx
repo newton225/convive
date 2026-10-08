@@ -4,6 +4,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useNotifyFormChange } from '@/hooks/use-notify-form-change';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 
@@ -82,8 +83,15 @@ export function PriceCategoriesField({
         ? 0
         : categories.reduce((sum, { quota }) => sum + (Number(quota) || 0), 0);
 
+    // Ajouter ou retirer une ligne ne tape dans aucun champ : le formulaire doit le savoir.
+    const field = useNotifyFormChange<HTMLDivElement>(categories.length);
+
     return (
-        <div className="space-y-4" data-test="price-categories-field">
+        <div
+            ref={field}
+            className="space-y-4"
+            data-test="price-categories-field"
+        >
             <input
                 type="hidden"
                 name="price_per_person"

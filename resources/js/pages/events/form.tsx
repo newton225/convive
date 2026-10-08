@@ -25,6 +25,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
+import { useNotifyFormChange } from '@/hooks/use-notify-form-change';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { edit, index, store, update } from '@/routes/tenants/events';
 import type {
@@ -74,6 +75,8 @@ export default function EventForm({
     );
     const [tableSeats, setTableSeats] = useState(0);
     const roomSeats = seatsAtTables ? tableSeats : Number(freeSeats) || 0;
+    // La case pilote un champ cache : le formulaire n'entend pas son changement sans ce signal.
+    const seatingMode = useNotifyFormChange<HTMLDivElement>(seatsAtTables);
     const [allFree, setAllFree] = useState(false);
     // L'apercu de la carte de vitrine suit la saisie : les champs ne sont pas controles, on relit
     // le formulaire a chaque changement.
@@ -431,7 +434,10 @@ export default function EventForm({
                                     title={t('events.steps.seating')}
                                     description={t('events.sections.seating')}
                                 >
-                                    <div className="space-y-2">
+                                    <div
+                                        ref={seatingMode}
+                                        className="space-y-2"
+                                    >
                                         <label className="flex items-center gap-2 text-sm font-medium">
                                             <Checkbox
                                                 checked={seatsAtTables}
