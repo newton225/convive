@@ -3,6 +3,7 @@
 namespace App\Actions\PaymentProofs;
 
 use App\Actions\Notifications\SendAlert;
+use App\Enums\EventStatus;
 use App\Enums\NotificationType;
 use App\Enums\RegistrationStatus;
 use App\Models\PaymentProof;
@@ -43,7 +44,10 @@ class SubmitPaymentProof
             return $existing;
         }
 
-        if ($registration->status !== RegistrationStatus::Held || $registration->holdHasExpired()) {
+        // Un evenement cloture n'accepte plus de preuve (decision du 2026-10-08), meme pendant un
+        // decompte qui court encore.
+        if ($registration->status !== RegistrationStatus::Held || $registration->holdHasExpired()
+            || $registration->event->status === EventStatus::Closed) {
             return null;
         }
 

@@ -119,6 +119,7 @@ return [
         'code_resent' => 'Un nouveau code vous a été envoyé par SMS.',
         'whatsapp_code_renewed' => 'Nouveau code prêt : envoyez-le par WhatsApp.',
         'proof_sent' => 'Preuve envoyée. Elle va être vérifiée par l\'organisation.',
+        'proof_event_closed' => "L'événement est clôturé : la preuve n'a pas été enregistrée. Contactez l'organisateur.",
         'proof_too_late' => "Le délai de réservation était écoulé : la preuve n'a pas été enregistrée. Vérifiez les places et relancez votre réservation.",
         'no_seats_left' => "Il ne reste plus assez de places pour votre inscription. Vous pouvez rejoindre la liste d'attente si elle est ouverte.",
         'hold_restarted' => 'Votre réservation est relancée : le décompte repart.',

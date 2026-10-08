@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Actions\PaymentProofs\SubmitPaymentProof;
+use App\Enums\EventStatus;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Public\StorePaymentProofRequest;
@@ -34,6 +35,13 @@ class PaymentProofController extends Controller
 
         if ($registration->holdHasExpired()) {
             $registration->update(['status' => RegistrationStatus::Expired]);
+        }
+
+        // Un evenement cloture : le refus le dit, au lieu de parler d'un delai ecoule.
+        if ($event->status === EventStatus::Closed) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => __('guest.flash.proof_event_closed')]);
+
+            return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
         }
 
         $proof = app(SubmitPaymentProof::class)->handle(

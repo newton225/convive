@@ -119,6 +119,7 @@ return [
         'code_resent' => 'A new code has been sent to you by SMS.',
         'whatsapp_code_renewed' => 'New code ready: send it by WhatsApp.',
         'proof_sent' => 'Proof sent. The organisation will verify it.',
+        'proof_event_closed' => 'The event is closed: the proof was not saved. Please contact the organiser.',
         'proof_too_late' => 'The reservation window had closed: the proof was not saved. Check availability and restart your reservation.',
         'no_seats_left' => 'There are not enough seats left for your registration. You can join the waitlist if it is open.',
         'hold_restarted' => 'Your reservation is back on: the countdown restarts.',

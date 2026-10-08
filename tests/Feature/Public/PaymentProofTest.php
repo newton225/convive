@@ -3,6 +3,7 @@
 namespace Tests\Feature\Public;
 
 use App\Actions\Tenants\CreateTenant;
+use App\Enums\EventStatus;
 use App\Enums\LegalForm;
 use App\Enums\PaymentChannel;
 use App\Enums\RegistrationStatus;
@@ -391,6 +392,29 @@ class PaymentProofTest extends TestCase
 
         $this->assertSame(
             RegistrationStatus::Expired,
+            $tenant->asCurrent(fn () => $registration->fresh())->status,
+        );
+    }
+
+    public function test_une_preuve_deposee_sur_un_evenement_cloture_est_refusee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $account = $tenant->asCurrent(fn () => PaymentAccount::first());
+        ['registration' => $registration, 'resume' => $resume] = $this->heldRegistration($tenant, $event);
+
+        $tenant->asCurrent(fn () => $event->forceFill(['status' => EventStatus::Closed])->save());
+
+        $this->post(
+            $this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}/proof"),
+            $this->validPayload($account),
+        )
+            ->assertRedirect($this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}"))
+            ->assertInertiaFlash('toast', ['type' => 'error', 'message' => __('guest.flash.proof_event_closed')]);
+
+        $this->assertSame(
+            RegistrationStatus::Held,
             $tenant->asCurrent(fn () => $registration->fresh())->status,
         );
     }
