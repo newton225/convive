@@ -229,6 +229,21 @@ class SupportAccessTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_un_membre_sans_le_droit_recoit_403_avant_qu_on_lui_demande_le_mot_de_passe(): void
+    {
+        $reader = User::factory()->withTwoFactor()->create();
+        $this->joinWithProfile($this->tenant, $reader, 'Lecture');
+
+        // Aucune confirmation de mot de passe en session : le droit se verifie en premier.
+        $this->actingAs($reader)
+            ->get(route('tenants.support-access.show', $this->tenant))
+            ->assertForbidden();
+
+        $this->actingAs($reader)
+            ->post(route('tenants.support-access.store', $this->tenant), [])
+            ->assertForbidden();
+    }
+
     public function test_un_acces_ouvert_donne_la_lecture_et_journalise_chaque_page(): void
     {
         $grant = $this->grant();

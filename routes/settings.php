@@ -126,13 +126,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('settings/tenants/{tenant}/billing/payment-method', [BillingController::class, 'paymentMethod'])->middleware(RequirePassword::class)->name('tenants.billing.payment-method');
             Route::post('settings/tenants/{tenant}/billing/cancel', [BillingController::class, 'cancel'])->middleware(RequirePassword::class)->name('tenants.billing.cancel');
 
-            // Acces du support (README ecran 25) : reserve au Proprietaire, voir `TenantPolicy`.
-            Route::get('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'show'])->middleware(RequirePassword::class)->name('tenants.support-access.show');
+            // Acces du support (README ecran 25) : reserve au Proprietaire, voir `TenantPolicy`. Le droit
+            // se verifie avant le mot de passe (decision du 2026-10-08) : un membre qui n'a pas la
+            // permission recoit 403 tout de suite, au lieu qu'on lui demande un mot de passe pour rien.
+            Route::get('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'show'])->middleware(['can:manageSupportAccess,tenant', RequirePassword::class])->name('tenants.support-access.show');
             // Ouvrir le contenu de l'organisation a l'editeur engage l'organisation entiere : mot de
             // passe redemande. Revoquer referme, et ne l'exige pas.
-            Route::post('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'store'])->middleware(RequirePassword::class)->name('tenants.support-access.store');
+            Route::post('settings/tenants/{tenant}/support-access', [SupportAccessController::class, 'store'])->middleware(['can:manageSupportAccess,tenant', RequirePassword::class])->name('tenants.support-access.store');
             // Prolonger laisse l'editeur lire plus longtemps : mot de passe redemande, comme a l'ouverture.
-            Route::patch('settings/tenants/{tenant}/support-access/{grant}', [SupportAccessController::class, 'update'])->middleware(RequirePassword::class)->name('tenants.support-access.update');
+            Route::patch('settings/tenants/{tenant}/support-access/{grant}', [SupportAccessController::class, 'update'])->middleware(['can:manageSupportAccess,tenant', RequirePassword::class])->name('tenants.support-access.update');
             Route::delete('settings/tenants/{tenant}/support-access/{grant}', [SupportAccessController::class, 'destroy'])->name('tenants.support-access.destroy');
             // La demande d'aide previent l'equipe Convive sans rien ouvrir : pas de mot de passe
             // redemande, mais chaque demande envoie des courriels, d'ou la limite.
