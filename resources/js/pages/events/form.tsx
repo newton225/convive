@@ -227,9 +227,11 @@ export default function EventForm({
                 !event.isAnnounced &&
                 event.missingBeforeAnnouncing.length > 0 ? (
                     <p
-                        className="text-muted-foreground text-sm"
+                        role="status"
+                        className="flex items-start gap-3 rounded-lg border border-amber-500/60 bg-amber-500/10 p-4 text-sm font-medium text-amber-700 dark:text-amber-300"
                         data-test="event-announce-blocked"
                     >
+                        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
                         {t('events.announcing.blocked', {
                             items: event.missingBeforeAnnouncing
                                 .map((key) =>
