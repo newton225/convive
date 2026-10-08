@@ -143,19 +143,21 @@ export function PublishEventDialog({
                             {accounts.length === 0 ? (
                                 notSet
                             ) : (
-                                <ul className="space-y-0.5">
+                                <ul className="space-y-2">
                                     {accounts.map((account) => (
-                                        <li
-                                            key={account.id}
-                                            className="break-words"
-                                        >
-                                            {account.channelLabel
-                                                ? `${account.channelLabel} · `
-                                                : ''}
-                                            {account.label}
-                                            {account.accountNumber
-                                                ? ` · ${account.accountNumber}`
-                                                : ''}
+                                        <li key={account.id}>
+                                            <span className="break-words">
+                                                {account.channelLabel
+                                                    ? `${account.channelLabel} · `
+                                                    : ''}
+                                                {account.label}
+                                            </span>
+                                            {/* Un numero ne se coupe jamais en deux : il tient sur sa ligne. */}
+                                            {account.accountNumber ? (
+                                                <span className="text-muted-foreground block whitespace-nowrap tabular-nums">
+                                                    {account.accountNumber}
+                                                </span>
+                                            ) : null}
                                         </li>
                                     ))}
                                 </ul>
