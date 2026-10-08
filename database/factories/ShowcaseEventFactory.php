@@ -20,7 +20,7 @@ class ShowcaseEventFactory extends Factory
     {
         return [
             'tenant_id' => Tenant::factory(),
-            'event_id' => fake()->numberBetween(1, 1000),
+            'event_id' => fake()->unique()->numberBetween(1, 1000000),
             'name' => 'Diner '.fake()->unique()->word(),
             'organisation_name' => fake()->company(),
             'starts_at' => fake()->dateTimeBetween('+2 weeks', '+3 months'),
