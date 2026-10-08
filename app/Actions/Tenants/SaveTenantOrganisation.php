@@ -2,6 +2,7 @@
 
 namespace App\Actions\Tenants;
 
+use App\Models\ShowcaseEvent;
 use App\Models\Tenant;
 use App\Models\TenantBranding;
 use Illuminate\Support\Facades\DB;
@@ -91,6 +92,13 @@ class SaveTenantOrganisation
                     'tenant_id' => $tenant->id,
                 ])
                 ->log($log);
+
+            // La vitrine garde une copie du nom affiche (table centrale, lue sans ouvrir les bases) :
+            // elle suit le nom de l'organisation, sinon une carte annoncee garderait l'ancien.
+            if ($branding->wasChanged('display_name')) {
+                ShowcaseEvent::where('tenant_id', $tenant->id)
+                    ->update(['organisation_name' => $branding->display_name ?? $tenant->name]);
+            }
 
             return $branding;
         });

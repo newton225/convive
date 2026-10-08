@@ -3,6 +3,7 @@
 namespace Tests\Feature\Events;
 
 use App\Actions\Tenants\CreateTenant;
+use App\Actions\Tenants\SaveTenantOrganisation;
 use App\Enums\LegalForm;
 use App\Enums\TenantPermission;
 use App\Models\Event;
@@ -176,6 +177,22 @@ class ShowcaseAnnouncementTest extends TestCase
         $showcased = ShowcaseEvent::where('tenant_id', $tenant->id)->where('event_id', $event->id)->firstOrFail();
 
         $this->assertSame('Nouveau nom de la soiree', $showcased->name);
+    }
+
+    public function test_renommer_l_organisation_met_a_jour_les_cartes_de_la_vitrine(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+
+        $this->actingAs($owner)->post(route('tenants.events.announce', [$tenant, $event]));
+
+        app(SaveTenantOrganisation::class)->legalIdentity($tenant, ['display_name' => 'Les Soldats du Christ']);
+
+        $this->assertSame(
+            'Les Soldats du Christ',
+            ShowcaseEvent::where('tenant_id', $tenant->id)->where('event_id', $event->id)->value('organisation_name'),
+        );
     }
 
     public function test_la_vitrine_montre_le_visuel_de_l_evenement_annonce(): void
