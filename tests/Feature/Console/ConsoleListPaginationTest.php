@@ -33,7 +33,8 @@ class ConsoleListPaginationTest extends TestCase
 
     public function test_les_organisations_sont_paginees(): void
     {
-        Tenant::factory()->count(30)->create();
+        // Le fondateur a deja son organisation personnelle : 29 de plus font 30 au total.
+        Tenant::factory()->count(29)->create();
 
         $this->actingAs($this->founder)
             ->get(route('console.organisations.index'))
