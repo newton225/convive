@@ -284,6 +284,7 @@ export default function EventForm({
                                         <Field
                                             name="venue"
                                             label={t('events.fields.venue')}
+                                            help={t('events.help.venue')}
                                             defaultValue={prefill?.venue ?? ''}
                                             error={errors.venue}
                                         />
@@ -292,6 +293,9 @@ export default function EventForm({
                                                 name="venue_address"
                                                 label={t(
                                                     'events.fields.venue_address',
+                                                )}
+                                                help={t(
+                                                    'events.help.venue_address',
                                                 )}
                                                 defaultValue={
                                                     prefill?.venueAddress ?? ''

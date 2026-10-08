@@ -65,6 +65,8 @@ return [
     ],
 
     'help' => [
+        'venue' => 'Le nom de l’endroit, tel que vos invités le reconnaissent : « Hôtel Ivoire, salle des Palmiers », « Palais de la Culture ». Il est nécessaire pour publier l’événement.',
+        'venue_address' => 'Facultatif. Où trouver ce lieu : rue, quartier, ville ou un repère, par exemple « Boulevard Latrille, Cocody, Abidjan ». Elle s’affiche sous le nom du lieu. Pour l’itinéraire, utilisez la localisation sur une carte juste en dessous.',
         'venue_map_url' => "Facultatif. Dans Google Maps, touchez le lieu puis « Partager » et collez le lien ici ; des coordonnées marchent aussi. Vos invités verront un bouton « Voir l'itinéraire ». Liens acceptés : Google Maps, Apple Plans, OpenStreetMap, Waze.",
         'primary_color' => 'La couleur dominante du parcours invité de cet événement : bouton « S’inscrire », date, jauge des places, étapes, bandeau des emails. Elle s’applique du lien public jusqu’au billet.',
         'secondary_color' => 'Une couleur d’accompagnement, plus discrète : le bouton d’action des emails envoyés aux invités, et le halo du bandeau quand l’événement n’a pas de visuel.',

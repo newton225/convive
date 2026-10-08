@@ -65,6 +65,8 @@ return [
     ],
 
     'help' => [
+        'venue' => 'The name of the place, as your guests know it: "Hôtel Ivoire, Palmiers room", "Palais de la Culture". It is required to publish the event.',
+        'venue_address' => 'Optional. Where to find this place: street, area, city or a landmark, for example "Boulevard Latrille, Cocody, Abidjan". It is shown under the venue name. For directions, use the map location just below.',
         'venue_map_url' => 'Optional. In Google Maps, tap the place, then "Share", and paste the link here; coordinates work too. Your guests will see a "Get directions" button. Accepted links: Google Maps, Apple Maps, OpenStreetMap, Waze.',
         'primary_color' => 'The dominant colour of this event’s guest journey: the “Register” button, date, seat gauge, steps and email header. It applies from the public link through to the ticket.',
         'secondary_color' => 'A quieter supporting colour: the action button in emails sent to guests, and the glow of the banner when the event has no visual.',
