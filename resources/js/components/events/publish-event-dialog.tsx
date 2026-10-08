@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
@@ -53,7 +54,12 @@ export function PublishEventDialog({
         onOpenChange(next);
     };
 
-    const rows: { label: string; value: string }[] = [
+    const priceLabel = (price: number) =>
+        price === 0
+            ? t('events.price_categories.free')
+            : formatAmount(price, locale);
+
+    const rows: { label: string; value: ReactNode }[] = [
         { label: t('events.fields.name'), value: event.name },
         {
             label: t('events.fields.starts_at'),
@@ -71,17 +77,27 @@ export function PublishEventDialog({
                 event.priceCategories.length > 0
                     ? t('events.fields.price_categories')
                     : t('events.fields.price_per_person'),
+            // Un tarif par ligne : le nom a gauche, le prix aligne a droite.
             value:
-                event.priceCategories.length > 0
-                    ? event.priceCategories
-                          .map(
-                              (category) =>
-                                  `${category.name}: ${category.price === 0 ? t('events.price_categories.free') : formatAmount(category.price, locale)}`,
-                          )
-                          .join(' · ')
-                    : event.pricePerPerson === 0
-                      ? t('events.price_categories.free')
-                      : formatAmount(event.pricePerPerson, locale),
+                event.priceCategories.length > 0 ? (
+                    <ul className="space-y-0.5">
+                        {event.priceCategories.map((category) => (
+                            <li
+                                key={category.id}
+                                className="flex justify-between gap-3"
+                            >
+                                <span className="break-words">
+                                    {category.name}
+                                </span>
+                                <span className="whitespace-nowrap tabular-nums">
+                                    {priceLabel(category.price)}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    priceLabel(event.pricePerPerson)
+                ),
         },
         {
             label: t('events.confirm_publish.capacity'),
