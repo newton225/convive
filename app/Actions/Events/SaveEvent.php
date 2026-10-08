@@ -84,7 +84,13 @@ class SaveEvent
     private function syncPriceCategories(Event $event, array $categories): void
     {
         $existing = $event->priceCategories()->get()->keyBy('id');
-        $keptIds = [];
+
+        // Le nom est unique par evenement : les lignes retirees partent d'abord, et les lignes
+        // gardees prennent un nom provisoire, sinon retirer « VIP » pour le recreer, ou echanger
+        // deux noms, heurterait la contrainte pendant l'enregistrement.
+        $submittedIds = collect($categories)->pluck('id')->filter()->map(fn ($id) => (int) $id)->all();
+        $event->priceCategories()->whereNotIn('id', $submittedIds)->delete();
+        $existing->only($submittedIds)->each(fn ($category) => $category->update(['name' => '~'.$category->id]));
 
         foreach ($categories as $position => $attributes) {
             $category = isset($attributes['id'])
@@ -99,10 +105,8 @@ class SaveEvent
                 'position' => $position,
             ]);
             $category->save();
-            $keptIds[] = $category->id;
         }
 
-        $event->priceCategories()->whereNotIn('id', $keptIds)->delete();
         $event->forceFill([
             'price_per_person' => (int) min(array_column($categories, 'price') ?: [0]),
         ])->save();

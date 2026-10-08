@@ -120,6 +120,38 @@ class EventTest extends TestCase
         $this->assertSame(EventStatus::Draft, $event->status);
     }
 
+    public function test_une_categorie_retiree_puis_recreee_sous_le_meme_nom_s_enregistre(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)->post(route('tenants.events.store', $tenant), $this->payload([
+            'price_categories' => [
+                ['name' => 'Standard', 'price' => 5000, 'quota' => null],
+                ['name' => 'VIP', 'price' => 20000, 'quota' => null],
+            ],
+        ]));
+        $event = $this->eventOf($tenant);
+        $standard = $tenant->asCurrent(fn () => $event->priceCategories()->where('name', 'Standard')->firstOrFail());
+        $vip = $tenant->asCurrent(fn () => $event->priceCategories()->where('name', 'VIP')->firstOrFail());
+
+        // La ligne VIP est retiree et une autre du meme nom est ajoutee, tandis que la ligne Standard
+        // gardee prend le nom VIP : aucune des deux ne doit heurter l'unicite du nom.
+        $this->actingAs($owner)
+            ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
+                'price_categories' => [
+                    ['id' => $standard->id, 'name' => 'VIP', 'price' => 5000, 'quota' => null],
+                    ['name' => 'Standard', 'price' => 9000, 'quota' => null],
+                ],
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $names = $tenant->asCurrent(fn () => $event->priceCategories()->orderBy('position')->pluck('name')->all());
+
+        $this->assertSame(['VIP', 'Standard'], $names);
+        $this->assertNull($tenant->asCurrent(fn () => $event->priceCategories()->find($vip->id)));
+    }
+
     public function test_un_evenement_s_enregistre_sans_aucun_compte_de_versement_coche(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
