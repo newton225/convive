@@ -499,10 +499,11 @@ class Event extends Model implements HasMedia
 
     /**
      * Get what the event still lacks before it can be announced on the product site's showcase :
-     * `not_published`, `closed`, `past`, `visual`.
+     * `not_published`, `closed`, `past`.
      *
      * La vitrine est une page commerciale (decision du 2026-10-07) : seulement des evenements
-     * publies, ouverts, a venir et illustres.
+     * publies, ouverts et a venir. Un visuel n'est pas exige (decision du 2026-10-08) : sans lui, la
+     * carte dessine une affiche a partir du titre et de la date.
      *
      * @return array<int, string>
      */
@@ -512,7 +513,6 @@ class Event extends Model implements HasMedia
             'not_published' => ! $this->isPublished(),
             'closed' => $this->status === EventStatus::Closed,
             'past' => $this->starts_at === null || $this->starts_at->isPast(),
-            'visual' => $this->getFirstMedia(self::VisualCollection) === null,
         ]));
     }
 

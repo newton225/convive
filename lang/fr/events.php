@@ -229,7 +229,6 @@ return [
         'not_published' => 'la publication du lien',
         'closed' => 'un événement ouvert (il est clos)',
         'past' => 'une date à venir',
-        'visual' => 'un visuel',
     ],
     'errors' => [
         'price_category_unknown' => 'Ce tarif ne correspond pas à cet événement.',

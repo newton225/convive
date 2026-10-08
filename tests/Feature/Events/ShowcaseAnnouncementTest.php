@@ -66,7 +66,7 @@ class ShowcaseAnnouncementTest extends TestCase
             return $event->fresh();
         });
 
-        // La vitrine n'accepte qu'un evenement illustre (decision du 2026-10-07).
+        // Un visuel est depose : plusieurs tests verifient son affichage dans la vitrine.
         $this->actingAs($tenant->owner())->post(route('tenants.events.visual.store', [$tenant, $event]), [
             'file' => UploadedFile::fake()->image('visuel.png', 800, 400),
         ]);

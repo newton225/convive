@@ -122,16 +122,17 @@ class PublicationChecksTest extends TestCase
                 ->where('event.missingBeforePublishing', ['venue']));
     }
 
-    public function test_un_evenement_sans_visuel_ne_s_annonce_pas(): void
+    public function test_un_evenement_sans_visuel_s_annonce_quand_meme(): void
     {
         $event = $this->event();
         $this->publish($event);
 
+        // Sans visuel, la carte de la vitrine dessine une affiche (decision du 2026-10-08).
         $this->actingAs($this->owner)
             ->post(route('tenants.events.announce', [$this->tenant, $event]))
-            ->assertSessionHasErrors('event');
+            ->assertSessionHasNoErrors();
 
-        $this->assertSame(0, ShowcaseEvent::count());
+        $this->assertSame(1, ShowcaseEvent::count());
     }
 
     public function test_un_evenement_publie_ouvert_a_venir_et_illustre_s_annonce(): void

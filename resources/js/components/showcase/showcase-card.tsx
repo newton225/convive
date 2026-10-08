@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowUpRight, CalendarDays } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import type { Ref } from 'react';
 import { FadeInImage } from '@/components/fade-in-image';
 import { useTranslation } from '@/hooks/use-translation';
@@ -17,6 +17,24 @@ type Props = {
     ref?: Ref<HTMLAnchorElement>;
 };
 
+// Les degrades de l'affiche generee quand un evenement n'a pas de visuel. Le meme titre prend
+// toujours le meme : une carte ne change pas de couleur d'un affichage a l'autre.
+const PosterTones = [
+    'from-[#3b0d1d] via-[#7b1e3a] to-[#c9a227]/70',
+    'from-[#10213f] via-[#26407a] to-[#7a8fd6]/70',
+    'from-[#0e2a22] via-[#1f5c46] to-[#c9a227]/60',
+    'from-[#2a1033] via-[#5b2a7a] to-[#d17a9b]/60',
+];
+
+function posterTone(name: string): string {
+    const sum = Array.from(name).reduce(
+        (total, character) => total + character.charCodeAt(0),
+        0,
+    );
+
+    return PosterTones[sum % PosterTones.length] ?? PosterTones[0];
+}
+
 /**
  * Une carte de la vitrine, cliquable en entier : elle mene a l'adresse complete avec jeton de
  * l'evenement, jamais a une seconde facon d'y acceder. La date se lit en vignette.
@@ -33,11 +51,29 @@ export function ShowcaseCard({ event, index, featured = false, ref }: Props) {
         ? formatDateParts(event.startsAt, locale)
         : null;
 
-    // Le meme fond sert d'evenement sans visuel et de repli si le visuel ne se charge pas.
+    // Sans visuel (ou si le visuel ne se charge pas), la carte dessine une affiche : un degrade, le
+    // titre et la date (decision du 2026-10-08). Sur la carte mise en avant le titre est deja pose
+    // sur le visuel, il n'est pas redit.
     const placeholder = (
-        <div className="bg-ink absolute inset-0" aria-hidden="true">
-            <div className="site-glow absolute inset-0 opacity-70" />
-            <CalendarDays className="absolute top-1/2 left-1/2 size-10 -translate-x-1/2 -translate-y-1/2 text-white/50" />
+        <div
+            className={cn(
+                'absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br px-6 text-center text-white',
+                posterTone(event.name),
+            )}
+            data-test="showcase-poster"
+        >
+            {featured ? null : (
+                <>
+                    <p className="line-clamp-3 font-serif text-xl leading-tight font-semibold">
+                        {event.name}
+                    </p>
+                    {date ? (
+                        <p className="text-xs tracking-wide text-white/80 uppercase">
+                            {date.day} {date.month}
+                        </p>
+                    ) : null}
+                </>
+            )}
         </div>
     );
 

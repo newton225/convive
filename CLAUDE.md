@@ -841,8 +841,9 @@ jamais recu le lien. **Ceci est la decision retenue, le code n'est pas encore ec
   comme le vider, pas comme le renverser. Colonne sur `events`, base du locataire.
 - **Retirer l'annonce est toujours possible**, y compris apres publication : l'organisateur garde
   la main sur sa visibilite a tout moment, pas seulement au moment de publier.
-- **Ce que la vitrine accepte** (decision du 2026-10-07) : un evenement publie, ouvert, a venir et
-  illustre (`Event::missingBeforeAnnouncing()`). **Cloturer un evenement le retire de la vitrine**
+- **Ce que la vitrine accepte** (decision du 2026-10-07) : un evenement publie, ouvert et a venir
+  (`Event::missingBeforeAnnouncing()`). **Un visuel n'est pas exige** (decision du 2026-10-08) : sans
+  lui, la carte dessine une affiche a partir du titre et de la date, sur un degrade. **Cloturer un evenement le retire de la vitrine**
   (`SaveEvent::close()`), et un evenement passe n'y apparait plus (`ShowcaseEvent::upcoming()`).
 - **La vitrine ne lit pas les bases des locataires a chaque affichage.** Boucler sur chaque
   organisation et initialiser sa tenancy a chaque requete d'un visiteur anonyme ne passerait pas

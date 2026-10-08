@@ -229,7 +229,6 @@ return [
         'not_published' => 'publishing the link',
         'closed' => 'an open event (it is closed)',
         'past' => 'a date still to come',
-        'visual' => 'a visual',
     ],
     'errors' => [
         'price_category_unknown' => 'This price does not belong to this event.',
