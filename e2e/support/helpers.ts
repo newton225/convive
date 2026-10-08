@@ -100,7 +100,13 @@ export async function register(
     for (const [index, companion] of (guest.companions ?? []).entries()) {
         await page.getByTestId('companion-add').click();
         await page.getByTestId('companion-name').nth(index).fill(companion);
-        await page.getByTestId('companion-unit').nth(index).click();
+        // Chaque accompagnateur porte aussi son tarif : sur un telephone, la liste d'unites du
+        // dernier s'ouvrirait hors de l'ecran si le champ n'etait pas d'abord amene en vue.
+        const unit = page.getByTestId('companion-unit').nth(index);
+        await unit.evaluate((element) =>
+            element.scrollIntoView({ block: 'center' }),
+        );
+        await unit.click();
         await page
             .getByRole('option', { name: guest.unit, exact: true })
             .click();
