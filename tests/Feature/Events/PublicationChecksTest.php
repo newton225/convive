@@ -152,7 +152,7 @@ class PublicationChecksTest extends TestCase
         $event = $this->event();
         $this->withVisual($event);
         $this->publish($event);
-        $this->tenant->asCurrent(fn () => $event->fresh()->update(['status' => EventStatus::Closed]));
+        $this->tenant->asCurrent(fn () => $event->fresh()->forceFill(['status' => EventStatus::Closed])->save());
 
         $this->actingAs($this->owner)
             ->post(route('tenants.events.announce', [$this->tenant, $event]))

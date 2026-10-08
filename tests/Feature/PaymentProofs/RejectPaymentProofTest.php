@@ -31,7 +31,7 @@ class RejectPaymentProofTest extends TestCase
     {
         return $tenant->asCurrent(function () {
             $event = Event::factory()->open()->create();
-            $registration = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id]);
+            $registration = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id, 'amount_due' => 5000]);
             $proof = PaymentProof::factory()->create(['registration_id' => $registration->id]);
 
             return ['event' => $event, 'registration' => $registration, 'proof' => $proof];
