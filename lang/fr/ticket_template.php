@@ -25,6 +25,7 @@ return [
         'title' => 'Aperçu',
         'guest' => 'Invité',
         'table' => 'Table',
+        'price_category' => 'Tarif',
         'seats' => 'Places',
         'companions' => 'Accompagnateurs',
         'scheduled' => 'Envoi programmé',

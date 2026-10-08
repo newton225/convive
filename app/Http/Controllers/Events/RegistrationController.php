@@ -67,7 +67,7 @@ class RegistrationController extends Controller
 
         return Inertia::render('events/registrations', [
             'tenant' => ['slug' => $tenant->slug],
-            'event' => ['id' => $event->id, 'name' => $event->name],
+            'event' => ['id' => $event->id, 'name' => $event->name, 'seatsAtTables' => $event->seatsAtTables()],
             'permissions' => $request->user()->toTenantPermissions($tenant),
             'rows' => $registrations->getCollection()->map(fn (Registration $registration) => $this->row(
                 $registration,

@@ -32,6 +32,8 @@ return [
         'starts_at' => 'Date et heure',
         'venue' => 'Lieu',
         'venue_address' => 'Adresse',
+        'seats_at_tables' => 'Les invités sont assis à des tables',
+        'free_seats' => 'Nombre de places',
         'venue_map_url' => 'Localisation sur une carte',
         'venue_map_url_placeholder' => 'Lien Google Maps, ou coordonnées « 5.3364, -4.0267 »',
         'primary_color' => 'Couleur principale',
@@ -67,6 +69,7 @@ return [
     'help' => [
         'venue' => 'Le nom de l’endroit, tel que vos invités le reconnaissent : « Hôtel Ivoire, salle des Palmiers », « Palais de la Culture ». Il est nécessaire pour publier l’événement.',
         'venue_address' => 'Facultatif. Où trouver ce lieu : rue, quartier, ville ou un repère, par exemple « Boulevard Latrille, Cocody, Abidjan ». Elle s’affiche sous le nom du lieu. Pour l’itinéraire, utilisez la localisation sur une carte juste en dessous.',
+        'seats_at_tables' => 'Cochez si vos invités sont répartis à des tables. Décochez pour un rassemblement sans table, comme un événement en plein air : vous indiquez alors seulement le nombre de places, et aucune table n’est attribuée.',
         'venue_map_url' => "Facultatif. Dans Google Maps, touchez le lieu puis « Partager » et collez le lien ici ; des coordonnées marchent aussi. Vos invités verront un bouton « Voir l'itinéraire ». Liens acceptés : Google Maps, Apple Plans, OpenStreetMap, Waze.",
         'primary_color' => 'La couleur dominante du parcours invité de cet événement : bouton « S’inscrire », date, jauge des places, étapes, bandeau des emails. Elle s’applique du lien public jusqu’au billet.',
         'secondary_color' => 'Une couleur d’accompagnement, plus discrète : le bouton d’action des emails envoyés aux invités, et le halo du bandeau quand l’événement n’a pas de visuel.',
@@ -217,6 +220,7 @@ return [
         'date' => 'la date et l\'heure',
         'date_past' => 'une date à venir',
         'venue' => 'le lieu',
+        'seats' => 'le nombre de places',
         'payment_account' => 'un compte de versement visible, rattaché à l\'événement',
     ],
 
@@ -231,6 +235,7 @@ return [
         'price_category_duplicate' => 'Chaque tarif doit avoir un nom différent.',
         'price_category_quota_below_taken' => 'Le quota ne peut pas être inférieur aux :count places déjà prises dans ce tarif.',
         'price_category_quota_above_capacity' => 'Le quota ne peut pas dépasser les :capacity places de la salle.',
+        'leave_tables_while_seated' => 'Des invités sont déjà assis à des tables : retirez-les du plan de salle avant de passer à un événement sans table.',
         'price_category_in_use' => 'Un tarif déjà choisi par des inscrits ou des personnes en attente ne peut pas être retiré.',
         'venue_map_url' => 'Collez un lien Google Maps, Apple Plans, OpenStreetMap ou Waze (en https), ou des coordonnées comme « 5.3364, -4.0267 ».',
         'deadline_after_event' => "La date limite des inscriptions ne peut pas être postérieure à l'événement.",

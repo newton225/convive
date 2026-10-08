@@ -32,10 +32,14 @@ export type TicketCardData = {
     // Null seulement dans l'apercu du gabarit, qui montre un QR d'exemple.
     qrImage: string | null;
     tableNumber: number | null;
+    // Faux pour un evenement sans table : le billet n'en parle pas.
+    seatsAtTables: boolean;
+    // Le tarif choisi par cette personne, null pour un billet d'avant les categories.
+    priceCategory: string | null;
     // Tout le groupe sur le billet principal, 1 sur celui d'un accompagnateur.
     seats: number;
     // Accompagnateurs de l'invite principal, si le gabarit les affiche ; vide sinon.
-    companions: { name: string; unit: string }[];
+    companions: { name: string; unit: string; priceCategory: string | null }[];
     // La personne qui invite un accompagnateur ; null sur le billet principal.
     host: { name: string; unit: string; reference: string | null } | null;
 };

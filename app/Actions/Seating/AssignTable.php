@@ -42,6 +42,11 @@ class AssignTable
     {
         $event = $registration->event;
 
+        // Un evenement sans table n'asseoit personne (decision du 2026-10-08).
+        if (! $event->seatsAtTables()) {
+            return null;
+        }
+
         return Cache::lock("event:{$event->id}:seating", 10)->block(5, function () use ($event, $registration) {
             $existing = RegistrationTableAssignment::where('registration_id', $registration->id)->first();
 

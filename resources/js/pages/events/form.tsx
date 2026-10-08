@@ -23,6 +23,7 @@ import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { edit, index, store, update } from '@/routes/tenants/events';
@@ -64,7 +65,15 @@ export default function EventForm({
     const { t } = useTranslation();
     const gettingStartedReturn = useGettingStartedReturn();
     const [confirmingPublish, setConfirmingPublish] = useState(false);
-    const [roomSeats, setRoomSeats] = useState(0);
+    // Les invites sont assis a des tables, sauf pour un rassemblement sans table (plein air...).
+    const [seatsAtTables, setSeatsAtTables] = useState(
+        (event ?? template)?.seatsAtTables ?? true,
+    );
+    const [freeSeats, setFreeSeats] = useState(
+        String((event ?? template)?.freeSeats ?? ''),
+    );
+    const [tableSeats, setTableSeats] = useState(0);
+    const roomSeats = seatsAtTables ? tableSeats : Number(freeSeats) || 0;
     const [allFree, setAllFree] = useState(false);
     // L'apercu de la carte de vitrine suit la saisie : les champs ne sont pas controles, on relit
     // le formulaire a chaque changement.
@@ -422,13 +431,79 @@ export default function EventForm({
                                     title={t('events.steps.seating')}
                                     description={t('events.sections.seating')}
                                 >
-                                    <TableGroupsField
-                                        onSeatsChange={setRoomSeats}
-                                        defaultGroups={
-                                            prefill?.tableGroups ?? []
-                                        }
-                                        errors={errors}
-                                    />
+                                    <div className="space-y-2">
+                                        <label className="flex items-center gap-2 text-sm font-medium">
+                                            <Checkbox
+                                                checked={seatsAtTables}
+                                                onCheckedChange={(checked) =>
+                                                    setSeatsAtTables(
+                                                        checked === true,
+                                                    )
+                                                }
+                                                data-test="event-seats-at-tables"
+                                            />
+                                            {t('events.fields.seats_at_tables')}
+                                            <HelpTip
+                                                subject={t(
+                                                    'events.fields.seats_at_tables',
+                                                )}
+                                            >
+                                                {t(
+                                                    'events.help.seats_at_tables',
+                                                )}
+                                            </HelpTip>
+                                        </label>
+                                        {/* La case n'est pas un champ de formulaire fiable : la valeur part par ce champ cache. */}
+                                        <input
+                                            type="hidden"
+                                            name="seats_at_tables"
+                                            value={seatsAtTables ? '1' : '0'}
+                                        />
+                                        <InputError
+                                            message={errors.seats_at_tables}
+                                        />
+                                    </div>
+
+                                    {seatsAtTables ? (
+                                        <TableGroupsField
+                                            onSeatsChange={setTableSeats}
+                                            defaultGroups={
+                                                prefill?.tableGroups ?? []
+                                            }
+                                            errors={errors}
+                                        />
+                                    ) : (
+                                        <div className="max-w-xs">
+                                            <Label
+                                                htmlFor="free_seats"
+                                                required
+                                            >
+                                                {t('events.fields.free_seats')}
+                                            </Label>
+                                            <Input
+                                                id="free_seats"
+                                                name="free_seats"
+                                                type="number"
+                                                min={1}
+                                                max={100000}
+                                                required
+                                                value={freeSeats}
+                                                onChange={(event) =>
+                                                    setFreeSeats(
+                                                        event.target.value.replace(
+                                                            /^0+(?=\d)/,
+                                                            '',
+                                                        ),
+                                                    )
+                                                }
+                                                data-test="event-free-seats"
+                                                className="mt-2"
+                                            />
+                                            <InputError
+                                                message={errors.free_seats}
+                                            />
+                                        </div>
+                                    )}
 
                                     <div className="grid items-start gap-4 sm:grid-cols-2">
                                         <div className="space-y-2 sm:col-span-2">

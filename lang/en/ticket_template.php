@@ -25,6 +25,7 @@ return [
         'title' => 'Preview',
         'guest' => 'Guest',
         'table' => 'Table',
+        'price_category' => 'Price',
         'seats' => 'Seats',
         'companions' => 'Companions',
         'scheduled' => 'Scheduled send',

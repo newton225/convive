@@ -92,8 +92,10 @@
                     <div class="stub-table {{ $brand['backgroundUrl'] ? 'on-image' : '' }}">
                         @if ($ticket['tableNumber'] !== null)
                             {{ __('guest.ticket.table', ['number' => $ticket['tableNumber']]) }}
-                        @else
+                        @elseif ($ticket['seatsAtTables'])
                             {{ __('guest.ticket.no_table') }}
+                        @else
+                            {{ $ticket['priceCategory'] }}
                         @endif
                     </div>
                     </div>
@@ -135,9 +137,18 @@
                         <div class="unit">{{ $ticket['holder']['unit'] }}</div>
                     </div>
 
+                    @if ($ticket['priceCategory'])
+                        <div class="field">
+                            <div class="label">{{ __('ticket_template.preview.price_category') }}</div>
+                            <div class="holder">{{ $ticket['priceCategory'] }}</div>
+                        </div>
+                    @endif
+
                     <table class="pair">
                         <tr>
-                            <td><div class="label">{{ __('ticket_template.preview.table') }}</div>{{ $ticket['tableNumber'] ?? '-' }}</td>
+                            @if ($ticket['seatsAtTables'])
+                                <td><div class="label">{{ __('ticket_template.preview.table') }}</div>{{ $ticket['tableNumber'] ?? '-' }}</td>
+                            @endif
                             <td><div class="label">{{ __('ticket_template.preview.seats') }}</div>{{ $ticket['seats'] }}</td>
                         </tr>
                     </table>
@@ -164,7 +175,7 @@
                                 </table>
                             @else
                                 @foreach ($ticket['companions'] as $companion)
-                                    <div class="companion">{{ $companion['name'] }} <span>· {{ $companion['unit'] }}</span></div>
+                                    <div class="companion">{{ $companion['name'] }} <span>· {{ $companion['unit'] }}@if ($companion['priceCategory']) · {{ $companion['priceCategory'] }}@endif</span></div>
                                 @endforeach
                             @endif
                         </div>

@@ -39,6 +39,7 @@ class EventSettingsController extends Controller
                 'name' => $event->name,
                 // Les tables n'ont pas toutes la meme taille (decision du 2026-09-29) : la salle
                 // se lit en groupes, et le nombre de tables est celui du plan reel.
+                'seatsAtTables' => $event->seatsAtTables(),
                 'tableGroups' => $groups = SyncSeatingTables::groupsOf($event),
                 'tableCount' => array_sum(array_column($groups, 'count')),
                 'capacity' => $event->capacity(),

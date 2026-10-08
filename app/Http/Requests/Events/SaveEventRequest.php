@@ -8,6 +8,8 @@ use App\Models\EventPriceCategory;
 use App\Models\PaymentAccount;
 use App\Models\Registration;
 use App\Models\RegistrationCompanion;
+use App\Models\RegistrationTableAssignment;
+use App\Models\SeatingTable;
 use App\Models\Tenant;
 use App\Models\WaitlistEntry;
 use App\Settings\ReservationSettings;
@@ -95,6 +97,9 @@ class SaveEventRequest extends FormRequest
             'secondary_color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
 
             // La salle en groupes de tables de tailles differentes (decision du 2026-09-29).
+            // Sans table (decision du 2026-10-08), un simple nombre de places remplace les groupes.
+            'seats_at_tables' => ['sometimes', 'boolean'],
+            'free_seats' => [Rule::requiredIf(fn () => ! $this->seatsAtTables()), 'nullable', 'integer', 'min:1', 'max:100000'],
             'table_groups' => ['sometimes', 'nullable', 'array', 'max:20'],
             'table_groups.*.count' => ['required', 'integer', 'min:1', 'max:500'],
             'table_groups.*.seats' => ['required', 'integer', 'min:1', 'max:100'],
@@ -152,6 +157,7 @@ class SaveEventRequest extends FormRequest
             function (Validator $validator): void {
                 $this->rejectDeadlineAfterTheEvent($validator);
                 $this->rejectPaymentAccountsOfAnotherTenant($validator);
+                $this->rejectLeavingTablesWhileGuestsAreSeated($validator);
                 $this->rejectTablePlanThatUnseatsGuests($validator);
                 $this->validatePriceCategories($validator);
                 $this->rejectQuotaAboveCapacity($validator);
@@ -168,6 +174,14 @@ class SaveEventRequest extends FormRequest
     }
 
     /**
+     * Determine whether the guests are seated at tables : yes unless the form says otherwise.
+     */
+    public function seatsAtTables(): bool
+    {
+        return $this->boolean('seats_at_tables', true);
+    }
+
+    /**
      * Get the room plan submitted, as the capacity of each table by number, or null when the
      * request says nothing about the tables (the plan is then left as it is).
      *
@@ -175,6 +189,10 @@ class SaveEventRequest extends FormRequest
      */
     public function tablePlan(): ?array
     {
+        if (! $this->seatsAtTables()) {
+            return [1 => (int) $this->input('free_seats')];
+        }
+
         if ($this->has('table_groups')) {
             /** @var array<int, array{count: int|string, seats: int|string}> $groups */
             $groups = (array) $this->input('table_groups', []);
@@ -189,6 +207,27 @@ class SaveEventRequest extends FormRequest
     }
 
     /**
+     * Quitter les tables est refuse tant qu'un invite est assis a l'une d'elles : il perdrait sa
+     * chaise sans que personne ne la lui retire.
+     */
+    private function rejectLeavingTablesWhileGuestsAreSeated(Validator $validator): void
+    {
+        $event = $this->route('event');
+
+        if (! $event instanceof Event || ! $event->seatsAtTables() || $this->seatsAtTables()) {
+            return;
+        }
+
+        $seated = RegistrationTableAssignment::query()
+            ->whereIn('seating_table_id', SeatingTable::where('event_id', $event->id)->select('id'))
+            ->exists();
+
+        if ($seated) {
+            $validator->errors()->add('seats_at_tables', __('events.errors.leave_tables_while_seated'));
+        }
+    }
+
+    /**
      * Un invite deja place ne perd jamais sa chaise, et un evenement publie ne descend pas sous
      * les places deja prises ou reservees (README 2.2).
      */
@@ -196,7 +235,7 @@ class SaveEventRequest extends FormRequest
     {
         $event = $this->route('event');
 
-        if (! $event instanceof Event || $validator->errors()->hasAny(['table_groups', 'table_groups.*.count', 'table_groups.*.seats'])) {
+        if (! $event instanceof Event || $validator->errors()->hasAny(['table_groups', 'table_groups.*.count', 'table_groups.*.seats', 'free_seats', 'seats_at_tables'])) {
             return;
         }
 
@@ -266,7 +305,7 @@ class SaveEventRequest extends FormRequest
      */
     private function rejectQuotaAboveCapacity(Validator $validator): void
     {
-        if ($validator->errors()->hasAny(['table_groups', 'table_groups.*.count', 'table_groups.*.seats', 'price_categories.*.quota'])) {
+        if ($validator->errors()->hasAny(['table_groups', 'table_groups.*.count', 'table_groups.*.seats', 'free_seats', 'seats_at_tables', 'price_categories.*.quota'])) {
             return;
         }
 
@@ -388,6 +427,8 @@ class SaveEventRequest extends FormRequest
             'subtitle' => __('events.fields.subtitle'),
             'starts_at' => __('events.fields.starts_at'),
             'venue' => __('events.fields.venue'),
+            'free_seats' => __('events.fields.free_seats'),
+            'seats_at_tables' => __('events.fields.seats_at_tables'),
             'payment_accounts' => __('events.fields.payment_accounts'),
             'venue_map_url' => __('events.fields.venue_map_url'),
             'table_groups' => __('events.fields.table_groups'),

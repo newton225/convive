@@ -20,6 +20,8 @@ export type EventSummary = {
     startsAt: string | null;
     venue: string | null;
     capacity: number;
+    // Faux pour un evenement sans table : personne n'y est assis a une table (plan de salle absent).
+    seatsAtTables: boolean;
     pricePerPerson: number;
     isPublished: boolean;
     isReadyToPublish: boolean;
@@ -45,6 +47,8 @@ export type EventDetails = EventSummary & {
     primaryColor: string | null;
     secondaryColor: string | null;
     visualUrl: string | null;
+    // Le nombre de places d'un evenement sans table, null quand la salle est en tables.
+    freeSeats: number | null;
     tableGroups: EventTableGroup[];
     priceCategories: EventPriceCategory[];
     companionLimit: number;
@@ -74,6 +78,8 @@ export type EventTemplate = {
     venueMapUrl: string | null;
     primaryColor: string | null;
     secondaryColor: string | null;
+    seatsAtTables: boolean;
+    freeSeats: number | null;
     tableGroups: EventTableGroup[];
     priceCategories: Omit<EventPriceCategory, 'id'>[];
     pricePerPerson: number;

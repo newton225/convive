@@ -276,34 +276,40 @@ export default function EventSettings({
                     description={t('event_settings.seating.description')}
                 >
                     <dl>
-                        <Row
-                            label={t('event_settings.seating.tables')}
-                            value={String(event.tableCount)}
-                        />
-                        <Row
-                            label={t('event_settings.seating.layout')}
-                            value={event.tableGroups
-                                .map(
-                                    (group) =>
-                                        `${group.count} × ${group.seats}`,
-                                )
-                                .join(', ')}
-                        />
+                        {event.seatsAtTables ? (
+                            <>
+                                <Row
+                                    label={t('event_settings.seating.tables')}
+                                    value={String(event.tableCount)}
+                                />
+                                <Row
+                                    label={t('event_settings.seating.layout')}
+                                    value={event.tableGroups
+                                        .map(
+                                            (group) =>
+                                                `${group.count} × ${group.seats}`,
+                                        )
+                                        .join(', ')}
+                                />
+                            </>
+                        ) : null}
                         <Row
                             label={t('event_settings.seating.capacity')}
                             value={String(event.capacity)}
                         />
                     </dl>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-3"
-                        asChild
-                    >
-                        <Link href={seatingIndex([tenant.slug, event.id])}>
-                            {t('event_settings.seating.open')}
-                        </Link>
-                    </Button>
+                    {event.seatsAtTables ? (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-3"
+                            asChild
+                        >
+                            <Link href={seatingIndex([tenant.slug, event.id])}>
+                                {t('event_settings.seating.open')}
+                            </Link>
+                        </Button>
+                    ) : null}
                 </SettingsSection>
 
                 <SettingsSection

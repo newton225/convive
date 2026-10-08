@@ -32,6 +32,8 @@ return [
         'starts_at' => 'Date and time',
         'venue' => 'Venue',
         'venue_address' => 'Address',
+        'seats_at_tables' => 'Guests are seated at tables',
+        'free_seats' => 'Number of seats',
         'venue_map_url' => 'Location on a map',
         'venue_map_url_placeholder' => 'Google Maps link, or coordinates "5.3364, -4.0267"',
         'primary_color' => 'Primary colour',
@@ -67,6 +69,7 @@ return [
     'help' => [
         'venue' => 'The name of the place, as your guests know it: "Hôtel Ivoire, Palmiers room", "Palais de la Culture". It is required to publish the event.',
         'venue_address' => 'Optional. Where to find this place: street, area, city or a landmark, for example "Boulevard Latrille, Cocody, Abidjan". It is shown under the venue name. For directions, use the map location just below.',
+        'seats_at_tables' => 'Tick if your guests are spread over tables. Untick for a gathering without tables, such as an outdoor event: you then only enter the number of seats, and no table is assigned.',
         'venue_map_url' => 'Optional. In Google Maps, tap the place, then "Share", and paste the link here; coordinates work too. Your guests will see a "Get directions" button. Accepted links: Google Maps, Apple Maps, OpenStreetMap, Waze.',
         'primary_color' => 'The dominant colour of this event’s guest journey: the “Register” button, date, seat gauge, steps and email header. It applies from the public link through to the ticket.',
         'secondary_color' => 'A quieter supporting colour: the action button in emails sent to guests, and the glow of the banner when the event has no visual.',
@@ -217,6 +220,7 @@ return [
         'date' => 'the date and time',
         'date_past' => 'a date still to come',
         'venue' => 'the venue',
+        'seats' => 'the number of seats',
         'payment_account' => 'a visible payment account linked to the event',
     ],
 
@@ -231,6 +235,7 @@ return [
         'price_category_duplicate' => 'Each price must have a different name.',
         'price_category_quota_below_taken' => 'The quota cannot be lower than the :count seats already taken in this price category.',
         'price_category_quota_above_capacity' => 'The quota cannot exceed the :capacity seats of the room.',
+        'leave_tables_while_seated' => 'Guests are already seated at tables: remove them from the seating plan before switching to an event without tables.',
         'price_category_in_use' => 'A price already chosen by guests or waitlisted people cannot be removed.',
         'venue_map_url' => 'Paste a Google Maps, Apple Maps, OpenStreetMap or Waze link (https), or coordinates such as "5.3364, -4.0267".',
         'deadline_after_event' => 'The registration deadline cannot be later than the event itself.',

@@ -187,7 +187,9 @@ export function BrandedTicket({
                             ? t('guest.ticket.table', {
                                   number: String(ticket.tableNumber),
                               })
-                            : t('guest.ticket.no_table')}
+                            : ticket.seatsAtTables
+                              ? t('guest.ticket.no_table')
+                              : ticket.priceCategory}
                     </p>
                 </div>
 
@@ -285,20 +287,34 @@ export function BrandedTicket({
                                     {ticket.holder.unit}
                                 </dd>
                             </div>
+                            {ticket.priceCategory ? (
+                                <div data-test="ticket-price-category">
+                                    <dt className="text-ink/60 text-xs">
+                                        {t(
+                                            'ticket_template.preview.price_category',
+                                        )}
+                                    </dt>
+                                    <dd className="font-medium break-words">
+                                        {ticket.priceCategory}
+                                    </dd>
+                                </div>
+                            ) : null}
                             <div
                                 className={cn(
                                     'grid grid-cols-2 gap-3',
                                     !centered && 'max-w-40',
                                 )}
                             >
-                                <div>
-                                    <dt className="text-ink/60 text-xs">
-                                        {t('ticket_template.preview.table')}
-                                    </dt>
-                                    <dd className="font-medium">
-                                        {ticket.tableNumber ?? '-'}
-                                    </dd>
-                                </div>
+                                {ticket.seatsAtTables ? (
+                                    <div>
+                                        <dt className="text-ink/60 text-xs">
+                                            {t('ticket_template.preview.table')}
+                                        </dt>
+                                        <dd className="font-medium">
+                                            {ticket.tableNumber ?? '-'}
+                                        </dd>
+                                    </div>
+                                ) : null}
                                 <div>
                                     <dt className="text-ink/60 text-xs">
                                         {t('ticket_template.preview.seats')}
@@ -358,6 +374,9 @@ export function BrandedTicket({
                                                             <span className="text-ink/60 text-xs">
                                                                 {' · '}
                                                                 {companion.unit}
+                                                                {companion.priceCategory
+                                                                    ? ` · ${companion.priceCategory}`
+                                                                    : ''}
                                                             </span>
                                                         )}
                                                     </li>

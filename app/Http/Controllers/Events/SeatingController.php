@@ -37,6 +37,9 @@ class SeatingController extends Controller
     {
         Gate::authorize('viewAny', [SeatingTable::class, $tenant]);
 
+        // Un evenement sans table n'a pas de plan de salle (decision du 2026-10-08).
+        abort_unless($event->seatsAtTables(), 404);
+
         $tables = SeatingTable::where('event_id', $event->id)
             ->with(['reservedUnit', 'assignments.registration.unit'])
             ->ordered()
@@ -79,6 +82,9 @@ class SeatingController extends Controller
         Event $event,
         SaveUnitSeparationRule $save,
     ): RedirectResponse {
+        // Un evenement sans table n'a pas de plan de salle (decision du 2026-10-08).
+        abort_unless($event->seatsAtTables(), 404);
+
         $save->store($event, (int) $request->validated('unit_id'), (int) $request->validated('other_unit_id'));
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('seating.flash.constraint_added')]);
@@ -96,6 +102,9 @@ class SeatingController extends Controller
         SaveUnitSeparationRule $save,
     ): RedirectResponse {
         Gate::authorize('assign', [SeatingTable::class, $tenant]);
+
+        // Un evenement sans table n'a pas de plan de salle (decision du 2026-10-08).
+        abort_unless($event->seatsAtTables(), 404);
 
         abort_unless($constraint->event_id === $event->id, 404);
 
@@ -116,6 +125,9 @@ class SeatingController extends Controller
         Registration $registration,
         MoveRegistrationToTable $move,
     ): RedirectResponse {
+        // Un evenement sans table n'a pas de plan de salle (decision du 2026-10-08).
+        abort_unless($event->seatsAtTables(), 404);
+
         $tableId = $request->validated('seating_table_id');
         $table = $tableId !== null ? SeatingTable::query()->whereKey($tableId)->firstOrFail() : null;
 
@@ -135,6 +147,9 @@ class SeatingController extends Controller
      */
     public function updateTable(UpdateSeatingTableRequest $request, Tenant $tenant, Event $event, SeatingTable $table): RedirectResponse
     {
+        // Un evenement sans table n'a pas de plan de salle (decision du 2026-10-08).
+        abort_unless($event->seatsAtTables(), 404);
+
         // `SeatingTable` vit dans la base du locataire, mais peut appartenir a un autre de ses
         // evenements : meme reponse qu'un objet introuvable.
         abort_if($table->event_id !== $event->id, 404);

@@ -340,6 +340,7 @@ class EventController extends Controller
             'startsAt' => $event->starts_at?->toISOString(),
             'venue' => $event->venue,
             'capacity' => $event->capacity(),
+            'seatsAtTables' => $event->seatsAtTables(),
             'pricePerPerson' => $event->price_per_person,
             'isPublished' => $event->isPublished(),
             'isReadyToPublish' => $event->isReadyToPublish(),
@@ -363,6 +364,8 @@ class EventController extends Controller
             'secondaryColor' => $event->secondary_color,
             'visualUrl' => $event->visualUrl(),
             // La salle telle que le formulaire la decrit : groupes de tables de meme taille.
+            'seatsAtTables' => $event->seatsAtTables(),
+            'freeSeats' => $event->seatsAtTables() ? null : $event->capacity(),
             'tableGroups' => SyncSeatingTables::groupsOf($event),
             'priceCategories' => $event->priceCategories()->get()->map(fn ($category) => [
                 'id' => $category->id,
@@ -426,6 +429,8 @@ class EventController extends Controller
             'venueMapUrl' => $source->venue_map_url,
             'primaryColor' => $source->primary_color,
             'secondaryColor' => $source->secondary_color,
+            'seatsAtTables' => $source->seatsAtTables(),
+            'freeSeats' => $source->seatsAtTables() ? null : $source->capacity(),
             'tableGroups' => SyncSeatingTables::groupsOf($source),
             'pricePerPerson' => $source->price_per_person,
             'priceCategories' => $source->priceCategories()->get()->map(fn ($category) => [
@@ -469,6 +474,7 @@ class EventController extends Controller
             'venue' => $request->validated('venue'),
             'venue_address' => $request->validated('venue_address'),
             'venue_map_url' => $request->validated('venue_map_url'),
+            'seats_at_tables' => $request->seatsAtTables(),
             'primary_color' => $request->validated('primary_color'),
             'secondary_color' => $request->validated('secondary_color'),
             'price_per_person' => $request->validated('price_per_person'),

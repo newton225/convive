@@ -82,11 +82,12 @@ export function EventActionsMenu({
     ].filter((item) => item !== false);
 
     const dayOf = [
-        allowed(Permission.SeatingView) && {
-            href: seatingIndex(target).url,
-            label: t('events.actions.seating'),
-            test: 'event-seating',
-        },
+        allowed(Permission.SeatingView) &&
+            event.seatsAtTables && {
+                href: seatingIndex(target).url,
+                label: t('events.actions.seating'),
+                test: 'event-seating',
+            },
         allowed(Permission.ScanPerform) && {
             href: scanIndex(target).url,
             label: t('events.actions.scan'),

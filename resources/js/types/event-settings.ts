@@ -3,6 +3,7 @@ import type { EventTableGroup } from './events';
 export type EventSettingsEvent = {
     id: number;
     name: string;
+    seatsAtTables: boolean;
     tableCount: number;
     tableGroups: EventTableGroup[];
     capacity: number;

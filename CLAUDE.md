@@ -730,6 +730,13 @@ change.
   n'a aucune place. En test, la fabrique d'evenement pose vingt tables de dix places ; la cle
   `tables` de `create()` decrit une autre salle (`[nombre, places]`) ou aucune (`null`, quand le
   test pose ses propres tables).
+- **Evenement sans table** (`events.seats_at_tables`, decision du 2026-10-08) : un rassemblement en
+  plein air n'a ni plan de salle ni table. Le formulaire demande alors un nombre de places
+  (`free_seats`) a la place des groupes ; la capacite reste derivee du plan de salle, qui ne porte
+  qu'une table interne de ce nombre. Aucune table n'est attribuee (`AssignTable`), le plan de salle
+  repond 404, le billet ne parle pas de table et affiche le nom du tarif de chaque personne. On ne
+  quitte pas les tables tant qu'un invite y est assis. Un evenement qui n'a ni tables ni nombre de
+  places n'a aucune place.
 - **« Complet » n'est pas un statut stocke** mais un etat calcule. Un statut stocke devrait
   etre mis a jour par quelqu'un, et ce quelqu'un se tromperait au pire moment. Les statuts
   reellement stockes sont brouillon, ouvert, en cours, termine.

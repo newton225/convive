@@ -56,7 +56,7 @@ import type {
 
 type Props = {
     tenant: { slug: string };
-    event: { id: number; name: string };
+    event: { id: number; name: string; seatsAtTables: boolean };
     permissions: TenantPermissions;
     rows: RegistrationRow[];
     meta: RegistrationsMeta;
@@ -155,6 +155,12 @@ export default function EventRegistrations({
 
     // L'identifiant d'une colonne triable est le champ que le controleur autorise dans
     // `allowedSorts()` : name, party_size, amount_due.
+    const tableColumn: ColumnDef<RegistrationRow> = {
+        header: t('registrations.columns.table'),
+        cell: ({ row }) =>
+            row.original.tableNumber ?? t('registrations.actions.no_table'),
+    };
+
     const columns: ColumnDef<RegistrationRow>[] = [
         {
             id: 'name',
@@ -213,11 +219,8 @@ export default function EventRegistrations({
                 </div>
             ),
         },
-        {
-            header: t('registrations.columns.table'),
-            cell: ({ row }) =>
-                row.original.tableNumber ?? t('registrations.actions.no_table'),
-        },
+        // Sans table (rassemblement en plein air), la colonne n'a rien a dire.
+        ...(event.seatsAtTables ? [tableColumn] : []),
         {
             header: t('registrations.columns.channel'),
             cell: ({ row }) =>

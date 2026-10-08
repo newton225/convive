@@ -111,7 +111,7 @@ class Ticket extends Model
      * Get the people accompanying the main guest, in the order they were entered. Empty on a
      * companion's ticket : il ne porte que sa propre place.
      *
-     * @return array<int, array{name: string, unit: string}>
+     * @return array<int, array{name: string, unit: string, priceCategory: string|null}>
      */
     public function companionsOfHolder(): array
     {
@@ -124,9 +124,25 @@ class Ticket extends Model
             ->map(fn (RegistrationCompanion $companion) => [
                 'name' => $companion->name,
                 'unit' => $companion->unit->name,
+                'priceCategory' => $companion->priceCategory?->name,
             ])
             ->values()
             ->all();
+    }
+
+    /**
+     * Get the name of the price category chosen by the person this ticket admits : chaque personne
+     * choisit la sienne (decision du 2026-10-07), l'invite comme chaque accompagnateur.
+     */
+    public function holderPriceCategoryName(): ?string
+    {
+        if (! $this->isCompanion()) {
+            return $this->registration->priceCategory?->name;
+        }
+
+        // Les billets d'accompagnateurs suivent l'ordre de leur position (`IssueTicket`).
+        return $this->registration->companions->sortBy('position')->values()
+            ->get($this->holder_position - 1)?->priceCategory?->name;
     }
 
     /**

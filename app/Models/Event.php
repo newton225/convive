@@ -63,6 +63,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property bool $rule_temporary_hold
  * @property bool $rule_phone_verification
  * @property bool $rule_show_remaining_seats
+ * @property bool $seats_at_tables
  * @property bool $rule_bot_protection
  * @property bool $ticket_template_enabled
  * @property TicketModel|null $ticket_model
@@ -76,7 +77,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read Collection<int, PaymentAccount> $paymentAccounts
  */
 #[Fillable([
-    'name', 'subtitle', 'starts_at', 'venue', 'venue_address', 'venue_map_url',
+    'name', 'subtitle', 'starts_at', 'venue', 'venue_address', 'venue_map_url', 'seats_at_tables',
     'primary_color', 'secondary_color',
     'price_per_person', 'companion_limit',
     'registration_deadline', 'purge_at', 'invitations_send_at', 'hold_duration_minutes',
@@ -288,6 +289,16 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Determine whether the guests are seated at tables. Sans table (un rassemblement en plein
+     * air, decision du 2026-10-08), personne n'est assis nulle part : le plan ne porte qu'une table
+     * interne, qui donne la capacite.
+     */
+    public function seatsAtTables(): bool
+    {
+        return (bool) $this->seats_at_tables;
+    }
+
+    /**
      * Get the total number of seats, derived from the room plan.
      *
      * La capacite ne se saisit pas : c'est le plan de salle qui fait foi le jour J. Les tables
@@ -476,7 +487,8 @@ class Event extends Model implements HasMedia
     {
         return array_keys(array_filter([
             'organisation' => ! (Tenant::current()?->isReadyToPublish() ?? false),
-            'capacity' => $this->capacity() <= 0,
+            // Sans table, c'est le nombre de places qui manque, pas un plan de salle.
+            ($this->seats_at_tables ? 'capacity' : 'seats') => $this->capacity() <= 0,
             'date' => $this->starts_at === null,
             'date_past' => $this->starts_at !== null && $this->starts_at->isPast(),
             'venue' => blank($this->venue),
@@ -681,6 +693,7 @@ class Event extends Model implements HasMedia
             'rule_phone_verification' => 'boolean',
             'rule_show_remaining_seats' => 'boolean',
             'rule_bot_protection' => 'boolean',
+            'seats_at_tables' => 'boolean',
             'ticket_template_enabled' => 'boolean',
             'ticket_model' => TicketModel::class,
             'ticket_element_logo' => 'boolean',
