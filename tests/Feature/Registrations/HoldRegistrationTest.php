@@ -38,6 +38,7 @@ class HoldRegistrationTest extends TestCase
         return $tenant->asCurrent(fn () => Registration::factory()->create([
             'event_id' => $event->id,
             'status' => RegistrationStatus::Draft,
+            'amount_due' => 5000,
             ...$attributes,
         ]));
     }
