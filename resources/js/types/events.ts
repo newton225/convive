@@ -93,6 +93,8 @@ export type EventPriceCategory = {
     name: string;
     price: number;
     quota: number | null;
+    // Vrai quand quelqu'un l'a deja choisi : son nom et son prix sont figes.
+    locked?: boolean;
 };
 
 export type PublicPriceCategory = EventPriceCategory & {

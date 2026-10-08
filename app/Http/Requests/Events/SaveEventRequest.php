@@ -7,11 +7,9 @@ use App\Models\Event;
 use App\Models\EventPriceCategory;
 use App\Models\PaymentAccount;
 use App\Models\Registration;
-use App\Models\RegistrationCompanion;
 use App\Models\RegistrationTableAssignment;
 use App\Models\SeatingTable;
 use App\Models\Tenant;
-use App\Models\WaitlistEntry;
 use App\Settings\ReservationSettings;
 use App\Support\MapLink;
 use Closure;
@@ -409,6 +407,17 @@ class SaveEventRequest extends FormRequest
             $keptIds[] = $category->id;
             $taken = $category->seatsTaken();
 
+            // Un tarif deja choisi garde son nom et son prix : seul son quota peut encore bouger.
+            if ($category->isChosen()) {
+                if (trim((string) ($attributes['name'] ?? '')) !== $category->name) {
+                    $validator->errors()->add("price_categories.{$index}.name", __('events.errors.price_category_locked'));
+                }
+
+                if ((int) ($attributes['price'] ?? 0) !== $category->price) {
+                    $validator->errors()->add("price_categories.{$index}.price", __('events.errors.price_category_locked'));
+                }
+            }
+
             if (($attributes['quota'] ?? null) !== null && (int) $attributes['quota'] < $taken) {
                 $validator->errors()->add(
                     "price_categories.{$index}.quota",
@@ -418,21 +427,7 @@ class SaveEventRequest extends FormRequest
         }
 
         foreach ($event->priceCategories()->whereNotIn('id', $keptIds)->get() as $removed) {
-            $hasRegistration = Registration::query()
-                ->where('price_category_id', $removed->id)
-                ->exists();
-            $hasCompanion = RegistrationCompanion::where('price_category_id', $removed->id)->exists();
-            $hasWaitlistEntry = WaitlistEntry::query()
-                ->where('event_id', $event->id)
-                ->where('price_category_id', $removed->id)
-                ->exists();
-            $hasWaitlistCompanion = WaitlistEntry::query()
-                ->where('event_id', $event->id)
-                ->get()
-                ->contains(fn (WaitlistEntry $entry) => collect($entry->companions)
-                    ->contains(fn (array $companion) => (int) ($companion['price_category_id'] ?? 0) === $removed->id));
-
-            if ($hasRegistration || $hasCompanion || $hasWaitlistEntry || $hasWaitlistCompanion) {
+            if ($removed->isChosen()) {
                 $validator->errors()->add('price_categories', __('events.errors.price_category_in_use'));
 
                 return;

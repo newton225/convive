@@ -372,6 +372,8 @@ class EventController extends Controller
                 'name' => $category->name,
                 'price' => $category->price,
                 'quota' => $category->quota,
+                // Deja choisi : nom et prix figes, le tarif ne se retire plus.
+                'locked' => $category->isChosen(),
             ])->all(),
             'companionLimit' => $event->companion_limit,
             'registrationDeadline' => $event->registration_deadline?->toDateTimeLocalString(),

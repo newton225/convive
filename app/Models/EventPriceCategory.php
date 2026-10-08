@@ -62,6 +62,26 @@ class EventPriceCategory extends Model
     }
 
     /**
+     * Determine whether anybody chose this category : a registration, a companion, or a waiting
+     * list entry. Son nom et son prix sont alors figes (decision du 2026-10-08) : le montant d'une
+     * personne ne doit pas dependre du moment ou elle s'est inscrite, et elle ne disparait pas.
+     */
+    public function isChosen(): bool
+    {
+        if (Registration::query()->where('price_category_id', $this->id)->exists()
+            || RegistrationCompanion::query()->where('price_category_id', $this->id)->exists()) {
+            return true;
+        }
+
+        return WaitlistEntry::query()
+            ->where('event_id', $this->event_id)
+            ->get()
+            ->contains(fn (WaitlistEntry $entry) => (int) $entry->price_category_id === $this->id
+                || collect($entry->companions)
+                    ->contains(fn (array $companion) => (int) ($companion['price_category_id'] ?? 0) === $this->id));
+    }
+
+    /**
      * Get the seats left in this category, or null when it has no quota of its own.
      */
     public function remaining(): ?int

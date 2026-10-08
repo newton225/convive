@@ -13,6 +13,7 @@ export type EventPriceCategoryInput = {
     name: string;
     price: number;
     quota: number | null;
+    locked?: boolean;
 };
 
 // La saisie reste une chaine tant qu'elle est en cours : la convertir a chaque frappe
@@ -22,6 +23,7 @@ type Row = {
     name: string;
     price: string;
     quota: string;
+    locked: boolean;
 };
 
 type Props = {
@@ -55,6 +57,7 @@ export function PriceCategoriesField({
             name: category.name,
             price: String(category.price),
             quota: category.quota === null ? '' : String(category.quota),
+            locked: category.locked === true,
         })),
     );
 
@@ -122,6 +125,7 @@ export function PriceCategoriesField({
                             id={`price-category-name-${index}`}
                             name={`price_categories[${index}][name]`}
                             value={category.name}
+                            readOnly={category.locked}
                             onChange={(event) =>
                                 update(index, { name: event.target.value })
                             }
@@ -147,6 +151,7 @@ export function PriceCategoriesField({
                             min={0}
                             max={100000000}
                             value={category.price}
+                            readOnly={category.locked}
                             onChange={(event) =>
                                 update(index, {
                                     price: event.target.value.replace(
@@ -161,6 +166,14 @@ export function PriceCategoriesField({
                         {Number(category.price) === 0 ? (
                             <p className="text-muted-foreground text-xs">
                                 {t('events.price_categories.free_hint')}
+                            </p>
+                        ) : null}
+                        {category.locked ? (
+                            <p
+                                className="text-muted-foreground text-xs"
+                                data-test="price-category-locked"
+                            >
+                                {t('events.price_categories.locked')}
                             </p>
                         ) : null}
                         <InputError
@@ -195,7 +208,7 @@ export function PriceCategoriesField({
                         aria-label={t('events.price_categories.remove', {
                             name: category.name,
                         })}
-                        disabled={categories.length <= 1}
+                        disabled={categories.length <= 1 || category.locked}
                         data-test="price-category-remove"
                         onClick={() =>
                             setCategories((current) =>
@@ -218,7 +231,7 @@ export function PriceCategoriesField({
                 onClick={() =>
                     setCategories((current) => [
                         ...current,
-                        { name: '', price: '0', quota: '' },
+                        { name: '', price: '0', quota: '', locked: false },
                     ])
                 }
             >

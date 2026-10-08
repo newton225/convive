@@ -8,6 +8,7 @@ use App\Enums\LegalForm;
 use App\Enums\TenantPermission;
 use App\Models\Event;
 use App\Models\PaymentAccount;
+use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\GettingStarted;
@@ -118,6 +119,59 @@ class EventTest extends TestCase
 
         $this->assertSame('Diner de gala 2026', $event->name);
         $this->assertSame(EventStatus::Draft, $event->status);
+    }
+
+    public function test_le_nom_et_le_prix_d_un_tarif_deja_choisi_sont_figes(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $categories = [['name' => 'Standard', 'price' => 5000, 'quota' => null]];
+
+        $this->actingAs($owner)->post(route('tenants.events.store', $tenant), $this->payload(['price_categories' => $categories]));
+        $event = $this->eventOf($tenant);
+        $category = $tenant->asCurrent(fn () => $event->priceCategories()->firstOrFail());
+
+        $tenant->asCurrent(fn () => Registration::factory()->create([
+            'event_id' => $event->id,
+            'price_category_id' => $category->id,
+        ]));
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
+                'price_categories' => [['id' => $category->id, 'name' => 'Standard', 'price' => 7000, 'quota' => null]],
+            ]))
+            ->assertSessionHasErrors('price_categories.0.price');
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
+                'price_categories' => [['id' => $category->id, 'name' => 'Normal', 'price' => 5000, 'quota' => null]],
+            ]))
+            ->assertSessionHasErrors('price_categories.0.name');
+
+        // Le quota reste modifiable.
+        $this->actingAs($owner)
+            ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
+                'price_categories' => [['id' => $category->id, 'name' => 'Standard', 'price' => 5000, 'quota' => 50]],
+            ]))
+            ->assertSessionHasNoErrors();
+    }
+
+    public function test_un_tarif_que_personne_n_a_choisi_reste_modifiable(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)->post(route('tenants.events.store', $tenant), $this->payload([
+            'price_categories' => [['name' => 'Standard', 'price' => 5000, 'quota' => null]],
+        ]));
+        $event = $this->eventOf($tenant);
+        $category = $tenant->asCurrent(fn () => $event->priceCategories()->firstOrFail());
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
+                'price_categories' => [['id' => $category->id, 'name' => 'Normal', 'price' => 7000, 'quota' => null]],
+            ]))
+            ->assertSessionHasNoErrors();
     }
 
     public function test_enregistrer_deux_fois_les_memes_tarifs_ne_cree_pas_de_doublon(): void
