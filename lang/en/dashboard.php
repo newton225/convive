@@ -99,7 +99,7 @@ return [
             ],
             'publish' => [
                 'title' => 'Publish the public link',
-                'hint' => "From the event's page, then copy the link to send it to your guests.",
+                'hint' => "From the event's page, publish it and copy the link to send it to your guests. You can also announce it on the Convive site to reach more people (optional, a visual is required).",
                 'action' => 'See my events',
             ],
             'team' => [

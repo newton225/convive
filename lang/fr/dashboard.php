@@ -99,7 +99,7 @@ return [
             ],
             'publish' => [
                 'title' => 'Publier le lien public',
-                'hint' => "Depuis la fiche de l'événement, puis copiez le lien pour l'envoyer à vos invités.",
+                'hint' => "Depuis la fiche de l'événement, publiez-le et copiez le lien pour l'envoyer à vos invités. Vous pouvez aussi l'annoncer sur le site Convive pour toucher d'autres personnes (facultatif, un visuel est nécessaire).",
                 'action' => 'Voir mes événements',
             ],
             'team' => [
