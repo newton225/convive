@@ -62,6 +62,15 @@ class ScanTicket
             return $this->outcome(ScanResult::Refused, false, null, null, null, $otherEvent);
         }
 
+        // Un billet authentique presente avant l'ouverture des portes : refuse, mais sans alerte de
+        // fraude (decision du 2026-10-09), un invite en avance n'est pas un faussaire. Le controle
+        // vient apres la verification du billet : un faux billet reste refuse sans rien reveler.
+        if ($this->tooEarly($event)) {
+            $this->journal($event, null, $actor, ScanResult::Refused, false, $station, alert: false);
+
+            return $this->outcome(ScanResult::Refused, false, null, null, null);
+        }
+
         return $this->admit($event, $ticket, $actor, $force, $station, manual: false);
     }
 
@@ -164,8 +173,7 @@ class ScanTicket
         if (($payload['tenant_id'] ?? null) !== Tenant::current()?->id
             || ($payload['event_id'] ?? null) !== $event->id
             || ($payload['key_version'] ?? null) !== $event->qr_key_version
-            || $this->expired($event, $payload['not_after'] ?? null)
-            || $this->tooEarly($event)) {
+            || $this->expired($event, $payload['not_after'] ?? null)) {
             return null;
         }
 
