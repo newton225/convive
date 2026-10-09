@@ -33,6 +33,7 @@ return [
             'proof_title' => 'Preuve validée',
             'proof_body' => 'Table 7 attribuée, billet envoyé',
             'scan' => 'Entrée acceptée',
+            'scanning' => 'Scan du billet',
         ],
     ],
 
@@ -75,6 +76,7 @@ return [
             'table' => 'Table',
             'seats' => 'Places',
             'valid' => 'Billet valide',
+            'pending' => 'En attente de validation',
         ],
         'hold' => [
             'label' => 'Réservation en cours',

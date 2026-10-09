@@ -1,53 +1,252 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { useReducedMotion } from 'framer-motion';
+import gsap from 'gsap';
 import { CircleCheck, ScanLine, Timer } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { formatCountdown } from '@/hooks/use-countdown';
-import { useLoopingCountdown } from '@/hooks/use-looping-countdown';
 import { useTranslation } from '@/hooks/use-translation';
-import { Duration, EaseOut } from '@/lib/motion';
 import { TicketPreview } from './ticket-preview';
+
+// Pas de mise en page cote serveur : `useLayoutEffect` y avertirait, `useEffect` n'y court pas.
+const useIsomorphicLayoutEffect =
+    typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+const HoldSeconds = 582;
 
 /**
  * La scene de l'accroche : le billet au centre, et autour de lui les trois temps du produit qui
  * s'enchainent dans l'ordre ou ils arrivent a l'invite. La reservation decompte, la preuve est
- * validee, l'entree est acceptee. Le mouvement raconte la causalite (CLAUDE.md, « Le produit comme
- * heros »). Sans mouvement, tout est pose d'emblee et le decompte reste fige.
+ * validee et le billet passe de « en attente » a « valide », puis l'entree est acceptee au scan. Le
+ * mouvement raconte la causalite (CLAUDE.md, « Le produit comme heros »).
+ *
+ * Une seule ligne de temps GSAP orchestre tout, en boucle : le billet entre une fois, puis la
+ * sequence se joue, se range et recommence. Seuls `transform` et `opacity` bougent. Elle s'arrete
+ * hors de l'ecran, et sans mouvement (`prefers-reduced-motion`) la scene reste dans son etat final.
  */
 export function HeroStage() {
     const { t } = useTranslation();
     const reduceMotion = useReducedMotion() === true;
-    const seconds = useLoopingCountdown(582, !reduceMotion);
+    const root = useRef<HTMLDivElement>(null);
+    const countdown = useRef<HTMLSpanElement>(null);
 
-    const appear = (delay: number, from: { x?: number; y?: number }) =>
-        reduceMotion
-            ? {}
-            : {
-                  initial: { opacity: 0, ...from },
-                  animate: { opacity: 1, x: 0, y: 0 },
-                  transition: { duration: Duration.slow, delay, ease: EaseOut },
-              };
+    useIsomorphicLayoutEffect(() => {
+        const scope = root.current;
+
+        if (reduceMotion || !scope) {
+            return;
+        }
+
+        const context = gsap.context(() => {
+            const q = gsap.utils.selector(scope);
+            const stage = (name: string) => q(`[data-stage="${name}"]`);
+            const counter = { value: HoldSeconds };
+            const render = () => {
+                if (countdown.current) {
+                    countdown.current.textContent = formatCountdown(
+                        Math.round(counter.value),
+                    );
+                }
+            };
+
+            // L'etat de depart, pose avant la premiere image : le billet attend sa preuve.
+            gsap.set(stage('ticket'), { autoAlpha: 0, y: 36, scale: 0.97 });
+            gsap.set(stage('hold'), { autoAlpha: 0, x: -24 });
+            gsap.set(stage('proof'), { autoAlpha: 0, y: 24, scale: 0.96 });
+            gsap.set(stage('scan'), { autoAlpha: 0, x: 24 });
+            gsap.set(stage('pending'), { autoAlpha: 1, y: 0 });
+            gsap.set(stage('valid'), { autoAlpha: 0, y: 6 });
+            gsap.set(stage('qr-cell'), {
+                autoAlpha: 0.1,
+                scale: 0.6,
+                transformBox: 'fill-box',
+                transformOrigin: '50% 50%',
+            });
+            gsap.set(stage('scanline'), { autoAlpha: 0, y: 0 });
+            gsap.set(stage('scan-idle'), { autoAlpha: 1 });
+            gsap.set(stage('scan-done'), { autoAlpha: 0, y: 6 });
+            render();
+
+            const intro = gsap.timeline({ defaults: { ease: 'expo.out' } });
+
+            intro.to(
+                stage('ticket'),
+                { autoAlpha: 1, y: 0, scale: 1, duration: 1.1 },
+                0.1,
+            );
+
+            const loop = gsap.timeline({
+                repeat: -1,
+                repeatDelay: 0.5,
+                defaults: { ease: 'power3.out' },
+            });
+
+            // 1. La reservation court : le decompte descend vraiment, sans passer par React.
+            loop.to(
+                stage('hold'),
+                { autoAlpha: 1, x: 0, duration: 0.8 },
+                0.2,
+            ).to(
+                counter,
+                {
+                    value: HoldSeconds - 9,
+                    duration: 3.4,
+                    ease: 'none',
+                    onUpdate: render,
+                },
+                0.4,
+            );
+
+            // 2. La preuve est validee : la notification arrive, la coche s'imprime, la reservation
+            // s'efface, et le billet passe de « en attente » a « valide ».
+            loop.to(
+                stage('proof'),
+                { autoAlpha: 1, y: 0, scale: 1, duration: 0.8 },
+                3.0,
+            )
+                .fromTo(
+                    stage('proof-check'),
+                    { scale: 0 },
+                    { scale: 1, duration: 0.6, ease: 'back.out(2.4)' },
+                    3.25,
+                )
+                .to(stage('hold'), { autoAlpha: 0, x: -14, duration: 0.5 }, 3.7)
+                .to(
+                    stage('pending'),
+                    { autoAlpha: 0, y: -6, duration: 0.35 },
+                    3.55,
+                )
+                .to(stage('valid'), { autoAlpha: 1, y: 0, duration: 0.5 }, 3.65)
+                .to(
+                    stage('qr-cell'),
+                    {
+                        autoAlpha: 1,
+                        scale: 1,
+                        duration: 0.45,
+                        ease: 'back.out(1.7)',
+                        stagger: { each: 0.03, from: 'random' },
+                    },
+                    3.65,
+                );
+
+            // 3. A la porte : le scan balaie le QR, l'entree est acceptee.
+            loop.to(stage('scan'), { autoAlpha: 1, x: 0, duration: 0.8 }, 5.4)
+                .fromTo(
+                    stage('scanline'),
+                    { autoAlpha: 1, y: 0 },
+                    {
+                        y: 62,
+                        duration: 1,
+                        ease: 'power1.inOut',
+                    },
+                    6.0,
+                )
+                .to(stage('scanline'), { autoAlpha: 0, duration: 0.2 }, 6.85)
+                .to(stage('scan-idle'), { autoAlpha: 0, duration: 0.2 }, 6.9)
+                .to(
+                    stage('scan-done'),
+                    { autoAlpha: 1, y: 0, duration: 0.45 },
+                    7.0,
+                )
+                .fromTo(
+                    stage('scan-check'),
+                    { scale: 0 },
+                    { scale: 1, duration: 0.5, ease: 'back.out(2.6)' },
+                    7.05,
+                )
+                .fromTo(
+                    stage('valid'),
+                    { scale: 1 },
+                    {
+                        scale: 1.08,
+                        duration: 0.2,
+                        yoyo: true,
+                        repeat: 1,
+                        ease: 'sine.inOut',
+                    },
+                    7.05,
+                );
+
+            // 4. Tout se range avant de recommencer : la boucle ne saute jamais.
+            loop.to(
+                [...stage('proof'), ...stage('scan')],
+                { autoAlpha: 0, y: 10, duration: 0.5, ease: 'power2.in' },
+                9.4,
+            )
+                .to(
+                    stage('qr-cell'),
+                    {
+                        autoAlpha: 0.1,
+                        scale: 0.6,
+                        duration: 0.35,
+                        ease: 'power2.in',
+                        stagger: { each: 0.01, from: 'random' },
+                    },
+                    9.4,
+                )
+                .to(stage('valid'), { autoAlpha: 0, y: 6, duration: 0.3 }, 9.6)
+                .to(
+                    stage('pending'),
+                    { autoAlpha: 1, y: 0, duration: 0.4 },
+                    9.8,
+                )
+                .set(stage('scan-idle'), { autoAlpha: 1 }, 10.1)
+                .set(stage('scan-done'), { autoAlpha: 0, y: 6 }, 10.1)
+                .set(stage('scan'), { x: 24 }, 10.1)
+                .set(stage('hold'), { x: -24 }, 10.1)
+                .call(
+                    () => {
+                        counter.value = HoldSeconds;
+                        render();
+                    },
+                    undefined,
+                    10.1,
+                );
+
+            const sequence = gsap.timeline();
+
+            sequence.add(intro).add(loop);
+
+            // Un billet qui flotte a peine : la scene vit sans distraire.
+            const float = gsap.to(stage('float'), {
+                y: -7,
+                duration: 3.4,
+                ease: 'sine.inOut',
+                yoyo: true,
+                repeat: -1,
+            });
+
+            // Hors de l'ecran, tout s'arrete : rien ne tourne pour rien.
+            const observer = new IntersectionObserver(([entry]) => {
+                const visible = entry?.isIntersecting ?? true;
+
+                sequence.paused(!visible);
+                float.paused(!visible);
+            });
+
+            observer.observe(scope);
+
+            return () => observer.disconnect();
+        }, scope);
+
+        return () => context.revert();
+    }, [reduceMotion]);
 
     return (
-        <div className="relative mx-auto w-full max-w-md py-10 lg:py-14">
-            <motion.div
-                {...appear(0.35, { y: 24 })}
+        <div
+            ref={root}
+            className="relative mx-auto w-full max-w-md pt-16 pb-20 lg:pt-20 lg:pb-24"
+        >
+            <div
+                data-stage="ticket"
                 className="relative z-10 flex justify-center"
             >
-                <motion.div
-                    animate={reduceMotion ? undefined : { y: [0, -8, 0] }}
-                    transition={{
-                        duration: 6,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                    }}
-                    className="w-full max-w-sm"
-                >
+                <div data-stage="float" className="w-full max-w-sm">
                     <TicketPreview />
-                </motion.div>
-            </motion.div>
+                </div>
+            </div>
 
-            <motion.div
-                {...appear(0.9, { x: -16 })}
-                className="bg-ink/80 absolute top-0 left-0 z-20 flex items-center gap-3 rounded-xl border border-white/10 px-3.5 py-2.5 text-white backdrop-blur-md sm:-left-8"
+            <div
+                data-stage="hold"
+                className="bg-ink/70 absolute top-4 left-0 z-20 flex items-center gap-3 rounded-2xl border border-white/10 px-3.5 py-2.5 text-white ring-1 ring-white/5 backdrop-blur-xl sm:-left-8 lg:top-6"
                 data-test="site-hero-hold"
             >
                 <span className="bg-primary/25 text-primary-foreground flex size-8 items-center justify-center rounded-lg">
@@ -57,19 +256,25 @@ export function HeroStage() {
                     <span className="block text-xs text-white/60">
                         {t('site.hero.stage.hold')}
                     </span>
-                    <span className="block font-semibold tabular-nums">
-                        {formatCountdown(seconds)}
+                    <span
+                        ref={countdown}
+                        className="block font-semibold tabular-nums"
+                    >
+                        {formatCountdown(HoldSeconds)}
                     </span>
                 </span>
-            </motion.div>
+            </div>
 
-            <motion.div
-                {...appear(1.6, { y: 16 })}
-                className="bg-card text-card-foreground absolute right-0 bottom-2 z-20 flex max-w-[16rem] items-start gap-3 rounded-xl px-3.5 py-3 sm:-right-6"
+            <div
+                data-stage="proof"
+                className="bg-card text-card-foreground absolute right-0 bottom-4 z-20 flex max-w-[16rem] items-start gap-3 rounded-2xl border border-white/10 px-3.5 py-3 ring-1 ring-white/5 sm:-right-6 lg:bottom-6"
                 role="status"
                 data-test="site-hero-proof"
             >
-                <CircleCheck className="text-primary mt-0.5 size-5 shrink-0" />
+                <CircleCheck
+                    data-stage="proof-check"
+                    className="text-primary mt-0.5 size-5 shrink-0"
+                />
                 <span>
                     <span className="block text-sm font-semibold">
                         {t('site.hero.stage.proof_title')}
@@ -78,15 +283,30 @@ export function HeroStage() {
                         {t('site.hero.stage.proof_body')}
                     </span>
                 </span>
-            </motion.div>
+            </div>
 
-            <motion.div
-                {...appear(2.2, { x: 16 })}
-                className="bg-ink/80 absolute top-5 right-0 z-20 hidden items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-xs whitespace-nowrap text-white backdrop-blur-md sm:flex lg:-right-6"
+            <div
+                data-stage="scan"
+                className="bg-ink/70 absolute top-4 right-0 z-20 hidden items-center rounded-full border border-white/10 px-3.5 py-1.5 text-xs whitespace-nowrap text-white ring-1 ring-white/5 backdrop-blur-xl sm:grid lg:top-6 lg:-right-6"
             >
-                <ScanLine className="size-3.5" />
-                {t('site.hero.stage.scan')}
-            </motion.div>
+                <span
+                    data-stage="scan-idle"
+                    className="flex items-center gap-2 text-white/70 opacity-0 [grid-area:1/1]"
+                >
+                    <ScanLine className="size-3.5" />
+                    {t('site.hero.stage.scanning')}
+                </span>
+                <span
+                    data-stage="scan-done"
+                    className="flex items-center gap-2 [grid-area:1/1]"
+                >
+                    <CircleCheck
+                        data-stage="scan-check"
+                        className="text-primary-foreground size-3.5"
+                    />
+                    {t('site.hero.stage.scan')}
+                </span>
+            </div>
         </div>
     );
 }

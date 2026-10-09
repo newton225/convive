@@ -33,6 +33,7 @@ return [
             'proof_title' => 'Proof approved',
             'proof_body' => 'Table 7 assigned, ticket sent',
             'scan' => 'Entry accepted',
+            'scanning' => 'Scanning the ticket',
         ],
     ],
 
@@ -75,6 +76,7 @@ return [
             'table' => 'Table',
             'seats' => 'Seats',
             'valid' => 'Valid ticket',
+            'pending' => 'Awaiting validation',
         ],
         'hold' => [
             'label' => 'Reservation in progress',
