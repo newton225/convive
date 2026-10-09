@@ -249,7 +249,7 @@ export function HeroStage() {
             if (tilt && glare && area) {
                 const MaxTilt = 11;
                 // La pose de repos : le billet est pose un peu de travers, vers la gauche.
-                const RestRotation = -4;
+                const RestRotation = -2;
                 const smooth = { duration: 0.7, ease: 'power3.out' };
 
                 gsap.set(tilt, {
@@ -329,7 +329,7 @@ export function HeroStage() {
                         mouvement de levitation du parent. */}
                     <div
                         data-stage="tilt"
-                        className="relative [transform:rotate(-4deg)] [transform-style:preserve-3d]"
+                        className="relative [transform:rotate(-2deg)] [transform-style:preserve-3d]"
                     >
                         <TicketPreview />
                         <span
