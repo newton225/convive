@@ -26,15 +26,19 @@ export function TicketPreview() {
 
     return (
         <div
-            className="text-ink w-full max-w-sm rounded-2xl bg-white p-6"
+            className="text-ink w-full max-w-sm rounded-2xl bg-white p-6 [transform-style:preserve-3d]"
             data-test="site-ticket-preview"
         >
-            <p className="font-serif text-2xl leading-tight font-semibold">
-                {t('site.preview.ticket.event')}
-            </p>
-            <p className="text-ink/60 mt-1 text-sm">
-                {t('site.preview.ticket.date')}
-            </p>
+            {/* Trois plans de profondeur : le titre, la pastille et le QR se decollent du billet
+                quand la scene l'incline (`HeroStage`), sans effet au repos. */}
+            <div className="[transform:translateZ(18px)]">
+                <p className="font-serif text-2xl leading-tight font-semibold">
+                    {t('site.preview.ticket.event')}
+                </p>
+                <p className="text-ink/60 mt-1 text-sm">
+                    {t('site.preview.ticket.date')}
+                </p>
+            </div>
 
             <dl className="mt-6 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-6 gap-y-1 text-sm">
                 <div>
@@ -60,7 +64,10 @@ export function TicketPreview() {
             <div className="border-ink/20 mt-6 flex items-center justify-between gap-4 border-t border-dashed pt-5">
                 {/* Les deux etats se superposent dans la meme cellule : la pastille garde la largeur
                     du plus long, rien ne bouge quand l'un remplace l'autre. */}
-                <span className="grid" role="status">
+                <span
+                    className="grid [transform:translateZ(26px)]"
+                    role="status"
+                >
                     <span
                         data-stage="pending"
                         className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium whitespace-nowrap text-amber-700 opacity-0 [grid-area:1/1]"
@@ -78,7 +85,7 @@ export function TicketPreview() {
                 </span>
 
                 {/* Un motif de QR : illustratif, jamais un vrai jeton. */}
-                <span className="relative block size-16 shrink-0 overflow-hidden">
+                <span className="relative block size-16 shrink-0 [transform:translateZ(34px)] overflow-hidden">
                     <svg
                         viewBox="0 0 7 7"
                         className="text-ink size-16"

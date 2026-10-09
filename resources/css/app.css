@@ -340,6 +340,14 @@
     );
 }
 
+.site-glare {
+    background: radial-gradient(
+        circle at var(--glare-x, 50%) var(--glare-y, 50%),
+        oklch(0.52 0.13 262 / 0.2),
+        oklch(0.52 0.13 262 / 0) 60%
+    );
+}
+
 .site-gradient-text {
     background-image: linear-gradient(
         100deg,

@@ -231,7 +231,77 @@ export function HeroStage() {
 
             observer.observe(scope);
 
-            return () => observer.disconnect();
+            // L'inclinaison 3D : le billet se penche vers le pointeur, comme s'il etait pousse par lui,
+            // et un reflet suit la souris. `quickTo` lisse chaque mouvement sur une courte duree : le
+            // billet ne saute jamais d'une position a l'autre. Souris et stylet seulement, un doigt qui
+            // defile ne doit rien incliner.
+            const tilt = scope.querySelector<HTMLElement>(
+                '[data-stage="tilt"]',
+            );
+            const glare = scope.querySelector<HTMLElement>(
+                '[data-stage="glare"]',
+            );
+            const area = scope.querySelector<HTMLElement>(
+                '[data-stage="float"]',
+            );
+            const cleanups: Array<() => void> = [() => observer.disconnect()];
+
+            if (tilt && glare && area) {
+                const MaxTilt = 11;
+                const smooth = { duration: 0.7, ease: 'power3.out' };
+
+                gsap.set(tilt, { transformPerspective: 900 });
+
+                const rotateX = gsap.quickTo(tilt, 'rotationX', smooth);
+                const rotateY = gsap.quickTo(tilt, 'rotationY', smooth);
+                const scale = gsap.quickTo(tilt, 'scale', {
+                    duration: 0.5,
+                    ease: 'power3.out',
+                });
+                const shine = gsap.quickTo(glare, 'opacity', {
+                    duration: 0.5,
+                    ease: 'power2.out',
+                });
+
+                const follow = (event: PointerEvent) => {
+                    if (event.pointerType === 'touch') {
+                        return;
+                    }
+
+                    const box = area.getBoundingClientRect();
+                    const x = Math.min(
+                        1,
+                        Math.max(0, (event.clientX - box.left) / box.width),
+                    );
+                    const y = Math.min(
+                        1,
+                        Math.max(0, (event.clientY - box.top) / box.height),
+                    );
+
+                    rotateY((x - 0.5) * 2 * MaxTilt);
+                    rotateX(-(y - 0.5) * 2 * MaxTilt);
+                    scale(1.03);
+                    glare.style.setProperty('--glare-x', `${x * 100}%`);
+                    glare.style.setProperty('--glare-y', `${y * 100}%`);
+                    shine(1);
+                };
+
+                const rest = () => {
+                    rotateX(0);
+                    rotateY(0);
+                    scale(1);
+                    shine(0);
+                };
+
+                area.addEventListener('pointermove', follow);
+                area.addEventListener('pointerleave', rest);
+                cleanups.push(() => {
+                    area.removeEventListener('pointermove', follow);
+                    area.removeEventListener('pointerleave', rest);
+                });
+            }
+
+            return () => cleanups.forEach((cleanup) => cleanup());
         }, scope);
 
         return () => context.revert();
@@ -250,7 +320,19 @@ export function HeroStage() {
                     data-stage="float"
                     className="w-full max-w-sm will-change-transform"
                 >
-                    <TicketPreview />
+                    {/* L'inclinaison suit le pointeur : un plan a part, pour ne pas se disputer le
+                        mouvement de levitation du parent. */}
+                    <div
+                        data-stage="tilt"
+                        className="relative [transform-style:preserve-3d]"
+                    >
+                        <TicketPreview />
+                        <span
+                            data-stage="glare"
+                            className="site-glare pointer-events-none absolute inset-0 rounded-2xl opacity-0"
+                            aria-hidden="true"
+                        />
+                    </div>
                 </div>
             </div>
 
