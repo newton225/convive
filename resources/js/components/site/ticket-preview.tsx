@@ -1,5 +1,6 @@
 import { Check, Clock } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
+import { TicketPattern } from './ticket-pattern';
 
 const QrRows = [
     '1110111',
@@ -30,6 +31,13 @@ export function TicketPreview() {
             className="relative w-full max-w-sm rounded-2xl border border-white/15 bg-[linear-gradient(145deg,oklch(0.34_0.1_265),oklch(0.22_0.06_265))] p-6 text-white [transform-style:preserve-3d]"
             data-test="site-ticket-preview"
         >
+            {/* Les motifs de fond : guillochis et hachures, sous le contenu. */}
+            <span
+                className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+                aria-hidden="true"
+            >
+                <TicketPattern />
+            </span>
             {/* Le filet or d'une carte d'invitation, juste en retrait du bord. */}
             <span
                 className="pointer-events-none absolute inset-2 [transform:translateZ(2px)] rounded-xl border border-[oklch(0.72_0.12_70/0.4)]"
@@ -46,7 +54,7 @@ export function TicketPreview() {
                 </p>
             </div>
 
-            <dl className="mt-6 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-6 gap-y-1 text-sm">
+            <dl className="relative mt-6 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-6 gap-y-1 text-sm">
                 <div>
                     <dt className="text-xs text-white/55">
                         {t('site.preview.ticket.guest')}
