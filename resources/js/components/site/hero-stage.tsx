@@ -137,7 +137,7 @@ export function HeroStage() {
                     stage('scanline'),
                     { autoAlpha: 1, y: 0 },
                     {
-                        y: 62,
+                        y: 72,
                         duration: 1,
                         ease: 'power1.inOut',
                     },
