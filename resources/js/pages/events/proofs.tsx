@@ -9,7 +9,13 @@ import {
     type SortingState,
     type Updater,
 } from '@tanstack/react-table';
-import { ChevronRight, Eye, Images, MessageSquareText } from 'lucide-react';
+import {
+    ChevronRight,
+    Eye,
+    Images,
+    MessageSquareText,
+    TriangleAlert,
+} from 'lucide-react';
 import { Fragment, useState } from 'react';
 import { formatPhoneNumberIntl } from 'react-phone-number-input';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
@@ -24,6 +30,7 @@ import Heading from '@/components/heading';
 import { ListPagination } from '@/components/list-pagination';
 import type { PaginationMeta } from '@/components/list-pagination';
 import { ProductTourButton } from '@/components/product-tour-button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -70,7 +77,7 @@ const SortColumns: Record<string, string> = {
 
 type Props = {
     tenant: { slug: string };
-    event: { id: number; name: string };
+    event: { id: number; name: string; hasPassed: boolean };
     permissions: TenantPermissions;
     // La page affichee seulement : recherche, filtre, tri et pagination se font cote serveur.
     rows: PaymentProofRow[];
@@ -498,6 +505,15 @@ export default function EventProofs({
                         autoStart={rows.length > 0}
                     />
                 </div>
+
+                {event.hasPassed && hasProofs ? (
+                    <Alert data-test="proofs-event-passed">
+                        <TriangleAlert />
+                        <AlertDescription>
+                            {t('proofs.event_passed')}
+                        </AlertDescription>
+                    </Alert>
+                ) : null}
 
                 {!hasProofs ? (
                     <div className="rounded-lg border p-6 text-center">

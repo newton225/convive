@@ -3,6 +3,8 @@
 return [
     'title' => 'Preuves à vérifier',
 
+    'event_passed' => 'La date de cet événement est passée. Avant de valider une preuve, vérifiez que l’invité peut encore venir : son billet cesse de donner l’entrée peu après l’heure de début. Rejeter une preuve ne rembourse rien : si l’invité a payé, remboursez-le vous-même.',
+
     'empty' => [
         'title' => 'Aucune preuve en attente',
         'description' => 'Toutes les preuves déposées pour cet événement ont été traitées.',

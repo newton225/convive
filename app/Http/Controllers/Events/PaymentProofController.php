@@ -61,7 +61,7 @@ class PaymentProofController extends Controller
 
         return Inertia::render('events/proofs', [
             'tenant' => ['slug' => $tenant->slug],
-            'event' => ['id' => $event->id, 'name' => $event->name],
+            'event' => ['id' => $event->id, 'name' => $event->name, 'hasPassed' => (bool) $event->starts_at?->isPast()],
             'permissions' => $request->user()->toTenantPermissions($tenant),
             'rows' => collect($page->items())->values(),
             'meta' => ListPage::meta($page),

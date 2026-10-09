@@ -315,6 +315,51 @@ class EventTest extends TestCase
             ->assertSessionHasErrors('price_categories');
     }
 
+    public function test_la_date_d_un_evenement_publie_ne_recule_pas_dans_le_passe(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(fn () => Event::factory()->published()->create(['starts_at' => now()->addWeek()]));
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
+                'starts_at' => now()->subDay()->toDateTimeString(),
+                'registration_deadline' => now()->subDays(2)->toDateTimeString(),
+            ]))
+            ->assertSessionHasErrors('starts_at');
+
+        $this->assertTrue($tenant->asCurrent(fn () => $event->fresh()->starts_at->isFuture()));
+    }
+
+    public function test_un_brouillon_sans_inscription_peut_prendre_une_date_passee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(fn () => Event::factory()->create(['starts_at' => now()->addWeek()]));
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
+                'starts_at' => now()->subDay()->toDateTimeString(),
+                'registration_deadline' => now()->subDays(2)->toDateTimeString(),
+            ]))
+            ->assertSessionDoesntHaveErrors('starts_at');
+    }
+
+    public function test_un_evenement_publie_deja_passe_reste_modifiable_sans_toucher_a_sa_date(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $startsAt = now()->subDay()->startOfMinute();
+        $event = $tenant->asCurrent(fn () => Event::factory()->published()->create(['starts_at' => $startsAt]));
+
+        $this->actingAs($owner)
+            ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
+                'starts_at' => $startsAt->toDateTimeString(),
+                'registration_deadline' => $startsAt->copy()->subDay()->toDateTimeString(),
+            ]))
+            ->assertSessionDoesntHaveErrors('starts_at');
+    }
+
     public function test_un_evenement_nait_en_brouillon_et_sans_lien_public(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

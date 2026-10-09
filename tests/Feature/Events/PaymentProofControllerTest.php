@@ -51,6 +51,23 @@ class PaymentProofControllerTest extends TestCase
             );
     }
 
+    public function test_la_file_signale_un_evenement_dont_la_date_est_passee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event] = $this->proofSubmitted($tenant);
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.proofs.index', [$tenant, $event]))
+            ->assertInertia(fn ($page) => $page->where('event.hasPassed', false));
+
+        $tenant->asCurrent(fn () => $event->update(['starts_at' => now()->subDay()]));
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.proofs.index', [$tenant, $event]))
+            ->assertInertia(fn ($page) => $page->where('event.hasPassed', true));
+    }
+
     public function test_un_membre_sans_la_permission_de_lecture_ne_voit_pas_la_file(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

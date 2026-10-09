@@ -196,6 +196,7 @@ class SaveEventRequest extends FormRequest
         return [
             function (Validator $validator): void {
                 $this->rejectDeadlineAfterTheEvent($validator);
+                $this->rejectMovingAnEventIntoThePast($validator);
                 $this->rejectPaymentAccountsOfAnotherTenant($validator);
                 $this->rejectChangingSeatingModeOnceGuestsAreIn($validator);
                 $this->rejectTablePlanThatUnseatsGuests($validator);
@@ -309,6 +310,31 @@ class SaveEventRequest extends FormRequest
         if ($startsAt && $deadline && $deadline->greaterThan($startsAt)) {
             $validator->errors()->add('registration_deadline', __('events.errors.deadline_after_event'));
         }
+    }
+
+    /**
+     * Un evenement publie ou deja reserve ne recule pas dans le passe (decision du 2026-10-09) :
+     * un invite qui a deja verse son argent recevrait un billet echu. Pour en finir, on le cloture.
+     * Une date passee qu'on ne touche pas ne bloque rien : l'evenement reste modifiable.
+     */
+    private function rejectMovingAnEventIntoThePast(Validator $validator): void
+    {
+        $event = $this->route('event');
+        $startsAt = $this->date('starts_at');
+
+        if (! $event instanceof Event || $startsAt === null || ! $startsAt->isPast()) {
+            return;
+        }
+
+        if ($event->published_at === null && ! $event->registrations()->exists()) {
+            return;
+        }
+
+        if ($event->starts_at !== null && intdiv($event->starts_at->getTimestamp(), 60) === intdiv($startsAt->getTimestamp(), 60)) {
+            return;
+        }
+
+        $validator->errors()->add('starts_at', __('events.errors.starts_at_past_when_published'));
     }
 
     /**
