@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils';
 import { register } from '@/routes';
 
 /**
- * L'appel a l'action de l'en-tete : le seul bouton de la vitrine qui doit appeler le clic. Un degrade
- * indigo vif, une lueur, une fleche qui avance au survol et un reflet qui le traverse de temps en
+ * L'appel a l'action de l'en-tete : le seul bouton de la vitrine qui doit appeler le clic. Le bleu des
+ * autres boutons (`primary`), une lueur de la meme teinte, une fleche qui avance au survol et un reflet qui le traverse de temps en
  * temps (`site-cta-shine`, coupe avec `prefers-reduced-motion`). Les autres boutons restent sobres.
  */
 export function SiteHeaderCta({ className }: { className?: string }) {
@@ -17,7 +17,7 @@ export function SiteHeaderCta({ className }: { className?: string }) {
         <Button
             size="sm"
             className={cn(
-                'site-cta-shine group relative isolate overflow-hidden rounded-full border border-white/25 bg-[linear-gradient(135deg,oklch(0.6_0.18_262),oklch(0.5_0.2_285))] px-5 font-semibold text-white shadow-[0_0_26px_oklch(0.6_0.18_262/0.55),inset_0_1px_0_oklch(1_0_0/0.35)] transition-[transform,box-shadow] duration-200 hover:scale-[1.04] hover:text-white hover:shadow-[0_0_34px_oklch(0.65_0.18_262/0.75),inset_0_1px_0_oklch(1_0_0/0.4)] focus-visible:ring-2 focus-visible:ring-white/70 active:scale-[0.98]',
+                'site-cta-shine group bg-primary text-primary-foreground relative isolate overflow-hidden rounded-full px-5 font-semibold shadow-[0_0_26px_color-mix(in_oklch,var(--primary)_55%,transparent),inset_0_1px_0_oklch(1_0_0/0.4)] transition-[transform,box-shadow] duration-200 hover:scale-[1.04] hover:shadow-[0_0_36px_color-mix(in_oklch,var(--primary)_80%,transparent),inset_0_1px_0_oklch(1_0_0/0.5)] focus-visible:ring-2 focus-visible:ring-white/70 active:scale-[0.98]',
                 className,
             )}
             asChild
