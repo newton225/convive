@@ -14,8 +14,9 @@ const QrRows = [
 /**
  * Le billet, tel qu'un invite le recoit : l'artefact reel du produit plutot qu'une illustration
  * abstraite. Les noms sont des donnees d'exemple, les libelles passent par les traductions. Le
- * serif est reserve aux billets et aux invitations (CLAUDE.md). Un billet est une feuille de
- * papier : il reste blanc, encre sur fond clair, dans le theme sombre aussi.
+ * serif est reserve aux billets et aux invitations (CLAUDE.md). Un billet est du carton : papier
+ * ivoire, encre dessus et filet or, dans le theme sombre aussi (decision du 2026-10-09 : le blanc
+ * pur ressemblait a une page web, pas a une carte).
  *
  * Les attributs `data-stage` sont les prises de la scene d'accroche (`HeroStage`), qui anime l'etat
  * du billet : en attente, puis valide, puis scanne. Sans animation, le billet est dans son etat
@@ -26,9 +27,14 @@ export function TicketPreview() {
 
     return (
         <div
-            className="text-ink w-full max-w-sm rounded-2xl bg-white p-6 [transform-style:preserve-3d]"
+            className="text-ink relative w-full max-w-sm rounded-2xl bg-[oklch(0.955_0.025_85)] p-6 [transform-style:preserve-3d]"
             data-test="site-ticket-preview"
         >
+            {/* Le filet or d'une carte d'invitation, juste en retrait du bord. */}
+            <span
+                className="pointer-events-none absolute inset-2 [transform:translateZ(2px)] rounded-xl border border-[oklch(0.72_0.1_80/0.45)]"
+                aria-hidden="true"
+            />
             {/* Trois plans de profondeur : le titre, la pastille et le QR se decollent du billet
                 quand la scene l'incline (`HeroStage`), sans effet au repos. */}
             <div className="[transform:translateZ(18px)]">
@@ -70,14 +76,14 @@ export function TicketPreview() {
                 >
                     <span
                         data-stage="pending"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium whitespace-nowrap text-amber-700 opacity-0 [grid-area:1/1]"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/80 px-3 py-1 text-xs font-medium whitespace-nowrap text-amber-800 opacity-0 [grid-area:1/1]"
                     >
                         <Clock className="size-3.5" />
                         {t('site.preview.ticket.pending')}
                     </span>
                     <span
                         data-stage="valid"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium whitespace-nowrap text-indigo-700 [grid-area:1/1]"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-indigo-100/80 px-3 py-1 text-xs font-medium whitespace-nowrap text-indigo-700 [grid-area:1/1]"
                     >
                         <Check className="size-3.5" />
                         {t('site.preview.ticket.valid')}
