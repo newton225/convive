@@ -31,8 +31,8 @@ return [
         'subtitle' => 'Sous-titre',
         'starts_at' => 'Date et heure de début',
         'ends_at' => 'Date et heure de fin (facultatif)',
-        'entry_opens_minutes_before' => "Ouverture des portes (minutes avant le début de l’événement)",
-        'entry_grace_minutes' => "Marge après la fin de l’événement (minutes)",
+        'entry_opens_minutes_before' => "Ouverture des portes (minutes avant le début)",
+        'entry_grace_minutes' => "Tolérance après la fin (minutes)",
         'venue' => 'Lieu',
         'venue_address' => 'Adresse',
         'seats_at_tables' => 'Les invités sont assis à des tables',
@@ -71,8 +71,8 @@ return [
 
     'help' => [
         'ends_at' => 'Facultatif. Sans fin, le billet reste valable 24 heures après le début.',
-        'entry_opens_minutes_before' => "Facultatif. Vide : un billet ouvre la porte à tout moment avant le début. Sinon, il ne la fait ouvrir qu’à partir de ce nombre de minutes avant le début, y compris hors connexion.",
-        'entry_grace_minutes' => "Pendant combien de minutes après la fin (ou 24 heures après le début si aucune fin n’est donnée) un billet ouvre encore la porte. 30 par défaut, 0 pour aucune marge.",
+        'entry_opens_minutes_before' => "Facultatif. À partir de quand les portes s’ouvrent : si l’événement commence à 19 h et que vous mettez 60, les billets sont acceptés dès 18 h, pas avant. Laissez vide pour accepter les billets à tout moment avant le début.",
+        'entry_grace_minutes' => "Temps pendant lequel un billet est encore accepté après la fin, pour les retardataires. Si l’événement finit à 23 h et que vous mettez 30, le billet ouvre la porte jusqu’à 23 h 30. Mettez 0 pour refuser dès l’heure de fin. Sans date de fin, le billet vaut 24 heures après le début, plus cette tolérance.",
         'venue' => 'Le nom de l’endroit, tel que vos invités le reconnaissent : « Hôtel Ivoire, salle des Palmiers », « Palais de la Culture ». Il est nécessaire pour publier l’événement.',
         'venue_address' => 'Facultatif. Où trouver ce lieu : rue, quartier, ville ou un repère, par exemple « Boulevard Latrille, Cocody, Abidjan ». Elle s’affiche sous le nom du lieu. Pour l’itinéraire, utilisez la localisation sur une carte juste en dessous.',
         'seats_at_tables' => 'Cochez si vos invités sont répartis à des tables. Décochez pour un rassemblement sans table, comme un événement en plein air : vous indiquez alors seulement le nombre de places, et aucune table n’est attribuée.',

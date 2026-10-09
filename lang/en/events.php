@@ -31,8 +31,8 @@ return [
         'subtitle' => 'Subtitle',
         'starts_at' => 'Start date and time',
         'ends_at' => 'End date and time (optional)',
-        'entry_opens_minutes_before' => "Doors open (minutes before the event starts)",
-        'entry_grace_minutes' => "Grace after the event ends (minutes)",
+        'entry_opens_minutes_before' => "Doors open (minutes before the start)",
+        'entry_grace_minutes' => "Tolerance after the end (minutes)",
         'venue' => 'Venue',
         'venue_address' => 'Address',
         'seats_at_tables' => 'Guests are seated at tables',
@@ -71,8 +71,8 @@ return [
 
     'help' => [
         'ends_at' => 'Optional. Without an end, the ticket stays valid for 24 hours after the start.',
-        'entry_opens_minutes_before' => "Optional. Empty: a ticket opens the door at any time before the start. Otherwise it only works from this many minutes before the start, offline too.",
-        'entry_grace_minutes' => "For how many minutes after the end (or 24 hours after the start when no end is given) a ticket still opens the door. 30 by default, 0 for no grace.",
+        'entry_opens_minutes_before' => "Optional. When the doors open: if the event starts at 7 pm and you enter 60, tickets are accepted from 6 pm, not before. Leave empty to accept tickets at any time before the start.",
+        'entry_grace_minutes' => "How long a ticket is still accepted after the end, for latecomers. If the event ends at 11 pm and you enter 30, the ticket opens the door until 11:30 pm. Enter 0 to refuse from the end time. With no end date, a ticket is valid for 24 hours after the start, plus this tolerance.",
         'venue' => 'The name of the place, as your guests know it: "Hôtel Ivoire, Palmiers room", "Palais de la Culture". It is required to publish the event.',
         'venue_address' => 'Optional. Where to find this place: street, area, city or a landmark, for example "Boulevard Latrille, Cocody, Abidjan". It is shown under the venue name. For directions, use the map location just below.',
         'seats_at_tables' => 'Tick if your guests are spread over tables. Untick for a gathering without tables, such as an outdoor event: you then only enter the number of seats, and no table is assigned.',
