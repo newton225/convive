@@ -68,6 +68,7 @@ class UserFactory extends Factory
         return $this->afterCreating(function (User $user) {
             $user->tenants()->detach();
             $user->forceFill(['current_tenant_id' => null])->save();
+            $user->unsetRelation('currentTenant');
         });
     }
 

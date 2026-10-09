@@ -218,6 +218,7 @@ class InvitationJourneyTest extends TestCase
     public function test_un_membre_qui_a_deja_une_organisation_revient_a_son_tableau_de_bord_par_le_logo(): void
     {
         $this->owner->forceFill(['current_tenant_id' => $this->tenant->id])->save();
+        $this->owner->unsetRelation('currentTenant');
 
         $this->actingAs($this->owner)
             ->get(route('home'))
