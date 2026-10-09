@@ -96,6 +96,15 @@ return [
             'count' => ':count sur :max',
             'limit_reached' => '{1} 1 accompagnateur au maximum pour cet événement.|[2,*] :count accompagnateurs au maximum pour cet événement.',
         ],
+        'summary' => [
+            'title' => 'Votre inscription',
+            'guest' => 'Invité',
+            'companion' => 'Accompagnateur',
+            'phone' => 'Téléphone',
+            'email' => 'Email',
+            'free' => 'Gratuit',
+        ],
+
         'total' => [
             'label' => 'Montant total dû',
         ],

@@ -96,6 +96,15 @@ return [
             'count' => ':count of :max',
             'limit_reached' => '{1} 1 companion maximum for this event.|[2,*] :count companions maximum for this event.',
         ],
+        'summary' => [
+            'title' => 'Your registration',
+            'guest' => 'Guest',
+            'companion' => 'Companion',
+            'phone' => 'Phone',
+            'email' => 'Email',
+            'free' => 'Free',
+        ],
+
         'total' => [
             'label' => 'Total amount due',
         ],

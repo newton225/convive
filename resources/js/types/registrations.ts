@@ -24,9 +24,16 @@ export type PublicUnitOption = {
     name: string;
 };
 
+// Le tarif choisi par une personne, tel que l'invite le relit sur son dossier.
+export type RegistrationPriceSummary = {
+    name: string;
+    price: number;
+};
+
 export type RegistrationCompanionSummary = {
     name: string;
     unit: string;
+    priceCategory: RegistrationPriceSummary | null;
 };
 
 export type RegistrationShowStatus =
@@ -75,7 +82,10 @@ export type RegistrationShow = {
     // Reference de dossier lisible (« SP-2026-0008 »), affichage seulement.
     reference: string | null;
     name: string;
+    phone: string;
+    email: string | null;
     unit: string;
+    priceCategory: RegistrationPriceSummary | null;
     amountDue: number;
     status: RegistrationShowStatus;
     heldUntil: string | null;

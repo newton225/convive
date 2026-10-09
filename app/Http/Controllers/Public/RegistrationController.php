@@ -13,6 +13,7 @@ use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Public\StoreRegistrationRequest;
 use App\Models\Event;
+use App\Models\EventPriceCategory;
 use App\Models\GuestClaim;
 use App\Models\PaymentAccount;
 use App\Models\Registration;
@@ -411,12 +412,21 @@ class RegistrationController extends Controller
             'registration' => [
                 'reference' => $registration->reference,
                 'name' => $registration->name,
+                // Ce que l'invite a declare sur la premiere page, pour qu'il le relise avant de payer :
+                // ce sont ses propres donnees, sur la page que lui seul peut ouvrir.
+                'phone' => PhoneNumber::display((string) $registration->phone),
+                'email' => $registration->email,
                 'unit' => $registration->unit->name,
+                'priceCategory' => $this->priceCategorySummary($registration->priceCategory),
                 'amountDue' => $registration->amount_due,
                 'status' => $registration->status->value,
                 'heldUntil' => $registration->held_until?->toISOString(),
-                'companions' => $registration->companions()->orderBy('position')->with('unit')->get()->map(
-                    fn ($companion) => ['name' => $companion->name, 'unit' => $companion->unit->name],
+                'companions' => $registration->companions()->orderBy('position')->with(['unit', 'priceCategory'])->get()->map(
+                    fn ($companion) => [
+                        'name' => $companion->name,
+                        'unit' => $companion->unit->name,
+                        'priceCategory' => $this->priceCategorySummary($companion->priceCategory),
+                    ],
                 ),
                 'ticket' => $registration->status === RegistrationStatus::Confirmed
                     ? $this->ticketSummary($registration, $event, $tenant)
@@ -438,6 +448,14 @@ class RegistrationController extends Controller
                     'instructions' => $account->instructions,
                 ]),
         ]);
+    }
+
+    /**
+     * @return array{name: string, price: int}|null
+     */
+    private function priceCategorySummary(?EventPriceCategory $category): ?array
+    {
+        return $category === null ? null : ['name' => $category->name, 'price' => $category->price];
     }
 
     /**

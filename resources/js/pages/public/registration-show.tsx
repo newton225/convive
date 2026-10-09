@@ -3,6 +3,7 @@ import { BrandColorStyle } from '@/components/brand-color-style';
 import { GuestClaimCard } from '@/components/public/guest-claim-card';
 import { ResumeLinkCard } from '@/components/public/resume-link-card';
 import { RegistrationRecap } from '@/components/public/registration-recap';
+import { RegistrationSummaryCard } from '@/components/public/registration-summary-card';
 import { OfflineBanner } from '@/components/offline-banner';
 import { useState } from 'react';
 import { CopyButton } from '@/components/copy-button';
@@ -27,7 +28,6 @@ import {
 } from '@/components/ui/select';
 import { formatCountdown, useCountdown } from '@/hooks/use-countdown';
 import { useTranslation } from '@/hooks/use-translation';
-import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { cn } from '@/lib/utils';
 import { retry } from '@/routes/public/registrations';
@@ -266,19 +266,7 @@ export default function PublicRegistrationShow({
                             </CardContent>
                         </Card>
 
-                        <Card>
-                            <CardContent className="flex items-center justify-between pt-6">
-                                <span className="text-sm font-medium">
-                                    {t('guest.registration.total.label')}
-                                </span>
-                                <span className="text-lg font-semibold">
-                                    {formatAmount(
-                                        registration.amountDue,
-                                        locale,
-                                    )}
-                                </span>
-                            </CardContent>
-                        </Card>
+                        <RegistrationSummaryCard registration={registration} />
 
                         <Card>
                             <CardHeader>
