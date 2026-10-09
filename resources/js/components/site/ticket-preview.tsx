@@ -41,7 +41,7 @@ export function TicketPreview() {
                 className="pointer-events-none absolute inset-0 [transform:translate3d(2.5px,3.5px,-6px)] rounded-2xl border border-white/10 bg-[oklch(0.14_0.05_265)]"
                 aria-hidden="true"
             />
-            {/* Les motifs de fond : guillochis et hachures, sous le contenu. */}
+            {/* Le motif de fond : des ecailles tres discretes, sous le contenu. */}
             <span
                 className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
                 aria-hidden="true"
