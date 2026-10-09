@@ -86,6 +86,11 @@ return [
 
     'payment_accounts_not_needed' => 'All your prices are free: no payment is expected, so you can publish without a payment account.',
 
+    'venue_map' => [
+        'preview' => 'Test this link',
+        'host' => 'Opens :host in a new tab, as your guests will see it.',
+    ],
+
     'price_categories' => [
         'default_name' => 'Standard price',
         'add' => 'Add a price',

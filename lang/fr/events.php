@@ -86,6 +86,11 @@ return [
 
     'payment_accounts_not_needed' => 'Tous vos tarifs sont gratuits : aucun versement n’est attendu, vous pouvez publier sans compte de versement.',
 
+    'venue_map' => [
+        'preview' => 'Tester ce lien',
+        'host' => 'Ouvre :host dans un nouvel onglet, comme le verront vos invités.',
+    ],
+
     'price_categories' => [
         'default_name' => 'Tarif unique',
         'add' => 'Ajouter un tarif',

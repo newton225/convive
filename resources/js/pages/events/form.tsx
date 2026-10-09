@@ -9,6 +9,7 @@ import { TemplatePicker } from '@/components/events/template-picker';
 import Heading from '@/components/heading';
 import { CompanionLimitField } from '@/components/events/companion-limit-field';
 import { TableGroupsField } from '@/components/events/table-groups-field';
+import { VenueMapField } from '@/components/events/venue-map-field';
 import { HelpTip } from '@/components/help-tip';
 import { LabelWithHelp } from '@/components/label-with-help';
 import { RequiredFieldsNote } from '@/components/required-fields-note';
@@ -350,17 +351,7 @@ export default function EventForm({
                                             />
                                         </div>
                                         <div className="sm:col-span-2">
-                                            <Field
-                                                name="venue_map_url"
-                                                label={t(
-                                                    'events.fields.venue_map_url',
-                                                )}
-                                                help={t(
-                                                    'events.help.venue_map_url',
-                                                )}
-                                                placeholder={t(
-                                                    'events.fields.venue_map_url_placeholder',
-                                                )}
+                                            <VenueMapField
                                                 defaultValue={
                                                     prefill?.venueMapUrl ?? ''
                                                 }
