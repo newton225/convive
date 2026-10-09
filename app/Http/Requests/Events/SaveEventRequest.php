@@ -369,7 +369,10 @@ class SaveEventRequest extends FormRequest
             return;
         }
 
-        $validator->errors()->add($endsAt !== null ? 'ends_at' : 'starts_at', __('events.errors.starts_at_past_when_published'));
+        $validator->errors()->add(
+            $endsAt !== null ? 'ends_at' : 'starts_at',
+            __($endsAt !== null ? 'events.errors.ends_at_past_when_published' : 'events.errors.starts_at_past_when_published'),
+        );
     }
 
     private function sameMinute(?DateTimeInterface $stored, ?DateTimeInterface $submitted): bool
