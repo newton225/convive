@@ -4,6 +4,7 @@ use App\Http\Controllers\Events\EntryControlController;
 use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Events\EventSettingsController;
 use App\Http\Controllers\Events\EventTicketTemplateController;
+use App\Http\Controllers\Events\GuestClaimController;
 use App\Http\Controllers\Events\PaymentProofController;
 use App\Http\Controllers\Events\ReconciliationController;
 use App\Http\Controllers\Events\RegistrationCardController;
@@ -61,6 +62,8 @@ Route::prefix('{tenant}')
 
         // La file de verification des preuves (README ecran 18), etape 6.
         Route::get('events/{event}/proofs', [PaymentProofController::class, 'index'])->name('tenants.events.proofs.index');
+        Route::get('events/{event}/claims', [GuestClaimController::class, 'index'])->name('tenants.events.claims.index');
+        Route::post('events/{event}/claims/{claim}/resolve', [GuestClaimController::class, 'resolve'])->name('tenants.events.claims.resolve');
         Route::get('events/{event}/proofs/{proof}/receipt', [PaymentProofController::class, 'receipt'])->name('tenants.events.proofs.receipt');
         Route::post('events/{event}/proofs/{proof}/approve', [PaymentProofController::class, 'approve'])->name('tenants.events.proofs.approve');
         Route::post('events/{event}/proofs/{proof}/reject', [PaymentProofController::class, 'reject'])->name('tenants.events.proofs.reject');

@@ -11,6 +11,7 @@ use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Requests\Events\SaveEventRequest;
 use App\Http\Requests\Events\SaveEventVisualRequest;
 use App\Models\Event;
+use App\Models\GuestClaim;
 use App\Models\PaymentAccount;
 use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
@@ -63,6 +64,7 @@ class EventController extends Controller
                     'occupiedSeats' => $event->occupiedSeats(),
                     'collectedAmount' => $event->collectedAmount(),
                     'proofsToCheck' => $event->registrations()->where('status', RegistrationStatus::ProofSubmitted)->count(),
+                    'openClaims' => GuestClaim::query()->open()->whereHas('registration', fn ($registration) => $registration->where('event_id', $event->id))->count(),
                 ])->values(),
             'permissions' => $request->user()->toTenantPermissions($tenant),
         ]);

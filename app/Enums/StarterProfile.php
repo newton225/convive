@@ -58,6 +58,7 @@ enum StarterProfile: string
                 TenantPermission::RegistrationsView,
                 TenantPermission::RegistrationsExport,
                 TenantPermission::RegistrationsRefund,
+                TenantPermission::RegistrationsClaims,
                 TenantPermission::ProofsView,
                 TenantPermission::ProofsApprove,
                 TenantPermission::ProofsReject,

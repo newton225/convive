@@ -11,6 +11,7 @@ return [
 
     'types' => [
         'proof_received' => ':name submitted a payment proof for :event.',
+        'claim_received' => ":name sent a claim for :event.",
         'holds_expired' => '{1} 1 reservation expired for :event.|[2,*] :count reservations expired for :event.',
         'proof_rejected' => 'The proof from :name for :event was rejected.',
         'seats_low' => '{1} Only 1 seat left for :event.|[2,*] Only :count seats left for :event.',
@@ -35,6 +36,7 @@ return [
         'saved' => 'Preferences saved.',
         'types' => [
             'proof_received' => 'Payment proof received',
+            'claim_received' => "Guest claim",
             'holds_expired' => 'Reservation expired',
             'proof_rejected' => 'Proof rejected',
             'seats_exhausted' => 'Seats exhausted',

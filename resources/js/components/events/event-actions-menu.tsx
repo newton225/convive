@@ -15,6 +15,7 @@ import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { useTranslation } from '@/hooks/use-translation';
 import { can, Permission } from '@/lib/permissions';
 import { duplicate, edit } from '@/routes/tenants/events';
+import { index as claimsIndex } from '@/routes/tenants/events/claims';
 import { index as proofsIndex } from '@/routes/tenants/events/proofs';
 import { index as reconciliationIndex } from '@/routes/tenants/events/reconciliation';
 import { index as registrationsIndex } from '@/routes/tenants/events/registrations';
@@ -68,6 +69,11 @@ export function EventActionsMenu({
             href: proofsIndex(target).url,
             label: t('events.actions.proofs'),
             test: 'event-proofs',
+        },
+        allowed(Permission.RegistrationsClaims) && {
+            href: claimsIndex(target).url,
+            label: t('events.actions.claims'),
+            test: 'event-claims',
         },
         allowed(Permission.ReconciliationImport) && {
             href: reconciliationIndex(target).url,

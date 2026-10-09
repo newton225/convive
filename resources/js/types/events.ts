@@ -35,6 +35,7 @@ export type EventListItem = EventSummary & {
     occupiedSeats: number;
     collectedAmount: number;
     proofsToCheck: number;
+    openClaims: number;
 };
 
 export type EventDetails = EventSummary & {

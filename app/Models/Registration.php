@@ -260,6 +260,14 @@ class Registration extends Model
     }
 
     /**
+     * @return HasMany<GuestClaim, $this>
+     */
+    public function claims(): HasMany
+    {
+        return $this->hasMany(GuestClaim::class);
+    }
+
+    /**
      * Get the proof currently awaiting verification, or the last one submitted.
      *
      * @return HasOne<PaymentProof, $this>

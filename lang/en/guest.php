@@ -111,7 +111,7 @@ return [
             'seats_enough' => 'Seats are still available for your group.',
             'seats_not_enough' => 'There are not enough seats left for your group right now.',
             'cancelled_title' => 'This registration has been cancelled.',
-            'cancelled_description' => 'The organisation cancelled this registration. Contact them if you believe this is a mistake.',
+            'cancelled_description' => 'The organisation cancelled this registration. If you believe this is a mistake, write to them with the form at the bottom of this page.',
         ],
     ],
 
@@ -120,7 +120,7 @@ return [
         'code_resent' => 'A new code has been sent to you by SMS.',
         'whatsapp_code_renewed' => 'New code ready: send it by WhatsApp.',
         'proof_sent' => 'Proof sent. The organisation will verify it.',
-        'proof_event_closed' => 'The event is closed: the proof was not saved. Please contact the organiser.',
+        'proof_event_closed' => 'The event is closed: the proof was not saved. Write to the organisation with the form at the bottom of this page.',
         'proof_too_late' => 'The reservation window had closed: the proof was not saved. Check availability and restart your reservation.',
         'no_seats_left' => 'There are not enough seats left for your registration. You can join the waitlist if it is open.',
         'hold_restarted' => 'Your reservation is back on: the countdown restarts.',
@@ -277,5 +277,25 @@ return [
         'copy' => 'Copy the link',
         'share' => 'Send it to me on WhatsApp',
         'deadline' => 'Resume before :date.',
+    ],
+
+    'claim' => [
+        'title' => 'A question or a problem?',
+        'description' => 'Write to us here: your message is read by the organisation, which will call you back on the number of your registration. No contact details to enter.',
+        'category' => 'Subject',
+        'category_placeholder' => 'Choose a subject',
+        'categories' => [
+            'payment' => 'My payment',
+            'refund' => 'My refund',
+            'ticket' => 'My ticket',
+            'other' => 'Another question',
+        ],
+        'message' => 'Your message',
+        'message_placeholder' => 'Explain what happened, in a few sentences.',
+        'message_help' => 'Between 10 and 1,000 characters. Never enter a secret code or a password.',
+        'submit' => 'Send my claim',
+        'sent' => 'Your claim has been sent. The organisation will call you back on the number of your registration.',
+        'too_many' => 'You already have claims waiting for an answer for this registration. Please wait: the organisation will call you back.',
+        'locked' => 'Your open claims are already with the organisation, which will call you back on the number of your registration.',
     ],
 ];

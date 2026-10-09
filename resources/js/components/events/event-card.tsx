@@ -11,6 +11,7 @@ import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
 import { edit } from '@/routes/tenants/events';
+import { index as claimsIndex } from '@/routes/tenants/events/claims';
 import { index as proofsIndex } from '@/routes/tenants/events/proofs';
 import { show as reportShow } from '@/routes/tenants/events/report';
 import { index as scanIndex } from '@/routes/tenants/events/scan';
@@ -172,6 +173,22 @@ export function EventCard({ tenantSlug, event, permissions, onClose }: Props) {
                                 {formatAmount(event.collectedAmount, locale)}
                             </span>
                         </div>
+                        {event.openClaims > 0 &&
+                        can(permissions, Permission.RegistrationsClaims) ? (
+                            <p
+                                className="text-sm font-medium"
+                                data-test="event-open-claims"
+                            >
+                                <Link
+                                    href={claimsIndex(target).url}
+                                    className="underline-offset-4 hover:underline"
+                                >
+                                    {t('events.card.open_claims', {
+                                        count: event.openClaims,
+                                    })}
+                                </Link>
+                            </p>
+                        ) : null}
                         {event.proofsToCheck > 0 ? (
                             <p
                                 className="text-sm font-medium"

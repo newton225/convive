@@ -7,6 +7,7 @@ import {
     FileX,
     Gauge,
     Hourglass,
+    MessageCircleWarning,
     MessageSquareWarning,
     ScanSearch,
     ShieldAlert,
@@ -22,6 +23,7 @@ import type { LucideIcon } from 'lucide-react';
  */
 const icons: Record<string, LucideIcon> = {
     proof_received: FileCheck,
+    claim_received: MessageCircleWarning,
     proof_rejected: FileX,
     holds_expired: Clock,
     seats_exhausted: Users,

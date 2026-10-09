@@ -33,6 +33,7 @@ export const Permission = {
     RegistrationsPurge: 'registrations.purge',
     RegistrationsCancel: 'registrations.cancel',
     RegistrationsRefund: 'registrations.refund',
+    RegistrationsClaims: 'registrations.claims',
     ReconciliationImport: 'reconciliation.import',
     ReconciliationResolve: 'reconciliation.resolve',
     ReportsView: 'reports.view',

@@ -24,6 +24,8 @@ enum TenantPermission: string
     // Sort du paiement d'une inscription annulee (README 2.11) : une decision d'argent,
     // distincte de l'annulation elle-meme.
     case RegistrationsRefund = 'registrations.refund';
+    // Lire et traiter les reclamations des invites (decision du 2026-10-09).
+    case RegistrationsClaims = 'registrations.claims';
 
     case ProofsView = 'proofs.view';
     case ProofsApprove = 'proofs.approve';
@@ -91,7 +93,7 @@ enum TenantPermission: string
 
             self::RegistrationsView, self::RegistrationsExport,
             self::RegistrationsPurge, self::RegistrationsCancel,
-            self::RegistrationsRefund => TenantPermissionDomain::Registrations,
+            self::RegistrationsRefund, self::RegistrationsClaims => TenantPermissionDomain::Registrations,
 
             self::ProofsView, self::ProofsApprove,
             self::ProofsReject => TenantPermissionDomain::Proofs,
@@ -137,7 +139,8 @@ enum TenantPermission: string
             self::EventsClose, self::EventsAnnounce => self::EventsView,
 
             self::RegistrationsExport, self::RegistrationsPurge,
-            self::RegistrationsCancel, self::RegistrationsRefund => self::RegistrationsView,
+            self::RegistrationsCancel, self::RegistrationsRefund,
+            self::RegistrationsClaims => self::RegistrationsView,
 
             self::ProofsApprove, self::ProofsReject => self::ProofsView,
 

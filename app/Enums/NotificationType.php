@@ -25,6 +25,7 @@ enum NotificationType: string
     case PlanLimitsLowered = 'plan_limits_lowered';
     case TrialEnding = 'trial_ending';
     case TrialEnded = 'trial_ended';
+    case ClaimReceived = 'claim_received';
 
     /**
      * Get the permission a member must hold to be told about this type, or null when the alert is
@@ -37,6 +38,7 @@ enum NotificationType: string
     {
         return match ($this) {
             self::ProofReceived, self::ProofRejected => TenantPermission::ProofsView,
+            self::ClaimReceived => TenantPermission::RegistrationsClaims,
             self::HoldsExpired, self::RegistrationsPurged => TenantPermission::RegistrationsView,
             self::SeatsExhausted, self::SeatsLow => TenantPermission::EventsView,
             self::PurgeScheduled => TenantPermission::RegistrationsView,

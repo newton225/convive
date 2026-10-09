@@ -33,6 +33,7 @@ use App\Support\WhatsApp\TwilioWhatsAppSender;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
@@ -261,6 +262,16 @@ class AppServiceProvider extends ServiceProvider
         // message, 3 par tranche de 10 minutes et par inscription plus IP.
         RateLimiter::for('phone-code', fn ($request) => Limit::perMinutes(10, 3)
             ->by((string) $request->route('resume').'|'.$request->ip()));
+
+        // Reclamation d'un invite : trois par heure et par dossier plus adresse IP, un message lu par
+        // une personne de l'organisation ne se genere pas en boucle.
+        RateLimiter::for('guest-claim', function ($request) {
+            $registration = $request->route('registration');
+
+            return Limit::perHour(3)->by(
+                (string) ($registration instanceof Model ? $registration->getKey() : $registration).'|'.$request->ip(),
+            );
+        });
 
         // Lien de reprise (table de CLAUDE.md, SECURITY.md H3) : 10 par heure, jeton plus IP.
         RateLimiter::for('resume', fn ($request) => Limit::perHour(10)

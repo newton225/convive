@@ -883,6 +883,22 @@ jamais recu le lien. **Ceci est la decision retenue, le code n'est pas encore ec
 - **Permission dediee**, distincte de `events.update` : annoncer publiquement une organisation
   est une decision de visibilite, pas une simple modification de fiche.
 
+### Reclamations des invites
+
+Decision du proprietaire du projet (2026-10-09) : l'invite n'a aucun moyen de joindre l'organisation, et ses
+coordonnees ne sont pas a divulguer. Un **formulaire** a la place, sur la page de son dossier.
+
+- **L'invite ecrit, l'organisation le rappelle** au numero du dossier : aucune coordonnee de l'organisation
+  n'est affichee. Sujet dans un catalogue ferme (`App\Enums\ClaimCategory`), message de 10 a 1 000 caracteres.
+- **Le dossier se prouve par la signature du lien de retour** (`Registration::notificationToken()`, comparee en
+  temps constant), jamais par un identifiant seul : route `public.registrations.claim.store`, 404 sinon.
+- **Limites** : limiteur `guest-claim` (3 par heure, dossier plus IP) et 3 reclamations ouvertes au plus par dossier
+  (`GuestClaim::MaxOpenPerRegistration`). Table `guest_claims` dans la base du locataire, supprimee avec l'inscription.
+- **Cote organisation** : permission `registrations.claims` (Proprietaire et Tresorier d'office), liste paginee par le
+  serveur sous l'evenement (`tenants.events.claims.index`, lien dans le menu de la carte et nombre de reclamations a
+  traiter sur la carte), alerte `NotificationType::ClaimReceived`, « Marquer comme traitee » journalise. L'application
+  ne repond pas : l'etat ne dit que « a traiter » ou « traitee ».
+
 ### Entree sans scan
 
 Decision du proprietaire du projet (2026-10-02) : quand le QR ne peut pas etre lu (ecran casse,

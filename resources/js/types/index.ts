@@ -1,6 +1,7 @@
 export type * from './auth';
 export type * from './audit';
 export type * from './billing';
+export type * from './claims';
 export type * from './console';
 export type * from './dashboard';
 export type * from './event-settings';

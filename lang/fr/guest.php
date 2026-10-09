@@ -111,7 +111,7 @@ return [
             'seats_enough' => 'Des places sont encore disponibles pour votre groupe.',
             'seats_not_enough' => 'Il ne reste plus assez de places pour votre groupe pour le moment.',
             'cancelled_title' => 'Cette inscription a été annulée.',
-            'cancelled_description' => "L'organisation a annulé cette inscription. Contactez-la si vous pensez qu'il s'agit d'une erreur.",
+            'cancelled_description' => "L'organisation a annulé cette inscription. Si vous pensez qu'il s'agit d'une erreur, écrivez-lui avec le formulaire en bas de cette page.",
         ],
     ],
 
@@ -120,7 +120,7 @@ return [
         'code_resent' => 'Un nouveau code vous a été envoyé par SMS.',
         'whatsapp_code_renewed' => 'Nouveau code prêt : envoyez-le par WhatsApp.',
         'proof_sent' => 'Preuve envoyée. Elle va être vérifiée par l\'organisation.',
-        'proof_event_closed' => "L'événement est clôturé : la preuve n'a pas été enregistrée. Contactez l'organisateur.",
+        'proof_event_closed' => "L'événement est clôturé : la preuve n'a pas été enregistrée. Écrivez à l'organisation avec le formulaire en bas de cette page.",
         'proof_too_late' => "Le délai de réservation était écoulé : la preuve n'a pas été enregistrée. Vérifiez les places et relancez votre réservation.",
         'no_seats_left' => "Il ne reste plus assez de places pour votre inscription. Vous pouvez rejoindre la liste d'attente si elle est ouverte.",
         'hold_restarted' => 'Votre réservation est relancée : le décompte repart.',
@@ -277,5 +277,25 @@ return [
         'copy' => 'Copier le lien',
         'share' => "Me l'envoyer sur WhatsApp",
         'deadline' => 'À reprendre avant le :date.',
+    ],
+
+    'claim' => [
+        'title' => 'Une question ou un problème ?',
+        'description' => 'Écrivez-nous ici : votre message est lu par l’organisation, qui vous rappellera au numéro de votre dossier. Aucune coordonnée à saisir.',
+        'category' => 'Sujet',
+        'category_placeholder' => 'Choisir un sujet',
+        'categories' => [
+            'payment' => 'Mon paiement',
+            'refund' => 'Mon remboursement',
+            'ticket' => 'Mon billet',
+            'other' => 'Autre question',
+        ],
+        'message' => 'Votre message',
+        'message_placeholder' => 'Expliquez ce qui s’est passé, en quelques phrases.',
+        'message_help' => 'Entre 10 et 1 000 caractères. Ne saisissez jamais un code secret ou un mot de passe.',
+        'submit' => 'Envoyer ma réclamation',
+        'sent' => 'Votre réclamation est envoyée. L’organisation vous rappellera au numéro de votre dossier.',
+        'too_many' => 'Vous avez déjà des réclamations en attente de réponse pour ce dossier. Patientez : l’organisation vous rappellera.',
+        'locked' => 'Vos réclamations en cours sont déjà entre les mains de l’organisation, qui vous rappellera au numéro de votre dossier.',
     ],
 ];

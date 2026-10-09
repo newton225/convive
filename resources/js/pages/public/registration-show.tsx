@@ -1,5 +1,6 @@
 import { Form, Head, router } from '@inertiajs/react';
 import { BrandColorStyle } from '@/components/brand-color-style';
+import { GuestClaimCard } from '@/components/public/guest-claim-card';
 import { ResumeLinkCard } from '@/components/public/resume-link-card';
 import { RegistrationRecap } from '@/components/public/registration-recap';
 import { OfflineBanner } from '@/components/offline-banner';
@@ -32,6 +33,7 @@ import { cn } from '@/lib/utils';
 import { retry } from '@/routes/public/registrations';
 import { store as storeProof } from '@/routes/public/registrations/proof';
 import type {
+    GuestClaimForm,
     PublicPaymentAccount,
     PublicRegistrationTenant,
     RegistrationShow,
@@ -47,6 +49,7 @@ type Props = {
     registration: RegistrationShow;
     paymentAccounts: PublicPaymentAccount[];
     token: string;
+    claim: GuestClaimForm;
     // Absent quand la page est atteinte par le lien signe des envois programmes plutot que par
     // le jeton de reprise de l'invite (voir `RegistrationController::render()`) : relancer une
     // reservation ou deposer une preuve reste alors hors de portee, la page masque ces actions.
@@ -66,6 +69,7 @@ export default function PublicRegistrationShow({
     registration,
     paymentAccounts,
     token,
+    claim,
     resume,
 }: Props) {
     const { t, locale } = useTranslation();
@@ -506,6 +510,7 @@ export default function PublicRegistrationShow({
                         }
                     />
                 ) : null}
+                <GuestClaimCard token={token} claim={claim} />
             </main>
         </div>
     );

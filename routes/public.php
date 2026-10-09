@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Public\EventController as PublicEventController;
+use App\Http\Controllers\Public\GuestClaimController as PublicGuestClaimController;
 use App\Http\Controllers\Public\PaymentProofController as PublicPaymentProofController;
 use App\Http\Controllers\Public\RegistrationController as PublicRegistrationController;
 use App\Http\Controllers\Public\RegistrationDeletedController as PublicRegistrationDeletedController;
@@ -80,6 +81,12 @@ Route::middleware([
     // lien signe ci-dessus.
     Route::get('/e/{token}/ticket/{ticket}', [PublicTicketController::class, 'show'])
         ->name('public.tickets.show');
+
+    // La reclamation d'un invite (decision du 2026-10-09) : le dossier se prouve par la signature
+    // du lien de retour, jamais par un identifiant seul.
+    Route::post('/e/{token}/register/{registration}/claim', [PublicGuestClaimController::class, 'store'])
+        ->middleware('throttle:guest-claim')
+        ->name('public.registrations.claim.store');
 
     // Les billets en PDF (README 2.8), a garder hors ligne pour l'entree : un billet seul, par
     // son lien individuel, ou tout le groupe, par le lien signe de la carte. Memes signatures.
