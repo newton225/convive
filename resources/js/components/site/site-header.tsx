@@ -16,8 +16,9 @@ import {
 } from '@/components/ui/sheet';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
-import { home, login, register } from '@/routes';
+import { home, login } from '@/routes';
 import { index as showcaseIndex } from '@/routes/showcase';
+import { SiteHeaderCta } from './site-header-cta';
 import { ThemeSwitcher } from './theme-switcher';
 
 /**
@@ -107,15 +108,7 @@ export function SiteHeader() {
                             {t('site.nav.login')}
                         </Link>
                     </Button>
-                    <Button
-                        size="sm"
-                        className="hidden rounded-full px-4 sm:inline-flex"
-                        asChild
-                    >
-                        <Link href={register()} data-test="site-register">
-                            {t('site.nav.register')}
-                        </Link>
-                    </Button>
+                    <SiteHeaderCta className="hidden sm:inline-flex" />
 
                     <Sheet>
                         <SheetTrigger asChild>
@@ -159,11 +152,7 @@ export function SiteHeader() {
                                         {t('site.nav.login')}
                                     </Link>
                                 </Button>
-                                <Button asChild>
-                                    <Link href={register()}>
-                                        {t('site.nav.register')}
-                                    </Link>
-                                </Button>
+                                <SiteHeaderCta className="h-10 w-full justify-center" />
                             </div>
                         </SheetContent>
                     </Sheet>
