@@ -36,7 +36,8 @@ function initialTranslations(): Translations {
  *
  * Erreurs de validation : une erreur deja affichee sous son champ ne se double pas d'une
  * notification. Est considere comme affiche tout message dont la cle correspond a un champ present
- * dans la page (`name`) ou a un emplacement declare (`data-error-for`). Le reste, typiquement une
+ * et visible a l'ecran (`name`) ou a un emplacement declare (`data-error-for`) : un champ hors de vue,
+ * tout en bas d'un long formulaire, donne aussi une notification. Le reste, typiquement une
  * action lancee par un bouton (table pleine, publication refusee, dernier Proprietaire), n'avait
  * aucun endroit ou s'afficher : il devient une notification d'echec.
  *
@@ -55,13 +56,32 @@ export function useVisitFeedback(): void {
             translations = event.detail.page.props.translations;
         });
 
+        // Une erreur n'est « affichee » que si son champ est a l'ecran : dans un long formulaire, on
+        // valide en haut de page et le champ fautif peut se trouver bien plus bas, hors de vue.
+        const isInView = (element: Element) => {
+            const target =
+                element instanceof HTMLInputElement && element.type === 'hidden'
+                    ? element.parentElement
+                    : element;
+
+            if (!target) {
+                return true;
+            }
+
+            const rect = target.getBoundingClientRect();
+
+            return rect.bottom > 0 && rect.top < window.innerHeight;
+        };
+
         const isDisplayed = (key: string) => {
             const base = key.split('.')[0];
             const selectors = [key, base, `${base}[]`]
                 .map((name) => `[name="${CSS.escape(name)}"]`)
                 .concat(`[data-error-for="${CSS.escape(base)}"]`);
 
-            return document.querySelector(selectors.join(',')) !== null;
+            return Array.from(
+                document.querySelectorAll(selectors.join(',')),
+            ).some(isInView);
         };
 
         const offError = router.on('error', (event) => {
