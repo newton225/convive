@@ -203,14 +203,6 @@ class RegistrationController extends Controller
         return Inertia::render('public/registration-verify', [
             'token' => $token,
             'resume' => $resume,
-            // La reclamation s'adresse par la signature du lien de retour, que la page connait deja
-            // des qu'on l'a ouverte (jeton de reprise ou lien signe).
-            'claim' => [
-                'registrationId' => $registration->id,
-                'signature' => $registration->notificationToken(),
-                'canSubmit' => $registration->claims()->open()->count() < GuestClaim::MaxOpenPerRegistration,
-                'categories' => ClaimCategory::values(),
-            ],
             'event' => ['name' => $event->name],
             'tenant' => [
                 'displayName' => $tenant->branding->display_name ?? $tenant->name,
@@ -393,6 +385,14 @@ class RegistrationController extends Controller
         return Inertia::render('public/registration-show', [
             'token' => $token,
             'resume' => $resume,
+            // La reclamation s'adresse par la signature du lien de retour, que la page connait deja
+            // des qu'on l'a ouverte (jeton de reprise ou lien signe).
+            'claim' => [
+                'registrationId' => $registration->id,
+                'signature' => $registration->notificationToken(),
+                'canSubmit' => $registration->claims()->open()->count() < GuestClaim::MaxOpenPerRegistration,
+                'categories' => ClaimCategory::values(),
+            ],
             'event' => [
                 'name' => $event->name,
                 // Pour le recapitulatif avant relance (README ecran 9) : le nombre de places
