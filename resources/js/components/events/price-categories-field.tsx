@@ -61,7 +61,14 @@ export function PriceCategoriesField({
         })),
     );
 
+    // Le refus du serveur date du dernier envoi : des qu'on retouche un tarif, il est perime et
+    // l'avertissement en direct reprend la main.
+    const [staleFor, setStaleFor] = useState<typeof errors | null>(null);
+    const serverError =
+        staleFor === errors ? undefined : errors.price_categories;
+
     const update = (index: number, values: Partial<Row>) => {
+        setStaleFor(errors);
         setCategories((current) =>
             current.map((category, categoryIndex) =>
                 categoryIndex === index ? { ...category, ...values } : category,
@@ -213,36 +220,36 @@ export function PriceCategoriesField({
                         })}
                         disabled={categories.length <= 1 || category.locked}
                         data-test="price-category-remove"
-                        onClick={() =>
+                        onClick={() => {
+                            setStaleFor(errors);
                             setCategories((current) =>
                                 current.filter(
                                     (_, categoryIndex) =>
                                         categoryIndex !== index,
                                 ),
-                            )
-                        }
+                            );
+                        }}
                     >
                         <Minus />
                     </Button>
                 </div>
             ))}
-            <InputError message={errors.price_categories} />
+            <InputError message={serverError} />
             <Button
                 type="button"
                 variant="secondary"
                 data-test="price-category-add"
-                onClick={() =>
+                onClick={() => {
+                    setStaleFor(errors);
                     setCategories((current) => [
                         ...current,
                         { name: '', price: '0', quota: '', locked: false },
-                    ])
-                }
+                    ]);
+                }}
             >
                 <Plus /> {t('events.price_categories.add')}
             </Button>
-            {capacity > 0 &&
-            quotaTotal > capacity &&
-            !errors.price_categories ? (
+            {capacity > 0 && quotaTotal > capacity && !serverError ? (
                 <p className="text-sm text-amber-600" role="status">
                     {t('events.price_categories.quotas_exceed', {
                         total: quotaTotal,
