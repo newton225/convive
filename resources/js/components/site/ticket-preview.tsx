@@ -28,9 +28,19 @@ export function TicketPreview() {
 
     return (
         <div
-            className="relative w-full max-w-sm rounded-2xl border border-white/15 bg-[linear-gradient(145deg,oklch(0.34_0.1_265),oklch(0.22_0.06_265))] p-6 text-white [transform-style:preserve-3d]"
+            className="relative w-full max-w-sm rounded-2xl border border-white/15 bg-[linear-gradient(145deg,oklch(0.34_0.1_265),oklch(0.22_0.06_265))] p-6 text-white shadow-[inset_0_1px_0_oklch(1_0_0/0.3),inset_0_-1px_0_oklch(0_0_0/0.4),inset_1px_0_0_oklch(1_0_0/0.1),inset_-1px_0_0_oklch(0_0_0/0.25)] [transform-style:preserve-3d]"
             data-test="site-ticket-preview"
         >
+            {/* L'epaisseur : deux cartons derriere, legerement decales. Invisibles a plat, ils
+                laissent voir une tranche des que le billet s'incline. */}
+            <span
+                className="pointer-events-none absolute inset-0 [transform:translate3d(1.5px,2px,-3px)] rounded-2xl border border-white/10 bg-[oklch(0.16_0.05_265)]"
+                aria-hidden="true"
+            />
+            <span
+                className="pointer-events-none absolute inset-0 [transform:translate3d(2.5px,3.5px,-6px)] rounded-2xl border border-white/10 bg-[oklch(0.14_0.05_265)]"
+                aria-hidden="true"
+            />
             {/* Les motifs de fond : guillochis et hachures, sous le contenu. */}
             <span
                 className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
@@ -38,6 +48,11 @@ export function TicketPreview() {
             >
                 <TicketPattern />
             </span>
+            {/* Le lustre : un reflet diagonal, clair en haut a gauche, sombre en bas a droite. */}
+            <span
+                className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(125deg,oklch(1_0_0/0.2),oklch(1_0_0/0.04)_32%,transparent_55%,oklch(0_0_0/0.18))]"
+                aria-hidden="true"
+            />
             {/* Le filet or d'une carte d'invitation, juste en retrait du bord. */}
             <span
                 className="pointer-events-none absolute inset-2 [transform:translateZ(2px)] rounded-xl border border-[oklch(0.72_0.12_70/0.4)]"
@@ -46,7 +61,7 @@ export function TicketPreview() {
             {/* Trois plans de profondeur : le titre, la pastille et le QR se decollent du billet
                 quand la scene l'incline (`HeroStage`), sans effet au repos. */}
             <div className="[transform:translateZ(18px)]">
-                <p className="font-serif text-2xl leading-tight font-semibold">
+                <p className="font-serif text-2xl leading-tight font-semibold [text-shadow:0_1px_0_oklch(1_0_0/0.18),0_-1px_0_oklch(0_0_0/0.55),0_2px_6px_oklch(0_0_0/0.35)]">
                     {t('site.preview.ticket.event')}
                 </p>
                 <p className="mt-1 text-sm text-white/60">
@@ -91,7 +106,7 @@ export function TicketPreview() {
                     </span>
                     <span
                         data-stage="valid"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-indigo-400/20 px-3 py-1 text-xs font-medium whitespace-nowrap text-indigo-200 [grid-area:1/1]"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-indigo-400/20 px-3 py-1 text-xs font-medium whitespace-nowrap text-indigo-200 shadow-[0_3px_8px_oklch(0_0_0/0.35)] [grid-area:1/1]"
                     >
                         <Check className="size-3.5" />
                         {t('site.preview.ticket.valid')}
@@ -99,7 +114,7 @@ export function TicketPreview() {
                 </span>
 
                 {/* Un motif de QR : illustratif, jamais un vrai jeton. */}
-                <span className="relative block size-[4.75rem] shrink-0 [transform:translateZ(34px)] overflow-hidden rounded-lg bg-white p-1.5">
+                <span className="relative block size-[4.75rem] shrink-0 [transform:translateZ(34px)] overflow-hidden rounded-lg bg-white p-1.5 shadow-[0_6px_14px_oklch(0_0_0/0.45),inset_0_-2px_0_oklch(0_0_0/0.12)]">
                     <svg
                         viewBox="0 0 7 7"
                         className="text-ink size-16"
