@@ -192,6 +192,7 @@ export default function EventScan({
         eventId: event.id,
         keyVersion: event.qrKeyVersion,
         validUntil: event.ticketValidUntil,
+        validFrom: event.ticketValidFrom,
     };
 
     // Garde la derniere liste de revocation authentique recue (SECURITY.md C2) : c'est elle que

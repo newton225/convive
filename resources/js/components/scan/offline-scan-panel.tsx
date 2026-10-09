@@ -10,6 +10,7 @@ export type LocalScanKind =
     | 'wrong_event'
     | 'outdated'
     | 'expired'
+    | 'too_early'
     | 'revoked'
     | 'unsupported'
     | 'no_key';
@@ -31,6 +32,7 @@ const Labels: Record<LocalScanKind, string> = {
     wrong_event: 'offline.scan.wrong_event',
     outdated: 'offline.scan.outdated',
     expired: 'offline.scan.expired',
+    too_early: 'offline.scan.too_early',
     revoked: 'offline.scan.revoked',
     unsupported: 'offline.scan.unsupported',
     no_key: 'offline.scan.no_key',

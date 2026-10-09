@@ -18,6 +18,7 @@ type Props = {
     event: {
         name: string;
         startsAt: string | null;
+        endsAt: string | null;
         venue: string | null;
         venueMapUrl: string | null;
     };
@@ -62,6 +63,9 @@ export default function PublicTicketShow({
                     {event.startsAt ? (
                         <p className="text-muted-foreground text-sm">
                             {formatDateTime(event.startsAt, locale)}
+                            {event.endsAt
+                                ? ` ${t('guest.event.until', { date: formatDateTime(event.endsAt, locale) })}`
+                                : ''}
                         </p>
                     ) : null}
                     {event.venue ? (

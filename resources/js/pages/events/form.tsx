@@ -329,6 +329,51 @@ export default function EventForm({
                                             error={errors.starts_at}
                                         />
                                         <Field
+                                            name="ends_at"
+                                            type="datetime-local"
+                                            label={t('events.fields.ends_at')}
+                                            help={t('events.help.ends_at')}
+                                            defaultValue={
+                                                event?.endsAtLocal ?? ''
+                                            }
+                                            error={errors.ends_at}
+                                        />
+                                        <Field
+                                            name="entry_opens_minutes_before"
+                                            type="number"
+                                            label={t(
+                                                'events.fields.entry_opens_minutes_before',
+                                            )}
+                                            help={t(
+                                                'events.help.entry_opens_minutes_before',
+                                            )}
+                                            defaultValue={
+                                                event?.entryOpensMinutesBefore !=
+                                                null
+                                                    ? String(
+                                                          event.entryOpensMinutesBefore,
+                                                      )
+                                                    : ''
+                                            }
+                                            error={
+                                                errors.entry_opens_minutes_before
+                                            }
+                                        />
+                                        <Field
+                                            name="entry_grace_minutes"
+                                            type="number"
+                                            label={t(
+                                                'events.fields.entry_grace_minutes',
+                                            )}
+                                            help={t(
+                                                'events.help.entry_grace_minutes',
+                                            )}
+                                            defaultValue={String(
+                                                event?.entryGraceMinutes ?? 30,
+                                            )}
+                                            error={errors.entry_grace_minutes}
+                                        />
+                                        <Field
                                             name="venue"
                                             label={t('events.fields.venue')}
                                             help={t('events.help.venue')}

@@ -491,6 +491,9 @@ class SaveEvent
         return [
             'name' => $event->name,
             'starts_at' => $event->starts_at?->toISOString(),
+            'ends_at' => $event->ends_at?->toISOString(),
+            'entry_opens_minutes_before' => $event->entry_opens_minutes_before,
+            'entry_grace_minutes' => $event->entry_grace_minutes,
             'tables' => $event->seatingTables()->count(),
             'capacity' => $event->capacity(),
             'price_per_person' => $event->price_per_person,

@@ -30,6 +30,9 @@ return [
         'name_placeholder' => 'For example: Gala dinner 2026',
         'subtitle' => 'Subtitle',
         'starts_at' => 'Date and time',
+        'ends_at' => 'End date and time (optional)',
+        'entry_opens_minutes_before' => "Doors open (minutes before the start)",
+        'entry_grace_minutes' => "Grace after the end (minutes)",
         'venue' => 'Venue',
         'venue_address' => 'Address',
         'seats_at_tables' => 'Guests are seated at tables',
@@ -67,6 +70,9 @@ return [
     ],
 
     'help' => [
+        'ends_at' => 'Optional. Without an end, the ticket stays valid for 24 hours after the start.',
+        'entry_opens_minutes_before' => "Optional. Empty: a ticket opens the door at any time before the start. Otherwise it only works from this many minutes before the start, offline too.",
+        'entry_grace_minutes' => "For how many minutes after the end (or 24 hours after the start when no end is given) a ticket still opens the door. 30 by default, 0 for no grace.",
         'venue' => 'The name of the place, as your guests know it: "Hôtel Ivoire, Palmiers room", "Palais de la Culture". It is required to publish the event.',
         'venue_address' => 'Optional. Where to find this place: street, area, city or a landmark, for example "Boulevard Latrille, Cocody, Abidjan". It is shown under the venue name. For directions, use the map location just below.',
         'seats_at_tables' => 'Tick if your guests are spread over tables. Untick for a gathering without tables, such as an outdoor event: you then only enter the number of seats, and no table is assigned.',
@@ -243,6 +249,8 @@ return [
         'price_category_quota_below_taken' => 'The quota cannot be lower than the :count seats already taken in this price category.',
         'price_category_quota_above_capacity' => 'The quota cannot exceed the :capacity seats of the room.',
         'starts_at_past_when_published' => 'This event is published or already booked: its date cannot move into the past, guests may already have paid. To end it, close it.',
+        'ends_at_before_start' => 'The end must be after the start.',
+        'ends_at_without_start' => 'Give the start first to give an end.',
         'price_category_quotas_above_capacity' => 'The quotas add up to :total, more than the room (:capacity seats): lower them so that their sum fits in the room.',
         'seating_mode_locked' => 'Guests have already registered: the choice with or without tables no longer changes, as it decides what their ticket says.',
         'price_category_locked' => 'This price has already been chosen: its name and amount no longer change, so every guest pays what was announced. Only its quota can still change.',

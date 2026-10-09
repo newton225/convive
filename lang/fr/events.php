@@ -30,6 +30,9 @@ return [
         'name_placeholder' => 'Par exemple : Dîner de gala 2026',
         'subtitle' => 'Sous-titre',
         'starts_at' => 'Date et heure',
+        'ends_at' => 'Date et heure de fin (facultatif)',
+        'entry_opens_minutes_before' => "Ouverture des portes (minutes avant le début)",
+        'entry_grace_minutes' => "Marge après la fin (minutes)",
         'venue' => 'Lieu',
         'venue_address' => 'Adresse',
         'seats_at_tables' => 'Les invités sont assis à des tables',
@@ -67,6 +70,9 @@ return [
     ],
 
     'help' => [
+        'ends_at' => 'Facultatif. Sans fin, le billet reste valable 24 heures après le début.',
+        'entry_opens_minutes_before' => "Facultatif. Vide : un billet ouvre la porte à tout moment avant le début. Sinon, il ne la fait ouvrir qu’à partir de ce nombre de minutes avant le début, y compris hors connexion.",
+        'entry_grace_minutes' => "Pendant combien de minutes après la fin (ou 24 heures après le début si aucune fin n’est donnée) un billet ouvre encore la porte. 30 par défaut, 0 pour aucune marge.",
         'venue' => 'Le nom de l’endroit, tel que vos invités le reconnaissent : « Hôtel Ivoire, salle des Palmiers », « Palais de la Culture ». Il est nécessaire pour publier l’événement.',
         'venue_address' => 'Facultatif. Où trouver ce lieu : rue, quartier, ville ou un repère, par exemple « Boulevard Latrille, Cocody, Abidjan ». Elle s’affiche sous le nom du lieu. Pour l’itinéraire, utilisez la localisation sur une carte juste en dessous.',
         'seats_at_tables' => 'Cochez si vos invités sont répartis à des tables. Décochez pour un rassemblement sans table, comme un événement en plein air : vous indiquez alors seulement le nombre de places, et aucune table n’est attribuée.',
@@ -243,6 +249,8 @@ return [
         'price_category_quota_below_taken' => 'Le quota ne peut pas être inférieur aux :count places déjà prises dans ce tarif.',
         'price_category_quota_above_capacity' => 'Le quota ne peut pas dépasser les :capacity places de la salle.',
         'starts_at_past_when_published' => 'Cet événement est publié ou déjà réservé : sa date ne peut pas reculer dans le passé, des invités ont peut-être déjà payé. Pour le terminer, clôturez-le.',
+        'ends_at_before_start' => 'La fin doit être après le début.',
+        'ends_at_without_start' => 'Indiquez d’abord le début pour donner une fin.',
         'price_category_quotas_above_capacity' => 'Les quotas additionnés (:total) dépassent la salle (:capacity places) : réduisez-les pour que leur somme tienne dans la salle.',
         'seating_mode_locked' => 'Des invités sont déjà inscrits : le choix avec ou sans tables ne change plus, car il décide de ce que dit leur billet.',
         'price_category_locked' => 'Ce tarif a déjà été choisi : son nom et son prix ne changent plus, pour que chaque invité paie ce qui lui a été annoncé. Seul son quota peut encore bouger.',

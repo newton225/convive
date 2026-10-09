@@ -5,7 +5,13 @@ import { formatDateParts } from '@/lib/format-date';
  * La date d'un evenement en vignette de calendrier : le jour se lit d'un coup d'oeil, le reste
  * suit en toutes lettres.
  */
-export function EventDateTile({ startsAt }: { startsAt: string | null }) {
+export function EventDateTile({
+    startsAt,
+    endsAt,
+}: {
+    startsAt: string | null;
+    endsAt: string | null;
+}) {
     const { t, locale } = useTranslation();
 
     if (startsAt === null) {
@@ -17,6 +23,9 @@ export function EventDateTile({ startsAt }: { startsAt: string | null }) {
     }
 
     const parts = formatDateParts(startsAt, locale);
+    const end = endsAt === null ? null : formatDateParts(endsAt, locale);
+    const sameDay =
+        end !== null && end.day === parts.day && end.month === parts.month;
 
     return (
         <div className="flex items-center gap-4">
@@ -33,7 +42,15 @@ export function EventDateTile({ startsAt }: { startsAt: string | null }) {
                     {t('guest.event.when')}
                 </p>
                 <p className="font-medium capitalize">{parts.weekday}</p>
-                <p className="text-muted-foreground text-sm">{parts.time}</p>
+                <p className="text-muted-foreground text-sm">
+                    {end === null
+                        ? parts.time
+                        : sameDay
+                          ? `${parts.time} - ${end.time}`
+                          : t('guest.event.until', {
+                                date: `${end.weekday} ${end.day} ${end.month}, ${end.time}`,
+                            })}
+                </p>
             </div>
         </div>
     );

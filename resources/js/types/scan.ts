@@ -73,4 +73,6 @@ export type ScanEventProps = {
     closed: boolean;
     // Echeance des billets en secondes depuis l'epoque (SECURITY.md C2), null sans date.
     ticketValidUntil: number | null;
+    // Heure d'ouverture des portes en secondes, null quand l'organisateur n'en fixe pas.
+    ticketValidFrom: number | null;
 };

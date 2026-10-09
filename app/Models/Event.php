@@ -32,6 +32,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property string|null $subtitle
  * @property EventStatus $status
  * @property CarbonImmutable|null $starts_at
+ * @property CarbonImmutable|null $ends_at
+ * @property int|null $entry_opens_minutes_before
+ * @property int|null $entry_grace_minutes
  * @property string|null $venue
  * @property string|null $venue_address
  * @property string|null $venue_map_url
@@ -77,7 +80,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read Collection<int, PaymentAccount> $paymentAccounts
  */
 #[Fillable([
-    'name', 'subtitle', 'starts_at', 'venue', 'venue_address', 'venue_map_url', 'seats_at_tables',
+    'name', 'subtitle', 'starts_at', 'ends_at', 'entry_opens_minutes_before', 'entry_grace_minutes', 'venue', 'venue_address', 'venue_map_url', 'seats_at_tables',
     'primary_color', 'secondary_color',
     'price_per_person', 'companion_limit',
     'registration_deadline', 'purge_at', 'invitations_send_at', 'hold_duration_minutes',
@@ -128,6 +131,12 @@ class Event extends Model implements HasMedia
      * Duree de reservation par defaut, en minutes (README 2.1).
      */
     public const DefaultHoldDurationMinutes = 10;
+
+    /**
+     * Minutes apres la fin pendant lesquelles un billet ouvre encore la porte (decision du
+     * 2026-10-09), reglable par evenement.
+     */
+    public const DefaultEntryGraceMinutes = 30;
 
     /**
      * Le visuel de l'evenement (README ecran 13), un seul exemplaire. Le SVG est refuse comme
@@ -601,11 +610,52 @@ class Event extends Model implements HasMedia
 
     /**
      * Get the moment after which this event's tickets stop granting entry (SECURITY.md C2), or
-     * null while the event has no date.
+     * null while the event has no date. La fin de l'evenement quand elle est donnee, sinon le
+     * debut plus la duree de validite par defaut.
      */
     public function ticketValidUntil(): ?CarbonImmutable
     {
-        return $this->starts_at?->addHours((int) config('convive.tickets.valid_hours_after_start'));
+        $end = $this->ends_at
+            ?? $this->starts_at?->addHours((int) config('convive.tickets.valid_hours_after_start'));
+
+        return $end?->addMinutes($this->entryGraceMinutes());
+    }
+
+    /**
+     * Get the moment before which a ticket does not open the door yet, or null when the
+     * organiser sets no limit (decision du 2026-10-09). Compte a partir du debut de l'evenement.
+     */
+    public function ticketValidFrom(): ?CarbonImmutable
+    {
+        if ($this->entry_opens_minutes_before === null) {
+            return null;
+        }
+
+        return $this->starts_at?->subMinutes($this->entry_opens_minutes_before);
+    }
+
+    /**
+     * Minutes during which a ticket still opens the door after the end of the event.
+     */
+    public function entryGraceMinutes(): int
+    {
+        return $this->entry_grace_minutes ?? self::DefaultEntryGraceMinutes;
+    }
+
+    /**
+     * L'instant ou l'evenement est fini : sa fin, ou son debut quand aucune fin n'est donnee.
+     */
+    public function endsOrStartsAt(): ?CarbonImmutable
+    {
+        return $this->ends_at ?? $this->starts_at;
+    }
+
+    /**
+     * Determine whether the event is over : sa fin est passee, ou son debut quand elle manque.
+     */
+    public function hasEnded(): bool
+    {
+        return $this->endsOrStartsAt()?->isPast() ?? false;
     }
 
     /**
@@ -668,6 +718,9 @@ class Event extends Model implements HasMedia
         return [
             'status' => EventStatus::class,
             'starts_at' => 'datetime',
+            'ends_at' => 'datetime',
+            'entry_opens_minutes_before' => 'integer',
+            'entry_grace_minutes' => 'integer',
             'registration_deadline' => 'datetime',
             'purge_at' => 'datetime',
             'seats_low_alerted_at' => 'datetime',

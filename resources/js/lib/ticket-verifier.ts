@@ -16,6 +16,7 @@ export type TicketVerification =
     | { status: 'wrong_event' }
     | { status: 'outdated' }
     | { status: 'expired' }
+    | { status: 'too_early' }
     | { status: 'revoked' }
     | { status: 'unsupported' }
     | { status: 'no_key' };
@@ -27,6 +28,9 @@ export type ExpectedEvent = {
     // Echeance que la date actuelle de l'evenement donne, en secondes. Un billet telecharge avant un
     // report porte une echeance plus ancienne : la plus tardive des deux fait foi, comme au serveur.
     validUntil: number | null;
+    // Heure d'ouverture des portes, en secondes ; null sans limite. Le jeton ne la porte pas : elle
+    // vient de l'evenement, comme `validUntil`.
+    validFrom: number | null;
 };
 
 type TicketPayload = {
@@ -200,6 +204,10 @@ export async function verifyTicketOffline(
 
     if (deadlines.length > 0 && Date.now() / 1000 > Math.max(...deadlines)) {
         return { status: 'expired' };
+    }
+
+    if (expected.validFrom !== null && Date.now() / 1000 < expected.validFrom) {
+        return { status: 'too_early' };
     }
 
     if (revoked.includes(payload.registration_id)) {

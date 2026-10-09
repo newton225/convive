@@ -88,7 +88,10 @@ export default function PublicEvent({ event, tenant, token }: Props) {
                         <InstallPrompt />
 
                         <Reveal className="grid gap-5 sm:grid-cols-2">
-                            <EventDateTile startsAt={event.startsAt} />
+                            <EventDateTile
+                                startsAt={event.startsAt}
+                                endsAt={event.endsAt}
+                            />
                             {event.venue ? (
                                 <div className="flex items-center gap-4">
                                     <span className="bg-card flex size-16 shrink-0 items-center justify-center rounded-2xl">

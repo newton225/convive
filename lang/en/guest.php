@@ -2,6 +2,7 @@
 
 return [
     'event' => [
+        'until' => 'until :date',
         'no_date' => 'Date to be announced',
         'venue' => 'Venue',
         'directions' => 'Get directions',

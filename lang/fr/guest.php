@@ -2,6 +2,7 @@
 
 return [
     'event' => [
+        'until' => 'jusqu’à :date',
         'no_date' => 'Date à venir',
         'venue' => 'Lieu',
         'directions' => "Voir l'itinéraire",

@@ -164,7 +164,8 @@ class ScanTicket
         if (($payload['tenant_id'] ?? null) !== Tenant::current()?->id
             || ($payload['event_id'] ?? null) !== $event->id
             || ($payload['key_version'] ?? null) !== $event->qr_key_version
-            || $this->expired($event, $payload['not_after'] ?? null)) {
+            || $this->expired($event, $payload['not_after'] ?? null)
+            || $this->tooEarly($event)) {
             return null;
         }
 
@@ -225,6 +226,17 @@ class ScanTicket
         ]);
 
         return $deadlines !== [] && now()->getTimestamp() > max($deadlines);
+    }
+
+    /**
+     * Determine whether the doors are not open yet : le billet est authentique mais l'organisateur
+     * a fixe une heure d'ouverture (decision du 2026-10-09). Sans reglage, jamais trop tot.
+     */
+    private function tooEarly(Event $event): bool
+    {
+        $from = $event->ticketValidFrom();
+
+        return $from !== null && now()->isBefore($from);
     }
 
     /**

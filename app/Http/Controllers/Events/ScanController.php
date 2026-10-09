@@ -179,6 +179,7 @@ class ScanController extends Controller
                 // L'appareil efface sa file locale d'un evenement clos (SECURITY.md M8).
                 'closed' => $event->status === EventStatus::Closed,
                 'ticketValidUntil' => $event->ticketValidUntil()?->getTimestamp(),
+                'ticketValidFrom' => $event->ticketValidFrom()?->getTimestamp(),
             ],
             // Relue par l'appareil a chaque retour du reseau (SECURITY.md C2) ; null tant
             // qu'aucun billet n'a ete emis, donc aucune cle generee.

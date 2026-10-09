@@ -20,6 +20,7 @@ return [
         'wrong_event' => 'Ticket for another event',
         'outdated' => 'Ticket issued with an old key: the guest must reopen their ticket to get the new code.',
         'expired' => 'Ticket expired',
+        'too_early' => 'The doors are not open yet for this ticket',
         'revoked' => 'Ticket cancelled',
         'review_title' => 'To review after syncing',
         'review_item' => 'A ticket accepted offline was refused or already used according to the server.',

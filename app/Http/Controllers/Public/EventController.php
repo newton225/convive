@@ -46,6 +46,7 @@ class EventController extends Controller
                 'name' => $event->name,
                 'subtitle' => $event->subtitle,
                 'startsAt' => $event->starts_at?->toISOString(),
+                'endsAt' => $event->ends_at?->toISOString(),
                 'venue' => $event->venue,
                 'venueAddress' => $event->venue_address,
                 'venueMapUrl' => $event->venue_map_url,

@@ -20,6 +20,7 @@ return [
         'wrong_event' => 'Billet d\'un autre événement',
         'outdated' => 'Billet émis avec une ancienne clé : l\'invité doit rouvrir son billet pour obtenir le nouveau code.',
         'expired' => 'Billet expiré',
+        'too_early' => 'Les portes ne sont pas encore ouvertes pour ce billet',
         'revoked' => 'Billet annulé',
         'review_title' => 'À revoir après synchronisation',
         'review_item' => 'Un billet accepté hors ligne a été refusé ou déjà utilisé par le serveur.',

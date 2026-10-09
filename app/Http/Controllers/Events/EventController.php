@@ -383,6 +383,9 @@ class EventController extends Controller
             'invitationsSendAt' => $event->invitations_send_at?->toDateTimeLocalString(),
             'holdDurationMinutes' => $event->hold_duration_minutes,
             'startsAtLocal' => $event->starts_at?->toDateTimeLocalString(),
+            'endsAtLocal' => $event->ends_at?->toDateTimeLocalString(),
+            'entryOpensMinutesBefore' => $event->entry_opens_minutes_before,
+            'entryGraceMinutes' => $event->entryGraceMinutes(),
             'paymentAccountIds' => $event->paymentAccounts->pluck('id')->all(),
         ]);
     }
@@ -475,6 +478,9 @@ class EventController extends Controller
             'name' => $request->validated('name'),
             'subtitle' => $request->validated('subtitle'),
             'starts_at' => $request->validated('starts_at'),
+            'ends_at' => $request->validated('ends_at'),
+            'entry_opens_minutes_before' => $request->validated('entry_opens_minutes_before'),
+            'entry_grace_minutes' => $request->validated('entry_grace_minutes') ?? Event::DefaultEntryGraceMinutes,
             'venue' => $request->validated('venue'),
             'venue_address' => $request->validated('venue_address'),
             'venue_map_url' => $request->validated('venue_map_url'),

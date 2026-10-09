@@ -11,6 +11,7 @@ use App\Models\Tenant;
 use App\Settings\ReservationSettings;
 use App\Support\MapLink;
 use Closure;
+use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -119,6 +120,12 @@ class SaveEventRequest extends FormRequest
             'subtitle' => ['nullable', 'string', 'max:200'],
 
             'starts_at' => ['nullable', 'date'],
+            // Facultative ; apres le debut, et jamais sans lui (verifie plus bas).
+            'ends_at' => ['nullable', 'date'],
+            // Fenetre d'entree : vide, les portes n'ont pas d'heure d'ouverture ; la marge apres la fin
+            // vaut 30 minutes si on ne la donne pas.
+            'entry_opens_minutes_before' => ['nullable', 'integer', 'min:0', 'max:1440'],
+            'entry_grace_minutes' => ['nullable', 'integer', 'min:0', 'max:720'],
             'venue' => ['nullable', 'string', 'max:150'],
             'venue_address' => ['nullable', 'string', 'max:255'],
             // Presente aux invites : un service de cartes connu, jamais un site quelconque.
@@ -196,6 +203,7 @@ class SaveEventRequest extends FormRequest
         return [
             function (Validator $validator): void {
                 $this->rejectDeadlineAfterTheEvent($validator);
+                $this->rejectEndBeforeStart($validator);
                 $this->rejectMovingAnEventIntoThePast($validator);
                 $this->rejectPaymentAccountsOfAnotherTenant($validator);
                 $this->rejectChangingSeatingModeOnceGuestsAreIn($validator);
@@ -313,16 +321,43 @@ class SaveEventRequest extends FormRequest
     }
 
     /**
-     * Un evenement publie ou deja reserve ne recule pas dans le passe (decision du 2026-10-09) :
-     * un invite qui a deja verse son argent recevrait un billet echu. Pour en finir, on le cloture.
-     * Une date passee qu'on ne touche pas ne bloque rien : l'evenement reste modifiable.
+     * La fin est apres le debut, et ne se donne pas sans lui.
+     */
+    private function rejectEndBeforeStart(Validator $validator): void
+    {
+        if ($validator->errors()->has('ends_at') || $validator->errors()->has('starts_at')) {
+            return;
+        }
+
+        $endsAt = $this->date('ends_at');
+
+        if ($endsAt === null) {
+            return;
+        }
+
+        $startsAt = $this->date('starts_at');
+
+        if ($startsAt === null) {
+            $validator->errors()->add('ends_at', __('events.errors.ends_at_without_start'));
+        } elseif ($endsAt->lessThanOrEqualTo($startsAt)) {
+            $validator->errors()->add('ends_at', __('events.errors.ends_at_before_start'));
+        }
+    }
+
+    /**
+     * Un evenement publie ou deja reserve ne se termine pas dans le passe (decision du
+     * 2026-10-09) : un invite qui a deja verse son argent recevrait un billet echu. Pour en finir,
+     * on le cloture. Un evenement deja commence mais pas fini reste valable, et des dates passees
+     * qu'on ne touche pas ne bloquent rien : l'evenement reste modifiable.
      */
     private function rejectMovingAnEventIntoThePast(Validator $validator): void
     {
         $event = $this->route('event');
         $startsAt = $this->date('starts_at');
+        $endsAt = $this->date('ends_at');
+        $end = $endsAt ?? $startsAt;
 
-        if (! $event instanceof Event || $startsAt === null || ! $startsAt->isPast()) {
+        if (! $event instanceof Event || $end === null || ! $end->isPast()) {
             return;
         }
 
@@ -330,11 +365,20 @@ class SaveEventRequest extends FormRequest
             return;
         }
 
-        if ($event->starts_at !== null && intdiv($event->starts_at->getTimestamp(), 60) === intdiv($startsAt->getTimestamp(), 60)) {
+        if ($this->sameMinute($event->starts_at, $startsAt) && $this->sameMinute($event->ends_at, $endsAt)) {
             return;
         }
 
-        $validator->errors()->add('starts_at', __('events.errors.starts_at_past_when_published'));
+        $validator->errors()->add($endsAt !== null ? 'ends_at' : 'starts_at', __('events.errors.starts_at_past_when_published'));
+    }
+
+    private function sameMinute(?DateTimeInterface $stored, ?DateTimeInterface $submitted): bool
+    {
+        if ($stored === null || $submitted === null) {
+            return $stored === $submitted;
+        }
+
+        return intdiv($stored->getTimestamp(), 60) === intdiv($submitted->getTimestamp(), 60);
     }
 
     /**
@@ -497,6 +541,9 @@ class SaveEventRequest extends FormRequest
             'name' => __('events.fields.name'),
             'subtitle' => __('events.fields.subtitle'),
             'starts_at' => __('events.fields.starts_at'),
+            'ends_at' => __('events.fields.ends_at'),
+            'entry_opens_minutes_before' => __('events.fields.entry_opens_minutes_before'),
+            'entry_grace_minutes' => __('events.fields.entry_grace_minutes'),
             'venue' => __('events.fields.venue'),
             'free_seats' => __('events.fields.free_seats'),
             'seats_at_tables' => __('events.fields.seats_at_tables'),

@@ -61,6 +61,10 @@ export type EventDetails = EventSummary & {
     invitationsSendAt: string | null;
     holdDurationMinutes: number;
     startsAtLocal: string | null;
+    endsAtLocal: string | null;
+    // Fenetre d'entree : minutes d'ouverture avant le debut (null : sans limite), marge apres la fin.
+    entryOpensMinutesBefore: number | null;
+    entryGraceMinutes: number;
     paymentAccountIds: number[];
 };
 
@@ -116,6 +120,7 @@ export type PublicEvent = {
     name: string;
     subtitle: string | null;
     startsAt: string | null;
+    endsAt: string | null;
     venue: string | null;
     venueAddress: string | null;
     // Lien vers un service de cartes, verifie par le serveur (`MapLink`).

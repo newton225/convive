@@ -763,6 +763,16 @@ change.
   capacite ne descend jamais sous les places prises. La date, le lieu et les echeances restent
   modifiables et journalises, **sans prevenir les inscrits** : la fiche le dit. Un message aux
   inscrits (geste « Reporter ») n'existe pas encore : WhatsApp exige un modele approuve par Meta.
+- **Fin facultative** (`events.ends_at`, decision du 2026-10-09) : sans fin, le billet vaut 24 heures apres le
+  debut (`Event::ticketValidUntil()`) ; avec une fin, jusqu'a cette fin. Un evenement est termine a sa fin, ou
+  a son debut quand elle manque (`Event::hasEnded()`). **Un evenement publie ou deja reserve ne se termine pas
+  dans le passe** (`SaveEventRequest`), on le cloture ; la file de preuves signale un evenement termine.
+- **Fenetre d'entree d'un billet** (decision du 2026-10-09, reglages de l'evenement, formulaire) : marge apres
+  la fin `entry_grace_minutes` (30 par defaut, 0 a 720), appliquee a `ticketValidUntil()` ; ouverture des portes
+  `entry_opens_minutes_before` (vide : sans limite, 0 a 1 440), `ticketValidFrom()`. Le serveur (`ScanTicket`) et le
+  scan hors connexion (`verifyTicketOffline`, statut `too_early`) la lisent de l'evenement, jamais du jeton : le
+  format du QR ne change pas. Comme l'echeance, la plus tardive des deux fait foi pour la fin ; l'entree sans scan
+  (`scan.manual`) n'est pas bornee par la fenetre, l'agent en repond.
 - **Une preuve ne se depose plus sur un evenement cloture** (`SubmitPaymentProof`), meme pendant un
   decompte qui court encore : l'invite lit un message qui le dit.
 - **Duree de reservation bornee** (decision du 2026-10-07) : curseur entre un minimum et un maximum

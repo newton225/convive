@@ -68,6 +68,57 @@ class TicketTokenLifecycleTest extends TestCase
         $this->assertSame($event->ticketValidUntil()?->getTimestamp(), $payload['not_after']);
     }
 
+    public function test_refuse_un_billet_avant_l_ouverture_des_portes_puis_l_accepte(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event, 'token' => $token] = $this->confirmedTicket($tenant);
+
+        $event = $tenant->asCurrent(function () use ($event) {
+            $event->update(['entry_opens_minutes_before' => 120]);
+
+            return $event->fresh();
+        });
+
+        $this->travelTo($event->starts_at->subMinutes(121));
+        $early = $tenant->asCurrent(fn () => app(ScanTicket::class)->handle($event, $token, $owner));
+
+        $this->travelTo($event->starts_at->subMinutes(119));
+        $open = $tenant->asCurrent(fn () => app(ScanTicket::class)->handle($event, $token, $owner));
+
+        $this->assertSame(ScanResult::Refused, $early['result']);
+        $this->assertSame(ScanResult::Accepted, $open['result']);
+    }
+
+    public function test_sans_heure_d_ouverture_un_billet_entre_des_qu_il_est_emis(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event, 'token' => $token] = $this->confirmedTicket($tenant);
+
+        $outcome = $tenant->asCurrent(fn () => app(ScanTicket::class)->handle($event, $token, $owner));
+
+        $this->assertSame(ScanResult::Accepted, $outcome['result']);
+    }
+
+    public function test_un_billet_vaut_encore_pendant_la_marge_apres_la_fin(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event, 'token' => $token] = $this->confirmedTicket($tenant);
+
+        $event = $tenant->asCurrent(function () use ($event) {
+            $event->update(['ends_at' => $event->starts_at->addHours(4), 'entry_grace_minutes' => 30]);
+
+            return $event->fresh();
+        });
+
+        $this->travelTo($event->ends_at->addMinutes(29));
+        $within = $tenant->asCurrent(fn () => app(ScanTicket::class)->handle($event, $token, $owner));
+
+        $this->assertSame(ScanResult::Accepted, $within['result']);
+    }
+
     public function test_refuse_un_billet_presente_apres_sa_date_d_expiration(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
