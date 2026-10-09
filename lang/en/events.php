@@ -75,7 +75,7 @@ return [
         'secondary_color' => 'A quieter supporting colour: the action button in emails sent to guests, and the glow of the banner when the event has no visual.',
         'table_groups' => 'Describe the room in groups of tables of the same size, for example 3 tables of 12 then 20 tables of 8. The event capacity is the sum of the seats of every table, and a given table can then be adjusted in the seating plan. A guest and their companions always sit at the same table.',
         'price_per_person' => 'Amount in CFA francs, with no decimals; 0 for a free event. Each companion pays this price too: the guest pays the price times the number of people registered.',
-        'price_categories' => 'Add the available prices. Each person chooses one; the seat quota is optional and counts people in that category.',
+        'price_categories' => 'Add the available prices. Each person chooses one; the seat limit is required and counts people in that category.',
         'companion_limit' => 'Maximum number of people a guest can register with them (10 at most). Each one takes a seat and gets their own ticket.',
         'payment_accounts' => 'The accounts your guests pay into. You create them under Organisation, Payment accounts. A new or changed account only shows after a 24-hour security delay.',
         'registration_deadline' => 'After this date, the public link no longer accepts registrations. Registrations already made carry on as usual.',
@@ -94,8 +94,7 @@ return [
         'free' => 'Free',
         'free_hint' => 'A price of 0 means free.',
         'locked' => 'Already chosen: the name and amount no longer change. The quota can still change.',
-        'capacity_hint' => 'The room has :count seats: a quota cannot exceed it.',
-        'quotas_exceed' => 'The quotas add up to :total, more than the room (:capacity seats): the room will fill up before every price reaches its quota.',
+        'quotas_exceed' => 'The quotas add up to :total, more than the room (:capacity seats): saving is refused while their sum exceeds the room.',
     ],
 
     'visual' => [
@@ -238,6 +237,7 @@ return [
         'price_category_duplicate' => 'Each price must have a different name.',
         'price_category_quota_below_taken' => 'The quota cannot be lower than the :count seats already taken in this price category.',
         'price_category_quota_above_capacity' => 'The quota cannot exceed the :capacity seats of the room.',
+        'price_category_quotas_above_capacity' => 'The quotas add up to :total, more than the room (:capacity seats): lower them so that their sum fits in the room.',
         'seating_mode_locked' => 'Guests have already registered: the choice with or without tables no longer changes, as it decides what their ticket says.',
         'price_category_locked' => 'This price has already been chosen: its name and amount no longer change, so every guest pays what was announced. Only its quota can still change.',
         'price_category_in_use' => 'A price already chosen by guests or waitlisted people cannot be removed.',

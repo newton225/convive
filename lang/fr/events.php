@@ -75,7 +75,7 @@ return [
         'secondary_color' => 'Une couleur d’accompagnement, plus discrète : le bouton d’action des emails envoyés aux invités, et le halo du bandeau quand l’événement n’a pas de visuel.',
         'table_groups' => 'Décrivez la salle par groupes de tables de même taille, par exemple 3 tables de 12 puis 20 tables de 8. La capacité de l’événement est la somme des places de toutes les tables, et une table précise s’ajuste ensuite dans le plan de salle. Un invité et ses accompagnateurs sont toujours assis à la même table.',
         'price_per_person' => 'Montant en francs CFA, sans décimale ; 0 pour un événement gratuit. Chaque accompagnateur paie aussi ce tarif : l’invité doit verser le tarif multiplié par le nombre de personnes inscrites.',
-        'price_categories' => 'Ajoutez les tarifs proposés. Chaque personne choisit son tarif ; le quota est facultatif et compte les places de cette catégorie.',
+        'price_categories' => 'Ajoutez les tarifs proposés. Chaque personne choisit son tarif ; le nombre de places de chaque tarif est obligatoire et compte les places de cette catégorie.',
         'companion_limit' => 'Nombre maximal de personnes qu’un invité peut inscrire avec lui (10 au plus). Chacune occupe une place et reçoit son propre billet.',
         'payment_accounts' => 'Les comptes sur lesquels vos invités vous versent l’argent. Ils se créent dans Organisation, Comptes de versement. Un compte nouveau ou modifié n’apparaît qu’après un délai de sécurité de 24 heures.',
         'registration_deadline' => 'Après cette date, le lien public n’accepte plus d’inscription. Les inscriptions déjà faites continuent normalement.',
@@ -94,8 +94,7 @@ return [
         'free' => 'Gratuit',
         'free_hint' => 'Un prix à 0 équivaut à gratuit.',
         'locked' => 'Déjà choisi : le nom et le prix ne changent plus. Le quota reste modifiable.',
-        'capacity_hint' => 'La salle compte :count places : un quota ne peut pas la dépasser.',
-        'quotas_exceed' => 'Les quotas additionnés (:total) dépassent la salle (:capacity places) : la salle se remplira avant que chaque tarif atteigne son quota.',
+        'quotas_exceed' => 'Les quotas additionnés (:total) dépassent la salle (:capacity places) : l’enregistrement sera refusé tant que leur somme dépasse la salle.',
     ],
 
     'visual' => [
@@ -238,6 +237,7 @@ return [
         'price_category_duplicate' => 'Chaque tarif doit avoir un nom différent.',
         'price_category_quota_below_taken' => 'Le quota ne peut pas être inférieur aux :count places déjà prises dans ce tarif.',
         'price_category_quota_above_capacity' => 'Le quota ne peut pas dépasser les :capacity places de la salle.',
+        'price_category_quotas_above_capacity' => 'Les quotas additionnés (:total) dépassent la salle (:capacity places) : réduisez-les pour que leur somme tienne dans la salle.',
         'seating_mode_locked' => 'Des invités sont déjà inscrits : le choix avec ou sans tables ne change plus, car il décide de ce que dit leur billet.',
         'price_category_locked' => 'Ce tarif a déjà été choisi : son nom et son prix ne changent plus, pour que chaque invité paie ce qui lui a été annoncé. Seul son quota peut encore bouger.',
         'price_category_in_use' => 'Un tarif déjà choisi par des inscrits ou des personnes en attente ne peut pas être retiré.',

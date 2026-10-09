@@ -20,6 +20,12 @@ use Illuminate\Validation\Validator;
 class SaveEventRequest extends FormRequest
 {
     /**
+     * Le quota est obligatoire (decision du 2026-10-08) quand le formulaire envoie ses tarifs. Un
+     * envoi sans tarifs (tarif unique reconstitue) n'a pas de quota a exiger.
+     */
+    private bool $categoriesFromForm = true;
+
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -43,7 +49,9 @@ class SaveEventRequest extends FormRequest
 
         $this->matchPriceCategoriesByName();
 
-        if (! $this->has('price_categories')) {
+        $this->categoriesFromForm = $this->has('price_categories');
+
+        if (! $this->categoriesFromForm) {
             $event = $this->route('event');
             $existing = $event instanceof Event ? $event->priceCategories()->get() : collect();
             $price = (int) $this->input('price_per_person', 0);
@@ -154,7 +162,7 @@ class SaveEventRequest extends FormRequest
             ],
             'price_categories.*.name' => ['required', 'string', 'max:60'],
             'price_categories.*.price' => ['required', 'integer', 'min:0', 'max:100000000'],
-            'price_categories.*.quota' => ['nullable', 'integer', 'min:1'],
+            'price_categories.*.quota' => [$this->categoriesFromForm ? 'required' : 'nullable', 'integer', 'min:1'],
             'companion_limit' => ['nullable', 'integer', 'min:0', 'max:'.Event::MaximumCompanionLimit],
 
             'registration_deadline' => ['nullable', 'date'],
@@ -348,15 +356,26 @@ class SaveEventRequest extends FormRequest
             return;
         }
 
+        $total = 0;
+        $aboveCapacity = false;
+
         foreach ((array) $this->input('price_categories', []) as $index => $attributes) {
             $quota = is_array($attributes) ? ($attributes['quota'] ?? null) : null;
 
+            $total += (int) $quota;
+
             if ($quota !== null && $quota !== '' && (int) $quota > $capacity) {
+                $aboveCapacity = true;
                 $validator->errors()->add(
                     "price_categories.{$index}.quota",
                     __('events.errors.price_category_quota_above_capacity', ['capacity' => $capacity]),
                 );
             }
+        }
+
+        // Les quotas se partagent la salle (decision du 2026-10-08) : leur somme ne la depasse pas.
+        if ($total > $capacity && ! $aboveCapacity) {
+            $validator->errors()->add('price_categories', __('events.errors.price_category_quotas_above_capacity', ['total' => $total, 'capacity' => $capacity]));
         }
     }
 

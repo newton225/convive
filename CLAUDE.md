@@ -748,7 +748,7 @@ change.
   manque : la fiche l'affiche, le refus du serveur aussi.
 - **Le tarif est toujours renseigne** : 0 veut dire gratuit, un champ vide est refuse.
 - **Categories de tarifs** (`event_price_categories`, decision du 2026-10-07) : l'exploitant saisit
-  ses propres categories (nom, prix, quota facultatif), au moins une par evenement. Chaque personne,
+  ses propres categories (nom, prix, quota obligatoire depuis le 2026-10-08), au moins une par evenement. Chaque personne,
   l'invite et chaque accompagnateur, choisit la sienne ; le montant du est la somme des prix choisis.
   Le quota est dans la capacite de la salle et se controle sous le verrou de reservation
   (`HoldRegistration`). Aucun lien avec les tables. `events.price_per_person` n'est plus que le tarif

@@ -125,7 +125,7 @@ class EventTest extends TestCase
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->tenantOwnedBy($owner);
-        $categories = [['name' => 'Standard', 'price' => 5000, 'quota' => null]];
+        $categories = [['name' => 'Standard', 'price' => 5000, 'quota' => 50]];
 
         $this->actingAs($owner)->post(route('tenants.events.store', $tenant), $this->payload(['price_categories' => $categories]));
         $event = $this->eventOf($tenant);
@@ -138,13 +138,13 @@ class EventTest extends TestCase
 
         $this->actingAs($owner)
             ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
-                'price_categories' => [['id' => $category->id, 'name' => 'Standard', 'price' => 7000, 'quota' => null]],
+                'price_categories' => [['id' => $category->id, 'name' => 'Standard', 'price' => 7000, 'quota' => 50]],
             ]))
             ->assertSessionHasErrors('price_categories.0.price');
 
         $this->actingAs($owner)
             ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
-                'price_categories' => [['id' => $category->id, 'name' => 'Normal', 'price' => 5000, 'quota' => null]],
+                'price_categories' => [['id' => $category->id, 'name' => 'Normal', 'price' => 5000, 'quota' => 50]],
             ]))
             ->assertSessionHasErrors('price_categories.0.name');
 
@@ -162,14 +162,14 @@ class EventTest extends TestCase
         $tenant = $this->tenantOwnedBy($owner);
 
         $this->actingAs($owner)->post(route('tenants.events.store', $tenant), $this->payload([
-            'price_categories' => [['name' => 'Standard', 'price' => 5000, 'quota' => null]],
+            'price_categories' => [['name' => 'Standard', 'price' => 5000, 'quota' => 50]],
         ]));
         $event = $this->eventOf($tenant);
         $category = $tenant->asCurrent(fn () => $event->priceCategories()->firstOrFail());
 
         $this->actingAs($owner)
             ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
-                'price_categories' => [['id' => $category->id, 'name' => 'Normal', 'price' => 7000, 'quota' => null]],
+                'price_categories' => [['id' => $category->id, 'name' => 'Normal', 'price' => 7000, 'quota' => 50]],
             ]))
             ->assertSessionHasNoErrors();
     }
@@ -200,8 +200,8 @@ class EventTest extends TestCase
 
         $this->actingAs($owner)->post(route('tenants.events.store', $tenant), $this->payload([
             'price_categories' => [
-                ['name' => 'Standard', 'price' => 5000, 'quota' => null],
-                ['name' => 'VIP', 'price' => 20000, 'quota' => null],
+                ['name' => 'Standard', 'price' => 5000, 'quota' => 50],
+                ['name' => 'VIP', 'price' => 20000, 'quota' => 50],
             ],
         ]));
         $event = $this->eventOf($tenant);
@@ -213,8 +213,8 @@ class EventTest extends TestCase
         $this->actingAs($owner)
             ->patch(route('tenants.events.update', [$tenant, $event]), $this->payload([
                 'price_categories' => [
-                    ['id' => $standard->id, 'name' => 'VIP', 'price' => 5000, 'quota' => null],
-                    ['name' => 'Standard', 'price' => 9000, 'quota' => null],
+                    ['id' => $standard->id, 'name' => 'VIP', 'price' => 5000, 'quota' => 50],
+                    ['name' => 'Standard', 'price' => 9000, 'quota' => 50],
                 ],
             ]))
             ->assertSessionHasNoErrors();
@@ -250,7 +250,7 @@ class EventTest extends TestCase
         $this->actingAs($owner)
             ->post(route('tenants.events.store', $tenant), $this->payload([
                 'price_categories' => [
-                    ['name' => 'Standard', 'price' => 15000, 'quota' => null],
+                    ['name' => 'Standard', 'price' => 15000, 'quota' => 50],
                     ['name' => 'VIP', 'price' => 30000, 'quota' => 20],
                 ],
             ]))
@@ -260,10 +260,26 @@ class EventTest extends TestCase
         $categories = $tenant->asCurrent(fn () => $event->priceCategories()->get());
 
         $this->assertSame(
-            [['Standard', 15000, null], ['VIP', 30000, 20]],
+            [['Standard', 15000, 50], ['VIP', 30000, 20]],
             $categories->map(fn ($category) => [$category->name, $category->price, $category->quota])->all(),
         );
         $this->assertSame(15000, $event->price_per_person);
+    }
+
+    public function test_le_quota_d_un_tarif_est_obligatoire(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $this->payload([
+                'price_categories' => [
+                    ['name' => 'gratos', 'price' => 0, 'quota' => ''],
+                    ['name' => '10Krika', 'price' => 10000, 'quota' => 25],
+                ],
+            ]))
+            ->assertSessionHasErrors('price_categories.0.quota')
+            ->assertSessionDoesntHaveErrors('price_categories.1.quota');
     }
 
     public function test_un_quota_ne_peut_pas_depasser_la_capacite_de_la_salle(): void
@@ -281,6 +297,22 @@ class EventTest extends TestCase
             ]))
             ->assertSessionHasErrors('price_categories.1.quota')
             ->assertSessionDoesntHaveErrors('price_categories.0.quota');
+    }
+
+    public function test_la_somme_des_quotas_ne_peut_pas_depasser_la_capacite_de_la_salle(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.store', $tenant), $this->payload([
+                'table_groups' => [['count' => 10, 'seats' => 4]],
+                'price_categories' => [
+                    ['name' => 'gratos', 'price' => 0, 'quota' => 30],
+                    ['name' => '10Krika', 'price' => 10000, 'quota' => 25],
+                ],
+            ]))
+            ->assertSessionHasErrors('price_categories');
     }
 
     public function test_un_evenement_nait_en_brouillon_et_sans_lien_public(): void

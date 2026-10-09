@@ -80,11 +80,10 @@ export function PriceCategoriesField({
         onFreeChange?.(free);
     }, [free, onFreeChange]);
 
-    // Seuls les tarifs plafonnes comptent : un tarif sans quota n'a pas de limite propre.
-    const unlimited = categories.some(({ quota }) => quota === '');
-    const quotaTotal = unlimited
-        ? 0
-        : categories.reduce((sum, { quota }) => sum + (Number(quota) || 0), 0);
+    const quotaTotal = categories.reduce(
+        (sum, { quota }) => sum + (Number(quota) || 0),
+        0,
+    );
 
     // Ajouter ou retirer une ligne ne tape dans aucun champ : le formulaire doit le savoir.
     const field = useNotifyFormChange<HTMLDivElement>(categories.length);
@@ -181,7 +180,10 @@ export function PriceCategoriesField({
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor={`price-category-quota-${index}`}>
+                        <Label
+                            htmlFor={`price-category-quota-${index}`}
+                            required
+                        >
                             {t('events.fields.price_category_quota')}
                         </Label>
                         <Input
@@ -194,6 +196,7 @@ export function PriceCategoriesField({
                             onChange={(event) =>
                                 update(index, { quota: event.target.value })
                             }
+                            required
                             data-test="price-category-quota"
                         />
                         <InputError
@@ -237,14 +240,9 @@ export function PriceCategoriesField({
             >
                 <Plus /> {t('events.price_categories.add')}
             </Button>
-            {capacity > 0 ? (
-                <p className="text-muted-foreground text-sm">
-                    {t('events.price_categories.capacity_hint', {
-                        count: capacity,
-                    })}
-                </p>
-            ) : null}
-            {capacity > 0 && quotaTotal > capacity ? (
+            {capacity > 0 &&
+            quotaTotal > capacity &&
+            !errors.price_categories ? (
                 <p className="text-sm text-amber-600" role="status">
                     {t('events.price_categories.quotas_exceed', {
                         total: quotaTotal,
