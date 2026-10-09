@@ -1,5 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
-import { AlertTriangle, Send } from 'lucide-react';
+import { AlertTriangle, Info, Send } from 'lucide-react';
 import { useState } from 'react';
 import { CopyButton } from '@/components/copy-button';
 import { FormDirtyReporter } from '@/components/events/form-dirty-reporter';
@@ -219,43 +219,43 @@ export default function EventForm({
                 ) : null}
 
                 {event?.isPublished ? (
-                    <div className="text-muted-foreground space-y-1 text-sm">
-                        <p>{t('events.publishing.frozen_subdomain')}</p>
-                        <p data-test="event-changes-not-notified">
-                            {t('events.publishing.changes_not_notified')}
-                        </p>
+                    <div
+                        className="bg-muted/40 text-muted-foreground flex items-start gap-3 rounded-lg border p-4 text-sm"
+                        data-test="event-published-notes"
+                    >
+                        <Info className="mt-0.5 size-4 shrink-0" />
+                        <ul className="space-y-1.5">
+                            <li>{t('events.publishing.frozen_subdomain')}</li>
+                            <li data-test="event-changes-not-notified">
+                                {t('events.publishing.changes_not_notified')}
+                            </li>
+                            <li data-test="event-announcing-description">
+                                {t(
+                                    event.isAnnounced
+                                        ? 'events.announcing.announced'
+                                        : 'events.announcing.description',
+                                )}
+                            </li>
+                            {!event.isAnnounced &&
+                            event.missingBeforeAnnouncing.length > 0 ? (
+                                <li
+                                    role="status"
+                                    className="font-medium text-amber-600 dark:text-amber-400"
+                                    data-test="event-announce-blocked"
+                                >
+                                    {t('events.announcing.blocked', {
+                                        items: event.missingBeforeAnnouncing
+                                            .map((key) =>
+                                                t(
+                                                    `events.missing_announce.${key}`,
+                                                ),
+                                            )
+                                            .join(', '),
+                                    })}
+                                </li>
+                            ) : null}
+                        </ul>
                     </div>
-                ) : null}
-
-                {event?.isPublished &&
-                !event.isAnnounced &&
-                event.missingBeforeAnnouncing.length > 0 ? (
-                    <p
-                        role="status"
-                        className="text-sm font-medium text-amber-600 dark:text-amber-400"
-                        data-test="event-announce-blocked"
-                    >
-                        {t('events.announcing.blocked', {
-                            items: event.missingBeforeAnnouncing
-                                .map((key) =>
-                                    t(`events.missing_announce.${key}`),
-                                )
-                                .join(', '),
-                        })}
-                    </p>
-                ) : null}
-
-                {event?.isPublished ? (
-                    <p
-                        className="text-muted-foreground text-sm"
-                        data-test="event-announcing-description"
-                    >
-                        {t(
-                            event.isAnnounced
-                                ? 'events.announcing.announced'
-                                : 'events.announcing.description',
-                        )}
-                    </p>
                 ) : null}
 
                 {event === null ? (
