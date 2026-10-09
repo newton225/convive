@@ -12,6 +12,9 @@ const useIsomorphicLayoutEffect =
 
 const HoldSeconds = 582;
 
+// La pose de repos : le billet est pose un peu de travers, vers la gauche (en degres).
+const RestRotation = -2;
+
 /**
  * La scene de l'accroche : le billet au centre, et autour de lui les trois temps du produit qui
  * s'enchainent dans l'ordre ou ils arrivent a l'invite. La reservation decompte, la preuve est
@@ -210,8 +213,14 @@ export function HeroStage() {
             sequence.add(intro).add(loop);
 
             // Un billet qui flotte a peine : la scene vit sans distraire.
-            // L'ombre au sol respire avec lui : plus le billet monte, plus elle se resserre et
-            // s'eclaircit, ce qui donne la hauteur de la levitation.
+            // L'ombre est portee sur le mur, derriere le billet : plus il se rapproche de nous, plus
+            // elle s'en eloigne, s'etale et s'eclaircit. C'est cet ecart qui donne la hauteur.
+            gsap.set(stage('shadow'), {
+                y: 20,
+                scale: 0.95,
+                rotation: RestRotation,
+            });
+
             const float = gsap.timeline({
                 repeat: -1,
                 yoyo: true,
@@ -226,7 +235,7 @@ export function HeroStage() {
                     { y: -10, force3D: true },
                     0,
                 )
-                .to(stage('shadow'), { scaleX: 0.84, opacity: 0.45 }, 0);
+                .to(stage('shadow'), { y: 38, scale: 1.02, opacity: 0.6 }, 0);
 
             // Hors de l'ecran, tout s'arrete : rien ne tourne pour rien.
             const observer = new IntersectionObserver(([entry]) => {
@@ -255,8 +264,6 @@ export function HeroStage() {
 
             if (tilt && glare && area) {
                 const MaxTilt = 11;
-                // La pose de repos : le billet est pose un peu de travers, vers la gauche.
-                const RestRotation = -2;
                 const smooth = { duration: 0.7, ease: 'power3.out' };
 
                 gsap.set(tilt, {
@@ -264,6 +271,13 @@ export function HeroStage() {
                     rotationZ: RestRotation,
                 });
 
+                const shadow = scope.querySelector<HTMLElement>(
+                    '[data-stage="shadow"]',
+                );
+                // L'ombre glisse a l'oppose de l'inclinaison : la lumiere reste fixe, le billet tourne.
+                const shadowX = shadow
+                    ? gsap.quickTo(shadow, 'x', smooth)
+                    : null;
                 const rotateX = gsap.quickTo(tilt, 'rotationX', smooth);
                 const rotateY = gsap.quickTo(tilt, 'rotationY', smooth);
                 const scale = gsap.quickTo(tilt, 'scale', {
@@ -290,6 +304,7 @@ export function HeroStage() {
                         Math.max(0, (event.clientY - box.top) / box.height),
                     );
 
+                    shadowX?.(-(x - 0.5) * 36);
                     rotateY((x - 0.5) * 2 * MaxTilt);
                     rotateX(-(y - 0.5) * 2 * MaxTilt);
                     scale(1.03);
@@ -299,6 +314,7 @@ export function HeroStage() {
                 };
 
                 const rest = () => {
+                    shadowX?.(0);
                     rotateX(0);
                     rotateY(0);
                     scale(1);
@@ -328,13 +344,24 @@ export function HeroStage() {
                 data-stage="ticket"
                 className="relative z-10 flex justify-center"
             >
-                {/* L'ombre reste au sol, derriere le billet : un halo sombre, et dessous une lueur indigo
-                    qui se lit sur le fond encre ou le noir seul ne se verrait pas. */}
+                {/* Le mur : une lueur douce derriere le billet, sans laquelle une ombre noire ne se
+                    verrait pas sur le fond encre. */}
                 <span
-                    data-stage="shadow"
-                    className="pointer-events-none absolute inset-x-[10%] -bottom-7 h-10 rounded-[50%] bg-[radial-gradient(closest-side,oklch(0_0_0/0.6),oklch(0.52_0.13_262/0.22)_60%,transparent)]"
+                    className="site-glow pointer-events-none absolute top-1/2 left-1/2 size-[30rem] -translate-x-1/2 -translate-y-1/2 opacity-60"
                     aria-hidden="true"
                 />
+                {/* L'ombre portee : la forme du billet, decalee vers le bas et floutee. */}
+                <div
+                    className="pointer-events-none absolute inset-0 flex justify-center"
+                    aria-hidden="true"
+                >
+                    <div className="h-full w-full max-w-sm">
+                        <span
+                            data-stage="shadow"
+                            className="block size-full rounded-2xl bg-black/85 blur-[30px] will-change-transform"
+                        />
+                    </div>
+                </div>
                 <div
                     data-stage="float"
                     className="w-full max-w-sm will-change-transform"
