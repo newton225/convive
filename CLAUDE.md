@@ -74,6 +74,12 @@ Aucune primitive d'interface ne doit etre codee a la main.
   ainsi avant que ce document n'impose React Hook Form et Zod, jamais installes ni utilises nulle
   part. Rester sur `useForm` evite un ecart de style avec l'existant plutot que d'introduire une
   seconde facon d'ecrire un formulaire dans la meme base de code.
+- **Validation en temps reel** (decision du proprietaire du projet, 2026-10-09) : a la sortie d'un champ, le serveur
+  rejoue les regles de la Form Request sur lui seul (**Precognition** de Laravel, deja embarquee par Inertia, aucun
+  paquet a ajouter) : route en `->middleware('precognitive')`, `validate(champ)` du `<Form>` d'Inertia, nom du champ
+  converti par `validatedFieldName()`. Les regles restent a un seul endroit. Premier formulaire : evenement. **Jamais sur
+  une route limitee ou a effet de bord** (inscription d'un invite, connexion) : chaque requete de validation compterait
+  dans le limiteur. Le message d'un champ disparait des qu'on le retouche (`InputError`).
 - Graphiques : **Recharts**. Dates : **date-fns** en locale francaise.
 - QR : generation cote serveur (**bwip-js** ou equivalent), lecture camera avec
   **@zxing/browser**.

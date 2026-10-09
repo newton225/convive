@@ -35,9 +35,9 @@ Route::prefix('{tenant}')
     ->group(function () {
         Route::get('events', [EventController::class, 'index'])->name('tenants.events.index');
         Route::get('events/new', [EventController::class, 'create'])->name('tenants.events.create');
-        Route::post('events', [EventController::class, 'store'])->name('tenants.events.store');
+        Route::post('events', [EventController::class, 'store'])->middleware('precognitive')->name('tenants.events.store');
         Route::get('events/{event}', [EventController::class, 'edit'])->name('tenants.events.edit');
-        Route::patch('events/{event}', [EventController::class, 'update'])->name('tenants.events.update');
+        Route::patch('events/{event}', [EventController::class, 'update'])->middleware('precognitive')->name('tenants.events.update');
         Route::post('events/{event}/publish', [EventController::class, 'publish'])->name('tenants.events.publish');
         Route::post('events/{event}/close', [EventController::class, 'close'])->name('tenants.events.close');
 

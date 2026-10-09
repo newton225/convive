@@ -181,6 +181,41 @@ class EventEndTest extends TestCase
             ->assertSessionHasErrors('ends_at');
     }
 
+    public function test_la_validation_en_temps_reel_signale_l_erreur_du_champ_sans_rien_creer(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = app(CreateTenant::class)->handle($owner, 'Association Convive');
+        $startsAt = now()->addMonth();
+
+        $this->actingAs($owner)
+            ->withHeaders(['Precognition' => 'true', 'Precognition-Validate-Only' => 'ends_at'])
+            ->post(route('tenants.events.store', $tenant), $this->payload([
+                'starts_at' => $startsAt->toDateTimeString(),
+                'ends_at' => $startsAt->copy()->subHour()->toDateTimeString(),
+            ]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('ends_at');
+
+        $this->assertSame(0, $tenant->asCurrent(fn () => Event::query()->count()));
+    }
+
+    public function test_la_validation_en_temps_reel_accepte_une_valeur_correcte_sans_rien_creer(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = app(CreateTenant::class)->handle($owner, 'Association Convive');
+        $startsAt = now()->addMonth();
+
+        $this->actingAs($owner)
+            ->withHeaders(['Precognition' => 'true', 'Precognition-Validate-Only' => 'ends_at'])
+            ->post(route('tenants.events.store', $tenant), $this->payload([
+                'starts_at' => $startsAt->toDateTimeString(),
+                'ends_at' => $startsAt->copy()->addHours(3)->toDateTimeString(),
+            ]))
+            ->assertNoContent();
+
+        $this->assertSame(0, $tenant->asCurrent(fn () => Event::query()->count()));
+    }
+
     public function test_un_evenement_publie_peut_avoir_commence_s_il_n_est_pas_termine(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

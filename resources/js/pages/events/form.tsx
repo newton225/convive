@@ -1,6 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
 import { AlertTriangle, Info, Send } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import type { ComponentRef } from 'react';
 import { CopyButton } from '@/components/copy-button';
 import { FormDirtyReporter } from '@/components/events/form-dirty-reporter';
 import { DisabledReason } from '@/components/disabled-reason';
@@ -26,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { validatedFieldName } from '@/lib/validated-field';
 import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { useNotifyFormChange } from '@/hooks/use-notify-form-change';
 import { translate, useTranslation } from '@/hooks/use-translation';
@@ -66,6 +68,8 @@ export default function EventForm({
     template = null,
 }: Props) {
     const { t } = useTranslation();
+    const formRef =
+        useRef<ComponentRef<typeof Form<Record<string, string>>>>(null);
     const gettingStartedReturn = useGettingStartedReturn();
     const [confirmingPublish, setConfirmingPublish] = useState(false);
     // Les invites sont assis a des tables, sauf pour un rassemblement sans table (plein air...).
@@ -270,6 +274,17 @@ export default function EventForm({
                     valeurs du modele choisi plutot que garder celles du precedent. */}
                 <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
                     <Form
+                        ref={formRef}
+                        // Validation en temps reel : quand on quitte un champ, le serveur rejoue les
+                        // regles de la Form Request sur lui seul (route `precognitive`).
+                        validationTimeout={400}
+                        onBlur={(left) => {
+                            const field = validatedFieldName(left.target);
+
+                            if (field !== null) {
+                                formRef.current?.validate(field);
+                            }
+                        }}
                         key={
                             event?.id ??
                             `template-${template?.sourceId ?? 'blank'}`
