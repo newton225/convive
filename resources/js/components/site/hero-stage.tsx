@@ -210,16 +210,23 @@ export function HeroStage() {
             sequence.add(intro).add(loop);
 
             // Un billet qui flotte a peine : la scene vit sans distraire.
-            const float = gsap.to(stage('float'), {
-                y: -8,
-                duration: 3.6,
-                ease: 'sine.inOut',
-                yoyo: true,
+            // L'ombre au sol respire avec lui : plus le billet monte, plus elle se resserre et
+            // s'eclaircit, ce qui donne la hauteur de la levitation.
+            const float = gsap.timeline({
                 repeat: -1,
-                // Reste sur sa propre couche GPU : le navigateur interpole la position au sous-pixel
-                // au lieu de re-dessiner le billet, ce qui evitait des saccades sur un mouvement lent.
-                force3D: true,
+                yoyo: true,
+                defaults: { duration: 3.6, ease: 'sine.inOut' },
             });
+
+            float
+                .to(
+                    stage('float'),
+                    // Reste sur sa propre couche GPU : le navigateur interpole la position au
+                    // sous-pixel au lieu de re-dessiner le billet, ce qui evitait des saccades.
+                    { y: -10, force3D: true },
+                    0,
+                )
+                .to(stage('shadow'), { scaleX: 0.84, opacity: 0.45 }, 0);
 
             // Hors de l'ecran, tout s'arrete : rien ne tourne pour rien.
             const observer = new IntersectionObserver(([entry]) => {
@@ -321,6 +328,13 @@ export function HeroStage() {
                 data-stage="ticket"
                 className="relative z-10 flex justify-center"
             >
+                {/* L'ombre reste au sol, derriere le billet : un halo sombre, et dessous une lueur indigo
+                    qui se lit sur le fond encre ou le noir seul ne se verrait pas. */}
+                <span
+                    data-stage="shadow"
+                    className="pointer-events-none absolute inset-x-[10%] -bottom-7 h-10 rounded-[50%] bg-[radial-gradient(closest-side,oklch(0_0_0/0.6),oklch(0.52_0.13_262/0.22)_60%,transparent)]"
+                    aria-hidden="true"
+                />
                 <div
                     data-stage="float"
                     className="w-full max-w-sm will-change-transform"
