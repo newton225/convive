@@ -64,8 +64,9 @@ export function PriceCategoriesField({
     // Le refus du serveur date du dernier envoi : des qu'on retouche un tarif, il est perime et
     // l'avertissement en direct reprend la main.
     const [staleFor, setStaleFor] = useState<typeof errors | null>(null);
-    const serverError =
-        staleFor === errors ? undefined : errors.price_categories;
+    const errorOf = (key: string) =>
+        staleFor === errors ? undefined : errors[key];
+    const serverError = errorOf('price_categories');
 
     const update = (index: number, values: Partial<Row>) => {
         setStaleFor(errors);
@@ -140,7 +141,7 @@ export function PriceCategoriesField({
                             data-test="price-category-name"
                         />
                         <InputError
-                            message={errors[`price_categories.${index}.name`]}
+                            message={errorOf(`price_categories.${index}.name`)}
                         />
                     </div>
                     <div className="space-y-2">
@@ -183,7 +184,7 @@ export function PriceCategoriesField({
                             </p>
                         ) : null}
                         <InputError
-                            message={errors[`price_categories.${index}.price`]}
+                            message={errorOf(`price_categories.${index}.price`)}
                         />
                     </div>
                     <div className="space-y-2">
@@ -207,7 +208,7 @@ export function PriceCategoriesField({
                             data-test="price-category-quota"
                         />
                         <InputError
-                            message={errors[`price_categories.${index}.quota`]}
+                            message={errorOf(`price_categories.${index}.quota`)}
                         />
                     </div>
                     <Button
