@@ -39,11 +39,15 @@ export function HeroStage() {
             const q = gsap.utils.selector(scope);
             const stage = (name: string) => q(`[data-stage="${name}"]`);
             const counter = { value: HoldSeconds };
+            // Le texte ne change qu'une fois par seconde : le reecrire a chaque image repeindrait la
+            // pastille soixante fois par seconde pour rien.
+            let shown = -1;
             const render = () => {
-                if (countdown.current) {
-                    countdown.current.textContent = formatCountdown(
-                        Math.round(counter.value),
-                    );
+                const seconds = Math.round(counter.value);
+
+                if (countdown.current && seconds !== shown) {
+                    shown = seconds;
+                    countdown.current.textContent = formatCountdown(seconds);
                 }
             };
 
@@ -207,11 +211,14 @@ export function HeroStage() {
 
             // Un billet qui flotte a peine : la scene vit sans distraire.
             const float = gsap.to(stage('float'), {
-                y: -7,
-                duration: 3.4,
+                y: -8,
+                duration: 3.6,
                 ease: 'sine.inOut',
                 yoyo: true,
                 repeat: -1,
+                // Reste sur sa propre couche GPU : le navigateur interpole la position au sous-pixel
+                // au lieu de re-dessiner le billet, ce qui evitait des saccades sur un mouvement lent.
+                force3D: true,
             });
 
             // Hors de l'ecran, tout s'arrete : rien ne tourne pour rien.
@@ -239,14 +246,17 @@ export function HeroStage() {
                 data-stage="ticket"
                 className="relative z-10 flex justify-center"
             >
-                <div data-stage="float" className="w-full max-w-sm">
+                <div
+                    data-stage="float"
+                    className="w-full max-w-sm will-change-transform"
+                >
                     <TicketPreview />
                 </div>
             </div>
 
             <div
                 data-stage="hold"
-                className="bg-ink/70 absolute top-4 left-0 z-20 flex items-center gap-3 rounded-2xl border border-white/10 px-3.5 py-2.5 text-white ring-1 ring-white/5 backdrop-blur-xl sm:-left-8 lg:top-6"
+                className="bg-ink/90 absolute top-4 left-0 z-20 flex items-center gap-3 rounded-2xl border border-white/10 px-3.5 py-2.5 text-white ring-1 ring-white/5 sm:-left-8 lg:top-6"
                 data-test="site-hero-hold"
             >
                 <span className="bg-primary/25 text-primary-foreground flex size-8 items-center justify-center rounded-lg">
@@ -287,7 +297,7 @@ export function HeroStage() {
 
             <div
                 data-stage="scan"
-                className="bg-ink/70 absolute top-4 right-0 z-20 hidden items-center rounded-full border border-white/10 px-3.5 py-1.5 text-xs whitespace-nowrap text-white ring-1 ring-white/5 backdrop-blur-xl sm:grid lg:top-6 lg:-right-6"
+                className="bg-ink/90 absolute top-4 right-0 z-20 hidden items-center rounded-full border border-white/10 px-3.5 py-1.5 text-xs whitespace-nowrap text-white ring-1 ring-white/5 sm:grid lg:top-6 lg:-right-6"
             >
                 <span
                     data-stage="scan-idle"
