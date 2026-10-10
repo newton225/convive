@@ -87,6 +87,9 @@ export function RegistrationRecap({
                                   : 'guest.registration.show.seats_not_enough',
                           )}
                 </p>
+                <p className="text-muted-foreground text-xs">
+                    {t('guest.registration.show.seats_not_reserved')}
+                </p>
             </CardContent>
         </Card>
     );
