@@ -151,7 +151,13 @@ export function TableGroupsField({
             ))}
 
             <div className="flex flex-wrap items-center justify-between gap-3">
-                <Button type="button" variant="outline" size="sm" onClick={add}>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={add}
+                    data-test="event-table-group-add"
+                >
                     <Plus />
                     {t('events.table_groups.add')}
                 </Button>

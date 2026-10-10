@@ -47,12 +47,16 @@ async function guestPage(browser: import('@playwright/test').Browser): Promise<{
 test('l\'organisateur cree un evenement a deux tarifs et le publie', async () => {
     const { tenantSlug } = state();
 
-    await owner.goto(`/${tenantSlug}/events/create`);
+    await owner.goto(`/${tenantSlug}/events/new`);
 
     await owner.getByTestId('event-name').fill('Gala du cycle complet');
     await owner.getByTestId('event-starts_at').fill('2027-06-12T19:00');
     await owner.getByTestId('event-ends_at').fill('2027-06-12T23:30');
     await owner.getByTestId('event-venue').fill('Hotel Ivoire, Abidjan');
+
+    if ((await owner.getByTestId('event-table-group-count').count()) === 0) {
+        await owner.getByTestId('event-table-group-add').click();
+    }
 
     await owner.getByTestId('event-table-group-count').first().fill('5');
     await owner.getByTestId('event-table-group-seats').first().fill('8');
@@ -70,8 +74,8 @@ test('l\'organisateur cree un evenement a deux tarifs et le publie', async () =>
     await owner.getByTestId('event-payment-account').first().click();
     await owner.getByTestId('event-submit').click();
 
-    await owner.waitForURL(/\/events\/\d+\/edit/);
-    eventId = Number(owner.url().match(/events\/(\d+)\/edit/)?.[1]);
+    await owner.waitForURL(/\/events\/\d+(\?.*)?$/);
+    eventId = Number(owner.url().match(/events\/(\d+)/)?.[1]);
     expect(eventId).toBeGreaterThan(0);
 
     await owner.getByTestId('event-publish').click();
@@ -79,8 +83,10 @@ test('l\'organisateur cree un evenement a deux tarifs et le publie', async () =>
     await owner.getByTestId('event-publish-confirm').click();
     await expect(owner.getByTestId('event-published')).toBeVisible();
 
-    const json = await owner.request.get(`/${tenantSlug}/events/${eventId}/edit`, {
-        headers: { 'X-Inertia': 'true', 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' },
+    // Les props de la page, telles qu'Inertia les envoie : on y lit l'adresse publique de l'evenement.
+    const version = await owner.evaluate(() => JSON.parse(document.querySelector('script[data-page="app"]')?.textContent ?? '{}').version);
+    const json = await owner.request.get(`/${tenantSlug}/events/${eventId}`, {
+        headers: { 'X-Inertia': 'true', 'X-Inertia-Version': String(version), 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' },
     });
     publicUrl = (await json.json()).props.event.publicUrl;
     expect(publicUrl).toContain('/e/');
@@ -158,15 +164,13 @@ test('l\'organisateur valide la preuve, l\'invite recoit son billet et son PDF',
     await page.goto(reservationUrl);
     await expect(page.getByTestId('ticket-card')).toBeVisible();
 
-    const pdf = page.getByTestId('ticket-pdf').first();
+    const pdf = page.getByTestId('ticket-pdf').first().locator('a[download]');
     await expect(pdf).toBeVisible();
-    const href = await pdf.getAttribute('href');
-    expect(href).toBeTruthy();
-
-    const download = await page.request.get(href as string);
-    expect(download.status()).toBe(200);
-    expect(download.headers()['content-type']).toContain('pdf');
-    expect((await download.body()).subarray(0, 4).toString()).toBe('%PDF');
+    // Le telechargement lui-meme : un vrai PDF, pas une page d'erreur renommee.
+    const [download] = await Promise.all([page.waitForEvent('download'), pdf.click()]);
+    const file = await (await import('node:fs')).promises.readFile(await download.path());
+    expect(file.subarray(0, 4).toString()).toBe('%PDF');
+    expect(file.length).toBeGreaterThan(1000);
 
     await context.close();
 });
@@ -190,15 +194,18 @@ test('a l\'entree : recherche par nom, validation, puis un second passage signal
     await owner.getByTestId('guest-lookup-search').fill('Cycle Complet');
     await owner.getByTestId('guest-lookup-submit').click();
 
-    const lookup = owner.getByTestId('guest-lookup-row').filter({ hasText: guestName });
+    // Un billet par personne : la recherche rend l'invite puis son accompagnateur (« accompagnateur de... »).
+    const lookup = owner.getByTestId('guest-lookup-row').filter({ hasText: guestName }).first();
     await expect(lookup).toBeVisible();
     await lookup.getByTestId('guest-lookup-admit').click();
+    // La confirmation : l'entree sans scan est tracee au nom de l'agent et ne s'annule pas.
+    await owner.getByRole('dialog').getByRole('button', { name: /Valider l.entrée/ }).click();
     await expect(owner.getByTestId('scan-result')).toBeVisible();
 
     // Le meme billet une seconde fois : l'ecran le dit.
     await owner.getByTestId('guest-lookup-search').fill('Cycle Complet');
     await owner.getByTestId('guest-lookup-submit').click();
-    await expect(owner.getByTestId('guest-lookup-row').filter({ hasText: guestName }).getByTestId('guest-lookup-arrived')).toBeVisible();
+    await expect(owner.getByTestId('guest-lookup-row').filter({ hasText: guestName }).first().getByTestId('guest-lookup-arrived')).toBeVisible();
 });
 
 test('l\'invite ecrit une reclamation, l\'organisateur la lit et la traite', async ({ browser }) => {
@@ -220,7 +227,8 @@ test('l\'invite ecrit une reclamation, l\'organisateur la lit et la traite', asy
     await expect(claim).toBeVisible();
     await expect(claim).toContainText('une facture');
     await claim.getByTestId('claim-resolve').click();
-    await owner.getByTestId('claim-resolve-dialog').getByRole('button', { name: /Marquer comme traitée/ }).click();
+    // Le repere `claim-resolve-dialog` est celui du bouton de confirmation.
+    await owner.getByTestId('claim-resolve-dialog').click();
     await expect(owner.getByTestId('claim-row').filter({ hasText: guestName })).toHaveCount(0);
 
     // Elle reste lisible dans les reclamations traitees.
@@ -240,7 +248,8 @@ test('le dossier s\'exporte en CSV avec l\'invite et son accompagnateur', async 
     const content = (await (await import('node:fs')).promises.readFile(await file.path(), 'utf8'));
 
     expect(content).toContain(guestName);
-    expect(content).toContain(companionName);
+    // Une ligne par dossier : le groupe de deux personnes et le montant des deux tarifs (10 000 + gratuit).
+    expect(content).toContain('"2";"10000";"Validée"');
 });
 
 test('l\'annulation d\'un dossier paye propose un remboursement, marque rembourse ensuite', async () => {
@@ -258,6 +267,9 @@ test('l\'annulation d\'un dossier paye propose un remboursement, marque rembours
     await expect(cancellations).toContainText('rembourser');
 
     await cancellations.getByTestId('refund-mark').first().click();
+    await owner.getByTestId('refund-channel').click();
+    await owner.getByRole('option').first().click();
+    await owner.getByTestId('refund-fee').fill('200');
     await owner.getByTestId('refund-reference').fill('REMB-CYCLE-0001');
     await owner.getByTestId('record-refund-confirm').click();
     await expect(cancellations).toContainText('Remboursé');

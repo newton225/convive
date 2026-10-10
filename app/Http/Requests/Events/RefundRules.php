@@ -63,6 +63,24 @@ final class RefundRules
     }
 
     /**
+     * Les noms des champs tels que l'ecran les affiche : sans eux, une erreur disait « Le champ fee est
+     * obligatoire » (relevee par le parcours de bout en bout du 2026-10-10).
+     *
+     * @return array<string, string>
+     */
+    public static function attributes(string $prefix): array
+    {
+        return [
+            $prefix.'status' => __('registrations.refund.title'),
+            $prefix.'channel' => __('registrations.refund.fields.channel'),
+            $prefix.'refunded_on' => __('registrations.refund.fields.refunded_on'),
+            $prefix.'fee' => __('registrations.refund.fields.fee'),
+            $prefix.'reference' => __('registrations.refund.fields.reference'),
+            $prefix.'kept_reason' => __('registrations.refund.fields.kept_reason'),
+        ];
+    }
+
+    /**
      * Messages that say what to do, rather than the framework's generic wording.
      *
      * @return array<string, string>

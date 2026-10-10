@@ -60,6 +60,17 @@ class CancelRegistrationRequest extends FormRequest
     /**
      * @return array<string, string>
      */
+    public function attributes(): array
+    {
+        return [
+            'reason' => __('registrations.modals.cancel.reason_label'),
+            ...RefundRules::attributes('refund.'),
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return RefundRules::messages('refund.');

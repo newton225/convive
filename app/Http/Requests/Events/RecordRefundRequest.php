@@ -45,6 +45,14 @@ class RecordRefundRequest extends FormRequest
     /**
      * @return array<string, string>
      */
+    public function attributes(): array
+    {
+        return RefundRules::attributes('');
+    }
+
+    /**
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return RefundRules::messages('');

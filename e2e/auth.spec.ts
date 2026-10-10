@@ -30,11 +30,17 @@ test('un visiteur cree son compte et son organisation, puis se deconnecte', asyn
     await page.getByTestId('register-user-button').click();
 
     await page.waitForURL((url) => !url.pathname.startsWith('/register'), { timeout: 30_000 });
-    // Le compte est ouvert : ni la page de connexion ni l'inscription.
-    expect(new URL(page.url()).pathname).not.toMatch(/^\/(login|register)/);
 
-    await page.getByTestId('sidebar-menu-button').click();
-    await page.getByTestId('logout-button').click();
+    // L'adresse email doit etre confirmee par un lien avant tout acces (README ecran 2) : le compte
+    // est ouvert, mais l'espace attend la confirmation.
+    await expect(page.getByRole('heading', { name: /Vérification de l'adresse email/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Renvoyer l'email de vérification/ })).toBeVisible();
+
+    // Tant que l'adresse n'est pas confirmee, le back-office reste ferme.
+    await page.goto('/settings/security');
+    await expect(page).toHaveURL(/email\/verify/);
+
+    await page.getByRole('button', { name: /Se déconnecter/ }).or(page.getByRole('link', { name: /Se déconnecter/ })).first().click();
     await page.waitForURL((url) => url.pathname === '/' || url.pathname.startsWith('/login'));
 });
 

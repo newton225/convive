@@ -8,7 +8,7 @@ import { signIn, state } from './support/helpers';
  */
 test.beforeEach(async ({ page }) => {
     await signIn(page);
-    await page.goto(`/${state().tenantSlug}/events/create`);
+    await page.goto(`/${state().tenantSlug}/events/new`);
     await page.getByTestId('event-name').fill('Evenement de validation');
 });
 
@@ -46,12 +46,16 @@ test('le quota de chaque tarif est obligatoire', async ({ page }) => {
     await page.getByTestId('event-submit').click();
 
     // Le navigateur bloque l'envoi d'un champ obligatoire vide : on reste sur le formulaire de creation.
-    await expect(page).toHaveURL(/\/events\/create/);
+    await expect(page).toHaveURL(/\/events\/new/);
     expect(await row.getByTestId('price-category-quota').evaluate((input: HTMLInputElement) => input.validity.valueMissing)).toBe(true);
 });
 
 test('la somme des quotas ne peut pas depasser la salle : avertissement, puis refus du serveur', async ({ page }) => {
     await page.getByTestId('event-starts_at').fill('2027-06-12T19:00');
+    if ((await page.getByTestId('event-table-group-count').count()) === 0) {
+        await page.getByTestId('event-table-group-add').click();
+    }
+
     await page.getByTestId('event-table-group-count').first().fill('5');
     await page.getByTestId('event-table-group-seats').first().fill('8');
 
@@ -71,7 +75,7 @@ test('la somme des quotas ne peut pas depasser la salle : avertissement, puis re
     await page.getByTestId('event-submit').click();
 
     // Le serveur refuse : on reste sur le formulaire, et le message ne se double pas.
-    await expect(page).toHaveURL(/\/events\/create/);
+    await expect(page).toHaveURL(/\/events\/new/);
     await expect(page.getByText(/quotas additionnés \(55\)/)).toBeVisible();
 
     // Corriger le quota fait disparaitre le message sans renvoyer le formulaire.

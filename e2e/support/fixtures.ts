@@ -14,6 +14,8 @@ const ignorable = [
     /Applying inline style violates the following Content Security Policy directive/,
     /favicon/,
     /\[vite\]/,
+    // Le rechargement a chaud de Vite (developpement seulement) : la CSP de l'application le refuse.
+    /Connecting to 'ws:\/\/127\.0\.0\.1:\d+\/.*Content Security Policy/,
     /Download the React DevTools/,
 ];
 
