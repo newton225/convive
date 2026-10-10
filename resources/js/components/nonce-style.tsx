@@ -22,5 +22,10 @@ export function NonceStyle({ selector, declarations }: Props) {
         .map(([property, value]) => `${property}: ${value};`)
         .join(' ');
 
-    return <style nonce={nonce}>{`${selector} { ${body} }`}</style>;
+    return (
+        <style
+            nonce={nonce}
+            suppressHydrationWarning
+        >{`${selector} { ${body} }`}</style>
+    );
 }

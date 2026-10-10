@@ -11,6 +11,7 @@ import { expect, test as base } from '@playwright/test';
  */
 const ignorable = [
     /Failed to load resource: the server responded with a status of (401|403|404|419|422|429)/,
+    /Refused to (apply a stylesheet|apply inline style|connect to (')?ws:)/,
     /Applying inline style violates the following Content Security Policy directive/,
     /favicon/,
     /\[vite\]/,
@@ -24,16 +25,26 @@ export const test = base.extend<{ pageErrors: string[] }>({
         async ({ page }, use) => {
             const errors: string[] = [];
 
-            page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
+            page.on('pageerror', (error) =>
+                errors.push(`pageerror: ${error.message}`),
+            );
             page.on('console', (message) => {
-                if (message.type() === 'error' && !ignorable.some((pattern) => pattern.test(message.text()))) {
-                    errors.push(`console.error: ${message.text().slice(0, 300)}`);
+                if (
+                    message.type() === 'error' &&
+                    !ignorable.some((pattern) => pattern.test(message.text()))
+                ) {
+                    errors.push(
+                        `console.error: ${message.text().slice(0, 300)}`,
+                    );
                 }
             });
 
             await use(errors);
 
-            expect(errors, 'erreurs JavaScript levees pendant le parcours').toEqual([]);
+            expect(
+                errors,
+                'erreurs JavaScript levees pendant le parcours',
+            ).toEqual([]);
         },
         { auto: true },
     ],

@@ -1,4 +1,5 @@
 import { MessageCircle } from 'lucide-react';
+import { useSyncExternalStore } from 'react';
 import { CopyButton } from '@/components/copy-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +10,10 @@ type Props = {
     deadline?: string | null;
 };
 
+const subscribeToNothing = () => () => undefined;
+const currentAddress = () => window.location.href;
+const serverAddress = () => '';
+
 /**
  * README ecran 8 : le lien de reprise. Une inscription enregistree sans preuve se reprend par ce
  * lien, depuis n'importe quel appareil, jusqu'a l'echeance : l'invite peut le copier ou se
@@ -18,7 +23,11 @@ type Props = {
 export function ResumeLinkCard({ deadline = null }: Props) {
     const { t, locale } = useTranslation();
 
-    const link = typeof window === 'undefined' ? '' : window.location.href;
+    const link = useSyncExternalStore(
+        subscribeToNothing,
+        currentAddress,
+        serverAddress,
+    );
 
     return (
         <Card data-test="resume-link-card">

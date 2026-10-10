@@ -276,6 +276,7 @@ export default function PublicRegistrationShow({
                                         isUrgent && 'text-[oklch(0.55_0.2_25)]',
                                     )}
                                     data-test="registration-countdown"
+                                    suppressHydrationWarning
                                 >
                                     {formatCountdown(remainingSeconds)}
                                 </p>
