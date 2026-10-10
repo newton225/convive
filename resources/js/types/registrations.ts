@@ -30,6 +30,14 @@ export type RegistrationPriceSummary = {
     price: number;
 };
 
+// Une ligne du detail par tarif : combien de personnes, a quel prix, pour quel sous-total.
+export type RegistrationPriceLine = {
+    name: string;
+    price: number;
+    count: number;
+    subtotal: number;
+};
+
 export type RegistrationCompanionSummary = {
     name: string;
     unit: string;
@@ -86,6 +94,8 @@ export type RegistrationShow = {
     email: string | null;
     unit: string;
     priceCategory: RegistrationPriceSummary | null;
+    breakdown: RegistrationPriceLine[];
+    createdAt: string | null;
     amountDue: number;
     status: RegistrationShowStatus;
     heldUntil: string | null;

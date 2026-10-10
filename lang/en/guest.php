@@ -103,6 +103,10 @@ return [
             'phone' => 'Phone',
             'email' => 'Email',
             'free' => 'Free',
+            'people' => '{1} 1 registered person|[2,*] :count registered people',
+            'by_price' => 'Breakdown by price',
+            'quantity' => ':count × :price',
+            'registered_on' => 'Registered on',
         ],
 
         'total' => [

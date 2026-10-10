@@ -396,6 +396,10 @@ class RegistrationController extends Controller
             ],
             'event' => [
                 'name' => $event->name,
+                // Pour que l'invite qui revient reconnaisse l'evenement : quand, et ou.
+                'startsAt' => $event->starts_at?->toISOString(),
+                'venue' => $event->venue,
+                'venueAddress' => $event->venue_address,
                 // Pour le recapitulatif avant relance (README ecran 9) : le nombre de places
                 // encore libres au moment ou l'invite regarde, informatif seulement. La relance
                 // elle-meme revalide le stock (`HoldRegistration`), c'est elle qui tranche.
@@ -418,6 +422,8 @@ class RegistrationController extends Controller
                 'email' => $registration->email,
                 'unit' => $registration->unit->name,
                 'priceCategory' => $this->priceCategorySummary($registration->priceCategory),
+                'breakdown' => $this->priceBreakdown($registration),
+                'createdAt' => $registration->created_at?->toISOString(),
                 'amountDue' => $registration->amount_due,
                 'status' => $registration->status->value,
                 'heldUntil' => $registration->held_until?->toISOString(),
@@ -448,6 +454,30 @@ class RegistrationController extends Controller
                     'instructions' => $account->instructions,
                 ]),
         ]);
+    }
+
+    /**
+     * Le detail par tarif : combien de personnes ont choisi chacun, a quel prix, pour quel sous-total.
+     * Une ligne par tarif, dans l'ordre du premier choix (l'invite d'abord, puis ses accompagnateurs).
+     *
+     * @return array<int, array{name: string, price: int, count: int, subtotal: int}>
+     */
+    private function priceBreakdown(Registration $registration): array
+    {
+        $categories = collect([$registration->priceCategory])
+            ->merge($registration->companions()->orderBy('position')->with('priceCategory')->get()->map->priceCategory)
+            ->filter();
+
+        return $categories
+            ->groupBy('id')
+            ->map(fn ($group) => [
+                'name' => $group->first()->name,
+                'price' => $group->first()->price,
+                'count' => $group->count(),
+                'subtotal' => $group->first()->price * $group->count(),
+            ])
+            ->values()
+            ->all();
     }
 
     /**

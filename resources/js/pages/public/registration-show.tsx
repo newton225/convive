@@ -42,6 +42,9 @@ import type {
 type Props = {
     event: {
         name: string;
+        startsAt: string | null;
+        venue: string | null;
+        venueAddress: string | null;
         remainingSeats: number | null;
         hasEnoughSeats: boolean;
     };
@@ -165,23 +168,36 @@ export default function PublicRegistrationShow({
                             </CardContent>
                         </Card>
 
-                        <RegistrationRecap
+                        <RegistrationSummaryCard
                             registration={registration}
+                            event={event}
+                        />
+
+                        <RegistrationRecap
                             remainingSeats={event.remainingSeats}
                             hasEnoughSeats={event.hasEnoughSeats}
                         />
                     </>
                 ) : registration.status === 'proof_submitted' ? (
-                    <Card>
-                        <CardContent className="pt-6 text-center">
-                            <p
-                                className="font-medium"
-                                data-test="registration-proof-status"
-                            >
-                                {t('guest.registration.show.proof_submitted')}
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <>
+                        <Card>
+                            <CardContent className="pt-6 text-center">
+                                <p
+                                    className="font-medium"
+                                    data-test="registration-proof-status"
+                                >
+                                    {t(
+                                        'guest.registration.show.proof_submitted',
+                                    )}
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        <RegistrationSummaryCard
+                            registration={registration}
+                            event={event}
+                        />
+                    </>
                 ) : registration.status === 'confirmed' ? (
                     ticket ? (
                         // Le billet talon (README ecran 7) : le meme pour l'invite et chacun de
@@ -266,7 +282,10 @@ export default function PublicRegistrationShow({
                             </CardContent>
                         </Card>
 
-                        <RegistrationSummaryCard registration={registration} />
+                        <RegistrationSummaryCard
+                            registration={registration}
+                            event={event}
+                        />
 
                         <Card>
                             <CardHeader>

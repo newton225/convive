@@ -46,6 +46,40 @@ class RegistrationSummaryTest extends TestCase
         return $tenant->fresh();
     }
 
+    public function test_deux_personnes_au_meme_tarif_forment_une_seule_ligne_de_detail(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+
+        $registration = $tenant->asCurrent(function () {
+            $event = Event::factory()->published()->create();
+            $standard = EventPriceCategory::factory()->create(['event_id' => $event->id, 'name' => 'Standard', 'price' => 10000]);
+
+            $registration = Registration::factory()->held()->create([
+                'event_id' => $event->id,
+                'price_category_id' => $standard->id,
+                'amount_due' => 20000,
+            ]);
+
+            RegistrationCompanion::factory()->create([
+                'registration_id' => $registration->id,
+                'unit_id' => Unit::factory()->create()->id,
+                'price_category_id' => $standard->id,
+                'position' => 1,
+            ]);
+
+            return $registration;
+        });
+
+        $this->get($registration->signedResumeUrl())
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('registration.breakdown', 1)
+                ->where('registration.breakdown.0.name', 'Standard')
+                ->where('registration.breakdown.0.count', 2)
+                ->where('registration.breakdown.0.subtotal', 20000));
+    }
+
     public function test_la_page_du_dossier_porte_les_personnes_leurs_tarifs_et_les_coordonnees(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
@@ -85,6 +119,13 @@ class RegistrationSummaryTest extends TestCase
                 ->where('registration.priceCategory.price', 30000)
                 ->where('registration.companions.0.name', 'Moussa Traore')
                 ->where('registration.companions.0.priceCategory.name', 'Gratos')
-                ->where('registration.companions.0.priceCategory.price', 0));
+                ->where('registration.companions.0.priceCategory.price', 0)
+                ->has('registration.breakdown', 2)
+                ->where('registration.breakdown.0.name', 'VIP')
+                ->where('registration.breakdown.0.count', 1)
+                ->where('registration.breakdown.0.subtotal', 30000)
+                ->where('registration.breakdown.1.name', 'Gratos')
+                ->where('registration.breakdown.1.subtotal', 0)
+                ->has('event.startsAt'));
     }
 }

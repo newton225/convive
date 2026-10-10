@@ -103,6 +103,10 @@ return [
             'phone' => 'Téléphone',
             'email' => 'Email',
             'free' => 'Gratuit',
+            'people' => '{1} 1 personne inscrite|[2,*] :count personnes inscrites',
+            'by_price' => 'Détail par tarif',
+            'quantity' => ':count × :price',
+            'registered_on' => 'Inscription enregistrée le',
         ],
 
         'total' => [
