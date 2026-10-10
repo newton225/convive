@@ -336,6 +336,7 @@ export default function EventForm({
                                         />
                                         <Field
                                             name="starts_at"
+                                            forPublishing
                                             type="datetime-local"
                                             label={t('events.fields.starts_at')}
                                             defaultValue={
@@ -390,6 +391,7 @@ export default function EventForm({
                                         />
                                         <Field
                                             name="venue"
+                                            forPublishing
                                             label={t('events.fields.venue')}
                                             help={t('events.help.venue')}
                                             defaultValue={prefill?.venue ?? ''}
@@ -829,6 +831,7 @@ function Field({
     type = 'text',
     placeholder,
     required = false,
+    forPublishing = false,
     help,
 }: {
     name: string;
@@ -838,6 +841,8 @@ function Field({
     type?: string;
     placeholder?: string;
     required?: boolean;
+    // Exige pour publier, pas pour enregistrer.
+    forPublishing?: boolean;
     help?: string;
 }) {
     return (
@@ -847,6 +852,7 @@ function Field({
                 label={label}
                 help={help}
                 required={required}
+                forPublishing={forPublishing}
             />
             <Input
                 id={name}

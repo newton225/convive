@@ -53,6 +53,12 @@ export type DashboardEventChoice = {
     startsAt: string | null;
 };
 
+// Le bouton des preuves : le total de tous les evenements, et l'evenement ou il mene.
+export type DashboardProofsToCheck = {
+    total: number;
+    eventId: number | null;
+};
+
 export type DashboardOverview = {
     eventId: number;
     eventName: string;

@@ -24,6 +24,13 @@ export type DuplicateImageMatch = {
     receiptUrl: string | null;
 };
 
+// Un evenement propose par le selecteur de la file de preuves, avec ses preuves en attente.
+export type ProofEventChoice = {
+    id: number;
+    name: string;
+    proofsToCheck: number;
+};
+
 export type PaymentProofRow = {
     registrationId: number;
     proofId: number;

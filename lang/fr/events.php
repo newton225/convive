@@ -234,7 +234,7 @@ return [
         'organisation' => "l'identité de l'organisation (page Espace et marque)",
         'capacity' => 'au moins une table avec des places',
         'date' => 'la date et l\'heure de début',
-        'date_past' => 'une date de début à venir',
+        'date_past' => 'une date de début à venir (celle saisie est déjà passée)',
         'venue' => 'le lieu',
         'seats' => 'le nombre de places',
         'payment_account' => 'un compte de versement visible, rattaché à l\'événement',

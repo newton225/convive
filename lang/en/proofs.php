@@ -3,6 +3,11 @@
 return [
     'title' => 'Proofs to verify',
 
+    'event_switcher' => [
+        'label' => 'Event whose proofs are shown',
+        'option' => ':name (:count to check)',
+    ],
+
     'event_passed' => 'The date of this event has passed. Before approving a proof, check that the guest can still come: their ticket stops granting entry shortly after the start time. Rejecting a proof refunds nothing: if the guest has paid, refund them yourself.',
 
     'empty' => [

@@ -7,6 +7,7 @@ use App\Models\PaymentAccount;
 use App\Models\TenantInvitation;
 use App\Support\DashboardOverview;
 use App\Support\GettingStarted;
+use App\Support\ProofQueueEvents;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -43,6 +44,8 @@ class DashboardController extends Controller
             'pendingInvitations' => $pendingInvitations,
             'paymentAccountNotice' => $this->paymentAccountNotice($request),
             'overview' => $event ? DashboardOverview::for($event) : null,
+            // Le bouton des preuves annonce le total de tous les evenements, pas celui du seul evenement affiche.
+            'proofsToCheck' => ProofQueueEvents::summary($event?->id),
             'eventChoices' => $event ? DashboardOverview::choices() : [],
             // Nul quand le choix est automatique, ou qu'un evenement inconnu a ete demande.
             'selectedEventId' => $chosenId !== null && $event?->id === $chosenId ? $chosenId : null,

@@ -26,6 +26,7 @@ import type {
     DashboardEventChoice,
     DashboardInvitation,
     DashboardOverview,
+    DashboardProofsToCheck,
     GettingStarted,
     LocaleCode,
     TranslationReplacements,
@@ -36,6 +37,7 @@ type Props = {
     pendingInvitations?: DashboardInvitation[];
     paymentAccountNotice?: { changed: boolean; days: number } | null;
     overview?: DashboardOverview | null;
+    proofsToCheck?: DashboardProofsToCheck;
     gettingStarted?: GettingStarted | null;
     // Les evenements que le selecteur propose, et celui choisi a la main (null : automatique).
     eventChoices?: DashboardEventChoice[];
@@ -120,6 +122,7 @@ export default function Dashboard({
     pendingInvitations = [],
     paymentAccountNotice = null,
     overview = null,
+    proofsToCheck = { total: 0, eventId: null },
     gettingStarted = null,
     eventChoices = [],
     selectedEventId = null,
@@ -183,7 +186,7 @@ export default function Dashboard({
                                 ) : null}
                                 {canCheckProofs &&
                                 currentTenant &&
-                                overview.kpis.toCheck > 0 ? (
+                                proofsToCheck.eventId !== null ? (
                                     <Button
                                         asChild
                                         data-test="dashboard-check-proofs"
@@ -191,11 +194,11 @@ export default function Dashboard({
                                         <Link
                                             href={proofsIndex([
                                                 currentTenant.slug,
-                                                overview.eventId,
+                                                proofsToCheck.eventId,
                                             ])}
                                         >
                                             {t('dashboard.check_proofs', {
-                                                count: overview.kpis.toCheck,
+                                                count: proofsToCheck.total,
                                             })}
                                         </Link>
                                     </Button>

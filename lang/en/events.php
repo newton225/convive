@@ -234,7 +234,7 @@ return [
         'organisation' => 'the organisation identity (Space and brand page)',
         'capacity' => 'at least one table with seats',
         'date' => 'the start date and time',
-        'date_past' => 'a start date still to come',
+        'date_past' => 'a start date still to come (the one entered has already passed)',
         'venue' => 'the venue',
         'seats' => 'the number of seats',
         'payment_account' => 'a visible payment account linked to the event',

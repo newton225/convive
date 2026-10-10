@@ -6,12 +6,14 @@ use App\Actions\PaymentProofs\RejectPaymentProof;
 use App\Actions\PaymentProofs\ValidatePaymentProof;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsureTenantMembership;
 use App\Models\Event;
 use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\RegistrationCompanion;
 use App\Models\Tenant;
 use App\Support\ListPage;
+use App\Support\ProofQueueEvents;
 use App\Support\Search\UnaccentedSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -79,6 +81,8 @@ class PaymentProofController extends Controller
                 'sort' => $sort,
             ],
             'hasProofs' => $this->queue($event, '', 'submitted_at')->exists(),
+            // Passer d'un evenement a l'autre : un acces du support limite a un evenement ne voit que lui.
+            'eventSwitcher' => ProofQueueEvents::all($event, $request->attributes->get(EnsureTenantMembership::SupportAccessAttribute)?->event_id),
         ]);
     }
 

@@ -25,6 +25,7 @@ import { ReceiptPreviewDialog } from '@/components/proofs/receipt-preview-dialog
 import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog';
 import { ProofConfirmSummary } from '@/components/proofs/proof-confirm-summary';
 import { ProofDetails } from '@/components/proofs/proof-details';
+import { ProofEventSwitcher } from '@/components/proofs/proof-event-switcher';
 import { ProofsToolbar } from '@/components/proofs/proofs-toolbar';
 import Heading from '@/components/heading';
 import { ListPagination } from '@/components/list-pagination';
@@ -65,7 +66,12 @@ import type { ProofSignalFilter } from '@/lib/proof-filters';
 import { proofReceiptFacts } from '@/lib/receipt-facts';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { approve, index, reject } from '@/routes/tenants/events/proofs';
-import type { PaymentProofRow, TenantPermissions, Translations } from '@/types';
+import type {
+    PaymentProofRow,
+    ProofEventChoice,
+    TenantPermissions,
+    Translations,
+} from '@/types';
 
 // Tris proposes par le serveur (`PaymentProofController::Sorts`) et colonne du tableau de chacun.
 const SortColumns: Record<string, string> = {
@@ -88,6 +94,7 @@ type Props = {
         sort: string;
     };
     hasProofs: boolean;
+    eventSwitcher: ProofEventChoice[];
 };
 
 /**
@@ -103,6 +110,7 @@ export default function EventProofs({
     meta,
     filters,
     hasProofs,
+    eventSwitcher,
 }: Props) {
     const { t, locale } = useTranslation();
     const [rejecting, setRejecting] = useState<PaymentProofRow | null>(null);
@@ -500,10 +508,17 @@ export default function EventProofs({
                         title={t('proofs.title')}
                         description={event.name}
                     />
-                    <ProductTourButton
-                        tour="proofs"
-                        autoStart={rows.length > 0}
-                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                        <ProofEventSwitcher
+                            tenantSlug={tenant.slug}
+                            currentEventId={event.id}
+                            choices={eventSwitcher}
+                        />
+                        <ProductTourButton
+                            tour="proofs"
+                            autoStart={rows.length > 0}
+                        />
+                    </div>
                 </div>
 
                 {event.hasPassed && hasProofs ? (

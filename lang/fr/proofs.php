@@ -3,6 +3,11 @@
 return [
     'title' => 'Preuves à vérifier',
 
+    'event_switcher' => [
+        'label' => 'Événement dont les preuves sont affichées',
+        'option' => ':name (:count à vérifier)',
+    ],
+
     'event_passed' => 'La date de cet événement est passée. Avant de valider une preuve, vérifiez que l’invité peut encore venir : son billet cesse de donner l’entrée peu après l’heure de début. Rejeter une preuve ne rembourse rien : si l’invité a payé, remboursez-le vous-même.',
 
     'empty' => [
