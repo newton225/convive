@@ -33,7 +33,12 @@ class GuestClaimController extends Controller
         $event = Event::where('public_token', (string) $request->route('token'))->first();
         abort_if(! $event || ! $event->isPublished(), 404);
 
-        $registration = $request->route('registration');
+        // Sur une route a domaine, la liaison implicite peut rendre l'identifiant brut plutot que le
+        // modele (voir CLAUDE.md, « Lien public de l'evenement ») : on resout nous-memes, dans la base de
+        // l'organisation deja initialisee.
+        $parameter = $request->route('registration');
+        $registration = $parameter instanceof Registration ? $parameter : Registration::query()->find($parameter);
+
         abort_unless($registration instanceof Registration && $registration->event_id === $event->id, 404);
         abort_unless(
             hash_equals($registration->notificationToken(), (string) $request->validated('signature')),
