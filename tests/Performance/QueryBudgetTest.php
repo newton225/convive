@@ -143,7 +143,7 @@ class QueryBudgetTest extends TestCase
             'Plan de salle' => fn () => $this->actingAs($this->owner)->get(route('tenants.events.seating.index', [$tenant, $event])),
             'Rapprochement' => fn () => $this->actingAs($this->owner)->get(route('tenants.events.reconciliation.index', [$tenant, $event])),
             'Page publique de l\'evenement' => fn () => $this->get('http://convive-ci.'.config('convive.public_domain').'/e/'.$event->public_token),
-            'Page du dossier de l\'invite' => fn () => $this->get($registration()->signedResumeUrl()),
+            'Page du dossier de l\'invite' => fn () => $this->get($this->tenant->asCurrent(fn () => $registration()->signedResumeUrl())),
         ];
     }
 

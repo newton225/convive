@@ -48,7 +48,8 @@ class TenantDataIsolationTest extends TestCase
 
         $this->eventA = $this->tenantA->asCurrent(function () {
             $event = Event::factory()->published()->create(['name' => 'Evenement Alpha']);
-            Registration::factory()->proofSubmitted()->create(['event_id' => $event->id, 'name' => 'Invite Alpha']);
+            $alpha = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id, 'name' => 'Invite Alpha']);
+            PaymentProof::factory()->create(['registration_id' => $alpha->id]);
 
             return $event;
         });
@@ -101,11 +102,13 @@ class TenantDataIsolationTest extends TestCase
 
             $path = route($route->getName(), $parameters, false);
 
-            foreach (['', '?filter[search]='.urlencode(self::Mark)] as $query) {
-                $response = $this->call('GET', $path.$query, [], [], [], ['HTTP_X-Inertia' => 'true', 'HTTP_ACCEPT' => 'application/json']);
+            foreach (['', '?filter[search]=ZXQ-SECRET'] as $query) {
+                $response = $this->call('GET', $path.$query);
                 $checked++;
 
-                if (str_contains((string) $response->getContent(), self::Mark) || str_contains((string) $response->getContent(), 'zxq-secret-b@example.com')) {
+                $body = (string) $response->getContent();
+
+                if (str_contains($body, self::Mark) || str_contains($body, 'zxq-secret-b@example.com')) {
                     $leaks[] = "{$route->getName()}{$query} -> fuite (statut {$response->getStatusCode()})";
                 }
             }
@@ -119,9 +122,11 @@ class TenantDataIsolationTest extends TestCase
     {
         $this->actingAs($this->ownerA);
 
-        $response = $this->get(route('tenants.events.registrations.index', [$this->tenantA, $this->eventA, 'filter' => ['search' => self::Mark]]));
+        $response = $this->get(route('tenants.events.registrations.index', [$this->tenantA, $this->eventA, 'filter' => ['search' => 'ZXQ-SECRET']]));
 
         $response->assertOk();
+        // Le terme tape (« ZXQ-SECRET ») revient dans les filtres de la page ; la donnee de B, elle,
+        // porte la marque entiere : c'est elle qu'on cherche.
         $this->assertStringNotContainsString(self::Mark, (string) $response->getContent());
     }
 

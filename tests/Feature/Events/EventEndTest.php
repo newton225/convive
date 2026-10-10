@@ -188,7 +188,7 @@ class EventEndTest extends TestCase
         $startsAt = now()->addMonth();
 
         $this->actingAs($owner)
-            ->withHeaders(['Precognition' => 'true', 'Precognition-Validate-Only' => 'ends_at'])
+            ->withHeaders(['Precognition' => 'true', 'Precognition-Validate-Only' => 'ends_at', 'Accept' => 'application/json'])
             ->post(route('tenants.events.store', $tenant), $this->payload([
                 'starts_at' => $startsAt->toDateTimeString(),
                 'ends_at' => $startsAt->copy()->subHour()->toDateTimeString(),
@@ -206,7 +206,7 @@ class EventEndTest extends TestCase
         $startsAt = now()->addMonth();
 
         $this->actingAs($owner)
-            ->withHeaders(['Precognition' => 'true', 'Precognition-Validate-Only' => 'ends_at'])
+            ->withHeaders(['Precognition' => 'true', 'Precognition-Validate-Only' => 'ends_at', 'Accept' => 'application/json'])
             ->post(route('tenants.events.store', $tenant), $this->payload([
                 'starts_at' => $startsAt->toDateTimeString(),
                 'ends_at' => $startsAt->copy()->addHours(3)->toDateTimeString(),

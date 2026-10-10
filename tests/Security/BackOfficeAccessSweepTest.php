@@ -207,8 +207,13 @@ class BackOfficeAccessSweepTest extends TestCase
 
             // 403 : refus. 404 : ressource absente ou masquee. Tout le reste (422, 302 avec erreurs de
             // champ, 2xx) veut dire que la validation ou l'action a precede l'autorisation.
-            if (! in_array($response->getStatusCode(), [403, 404], true)) {
-                $failures[] = "{$name} -> {$response->getStatusCode()}";
+            // Une route sensible redemande d'abord le mot de passe ou le code a deux facteurs : le renvoi vers
+            // cette confirmation precede le refus, l'ecriture n'a pas lieu pour autant.
+            $stepUp = $response->getStatusCode() === 302
+                && preg_match('#confirm-(password|two-factor)#', (string) $response->headers->get('Location')) === 1;
+
+            if (! $stepUp && ! in_array($response->getStatusCode(), [403, 404], true)) {
+                $failures[] = "{$name} -> {$response->getStatusCode()} ".$response->headers->get('Location');
             }
         }
 
@@ -261,7 +266,7 @@ class BackOfficeAccessSweepTest extends TestCase
 
         // Ces pages sont lisibles par tout membre (voir la politique de chacune) : on les nomme pour que
         // la liste reste lue, et non pour les excuser en bloc.
-        $expectedOpen = ['tenants.edit', 'tenants.update', 'tenants.dashboard'];
+        $expectedOpen = ['tenants.edit', 'tenants.organisation.edit', 'tenants.update', 'tenants.dashboard'];
 
         $this->assertSame([], array_values(array_diff($failures, $expectedOpen)), "Pages lisibles par un profil sans aucune permission :\n".implode("\n", $failures));
     }

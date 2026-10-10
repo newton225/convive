@@ -210,7 +210,7 @@ class GuestClaimTest extends TestCase
         $event = $this->publishedEvent($tenant);
         $registration = $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create(['event_id' => $event->id]));
 
-        $this->get($registration->signedResumeUrl())
+        $this->get($tenant->asCurrent(fn () => $registration->signedResumeUrl()))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->where('claim.registrationId', $registration->id)

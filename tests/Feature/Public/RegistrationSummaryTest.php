@@ -71,7 +71,7 @@ class RegistrationSummaryTest extends TestCase
             return $registration;
         });
 
-        $this->get($registration->signedResumeUrl())
+        $this->get($tenant->asCurrent(fn () => $registration->signedResumeUrl()))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->has('registration.breakdown', 1)
@@ -110,7 +110,7 @@ class RegistrationSummaryTest extends TestCase
             return $registration;
         });
 
-        $this->get($registration->signedResumeUrl())
+        $this->get($tenant->asCurrent(fn () => $registration->signedResumeUrl()))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->where('registration.phone', '+225 07 07 12 34 56')

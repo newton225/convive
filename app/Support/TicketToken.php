@@ -96,7 +96,9 @@ class TicketToken
 
     private static function base64UrlDecode(string $value): ?string
     {
-        if ($value === '' || ! preg_match('/^[A-Za-z0-9_-]+$/', $value)) {
+        // `\z` et non `$` : `$` accepte un saut de ligne final, et un meme billet aurait alors plusieurs
+        // ecritures valides (test par mutation, `TicketTokenMutationTest`).
+        if ($value === '' || ! preg_match('/\A[A-Za-z0-9_-]+\z/', $value)) {
             return null;
         }
 

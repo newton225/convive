@@ -41,6 +41,14 @@ class PaymentProof extends Model implements HasMedia
     use HasFactory, InteractsWithMedia;
 
     /**
+     * Les signaux deja calcules en lot par `preloadSignals()`, ou null : les methodes de signal
+     * interrogent alors la base elles-memes (une preuve isolee).
+     *
+     * @var array{duplicateReference: bool, duplicateImageIds: array<int, int>, referenceMissingFromStatement: bool, statementAmountMismatch: bool}|null
+     */
+    private ?array $signals = null;
+
+    /**
      * Voir `Event::$dateFormat` : meme raison, meme valeur constante pour toutes les connexions
      * SQLite de l'application.
      */
@@ -103,6 +111,10 @@ class PaymentProof extends Model implements HasMedia
             return false;
         }
 
+        if ($this->signals !== null) {
+            return $this->signals['duplicateReference'];
+        }
+
         return self::query()
             ->where('reference', $this->reference)
             ->whereKeyNot($this->getKey())
@@ -149,6 +161,10 @@ class PaymentProof extends Model implements HasMedia
             return new SupportCollection;
         }
 
+        if ($this->signals !== null) {
+            return collect($this->signals['duplicateImageIds']);
+        }
+
         return self::query()
             ->whereKeyNot($this->getKey())
             ->whereNotNull('perceptual_hash')
@@ -172,7 +188,15 @@ class PaymentProof extends Model implements HasMedia
      */
     public function referenceMissingFromStatement(): bool
     {
-        if ($this->reference === null || ! $this->statementLines()->exists()) {
+        if ($this->reference === null) {
+            return false;
+        }
+
+        if ($this->signals !== null) {
+            return $this->signals['referenceMissingFromStatement'];
+        }
+
+        if (! $this->statementLines()->exists()) {
             return false;
         }
 
@@ -191,9 +215,74 @@ class PaymentProof extends Model implements HasMedia
             return false;
         }
 
+        if ($this->signals !== null) {
+            return $this->signals['statementAmountMismatch'];
+        }
+
         $amounts = $this->statementLinesWithSameReference()->get()->pluck('amount');
 
         return $amounts->isNotEmpty() && ! $amounts->contains($this->registration->amount_due);
+    }
+
+    /**
+     * Calcule d'un coup les signaux d'une liste de preuves (file de verification) : au lieu de poser
+     * quatre a six requetes par ligne, une requete lit toutes les references et empreintes, une autre
+     * les lignes de releve concernees. Mesure par `QueryBudgetTest` : 154 requetes pour une page de
+     * 25 preuves avant, un nombre constant apres. Les methodes de signal rendent ensuite ces valeurs.
+     *
+     * Chaque preuve doit porter sa relation `registration` (deja chargee par la file).
+     *
+     * @param  SupportCollection<int, self|null>  $proofs
+     */
+    public static function preloadSignals(SupportCollection $proofs): void
+    {
+        $proofs = $proofs->filter()->values();
+
+        if ($proofs->isEmpty()) {
+            return;
+        }
+
+        $all = self::query()->get(['id', 'reference', 'perceptual_hash']);
+        $byReference = $all->whereNotNull('reference')->groupBy('reference');
+        $hashed = $all->whereNotNull('perceptual_hash');
+
+        // Les lignes de releve de chaque evenement concerne, pour les references de la page.
+        $statement = [];
+
+        foreach ($proofs->groupBy(fn (self $proof) => $proof->registration->event_id) as $eventId => $group) {
+            $references = $group->pluck('reference')->filter()
+                ->map(fn ($reference) => mb_strtoupper(trim((string) $reference)))->unique()->values()->all();
+
+            $lines = StatementLine::query()
+                ->whereHas('statementImport', fn (Builder $query) => $query->where('event_id', $eventId))
+                ->get(['reference', 'amount']);
+
+            $statement[$eventId] = [
+                'hasLines' => $lines->isNotEmpty(),
+                'amounts' => $lines
+                    ->filter(fn (StatementLine $line) => in_array(mb_strtoupper(trim((string) $line->reference)), $references, true))
+                    ->groupBy(fn (StatementLine $line) => mb_strtoupper(trim((string) $line->reference)))
+                    ->map(fn ($grouped) => $grouped->pluck('amount')),
+            ];
+        }
+
+        foreach ($proofs as $proof) {
+            $key = mb_strtoupper(trim((string) $proof->reference));
+            $lines = $statement[$proof->registration->event_id];
+            $amounts = $lines['amounts']->get($key, collect());
+
+            $proof->signals = [
+                'duplicateReference' => $proof->reference !== null
+                    && $byReference->get($proof->reference, collect())->contains(fn (self $other) => $other->id !== $proof->id),
+                'duplicateImageIds' => $proof->perceptual_hash === null ? [] : $hashed
+                    ->filter(fn (self $other) => $other->id !== $proof->id
+                        && PerceptualHash::hammingDistance($proof->perceptual_hash, $other->perceptual_hash) <= self::DuplicateHashThreshold)
+                    ->map(fn (self $other) => $other->id)->values()->all(),
+                'referenceMissingFromStatement' => $proof->reference !== null && $lines['hasLines'] && $amounts->isEmpty(),
+                'statementAmountMismatch' => $proof->reference !== null && $amounts->isNotEmpty()
+                    && ! $amounts->contains($proof->registration->amount_due),
+            ];
+        }
     }
 
     /**

@@ -1,0 +1,76 @@
+{
+    "date": "2026-10-10T03:46:08+00:00",
+    "inscriptions": 2000,
+    "mesures": {
+        "Base d'inscrits, page 1": {
+            "seconds": 0.309,
+            "megabytes": 4,
+            "bytes": 224115,
+            "status": 200,
+            "plafond_secondes": 3
+        },
+        "Base d'inscrits, recherche": {
+            "seconds": 0.248,
+            "megabytes": 2,
+            "bytes": 223981,
+            "status": 200,
+            "plafond_secondes": 3
+        },
+        "Base d'inscrits, derniere page": {
+            "seconds": 0.159,
+            "megabytes": 0,
+            "bytes": 213440,
+            "status": 200,
+            "plafond_secondes": 3
+        },
+        "Base d'inscrits, filtre a verifier": {
+            "seconds": 0.201,
+            "megabytes": 0,
+            "bytes": 224156,
+            "status": 200,
+            "plafond_secondes": 3
+        },
+        "File des preuves": {
+            "seconds": 0.378,
+            "megabytes": 2,
+            "bytes": 226689,
+            "status": 200,
+            "plafond_secondes": 4
+        },
+        "Rapport de l'evenement": {
+            "seconds": 0.343,
+            "megabytes": 2,
+            "bytes": 213366,
+            "status": 200,
+            "plafond_secondes": 4
+        },
+        "Tableau de bord": {
+            "seconds": 0.709,
+            "megabytes": 6,
+            "bytes": 226546,
+            "status": 200,
+            "plafond_secondes": 3
+        },
+        "Plan de salle": {
+            "seconds": 0.347,
+            "megabytes": 2,
+            "bytes": 274502,
+            "status": 200,
+            "plafond_secondes": 4
+        },
+        "Export CSV (2 000 inscriptions)": {
+            "seconds": 3.66,
+            "megabytes": 10,
+            "bytes": 0,
+            "status": 200,
+            "plafond_secondes": 10
+        },
+        "Export Excel (2 000 inscriptions)": {
+            "seconds": 4.328,
+            "megabytes": 22,
+            "bytes": 0,
+            "status": 200,
+            "plafond_secondes": 25
+        }
+    }
+}

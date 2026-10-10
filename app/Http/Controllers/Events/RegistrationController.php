@@ -60,10 +60,18 @@ class RegistrationController extends Controller
         // les inscrits sans voir les preuves n'en recoit pas le lien.
         $canViewReceipts = $request->user()->hasTenantPermission($tenant, TenantPermission::ProofsView);
 
+        // Lien de la carte : une cle d'acces aux billets (README 2.7), il ne part vers la page que pour qui
+        // peut l'envoyer. Lu une fois pour la page, pas une fois par ligne (une verification de droit
+        // coute trois requetes : mesure par `QueryBudgetTest`).
+        $canSendCards = $request->user()->hasTenantPermission($tenant, TenantPermission::MessagesSend);
+
         $registrations = $this->filteredQuery($request, $event)
             ->with(['unit', 'tableAssignment.seatingTable', 'latestProof.media', 'tickets.arrival'])
             ->paginate(25)
             ->withQueryString();
+
+        // Toutes les lignes appartiennent a l'evenement de l'adresse : inutile de le relire pour chacune.
+        $registrations->getCollection()->each(fn (Registration $registration) => $registration->setRelation('event', $event));
 
         return Inertia::render('events/registrations', [
             'tenant' => ['slug' => $tenant->slug],
@@ -71,9 +79,7 @@ class RegistrationController extends Controller
             'permissions' => $request->user()->toTenantPermissions($tenant),
             'rows' => $registrations->getCollection()->map(fn (Registration $registration) => $this->row(
                 $registration,
-                // Le lien de la carte est une cle d'acces aux billets (README 2.7) : il ne part
-                // vers la page que pour qui peut l'envoyer.
-                withCardLinks: Gate::allows('sendCard', [$registration, $tenant]),
+                withCardLinks: $canSendCards,
                 withReceiptLink: $canViewReceipts,
             )),
             'meta' => [

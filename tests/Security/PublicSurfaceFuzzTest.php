@@ -174,7 +174,7 @@ class PublicSurfaceFuzzTest extends TestCase
 
     public function test_un_lien_signe_altere_recoit_404(): void
     {
-        $url = $this->registration->signedResumeUrl();
+        $url = $this->tenant->asCurrent(fn () => $this->registration->signedResumeUrl());
 
         $this->assertNotNull($url);
         $this->get($url)->assertOk();

@@ -16,6 +16,7 @@ use App\Support\Search\UnaccentedSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -44,20 +45,27 @@ class PaymentProofController extends Controller
         $sort = in_array($request->input('sort'), self::Sorts, true) ? $request->input('sort') : 'submitted_at';
 
         $query = $this->queue($event, $search, $sort)
-            ->with(['unit', 'companions.unit', 'latestProof.paymentAccount']);
+            ->with(['unit', 'companions.unit', 'latestProof.paymentAccount', 'latestProof.media']);
 
         // Les signaux (reference ou capture deja vues, ecart avec le releve) se calculent en PHP :
         // la comparaison des captures n'a pas d'equivalent SQL. Filtrer sur eux passe donc par la
         // file de l'evenement, bornee par sa capacite ; le navigateur ne recoit toujours qu'une page.
-        $page = $signal === 'all'
-            ? ListPage::of($query, $request)->through(fn (Registration $registration) => $this->row($registration))
-            : ListPage::ofCollection(
-                $query->get()
+        if ($signal === 'all') {
+            $paginator = ListPage::of($query, $request);
+            $this->prepareSignals($paginator->getCollection());
+            $page = $paginator->through(fn (Registration $registration) => $this->row($registration));
+        } else {
+            $queue = $query->get();
+            $this->prepareSignals($queue);
+
+            $page = ListPage::ofCollection(
+                $queue
                     ->map(fn (Registration $registration) => $this->row($registration))
                     ->filter(fn (array $row) => $this->matchesSignal($row['signals'], $signal))
                     ->values(),
                 $request,
             );
+        }
 
         return Inertia::render('events/proofs', [
             'tenant' => ['slug' => $tenant->slug],
@@ -95,6 +103,9 @@ class PaymentProofController extends Controller
         return Registration::query()
             ->where('event_id', $event->id)
             ->where('status', RegistrationStatus::ProofSubmitted)
+            // Une inscription « preuve envoyee » sans preuve est une donnee incoherente : la file l'ignore
+            // plutot que de renvoyer une erreur serveur a qui la parcourt (balayage de volume du 2026-10-10).
+            ->whereHas('proofs')
             // Tout ce qui identifie une preuve : nom, reference du dossier et de la transaction,
             // telephone, unite, accompagnateurs.
             ->when($search !== '', fn (Builder $query) => $query->where(fn (Builder $any) => $any
@@ -222,6 +233,19 @@ class PaymentProofController extends Controller
     /**
      * @return array<string, mixed>
      */
+    /**
+     * Calcule les signaux de toute la page en lot et relie chaque preuve a son inscription deja
+     * chargee : sans cela, chaque ligne posait cinq a six requetes (`QueryBudgetTest`).
+     *
+     * @param  Collection<int, Registration>  $registrations
+     */
+    private function prepareSignals(Collection $registrations): void
+    {
+        $registrations->each(fn (Registration $registration) => $registration->latestProof?->setRelation('registration', $registration));
+
+        PaymentProof::preloadSignals($registrations->map(fn (Registration $registration) => $registration->latestProof));
+    }
+
     private function row(Registration $registration): array
     {
         $proof = $registration->latestProof;
