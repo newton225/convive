@@ -10,6 +10,7 @@ use App\Enums\BrandFile;
 use App\Enums\ClaimCategory;
 use App\Enums\PhoneCodeResult;
 use App\Enums\RegistrationStatus;
+use App\Exceptions\ReservationBusy;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Public\StoreRegistrationRequest;
 use App\Models\Event;
@@ -162,7 +163,7 @@ class RegistrationController extends Controller
             ]);
         }
 
-        if (! app(HoldRegistration::class)->handle($event, $registration)) {
+        if (! $this->holdOrDiscard($event, $registration)) {
             $registration->delete();
 
             // Le plafond d'inscrits du plan de l'organisation (README section 3) refuse la
@@ -283,6 +284,22 @@ class RegistrationController extends Controller
     /**
      * Hold the seats of a registration whose phone was just verified.
      */
+    /**
+     * Tenter la reservation d'un dossier qui vient d'etre cree. Si la base est saturee, le dossier
+     * n'a rien pris : il est retire plutot que laisse en brouillon, puis le signal remonte pour que
+     * l'invite lise qu'il doit reessayer.
+     */
+    private function holdOrDiscard(Event $event, Registration $registration): bool
+    {
+        try {
+            return app(HoldRegistration::class)->handle($event, $registration);
+        } catch (ReservationBusy $busy) {
+            $registration->delete();
+
+            throw $busy;
+        }
+    }
+
     private function holdVerified(Event $event, Registration $registration, string $token, string $resume): RedirectResponse
     {
         // Les regles verifiees au formulaire se rejouent : le code a pu etre saisi longtemps
@@ -293,7 +310,7 @@ class RegistrationController extends Controller
             return redirect()->to($event->publicUrl());
         }
 
-        if (! app(HoldRegistration::class)->handle($event, $registration)) {
+        if (! $this->holdOrDiscard($event, $registration)) {
             $registration->delete();
 
             Inertia::flash('toast', ['type' => 'error', 'message' => PlanLimits::for(Tenant::current())->canRegister($registration->party_size)

@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ReservationBusy;
 use App\Http\Middleware\EndTenancy;
 use App\Http\Middleware\EnforceAbsoluteSessionLifetime;
 use App\Http\Middleware\EnsureAccountIsNotBlocked;
@@ -21,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Session\Middleware\AuthenticateSession;
+use Inertia\Inertia;
 use Stancl\Tenancy\Contracts\TenantCouldNotBeIdentifiedException;
 use Stancl\Tenancy\Exceptions\NotASubdomainException;
 
@@ -94,6 +96,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // Trop de reservations au meme instant (SQLite refuse l'ecriture, ou le verrou des places est
+        // reste pris) : l'invite lit qu'il doit reessayer, ce n'est ni un 500 ni un « complet ».
+        $exceptions->render(function (ReservationBusy $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => __('guest.flash.reservation_busy')]);
+
+            return back();
+        });
+        $exceptions->dontReport([ReservationBusy::class]);
 
         // Un sous-domaine ou un chemin qui ne resout aucun locataire renvoie 404, jamais 500 :
         // meme regle que pour un acces croise (CLAUDE.md, « Multi-locataire »), rien ne doit

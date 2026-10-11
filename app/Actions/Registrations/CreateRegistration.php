@@ -3,14 +3,23 @@
 namespace App\Actions\Registrations;
 
 use App\Enums\RegistrationStatus;
+use App\Exceptions\ReservationBusy;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Support\RegistrationReference;
+use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Database\DeadlockException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class CreateRegistration
 {
+    /**
+     * Tentatives d'une ecriture refusee par la base avant d'abandonner.
+     */
+    public const WriteAttempts = 5;
+
     /**
      * Create a draft registration for the given event, with its companions.
      *
@@ -25,6 +34,25 @@ class CreateRegistration
      *                                                                empreinte est stockee.
      */
     public function handle(Event $event, array $data): array
+    {
+        // Ces ecritures se disputaient la base avec celles de toutes les autres inscriptions : SQLite
+        // refuse alors l'ecriture au lieu de l'attendre, et retenter aussitot relance la collision
+        // (campagne `qa/race.mjs` du 2026-10-11). Un verrou court par evenement les met en file, a
+        // part de celui des places (`HoldRegistration`) pour qu'aucun des deux n'attende l'autre.
+        // Si la base refuse encore, l'invite lit un message qui dit de reessayer (`ReservationBusy`).
+        try {
+            return Cache::lock("event:{$event->id}:registering", 15)
+                ->block(10, fn () => $this->create($event, $data));
+        } catch (DeadlockException|LockTimeoutException $exception) {
+            throw new ReservationBusy(previous: $exception);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{registration: Registration, resumeToken: string}
+     */
+    private function create(Event $event, array $data): array
     {
         return DB::transaction(function () use ($event, $data) {
             $resumeToken = Registration::generateResumeToken();
@@ -81,6 +109,6 @@ class CreateRegistration
             }
 
             return ['registration' => $registration, 'resumeToken' => $resumeToken];
-        });
+        }, self::WriteAttempts);
     }
 }

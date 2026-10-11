@@ -136,6 +136,7 @@ return [
         'proof_sent' => 'Preuve envoyée. Elle va être vérifiée par l\'organisation.',
         'proof_event_closed' => "L'événement est clôturé : la preuve n'a pas été enregistrée. Écrivez à l'organisation avec le formulaire en bas de cette page.",
         'proof_too_late' => "Le délai de réservation était écoulé : la preuve n'a pas été enregistrée. Vérifiez les places et relancez votre réservation.",
+        'reservation_busy' => 'Beaucoup de personnes s’inscrivent au même moment. Aucune place n’a été prise à votre nom : réessayez dans un instant.',
         'no_seats_left' => "Il ne reste plus assez de places pour votre inscription. Vous pouvez rejoindre la liste d'attente si elle est ouverte.",
         'hold_restarted' => 'Votre réservation est relancée : le décompte repart.',
         'seats_available' => "Des places sont disponibles : inscrivez-vous directement, sans passer par la liste d'attente.",

@@ -174,7 +174,9 @@ class DashboardTest extends TestCase
         $tenant->asCurrent(function () {
             $event = Event::factory()->open()->create(['tables' => [5, 10]]);
             Registration::factory()->confirmed()->create(['event_id' => $event->id, 'party_size' => 2]);
-            Registration::factory()->proofSubmitted()->create(['event_id' => $event->id, 'party_size' => 1]);
+            // Une preuve reellement deposee : la carte « A verifier » compte comme la file de preuves.
+            $submitted = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id, 'party_size' => 1]);
+            PaymentProof::factory()->create(['registration_id' => $submitted->id]);
             Registration::factory()->held()->create(['event_id' => $event->id, 'party_size' => 1]);
         });
 

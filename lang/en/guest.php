@@ -136,6 +136,7 @@ return [
         'proof_sent' => 'Proof sent. The organisation will verify it.',
         'proof_event_closed' => 'The event is closed: the proof was not saved. Write to the organisation with the form at the bottom of this page.',
         'proof_too_late' => 'The reservation window had closed: the proof was not saved. Check availability and restart your reservation.',
+        'reservation_busy' => 'Many people are registering at the same time. No seat has been taken in your name: please try again in a moment.',
         'no_seats_left' => 'There are not enough seats left for your registration. You can join the waitlist if it is open.',
         'hold_restarted' => 'Your reservation is back on: the countdown restarts.',
         'seats_available' => 'Seats are available: register directly, no need for the waitlist.',

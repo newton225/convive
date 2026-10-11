@@ -5,11 +5,15 @@ namespace App\Actions\Registrations;
 use App\Actions\Notifications\SendAlert;
 use App\Enums\NotificationType;
 use App\Enums\RegistrationStatus;
+use App\Exceptions\ReservationBusy;
 use App\Models\Event;
 use App\Models\EventPriceCategory;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Support\PlanLimits;
+use Illuminate\Contracts\Cache\Lock;
+use Illuminate\Contracts\Cache\LockTimeoutException;
+use Illuminate\Database\DeadlockException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -59,6 +63,16 @@ class HoldRegistration
 
         $lock = Cache::lock("event:{$event->id}:seats", 10);
 
+        try {
+            return $this->holdUnderLock($lock, $event, $registration, $lapsedBefore);
+        } catch (LockTimeoutException $exception) {
+            // Le verrou est reste pris plus de cinq secondes : saturation, pas un evenement complet.
+            throw new ReservationBusy(previous: $exception);
+        }
+    }
+
+    private function holdUnderLock(Lock $lock, Event $event, Registration $registration, bool $lapsedBefore): bool
+    {
         return $lock->block(5, function () use ($event, $registration, $lapsedBefore) {
             for ($attempt = 0; $attempt < self::MaxAttempts; $attempt++) {
                 if ($registration->party_size > $event->remainingSeats() || $this->exceedsCategoryQuota($registration)) {
@@ -81,8 +95,8 @@ class HoldRegistration
                         ]);
 
                         return true;
-                    });
-                } catch (QueryException $exception) {
+                    }, CreateRegistration::WriteAttempts);
+                } catch (QueryException|DeadlockException $exception) {
                     // Violation d'unicite sur hold_sequence : quelqu'un d'autre a reclame ce
                     // jeton entre la lecture du maximum et l'ecriture, malgre le verrou. On
                     // recalcule la disponibilite et on retente plutot que d'echouer.
@@ -101,7 +115,9 @@ class HoldRegistration
                 return $held;
             }
 
-            return false;
+            // Les tentatives se sont toutes heurtees a une ecriture refusee : la saturation n'est pas
+            // un « complet », l'appelant doit pouvoir dire a l'invite de reessayer.
+            throw new ReservationBusy;
         });
     }
 
