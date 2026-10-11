@@ -21,6 +21,7 @@ import { formatPhoneNumberIntl } from 'react-phone-number-input';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { DataTableSortHeader } from '@/components/data-table-sort-header';
 import { DuplicateImageDialog } from '@/components/proofs/duplicate-image-dialog';
+import { DuplicateReferenceDialog } from '@/components/proofs/duplicate-reference-dialog';
 import { ReceiptPreviewDialog } from '@/components/proofs/receipt-preview-dialog';
 import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog';
 import { ProofConfirmSummary } from '@/components/proofs/proof-confirm-summary';
@@ -120,6 +121,8 @@ export default function EventProofs({
         null,
     );
     const [duplicateImageOf, setDuplicateImageOf] =
+        useState<PaymentProofRow | null>(null);
+    const [duplicateReferenceOf, setDuplicateReferenceOf] =
         useState<PaymentProofRow | null>(null);
     const [expanded, setExpanded] = useState<ExpandedState>({});
     const { search, setSearch, visit } = useServerList({
@@ -327,11 +330,34 @@ export default function EventProofs({
                     data-tour="proof-signals"
                 >
                     {row.original.signals.duplicateReference ? (
-                        <Badge
-                            variant="destructive"
-                            data-test="signal-duplicate-reference"
-                        >
-                            {t('proofs.signals.duplicate_reference')}
+                        // Le signal ouvre les autres preuves qui portent la meme reference : le
+                        // tresorier voit avec qui elle est partagee sans avoir a chercher.
+                        <Badge variant="destructive" asChild>
+                            <button
+                                type="button"
+                                className="cursor-pointer underline-offset-2 hover:underline"
+                                aria-label={t(
+                                    'proofs.duplicate_reference.show',
+                                )}
+                                data-test="signal-duplicate-reference"
+                                onClick={() =>
+                                    setDuplicateReferenceOf(row.original)
+                                }
+                            >
+                                {t('proofs.signals.duplicate_reference')}
+                                {row.original.duplicateReferenceMatches.length >
+                                0 ? (
+                                    <span className="tabular-nums">
+                                        (
+                                        {
+                                            row.original
+                                                .duplicateReferenceMatches
+                                                .length
+                                        }
+                                        )
+                                    </span>
+                                ) : null}
+                            </button>
                         </Badge>
                     ) : null}
                     {row.original.signals.duplicateImage ? (
@@ -671,6 +697,10 @@ export default function EventProofs({
                 onOpenChange={(open) => !open && setReceiptPreview(null)}
             />
 
+            <DuplicateReferenceDialog
+                proof={duplicateReferenceOf}
+                onOpenChange={(open) => !open && setDuplicateReferenceOf(null)}
+            />
             <DuplicateImageDialog
                 proof={duplicateImageOf}
                 onOpenChange={(open) => !open && setDuplicateImageOf(null)}

@@ -33,11 +33,11 @@ class ProofQueueEvents
             ->orderBy('starts_at')
             ->orderBy('id')
             ->get()
-            ->filter(fn (Event $event) => $event->proofs_to_check > 0 || $event->is($alwaysInclude))
+            ->filter(fn (Event $event) => (int) $event->getAttribute('proofs_to_check') > 0 || $event->is($alwaysInclude))
             ->map(fn (Event $event) => [
                 'id' => $event->id,
                 'name' => $event->name,
-                'proofsToCheck' => (int) $event->proofs_to_check,
+                'proofsToCheck' => (int) $event->getAttribute('proofs_to_check'),
             ])
             ->values()
             ->all();

@@ -60,6 +60,10 @@ class TwoFactorDetour
             ? $request->session()->pull(self::SessionKey)
             : $request->session()->get(self::SessionKey);
 
-        return is_array($detour) ? $detour : null;
+        if (! is_array($detour) || ! is_string($detour['reason'] ?? null) || ! is_string($detour['returnUrl'] ?? null)) {
+            return null;
+        }
+
+        return ['reason' => $detour['reason'], 'returnUrl' => $detour['returnUrl']];
     }
 }

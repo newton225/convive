@@ -2,6 +2,7 @@ import { Link, router } from '@inertiajs/react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
+import { StickySaveBar } from '@/components/sticky-save-bar';
 import { SubmitButton } from '@/components/submit-button';
 import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
 import { Button } from '@/components/ui/button';
@@ -221,15 +222,17 @@ export function TicketTemplateEditor({
                 </Card>
 
                 {canSave ? (
-                    <SubmitButton
-                        type="button"
-                        processing={processing}
-                        dirty={dirty}
-                        onClick={save}
-                        data-test="ticket-template-save"
-                    >
-                        {t('common.actions.save')}
-                    </SubmitButton>
+                    <StickySaveBar testId="ticket-template-save-bar">
+                        <SubmitButton
+                            type="button"
+                            processing={processing}
+                            dirty={dirty}
+                            onClick={save}
+                            data-test="ticket-template-save"
+                        >
+                            {t('common.actions.save')}
+                        </SubmitButton>
+                    </StickySaveBar>
                 ) : null}
             </div>
 

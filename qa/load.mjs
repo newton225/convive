@@ -28,7 +28,7 @@ const uniqueAddress = () => {
     return `10.${(counter >> 16) & 255}.${(counter >> 8) & 255}.${(counter & 255) || 1}`;
 };
 
-function scenarios(facts, volume, owner) {
+function scenarios(facts, volume) {
     const publicHost = (port) => `${facts.subdomain}.localhost:${port}`;
     const json = { 'X-Inertia': 'true', Accept: 'application/json' };
 
@@ -163,7 +163,7 @@ async function run(processes, facts, volume) {
         await owner.login('admin@convive.com');
         const ownerCookies = Object.fromEntries(owner.cookies);
 
-        for (const scenario of scenarios(facts, volume, ownerCookies)) {
+        for (const scenario of scenarios(facts, volume)) {
             for (const concurrency of levels) {
                 // Une ecriture ne se rejoue pas a l'infini : on s'arrete aux places.
                 if (scenario.write && concurrency > 25) {

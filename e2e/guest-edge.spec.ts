@@ -134,3 +134,14 @@ test('le lien de reprise rouvre le meme dossier dans un autre navigateur', async
     await expect(other.getByTestId('registration-summary')).toContainText(name);
     await elsewhere.close();
 });
+
+test('le decompte reste visible en bas de la page de reservation', async ({ page }, testInfo) => {
+    const { publicUrl, unit } = state();
+
+    const url = await register(page, { eventUrl: publicUrl, name: `Decompte colle ${testInfo.project.name}`, phone: phoneFor(testInfo, 45), unit });
+    await page.goto(url);
+    await expect(page.getByTestId('registration-countdown')).toBeVisible();
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect(page.getByTestId('registration-countdown')).toBeInViewport();
+});

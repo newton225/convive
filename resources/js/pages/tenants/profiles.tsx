@@ -1,9 +1,18 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Copy, Eye, EyeOff, Plus, ShieldCheck, Trash2 } from 'lucide-react';
+import {
+    Copy,
+    Eye,
+    EyeOff,
+    Plus,
+    ShieldCheck,
+    Trash2,
+    Users,
+} from 'lucide-react';
 import { useState } from 'react';
 import DeleteProfileModal from '@/components/delete-profile-modal';
 import Heading from '@/components/heading';
 import { PermissionMatrix } from '@/components/profiles/permission-matrix';
+import { ProfileMembersDialog } from '@/components/profiles/profile-members-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,6 +45,9 @@ type Props = {
 export default function TenantProfiles({ tenant, profiles, catalogue }: Props) {
     const { t } = useTranslation();
     const [deleting, setDeleting] = useState<TenantProfile | null>(null);
+    const [viewingMembers, setViewingMembers] = useState<TenantProfile | null>(
+        null,
+    );
     const [deleteOpen, setDeleteOpen] = useState(false);
     const customProfiles = profiles.filter(
         (profile) => !profile.isSystem && !profile.isStarter,
@@ -139,14 +151,48 @@ export default function TenantProfiles({ tenant, profiles, catalogue }: Props) {
                                                             )}
                                                         </Badge>
                                                     ) : null}
-                                                    <Badge variant="outline">
-                                                        {t(
-                                                            'profiles.badges.members',
-                                                            {
-                                                                count: profile.memberCount,
-                                                            },
-                                                        )}
-                                                    </Badge>
+                                                    {profile.members !== null &&
+                                                    profile.memberCount > 0 ? (
+                                                        // Le nombre ouvre la liste des membres qui portent ce profil.
+                                                        <Badge
+                                                            variant="outline"
+                                                            asChild
+                                                        >
+                                                            <button
+                                                                type="button"
+                                                                className="cursor-pointer underline-offset-2 hover:underline"
+                                                                aria-label={t(
+                                                                    'profiles.members_dialog.show',
+                                                                    {
+                                                                        name: profile.name,
+                                                                    },
+                                                                )}
+                                                                data-test="profile-members-open"
+                                                                onClick={() =>
+                                                                    setViewingMembers(
+                                                                        profile,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Users className="h-3 w-3" />
+                                                                {t(
+                                                                    'profiles.badges.members',
+                                                                    {
+                                                                        count: profile.memberCount,
+                                                                    },
+                                                                )}
+                                                            </button>
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="outline">
+                                                            {t(
+                                                                'profiles.badges.members',
+                                                                {
+                                                                    count: profile.memberCount,
+                                                                },
+                                                            )}
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                                 {profile.description ? (
                                                     <p className="text-muted-foreground text-sm">
@@ -308,6 +354,10 @@ export default function TenantProfiles({ tenant, profiles, catalogue }: Props) {
                 />
             </div>
 
+            <ProfileMembersDialog
+                profile={viewingMembers}
+                onOpenChange={(open) => !open && setViewingMembers(null)}
+            />
             <DeleteProfileModal
                 tenantSlug={tenant.slug}
                 profile={deleting}

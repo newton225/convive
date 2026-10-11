@@ -58,6 +58,12 @@ return [
     'starter_hint' => 'Profil de base : il ne se modifie pas et ne se supprime pas. Dupliquez-le pour créer une variante, ou masquez-le pour ne plus le proposer.',
     'starter_hidden_hint' => "Masqué : il n'est plus proposé pour inviter une personne ni changer le profil d'un membre. Ceux qui le portent le gardent.",
 
+    'members_dialog' => [
+        'title' => 'Membres du profil :name',
+        'show' => 'Voir les membres du profil :name',
+        'empty' => 'Personne ne porte ce profil.',
+    ],
+
     'badges' => [
         'system' => 'Profil système',
         'starter' => 'Profil de base',

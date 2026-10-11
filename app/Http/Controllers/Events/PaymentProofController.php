@@ -235,9 +235,6 @@ class PaymentProofController extends Controller
     }
 
     /**
-     * @return array<string, mixed>
-     */
-    /**
      * Calcule les signaux de toute la page en lot et relie chaque preuve a son inscription deja
      * chargee : sans cela, chaque ligne posait cinq a six requetes (`QueryBudgetTest`).
      *
@@ -245,11 +242,42 @@ class PaymentProofController extends Controller
      */
     private function prepareSignals(Collection $registrations): void
     {
+        $this->loadReferenceMatches($registrations);
+
         $registrations->each(fn (Registration $registration) => $registration->latestProof?->setRelation('registration', $registration));
 
-        PaymentProof::preloadSignals($registrations->map(fn (Registration $registration) => $registration->latestProof));
+        PaymentProof::preloadSignals($registrations->map(fn (Registration $registration): ?PaymentProof => $registration->latestProof)->all());
     }
 
+    /**
+     * Les preuves de la page qui partagent leur reference avec une autre, lues en une fois : le
+     * signal « Reference deja utilisee » doit dire avec qui, pas seulement l'annoncer.
+     *
+     * @var Collection<array-key, Collection<int, PaymentProof>>
+     */
+    private Collection $referenceMatches;
+
+    /**
+     * @param  Collection<int, Registration>  $registrations
+     */
+    private function loadReferenceMatches(Collection $registrations): void
+    {
+        $references = $registrations->map(fn (Registration $registration) => $registration->latestProof?->reference)->filter()->unique()->values();
+
+        $this->referenceMatches = $references->isEmpty()
+            ? new Collection
+            : PaymentProof::query()
+                ->whereIn('reference', $references)
+                ->with(['registration.event', 'media'])
+                ->orderBy('created_at')
+                ->get()
+                ->toBase()
+                ->groupBy('reference');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     private function row(Registration $registration): array
     {
         $proof = $registration->latestProof;
@@ -289,6 +317,23 @@ class PaymentProofController extends Controller
                 'reference' => $match->reference,
                 'receiptUrl' => $this->receiptUrl($match, $match->registration->event_id),
             ])->values()->all(),
+            // Les autres preuves qui portent la meme reference : meme dossier (nouveau depot) ou autre
+            // inscription, d'un autre evenement le cas echeant.
+            'duplicateReferenceMatches' => ($this->referenceMatches->get($proof->reference) ?? new Collection)
+                ->reject(fn (PaymentProof $match) => $match->id === $proof->id)
+                ->map(fn (PaymentProof $match) => [
+                    'proofId' => $match->id,
+                    'registrationReference' => $match->registration->reference,
+                    'name' => $match->registration->name,
+                    'eventName' => $match->registration->event->name,
+                    'sameEvent' => $match->registration->event_id === $registration->event_id,
+                    'sameRegistration' => $match->registration_id === $registration->id,
+                    'status' => $match->registration->status->value,
+                    'statusLabel' => $match->registration->status->label(),
+                    'submittedAt' => $match->created_at?->toISOString(),
+                    'reference' => $match->reference,
+                    'receiptUrl' => $this->receiptUrl($match, $match->registration->event_id),
+                ])->values()->all(),
             'signals' => [
                 'duplicateReference' => $proof->hasDuplicateReference(),
                 'duplicateImage' => $duplicateImageProofs->isNotEmpty(),

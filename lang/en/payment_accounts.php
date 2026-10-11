@@ -49,6 +49,7 @@ return [
         'save' => 'Request the change',
         'approve' => 'Approve and apply now',
         'cancel_change' => 'Cancel the change',
+        'cancel_creation' => 'Cancel the creation',
         'delete' => 'Delete account',
     ],
 
@@ -64,6 +65,8 @@ return [
         'requested_by' => 'Requested by :name.',
         'activates_at' => 'It will apply on :date. Until then, the previous number stays visible.',
         'new_number' => 'New number: :value',
+        'activates_at_new' => 'It will be offered to guests on :date.',
+        'none' => 'none',
         'approve_hint' => 'A second Owner can apply it immediately.',
         'not_the_requester' => 'You cannot approve a change you requested yourself.',
     ],
@@ -77,6 +80,7 @@ return [
         'updated' => 'Account updated.',
         'change_approved' => 'Change applied.',
         'change_cancelled' => 'Change cancelled.',
+        'creation_cancelled' => 'Account creation cancelled.',
         'deleted' => 'Account deleted.',
     ],
 
@@ -86,6 +90,13 @@ return [
         'account_number_required' => 'This channel requires an account number.',
         'number_invalid' => 'Enter a 10-digit Ivorian number, for example 07 07 12 34 56.',
         'number_network' => 'A :channel number starts with :prefixes. Check the number or the channel chosen.',
+    ],
+
+    'confirm_cancel' => [
+        'change_title' => 'Cancel the change?',
+        'change_description' => 'The new number :number will never be applied to the account ":label". The previous number stays shown to your guests.',
+        'creation_title' => 'Cancel the creation of the account?',
+        'creation_description' => 'The account ":label" has never been offered to your guests: it will be deleted. For another number, add a new account.',
     ],
 
     'confirm_approve' => [

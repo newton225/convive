@@ -15,7 +15,6 @@ return [
         'active' => 'Up to date',
         'past_due' => 'Payment overdue',
         'suspended' => 'Suspended',
-        'suspended_by_editor' => 'This space has been suspended by the Convive team. Write to support to learn why and reopen it.',
         'canceled' => 'Canceled',
     ],
 
@@ -87,6 +86,7 @@ return [
 
     'errors' => [
         'suspended' => 'This workspace is suspended for non-payment. Pay the subscription to reopen it.',
+        'suspended_by_editor' => 'This space has been suspended by the Convive team. Write to support to learn why and reopen it.',
         'event_quota' => 'The :plan plan does not allow another active event. Close an event or move to a higher plan.',
         'member_quota' => 'The :plan plan cannot take another member, pending invitations included. Move to a higher plan.',
         'not_purchasable' => 'This plan cannot be bought online: it is free, or negotiated on quote.',

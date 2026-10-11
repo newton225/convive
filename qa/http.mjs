@@ -107,7 +107,7 @@ export class Session {
 
         return this.post(path, body, {
             ...options,
-            headers: { ...(token ? { 'X-XSRF-TOKEN': token } : {}), ...(options.headers ?? {}) },
+            headers: { ...(token ? { 'X-XSRF-TOKEN': token } : {}), ...options.headers },
         });
     }
 

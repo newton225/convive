@@ -31,6 +31,12 @@ export type ProofEventChoice = {
     proofsToCheck: number;
 };
 
+// Une autre preuve qui porte la meme reference de transaction : `sameRegistration` dit s'il s'agit
+// d'un nouveau depot du meme dossier ou d'une autre inscription.
+export type DuplicateReferenceMatch = DuplicateImageMatch & {
+    sameRegistration: boolean;
+};
+
 export type PaymentProofRow = {
     registrationId: number;
     proofId: number;
@@ -48,5 +54,6 @@ export type PaymentProofRow = {
     paymentAccountLabel: string;
     receiptUrl: string | null;
     duplicateImageMatches: DuplicateImageMatch[];
+    duplicateReferenceMatches: DuplicateReferenceMatch[];
     signals: PaymentProofSignals;
 };

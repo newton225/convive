@@ -22,6 +22,7 @@ import { PriceCategoriesField } from '@/components/events/price-categories-field
 import { PublishEventDialog } from '@/components/events/publish-event-dialog';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
+import { StickySaveBar } from '@/components/sticky-save-bar';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -772,14 +773,16 @@ export default function EventForm({
                                     </div>
                                 </Step>
 
-                                <SubmitButton
-                                    data-test="event-submit"
-                                    data-tour="event-submit"
-                                    processing={processing}
-                                    dirty={isDirty}
-                                >
-                                    {t('common.actions.save')}
-                                </SubmitButton>
+                                <StickySaveBar testId="event-submit-bar">
+                                    <SubmitButton
+                                        data-test="event-submit"
+                                        data-tour="event-submit"
+                                        processing={processing}
+                                        dirty={isDirty}
+                                    >
+                                        {t('common.actions.save')}
+                                    </SubmitButton>
+                                </StickySaveBar>
                             </>
                         )}
                     </Form>

@@ -7,6 +7,7 @@ import { ConfirmSummary } from '@/components/confirm-summary';
 import InputError from '@/components/input-error';
 import { LabelWithHelp } from '@/components/label-with-help';
 import { RequiredFieldsNote } from '@/components/required-fields-note';
+import { StickySaveBar } from '@/components/sticky-save-bar';
 import { SubmitButton } from '@/components/submit-button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -259,16 +260,18 @@ export function AccountForm({ action, account, channels, delayActive }: Props) {
 
                         <InputError message={errors.confirmed} />
 
-                        <SubmitButton
-                            data-test="payment-account-submit"
-                            processing={processing}
-                            dirty={isDirty}
-                        >
-                            {account ? null : <Plus />}
-                            {account
-                                ? t('payment_accounts.actions.save')
-                                : t('payment_accounts.actions.create')}
-                        </SubmitButton>
+                        <StickySaveBar testId="payment-account-submit-bar">
+                            <SubmitButton
+                                data-test="payment-account-submit"
+                                processing={processing}
+                                dirty={isDirty}
+                            >
+                                {account ? null : <Plus />}
+                                {account
+                                    ? t('payment_accounts.actions.save')
+                                    : t('payment_accounts.actions.create')}
+                            </SubmitButton>
+                        </StickySaveBar>
                     </>
                 )}
             </Form>

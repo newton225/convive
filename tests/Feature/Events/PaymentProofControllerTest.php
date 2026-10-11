@@ -215,6 +215,79 @@ class PaymentProofControllerTest extends TestCase
             );
     }
 
+    public function test_une_reference_deja_utilisee_liste_les_autres_preuves_qui_la_portent(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        ['event' => $event, 'earlier' => $earlier] = $tenant->asCurrent(function () {
+            $event = Event::factory()->open()->create();
+            $pending = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id]);
+            PaymentProof::factory()->withReference('T_MA_REF')->create(['registration_id' => $pending->id]);
+
+            // Meme reference sur un autre evenement : elle doit figurer, avec son evenement.
+            $otherEvent = Event::factory()->open()->create(['name' => 'Gala precedent']);
+            $other = Registration::factory()->proofSubmitted()->create(['event_id' => $otherEvent->id, 'name' => 'Awa Kone']);
+            $earlier = PaymentProof::factory()->withReference('T_MA_REF')->create(['registration_id' => $other->id]);
+
+            // Autre reference : elle ne doit pas figurer.
+            $unrelated = Registration::factory()->confirmed()->create(['event_id' => $event->id]);
+            PaymentProof::factory()->withReference('T_AUTRE')->create(['registration_id' => $unrelated->id]);
+
+            return ['event' => $event, 'earlier' => $earlier];
+        });
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.proofs.index', [$tenant, $event]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('rows.0.signals.duplicateReference', true)
+                ->has('rows.0.duplicateReferenceMatches', 1)
+                ->where('rows.0.duplicateReferenceMatches.0.proofId', $earlier->id)
+                ->where('rows.0.duplicateReferenceMatches.0.name', 'Awa Kone')
+                ->where('rows.0.duplicateReferenceMatches.0.eventName', 'Gala precedent')
+                ->where('rows.0.duplicateReferenceMatches.0.sameEvent', false)
+                ->where('rows.0.duplicateReferenceMatches.0.sameRegistration', false),
+            );
+    }
+
+    public function test_une_reference_reutilisee_par_le_meme_dossier_est_indiquee_comme_telle(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $event = $tenant->asCurrent(function () {
+            $event = Event::factory()->open()->create();
+            $registration = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id]);
+            PaymentProof::factory()->withReference('T_REDEPOT')->create(['registration_id' => $registration->id, 'created_at' => now()->subHour()]);
+            PaymentProof::factory()->withReference('T_REDEPOT')->create(['registration_id' => $registration->id]);
+
+            return $event;
+        });
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.proofs.index', [$tenant, $event]))
+            ->assertInertia(fn ($page) => $page
+                ->where('rows.0.signals.duplicateReference', true)
+                ->has('rows.0.duplicateReferenceMatches', 1)
+                ->where('rows.0.duplicateReferenceMatches.0.sameRegistration', true),
+            );
+    }
+
+    public function test_une_reference_inedite_ne_liste_aucune_autre_preuve(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event] = $this->proofSubmitted($tenant);
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.proofs.index', [$tenant, $event]))
+            ->assertInertia(fn ($page) => $page
+                ->where('rows.0.signals.duplicateReference', false)
+                ->has('rows.0.duplicateReferenceMatches', 0),
+            );
+    }
+
     public function test_une_capture_inedite_ne_liste_aucune_autre_preuve(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

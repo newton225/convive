@@ -90,6 +90,14 @@ export type TenantProfile = {
     requiresTwoFactor: boolean;
     permissions: string[];
     memberCount: number;
+    // Les membres du profil ; null quand l'utilisateur ne peut pas lire la liste de l'equipe.
+    members: ProfileMember[] | null;
+};
+
+export type ProfileMember = {
+    id: number;
+    name: string;
+    email: string;
 };
 
 export type PermissionOption = {

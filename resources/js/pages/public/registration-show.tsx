@@ -263,25 +263,33 @@ export default function PublicRegistrationShow({
                     ) : null
                 ) : (
                     <>
-                        <Card>
-                            <CardContent className="space-y-2 pt-6 text-center">
-                                <p className="text-muted-foreground text-sm">
-                                    {t(
-                                        'guest.registration.show.countdown_label',
-                                    )}
-                                </p>
-                                <p
-                                    className={cn(
-                                        'text-3xl font-semibold tabular-nums',
-                                        isUrgent && 'text-[oklch(0.55_0.2_25)]',
-                                    )}
-                                    data-test="registration-countdown"
-                                    suppressHydrationWarning
-                                >
-                                    {formatCountdown(remainingSeconds)}
-                                </p>
-                            </CardContent>
-                        </Card>
+                        {/* Colle en haut de l'ecran : l'invite voit le temps qui reste, quelle que soit sa
+                            position dans la page (decision du proprietaire du projet, 2026-10-11). */}
+                        <div
+                            className="sticky top-2 z-20"
+                            data-test="registration-countdown-bar"
+                        >
+                            <Card className="ring-border ring-1">
+                                <CardContent className="flex items-center justify-between gap-3 py-3">
+                                    <p className="text-muted-foreground text-sm">
+                                        {t(
+                                            'guest.registration.show.countdown_label',
+                                        )}
+                                    </p>
+                                    <p
+                                        className={cn(
+                                            'text-2xl font-semibold tabular-nums',
+                                            isUrgent &&
+                                                'text-[oklch(0.55_0.2_25)]',
+                                        )}
+                                        data-test="registration-countdown"
+                                        suppressHydrationWarning
+                                    >
+                                        {formatCountdown(remainingSeconds)}
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        </div>
 
                         <RegistrationSummaryCard
                             registration={registration}

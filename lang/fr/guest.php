@@ -296,6 +296,7 @@ return [
     'claim' => [
         'title' => 'Une question ou un problème ?',
         'description' => 'Écrivez-nous ici : votre message est lu par l’organisation, qui vous rappellera au numéro de votre dossier. Aucune coordonnée à saisir.',
+        'open' => 'Écrire à l’organisation',
         'category' => 'Sujet',
         'category_placeholder' => 'Choisir un sujet',
         'categories' => [
@@ -307,7 +308,7 @@ return [
         'message' => 'Votre message',
         'message_placeholder' => 'Expliquez ce qui s’est passé, en quelques phrases.',
         'message_help' => 'Entre 10 et 1 000 caractères. Ne saisissez jamais un code secret ou un mot de passe.',
-        'submit' => 'Envoyer ma réclamation',
+        'submit' => 'Envoyer mon message à l’organisation',
         'sent' => 'Votre réclamation est envoyée. L’organisation vous rappellera au numéro de votre dossier.',
         'too_many' => 'Vous avez déjà des réclamations en attente de réponse pour ce dossier. Patientez : l’organisation vous rappellera.',
         'locked' => 'Vos réclamations en cours sont déjà entre les mains de l’organisation, qui vous rappellera au numéro de votre dossier.',

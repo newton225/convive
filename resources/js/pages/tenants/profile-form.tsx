@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { PermissionModule } from '@/components/profiles/permission-module';
+import { StickySaveBar } from '@/components/sticky-save-bar';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -212,7 +213,7 @@ export default function ProfileForm({
                     ))}
                 </section>
 
-                <div className="flex flex-wrap gap-2">
+                <StickySaveBar testId="profile-submit-bar">
                     <SubmitButton
                         processing={form.processing}
                         dirty={form.isDirty}
@@ -225,7 +226,7 @@ export default function ProfileForm({
                             {t('common.actions.cancel')}
                         </Link>
                     </Button>
-                </div>
+                </StickySaveBar>
             </form>
         </>
     );

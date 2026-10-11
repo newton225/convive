@@ -213,8 +213,10 @@ test('l\'invite ecrit une reclamation, l\'organisateur la lit et la traite', asy
     const { context, page } = await guestPage(browser);
 
     await page.goto(reservationUrl);
-    const form = page.getByTestId('guest-claim-form');
-    await form.scrollIntoViewIfNeeded();
+    // Le formulaire est replie par defaut : on l'ouvre.
+    await page.getByTestId('guest-claim-open').scrollIntoViewIfNeeded();
+    await expect(page.getByTestId('guest-claim-form')).toHaveCount(0);
+    await page.getByTestId('guest-claim-open').click();
     await page.getByTestId('guest-claim-category').click();
     await page.getByRole('option', { name: 'Mon paiement' }).click();
     await page.getByTestId('guest-claim-message').fill('Bonjour, ma preuve a ete validee mais je voudrais une facture.');

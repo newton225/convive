@@ -58,6 +58,12 @@ return [
     'starter_hint' => 'Starter profile: it cannot be edited or deleted. Duplicate it to create a variant, or hide it to stop offering it.',
     'starter_hidden_hint' => "Hidden: it is no longer offered when inviting someone or changing a member's profile. Members who carry it keep it.",
 
+    'members_dialog' => [
+        'title' => 'Members with the :name profile',
+        'show' => 'See the members with the :name profile',
+        'empty' => 'Nobody has this profile.',
+    ],
+
     'badges' => [
         'system' => 'System profile',
         'starter' => 'Starter profile',

@@ -296,6 +296,7 @@ return [
     'claim' => [
         'title' => 'A question or a problem?',
         'description' => 'Write to us here: your message is read by the organisation, which will call you back on the number of your registration. No contact details to enter.',
+        'open' => 'Write to the organisation',
         'category' => 'Subject',
         'category_placeholder' => 'Choose a subject',
         'categories' => [
@@ -307,7 +308,7 @@ return [
         'message' => 'Your message',
         'message_placeholder' => 'Explain what happened, in a few sentences.',
         'message_help' => 'Between 10 and 1,000 characters. Never enter a secret code or a password.',
-        'submit' => 'Send my claim',
+        'submit' => 'Send my message to the organisation',
         'sent' => 'Your claim has been sent. The organisation will call you back on the number of your registration.',
         'too_many' => 'You already have claims waiting for an answer for this registration. Please wait: the organisation will call you back.',
         'locked' => 'Your open claims are already with the organisation, which will call you back on the number of your registration.',

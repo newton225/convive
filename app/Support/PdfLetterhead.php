@@ -90,7 +90,7 @@ class PdfLetterhead
 
         $name = Locale::getDisplayRegion('-'.$code, app()->getLocale());
 
-        return $name !== '' && $name !== $code ? $name : $code;
+        return is_string($name) && $name !== '' && $name !== $code ? $name : $code;
     }
 
     private static function dataUri(?Media $media, string $conversion = ''): ?string

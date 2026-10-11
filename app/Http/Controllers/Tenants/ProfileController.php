@@ -12,8 +12,10 @@ use App\Http\Requests\Tenants\ChangeProfileVisibilityRequest;
 use App\Http\Requests\Tenants\SaveProfileRequest;
 use App\Models\Profile;
 use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -33,7 +35,7 @@ class ProfileController extends Controller
                 'name' => $tenant->name,
                 'slug' => $tenant->slug,
             ],
-            'profiles' => $this->profilesFor($tenant),
+            'profiles' => $this->profilesFor($tenant, $request->user()->hasTenantPermission($tenant, TenantPermission::TeamView)),
             // Pour la vue comparative profils x permissions (prototype Convive.dc.html).
             'catalogue' => $this->catalogue(),
         ]);
@@ -175,8 +177,12 @@ class ProfileController extends Controller
     /**
      * @return array<int, array<string, mixed>>
      */
-    private function profilesFor(Tenant $tenant): array
+    private function profilesFor(Tenant $tenant, bool $withMembers = false): array
     {
+        // Les membres de chaque profil, lus en une fois. Leurs noms et adresses ne sont donnes qu'a qui
+        // peut deja lire la liste de l'equipe : gerer les profils n'ouvre pas cette liste.
+        $membersByProfile = $withMembers ? $this->membersByProfile() : null;
+
         // La tenancy est deja active pour ce locataire (EnsureTenantMembership) : Profile se
         // resout directement, sans filtre a poser.
         return Profile::query()
@@ -193,8 +199,34 @@ class ProfileController extends Controller
                 'isHidden' => $profile->isHidden(),
                 'requiresTwoFactor' => $profile->demandsTwoFactor(),
                 'permissions' => $profile->permissionValues(),
-                'memberCount' => $profile->members()->count(),
+                'memberCount' => $profile->memberCount(),
+                'members' => $membersByProfile === null ? null : ($membersByProfile[$profile->id] ?? []),
             ])
+            ->all();
+    }
+
+    /**
+     * Les membres de chaque profil de l'organisation courante, par identifiant de profil.
+     *
+     * @return array<int, array<int, array{id: int, name: string, email: string}>>
+     */
+    private function membersByProfile(): array
+    {
+        $assignments = DB::table('model_has_profiles')
+            ->where('model_type', (new User)->getMorphClass())
+            ->get(['profile_id', 'model_id']);
+
+        $users = User::query()->whereIn('id', $assignments->pluck('model_id'))->orderBy('name')->get()->keyBy('id');
+
+        return $assignments
+            ->groupBy('profile_id')
+            ->map(fn ($rows) => $rows
+                ->map(fn ($row) => $users->get($row->model_id))
+                ->filter()
+                ->sortBy('name')
+                ->map(fn (User $user) => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email])
+                ->values()
+                ->all())
             ->all();
     }
 

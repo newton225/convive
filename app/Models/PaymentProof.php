@@ -232,11 +232,11 @@ class PaymentProof extends Model implements HasMedia
      *
      * Chaque preuve doit porter sa relation `registration` (deja chargee par la file).
      *
-     * @param  SupportCollection<int, self|null>  $proofs
+     * @param  array<int, PaymentProof|null>  $proofs
      */
-    public static function preloadSignals(SupportCollection $proofs): void
+    public static function preloadSignals(array $proofs): void
     {
-        $proofs = $proofs->filter()->values();
+        $proofs = collect($proofs)->filter()->values();
 
         if ($proofs->isEmpty()) {
             return;

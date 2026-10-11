@@ -543,8 +543,9 @@ d'un catalogue de permissions, lui fige.
   permission n'est creee depuis l'interface** : le controle d'acces deviendrait falsifiable par
   saisie.
 - Les **profils** sont des donnees propres a chaque locataire : le modele `App\Models\Profile`,
-  qui etend le role de `spatie/laravel-permission` en mode `teams`, le team etant le locataire.
-  Deux organisations peuvent avoir un profil du meme nom sans se toucher.
+  qui etend le role de `spatie/laravel-permission` **sans mode `teams`** (voir « Configuration
+  Spatie » plus bas) : ils vivent dans la base du locataire. Deux organisations peuvent avoir un
+  profil du meme nom sans se toucher.
 
 ### Configuration Spatie
 
@@ -815,9 +816,8 @@ un lien.
 
 - **Sous-domaine, pas chemin.** `Route::domain('{tenant_subdomain}.'.config('convive.public_domain'))`
   tient le role du `TenantFinder` decrit dans la section « Multi-locataire » : c'est
-  `App\Http\Middleware\ResolveCurrentTenant` (globalement prepose au groupe `web`) qui lit
-  `tenant_subdomain` et pose le contexte, avant que le scope de `BelongsToTenant` n'entre en
-  jeu. Un sous-domaine inconnu ne resout aucun locataire : le controleur repond 404.
+  `InitializeTenancyBySubdomain` (`routes/public.php`) qui lit `tenant_subdomain` et initialise la
+  tenancy, donc la base du locataire. Un sous-domaine inconnu ne resout aucun locataire : 404.
 - **L'acces croise est impossible par construction, pas verifie a la main.** Le jeton d'un
   evenement n'est cherche qu'a l'interieur du locataire deja resolu par le sous-domaine : le
   jeton d'une organisation A presente sous le sous-domaine de B ne trouve rien. Teste
@@ -855,7 +855,7 @@ pas une chose a ajouter au cas par cas sur une seule route.
 Decision du proprietaire du projet (2026-09-22) : au-dela du lien direct que l'organisateur
 distribue lui-meme, un evenement peut aussi apparaitre dans une vitrine publique sur le site
 produit (README ecran 1, domaine central, aucun sous-domaine), pour toucher un public qui n'a
-jamais recu le lien. **Ceci est la decision retenue, le code n'est pas encore ecrit.**
+jamais recu le lien. **Decision en service** (`announced_at`, table centrale `ShowcaseEvent`).
 
 - **Opt-in, jamais automatique.** Publier un evenement ne l'annonce pas de lui-meme sur le site
   produit : c'est un second geste, volontaire, depuis le back-office de l'evenement (le meme
@@ -1054,10 +1054,11 @@ parfaitement authentiques. Les controles sont ceux de `SECURITY.md` C1, aucun n'
   en attente vers la valeur vivante. Si la tache ne tourne pas, l'activation est en retard et
   l'ancien numero reste affiche : c'est le bon sens de defaillance pour de l'argent.
 - Une tache qui doit balayer tous les locataires **boucle sur eux et pose le contexte**
-  (`Tenant::asCurrent()`), plutot que de lever le scope global.
+  (`Tenant::asCurrent()`), jamais une requete large sur les bases.
 
-**Non encore fait** : le second facteur TOTP rejoue juste avant la modification (seul le mot de
-passe est redemande), l'alerte WhatsApp, et le bandeau sur le tableau de bord.
+Le second facteur TOTP est rejoue avant la modification (`EnsureRecentTwoFactorConfirmation`), l'alerte
+part aussi par WhatsApp, et le tableau de bord porte un bandeau pendant sept jours apres un changement
+(`paymentAccountNotice`).
 
 ### Mesure d'audience : pages commerciales seulement
 
@@ -1116,7 +1117,7 @@ remaniables ensuite.
   peut plus etre rempli.
 - Une unite retiree de la liste se **desactive** (`is_active`) plutot que de se supprimer, pour
   ne pas casser l'historique des inscriptions deja prises.
-- Unicite composite `(tenant_id, name)` : deux organisations peuvent avoir la meme unite, une
+- Unicite du nom dans la base du locataire : deux organisations peuvent avoir la meme unite, une
   seule organisation ne peut pas l'avoir deux fois.
 - Permission dediee : `tenant.units`.
 
@@ -1231,9 +1232,9 @@ passee au moment de la validation (« une inscription validee apres l'echeance e
 validation », README 2.7) ; depuis la tache planifiee, pour toutes les inscriptions confirmees
 avant cette echeance.
 
-**Non encore fait** : un vrai client WhatsApp Business API (le palliatif journalise seulement),
-et le rendu HTML aux couleurs de marque du locataire pour les emails, qui utilisent pour
-l'instant le gabarit texte par defaut des notifications Laravel.
+Les courriels destines aux invites utilisent un gabarit HTML aux couleurs de l'organisation
+(`emails.guest.notification`, `GuestNotificationMail`) ; ceux de l'equipe (alertes, invitations)
+gardent le gabarit par defaut des notifications Laravel.
 
 ---
 
@@ -1367,9 +1368,11 @@ Principes :
 
 ## Securite : exigences non negociables
 
-- **Isolation des locataires** : chaque requete metier filtree par `tenant_id`, via un scope
-  global Eloquent plus une verification dans les Policies, et Row Level Security en base.
-  Un acces croise renvoie 404, jamais 403, pour ne pas divulguer l'existence de la ressource.
+- **Isolation des locataires** : une base de donnees physiquement separee par organisation
+  (`stancl/tenancy`, voir « Multi-locataire »), plus une verification dans les Policies ; les
+  tables centrales (`tenant_members`, `tenant_invitations`, `tenant_brandings`, `domains`) gardent
+  un `tenant_id` et un scope explicite. Un acces croise renvoie 404, jamais 403, pour ne pas
+  divulguer l'existence de la ressource.
 - **Autorisation systematique** : `authorize()` ou middleware `can` sur chaque route du
   back-office. Aucune verification de role uniquement cote client.
 - **Concurrence** : calcul des places et creation d'une reservation dans une transaction avec

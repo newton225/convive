@@ -81,6 +81,16 @@ return [
         'status' => 'Statut du dossier',
     ],
 
+    'duplicate_reference' => [
+        'title' => 'Même référence ailleurs',
+        'description' => 'La référence de transaction déposée par :name figure aussi sur ces autres preuves. Deux versements réels n’ont jamais la même référence : vérifiez avant de valider.',
+        'show' => 'Voir les preuves qui portent cette référence',
+        'current' => 'Preuve examinée',
+        'others' => '{0} Aucune autre preuve|{1} 1 autre preuve avec cette référence|[2,*] :count autres preuves avec cette référence',
+        'same_registration' => 'Même dossier',
+        'empty' => 'Aucune autre preuve ne porte cette référence.',
+    ],
+
     'duplicate_image' => [
         'title' => 'Même capture ailleurs',
         'description' => 'La capture déposée par :name ressemble à celle de ces autres versements. Comparez les fiches, et cliquez sur une capture pour l’agrandir.',

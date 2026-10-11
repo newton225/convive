@@ -175,6 +175,41 @@ class ProfileTest extends TestCase
         $this->assertSame(Profile::Owner, $owner->fresh()->tenantProfile($tenant)?->name);
     }
 
+    public function test_la_liste_des_profils_donne_les_membres_de_chaque_profil(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create(['name' => 'Chef Equipe']);
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $reader = User::factory()->withTwoFactor()->create(['name' => 'Awa Kone', 'email' => 'awa@example.test']);
+        $tenant->addMember($reader, $this->profileOf($tenant, 'Lecture'));
+
+        $this->actingAs($owner)
+            ->get(route('tenants.profiles.index', $tenant))
+            ->assertInertia(fn ($page) => $page
+                ->where('profiles', fn ($profiles) => collect($profiles)->firstWhere('name', 'Lecture')['memberCount'] === 1
+                    && collect($profiles)->firstWhere('name', 'Lecture')['members'][0]['name'] === 'Awa Kone'
+                    && collect($profiles)->firstWhere('name', 'Lecture')['members'][0]['email'] === 'awa@example.test'
+                    && collect($profiles)->firstWhere('name', Profile::Owner)['members'][0]['name'] === 'Chef Equipe'
+                    && collect($profiles)->firstWhere('name', 'Tresorier')['members'] === []),
+            );
+    }
+
+    public function test_sans_la_permission_de_voir_l_equipe_les_membres_ne_sont_pas_donnes(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        $manager = User::factory()->withTwoFactor()->create();
+        $tenant->addMember($manager, $this->makeProfile($tenant, 'Gestionnaire', [TenantPermission::ProfilesManage]));
+
+        $this->actingAs($manager)
+            ->get(route('tenants.profiles.index', $tenant))
+            ->assertInertia(fn ($page) => $page
+                ->where('profiles', fn ($profiles) => collect($profiles)->every(fn ($profile) => $profile['members'] === null)
+                    && collect($profiles)->firstWhere('name', Profile::Owner)['memberCount'] === 1),
+            );
+    }
+
     public function test_on_ne_peut_pas_attribuer_une_permission_que_l_on_ne_detient_pas(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

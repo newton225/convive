@@ -111,7 +111,7 @@ class DashboardOverview
         return [
             'registrations' => $event->registrations()->count(),
             'validated' => $event->registrations()->where('status', RegistrationStatus::Confirmed)->count(),
-            'toCheck' => $event->registrations()->where('status', RegistrationStatus::ProofSubmitted)->count(),
+            'toCheck' => $event->registrations()->where('status', RegistrationStatus::ProofSubmitted)->whereHas('proofs')->count(),
             'withoutProof' => $event->registrations()->whereIn('status', Registration::UnfinalizedStatuses)->count(),
             'seatsLeft' => $event->remainingSeats(),
         ];

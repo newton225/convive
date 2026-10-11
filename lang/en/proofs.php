@@ -81,6 +81,16 @@ return [
         'status' => 'Registration status',
     ],
 
+    'duplicate_reference' => [
+        'title' => 'Same reference elsewhere',
+        'description' => 'The transaction reference submitted by :name also appears on these other proofs. Two real payments never share a reference: check before approving.',
+        'show' => 'See the proofs that carry this reference',
+        'current' => 'Proof being checked',
+        'others' => '{0} No other proof|{1} 1 other proof with this reference|[2,*] :count other proofs with this reference',
+        'same_registration' => 'Same registration',
+        'empty' => 'No other proof carries this reference.',
+    ],
+
     'duplicate_image' => [
         'title' => 'Same capture elsewhere',
         'description' => 'The capture submitted by :name looks like the one of these other payments. Compare the details, and click a capture to enlarge it.',

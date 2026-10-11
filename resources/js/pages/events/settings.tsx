@@ -4,6 +4,7 @@ import Heading from '@/components/heading';
 import { NonceStyle } from '@/components/nonce-style';
 import { CheckboxRow } from '@/components/settings/checkbox-row';
 import { SettingsSection } from '@/components/settings/settings-section';
+import { StickySaveBar } from '@/components/sticky-save-bar';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import { translate, useTranslation } from '@/hooks/use-translation';
@@ -393,7 +394,7 @@ export default function EventSettings({
                 </SettingsSection>
 
                 {canEditEvent ? (
-                    <div>
+                    <StickySaveBar testId="event-settings-save-bar">
                         <SubmitButton
                             type="button"
                             processing={processing}
@@ -403,7 +404,7 @@ export default function EventSettings({
                         >
                             {t('common.actions.save')}
                         </SubmitButton>
-                    </div>
+                    </StickySaveBar>
                 ) : null}
             </div>
         </>
