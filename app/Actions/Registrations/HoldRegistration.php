@@ -108,6 +108,16 @@ class HoldRegistration
                 $this->alertIfSeatsExhausted($event);
                 $this->alertIfSeatsLow($event);
 
+                // Une relance apres expiration n'est pas une nouvelle inscription pour l'equipe, et
+                // une inscription gratuite est annoncee comme confirmee (`confirmFree`).
+                if (! $lapsedBefore && ! $registration->isFreeOfCharge()) {
+                    app(SendAlert::class)->toTenantMembersGrouped(
+                        NotificationType::RegistrationReceived,
+                        ['event' => $event->name, 'event_id' => $event->id],
+                        route('tenants.events.registrations.index', [Tenant::current(), $event], absolute: false),
+                    );
+                }
+
                 if ($registration->isFreeOfCharge()) {
                     $this->confirmFree($registration);
                 }
@@ -170,6 +180,12 @@ class HoldRegistration
             ->log('registration.confirmed_free');
 
         app(FinalizeConfirmedRegistration::class)->handle($registration->fresh() ?? $registration);
+
+        app(SendAlert::class)->toTenantMembersGrouped(
+            NotificationType::RegistrationConfirmed,
+            ['event' => $registration->event->name, 'event_id' => $registration->event_id],
+            route('tenants.events.registrations.index', [Tenant::current(), $registration->event], absolute: false),
+        );
     }
 
     /**

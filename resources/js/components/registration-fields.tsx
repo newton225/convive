@@ -30,6 +30,7 @@ export function Field({
     label,
     error,
     help,
+    hint,
     required = false,
     children,
 }: {
@@ -37,6 +38,7 @@ export function Field({
     label: string;
     error?: string;
     help?: string;
+    hint?: string;
     required?: boolean;
     children: React.ReactNode;
 }) {
@@ -49,6 +51,14 @@ export function Field({
                 required={required}
             />
             {children}
+            {hint && (
+                <p
+                    id={`${id}-hint`}
+                    className="text-sm text-muted-foreground"
+                >
+                    {hint}
+                </p>
+            )}
             <InputError message={error} />
         </div>
     );

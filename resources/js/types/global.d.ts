@@ -2,6 +2,7 @@ import type { Auth } from '@/types/auth';
 import type { LocaleCode, SupportedLocales, Translations } from '@/types/i18n';
 import type { NotificationsSummary } from '@/types/notifications';
 import type { SupportAccessNotice } from '@/types/support-access';
+import type { FlashToast } from '@/types/ui';
 import type { CurrentPlan, TenantPermissions } from '@/types/tenants';
 import type { Tenant } from '@/types/tenants';
 
@@ -13,6 +14,11 @@ declare module 'react' {
 
 declare module '@inertiajs/core' {
     export interface InertiaConfig {
+        flashDataType: {
+            toast?: FlashToast;
+            // Le refus du numero vient d'une reservation avec decompte : le lien peut etre renvoye.
+            recoverable?: boolean;
+        };
         sharedPageProps: {
             name: string;
             auth: Auth;

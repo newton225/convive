@@ -2,9 +2,12 @@
 
 namespace App\Actions\PaymentProofs;
 
+use App\Actions\Notifications\SendAlert;
 use App\Actions\Registrations\FinalizeConfirmedRegistration;
+use App\Enums\NotificationType;
 use App\Enums\RegistrationStatus;
 use App\Models\PaymentProof;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -67,6 +70,14 @@ class ValidatePaymentProof
         });
 
         app(FinalizeConfirmedRegistration::class)->handle($registration);
+
+        // Celui qui valide la preuve sait ce qu'il vient de faire : seuls les autres sont prevenus.
+        app(SendAlert::class)->toTenantMembersGrouped(
+            NotificationType::RegistrationConfirmed,
+            ['event' => $registration->event->name, 'event_id' => $registration->event_id],
+            route('tenants.events.registrations.index', [Tenant::current(), $registration->event], absolute: false),
+            $actor,
+        );
 
         return true;
     }

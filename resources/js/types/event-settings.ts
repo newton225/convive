@@ -26,9 +26,7 @@ export type EventRules = {
     scheduledSend: boolean;
     autoSeating: boolean;
     allowWithoutProof: boolean;
-    proofLegibility: boolean;
     purgeOnExhaustion: boolean;
-    temporaryHold: boolean;
     phoneVerification: boolean;
     botProtection: boolean;
     showRemainingSeats: boolean;

@@ -51,12 +51,10 @@ return [
         'scheduled_send' => 'Send cards at the scheduled time',
         'auto_seating' => 'Assign tables automatically on approval',
         'allow_without_proof' => 'Accept a registration saved without a proof',
-        'proof_legibility' => 'Require a legible receipt before sending',
         'purge_on_exhaustion' => 'Purge as soon as seats run out',
         'phone_verification' => 'Verify the phone before booking',
         'show_remaining_seats' => 'Show guests how many seats are left',
         'bot_protection' => 'Protect the registration form against robots',
-        'temporary_hold' => 'Hold the seat during the reservation',
         'not_enforced' => 'Saved, but does not act on the event yet.',
     ],
 

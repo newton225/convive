@@ -102,4 +102,92 @@ class PurgeRegistrationsTest extends TestCase
         $entry = $tenant->asCurrent(fn () => WaitlistEntry::first());
         $this->assertSame(WaitlistStatus::Invited, $entry->status);
     }
+
+    public function test_une_purge_ciblee_ne_supprime_que_les_dossiers_choisis(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(fn () => Event::factory()->create());
+
+        [$chosen, $kept] = $tenant->asCurrent(fn () => [
+            Registration::factory()->expired()->create(['event_id' => $event->id]),
+            Registration::factory()->expired()->create(['event_id' => $event->id]),
+        ]);
+
+        $result = $tenant->asCurrent(fn () => app(PurgeRegistrations::class)->handle($event, [$chosen->id]));
+
+        $this->assertSame(1, $result['count']);
+        $tenant->asCurrent(function () use ($chosen, $kept) {
+            $this->assertNull(Registration::find($chosen->id));
+            $this->assertNotNull(Registration::find($kept->id));
+        });
+    }
+
+    public function test_une_purge_ciblee_n_efface_jamais_une_inscription_finalisee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(fn () => Event::factory()->create());
+
+        $confirmed = $tenant->asCurrent(fn () => Registration::factory()->confirmed()->create(['event_id' => $event->id]));
+        $proofSubmitted = $tenant->asCurrent(fn () => Registration::factory()->proofSubmitted()->create(['event_id' => $event->id]));
+
+        $result = $tenant->asCurrent(fn () => app(PurgeRegistrations::class)->handle($event, [$confirmed->id, $proofSubmitted->id]));
+
+        $this->assertSame(0, $result['count']);
+        $tenant->asCurrent(fn () => $this->assertSame(2, Registration::where('event_id', $event->id)->count()));
+    }
+
+    public function test_une_purge_ciblee_ignore_un_dossier_d_un_autre_evenement(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        [$event, $other] = $tenant->asCurrent(fn () => [Event::factory()->create(), Event::factory()->create()]);
+        $foreign = $tenant->asCurrent(fn () => Registration::factory()->expired()->create(['event_id' => $other->id]));
+
+        $result = $tenant->asCurrent(fn () => app(PurgeRegistrations::class)->handle($event, [$foreign->id]));
+
+        $this->assertSame(0, $result['count']);
+        $tenant->asCurrent(fn () => $this->assertNotNull(Registration::find($foreign->id)));
+    }
+
+    public function test_la_purge_de_tout_l_evenement_peut_epargner_les_reservations_en_cours(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(fn () => Event::factory()->create());
+
+        [$active, $expired] = $tenant->asCurrent(fn () => [
+            Registration::factory()->held()->create(['event_id' => $event->id]),
+            Registration::factory()->expired()->create(['event_id' => $event->id]),
+        ]);
+
+        $result = $tenant->asCurrent(fn () => app(PurgeRegistrations::class)->handle($event, null, keepActiveHolds: true));
+
+        $this->assertSame(1, $result['count']);
+        $tenant->asCurrent(function () use ($active, $expired) {
+            $this->assertNotNull(Registration::find($active->id));
+            $this->assertNull(Registration::find($expired->id));
+        });
+    }
+
+    public function test_le_journal_d_une_purge_ciblee_garde_les_references_sans_donnees_personnelles(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $tenant->asCurrent(fn () => Event::factory()->create());
+
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->expired()->create([
+            'event_id' => $event->id,
+            'reference' => 'CO-2026-0042',
+        ]));
+
+        $tenant->asCurrent(fn () => app(PurgeRegistrations::class)->handle($event, [$registration->id]));
+
+        $activity = $tenant->asCurrent(fn () => Activity::where('description', 'registrations.purged')->latest('id')->first());
+
+        $this->assertSame(['CO-2026-0042'], $activity->properties['references']);
+        $this->assertStringNotContainsString($registration->phone, json_encode($activity->properties));
+    }
 }

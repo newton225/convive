@@ -46,6 +46,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property CarbonImmutable|null $purge_at
  * @property CarbonImmutable|null $seats_low_alerted_at
  * @property CarbonImmutable|null $purge_notice_sent_at
+ * @property CarbonImmutable|null $ended_alerted_at
+ * @property CarbonImmutable|null $registrations_closed_alerted_at
  * @property CarbonImmutable|null $invitations_send_at
  * @property int $hold_duration_minutes
  * @property string|null $public_token
@@ -511,7 +513,7 @@ class Event extends Model implements HasMedia
      * `not_published`, `closed`, `past`.
      *
      * La vitrine est une page commerciale (decision du 2026-10-07) : seulement des evenements
-     * publies, ouverts et a venir. Un visuel n'est pas exige (decision du 2026-10-08) : sans lui, la
+     * publies, ouverts, a venir et dont les inscriptions ne sont pas closes (`showcaseUntil()`). Un visuel n'est pas exige (decision du 2026-10-08) : sans lui, la
      * carte dessine une affiche a partir du titre et de la date.
      *
      * @return array<int, string>
@@ -521,7 +523,7 @@ class Event extends Model implements HasMedia
         return array_keys(array_filter([
             'not_published' => ! $this->isPublished(),
             'closed' => $this->status === EventStatus::Closed,
-            'past' => $this->starts_at === null || $this->starts_at->isPast(),
+            'past' => $this->showcaseUntil()?->isPast() ?? true,
         ]));
     }
 
@@ -651,6 +653,19 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Get the moment the event leaves the product site's showcase (decision du 2026-10-12) : la
+     * fin de l'evenement (son debut quand elle manque) ou la date limite des inscriptions, la
+     * premiere des deux. La vitrine invite a s'inscrire : une fois les inscriptions closes, elle
+     * n'a plus rien a proposer. L'evenement reste joignable par son lien direct.
+     */
+    public function showcaseUntil(): ?CarbonImmutable
+    {
+        $moments = array_filter([$this->endsOrStartsAt(), $this->registration_deadline]);
+
+        return $moments === [] ? null : min($moments);
+    }
+
+    /**
      * Determine whether the event is over : sa fin est passee, ou son debut quand elle manque.
      */
     public function hasEnded(): bool
@@ -725,6 +740,8 @@ class Event extends Model implements HasMedia
             'purge_at' => 'datetime',
             'seats_low_alerted_at' => 'datetime',
             'purge_notice_sent_at' => 'datetime',
+            'ended_alerted_at' => 'datetime',
+            'registrations_closed_alerted_at' => 'datetime',
             'invitations_send_at' => 'datetime',
             'published_at' => 'datetime',
             'announced_at' => 'datetime',

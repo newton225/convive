@@ -2,8 +2,12 @@
 
 namespace Tests\Feature\Notifications;
 
+use App\Actions\Events\SaveEvent;
+use App\Actions\Notifications\NotifyEventMilestones;
+use App\Actions\Notifications\SendAlert;
 use App\Actions\PaymentProofs\RejectPaymentProof;
 use App\Actions\PaymentProofs\SubmitPaymentProof;
+use App\Actions\Registrations\CancelRegistration;
 use App\Actions\Registrations\ExpireHolds;
 use App\Actions\Registrations\HoldRegistration;
 use App\Actions\Registrations\PurgeRegistrations;
@@ -172,15 +176,144 @@ class NotificationTriggersTest extends TestCase
         $this->assertAlerted($this->owner, NotificationType::SeatsExhausted);
     }
 
-    public function test_reserver_sans_epuiser_les_places_ne_previent_pas(): void
+    public function test_reserver_sans_epuiser_les_places_previent_d_une_nouvelle_inscription_sans_alerte_de_places(): void
     {
         Notification::fake();
 
         $this->tenant->asCurrent(function () {
-            $registration = Registration::factory()->create(['event_id' => $this->event->id, 'party_size' => 1]);
+            $registration = Registration::factory()->create(['event_id' => $this->event->id, 'party_size' => 1, 'amount_due' => 15000]);
 
             app(HoldRegistration::class)->handle($this->event, $registration);
         });
+
+        $this->assertAlerted($this->owner, NotificationType::RegistrationReceived);
+        Notification::assertNotSentTo($this->owner, TenantAlert::class, fn (TenantAlert $alert) => in_array($alert->type, [NotificationType::SeatsExhausted, NotificationType::SeatsLow], true));
+    }
+
+    public function test_la_relance_d_une_reservation_expiree_n_est_pas_une_nouvelle_inscription(): void
+    {
+        Notification::fake();
+
+        $this->tenant->asCurrent(function () {
+            $registration = Registration::factory()->expired()->create(['event_id' => $this->event->id, 'party_size' => 1, 'amount_due' => 15000]);
+
+            app(HoldRegistration::class)->handle($this->event, $registration);
+        });
+
+        Notification::assertNotSentTo($this->owner, TenantAlert::class, fn (TenantAlert $alert) => $alert->type === NotificationType::RegistrationReceived);
+    }
+
+    public function test_les_inscriptions_non_lues_d_un_evenement_se_regroupent_en_une_alerte(): void
+    {
+        $this->tenant->asCurrent(function () {
+            foreach (range(1, 3) as $attempt) {
+                app(SendAlert::class)->toTenantMembersGrouped(
+                    NotificationType::RegistrationReceived,
+                    ['event' => $this->event->name, 'event_id' => $this->event->id],
+                    '/',
+                );
+            }
+        });
+
+        $alerts = $this->owner->unreadNotifications()->where('data->type', NotificationType::RegistrationReceived->value)->get();
+
+        $this->assertCount(1, $alerts);
+        $this->assertSame(3, $alerts->first()->data['params']['count']);
+    }
+
+    public function test_une_alerte_lue_n_est_plus_regroupee(): void
+    {
+        $send = fn () => $this->tenant->asCurrent(fn () => app(SendAlert::class)->toTenantMembersGrouped(
+            NotificationType::RegistrationReceived,
+            ['event' => $this->event->name, 'event_id' => $this->event->id],
+            '/',
+        ));
+
+        $send();
+        $this->owner->unreadNotifications->markAsRead();
+        $send();
+
+        $this->assertCount(1, $this->owner->unreadNotifications()->get());
+        $this->assertCount(2, $this->owner->notifications()->where('data->type', NotificationType::RegistrationReceived->value)->get());
+    }
+
+    public function test_publier_un_evenement_previent_les_autres_membres_mais_pas_celui_qui_publie(): void
+    {
+        Notification::fake();
+
+        $publisher = User::factory()->withTwoFactor()->create();
+        $this->joinWithPermissions($this->tenant, $publisher, [TenantPermission::EventsView]);
+
+        $this->actingAs($publisher);
+        $this->tenant->asCurrent(fn () => app(SaveEvent::class)->publish($this->event));
+
+        $this->assertAlerted($this->owner, NotificationType::EventPublished);
+        Notification::assertNotSentTo($publisher, TenantAlert::class);
+    }
+
+    public function test_une_annulation_previent_les_autres_membres_mais_pas_celui_qui_annule(): void
+    {
+        Notification::fake();
+
+        $canceller = User::factory()->withTwoFactor()->create();
+        $this->joinWithPermissions($this->tenant, $canceller, [TenantPermission::RegistrationsView]);
+
+        $this->tenant->asCurrent(function () use ($canceller) {
+            $registration = Registration::factory()->confirmed()->create(['event_id' => $this->event->id]);
+
+            app(CancelRegistration::class)->handle($registration, 'Doublon', $canceller);
+        });
+
+        $this->assertAlerted($this->owner, NotificationType::RegistrationCancelled);
+        Notification::assertNotSentTo($canceller, TenantAlert::class);
+    }
+
+    public function test_la_fin_d_un_evenement_previent_l_equipe_une_seule_fois(): void
+    {
+        Notification::fake();
+
+        $ended = $this->tenant->asCurrent(fn () => Event::factory()->published()->create([
+            'starts_at' => now()->subDays(3),
+            'ends_at' => now()->subDay(),
+            'registration_deadline' => now()->subDays(5),
+        ]));
+
+        $this->tenant->asCurrent(function () use ($ended) {
+            app(NotifyEventMilestones::class)->handle($ended);
+            app(NotifyEventMilestones::class)->handle($ended->fresh());
+        });
+
+        Notification::assertSentToTimes($this->owner, TenantAlert::class, 1);
+        $this->assertAlerted($this->owner, NotificationType::EventEnded);
+    }
+
+    public function test_la_date_limite_d_inscription_atteinte_previent_l_equipe_avant_la_fin(): void
+    {
+        Notification::fake();
+
+        $open = $this->tenant->asCurrent(fn () => Event::factory()->published()->create([
+            'starts_at' => now()->addWeek(),
+            'ends_at' => null,
+            'registration_deadline' => now()->subHour(),
+        ]));
+
+        $this->tenant->asCurrent(fn () => app(NotifyEventMilestones::class)->handle($open));
+
+        $this->assertAlerted($this->owner, NotificationType::RegistrationsClosed);
+        $this->assertNotNull($this->tenant->asCurrent(fn () => $open->fresh())->registrations_closed_alerted_at);
+        $this->assertNull($this->tenant->asCurrent(fn () => $open->fresh())->ended_alerted_at);
+    }
+
+    public function test_un_evenement_cloture_a_la_main_ne_declenche_pas_les_alertes_de_fin(): void
+    {
+        Notification::fake();
+
+        $closed = $this->tenant->asCurrent(fn () => Event::factory()->published()->closed()->create([
+            'starts_at' => now()->subDays(3),
+            'ends_at' => now()->subDay(),
+        ]));
+
+        $this->tenant->asCurrent(fn () => app(NotifyEventMilestones::class)->handle($closed));
 
         Notification::assertNothingSent();
     }

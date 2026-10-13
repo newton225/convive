@@ -14,6 +14,7 @@ use App\Enums\TenantPermission;
 use App\Exports\RegistrationsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\CancelRegistrationRequest;
+use App\Http\Requests\Events\PurgeRegistrationsRequest;
 use App\Http\Requests\Events\RecordRefundRequest;
 use App\Models\Event;
 use App\Models\PaymentProof;
@@ -136,11 +137,14 @@ class RegistrationController extends Controller
      * Purge the event's unfinalized registrations on demand (README 2.4), reusing the same
      * action as the scheduled purge (etape 5) : one rule, one implementation.
      */
-    public function purge(Tenant $tenant, Event $event, PurgeRegistrations $purge): RedirectResponse
+    public function purge(PurgeRegistrationsRequest $request, Tenant $tenant, Event $event, PurgeRegistrations $purge): RedirectResponse
     {
-        Gate::authorize('purge', [Registration::class, $tenant]);
+        // Sans selection, la purge de tout l'evenement epargne les reservations dont le decompte
+        // tourne encore : un invite est peut-etre en train de payer. Une selection explicite, elle,
+        // est un choix de l'organisateur sur des lignes qu'il a sous les yeux.
+        $chosen = $request->chosenRegistrations();
 
-        $result = $purge->handle($event);
+        $result = $purge->handle($event, $chosen, keepActiveHolds: $chosen === null);
 
         Inertia::flash('toast', [
             'type' => 'success',
@@ -372,6 +376,10 @@ class RegistrationController extends Controller
             'amountDue' => $registration->amount_due,
             'status' => $registration->status->value,
             'statusLabel' => $registration->status->label(),
+            // Ce que la purge peut effacer, et ce qui merite une mise en garde : une reservation
+            // dont le decompte tourne encore peut etre en train d'etre payee.
+            'purgeable' => in_array($registration->status, Registration::UnfinalizedStatuses, true),
+            'holdActive' => $registration->status === RegistrationStatus::Held && ! $registration->holdHasExpired(),
             'tableNumber' => $registration->tableAssignment?->seatingTable->number,
             'cancellationReason' => $registration->cancellation_reason,
             'channelLabel' => $proof?->channel->label(),

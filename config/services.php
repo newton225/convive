@@ -67,6 +67,7 @@ return [
         'templates' => [
             'invitation_card' => env('WHATSAPP_TEMPLATE_INVITATION_CARD'),
             'proof_reminder' => env('WHATSAPP_TEMPLATE_PROOF_REMINDER'),
+            'resume_link' => env('WHATSAPP_TEMPLATE_RESUME_LINK'),
             'ticket_reminder' => env('WHATSAPP_TEMPLATE_TICKET_REMINDER'),
             'registration_cancelled' => env('WHATSAPP_TEMPLATE_REGISTRATION_CANCELLED'),
             'refund_sent' => env('WHATSAPP_TEMPLATE_REFUND_SENT'),

@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { AlertCircle } from 'lucide-react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import type { Country } from 'react-phone-number-input';
@@ -7,6 +7,8 @@ import { AdditionalRegistrationNotice } from '@/components/public/additional-reg
 import { BotCheck } from '@/components/public/bot-check';
 import { OngoingReservationNotice } from '@/components/public/ongoing-reservation-notice';
 import { PhoneField } from '@/components/phone/phone-field';
+import { RegistrationReviewDialog } from '@/components/public/registration-review-dialog';
+import { ResumeLinkRecovery } from '@/components/public/resume-link-recovery';
 import { useRef, useState } from 'react';
 import {
     CompanionFields,
@@ -22,6 +24,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
+import {
+    buildRegistrationRecap,
+    type RegistrationRecap,
+} from '@/lib/registration-recap';
 import { store } from '@/routes/public/registrations';
 import type {
     PublicRegistrationEvent,
@@ -63,6 +69,7 @@ export default function PublicRegistration({
     ongoingReservationUrl,
 }: Props) {
     const { t, locale } = useTranslation();
+    const { flash } = usePage();
     const [companionIds, setCompanionIds] = useState<number[]>([]);
     const defaultCategoryId = event.priceCategories.find(
         (category) => category.remainingQuota !== 0,
@@ -75,6 +82,8 @@ export default function PublicRegistration({
     >({});
     const nextId = useRef(0);
     const [botCheckReset, setBotCheckReset] = useState(0);
+    const [reviewOpen, setReviewOpen] = useState(false);
+    const [recap, setRecap] = useState<RegistrationRecap | null>(null);
 
     const prices = new Map(
         event.priceCategories.map((category) => [category.id, category.price]),
@@ -132,7 +141,7 @@ export default function PublicRegistration({
                     data-test="registration-form"
                     onError={() => setBotCheckReset((count) => count + 1)}
                 >
-                    {({ errors, processing }) => (
+                    {({ errors, processing, getData, getFormData, submit }) => (
                         <>
                             {errors.registration ? (
                                 <Alert
@@ -176,6 +185,9 @@ export default function PublicRegistration({
                                         help={t(
                                             'guest.registration.help.phone',
                                         )}
+                                        hint={t(
+                                            'guest.registration.hint.phone',
+                                        )}
                                     >
                                         <PhoneField
                                             id="phone"
@@ -185,6 +197,13 @@ export default function PublicRegistration({
                                             testId="registration-phone"
                                         />
                                     </Field>
+
+                                    {errors.phone && flash.recoverable ? (
+                                        <ResumeLinkRecovery
+                                            token={token}
+                                            phone={String(getData().phone ?? '')}
+                                        />
+                                    ) : null}
 
                                     <Field
                                         id="email"
@@ -297,12 +316,43 @@ export default function PublicRegistration({
                             ) : null}
 
                             <SubmitButton
+                                type="button"
                                 className="w-full"
                                 processing={processing}
                                 data-test="registration-submit"
+                                onClick={(clicked) => {
+                                    // Le bouton ne soumet plus : on verifie d'abord les champs
+                                    // obligatoires comme le ferait le navigateur, puis l'invite
+                                    // relit son recapitulatif.
+                                    if (!clicked.currentTarget.form?.reportValidity()) {
+                                        return;
+                                    }
+
+                                    setRecap(
+                                        buildRegistrationRecap(
+                                            getFormData(),
+                                            units,
+                                            event.priceCategories,
+                                            event.pricePerPerson,
+                                        ),
+                                    );
+                                    setReviewOpen(true);
+                                }}
                             >
                                 {t('guest.registration.submit')}
                             </SubmitButton>
+
+                            <RegistrationReviewDialog
+                                open={reviewOpen}
+                                onOpenChange={setReviewOpen}
+                                recap={recap}
+                                total={total}
+                                processing={processing}
+                                onConfirm={() => {
+                                    setReviewOpen(false);
+                                    submit();
+                                }}
+                            />
 
                             <p
                                 className="text-muted-foreground text-center text-xs"

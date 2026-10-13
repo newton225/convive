@@ -1,6 +1,13 @@
 import {
     Armchair,
     Bell,
+    CalendarCheck,
+    CalendarPlus,
+    CalendarX,
+    Flag,
+    ListPlus,
+    UserCheck,
+    UserMinus,
     Clock,
     FileDown,
     FileCheck,
@@ -38,6 +45,15 @@ const icons: Record<string, LucideIcon> = {
     plan_limits_lowered: Gauge,
     trial_ending: Hourglass,
     trial_ended: Hourglass,
+    event_created: CalendarPlus,
+    event_published: CalendarCheck,
+    event_closed: CalendarX,
+    event_ended: Flag,
+    registrations_closed: Clock,
+    registration_received: UserPlus,
+    registration_confirmed: UserCheck,
+    registration_cancelled: UserMinus,
+    waitlist_joined: ListPlus,
 };
 
 export function notificationIcon(type: string | null): LucideIcon {

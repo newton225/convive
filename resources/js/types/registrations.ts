@@ -113,6 +113,10 @@ export type RegistrationRow = {
     amountDue: number;
     status: RegistrationShowStatus;
     statusLabel: string;
+    // Peut etre purgee (non finalisee), et reservation dont le decompte tourne encore : la purger
+    // peut couper un invite en train de payer.
+    purgeable: boolean;
+    holdActive: boolean;
     tableNumber: number | null;
     cancellationReason: string | null;
     // Canal de la derniere preuve deposee, et heure du passage a l'entree (null tant qu'absent).

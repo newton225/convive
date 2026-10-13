@@ -44,8 +44,12 @@ Route::middleware([
     Route::post('/e/{token}/register', [PublicRegistrationController::class, 'store'])
         ->middleware('throttle:registration')
         ->name('public.registrations.store');
+    // Placee avant `{resume}` : « recover » ne doit pas etre lu comme un jeton de reprise.
+    Route::post('/e/{token}/register/recover', [PublicRegistrationController::class, 'recover'])
+        ->middleware('throttle:resume-recovery')
+        ->name('public.registrations.recover');
     Route::get('/e/{token}/register/{resume}', [PublicRegistrationController::class, 'show'])
-        ->middleware('throttle:resume')
+        ->middleware('throttle:resume-view')
         ->name('public.registrations.show');
     Route::post('/e/{token}/register/{resume}/retry', [PublicRegistrationController::class, 'retry'])
         ->middleware('throttle:resume')
@@ -54,7 +58,11 @@ Route::middleware([
     // Verification du telephone par code avant la reservation (SECURITY.md C3), quand
     // l'evenement l'exige. Renvoi du code limite a part : chaque envoi coute un message.
     Route::get('/e/{token}/register/{resume}/verify', [PublicRegistrationController::class, 'showVerification'])
-        ->middleware('throttle:resume')
+        // L'attente du message interroge cette page toutes les trois secondes, soit vingt requetes
+        // par minute : tout le plafond de `public-link` (20 par minute et par adresse). Elle a son
+        // propre limiteur, et ne doit pas consommer celui des autres pages de la meme adresse.
+        ->withoutMiddleware('throttle:public-link')
+        ->middleware('throttle:verification-poll')
         ->name('public.registrations.verify.show');
     Route::post('/e/{token}/register/{resume}/verify', [PublicRegistrationController::class, 'verify'])
         ->middleware('throttle:resume')
@@ -109,7 +117,7 @@ Route::middleware([
     Route::post('/e/{token}/waitlist', [PublicWaitlistController::class, 'store'])
         ->name('public.waitlist.store');
     Route::get('/e/{token}/waitlist/{resume}', [PublicWaitlistController::class, 'show'])
-        ->middleware('throttle:resume')
+        ->middleware('throttle:resume-view')
         ->name('public.waitlist.show');
     Route::post('/e/{token}/waitlist/{resume}/finalize', [PublicWaitlistController::class, 'finalize'])
         ->middleware('throttle:resume')

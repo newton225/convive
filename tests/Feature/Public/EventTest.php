@@ -273,12 +273,12 @@ class EventTest extends TestCase
 
         $url = $this->publicUrl($tenant, $event);
 
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 120; $i++) {
             $this->get($url)->assertOk();
         }
 
-        // Vingt requetes par minute par adresse IP (CLAUDE.md) : la vingt et unieme est
-        // refusee.
+        // Cent vingt requetes par minute par adresse IP (decision du 2026-10-13) : un groupe
+        // d'invites derriere la meme adresse mobile passe, la cent vingt et unieme est refusee.
         $this->get($url)->assertStatus(429);
     }
 

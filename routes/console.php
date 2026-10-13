@@ -4,6 +4,7 @@ use App\Actions\Audit\PurgeAuditLog;
 use App\Actions\Billing\NotifyTrialDeadlines;
 use App\Actions\Billing\ProcessOverdueSubscriptions;
 use App\Actions\Events\PurgeDeletedEvents;
+use App\Actions\Notifications\NotifyEventMilestones;
 use App\Actions\Notifications\NotifyUpcomingPurge;
 use App\Actions\Registrations\ExpireHolds;
 use App\Actions\Registrations\PurgeRegistrations;
@@ -16,6 +17,7 @@ use App\Actions\Waitlist\PromoteNextWaitlistEntry;
 use App\Enums\RegistrationStatus;
 use App\Enums\ReminderCheckpoint;
 use App\Enums\WaitlistStatus;
+use App\Enums\EventStatus;
 use App\Models\Event;
 use App\Models\PaymentAccount;
 use App\Models\Registration;
@@ -106,6 +108,20 @@ Schedule::call(function (NotifyUpcomingPurge $notify) {
             ->each(fn (Event $event) => $notify->handle($event)),
     ));
 })->hourly()->description('Warn the team a day before an automatic purge');
+
+/*
+ * Fin d'un evenement et date limite d'inscription atteinte (decision du 2026-10-12) : l'equipe est
+ * prevenue une fois, par evenement.
+ */
+Schedule::call(function (NotifyEventMilestones $notify) {
+    Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(
+        fn () => Event::query()
+            ->whereNotNull('published_at')
+            ->where('status', '!=', EventStatus::Closed)
+            ->where(fn ($pending) => $pending->whereNull('ended_alerted_at')->orWhereNull('registrations_closed_alerted_at'))
+            ->each(fn (Event $event) => $notify->handle($event)),
+    ));
+})->everyFifteenMinutes()->description('Tell the team when an event ends or its registration deadline passes');
 
 /*
  * Purge automatique (README 2.4), premier declencheur : a l'echeance planifiee de l'evenement,

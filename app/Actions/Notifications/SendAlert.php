@@ -49,6 +49,54 @@ class SendAlert
     }
 
     /**
+     * Send an alert that merges into the unread one of the same type and event (`isGrouped()`).
+     *
+     * `$params['event_id']` designe l'evenement : un membre qui n'a pas lu « 3 nouvelles
+     * inscriptions » voit le compteur monter, au lieu de recevoir une ligne de plus. Une fois lue,
+     * l'alerte suivante en ouvre une nouvelle. Le courriel, quand le membre l'a choisi, ne part
+     * qu'avec la premiere alerte du groupe : un courriel par inscription serait du bruit.
+     *
+     * @param  array<string, mixed>  $params
+     * @return int le nombre de membres prevenus
+     */
+    public function toTenantMembersGrouped(NotificationType $type, array $params, string $url, ?User $except = null): int
+    {
+        $tenant = Tenant::current();
+        $permission = $type->recipientPermission();
+
+        if ($tenant === null || $permission === null) {
+            return 0;
+        }
+
+        $recipients = $tenant->membersWithPermission($permission, $except);
+        $fresh = collect();
+
+        foreach ($recipients as $recipient) {
+            $open = $recipient->unreadNotifications()
+                ->where('data->type', $type->value)
+                ->where('data->tenant_id', $tenant->id)
+                ->where('data->params->event_id', $params['event_id'])
+                ->first();
+
+            if ($open === null) {
+                $fresh->push($recipient);
+
+                continue;
+            }
+
+            $data = $open->data;
+            $data['params']['count'] = ((int) ($data['params']['count'] ?? 1)) + 1;
+            $open->forceFill(['data' => $data, 'created_at' => now()])->save();
+        }
+
+        if ($fresh->isNotEmpty()) {
+            Notification::send($fresh, new TenantAlert($type, [...$params, 'count' => 1], $url, $tenant->id, $tenant->name));
+        }
+
+        return $recipients->count();
+    }
+
+    /**
      * Send the alert to one person.
      *
      * @param  array<string, mixed>  $params

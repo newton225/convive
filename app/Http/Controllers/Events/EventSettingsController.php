@@ -18,10 +18,13 @@ use Inertia\Response;
  * Les reglages d'un evenement (README ecran 24) : identite visuelle, places, echeances, rappels,
  * regles.
  *
- * Trois regles restent posees mais non appliquees (`rule_allow_without_proof`,
- * `rule_proof_legibility`, `rule_temporary_hold`) : leur sens exact n'est pas assez precis dans
- * le README pour deviner le comportement qu'elles devraient gouverner sans risquer une regle
- * fausse. Elles s'enregistrent, l'ecran le dit, rien ne les lit encore ailleurs.
+ * Une regle reste posee mais non appliquee (`rule_allow_without_proof`) : son sens exact n'est
+ * pas assez precis dans le README pour deviner le comportement qu'elle devrait gouverner sans
+ * risquer une regle fausse. Elle s'enregistre, l'ecran le dit, rien ne la lit encore ailleurs.
+ * La retenue de la place pendant le decompte n'est pas une regle : elle s'applique toujours
+ * (`HoldRegistration`). Le reste a juger sur le recu, sa lisibilite, revient au tresorier qui
+ * valide ou rejette la preuve. Les colonnes `rule_temporary_hold` et `rule_proof_legibility`
+ * restent en base, elles ne sont plus proposees a l'ecran.
  */
 class EventSettingsController extends Controller
 {
@@ -64,9 +67,7 @@ class EventSettingsController extends Controller
                 'scheduledSend' => $event->rule_scheduled_send,
                 'autoSeating' => $event->rule_auto_seating,
                 'allowWithoutProof' => $event->rule_allow_without_proof,
-                'proofLegibility' => $event->rule_proof_legibility,
                 'purgeOnExhaustion' => $event->rule_purge_on_exhaustion,
-                'temporaryHold' => $event->rule_temporary_hold,
                 'phoneVerification' => $event->rule_phone_verification,
                 'showRemainingSeats' => $event->rule_show_remaining_seats,
                 'botProtection' => $event->rule_bot_protection,
@@ -74,7 +75,7 @@ class EventSettingsController extends Controller
             // README ecran 24 : ces trois regles s'enregistrent mais ne gouvernent encore rien
             // (voir le commentaire de classe). L'ecran l'affiche plutot que de laisser croire
             // qu'elles agissent deja.
-            'unenforcedRules' => ['allowWithoutProof', 'proofLegibility', 'temporaryHold'],
+            'unenforcedRules' => ['allowWithoutProof'],
         ]);
     }
 
@@ -91,9 +92,7 @@ class EventSettingsController extends Controller
             'rule_scheduled_send' => $request->boolean('rule_scheduled_send'),
             'rule_auto_seating' => $request->boolean('rule_auto_seating'),
             'rule_allow_without_proof' => $request->boolean('rule_allow_without_proof'),
-            'rule_proof_legibility' => $request->boolean('rule_proof_legibility'),
             'rule_purge_on_exhaustion' => $request->boolean('rule_purge_on_exhaustion'),
-            'rule_temporary_hold' => $request->boolean('rule_temporary_hold'),
             'rule_phone_verification' => $request->boolean('rule_phone_verification'),
             'rule_show_remaining_seats' => $request->boolean('rule_show_remaining_seats'),
             'rule_bot_protection' => $request->boolean('rule_bot_protection'),

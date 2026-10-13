@@ -26,6 +26,7 @@ use App\Support\Search\UnaccentedSearch;
 use App\Support\Sms\LogSmsSender;
 use App\Support\Sms\OrangeSmsSender;
 use App\Support\Stripe\StripeApi;
+use App\Support\PhoneNumber;
 use App\Support\Stripe\StripeSubscriptionBillingGateway;
 use App\Support\UnconfiguredBillingGateway;
 use App\Support\WhatsApp\MetaWhatsAppSender;
@@ -237,12 +238,26 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiters(): void
     {
-        RateLimiter::for('public-link', fn ($request) => Limit::perMinute(20)->by($request->ip()));
+        // Cent vingt par minute et par adresse (decision du 2026-10-13, la table de CLAUDE.md n'est
+        // qu'indicative) : les operateurs mobiles partagent peu d'adresses entre beaucoup d'abonnes,
+        // et un lien distribue sur un groupe WhatsApp amene des dizaines d'invites de la meme adresse
+        // en quelques secondes. Cela arrete toujours un aspirateur de site.
+        RateLimiter::for('public-link', fn ($request) => Limit::perMinute(120)->by($request->ip()));
+
+        // Un refus (validation, numero deja pris) n'est pas une reservation creee : seuls les envois
+        // acceptes comptent dans les plafonds de creation, sans quoi une faute de saisie use le
+        // quota d'une famille derriere la meme adresse. Un plafond plus large compte tout, pour
+        // borner quand meme qui martelle le formulaire.
+        $accepted = fn ($response) => $response->isRedirection() && ! session()->has('errors');
 
         // Cle inscription plus adresse IP (table de CLAUDE.md) : le jeton de reprise identifie
         // l'inscription sans exposer son identifiant sequentiel dans la cle du limiteur.
-        RateLimiter::for('proof-submission', fn ($request) => Limit::perHour(5)
-            ->by($request->route('resume').'|'.$request->ip()));
+        // Cinq depots acceptes par heure ; une capture refusee (format, poids) ne compte pas, sinon
+        // cinq essais rates bloqueraient l'invite une heure alors que son decompte dure dix minutes.
+        RateLimiter::for('proof-submission', fn ($request) => [
+            Limit::perHour(5)->by($request->route('resume').'|'.$request->ip())->after($accepted),
+            Limit::perHour(30)->by('attempts|'.$request->route('resume').'|'.$request->ip()),
+        ]);
 
         // Par utilisateur : un agent d'accueil authentifie, jamais par IP (plusieurs postes
         // d'un meme poste de controle peuvent partager une adresse).
@@ -277,19 +292,46 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('resume', fn ($request) => Limit::perHour(10)
             ->by((string) $request->route('resume').'|'.$request->ip()));
 
+        // La page de reservation, en lecture seule : l'invite y revient pour copier un numero de
+        // versement ou voir le decompte, chaque ouverture ne doit pas user les dix gestes par heure de
+        // `resume`. Le plafond par adresse, tous jetons confondus, borne qui essaierait des jetons.
+        RateLimiter::for('resume-view', fn ($request) => [
+            Limit::perHour(60)->by((string) $request->route('resume').'|'.$request->ip()),
+            Limit::perHour(600)->by('ip|'.$request->ip()),
+        ]);
+
+        // L'attente du message WhatsApp de l'invite (page de verification) : la page interroge le
+        // serveur toutes les trois secondes, soit vingt fois par minute. Le limiteur `resume`, a dix
+        // par heure, la bloquait au bout d'une demi-minute. Cette route ne fait que lire un etat
+        // (message recu ou non) : une marge au-dessus du rythme normal suffit.
+        RateLimiter::for('verification-poll', fn ($request) => Limit::perMinute(30)
+            ->by((string) $request->route('resume').'|'.$request->ip()));
+
+        // « Retrouver ma reservation » : chaque envoi coute un message WhatsApp a l'organisation.
+        // Trois par heure et par numero (on ne harcele pas un telephone), dix par adresse IP.
+        RateLimiter::for('resume-recovery', function ($request) {
+            $phone = (string) $request->input('phone');
+
+            return [
+                Limit::perHour(3)->by('phone|'.(PhoneNumber::normalize($phone) ?? preg_replace('/\D+/', '', $phone))),
+                Limit::perHour(10)->by('ip|'.$request->ip()),
+            ];
+        });
+
         // Creation de reservation par le lien public (SECURITY.md C3) : une reservation bloque des
         // places pendant sa duree, un script qui en cree en boucle epuise l'evenement. Plafond
         // par adresse IP, et plus large par sous-reseau /24 (IPv4) pour les rotations d'adresse
         // voisines. Fenetre de dix minutes, la duree d'une reservation par defaut.
-        RateLimiter::for('registration', function ($request) {
+        RateLimiter::for('registration', function ($request) use ($accepted) {
             $ip = (string) $request->ip();
             $subnet = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
                 ? implode('.', array_slice(explode('.', $ip), 0, 3)).'.0/24'
                 : $ip;
 
             return [
-                Limit::perMinutes(10, 5)->by('registration:ip:'.$ip),
-                Limit::perMinutes(10, 20)->by('registration:subnet:'.$subnet),
+                Limit::perMinutes(10, 10)->by('registration:ip:'.$ip)->after($accepted),
+                Limit::perMinutes(10, 100)->by('registration:subnet:'.$subnet)->after($accepted),
+                Limit::perMinutes(10, 60)->by('registration:attempts:'.$ip),
             ];
         });
 

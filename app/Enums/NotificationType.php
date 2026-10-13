@@ -26,6 +26,15 @@ enum NotificationType: string
     case TrialEnding = 'trial_ending';
     case TrialEnded = 'trial_ended';
     case ClaimReceived = 'claim_received';
+    case EventCreated = 'event_created';
+    case EventPublished = 'event_published';
+    case EventClosed = 'event_closed';
+    case EventEnded = 'event_ended';
+    case RegistrationsClosed = 'registrations_closed';
+    case RegistrationReceived = 'registration_received';
+    case RegistrationConfirmed = 'registration_confirmed';
+    case RegistrationCancelled = 'registration_cancelled';
+    case WaitlistJoined = 'waitlist_joined';
 
     /**
      * Get the permission a member must hold to be told about this type, or null when the alert is
@@ -41,6 +50,11 @@ enum NotificationType: string
             self::ClaimReceived => TenantPermission::RegistrationsClaims,
             self::HoldsExpired, self::RegistrationsPurged => TenantPermission::RegistrationsView,
             self::SeatsExhausted, self::SeatsLow => TenantPermission::EventsView,
+            // Ce qui arrive aux evenements (decision du 2026-10-12) : ceux qui les voient.
+            self::EventCreated, self::EventPublished, self::EventClosed,
+            self::EventEnded, self::RegistrationsClosed => TenantPermission::EventsView,
+            self::RegistrationReceived, self::RegistrationConfirmed,
+            self::RegistrationCancelled, self::WaitlistJoined => TenantPermission::RegistrationsView,
             self::PurgeScheduled => TenantPermission::RegistrationsView,
             self::TicketRefused => TenantPermission::ScanLogView,
             // SECURITY.md M3 : ceux qui surveillent le journal, le Proprietaire en tete. Une
@@ -65,6 +79,19 @@ enum NotificationType: string
         return match ($this) {
             self::TeamInvitationAccepted => NotificationChannel::Both,
             default => NotificationChannel::default(),
+        };
+    }
+
+    /**
+     * Determine whether alerts of this type merge into one while the previous is unread (decision
+     * du 2026-10-12) : « 12 nouvelles inscriptions pour X » plutot que douze lignes. Les types qui
+     * arrivent en rafale sur un evenement populaire, jamais ceux qui annoncent un fait unique.
+     */
+    public function isGrouped(): bool
+    {
+        return match ($this) {
+            self::RegistrationReceived, self::RegistrationConfirmed, self::WaitlistJoined => true,
+            default => false,
         };
     }
 

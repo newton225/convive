@@ -14,7 +14,9 @@ use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\Unit;
 use App\Models\User;
+use App\Notifications\Registrations\ResumeLink;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
@@ -767,14 +769,14 @@ class RegistrationTest extends TestCase
 
         $url = $this->registrationFormUrl($tenant, $event);
 
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 120; $i++) {
             $this->get($url)->assertOk();
         }
 
         $this->get($url)->assertStatus(429);
     }
 
-    public function test_le_lien_de_reprise_est_limite_a_dix_consultations_par_heure(): void
+    public function test_la_page_de_reservation_est_limitee_a_soixante_consultations_par_heure(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
         $tenant = $this->publishableTenant($owner);
@@ -788,12 +790,29 @@ class RegistrationTest extends TestCase
 
         // Le limiteur compte par jeton et adresse, que le jeton soit valide ou non : deviner un
         // jeton est precisement ce qu'il faut ralentir (SECURITY.md H3).
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 60; $i++) {
             $this->get($url)->assertNotFound();
         }
 
         $this->get($url)->assertStatus(429);
         $this->assertNotNull($registration);
+    }
+
+    public function test_la_page_de_verification_supporte_l_interrogation_toutes_les_trois_secondes(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+
+        $url = $this->urlFor($tenant->subdomain, $event->public_token, '/register/jeton-inconnu-mais-stable/verify');
+
+        // Une minute d'attente du message WhatsApp : vingt interrogations, bien plus que les dix par
+        // heure du lien de reprise, qui bloquaient la page au bout d'une demi-minute.
+        for ($i = 0; $i < 30; $i++) {
+            $this->get($url)->assertNotFound();
+        }
+
+        $this->get($url)->assertStatus(429);
     }
 
     public function test_un_numero_ne_peut_avoir_qu_une_reservation_active_par_evenement(): void
@@ -810,6 +829,141 @@ class RegistrationTest extends TestCase
             ->assertSessionHasErrors('phone');
 
         $this->assertSame(1, $tenant->asCurrent(fn () => Registration::count()));
+    }
+
+    public function test_le_refus_d_un_numero_dont_la_reservation_court_parle_du_delai(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $url = $this->registrationFormUrl($tenant, $event);
+
+        $this->post($url, $this->validPayload($tenant))->assertRedirect();
+
+        $this->post($url, [...$this->validPayload($tenant), 'name' => 'Autre nom'])
+            ->assertSessionHasErrors(['phone' => __('guest.registration.errors.phone_already_active')]);
+    }
+
+    public function test_le_refus_d_un_numero_dont_la_preuve_attend_sa_verification_ne_parle_pas_de_delai(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $url = $this->registrationFormUrl($tenant, $event);
+
+        $this->post($url, $this->validPayload($tenant))->assertRedirect();
+        $tenant->asCurrent(fn () => Registration::query()->update(['status' => RegistrationStatus::ProofSubmitted]));
+
+        $this->post($url, [...$this->validPayload($tenant), 'name' => 'Autre nom'])
+            ->assertSessionHasErrors(['phone' => __('guest.registration.errors.phone_proof_pending')]);
+    }
+
+    /**
+     * Une reservation avec decompte, sur le telephone de l'invite, et le jeton de reprise qu'il a perdu.
+     *
+     * @param  array<string, mixed>  $attributes
+     * @return array{Registration, string}
+     */
+    private function heldRegistration(Tenant $tenant, Event $event, array $attributes = []): array
+    {
+        $plainToken = Registration::generateResumeToken();
+
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->create([
+            'event_id' => $event->id,
+            'status' => RegistrationStatus::Held,
+            'held_until' => now()->addMinutes(8),
+            'phone' => '+225 07 07 12 34 56',
+            'resume_token_hash' => Registration::hashResumeToken($plainToken),
+            ...$attributes,
+        ]));
+
+        return [$registration, $plainToken];
+    }
+
+    public function test_le_lien_perdu_est_renvoye_par_whatsapp_et_remplace_l_ancien(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        [, $oldToken] = $this->heldRegistration($tenant, $event);
+
+        $this->post($this->urlFor($tenant->subdomain, $event->public_token, '/register/recover'), ['phone' => '07 07 12 34 56'])
+            ->assertRedirect();
+
+        $newLink = null;
+        Notification::assertSentOnDemand(ResumeLink::class, function (ResumeLink $notification, array $channels, $notifiable) use (&$newLink) {
+            $newLink = $notification->link;
+
+            return $notifiable->routes['whatsapp'] === '+225 07 07 12 34 56' && in_array('whatsapp', $channels, true);
+        });
+
+        $this->get($this->urlFor($tenant->subdomain, $event->public_token, "/register/{$oldToken}"))->assertNotFound();
+
+        $newToken = basename(parse_url((string) $newLink, PHP_URL_PATH));
+        $this->get($this->urlFor($tenant->subdomain, $event->public_token, "/register/{$newToken}"))->assertOk();
+    }
+
+    public function test_le_lien_va_au_telephone_de_la_reservation_pas_a_celui_saisi(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $this->heldRegistration($tenant, $event);
+
+        $this->post($this->urlFor($tenant->subdomain, $event->public_token, '/register/recover'), ['phone' => '+225 05 05 99 99 99'])
+            ->assertRedirect();
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_une_preuve_deja_deposee_ne_declenche_aucun_renvoi_de_lien(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $this->heldRegistration($tenant, $event, ['status' => RegistrationStatus::ProofSubmitted]);
+
+        $this->post($this->urlFor($tenant->subdomain, $event->public_token, '/register/recover'), ['phone' => '+225 07 07 12 34 56'])
+            ->assertRedirect();
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_le_renvoi_du_lien_est_limite_a_trois_par_heure_et_par_numero(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $this->heldRegistration($tenant, $event);
+        $url = $this->urlFor($tenant->subdomain, $event->public_token, '/register/recover');
+
+        foreach (range(1, 3) as $attempt) {
+            $this->post($url, ['phone' => '+225 07 07 12 34 56'])->assertRedirect();
+        }
+
+        $this->post($url, ['phone' => '+225 07 07 12 34 56'])->assertStatus(429);
+    }
+
+    public function test_le_refus_d_un_numero_dont_la_reservation_court_propose_de_retrouver_le_lien(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $url = $this->registrationFormUrl($tenant, $event);
+
+        $this->post($url, $this->validPayload($tenant))->assertRedirect();
+
+        $this->followingRedirects()
+            ->post($url, [...$this->validPayload($tenant), 'name' => 'Autre nom'])
+            ->assertInertia(fn ($page) => $page->hasFlash('recoverable', true));
     }
 
     public function test_un_numero_dont_la_reservation_a_expire_peut_s_inscrire_de_nouveau(): void
@@ -848,10 +1002,25 @@ class RegistrationTest extends TestCase
         $url = $this->registrationFormUrl($tenant, $event);
 
         // Numeros differents : seul le plafond par IP peut arreter ce script.
-        for ($i = 0; $i < 5; $i++) {
-            $this->post($url, [...$this->validPayload($tenant), 'phone' => '+225 07 07 00 00 0'.$i])->assertRedirect();
+        for ($i = 0; $i < 10; $i++) {
+            $this->post($url, [...$this->validPayload($tenant), 'phone' => sprintf('+225 07 07 00 00 %02d', $i)])->assertRedirect();
         }
 
         $this->post($url, [...$this->validPayload($tenant), 'phone' => '+225 07 07 00 00 99'])->assertStatus(429);
+    }
+
+    public function test_un_envoi_refuse_ne_compte_pas_dans_le_plafond_de_creation(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant, ['tables' => [50, 10]]);
+        $url = $this->registrationFormUrl($tenant, $event);
+
+        // Douze fautes de saisie (nom manquant) : plus que le plafond de creation, sans en user.
+        for ($i = 0; $i < 12; $i++) {
+            $this->post($url, [...$this->validPayload($tenant), 'name' => ''])->assertSessionHasErrors('name');
+        }
+
+        $this->post($url, $this->validPayload($tenant))->assertRedirect();
     }
 }

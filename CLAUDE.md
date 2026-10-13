@@ -226,11 +226,28 @@ possible, avec des limiteurs nommes et non le seul reglage par defaut.
 | --------------------------- | ----------------------- | --------------------------- |
 | Connexion                   | 5 tentatives par minute | email plus adresse IP       |
 | Verification 2FA            | 5 tentatives par minute | session utilisateur         |
-| Lien public d'inscription   | 20 requetes par minute  | adresse IP                  |
-| Soumission de preuve        | 5 par heure             | inscription plus adresse IP |
-| Lien de reprise             | 10 par heure            | jeton plus adresse IP       |
+| Lien public (toute page)    | 120 requetes par minute | adresse IP                  |
+| Creation de reservation     | 10 acceptees par 10 min | adresse IP (100 par /24)    |
+| Soumission de preuve        | 5 acceptees par heure   | inscription plus adresse IP |
+| Lien de reprise (gestes)    | 10 par heure            | jeton plus adresse IP       |
+| Lien de reprise (lecture)   | 60 par heure            | jeton plus adresse IP       |
 | Scan a l'entree             | 60 par minute           | utilisateur agent           |
 | Exports et import de releve | 30 par heure, reglable  | utilisateur                 |
+
+**Reglage du 2026-10-13** (les valeurs ci-dessus sont indicatives, ajustees apres que des limites trop
+serrees aient bloque l'usage reel) :
+
+- Un refus (validation, numero deja pris, capture refusee) ne compte pas dans les plafonds de creation de
+  reservation et de depot de preuve (`Limit::after()`) ; un plafond plus large compte tout (60 essais par
+  10 minutes pour la creation, 30 par heure pour les preuves).
+- `public-link` est large (120) parce que les operateurs mobiles partagent peu d'adresses entre beaucoup
+  d'abonnes et qu'un lien distribue sur un groupe WhatsApp amene des dizaines d'invites en quelques secondes.
+- **Toute page qui interroge le serveur seule (sondage) a son propre limiteur** et est retiree de
+  `public-link` : l'attente du message WhatsApp (`verification-poll`, 30 par minute, toutes les trois
+  secondes). Avant d'ajouter un sondage ou un rechargement automatique, compter ses requetes contre chaque
+  limiteur de sa route.
+- La lecture de la page de reservation (`resume-view`, 60 par heure plus 600 par adresse tous jetons
+  confondus) est separee des gestes qui agissent (`resume`, 10 par heure).
 
 La limite d'exports se regle depuis l'ecran Securite de la console (`App\Settings\ProtectionSettings`,
 decision du 2026-10-02) : trente au depart, jamais retirable, chaque reglage au journal central.
@@ -870,7 +887,7 @@ jamais recu le lien. **Decision en service** (`announced_at`, table centrale `Sh
 - **Ce que la vitrine accepte** (decision du 2026-10-07) : un evenement publie, ouvert et a venir
   (`Event::missingBeforeAnnouncing()`). **Un visuel n'est pas exige** (decision du 2026-10-08) : sans
   lui, la carte dessine une affiche a partir du titre et de la date, sur un degrade. **Cloturer un evenement le retire de la vitrine**
-  (`SaveEvent::close()`), et un evenement passe n'y apparait plus (`ShowcaseEvent::upcoming()`).
+  (`SaveEvent::close()`), et un evenement n'y apparait plus a sa fin (son debut quand elle manque) ou a la date limite des inscriptions, la premiere des deux (`Event::showcaseUntil()`, `showcase_events.listed_until`, `ShowcaseEvent::upcoming()`, decision du 2026-10-12) ; il reste joignable par son lien direct.
 - **La vitrine ne lit pas les bases des locataires a chaque affichage.** Boucler sur chaque
   organisation et initialiser sa tenancy a chaque requete d'un visiteur anonyme ne passerait pas
   a l'echelle (CLAUDE.md, « Multi-locataire », le meme risque que pour une tache planifiee, ici
@@ -931,6 +948,24 @@ est trop long.
   doit pas la detenir.
 - **Un refus sans scan n'alerte pas** comme une fraude : c'est une inscription annulee ou un
   evenement clos entre la recherche et la validation, pas un faux billet.
+
+### Alertes de l'equipe sur la vie des evenements
+
+Decision du proprietaire du projet (2026-10-12) : les alertes vont a **tous les membres, selon la
+permission de leur profil** (`NotificationType::recipientPermission()`), l'acteur excepte.
+
+- **Evenements** (permission `events.view`) : cree, publie, cloture (`SaveEvent`), termine et date
+  limite d'inscription atteinte (`NotifyEventMilestones`, toutes les 15 minutes, une fois chacun :
+  `ended_alerted_at`, `registrations_closed_alerted_at`). Une fin atteinte couvre la date limite. Un
+  evenement cloture a la main ne declenche pas les alertes de fin.
+- **Inscriptions** (permission `registrations.view`) : nouvelle inscription (`HoldRegistration`, pas
+  une relance apres expiration, pas un evenement gratuit), inscription confirmee (preuve validee ou
+  evenement gratuit), inscription annulee, arrivee en liste d'attente.
+- **Regroupement** (`NotificationType::isGrouped()`, `SendAlert::toTenantMembersGrouped()`) : nouvelle
+  inscription, inscription confirmee et liste d'attente fusionnent en une alerte non lue par
+  evenement (« 12 nouvelles inscriptions »). Lue, la suivante en ouvre une nouvelle. Le courriel,
+  si choisi, ne part qu'avec la premiere du groupe.
+- Canal par defaut : dans l'application seulement.
 
 ### Protection anti-robot du formulaire d'inscription
 
@@ -1217,6 +1252,49 @@ Construction manuelle de l'URL, comme `Event::publicUrl()`, pas `route()`/`url()
 middleware `signed` de Laravel : ces deux mecanismes deriveraient l'hote du lien de la requete
 HTTP en cours, qui n'existe pas depuis une tache planifiee. Le sous-domaine du locataire vient
 de `Tenant::current()`, comme partout ailleurs ou une URL publique complete se construit.
+
+### Retrouver une reservation dont le lien est perdu
+
+Decision du proprietaire du projet (2026-10-12) : sous le refus « une reservation est deja en cours
+pour ce numero », un bouton « Retrouver ma reservation » (`public.registrations.recover`,
+`App\Actions\Registrations\SendResumeLink`) renvoie le lien par WhatsApp (et courriel s'il existe).
+
+- **Un lien neuf, pas le lien signe.** Le lien signe des rappels ne permet pas de finaliser : la
+  page masque la relance et le depot de preuve sans jeton de reprise. L'action emet donc un
+  **nouveau jeton de reprise** (l'ancien lien cesse de marcher, seule l'empreinte est stockee).
+- **Envoye au telephone de la reservation**, jamais a celui qu'on saisit, et seulement pour une
+  reservation avec decompte (`Held`), pas pour une preuve deposee. Reponse identique qu'un message
+  soit parti ou non.
+- **Envoi immediat, hors file** (`ResumeLink` n'est pas `ShouldQueue`) : le jeton en clair ne doit
+  etre ecrit dans aucune file. Dans la meme transaction que le changement de jeton.
+- Limiteur `resume-recovery` : 3 par heure et par numero, 10 par heure et par adresse IP. Compte dans
+  le plafond mensuel de messages. Modele WhatsApp `resume_link` a faire approuver
+  (`docs/whatsapp-modeles.md`).
+
+### Relire avant de reserver, sans modifier ensuite
+
+Decision du proprietaire du projet (2026-10-13) : l'invite **ne modifie pas** son inscription une fois
+reservee (le telephone, le nombre de personnes et les tarifs touchent a la verification, aux places et
+au montant). A la place, le bouton du premier formulaire ouvre une **fenetre de recapitulatif**
+(`RegistrationReviewDialog`, `buildRegistrationRecap`) : nom, telephone, courriel, chaque personne avec
+son unite et son tarif, total. « Modifier » revient au formulaire, « Confirmer et reserver » envoie. Les
+champs obligatoires sont controles avant l'ouverture (`reportValidity`).
+
+### Purger des inscriptions : tout l'evenement ou des lignes choisies
+
+Decision du proprietaire du projet (2026-10-13). `PurgeRegistrations::handle($event, $only, $keepActiveHolds)`.
+
+- **« Tout purger »** (bouton de la liste des inscrits) epargne les reservations dont le decompte
+  tourne encore (`keepActiveHolds`) : un invite est peut-etre en train de payer. Les purges
+  automatiques (echeance, epuisement) gardent leur comportement d'origine et les effacent.
+- **Purge d'une selection** : cases a cocher (TanStack Table, `DataTable` prop `selection`), sur la page
+  affichee seulement (25 au plus), seulement les dossiers non finalises (`RegistrationRow.purgeable`).
+  Jamais une inscription validee ni une preuve en attente, meme si l'identifiant est envoye a la main.
+  La confirmation nomme les dossiers et previent quand l'un a encore son decompte (`holdActive`).
+- **Journal** : une ligne `registrations.purged`, avec les references des dossiers et jamais un nom
+  ni un telephone.
+- La page de verification WhatsApp a son propre limiteur (`verification-poll`, 30 par minute) : elle
+  interroge le serveur toutes les trois secondes, le limiteur `resume` (10 par heure) la bloquait.
 
 ### Idempotence : une colonne « envoye a » par envoi, jamais un statut
 

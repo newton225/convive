@@ -537,6 +537,7 @@ return [
             'activate_due_payment_account_changes' => 'Activation of payout account changes',
             'mark_expired_holds_as_such_and_advance_the_waitlist' => 'Hold expiry and waitlist progress',
             'expire_unanswered_waitlist_invites_and_advance_the_queue' => 'Expiry of unanswered waitlist invites',
+            'tell_the_team_when_an_event_ends_or_its_registration_deadline_passes' => 'Alert when an event ends or its registration deadline passes',
             'warn_the_team_a_day_before_an_automatic_purge' => 'Warning the day before an automatic purge',
             'purge_non_finalized_registrations_at_their_event_deadline' => 'Registration purge at the event deadline',
             'purge_non_finalized_registrations_once_capacity_is_exhausted_by_confirmed_seats_alone' => 'Registration purge once the event is full',

@@ -113,6 +113,7 @@ export async function register(
     }
 
     await page.getByTestId('registration-submit').click();
+    await page.getByTestId('registration-confirm').click();
     await expect(page.getByTestId('registration-countdown')).toBeVisible();
 
     return page.url();

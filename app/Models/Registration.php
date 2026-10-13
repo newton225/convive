@@ -327,15 +327,18 @@ class Registration extends Model
     }
 
     /**
-     * Determine whether another registration of the event still holds seats for this phone
-     * number : reservation en cours ou preuve en attente de verification (SECURITY.md C3, « une
+     * Get the registration of the event that still holds seats for this phone
+     * number, or null : reservation en cours ou preuve en attente de verification (SECURITY.md C3, « une
      * seule reservation active par numero de telephone et par evenement »).
      *
      * Compare les numeros sous leur forme unique (`PhoneNumber::same`) : `+225 07 07...` et
      * `07 07...` designent le meme telephone. Le nombre de reservations actives d'un evenement est
      * borne par sa capacite, la comparaison en PHP reste donc petite.
+     *
+     * L'etat de la reservation trouvee decide du message de refus : un delai a attendre, ou une
+     * preuve a verifier.
      */
-    public static function phoneHoldsSeats(Event $event, string $phone, ?int $exceptId = null): bool
+    public static function phoneHolder(Event $event, string $phone, ?int $exceptId = null): ?self
     {
         return self::query()
             ->where('event_id', $event->id)
@@ -345,8 +348,8 @@ class Registration extends Model
                     ->orWhere(fn (Builder $held) => $held->where('status', RegistrationStatus::Held)
                         ->where('held_until', '>', now()));
             })
-            ->pluck('phone')
-            ->contains(fn (string $other) => PhoneNumber::same($other, $phone));
+            ->get()
+            ->first(fn (self $other) => PhoneNumber::same($other->phone, $phone));
     }
 
     /**

@@ -24,6 +24,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property string $name
  * @property string $organisation_name
  * @property Carbon|null $starts_at
+ * @property Carbon|null $listed_until
  * @property string $public_url
  * @property string|null $visual_path
  * @property Carbon $announced_at
@@ -31,7 +32,7 @@ use Stancl\Tenancy\Database\Concerns\CentralConnection;
  * @property Carbon|null $updated_at
  * @property-read Tenant $tenant
  */
-#[Fillable(['tenant_id', 'event_id', 'name', 'organisation_name', 'starts_at', 'public_url', 'announced_at', 'visual_path'])]
+#[Fillable(['tenant_id', 'event_id', 'name', 'organisation_name', 'starts_at', 'listed_until', 'public_url', 'announced_at', 'visual_path'])]
 class ShowcaseEvent extends Model
 {
     /** @use HasFactory<ShowcaseEventFactory> */
@@ -63,14 +64,16 @@ class ShowcaseEvent extends Model
     }
 
     /**
-     * Scope the query to the events still to come : a past event leaves the public showcase on its
-     * own, without the organiser having to withdraw it (decision du 2026-10-07).
+     * Scope the query to the events still listed : an event leaves the public showcase on its own,
+     * without the organiser having to withdraw it (decision du 2026-10-07), at the end of the event
+     * (its start when it has no end) or at the registration deadline, whichever comes first
+     * (decision du 2026-10-12, `Event::showcaseUntil()`).
      *
      * @param  Builder<ShowcaseEvent>  $query
      */
     public function scopeUpcoming(Builder $query): void
     {
-        $query->where('starts_at', '>=', now());
+        $query->where('listed_until', '>=', now());
     }
 
     /**
@@ -90,6 +93,7 @@ class ShowcaseEvent extends Model
     {
         return [
             'starts_at' => 'datetime',
+            'listed_until' => 'datetime',
             'announced_at' => 'datetime',
         ];
     }

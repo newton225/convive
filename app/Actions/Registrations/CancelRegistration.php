@@ -2,11 +2,14 @@
 
 namespace App\Actions\Registrations;
 
+use App\Actions\Notifications\SendAlert;
 use App\Actions\Waitlist\PromoteNextWaitlistEntry;
 use App\Data\RefundDecision;
+use App\Enums\NotificationType;
 use App\Enums\RegistrationStatus;
 use App\Models\Registration;
 use App\Models\RegistrationTableAssignment;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\Registrations\RegistrationCancelled;
 use App\Support\GuestMessageQuota;
@@ -88,6 +91,13 @@ class CancelRegistration
         });
 
         $this->notifyGuest($registration);
+
+        app(SendAlert::class)->toTenantMembers(
+            NotificationType::RegistrationCancelled,
+            ['name' => $registration->name, 'event' => $registration->event->name, 'actor' => $actor->name],
+            route('tenants.events.registrations.index', [Tenant::current(), $registration->event], absolute: false),
+            $actor,
+        );
 
         // Meme raisonnement que `PurgeRegistrations` (README 2.3) : des qu'une place se libere
         // reellement, la liste d'attente avance tant qu'il reste du monde en attente et de la

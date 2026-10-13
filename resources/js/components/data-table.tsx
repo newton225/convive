@@ -5,11 +5,13 @@ import {
     getSortedRowModel,
     useReactTable,
     type ColumnDef,
+    type RowSelectionState,
     type SortingState,
     type Updater,
 } from '@tanstack/react-table';
 import { useState } from 'react';
 import { DataTableSortHeader } from '@/components/data-table-sort-header';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Table,
     TableBody,
@@ -43,11 +45,24 @@ type ClientProps = {
     initialSorting?: SortingState;
 };
 
+type Selection<TData> = {
+    // Les lignes cochees, par identifiant (`getRowId`). Cote serveur la selection ne vaut que pour la
+    // page affichee : l'ecran la remet a zero quand les lignes changent.
+    selected: RowSelectionState;
+    onSelectedChange: (selected: RowSelectionState) => void;
+    getRowId: (row: TData) => string;
+    // Une ligne qui n'est pas selectionnable n'a pas de case.
+    isSelectable: (row: TData) => boolean;
+    selectAllLabel: string;
+    selectRowLabel: (row: TData) => string;
+};
+
 type Props<TData> = {
     columns: ColumnDef<TData, unknown>[];
     data: TData[];
     emptyState: React.ReactNode;
     rowTestId?: string;
+    selection?: Selection<TData>;
 } & (ServerProps | ClientProps);
 
 /**
@@ -64,7 +79,7 @@ type Props<TData> = {
  * filtres restent a chaque ecran : trop propres a chacun pour etre generiques.
  */
 export default function DataTable<TData>(props: Props<TData>) {
-    const { columns, data, emptyState, rowTestId } = props;
+    const { data, emptyState, rowTestId, selection } = props;
     const isClient = props.mode === 'client';
     const [clientSorting, setClientSorting] = useState<SortingState>(
         props.mode === 'client' ? (props.initialSorting ?? []) : [],
@@ -89,11 +104,65 @@ export default function DataTable<TData>(props: Props<TData>) {
         onServerSortingChange?.(next);
     };
 
+    const columns: ColumnDef<TData, unknown>[] = selection
+        ? [
+              {
+                  id: 'select',
+                  header: ({ table }) =>
+                      table.getCoreRowModel().rows.some((row) => row.getCanSelect()) ? (
+                          <Checkbox
+                              checked={
+                                  table.getIsAllPageRowsSelected()
+                                      ? true
+                                      : table.getIsSomePageRowsSelected()
+                                        ? 'indeterminate'
+                                        : false
+                              }
+                              onCheckedChange={(value) =>
+                                  table.toggleAllPageRowsSelected(value === true)
+                              }
+                              aria-label={selection.selectAllLabel}
+                              data-test="select-all-rows"
+                          />
+                      ) : null,
+                  cell: ({ row }) =>
+                      row.getCanSelect() ? (
+                          <Checkbox
+                              checked={row.getIsSelected()}
+                              onCheckedChange={(value) =>
+                                  row.toggleSelected(value === true)
+                              }
+                              aria-label={selection.selectRowLabel(row.original)}
+                              data-test="select-row"
+                          />
+                      ) : null,
+                  enableSorting: false,
+              },
+              ...props.columns,
+          ]
+        : props.columns;
+
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
-        state: { sorting: isClient ? clientSorting : (serverSorting ?? []) },
+        ...(selection
+            ? {
+                  getRowId: (row: TData) => selection.getRowId(row),
+                  enableRowSelection: (row: { original: TData }) =>
+                      selection.isSelectable(row.original),
+                  onRowSelectionChange: (updater: Updater<RowSelectionState>) =>
+                      selection.onSelectedChange(
+                          typeof updater === 'function'
+                              ? updater(selection.selected)
+                              : updater,
+                      ),
+              }
+            : {}),
+        state: {
+            sorting: isClient ? clientSorting : (serverSorting ?? []),
+            ...(selection ? { rowSelection: selection.selected } : {}),
+        },
         onSortingChange: changeSorting,
         enableSorting: isClient || onServerSortingChange !== undefined,
         // Un seul critere de tri : c'est ce que le serveur sait appliquer, et ce qui se lit.

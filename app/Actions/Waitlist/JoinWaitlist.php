@@ -2,8 +2,11 @@
 
 namespace App\Actions\Waitlist;
 
+use App\Actions\Notifications\SendAlert;
+use App\Enums\NotificationType;
 use App\Enums\WaitlistStatus;
 use App\Models\Event;
+use App\Models\Tenant;
 use App\Models\WaitlistEntry;
 
 /**
@@ -30,6 +33,12 @@ class JoinWaitlist
             'companions' => $data['companions'],
             'resume_token_hash' => WaitlistEntry::hashResumeToken($resumeToken),
         ]);
+
+        app(SendAlert::class)->toTenantMembersGrouped(
+            NotificationType::WaitlistJoined,
+            ['event' => $event->name, 'event_id' => $event->id],
+            route('tenants.events.registrations.index', [Tenant::current(), $event], absolute: false),
+        );
 
         return ['entry' => $entry, 'resumeToken' => $resumeToken];
     }

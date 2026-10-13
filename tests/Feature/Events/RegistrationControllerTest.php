@@ -258,6 +258,92 @@ class RegistrationControllerTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_la_purge_d_une_selection_ne_supprime_que_les_lignes_cochees(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+
+        [$chosen, $kept] = $tenant->asCurrent(fn () => [
+            Registration::factory()->create(['event_id' => $event->id, 'status' => RegistrationStatus::Draft]),
+            Registration::factory()->create(['event_id' => $event->id, 'status' => RegistrationStatus::Draft]),
+        ]);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.registrations.purge', [$tenant, $event]), ['registrations' => [$chosen->id]])
+            ->assertRedirect(route('tenants.events.registrations.index', [$tenant, $event]));
+
+        $tenant->asCurrent(function () use ($chosen, $kept) {
+            $this->assertNull(Registration::find($chosen->id));
+            $this->assertNotNull(Registration::find($kept->id));
+        });
+    }
+
+    public function test_la_purge_sans_selection_epargne_les_reservations_dont_le_decompte_tourne(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+
+        $active = $tenant->asCurrent(fn () => Registration::factory()->held()->create(['event_id' => $event->id]));
+        $tenant->asCurrent(fn () => Registration::factory()->expired()->create(['event_id' => $event->id]));
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.registrations.purge', [$tenant, $event]))
+            ->assertRedirect();
+
+        $tenant->asCurrent(function () use ($active, $event) {
+            $this->assertNotNull(Registration::find($active->id));
+            $this->assertSame(1, Registration::where('event_id', $event->id)->count());
+        });
+    }
+
+    public function test_une_selection_de_purge_est_limitee_a_une_page(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.registrations.purge', [$tenant, $event]), ['registrations' => range(1, 26)])
+            ->assertSessionHasErrors('registrations');
+    }
+
+    public function test_un_membre_sans_la_permission_de_purge_ne_purge_pas_une_selection(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+        $registration = $tenant->asCurrent(fn () => Registration::factory()->create(['event_id' => $event->id, 'status' => RegistrationStatus::Draft]));
+
+        $member = User::factory()->withTwoFactor()->create();
+        $this->joinWithPermissions($tenant, $member, [TenantPermission::RegistrationsView]);
+
+        $this->actingAs($member)
+            ->post(route('tenants.events.registrations.purge', [$tenant, $event]), ['registrations' => [$registration->id]])
+            ->assertForbidden();
+
+        $tenant->asCurrent(fn () => $this->assertNotNull(Registration::find($registration->id)));
+    }
+
+    public function test_la_liste_dit_quelles_lignes_se_purgent_et_lesquelles_ont_un_decompte_en_cours(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $event = $this->eventOf($tenant);
+
+        $tenant->asCurrent(function () use ($event) {
+            Registration::factory()->held()->create(['event_id' => $event->id, 'name' => 'En cours']);
+            Registration::factory()->confirmed()->create(['event_id' => $event->id, 'name' => 'Validee']);
+        });
+
+        $this->actingAs($owner)
+            ->get(route('tenants.events.registrations.index', [$tenant, $event]))
+            ->assertInertia(fn ($page) => $page
+                ->where('rows', fn ($rows) => collect($rows)->contains(fn ($row) => $row['name'] === 'En cours' && $row['purgeable'] === true && $row['holdActive'] === true)
+                    && collect($rows)->contains(fn ($row) => $row['name'] === 'Validee' && $row['purgeable'] === false && $row['holdActive'] === false)));
+    }
+
     public function test_l_export_excel_reflete_le_filtre_actif(): void
     {
         Excel::fake();

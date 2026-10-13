@@ -2,14 +2,17 @@
 
 namespace App\Actions\Events;
 
+use App\Actions\Notifications\SendAlert;
 use App\Actions\Seating\SyncSeatingTables;
 use App\Actions\Waitlist\InviteWaitlistAfterGrowth;
 use App\Enums\BrandFile;
 use App\Enums\EventStatus;
+use App\Enums\NotificationType;
 use App\Models\Event;
 use App\Models\SeatingTable;
 use App\Models\ShowcaseEvent;
 use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -74,6 +77,10 @@ class SaveEvent
             // nom ou la date changent sur un evenement deja annonce.
             if ($event->isAnnounced()) {
                 $this->syncShowcase($event);
+            }
+
+            if ($creating) {
+                $this->alertTeam(NotificationType::EventCreated, $event, auth()->user());
             }
 
             return $event;
@@ -164,6 +171,20 @@ class SaveEvent
     }
 
     /**
+     * Tell the team what a member just did to an event (decision du 2026-10-12). L'acteur n'est
+     * pas prevenu de ce qu'il vient de faire lui-meme ; hors requete (console), il n'y en a pas.
+     */
+    private function alertTeam(NotificationType $type, Event $event, ?User $actor): void
+    {
+        app(SendAlert::class)->toTenantMembers(
+            $type,
+            ['event' => $event->name, 'actor' => $actor->name ?? __('notifications.unknown_actor')],
+            route('tenants.events.edit', [Tenant::current(), $event], absolute: false),
+            $actor,
+        );
+    }
+
+    /**
      * Keep the central showcase row in sync with this event's current display data.
      */
     private function syncShowcase(Event $event): void
@@ -183,6 +204,7 @@ class SaveEvent
                 // que si `branding` existe et est complete.
                 'organisation_name' => $tenant->branding->display_name ?? $tenant->name,
                 'starts_at' => $event->starts_at,
+                'listed_until' => $event->showcaseUntil(),
                 'public_url' => $event->publicUrl(),
                 'announced_at' => $event->announced_at,
                 'visual_path' => $event->getFirstMedia(Event::VisualCollection)?->getPathRelativeToRoot(),
@@ -215,6 +237,8 @@ class SaveEvent
                 ])
                 ->log('event.published');
 
+            $this->alertTeam(NotificationType::EventPublished, $event, auth()->user());
+
             return $event;
         });
     }
@@ -238,6 +262,8 @@ class SaveEvent
                     'attributes' => ['status' => $event->status->value],
                 ])
                 ->log('event.closed');
+
+            $this->alertTeam(NotificationType::EventClosed, $event, auth()->user());
 
             // Un evenement clos quitte la vitrine (decision du 2026-10-07) : elle ne montre que ce
             // qui accueille encore des inscriptions.
@@ -264,7 +290,7 @@ class SaveEvent
             $copy = $event->replicate([
                 'public_token', 'published_at', 'announced_at', 'created_at', 'updated_at', 'deleted_at',
                 'qr_public_key', 'qr_secret_key',
-                'seats_low_alerted_at', 'purge_notice_sent_at',
+                'seats_low_alerted_at', 'purge_notice_sent_at', 'ended_alerted_at', 'registrations_closed_alerted_at',
             ]);
 
             $copy->name = __('events.duplicate_name', ['name' => $event->name]);

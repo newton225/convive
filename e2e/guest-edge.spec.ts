@@ -38,6 +38,7 @@ test('un numero de telephone invalide est refuse, un numero etranger valide est 
     await page.getByTestId('registration-unit').click();
     await page.getByRole('option', { name: unit, exact: true }).click();
     await page.getByTestId('registration-submit').click();
+    await page.getByTestId('registration-confirm').click();
 
     await expect(page.getByTestId('registration-form')).toBeVisible();
     await expect(page).not.toHaveURL(/\/register\/[A-Za-z0-9_-]{20,}/);
@@ -59,6 +60,7 @@ test('un meme numero ne tient pas deux reservations actives sur le meme evenemen
     await other.getByTestId('registration-unit').click();
     await other.getByRole('option', { name: unit, exact: true }).click();
     await other.getByTestId('registration-submit').click();
+    await other.getByTestId('registration-confirm').click();
 
     // Pas de seconde reservation : l'invite est renvoye vers la premiere ou informe.
     await expect(other.getByTestId('registration-ongoing').or(other.getByTestId('registration-form'))).toBeVisible();

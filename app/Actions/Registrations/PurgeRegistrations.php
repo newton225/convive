@@ -19,11 +19,28 @@ use App\Models\Tenant;
 class PurgeRegistrations
 {
     /**
+     * `$only` limite la purge a ces dossiers (geste manuel sur une ou quelques lignes) : ceux qui
+     * ne sont pas de cet evenement ou qui sont finalises sont ignores, jamais effaces.
+     * `$keepActiveHolds` epargne les reservations dont le decompte tourne encore : un invite est
+     * peut-etre en train de payer. Les purges automatiques (echeance, epuisement) gardent le
+     * comportement d'origine et ne l'utilisent pas.
+     *
+     * @param  array<int, int>|null  $only
      * @return array{count: int, seatsFreed: int}
      */
-    public function handle(Event $event): array
+    public function handle(Event $event, ?array $only = null, bool $keepActiveHolds = false): array
     {
         $query = $event->registrations()->whereIn('status', Registration::UnfinalizedStatuses);
+
+        if ($only !== null) {
+            $query->whereIn('id', $only);
+        }
+
+        if ($keepActiveHolds) {
+            $query->whereNot(fn ($active) => $active
+                ->where('status', RegistrationStatus::Held)
+                ->where('held_until', '>', now()));
+        }
 
         $count = $query->count();
 
@@ -47,12 +64,20 @@ class PurgeRegistrations
             ->get()
             ->each(fn (PaymentProof $proof) => $proof->delete());
 
+        // Les references seules (jamais les noms ni les numeros) : de quoi retrouver ce qui a ete
+        // purge sans conserver de donnees personnelles dans le journal.
+        $references = (clone $query)->whereNotNull('reference')->pluck('reference')->all();
+
         $query->delete();
 
         activity()
             ->performedOn($event)
             ->event('purged')
-            ->withProperties(['count' => $count, 'seats_freed' => $seatsFreed])
+            ->withProperties(array_filter([
+                'count' => $count,
+                'seats_freed' => $seatsFreed,
+                'references' => $only !== null ? $references : null,
+            ], fn ($value) => $value !== null))
             ->log('registrations.purged');
 
         app(SendAlert::class)->toTenantMembers(

@@ -117,6 +117,7 @@ test('un invite s\'inscrit avec un accompagnateur a un autre tarif et relit son 
     // Le montant suit les tarifs choisis : 10 000 + 0.
     await expect(page.getByTestId('registration-total')).toContainText('10');
     await page.getByTestId('registration-submit').click();
+    await page.getByTestId('registration-confirm').click();
     await expect(page.getByTestId('registration-countdown')).toBeVisible();
     reservationUrl = page.url();
 

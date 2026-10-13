@@ -537,6 +537,7 @@ return [
             'activate_due_payment_account_changes' => 'Activation des changements de compte de versement',
             'mark_expired_holds_as_such_and_advance_the_waitlist' => 'Expiration des réservations et avancée de la liste d’attente',
             'expire_unanswered_waitlist_invites_and_advance_the_queue' => 'Expiration des invitations de liste d’attente sans réponse',
+            'tell_the_team_when_an_event_ends_or_its_registration_deadline_passes' => 'Alerte à la fin d’un événement ou à sa date limite d’inscription',
             'warn_the_team_a_day_before_an_automatic_purge' => 'Alerte la veille d’une purge automatique',
             'purge_non_finalized_registrations_at_their_event_deadline' => 'Purge des inscriptions à l’échéance de l’événement',
             'purge_non_finalized_registrations_once_capacity_is_exhausted_by_confirmed_seats_alone' => 'Purge des inscriptions quand l’événement est complet',

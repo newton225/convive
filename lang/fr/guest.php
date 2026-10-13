@@ -48,6 +48,12 @@ return [
         'additional' => [
             'confirm' => 'Oui, créer une inscription additionnelle',
         ],
+        'recovery' => [
+            'hint' => "Vous avez perdu le lien de votre réservation ? Nous le renvoyons par WhatsApp au numéro de cette réservation.",
+            'action' => 'Retrouver ma réservation',
+            'sent' => "Si une réservation est en cours pour ce numéro, son lien vient d'être envoyé par WhatsApp. Il remplace le précédent.",
+            'failed' => "Le message n'a pas pu être envoyé. Réessayez dans quelques instants.",
+        ],
         'ongoing' => [
             'title' => 'Vous avez déjà une réservation en cours',
             'description' => "Votre place est retenue pour cet événement. Reprenez votre réservation plutôt que d'en recommencer une.",
@@ -58,6 +64,7 @@ return [
         'errors' => [
             'phone_invalid' => "Ce numéro n'est pas valide pour le pays choisi. Vérifiez le pays sélectionné devant le champ, puis le numéro.",
             'phone_already_active' => 'Une réservation est déjà en cours pour ce numéro. Terminez-la, ou attendez la fin de son délai avant d\'en créer une autre.',
+            'phone_proof_pending' => 'Une preuve de paiement est déjà en cours de vérification pour ce numéro. Attendez qu\'elle soit traitée avant de vous inscrire de nouveau avec ce numéro.',
             'bot_check' => "La vérification anti-robot n'a pas abouti. Patientez un instant qu'elle se termine, puis envoyez de nouveau le formulaire.",
             'already_confirmed' => "Ce numéro a déjà une inscription confirmée pour cet événement. Si vous voulez inscrire d'autres personnes, vous pouvez créer une inscription additionnelle : elle aura son propre paiement et ses propres billets.",
             'too_many_codes' => 'Trop de codes ont été envoyés à ce numéro. Réessayez dans une heure.',
@@ -75,6 +82,9 @@ return [
             'unit' => 'Unité',
             'unit_placeholder' => 'Choisir une unité',
             'companion_name' => 'Nom de l\'accompagnateur',
+        ],
+        'hint' => [
+            'phone' => "Saisissez-le avec soin : c'est sur ce numéro WhatsApp que vous recevrez votre carte d'invitation, vos billets et vos rappels. Une erreur, et ils ne vous parviendront pas.",
         ],
         'help' => [
             'phone' => 'Il sert à vous envoyer votre carte d’invitation et vos rappels par WhatsApp. Numéro étranger : ajoutez l’indicatif du pays (+33, +1…). Une seule réservation à la fois par numéro.',
@@ -113,6 +123,13 @@ return [
             'label' => 'Montant total dû',
         ],
         'submit' => "Continuer l'inscription",
+        'review' => [
+            'title' => 'Vérifiez vos informations',
+            'description' => "Relisez votre fiche avant de continuer, surtout votre numéro de téléphone. Vous ne pourrez plus la modifier ensuite.",
+            'edit' => 'Modifier',
+            'confirm' => 'Confirmer et réserver',
+            'phone_warning' => "Votre numéro sert à vous envoyer votre carte, vos billets et vos rappels sur WhatsApp. Une erreur, et ils ne vous parviendront pas.",
+        ],
         'show' => [
             'countdown_label' => 'Temps restant pour envoyer votre preuve',
             'expired' => 'Le délai de réservation est écoulé.',
@@ -205,6 +222,11 @@ return [
             'action' => 'Voir mon billet',
             'companions' => 'Les billets de vos accompagnateurs, à leur transmettre :',
         ],
+        'resume_link' => [
+            'subject' => 'Votre réservation pour :event',
+            'intro' => "Bonjour :name, voici le lien pour reprendre votre réservation pour :event. Il remplace le précédent.",
+            'action' => 'Reprendre ma réservation',
+        ],
         'proof_reminder' => [
             'subject' => 'Il manque votre preuve de paiement pour :event',
             'intro' => "Bonjour :name, votre inscription à :event n'a pas encore de preuve de paiement validée.",
@@ -231,6 +253,7 @@ return [
     'whatsapp' => [
         'phone_verified' => "Convive : votre numéro est vérifié. Revenez sur la page d'inscription pour continuer.",
         'invitation_card' => 'Bonjour :name, votre inscription à :event est confirmée. Votre billet : :link',
+        'resume_link' => "Bonjour :name, voici le lien pour reprendre votre réservation pour :event : :link Il remplace le précédent.",
         'proof_reminder' => 'Bonjour :name, il manque votre preuve de paiement pour :event. Envoyez-la ici : :link',
         'ticket_reminder' => 'Bonjour :name, :event a lieu dans trois heures. Votre billet : :link',
         'registration_cancelled' => 'Bonjour :name, votre inscription à :event a été annulée par l\'organisation. Motif : :reason.',

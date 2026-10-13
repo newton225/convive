@@ -129,6 +129,9 @@ export default function PublicWaitlistJoin({
                                         help={t(
                                             'guest.registration.help.phone',
                                         )}
+                                        hint={t(
+                                            'guest.registration.hint.phone',
+                                        )}
                                     >
                                         <PhoneField
                                             id="phone"

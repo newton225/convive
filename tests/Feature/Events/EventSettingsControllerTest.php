@@ -55,7 +55,7 @@ class EventSettingsControllerTest extends TestCase
                 ->where('reminders.dayOf', true)
                 ->where('rules.scheduledSend', true)
                 ->where('rules.autoSeating', true)
-                ->where('unenforcedRules', ['allowWithoutProof', 'proofLegibility', 'temporaryHold']),
+                ->where('unenforcedRules', ['allowWithoutProof']),
             );
     }
 
@@ -91,9 +91,7 @@ class EventSettingsControllerTest extends TestCase
                 'rule_scheduled_send' => false,
                 'rule_auto_seating' => true,
                 'rule_allow_without_proof' => true,
-                'rule_proof_legibility' => true,
                 'rule_purge_on_exhaustion' => true,
-                'rule_temporary_hold' => true,
             ])
             ->assertRedirect(route('tenants.events.settings.edit', [$this->tenant, $this->event]));
 

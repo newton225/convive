@@ -23,7 +23,8 @@ class ShowcaseEventFactory extends Factory
             'event_id' => fake()->unique()->numberBetween(1, 1000000),
             'name' => 'Diner '.fake()->unique()->word(),
             'organisation_name' => fake()->company(),
-            'starts_at' => fake()->dateTimeBetween('+2 weeks', '+3 months'),
+            'starts_at' => $startsAt = fake()->dateTimeBetween('+2 weeks', '+3 months'),
+            'listed_until' => $startsAt,
             'public_url' => 'https://'.fake()->domainWord().'.convive.test/e/'.bin2hex(random_bytes(32)),
             'announced_at' => now(),
         ];

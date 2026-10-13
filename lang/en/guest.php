@@ -48,6 +48,12 @@ return [
         'additional' => [
             'confirm' => 'Yes, create an additional registration',
         ],
+        'recovery' => [
+            'hint' => 'Lost the link to your reservation? We send it again by WhatsApp to the number of that reservation.',
+            'action' => 'Find my reservation',
+            'sent' => 'If a reservation is in progress for this number, its link has just been sent by WhatsApp. It replaces the previous one.',
+            'failed' => 'The message could not be sent. Try again in a few moments.',
+        ],
         'ongoing' => [
             'title' => 'You already have a reservation in progress',
             'description' => 'Your seat is held for this event. Resume your reservation rather than starting a new one.',
@@ -58,6 +64,7 @@ return [
         'errors' => [
             'phone_invalid' => 'This number is not valid for the selected country. Check the country chosen in front of the field, then the number.',
             'phone_already_active' => 'A reservation is already in progress for this number. Finish it, or wait for its time limit to end before creating another.',
+            'phone_proof_pending' => 'A payment proof is already being checked for this number. Wait for it to be processed before registering again with this number.',
             'bot_check' => 'The anti-robot check did not complete. Wait a moment for it to finish, then send the form again.',
             'already_confirmed' => 'This number already has a confirmed registration for this event. If you want to register other people, you can create an additional registration: it will have its own payment and its own tickets.',
             'too_many_codes' => 'Too many codes were sent to this number. Please try again in an hour.',
@@ -75,6 +82,9 @@ return [
             'unit' => 'Unit',
             'unit_placeholder' => 'Choose a unit',
             'companion_name' => "Companion's name",
+        ],
+        'hint' => [
+            'phone' => 'Enter it carefully: your invitation card, tickets and reminders are sent to this WhatsApp number. If it is wrong, you will not receive them.',
         ],
         'help' => [
             'phone' => 'It is used to send your invitation card and reminders by WhatsApp. Foreign number: add the country code (+33, +1…). One reservation at a time per number.',
@@ -113,6 +123,13 @@ return [
             'label' => 'Total amount due',
         ],
         'submit' => 'Continue registration',
+        'review' => [
+            'title' => 'Check your details',
+            'description' => "Read your details again before continuing, especially your phone number. You will not be able to change them afterwards.",
+            'edit' => 'Edit',
+            'confirm' => 'Confirm and book',
+            'phone_warning' => "Your number is used to send your card, tickets and reminders on WhatsApp. If it is wrong, they will not reach you.",
+        ],
         'show' => [
             'countdown_label' => 'Time left to send your payment proof',
             'expired' => 'The reservation window has closed.',
@@ -205,6 +222,11 @@ return [
             'action' => 'View my ticket',
             'companions' => 'Your companions\' tickets, to forward to them:',
         ],
+        'resume_link' => [
+            'subject' => 'Your reservation for :event',
+            'intro' => 'Hello :name, here is the link to resume your reservation for :event. It replaces the previous one.',
+            'action' => 'Resume my reservation',
+        ],
         'proof_reminder' => [
             'subject' => 'Your payment proof for :event is still missing',
             'intro' => 'Hello :name, your registration for :event does not have a validated payment proof yet.',
@@ -231,6 +253,7 @@ return [
     'whatsapp' => [
         'phone_verified' => 'Convive: your number is verified. Go back to the registration page to continue.',
         'invitation_card' => 'Hello :name, your registration for :event is confirmed. Your ticket: :link',
+        'resume_link' => 'Hello :name, here is the link to resume your reservation for :event: :link It replaces the previous one.',
         'proof_reminder' => 'Hello :name, your payment proof for :event is still missing. Send it here: :link',
         'ticket_reminder' => 'Hello :name, :event starts in three hours. Your ticket: :link',
         'registration_cancelled' => 'Hello :name, your registration for :event was cancelled by the organisation. Reason: :reason.',

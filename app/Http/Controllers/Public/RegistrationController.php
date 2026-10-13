@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Actions\Registrations\CreateRegistration;
 use App\Actions\Registrations\HoldRegistration;
 use App\Actions\Registrations\PhoneVerification;
+use App\Actions\Registrations\SendResumeLink;
 use App\Actions\Waitlist\PromoteNextWaitlistEntry;
 use App\Enums\BrandFile;
 use App\Enums\ClaimCategory;
@@ -12,6 +13,7 @@ use App\Enums\PhoneCodeResult;
 use App\Enums\RegistrationStatus;
 use App\Exceptions\ReservationBusy;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Public\RecoverResumeLinkRequest;
 use App\Http\Requests\Public\StoreRegistrationRequest;
 use App\Models\Event;
 use App\Models\EventPriceCategory;
@@ -34,6 +36,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 /**
  * Le formulaire d'inscription (README ecran 4) et sa reservation (ecran 5, etape 5 de
@@ -112,8 +115,12 @@ class RegistrationController extends Controller
             return redirect()->to($event->publicUrl());
         }
 
-        if (Registration::phoneHoldsSeats($event, (string) $request->validated('phone'))) {
-            return back()->withInput()->withErrors(['phone' => __('guest.registration.errors.phone_already_active')]);
+        if ($holder = Registration::phoneHolder($event, (string) $request->validated('phone'))) {
+            // Une reservation avec decompte peut etre retrouvee par WhatsApp ; une preuve deposee n'a
+            // plus rien a finaliser (`SendResumeLink`).
+            Inertia::flash('recoverable', $holder->status === RegistrationStatus::Held);
+
+            return back()->withInput()->withErrors(['phone' => $this->phoneBusyMessage($holder)]);
         }
 
         // Une inscription confirmee existe deja pour ce numero : la nouvelle n'est possible que comme
@@ -300,12 +307,56 @@ class RegistrationController extends Controller
         }
     }
 
+    /**
+     * Send the guest a fresh link to the reservation running on this phone number, when they lost
+     * theirs (decision du 2026-10-12).
+     *
+     * La reponse est la meme qu'un message soit parti ou non : elle ne doit pas confirmer qu'un
+     * numero a une reservation (le refus du formulaire le dit deja a qui tente de s'inscrire, rien
+     * de plus ici). Le lien part vers le telephone de l'inscription, jamais vers l'appelant.
+     */
+    public function recover(RecoverResumeLinkRequest $request, string $token): RedirectResponse
+    {
+        $event = $this->publishedEvent($token);
+
+        if (! $event->acceptsRegistrations()) {
+            return redirect()->to($event->publicUrl());
+        }
+
+        try {
+            app(SendResumeLink::class)->handle($event, (string) $request->validated('phone'));
+        } catch (Throwable $failure) {
+            report($failure);
+
+            Inertia::flash('toast', ['type' => 'error', 'message' => __('guest.registration.recovery.failed')]);
+
+            return back();
+        }
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('guest.registration.recovery.sent')]);
+
+        return back();
+    }
+
+    /**
+     * Get the refusal shown when a phone number already holds seats : une preuve deposee n'a pas de
+     * delai a attendre, elle attend d'etre verifiee ; seule une reservation en cours en a un.
+     */
+    private function phoneBusyMessage(?Registration $holder): string
+    {
+        return $holder?->status === RegistrationStatus::ProofSubmitted
+            ? __('guest.registration.errors.phone_proof_pending')
+            : __('guest.registration.errors.phone_already_active');
+    }
+
     private function holdVerified(Event $event, Registration $registration, string $token, string $resume): RedirectResponse
     {
         // Les regles verifiees au formulaire se rejouent : le code a pu etre saisi longtemps
         // apres, une autre reservation du meme numero a pu etre prise entre-temps.
-        if (! $event->acceptsRegistrations() || Registration::phoneHoldsSeats($event, $registration->phone, $registration->id)) {
-            Inertia::flash('toast', ['type' => 'error', 'message' => __('guest.registration.errors.phone_already_active')]);
+        $holder = Registration::phoneHolder($event, $registration->phone, $registration->id);
+
+        if (! $event->acceptsRegistrations() || $holder !== null) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $this->phoneBusyMessage($holder)]);
 
             return redirect()->to($event->publicUrl());
         }
@@ -533,8 +584,8 @@ class RegistrationController extends Controller
         // Relancer une reservation expiree ne doit pas contourner « une reservation active par
         // numero » (SECURITY.md C3) : une autre inscription du meme telephone peut avoir ete prise
         // entre-temps.
-        if (Registration::phoneHoldsSeats($event, $registration->phone, $registration->id)) {
-            Inertia::flash('toast', ['type' => 'error', 'message' => __('guest.registration.errors.phone_already_active')]);
+        if ($holder = Registration::phoneHolder($event, $registration->phone, $registration->id)) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $this->phoneBusyMessage($holder)]);
 
             return to_route('public.registrations.show', ['token' => $token, 'resume' => $resume]);
         }

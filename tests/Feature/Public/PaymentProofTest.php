@@ -442,8 +442,27 @@ class PaymentProofTest extends TestCase
 
         $url = $this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}/proof");
 
-        for ($i = 0; $i < 5; $i++) {
-            $this->post($url, $this->validPayload($account));
+        // Les captures refusees ne comptent pas dans les cinq depots par heure : l'invite corrige
+        // son fichier sans perdre son decompte.
+        for ($i = 0; $i < 6; $i++) {
+            $this->post($url, [...$this->validPayload($account), 'receipt' => null])->assertSessionHasErrors('receipt');
+        }
+
+        $this->post($url, $this->validPayload($account))->assertRedirect();
+    }
+
+    public function test_les_essais_de_depot_restent_bornes_meme_refuses(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $account = $tenant->asCurrent(fn () => PaymentAccount::first());
+        ['resume' => $resume] = $this->heldRegistration($tenant, $event);
+
+        $url = $this->urlFor($tenant->subdomain, $event->public_token, "/register/{$resume}/proof");
+
+        for ($i = 0; $i < 30; $i++) {
+            $this->post($url, [...$this->validPayload($account), 'receipt' => null]);
         }
 
         $this->post($url, $this->validPayload($account))->assertStatus(429);

@@ -234,7 +234,7 @@ return [
         'organisation' => "l'identité de l'organisation (page Espace et marque)",
         'capacity' => 'au moins une table avec des places',
         'date' => 'la date et l\'heure de début',
-        'date_past' => 'une date de début à venir (celle saisie est déjà passée)',
+        'date_past' => 'des inscriptions encore ouvertes et une fin à venir (celle saisie est déjà passée)',
         'venue' => 'le lieu',
         'seats' => 'le nombre de places',
         'payment_account' => 'un compte de versement visible, rattaché à l\'événement',
@@ -243,7 +243,7 @@ return [
     'missing_announce' => [
         'not_published' => 'la publication du lien',
         'closed' => 'un événement ouvert (il est clos)',
-        'past' => 'une date de début à venir',
+        'past' => 'des inscriptions encore ouvertes et une fin à venir',
     ],
     'errors' => [
         'price_category_unknown' => 'Ce tarif ne correspond pas à cet événement.',

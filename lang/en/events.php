@@ -234,7 +234,7 @@ return [
         'organisation' => 'the organisation identity (Space and brand page)',
         'capacity' => 'at least one table with seats',
         'date' => 'the start date and time',
-        'date_past' => 'a start date still to come (the one entered has already passed)',
+        'date_past' => 'registrations still open and an end still to come (the one entered has already passed)',
         'venue' => 'the venue',
         'seats' => 'the number of seats',
         'payment_account' => 'a visible payment account linked to the event',
@@ -243,7 +243,7 @@ return [
     'missing_announce' => [
         'not_published' => 'publishing the link',
         'closed' => 'an open event (it is closed)',
-        'past' => 'a start date still to come',
+        'past' => 'registrations still open and an end still to come',
     ],
     'errors' => [
         'price_category_unknown' => 'This price does not belong to this event.',

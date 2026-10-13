@@ -1,7 +1,8 @@
 import { Head, router } from '@inertiajs/react';
-import type { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef, RowSelectionState } from '@tanstack/react-table';
 import { Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import DataTable from '@/components/data-table';
 import { DownloadButton } from '@/components/download-button';
 import { CancelRegistrationDialog } from '@/components/registrations/cancel-registration-dialog';
@@ -95,6 +96,10 @@ export default function EventRegistrations({
         (RegistrationRow & { card: RegistrationCard }) | null
     >(null);
     const [purging, setPurging] = useState(false);
+    // La selection ne vaut que pour la page affichee : elle repart a zero des que les lignes changent
+    // (autre page, filtre, purge faite).
+    const [selected, setSelected] = useState<RowSelectionState>({});
+    const [purgingSelection, setPurgingSelection] = useState(false);
     const [receiptPreview, setReceiptPreview] = useState<ReceiptPreview | null>(
         null,
     );
@@ -152,6 +157,13 @@ export default function EventRegistrations({
         return () => clearTimeout(timeout);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
+
+    useEffect(() => {
+        setSelected({});
+    }, [rows]);
+
+    const selectedRows = rows.filter((row) => selected[String(row.id)]);
+    const activeHoldCount = selectedRows.filter((row) => row.holdActive).length;
 
     // L'identifiant d'une colonne triable est le champ que le controleur autorise dans
     // `allowedSorts()` : name, party_size, amount_due.
@@ -358,14 +370,28 @@ export default function EventRegistrations({
                     />
 
                     {canPurge ? (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            data-test="registrations-purge"
-                            onClick={() => setPurging(true)}
-                        >
-                            {t('registrations.actions.purge')}
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                            {selectedRows.length > 0 ? (
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    data-test="registrations-purge-selection"
+                                    onClick={() => setPurgingSelection(true)}
+                                >
+                                    {t('registrations.actions.purge_selection', {
+                                        count: selectedRows.length,
+                                    })}
+                                </Button>
+                            ) : null}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                data-test="registrations-purge"
+                                onClick={() => setPurging(true)}
+                            >
+                                {t('registrations.actions.purge')}
+                            </Button>
+                        </div>
                     ) : null}
                 </div>
 
@@ -462,6 +488,23 @@ export default function EventRegistrations({
                         navigate({ sort: sortingToParam(sorting) ?? null })
                     }
                     rowTestId="registration-row"
+                    selection={
+                        canPurge
+                            ? {
+                                  selected,
+                                  onSelectedChange: setSelected,
+                                  getRowId: (row) => String(row.id),
+                                  isSelectable: (row) => row.purgeable,
+                                  selectAllLabel: t(
+                                      'registrations.selection.select_all',
+                                  ),
+                                  selectRowLabel: (row) =>
+                                      t('registrations.selection.select_row', {
+                                          name: row.name,
+                                      }),
+                              }
+                            : undefined
+                    }
                     emptyState={
                         <>
                             <p className="font-medium">
@@ -511,6 +554,57 @@ export default function EventRegistrations({
                 receipt={receiptPreview}
                 onOpenChange={(open) => !open && setReceiptPreview(null)}
             />
+
+            <ConfirmActionDialog
+                open={purgingSelection}
+                onOpenChange={setPurgingSelection}
+                title={t('registrations.modals.purge_selection.title', {
+                    count: selectedRows.length,
+                })}
+                description={t(
+                    'registrations.modals.purge_selection.description',
+                )}
+                confirmLabel={t('registrations.modals.purge_selection.submit')}
+                destructive
+                testId="registrations-purge-selection-confirm"
+                onConfirm={() =>
+                    router.post(
+                        purge([tenant.slug, event.id]).url,
+                        { registrations: selectedRows.map((row) => row.id) },
+                        {
+                            preserveScroll: true,
+                            onFinish: () => setPurgingSelection(false),
+                        },
+                    )
+                }
+            >
+                <div className="space-y-3">
+                    <ul className="divide-y rounded-md border text-sm">
+                        {selectedRows.map((row) => (
+                            <li
+                                key={row.id}
+                                className="flex items-center justify-between gap-3 p-2"
+                            >
+                                <span className="font-medium">{row.name}</span>
+                                <span className="text-muted-foreground text-xs">
+                                    {row.reference ?? row.statusLabel}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                    {activeHoldCount > 0 ? (
+                        <p
+                            className="text-destructive text-sm"
+                            data-test="registrations-purge-active-warning"
+                        >
+                            {t(
+                                'registrations.modals.purge_selection.active_warning',
+                                { count: activeHoldCount },
+                            )}
+                        </p>
+                    ) : null}
+                </div>
+            </ConfirmActionDialog>
 
             <Dialog open={purging} onOpenChange={setPurging}>
                 <DialogContent>

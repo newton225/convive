@@ -59,6 +59,17 @@ expiration 10 minutes, avertissement de sécurité.
 
 > Bonjour {{1}}, il manque votre preuve de paiement pour {{2}}. Envoyez-la ici : {{3}} Merci !
 
+## Lien de réservation renvoyé
+
+- Réglage : `WHATSAPP_TEMPLATE_RESUME_LINK`
+- Catégorie : utilitaire
+- Variables : `{{1}}` nom de l'invité, `{{2}}` nom de l'événement, `{{3}}` lien pour reprendre la réservation
+
+> Bonjour {{1}}, voici le lien pour reprendre votre réservation pour {{2}} : {{3}} Il remplace le précédent. À bientôt !
+
+Envoyé quand l'invité a perdu le lien de sa réservation en cours (bouton « Retrouver ma réservation »).
+Le lien porte le jeton de reprise : le message part tout de suite, jamais par la file d'attente.
+
 ## Rappel du jour J
 
 - Réglage : `WHATSAPP_TEMPLATE_TICKET_REMINDER`
