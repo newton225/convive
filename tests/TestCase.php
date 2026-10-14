@@ -9,8 +9,12 @@ use App\Models\User;
 use App\Support\ScopedSqliteDatabaseManager;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Laravel\Fortify\Features;
+use Stancl\Tenancy\Events\DatabaseCreated;
+use Tests\Support\OutOfTransactionPostgreSQLDatabaseManager;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -26,9 +30,20 @@ abstract class TestCase extends BaseTestCase
      * reel d'un developpeur qui aurait `php artisan serve` ouvert a cote (voir la classe pour
      * l'incident que cet ecart a cause avant sa correction).
      */
+    /**
+     * Les bases d'organisation creees pendant un test sur PostgreSQL, a effacer ensuite.
+     *
+     * @var array<int, string>
+     */
+    private array $createdTenantDatabases = [];
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        if (self::onPostgres()) {
+            $this->prepareTenantDatabasesOnPostgres();
+        }
 
         // Aucun test n'atteint un service reel (WhatsApp, SMS...) : une requete HTTP non simulee
         // par `Http::fake()` echoue au lieu de partir. Incident du 2026-10-03 : avec de vrais
@@ -57,6 +72,74 @@ abstract class TestCase extends BaseTestCase
                 @unlink($path);
             }
         }
+    }
+
+    protected function tearDown(): void
+    {
+        if (self::onPostgres()) {
+            $this->dropCreatedTenantDatabases();
+        }
+
+        parent::tearDown();
+    }
+
+    /**
+     * Suite lancee sur PostgreSQL (`DB_CENTRAL_DRIVER=pgsql`) plutot que sur SQLite en memoire.
+     */
+    private static function onPostgres(): bool
+    {
+        return (getenv('DB_CENTRAL_DRIVER') ?: ($_ENV['DB_CENTRAL_DRIVER'] ?? 'sqlite')) === 'pgsql';
+    }
+
+    /**
+     * Garde-fou, puis creation des bases d'organisation hors de la transaction du test.
+     *
+     * `RefreshDatabase` enveloppe chaque test dans une transaction de la connexion centrale, or
+     * PostgreSQL refuse `CREATE DATABASE` dans un bloc de transaction. Le gestionnaire de bases du paquet
+     * passe donc par une seconde connexion, `central_ddl`, qui n'en porte aucune. Les bases creees sont
+     * retenues puis effacees a la fin du test : le retour en arriere de la transaction ne les retire pas.
+     *
+     * La base centrale d'essai doit se terminer par `_test` : `migrate:fresh` de `RefreshDatabase`
+     * efface tout ce qu'elle contient, jamais la base de developpement.
+     */
+    private function prepareTenantDatabasesOnPostgres(): void
+    {
+        $name = (string) DB::connection('central')->getDatabaseName();
+
+        if (! str_ends_with($name, '_test')) {
+            $this->fail("Les tests sur PostgreSQL exigent une base dont le nom se termine par _test, pas « {$name} ».");
+        }
+
+        config([
+            'database.connections.central_ddl' => config('database.connections.central'),
+            'tenancy.database.managers.pgsql' => OutOfTransactionPostgreSQLDatabaseManager::class,
+        ]);
+
+        $this->createdTenantDatabases = [];
+
+        Event::listen(DatabaseCreated::class, function (DatabaseCreated $event): void {
+            $this->createdTenantDatabases[] = $event->tenant->database()->getName();
+        });
+    }
+
+    private function dropCreatedTenantDatabases(): void
+    {
+        if ($this->createdTenantDatabases === []) {
+            return;
+        }
+
+        tenancy()->end();
+        DB::purge('tenant');
+        gc_collect_cycles();
+
+        $central = DB::connection('central_ddl');
+
+        foreach ($this->createdTenantDatabases as $name) {
+            // FORCE (PostgreSQL 13 et plus) : une connexion encore ouverte ne bloque pas l'effacement.
+            $central->statement('drop database if exists "'.$name.'" with (force)');
+        }
+
+        $this->createdTenantDatabases = [];
     }
 
     /**
