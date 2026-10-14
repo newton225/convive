@@ -30,7 +30,8 @@ dis et me le dire quand quelque chose ne colle pas pour que je tranche ».
   pour le back-office : les controleurs rendent des pages Inertia.
 - **Vite** pour le bundling, **Tailwind CSS** pour le style.
 - **PostgreSQL** (MySQL 8 accepte si l'hebergement l'impose), `tenant_id` sur chaque table
-  metier. **Etat actuel : SQLite**, voir la section « Base de donnees » plus bas.
+  metier. **Production : PostgreSQL** ; SQLite reste le moteur du developpement et des tests, voir
+  la section « Base de donnees » plus bas.
 - **PWA** pour le parcours invite et l'ecran de scan : service worker, file locale,
   synchronisation au retour du reseau.
 - **Queues Laravel** (Redis) et `schedule:run` pour les taches planifiees : purges, envois
@@ -267,11 +268,25 @@ journalise. Les reponses limitees renvoient un message utile, jamais un code tec
 - Les migrations ajoutent des tables et des colonnes ; elles ne renomment ni ne suppriment une
   structure existante sans accord explicite.
 
-### Etat actuel : SQLite
+### Bascule vers PostgreSQL (decision du 2026-10-13, en cours)
 
-Le proprietaire du projet a decide de rester sur **SQLite**, la configuration par defaut du
-starter. PostgreSQL reste l'objectif, il est reporte. Ne pas reproposer le changement a
-chaque session, et ne pas y toucher sans nouvelle demande explicite.
+Le proprietaire du projet a decide que **la production tourne sur PostgreSQL**, installe sur le serveur
+(hors des conteneurs), et a demande le chantier le 2026-10-14. Le moteur se choisit par
+`DB_CENTRAL_DRIVER` (`sqlite` par defaut, `pgsql`) ; `DB_CONNECTION` reste `central`. Un fichier
+`.env.pgsql` (ignore par git) porte les identifiants des essais locaux, chargeables dans l'environnement
+du processus sans toucher a `.env`.
+
+Fait et verifie sur PostgreSQL 18 : migrations centrales et d'organisation, creation d'une organisation
+(la base se cree **avant** la transaction, `CREATE DATABASE` y etant interdit ; `TenantDatabaseConfig`
+ignore les colonnes `tenancy_db_username` et `tenancy_db_password` vides), nommage et orphelins
+(`pg_database`), effacement, extension `unaccent` (migration centrale et d'organisation), sauvegardes par
+`pg_dump`. **Reste** : la suite de tests complete sur PostgreSQL, et la grille de `SECURITY.md` rejouee,
+concurrence sur la derniere place comprise (`lockForUpdate()` y est enfin actif).
+
+### Etat de SQLite (developpement et tests)
+
+SQLite reste le moteur par defaut du developpement et de la suite de tests (base centrale en memoire).
+Les deux moteurs doivent continuer de fonctionner : une modification qui ne marche que sur l'un est un bogue.
 
 Deux consequences a compenser dans le code, pas a ignorer :
 
@@ -1323,12 +1338,13 @@ archiverait les fichiers sans aucune base.
 
 - **Contenu d'une archive** : `backup-databases/` (la base centrale et celle de chaque
   organisation), `tenant-media/` (fichiers de marque) et `payment-proofs/` (preuves de paiement).
-- **Les bases sont copiees par `VACUUM INTO`** (`App\Support\Backup\DatabaseSnapshots`), pas par
-  l'export du paquet : celui-ci appelle le programme `sqlite3`, absent d'un serveur ou seul PHP
-  est installe, et ne connait que des connexions declarees d'avance, pas une base par
-  organisation. La copie est coherente meme pendant une ecriture. Les copies sont retirees du
-  serveur des que l'archive est faite. Au passage a PostgreSQL, l'export du paquet reprend la main
-  (`backup.source.databases`) ; la classe refuse d'ici la tout autre moteur.
+- **Les bases sont copiees par `App\Support\Backup\DatabaseSnapshots`**, pas par l'export du
+  paquet : celui-ci ne connait que des connexions declarees d'avance, pas une base par
+  organisation. **SQLite** : `VACUUM INTO`, coherent meme pendant une ecriture. **PostgreSQL** :
+  `pg_dump` base par base, format personnalise, sans proprietaire ni droits (`central.dump`,
+  `tenant_<ULID>.dump`) ; le programme se regle par `PG_DUMP_BINARY`, sa version doit etre au moins
+  celle du serveur, le mot de passe passe par `PGPASSWORD`. Les copies sont retirees du serveur des
+  que l'archive est faite ; un autre moteur est refuse.
 - **Planification** (`routes/console.php`) : sauvegarde a 2 h 30, menage a 3 h 30, surveillance a
   6 h. Conservation : tout pendant 7 jours, puis une par jour, par semaine, par mois, **un an au
   plus** et aucune archive annuelle (`config/backup.php`). C'est le temps pendant lequel une
@@ -1340,11 +1356,16 @@ archiverait les fichiers sans aucune base.
   l'archive. L'ecran de sante technique le rappelle tant que ce n'est pas fait.
 - **Alertes** : seuls les echecs previennent, a l'adresse `CONVIVE_ALERT_EMAIL`. Sans elle, aucun
   courriel ne part et l'etat ne se lit que sur l'ecran de sante technique.
-- **Restauration** : a la main, application arretee. Extraire l'archive, remettre `central.sqlite`
-  et les fichiers de base des organisations (`tenant<numero>.sqlite` et `tenant_<ULID>.sqlite`, sous
-  le nom enregistre sur chacune) dans `database/`, `tenant-media/` et `payment-proofs/` dans
-  `storage/app/`, puis `php artisan tenants:migrate`. Aucun bouton de restauration dans la
-  console : ecraser toutes les bases ne se fait pas d'un clic.
+- **Restauration** : a la main, application arretee. Extraire l'archive, puis remettre
+  `tenant-media/` et `payment-proofs/` dans `storage/app/`, et les bases :
+  - **SQLite** : `central.sqlite` et les fichiers des organisations (`tenant<numero>.sqlite` et
+    `tenant_<ULID>.sqlite`, sous le nom enregistre sur chacune) dans `database/`.
+  - **PostgreSQL** : pour chaque copie, creer la base vide du meme nom (`central` correspond a la base
+    centrale de `DB_CENTRAL_DATABASE`), puis `pg_restore --no-owner --dbname=<base> <copie>.dump`, avec
+    le role de l'application. Le nom d'une base d'organisation est celui de `tenants.tenancy_db_name`.
+  Enfin `php artisan tenants:migrate`. Aucun bouton de restauration dans la console : ecraser
+  toutes les bases ne se fait pas d'un clic. Exercice fait le 2026-10-14 : les deux copies d'essai
+  se relisent avec leurs 38 et 34 tables.
 
 ---
 

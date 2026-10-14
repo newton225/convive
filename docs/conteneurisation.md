@@ -44,38 +44,23 @@ l'hôte, PostgreSQL doit :
 3. être protégé par le pare-feu : le port 5432 n'est **pas** ouvert sur Internet ;
 4. avoir un rôle applicatif avec `CREATEDB` : `stancl/tenancy` crée **une base par organisation**.
 
-Le client `pg_dump` de l'image (`postgresql-client`) doit être au moins de la version du serveur.
+Le client `pg_dump` de l'image (`postgresql-client`) doit être au moins de la version du serveur. L'extension `unaccent` vient de `postgresql-contrib` (dans le paquet principal sur Debian et Ubuntu).
 
-## Avertissement : l'application n'est pas encore prête pour PostgreSQL
+## L'application et PostgreSQL
 
-Tout ce qui précède prépare l'infrastructure. **Le code n'a jamais tourné sur PostgreSQL**, et plusieurs
-parties sont écrites pour SQLite. Repérées dans le code au 2026-10-13 :
+Le chantier est fait pour l'essentiel (2026-10-14, vérifié sur PostgreSQL 18 en local) :
 
-| Partie | Ce qui est propre à SQLite |
+| Partie | État |
 | --- | --- |
-| Bases des organisations | Un fichier par organisation : `config/tenancy.php` (`suffix => '.sqlite'`), `ScopedSqliteDatabaseManager`, `TenantDatabaseName` (`tenant_<ULID>.sqlite`) |
-| Création d'organisation | `CreateTenant` efface le fichier laissé par une tentative échouée |
-| Bases orphelines | `TenantDatabaseFiles`, `OrphanTenantDatabasesCheck`, `DeleteOrphanDatabase`, écran de santé : ils listent des fichiers |
-| Sauvegardes | `DatabaseSnapshots` copie par `VACUUM INTO` et **refuse tout autre moteur** ; `convive:backup` est à reprendre avec `pg_dump` |
-| Recherche sans accents | `unaccent` est fournie à SQLite par `AppServiceProvider` ; PostgreSQL demande `CREATE EXTENSION unaccent` (une migration) |
-| Verrous | `lockForUpdate()` est inopérant en SQLite et actif en PostgreSQL : à rejouer avec de vrais tests de concurrence |
-| Tests | La suite tourne en SQLite en mémoire ; il faut une exécution sur PostgreSQL |
+| Bases des organisations | Une base par organisation (`tenant_<ULID>`), créée avant la transaction, migrée à la création |
+| Bases orphelines et effacement | Lus dans `pg_database`, suppression par `DROP DATABASE` |
+| Recherche sans accents | Extension `unaccent`, activée par migration (centrale et par organisation) |
+| Sauvegardes | `pg_dump` base par base, restauration par `pg_restore` (voir `CLAUDE.md`, « Sauvegardes ») |
+| Suite de tests complète | **Pas encore rejouée sur PostgreSQL** |
+| Verrous (`lockForUpdate()`), concurrence sur la dernière place | **Grille de `SECURITY.md` à rejouer** : actif sur PostgreSQL, inopérant sur SQLite |
 
-Chantier proposé, **à ne lancer que sur votre accord explicite** (`CLAUDE.md`, « Base de données » : ne rien
-changer sans demande explicite) :
-
-1. un environnement PostgreSQL de développement (un conteneur, comme Redis aujourd'hui) ;
-2. le gestionnaire de bases par organisation en PostgreSQL (`PostgreSQLDatabaseManager`, déjà référencé dans
-   `config/tenancy.php`) et le nommage associé ;
-3. orphelins et suppression d'une base d'organisation ;
-4. sauvegardes avec `pg_dump` et exercice de restauration ;
-5. extension `unaccent` ;
-6. suite complète et parcours Playwright sur PostgreSQL ;
-7. grille de `SECURITY.md` rejouée, en particulier la concurrence sur la dernière place.
-
-Tant que ce chantier n'est pas fait, **ne pas déployer ces conteneurs avec `DB_CONNECTION=pgsql`**. Pour un
-premier déploiement sur SQLite (un seul serveur, volume dédié aux fichiers de bases), il faudrait ajouter le
-dossier `database` en volume : dites-le-moi et je prépare cette variante.
+Tant que les deux dernières lignes ne sont pas faites, **ne pas ouvrir au public**. Réglage : `DB_CENTRAL_DRIVER=pgsql`
+dans le `.env` de production, avec `DB_HOST=host.docker.internal`. `PG_DUMP_BINARY` reste `pg_dump` dans l'image.
 
 ## Livrer une nouvelle version
 

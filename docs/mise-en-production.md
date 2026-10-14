@@ -29,7 +29,7 @@ Pas prêt, et indépendant du code :
 | --- | --- | --- |
 | Où héberger : le VPS Contabo existant, ou le second serveur OVH évoqué le 2026-10-03 | Fixe le système, le nginx, les sous-domaines et le coût | Le VPS Contabo : vous l'administrez déjà, `devultraapp.com` y pointe |
 | Adresse de l'application (`APP_URL`) | Les organisations vivent en sous-domaines de ce domaine | Un sous-domaine dédié, par exemple `app.devultraapp.com`, plutôt que la racine déjà prise par la vitrine DevUltraApp |
-| Base de données au lancement : rester sur SQLite ou passer à PostgreSQL | `CLAUDE.md` dit que la grille de `SECURITY.md` sera rejouée sur PostgreSQL avant production, et SQLite est mono-écrivain | À trancher explicitement : lancer en SQLite avec peu d'organisations et un seul serveur, ou migrer d'abord. Je ne le décide pas à votre place |
+| ~~Base de données au lancement~~ | **Tranché le 2026-10-13 : PostgreSQL**, installé sur le VPS, hors des conteneurs | Chantier en cours, voir § 3 bis |
 | Vérification du téléphone par défaut sur les nouveaux événements | Voir l'interrupteur proposé | Désactivée au lancement, activée seulement quand Meta transmet les vrais messages |
 | Aucune offre de paiement en ligne au lancement | Stripe n'est pas disponible en Côte d'Ivoire | Paiement des abonnements à la main, comme prévu |
 
@@ -64,8 +64,10 @@ alors mettre `CONVIVE_LEGAL_REVIEWED=true`. Le contrôle de production refuse de
 
 ### 2.3 Cloudflare [vous]
 
-- Clés **Turnstile** réelles (`TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`), un seul domaine déclaré couvre
-  tous les sous-domaines des organisations.
+- **Obligatoire : le captcha doit être actif en production.** Créer un widget **Turnstile** pour
+  `devultraapp.com` (un seul domaine couvre tous les sous-domaines des organisations), puis renseigner
+  `TURNSTILE_SITE_KEY` et `TURNSTILE_SECRET_KEY`. Sans clés réelles (ou avec les clés d'essai `1x…`, `2x…`,
+  `3x…`), `convive:production-check` échoue : aucune protection anti-robot ne s'applique.
 - Optionnel mais recommandé : placer le domaine derrière Cloudflare (DNS, TLS, protection contre le DDoS,
   en-tête `CF-IPCountry` utilisé pour le pays préselectionné du téléphone). Si oui, déclarer ses adresses
   dans `TRUSTED_PROXIES` (jamais `*`).
@@ -86,7 +88,7 @@ manipulation, pas de la perte du serveur. Un exercice de restauration est exigé
 
 Exigences de `CLAUDE.md` et de `composer.json` :
 
-- PHP 8.3 ou plus avec les extensions de Laravel 13, SQLite, GD ou Imagick (réencodage des images), Redis.
+- PHP 8.3 ou plus avec les extensions de Laravel 13, `pdo_pgsql`, GD ou Imagick (réencodage des images), Redis.
 - **Redis** (cache à étiquettes et files). En développement il tourne dans Docker ; en production un Redis
   installé sur la machine, avec mot de passe, écoutant en local seulement.
 - **Un processus `php artisan queue:work`** surveillé (Supervisor ou systemd), redémarré à chaque livraison.
@@ -94,13 +96,31 @@ Exigences de `CLAUDE.md` et de `composer.json` :
   cartes, rappels, expiration des réservations, alertes de fin d'événement, sauvegardes, contrôles de santé.
 - **nginx** avec un bloc pour le domaine de l'application **et un bloc générique `*.<domaine>`** pour les
   sous-domaines des organisations, un certificat TLS générique (Let's Encrypt par défi DNS), HSTS.
-- Les dossiers `storage` et `database` (fichiers SQLite des organisations) inscriptibles par PHP, **hors de
-  la racine web**. Racine web : `public` seulement.
+- Le dossier `storage` inscriptible par PHP, **hors de la racine web** (les bases sont dans PostgreSQL, plus
+  aucun fichier de base à protéger). Racine web : `public` seulement.
 - `TRUSTED_PROXIES` : les proxys réellement placés devant l'application.
 - Node ou une machine de build : `npm ci && npm run build` (le dossier `public/build` est servi).
 
 [moi] : je peux écrire le bloc nginx, l'unité Supervisor, le cron, le script de déploiement, et une checklist
 d'installation pour le VPS, à vous de les appliquer ou de me guider pas à pas sur la machine.
+
+## 3 bis. PostgreSQL [serveur] [moi]
+
+État au 2026-10-14 : le code tourne sur PostgreSQL 18 en local (migrations, création et effacement d'une
+organisation, orphelins, `unaccent`, sauvegardes `pg_dump` et restauration). **Reste avant d'ouvrir** : la suite
+de tests complète sur PostgreSQL et la grille de `SECURITY.md` rejouée (concurrence sur la dernière place).
+
+Sur le VPS :
+
+- Connaître la version (`psql --version`) : le `pg_dump` utilisé par l'application doit être **au moins aussi
+  récent que le serveur** (`PG_DUMP_BINARY`, ou `postgresql-client` de l'image Docker).
+- Extension **`unaccent`** : fournie par `postgresql-contrib` (dans le paquet principal sur Debian et Ubuntu).
+  Elle est « de confiance » depuis PostgreSQL 13 : le rôle de l'application, propriétaire de ses bases, l'active
+  sans être super-utilisateur.
+- Un rôle applicatif avec **`CREATEDB`** (une base par organisation), propriétaire de la base centrale.
+  `DB_CENTRAL_DRIVER=pgsql`, `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_CENTRAL_DATABASE`.
+- Port 5432 fermé sur Internet ; depuis les conteneurs, voir `docs/conteneurisation.md`.
+- Restauration : `CLAUDE.md`, « Sauvegardes ».
 
 ## 4. Configuration `.env` de production
 
@@ -166,7 +186,6 @@ migration n'est jamais annulée à chaud : on restaure.
 - Surveillance extérieure du planificateur (`SCHEDULE_HEARTBEAT_URL`), un service à choisir.
 - Rotation des secrets, copie des clés hors du serveur.
 - Mesure d'audience (`GOOGLE_ANALYTICS_ID`) si souhaité, avec consentement.
-- Bascule PostgreSQL, quand vous la déciderez.
 
 ## 9. Points en attente de votre validation
 
