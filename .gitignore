@@ -58,3 +58,4 @@ yarn-error.log
 /storage/e2e/
 /playwright-report/
 /test-results/
+.env.pgsql

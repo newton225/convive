@@ -1,0 +1,95 @@
+# Convive en production, sur un seul serveur.
+#
+# La base de donnees PostgreSQL n'est PAS ici : elle est installee sur le serveur, l'application s'y
+# connecte (DB_HOST, voir `.env.production.docker.example`). Les conteneurs la joignent par
+# `host.docker.internal`, qui designe l'hote.
+#
+# Lancer :   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+# Livrer :   docker compose -f docker-compose.prod.yml --env-file .env.production run --rm migrate
+# Un serveur de tete (nginx, Caddy ou Traefik de l'hote) recoit `*.domaine` en HTTPS, avec le
+# certificat generique, et transmet a 127.0.0.1:${WEB_PORT:-8080}. Ses adresses vont dans TRUSTED_PROXIES.
+
+x-app: &app
+    build:
+        context: .
+        target: app
+    image: convive-app:${APP_IMAGE_TAG:-latest}
+    env_file: .env.production
+    restart: unless-stopped
+    # L'hote : la base PostgreSQL y ecoute (listen_addresses et pg_hba.conf doivent accepter le
+    # reseau Docker, voir docs/conteneurisation.md).
+    extra_hosts:
+        - 'host.docker.internal:host-gateway'
+    volumes:
+        # Fichiers de l'application : marque, preuves de paiement, sauvegardes, journaux. Le meme
+        # volume pour tous les roles : un fichier depose par la page web est lu par la file.
+        - convive-storage:/var/www/html/storage
+    depends_on:
+        redis:
+            condition: service_healthy
+
+services:
+    # PHP-FPM : les pages.
+    app:
+        <<: *app
+        command: php-fpm
+
+    # nginx : fichiers statiques et transmission a PHP-FPM.
+    web:
+        build:
+            context: .
+            target: web
+        image: convive-web:${APP_IMAGE_TAG:-latest}
+        restart: unless-stopped
+        depends_on:
+            - app
+        ports:
+            # Seulement en local : le serveur de tete de l'hote porte le HTTPS.
+            - '127.0.0.1:${WEB_PORT:-8080}:80'
+        healthcheck:
+            test: ['CMD', 'wget', '-q', '--spider', 'http://127.0.0.1/up']
+            interval: 15s
+            timeout: 5s
+            retries: 5
+
+    # La file : envois de cartes, rappels, alertes. Redemarree a chaque livraison (queue:restart).
+    queue:
+        <<: *app
+        command: php artisan queue:work --tries=3 --timeout=90 --max-time=3600 --sleep=3
+
+    # Le planificateur : expirations, rappels, alertes de fin d'evenement, sauvegardes, controles.
+    # `schedule:work` lance `schedule:run` chaque minute.
+    scheduler:
+        <<: *app
+        command: php artisan schedule:work
+
+    # Redis : cache a etiquettes et files. Jamais expose hors du reseau des conteneurs.
+    redis:
+        image: redis:7-alpine
+        restart: unless-stopped
+        command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD est requis}
+        volumes:
+            - convive-redis-data:/data
+        healthcheck:
+            test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" ping | grep PONG']
+            interval: 5s
+            timeout: 3s
+            retries: 5
+        environment:
+            REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+    # Livraison : a lancer a la main, une fois, avant de basculer. Hors du demarrage normal.
+    migrate:
+        <<: *app
+        profiles: ['deploy']
+        restart: 'no'
+        command: >
+            sh -c "php artisan migrate --force
+            && php artisan tenants:migrate --force
+            && php artisan tenants:sync-permissions
+            && php artisan convive:release
+            && php artisan queue:restart"
+
+volumes:
+    convive-storage:
+    convive-redis-data:
