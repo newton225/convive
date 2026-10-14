@@ -34,6 +34,10 @@ $storage = storage_path('app').DIRECTORY_SEPARATOR;
 
 return [
 
+    // Programme `pg_dump` des copies PostgreSQL (`DatabaseSnapshots`). Sa version doit etre au moins
+    // celle du serveur. Le nom seul suffit quand il est dans le PATH ; sous Windows, le chemin complet.
+    'pg_dump_binary' => env('PG_DUMP_BINARY', 'pg_dump'),
+
     'backup' => [
         'name' => $name,
 

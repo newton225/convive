@@ -6,6 +6,8 @@ use App\Models\Tenant;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 /**
@@ -18,12 +20,15 @@ use RuntimeException;
  * connexion deja ouverte et produit un fichier complet et coherent, y compris pendant qu'une
  * ecriture est en cours : copier le fichier tel quel pourrait saisir une base a moitie ecrite.
  *
- * Le jour du passage a PostgreSQL, cette classe laisse la place a l'export du paquet
- * (`backup.source.databases`) : elle refuse d'ici la tout autre moteur, plutot que de produire une
- * sauvegarde sans base.
+ * Sur PostgreSQL, la meme classe lance `pg_dump` base par base (`<nom>.dump`, format personnalise) :
+ * l'export du paquet ne connait pas non plus une base par organisation. Un autre moteur est refuse,
+ * plutot que de produire une sauvegarde sans base.
  */
 class DatabaseSnapshots
 {
+    /** Une base volumineuse peut prendre du temps : le delai de `pg_dump` est large. */
+    private const DumpTimeoutSeconds = 1800;
+
     public static function directory(): string
     {
         // Le meme chemin, au separateur pres, que `backup.source.files.include`.
@@ -44,7 +49,7 @@ class DatabaseSnapshots
         self::clear();
         File::ensureDirectoryExists($directory);
 
-        self::snapshot(DB::connection('central'), $directory.DIRECTORY_SEPARATOR.'central.sqlite');
+        self::snapshot(DB::connection('central'), $directory, 'central.sqlite');
         $count = 1;
 
         // Avec la corbeille : une organisation supprimee reste restaurable trente jours, sa base se
@@ -58,9 +63,11 @@ class DatabaseSnapshots
 
             $tenant->run(fn () => self::snapshot(
                 DB::connection(),
-                // Sous le nom reel du fichier : la restauration le remet tel quel dans le dossier des
-                // bases (`tenant_<ULID>.sqlite` pour les organisations ouvertes depuis le 2026-10-04).
-                $directory.DIRECTORY_SEPARATOR.$database->getName(),
+                $directory,
+                // Sous le nom reel de la base : la restauration la remet telle quelle
+                // (`tenant_<ULID>.sqlite` ou `tenant_<ULID>.dump` pour les organisations ouvertes
+                // depuis le 2026-10-04).
+                $database->getName(),
             ));
 
             $count++;
@@ -78,16 +85,64 @@ class DatabaseSnapshots
         File::deleteDirectory(self::directory());
     }
 
-    private static function snapshot(Connection $connection, string $path): void
+    /**
+     * Copie une base dans le dossier des copies, sous `$name` : un fichier SQLite par `VACUUM INTO`, un
+     * export `pg_dump` (`<nom>.dump`) en PostgreSQL.
+     */
+    private static function snapshot(Connection $connection, string $directory, string $name): void
     {
-        if ($connection->getDriverName() !== 'sqlite') {
-            throw new RuntimeException("La sauvegarde par copie ne sait lire qu'une base SQLite, pas « {$connection->getDriverName()} ».");
-        }
+        match ($connection->getDriverName()) {
+            'sqlite' => self::snapshotSqlite($connection, $directory.DIRECTORY_SEPARATOR.$name),
+            'pgsql' => self::snapshotPostgres($connection, $directory.DIRECTORY_SEPARATOR.self::dumpName($name)),
+            default => throw new RuntimeException("La sauvegarde ne sait lire qu'une base SQLite ou PostgreSQL, pas « {$connection->getDriverName()} »."),
+        };
+    }
 
+    private static function snapshotSqlite(Connection $connection, string $path): void
+    {
         $pdo = $connection->getPdo();
 
         // `VACUUM INTO` n'accepte pas de parametre lie : le chemin est mis entre guillemets par le
         // pilote. Il vient du code, jamais d'une saisie.
         $pdo->exec('VACUUM INTO '.$pdo->quote($path));
+    }
+
+    /**
+     * Export au format personnalise de `pg_dump` (restauration par `pg_restore`, y compris d'une seule
+     * table). Sans proprietaire ni droits : la restauration se fait avec le role du serveur cible.
+     *
+     * Le mot de passe passe par l'environnement du processus (`PGPASSWORD`), jamais par la ligne de
+     * commande, ou n'importe quel utilisateur du serveur le lirait. Les arguments sont une liste, sans
+     * interpreteur de commandes.
+     */
+    private static function snapshotPostgres(Connection $connection, string $path): void
+    {
+        $config = $connection->getConfig();
+
+        $result = Process::timeout(self::DumpTimeoutSeconds)
+            ->env(['PGPASSWORD' => (string) ($config['password'] ?? '')])
+            ->run([
+                (string) config('backup.pg_dump_binary'),
+                '--format=custom',
+                '--no-owner',
+                '--no-acl',
+                '--host='.$config['host'],
+                '--port='.$config['port'],
+                '--username='.$config['username'],
+                '--file='.$path,
+                (string) $config['database'],
+            ]);
+
+        if ($result->failed()) {
+            throw new RuntimeException("pg_dump a echoue pour « {$config['database']} » : ".trim($result->errorOutput()));
+        }
+    }
+
+    /**
+     * Le nom d'une copie PostgreSQL : celui de la base, sans l'extension `.sqlite` des anciennes.
+     */
+    private static function dumpName(string $name): string
+    {
+        return Str::beforeLast($name, '.sqlite').'.dump';
     }
 }
