@@ -28,15 +28,20 @@ class TenantDatabaseNameTest extends TestCase
         parent::tearDown();
     }
 
+    private function suffix(): string
+    {
+        return (string) config('tenancy.database.suffix');
+    }
+
     public function test_une_nouvelle_organisation_recoit_un_nom_aleatoire_et_non_son_numero(): void
     {
         $tenant = app(CreateTenant::class)->handle(User::factory()->create(), 'Association Convive');
 
         $name = $tenant->fresh()->tenancy_db_name;
 
-        $this->assertMatchesRegularExpression('/^tenant_[0-9a-z]{26}\.sqlite$/', $name);
+        $this->assertMatchesRegularExpression('/^tenant_[0-9a-z]{26}'.preg_quote($this->suffix(), '/').'$/', $name);
         $this->assertStringNotContainsString((string) $tenant->id, substr($name, 0, 8));
-        $this->assertFileExists(ScopedSqliteDatabaseManager::directory().DIRECTORY_SEPARATOR.$name);
+        $this->assertTrue($tenant->database()->manager()->databaseExists($name));
     }
 
     public function test_deux_organisations_n_ont_jamais_le_meme_nom(): void
@@ -51,6 +56,8 @@ class TenantDatabaseNameTest extends TestCase
 
     public function test_un_nom_deja_pris_par_un_fichier_est_tire_de_nouveau(): void
     {
+        $this->skipOnPostgres();
+
         $taken = '01jxk3q7m8v2c9r4t6y8w0z1ab';
         $fresh = '01jxk3q7m8v2c9r4t6y8w0z1ac';
         $takenFile = ScopedSqliteDatabaseManager::directory().DIRECTORY_SEPARATOR.'tenant_'.$taken.'.sqlite';
@@ -72,11 +79,11 @@ class TenantDatabaseNameTest extends TestCase
         $fresh = '01jxk3q7m8v2c9r4t6y8w0z1ae';
 
         $tenant = app(CreateTenant::class)->handle(User::factory()->create(), 'Association Convive');
-        Tenant::whereKey($tenant->id)->update(['tenancy_db_name' => 'tenant_'.$taken.'.sqlite']);
+        Tenant::whereKey($tenant->id)->update(['tenancy_db_name' => 'tenant_'.$taken.$this->suffix()]);
 
         Str::createUlidsUsingSequence([strtoupper($taken), strtoupper($fresh)]);
 
-        $this->assertSame('tenant_'.$fresh.'.sqlite', TenantDatabaseName::generate());
+        $this->assertSame('tenant_'.$fresh.$this->suffix(), TenantDatabaseName::generate());
     }
 
     public function test_une_organisation_existante_garde_son_ancien_nom(): void

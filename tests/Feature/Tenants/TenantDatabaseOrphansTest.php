@@ -57,6 +57,9 @@ class TenantDatabaseOrphansTest extends TestCase
 
     public function test_un_fichier_de_base_sans_organisation_est_signale(): void
     {
+        // Sur PostgreSQL le serveur porte aussi les bases reelles du developpement : aucune liste d'orphelins n'y est previsible.
+        $this->skipOnPostgres();
+
         $owner = User::factory()->create();
         app(CreateTenant::class)->handle($owner, 'Association Convive');
 
@@ -75,6 +78,9 @@ class TenantDatabaseOrphansTest extends TestCase
 
     public function test_la_base_d_une_organisation_en_corbeille_n_est_pas_orpheline(): void
     {
+        // Sur PostgreSQL le serveur porte aussi les bases reelles du developpement : aucune liste d'orphelins n'y est previsible.
+        $this->skipOnPostgres();
+
         // Une organisation supprimee reste trente jours en corbeille, recuperable : sa base aussi.
         $owner = User::factory()->create();
         $tenant = app(CreateTenant::class)->handle($owner, 'Association en corbeille');
