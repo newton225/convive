@@ -86,9 +86,20 @@ abstract class TestCase extends BaseTestCase
     /**
      * Suite lancee sur PostgreSQL (`DB_CENTRAL_DRIVER=pgsql`) plutot que sur SQLite en memoire.
      */
-    private static function onPostgres(): bool
+    protected static function onPostgres(): bool
     {
         return (getenv('DB_CENTRAL_DRIVER') ?: ($_ENV['DB_CENTRAL_DRIVER'] ?? 'sqlite')) === 'pgsql';
+    }
+
+    /**
+     * Pour un test qui verifie des fichiers `.sqlite` : sur PostgreSQL le meme comportement se verifie
+     * par `pg_database`, a la main (CLAUDE.md, « Bascule vers PostgreSQL »).
+     */
+    protected function skipOnPostgres(): void
+    {
+        if (self::onPostgres()) {
+            $this->markTestSkipped('Test propre aux fichiers SQLite.');
+        }
     }
 
     /**

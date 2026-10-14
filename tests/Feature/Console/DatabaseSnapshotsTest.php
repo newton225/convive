@@ -28,6 +28,8 @@ class DatabaseSnapshotsTest extends TestCase
     {
         parent::setUp();
 
+        $this->skipOnPostgres();
+
         $owner = User::factory()->withTwoFactor()->create();
         $this->tenant = app(CreateTenant::class)->handle($owner, 'Association Convive');
     }

@@ -30,6 +30,8 @@ class OrphanDatabaseRemovalTest extends TestCase
     {
         parent::setUp();
 
+        $this->skipOnPostgres();
+
         config(['convive.console.operators' => ['fondateur@convive.test']]);
         $this->founder = User::factory()->withTwoFactor()->create(['email' => 'fondateur@convive.test']);
 
@@ -38,7 +40,9 @@ class OrphanDatabaseRemovalTest extends TestCase
 
     protected function tearDown(): void
     {
-        @unlink($this->path($this->stray));
+        if (! self::onPostgres()) {
+            @unlink($this->path($this->stray));
+        }
 
         parent::tearDown();
     }
