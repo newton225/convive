@@ -8,6 +8,7 @@ use App\Enums\SubscriptionStatus;
 use App\Enums\TenantPermission;
 use App\Settings\TrialSettings;
 use App\Support\Subdomain;
+use App\Support\TenantDatabaseConfig;
 use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -26,6 +27,7 @@ use Stancl\Tenancy\Database\Concerns\HasInternalKeys;
 use Stancl\Tenancy\Database\Concerns\InvalidatesResolverCache;
 use Stancl\Tenancy\Database\Concerns\TenantRun;
 use Stancl\Tenancy\Database\Models\Domain;
+use Stancl\Tenancy\DatabaseConfig;
 use Stancl\Tenancy\Events;
 
 /**
@@ -115,6 +117,11 @@ class Tenant extends Model implements TenantWithDatabase
                 $tenant->slug = static::generateUniqueTenantSlug($tenant->name, $tenant->id);
             }
         });
+    }
+
+    public function database(): DatabaseConfig
+    {
+        return new TenantDatabaseConfig($this);
     }
 
     public function getTenantKeyName(): string

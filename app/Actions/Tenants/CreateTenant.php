@@ -33,24 +33,30 @@ class CreateTenant
      */
     public function handle(User $user, string $name, bool $isPersonal = false): Tenant
     {
-        $created = null;
+        $tenant = new Tenant([
+            'name' => $name,
+            'is_personal' => $isPersonal,
+        ]);
 
         try {
-            return DB::transaction(function () use ($user, $name, $isPersonal, &$created) {
-                $tenant = $created = Tenant::create([
-                    'name' => $name,
-                    'is_personal' => $isPersonal,
-                ]);
+            // Hors transaction : PostgreSQL refuse `CREATE DATABASE` dans un bloc de transaction.
+            // La ligne de l'organisation n'est donc plus annulee par un retour en arriere, elle
+            // est retiree a la main plus bas si la suite echoue.
+            $tenant->save();
 
-                return $this->provision($tenant, $user);
-            });
+            return DB::transaction(fn () => $this->provision($tenant, $user));
         } catch (TenantDatabaseAlreadyExistsException $exception) {
             // Le fichier trouve en place n'est pas celui de cette tentative : il n'est jamais efface
             // a l'aveugle. L'ecran de sante technique le signale comme orphelin.
+            if ($tenant->exists) {
+                $tenant->forceDelete();
+            }
+
             throw $exception;
         } catch (Throwable $exception) {
-            if ($created instanceof Tenant) {
-                $this->deleteDatabase($created);
+            if ($tenant->exists) {
+                $this->deleteDatabase($tenant);
+                $tenant->forceDelete();
             }
 
             throw $exception;

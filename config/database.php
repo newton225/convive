@@ -57,12 +57,32 @@ return [
         // centraux declarent explicitement cette connexion (trait CentralConnection ou
         // equivalent), pour ne jamais basculer accidentellement sur la base d'un locataire
         // quand la tenancy est active.
-        'central' => [
-            'driver' => 'sqlite',
-            'database' => env('DB_CENTRAL_DATABASE', database_path('central.sqlite')),
-            'prefix' => '',
-            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-        ],
+        //
+        // Le pilote se regle par `DB_CENTRAL_DRIVER` : `sqlite` (defaut, developpement et tests) ou
+        // `pgsql` (production, decision du proprietaire du projet du 2026-10-13). Cette connexion
+        // sert aussi de modele aux bases des organisations (`stancl/tenancy`) : avec `pgsql`, chaque
+        // organisation a sa propre base PostgreSQL, sur le meme serveur, sous le meme role (qui doit
+        // pouvoir creer des bases).
+        'central' => env('DB_CENTRAL_DRIVER', 'sqlite') === 'pgsql'
+            ? [
+                'driver' => 'pgsql',
+                'host' => env('DB_HOST', '127.0.0.1'),
+                'port' => env('DB_PORT', '5432'),
+                'database' => env('DB_CENTRAL_DATABASE', 'convive_central'),
+                'username' => env('DB_USERNAME', 'convive'),
+                'password' => env('DB_PASSWORD', ''),
+                'charset' => 'utf8',
+                'prefix' => '',
+                'prefix_indexes' => true,
+                'search_path' => 'public',
+                'sslmode' => env('DB_SSLMODE', 'prefer'),
+            ]
+            : [
+                'driver' => 'sqlite',
+                'database' => env('DB_CENTRAL_DATABASE', database_path('central.sqlite')),
+                'prefix' => '',
+                'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+            ],
 
         'mysql' => [
             'driver' => 'mysql',

@@ -73,7 +73,8 @@ return [
          * prefix + tenant_id + suffix.
          */
         'prefix' => 'tenant',
-        'suffix' => '.sqlite',
+        // Un fichier SQLite porte son extension ; une base PostgreSQL n'en a pas.
+        'suffix' => env('DB_CENTRAL_DRIVER', 'sqlite') === 'pgsql' ? '' : '.sqlite',
 
         /**
          * TenantDatabaseManagers are classes that handle the creation & deletion of tenant databases.

@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Tenant;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -32,7 +33,21 @@ final class TenantDatabaseName
 
     private static function taken(string $name): bool
     {
-        return file_exists(ScopedSqliteDatabaseManager::directory().DIRECTORY_SEPARATOR.$name)
+        return self::existsOnServer($name)
             || Tenant::withTrashed()->where('tenancy_db_name', $name)->exists();
+    }
+
+    /**
+     * Un fichier present en SQLite, une base presente sur le serveur en PostgreSQL.
+     */
+    private static function existsOnServer(string $name): bool
+    {
+        $central = DB::connection(config('tenancy.database.central_connection'));
+
+        if ($central->getDriverName() === 'pgsql') {
+            return $central->table('pg_database')->where('datname', $name)->exists();
+        }
+
+        return file_exists(ScopedSqliteDatabaseManager::directory().DIRECTORY_SEPARATOR.$name);
     }
 }
