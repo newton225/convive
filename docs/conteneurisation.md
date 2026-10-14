@@ -59,8 +59,10 @@ Le chantier est fait pour l'essentiel (2026-10-14, vérifié sur PostgreSQL 18 e
 | Suite de tests complète | **Pas encore rejouée sur PostgreSQL** |
 | Verrous (`lockForUpdate()`), concurrence sur la dernière place | **Grille de `SECURITY.md` à rejouer** : actif sur PostgreSQL, inopérant sur SQLite |
 
-Tant que les deux dernières lignes ne sont pas faites, **ne pas ouvrir au public**. Réglage : `DB_CENTRAL_DRIVER=pgsql`
-dans le `.env` de production, avec `DB_HOST=host.docker.internal`. `PG_DUMP_BINARY` reste `pg_dump` dans l'image.
+Tant que les deux dernières lignes ne sont pas faites, **ne pas ouvrir au public** : un déploiement pilote, privé,
+avec une seule organisation, reste possible. Réglage dans le `.env` de production : `DB_CONNECTION=central`,
+`DB_CENTRAL_DRIVER=pgsql`, `DB_CENTRAL_DATABASE`, `DB_HOST=host.docker.internal`, `DB_USERNAME`, `DB_PASSWORD`
+(`DB_DATABASE` n'est pas lu). `PG_DUMP_BINARY` reste `pg_dump` dans l'image.
 
 ## Livrer une nouvelle version
 
