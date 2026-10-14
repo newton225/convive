@@ -4,7 +4,6 @@ namespace App\Actions\Console;
 
 use App\Models\User;
 use App\Support\Console\ConsoleJournal;
-use App\Support\ScopedSqliteDatabaseManager;
 use App\Support\TenantDatabaseFiles;
 
 /**
@@ -22,16 +21,15 @@ class DeleteOrphanDatabase
             return false;
         }
 
-        $path = ScopedSqliteDatabaseManager::directory().DIRECTORY_SEPARATOR.$file;
-        $size = filesize($path);
+        $size = TenantDatabaseFiles::size($file);
 
-        if (! @unlink($path)) {
+        if (! TenantDatabaseFiles::drop($file)) {
             return false;
         }
 
         ConsoleJournal::record('orphan_database_deleted', $actor, null, [
             'file' => $file,
-            'size' => $size === false ? null : $size,
+            'size' => $size,
         ]);
 
         return true;
