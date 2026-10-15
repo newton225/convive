@@ -55,7 +55,10 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN composer dump-autoload --optimize --no-dev --classmap-authoritative \
+# .dockerignore exclut storage/framework : sans ces dossiers, Laravel refuse de demarrer
+# ("Please provide a valid cache path") des `package:discover`.
+RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+    && composer dump-autoload --optimize --no-dev --classmap-authoritative \
     && php artisan package:discover --ansi \
     && npm run build \
     && rm -rf node_modules .git tests e2e qa docs test-results playwright-report
