@@ -6,8 +6,11 @@ use App\Models\Tenant;
 use App\Models\TenantInvitation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Inertia\Testing\AssertableInertia as Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Stancl\Tenancy\Events\CreatingDatabase;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
@@ -41,6 +44,33 @@ class RegistrationTest extends TestCase
             ->where('tenantInvitation.code', $invitation->code)
             ->where('tenantInvitation.tenantName', 'Laravel Tenant'),
         );
+    }
+
+    /**
+     * PostgreSQL refuse `CREATE DATABASE` dans un bloc de transaction : l'inscription ne doit donc
+     * en ouvrir aucune autour de la creation de l'espace. En test, `RefreshDatabase` en porte deja
+     * une, d'ou la comparaison avec le niveau de depart plutot qu'avec zero.
+     */
+    public function test_la_base_de_l_espace_est_creee_sans_transaction_ouverte_par_l_inscription(): void
+    {
+        $baseLevel = DB::connection('central')->transactionLevel();
+        $levels = [];
+
+        Event::listen(CreatingDatabase::class, function () use (&$levels): void {
+            $levels[] = DB::connection('central')->transactionLevel();
+        });
+
+        $this->post(route('register.store'), [
+            'name' => 'Test User',
+            'organisation_name' => 'Soldats du Palais',
+            'email' => 'test@example.com',
+            'phone' => '+225 07 07 12 34 56',
+            'password' => 'Convive-2026!',
+            'password_confirmation' => 'Convive-2026!',
+            'terms' => 'on',
+        ]);
+
+        $this->assertSame([$baseLevel], $levels);
     }
 
     public function test_new_users_can_register()

@@ -10,7 +10,6 @@ use App\Support\LegalDocument;
 use App\Support\PendingTenantInvitation;
 use App\Support\PhoneNumber;
 use App\Support\TenantCreationFailure;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -110,23 +109,30 @@ class CreateNewUser implements CreatesNewUsers
      */
     private function createAccount(array $input, string $organisationName): User
     {
-        return DB::transaction(function () use ($input, $organisationName) {
-            $user = User::create([
-                'name' => $input['name'],
-                'email' => $input['email'],
-                'phone' => $input['phone'],
-                'password' => $input['password'],
-                'terms_accepted_at' => now(),
-                'terms_version' => LegalDocument::Version,
-            ]);
+        $user = User::create([
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'phone' => $input['phone'],
+            'password' => $input['password'],
+            'terms_accepted_at' => now(),
+            'terms_version' => LegalDocument::Version,
+        ]);
 
+        // Hors transaction : `CreateTenant` cree la base de l'organisation, et PostgreSQL refuse
+        // `CREATE DATABASE` dans un bloc de transaction. Le compte est donc retire a la main si
+        // l'espace n'a pas pu s'ouvrir, ce que la transaction faisait avant (rien n'est garde).
+        try {
             $this->createTenant->handle(
                 $user,
                 $organisationName !== '' ? $organisationName : __('tenants.personal_name', ['name' => $user->name]),
                 isPersonal: true,
             );
+        } catch (Throwable $exception) {
+            $user->delete();
 
-            return $user;
-        });
+            throw $exception;
+        }
+
+        return $user;
     }
 }
