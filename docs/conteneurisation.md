@@ -25,9 +25,14 @@ volume** `convive-storage` (marque, preuves de paiement, sauvegardes, journaux).
 ```
 cp .env.production.example .env.production      # puis ajouter le contenu de .env.production.docker.example
 # renseigner APP_KEY (php artisan key:generate --show), REDIS_PASSWORD, les secrets
-docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+docker compose -f docker-compose.prod.yml --env-file .env.production build app web
 docker compose -f docker-compose.prod.yml --env-file .env.production run --rm migrate
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --no-build
 ```
+
+`build app web` et non `build` seul : `app`, `queue`, `scheduler` et `migrate` partagent l'image `convive-app`, que
+seul `app` construit. Construite par chacun, Docker les exporterait en parallele sous le meme nom (« image already
+exists »).
 
 Le serveur de tête de l'hôte (nginx, Caddy ou Traefik) reçoit `*.domaine` en HTTPS avec le certificat
 générique et transmet à `127.0.0.1:8080`. Ses adresses vont dans `TRUSTED_PROXIES`. Il doit transmettre
@@ -68,9 +73,9 @@ avec une seule organisation, reste possible. Réglage dans le `.env` de producti
 
 ```
 git pull
-docker compose -f docker-compose.prod.yml --env-file .env.production build
+docker compose -f docker-compose.prod.yml --env-file .env.production build app web
 docker compose -f docker-compose.prod.yml --env-file .env.production run --rm migrate
-docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --no-build
 ```
 
 Retour arrière : garder l'image précédente (`APP_IMAGE_TAG`) et l'archive de `convive:backup` prise avant la

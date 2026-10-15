@@ -4,15 +4,13 @@
 # connecte (DB_HOST, voir `.env.production.docker.example`). Les conteneurs la joignent par
 # `host.docker.internal`, qui designe l'hote.
 #
-# Lancer :   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+# Construire : docker compose -f docker-compose.prod.yml --env-file .env.production build app web
+# Lancer :   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --no-build
 # Livrer :   docker compose -f docker-compose.prod.yml --env-file .env.production run --rm migrate
 # Un serveur de tete (nginx, Caddy ou Traefik de l'hote) recoit `*.domaine` en HTTPS, avec le
 # certificat generique, et transmet a 127.0.0.1:${WEB_PORT:-8080}. Ses adresses vont dans TRUSTED_PROXIES.
 
 x-app: &app
-    build:
-        context: .
-        target: app
     image: convive-app:${APP_IMAGE_TAG:-latest}
     env_file: .env.production
     restart: unless-stopped
@@ -29,9 +27,14 @@ x-app: &app
             condition: service_healthy
 
 services:
-    # PHP-FPM : les pages.
+    # PHP-FPM : les pages. Seul service qui construit l'image `convive-app`, partagee avec la file, le
+    # planificateur et les migrations : si chacun la construisait, Docker les exporterait en parallele
+    # sous le meme nom et le deuxieme echouerait (« image already exists »).
     app:
         <<: *app
+        build:
+            context: .
+            target: app
         command: php-fpm
 
     # nginx : fichiers statiques et transmission a PHP-FPM.
@@ -55,12 +58,14 @@ services:
     # La file : envois de cartes, rappels, alertes. Redemarree a chaque livraison (queue:restart).
     queue:
         <<: *app
+        pull_policy: never
         command: php artisan queue:work --tries=3 --timeout=90 --max-time=3600 --sleep=3
 
     # Le planificateur : expirations, rappels, alertes de fin d'evenement, sauvegardes, controles.
     # `schedule:work` lance `schedule:run` chaque minute.
     scheduler:
         <<: *app
+        pull_policy: never
         command: php artisan schedule:work
 
     # Redis : cache a etiquettes et files. Jamais expose hors du reseau des conteneurs.
@@ -81,6 +86,7 @@ services:
     # Livraison : a lancer a la main, une fois, avant de basculer. Hors du demarrage normal.
     migrate:
         <<: *app
+        pull_policy: never
         profiles: ['deploy']
         restart: 'no'
         command: >
