@@ -55,7 +55,8 @@ return [
         'registration_number' => 'Your trade and personal property credit register (RCCM) number. Type it as it appears on your documents: the format varies from country to country. It appears on receipts.',
         'tax_number' => 'Your tax identifier, as it appears on your official documents. It appears on receipts.',
         'subdomain' => 'The start of your registration link addresses. It is frozen as soon as your first link is published, so links already sent to your guests never break.',
-        'subdomain_example' => 'Example: with “:example”, your links start with :example.:domain',
+        'subdomain_example' => 'Example address:',
+        'subdomain_preview' => 'Your links will start with:',
     ],
 
     'placeholders' => [

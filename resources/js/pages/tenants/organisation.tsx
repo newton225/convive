@@ -5,6 +5,7 @@ import Heading from '@/components/heading';
 import { LabelWithHelp } from '@/components/label-with-help';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
+import { SubdomainField } from '@/components/subdomain-field';
 import { SubmitButton } from '@/components/submit-button';
 import { Input } from '@/components/ui/input';
 import {
@@ -398,50 +399,11 @@ export default function Organisation({
                         >
                             {({ errors, processing, isDirty }) => (
                                 <>
-                                    <div className="grid max-w-md gap-2">
-                                        <LabelWithHelp
-                                            htmlFor="subdomain"
-                                            required
-                                            label={t(
-                                                'organisation.fields.subdomain',
-                                            )}
-                                            help={t(
-                                                'organisation.help.subdomain',
-                                            )}
-                                        />
-                                        <Input
-                                            id="subdomain"
-                                            name="subdomain"
-                                            data-test="organisation-subdomain"
-                                            defaultValue={
-                                                tenant.subdomain ?? ''
-                                            }
-                                            placeholder={t(
-                                                'organisation.placeholders.subdomain',
-                                            )}
-                                            aria-describedby="subdomain-example"
-                                            autoComplete="off"
-                                            spellCheck={false}
-                                        />
-                                        <p
-                                            id="subdomain-example"
-                                            data-test="organisation-subdomain-example"
-                                            className="text-sm text-muted-foreground"
-                                        >
-                                            {t(
-                                                'organisation.help.subdomain_example',
-                                                {
-                                                    example: t(
-                                                        'organisation.placeholders.subdomain',
-                                                    ),
-                                                    domain: publicDomain,
-                                                },
-                                            )}
-                                        </p>
-                                        <InputError
-                                            message={errors.subdomain}
-                                        />
-                                    </div>
+                                    <SubdomainField
+                                        defaultValue={tenant.subdomain ?? ''}
+                                        publicDomain={publicDomain}
+                                        error={errors.subdomain}
+                                    />
 
                                     <SubmitButton
                                         data-test="organisation-subdomain-submit"
