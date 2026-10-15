@@ -55,6 +55,11 @@ return [
         'registration_number' => 'Votre numéro au Registre du commerce et du crédit mobilier. Saisissez-le tel qu’il figure sur vos documents : le format change d’un pays à l’autre. Il apparaît sur les reçus.',
         'tax_number' => 'Votre identifiant fiscal, tel qu’il figure sur vos documents officiels. Il apparaît sur les reçus.',
         'subdomain' => 'Le début de l’adresse de vos liens d’inscription. Il se fige dès votre premier lien publié, pour ne jamais casser les liens déjà envoyés à vos invités.',
+        'subdomain_example' => 'Exemple : avec « :example », vos liens commencent par :example.:domain',
+    ],
+
+    'placeholders' => [
+        'subdomain' => 'mon-association',
     ],
 
     'files' => [

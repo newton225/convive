@@ -38,6 +38,7 @@ type Props = {
     legalForms: LegalFormOption[];
     brandFiles: BrandFileOption[];
     permissions: TenantPermissions;
+    publicDomain: string;
 };
 
 export default function Organisation({
@@ -46,6 +47,7 @@ export default function Organisation({
     legalForms,
     brandFiles,
     permissions,
+    publicDomain,
 }: Props) {
     const { t } = useTranslation();
     const gettingStartedReturn = useGettingStartedReturn();
@@ -414,9 +416,28 @@ export default function Organisation({
                                             defaultValue={
                                                 tenant.subdomain ?? ''
                                             }
+                                            placeholder={t(
+                                                'organisation.placeholders.subdomain',
+                                            )}
+                                            aria-describedby="subdomain-example"
                                             autoComplete="off"
                                             spellCheck={false}
                                         />
+                                        <p
+                                            id="subdomain-example"
+                                            data-test="organisation-subdomain-example"
+                                            className="text-sm text-muted-foreground"
+                                        >
+                                            {t(
+                                                'organisation.help.subdomain_example',
+                                                {
+                                                    example: t(
+                                                        'organisation.placeholders.subdomain',
+                                                    ),
+                                                    domain: publicDomain,
+                                                },
+                                            )}
+                                        </p>
                                         <InputError
                                             message={errors.subdomain}
                                         />

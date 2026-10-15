@@ -71,6 +71,9 @@ class OrganisationController extends Controller
                 'label' => $form->label(),
             ], LegalForm::cases()),
             'permissions' => $request->user()->toTenantPermissions($tenant),
+            // Le domaine sous lequel vivent les adresses des organisations, pour l'exemple du champ
+            // « sous-domaine » (jamais le port : voir `config('convive.public_domain')`).
+            'publicDomain' => config('convive.public_domain'),
         ]);
     }
 
