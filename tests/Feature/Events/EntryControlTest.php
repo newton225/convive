@@ -59,7 +59,8 @@ class EntryControlTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('events/entry-control')
-                ->has('events', 2));
+                ->has('events', 2)
+                ->has('events.0.status'));
     }
 
     public function test_un_evenement_en_cours_compte_meme_commence_la_veille(): void

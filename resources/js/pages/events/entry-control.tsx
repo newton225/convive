@@ -2,7 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { ScanLine } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import {
@@ -10,6 +10,7 @@ import {
     recallEntryControl,
 } from '@/lib/entry-control-memory';
 import { formatDateTime } from '@/lib/format-date';
+import { eventStatusTones } from '@/lib/status-tones';
 import { entryControl } from '@/routes/tenants';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { index as scanIndex } from '@/routes/tenants/events/scan';
@@ -20,6 +21,7 @@ type EntryControlEvent = {
     name: string;
     startsAt: string | null;
     venue: string | null;
+    status: string;
     statusLabel: string;
 };
 
@@ -103,9 +105,15 @@ export default function EntryControl({ tenant, events }: Props) {
                                         <span className="font-medium">
                                             {event.name}
                                         </span>
-                                        <Badge variant="secondary">
+                                        <StatusBadge
+                                            tone={
+                                                eventStatusTones[
+                                                    event.status
+                                                ] ?? 'muted'
+                                            }
+                                        >
                                             {event.statusLabel}
-                                        </Badge>
+                                        </StatusBadge>
                                     </div>
                                     <p className="text-muted-foreground text-sm">
                                         {event.startsAt

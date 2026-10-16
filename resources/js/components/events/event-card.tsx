@@ -3,13 +3,14 @@ import { CalendarDays, ImageOff, MapPin } from 'lucide-react';
 import { EventActionsMenu } from '@/components/events/event-actions-menu';
 import { EventFillBar } from '@/components/events/event-fill-bar';
 import { FadeInImage } from '@/components/fade-in-image';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
+import { eventStatusTones } from '@/lib/status-tones';
 import { edit } from '@/routes/tenants/events';
 import { index as claimsIndex } from '@/routes/tenants/events/claims';
 import { index as proofsIndex } from '@/routes/tenants/events/proofs';
@@ -130,16 +131,20 @@ export function EventCard({ tenantSlug, event, permissions, onClose }: Props) {
                     </div>
 
                     <div className="flex flex-wrap gap-1.5">
-                        <Badge variant="secondary">{event.statusLabel}</Badge>
+                        <StatusBadge
+                            tone={eventStatusTones[event.status] ?? 'muted'}
+                        >
+                            {event.statusLabel}
+                        </StatusBadge>
                         {!event.isPublished && !event.isReadyToPublish ? (
-                            <Badge variant="outline">
+                            <StatusBadge tone="warning">
                                 {t('events.badges.not_ready')}
-                            </Badge>
+                            </StatusBadge>
                         ) : null}
                         {event.isAnnounced ? (
-                            <Badge variant="outline">
+                            <StatusBadge tone="accent">
                                 {t('events.badges.announced')}
-                            </Badge>
+                            </StatusBadge>
                         ) : null}
                     </div>
 

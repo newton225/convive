@@ -14,7 +14,7 @@ import { RegistrationDetails } from '@/components/registrations/registration-det
 import { RegistrationStatusBadge } from '@/components/registrations/registration-status-badge';
 import { SingleExpandToggle } from '@/components/single-expand-toggle';
 import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -38,7 +38,6 @@ import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
-import { cn } from '@/lib/utils';
 import { registrationReceiptFacts } from '@/lib/receipt-facts';
 import { sortingFromParam, sortingToParam } from '@/lib/server-sorting';
 import { index as eventsIndex } from '@/routes/tenants/events';
@@ -266,14 +265,12 @@ export default function EventRegistrations({
             header: t('registrations.columns.entry'),
             cell: ({ row }) =>
                 row.original.enteredAt ? (
-                    <Badge
-                        variant="secondary"
-                        className={cn(
-                            'border-transparent',
+                    <StatusBadge
+                        tone={
                             row.original.enteredCount < row.original.partySize
-                                ? 'bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-300'
-                                : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300',
-                        )}
+                                ? 'warning'
+                                : 'success'
+                        }
                     >
                         {row.original.partySize > 1
                             ? t('registrations.entry.group', {
@@ -290,7 +287,7 @@ export default function EventRegistrations({
                                       locale,
                                   ),
                               })}
-                    </Badge>
+                    </StatusBadge>
                 ) : (
                     <span className="text-muted-foreground text-xs">
                         {t('registrations.entry.not_yet')}

@@ -3,6 +3,7 @@ import { useId, useState } from 'react';
 import AlertError from '@/components/alert-error';
 import Heading from '@/components/heading';
 import { NonceStyle } from '@/components/nonce-style';
+import { StatusBadge } from '@/components/status-badge';
 import { Badge } from '@/components/ui/badge';
 import {
     Select,
@@ -26,6 +27,10 @@ import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatMoney } from '@/lib/format-currency';
 import { formatDate } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
+import {
+    invoiceStatusTones,
+    subscriptionStatusTones,
+} from '@/lib/status-tones';
 import { edit } from '@/routes/tenants';
 import {
     cancel,
@@ -209,9 +214,15 @@ export default function Billing({
                             <CardTitle className="flex items-center gap-2">
                                 {plan.name}
                                 {subscription ? (
-                                    <Badge variant="secondary">
+                                    <StatusBadge
+                                        tone={
+                                            subscriptionStatusTones[
+                                                subscription.status
+                                            ] ?? 'muted'
+                                        }
+                                    >
                                         {subscription.statusLabel}
-                                    </Badge>
+                                    </StatusBadge>
                                 ) : null}
                             </CardTitle>
                         </CardHeader>
@@ -550,7 +561,15 @@ export default function Billing({
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            {invoice.statusLabel}
+                                            <StatusBadge
+                                                tone={
+                                                    invoiceStatusTones[
+                                                        invoice.status
+                                                    ] ?? 'muted'
+                                                }
+                                            >
+                                                {invoice.statusLabel}
+                                            </StatusBadge>
                                         </TableCell>
                                         <TableCell>
                                             {invoice.hostedUrl ? (

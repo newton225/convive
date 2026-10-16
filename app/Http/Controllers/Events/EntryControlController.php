@@ -38,6 +38,7 @@ class EntryControlController extends Controller
                 'name' => $event->name,
                 'startsAt' => $event->starts_at?->toISOString(),
                 'venue' => $event->venue,
+                'status' => $event->status->value,
                 'statusLabel' => $event->status->label(),
             ])->all(),
         ]);

@@ -22,12 +22,14 @@ import { PriceCategoriesField } from '@/components/events/price-categories-field
 import { PublishEventDialog } from '@/components/events/publish-event-dialog';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { StickySaveBar } from '@/components/sticky-save-bar';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { eventStatusTones } from '@/lib/status-tones';
 import { validatedFieldName } from '@/lib/validated-field';
 import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { useNotifyFormChange } from '@/hooks/use-notify-form-change';
@@ -135,13 +137,15 @@ export default function EventForm({
 
                     {event ? (
                         <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant="secondary">
+                            <StatusBadge
+                                tone={eventStatusTones[event.status] ?? 'muted'}
+                            >
                                 {event.statusLabel}
-                            </Badge>
+                            </StatusBadge>
                             {event.isAnnounced ? (
-                                <Badge variant="outline">
+                                <StatusBadge tone="accent">
                                     {t('events.badges.announced')}
-                                </Badge>
+                                </StatusBadge>
                             ) : null}
                             {/* Une fois publie, il n'y a plus rien a publier : le bouton laisse
                                 place au lien lui-meme, seul geste encore utile. */}
