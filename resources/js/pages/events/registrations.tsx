@@ -11,6 +11,7 @@ import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog'
 import { CancellationsCard } from '@/components/registrations/cancellations-card';
 import { InvitationCardDialog } from '@/components/registrations/invitation-card-dialog';
 import { RegistrationDetails } from '@/components/registrations/registration-details';
+import { RegistrationStatusBadge } from '@/components/registrations/registration-status-badge';
 import { SingleExpandToggle } from '@/components/single-expand-toggle';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +38,7 @@ import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
+import { cn } from '@/lib/utils';
 import { registrationReceiptFacts } from '@/lib/receipt-facts';
 import { sortingFromParam, sortingToParam } from '@/lib/server-sorting';
 import { index as eventsIndex } from '@/routes/tenants/events';
@@ -217,17 +219,10 @@ export default function EventRegistrations({
             header: t('registrations.columns.status'),
             cell: ({ row }) => (
                 <div className="space-y-1">
-                    <Badge
-                        variant={
-                            row.original.status === 'confirmed'
-                                ? 'default'
-                                : row.original.status === 'cancelled'
-                                  ? 'destructive'
-                                  : 'secondary'
-                        }
-                    >
-                        {row.original.statusLabel}
-                    </Badge>
+                    <RegistrationStatusBadge
+                        status={row.original.status}
+                        label={row.original.statusLabel}
+                    />
                     {row.original.cancellationReason ? (
                         <p className="text-muted-foreground text-xs">
                             {row.original.cancellationReason}
@@ -272,11 +267,13 @@ export default function EventRegistrations({
             cell: ({ row }) =>
                 row.original.enteredAt ? (
                     <Badge
-                        variant={
+                        variant="secondary"
+                        className={cn(
+                            'border-transparent',
                             row.original.enteredCount < row.original.partySize
-                                ? 'secondary'
-                                : 'default'
-                        }
+                                ? 'bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-300'
+                                : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300',
+                        )}
                     >
                         {row.original.partySize > 1
                             ? t('registrations.entry.group', {
