@@ -127,7 +127,7 @@
                     @if ($ticket['priceCategory'])
                         <div class="field">
                             <div class="label">{{ __('ticket_template.preview.price_category') }}</div>
-                            <div class="holder">{{ $ticket['priceCategory'] }}</div>
+                            <div class="holder">{{ \App\Support\TicketCard::priceCategoryLabel($ticket['priceCategory']) }}</div>
                         </div>
                     @endif
 
@@ -153,7 +153,7 @@
                                 </table>
                             @else
                                 @foreach ($ticket['companions'] as $companion)
-                                    <div class="companion">{{ $companion['name'] }} <span>· {{ $companion['unit'] }}@if ($companion['priceCategory']) · {{ $companion['priceCategory'] }}@endif</span></div>
+                                    <div class="companion">{{ $companion['name'] }} <span>· {{ $companion['unit'] }}@if ($companion['priceCategory']) · {{ \App\Support\TicketCard::priceCategoryLabel($companion['priceCategory']) }}@endif</span></div>
                                 @endforeach
                             @endif
                         </div>

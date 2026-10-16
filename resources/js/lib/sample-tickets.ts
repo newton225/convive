@@ -5,16 +5,56 @@ export type SampleTicketHolder = 'guest' | 'companion';
 // Dix accompagnateurs, le plafond d'un evenement : l'apercu montre le billet le plus charge, celui
 // qui doit encore tenir sur le talon.
 const SampleCompanions: TicketCardData['companions'] = [
-    { name: 'Kofi Kouassi', unit: 'QODESH', priceCategory: 'Standard' },
-    { name: 'Marie Kouassi', unit: 'CHOSEN', priceCategory: 'Standard' },
-    { name: 'Yao Konan', unit: 'ELIAKIM', priceCategory: 'Standard' },
-    { name: 'Awa Diallo', unit: 'SENTINELLES', priceCategory: 'Standard' },
-    { name: 'Serge Bamba', unit: 'ELISHAMA', priceCategory: 'Standard' },
-    { name: 'Grace Aka', unit: 'ETAT MAJOR', priceCategory: 'Standard' },
-    { name: 'Ibrahim Traoré', unit: 'Aucune', priceCategory: 'Standard' },
-    { name: 'Esther N’Guessan', unit: 'QODESH', priceCategory: 'Standard' },
-    { name: 'Paul Yapi', unit: 'CHOSEN', priceCategory: 'Standard' },
-    { name: 'Fatou Koné', unit: 'ELIAKIM', priceCategory: 'Standard' },
+    {
+        name: 'Kofi Kouassi',
+        unit: 'QODESH',
+        priceCategory: { name: 'Standard', price: 5000 },
+    },
+    {
+        name: 'Marie Kouassi',
+        unit: 'CHOSEN',
+        priceCategory: { name: 'Standard', price: 5000 },
+    },
+    {
+        name: 'Yao Konan',
+        unit: 'ELIAKIM',
+        priceCategory: { name: 'Standard', price: 5000 },
+    },
+    {
+        name: 'Awa Diallo',
+        unit: 'SENTINELLES',
+        priceCategory: { name: 'Standard', price: 5000 },
+    },
+    {
+        name: 'Serge Bamba',
+        unit: 'ELISHAMA',
+        priceCategory: { name: 'Standard', price: 5000 },
+    },
+    {
+        name: 'Grace Aka',
+        unit: 'ETAT MAJOR',
+        priceCategory: { name: 'Standard', price: 5000 },
+    },
+    {
+        name: 'Ibrahim Traoré',
+        unit: 'Aucune',
+        priceCategory: { name: 'Standard', price: 5000 },
+    },
+    {
+        name: 'Esther N’Guessan',
+        unit: 'QODESH',
+        priceCategory: { name: 'Standard', price: 5000 },
+    },
+    {
+        name: 'Paul Yapi',
+        unit: 'CHOSEN',
+        priceCategory: { name: 'Standard', price: 5000 },
+    },
+    {
+        name: 'Fatou Koné',
+        unit: 'ELIAKIM',
+        priceCategory: { name: 'Standard', price: 5000 },
+    },
 ];
 
 /**
@@ -33,7 +73,7 @@ export function sampleTicket(
             qrImage: null,
             tableNumber: 7,
             seatsAtTables: true,
-            priceCategory: 'Standard',
+            priceCategory: { name: 'Standard', price: 5000 },
             seats: 1,
             companions: [],
             host: {
@@ -49,7 +89,7 @@ export function sampleTicket(
         qrImage: null,
         tableNumber: 7,
         seatsAtTables: true,
-        priceCategory: 'VIP',
+        priceCategory: { name: 'VIP', price: 15000 },
         seats: SampleCompanions.length + 1,
         companions: withCompanions ? SampleCompanions : [],
         host: null,

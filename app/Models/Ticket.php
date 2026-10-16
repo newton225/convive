@@ -111,7 +111,7 @@ class Ticket extends Model
      * Get the people accompanying the main guest, in the order they were entered. Empty on a
      * companion's ticket : il ne porte que sa propre place.
      *
-     * @return array<int, array{name: string, unit: string, priceCategory: string|null}>
+     * @return array<int, array{name: string, unit: string, priceCategory: array{name: string, price: int}|null}>
      */
     public function companionsOfHolder(): array
     {
@@ -124,25 +124,38 @@ class Ticket extends Model
             ->map(fn (RegistrationCompanion $companion) => [
                 'name' => $companion->name,
                 'unit' => $companion->unit->name,
-                'priceCategory' => $companion->priceCategory?->name,
+                'priceCategory' => self::priceCategoryData($companion->priceCategory),
             ])
             ->values()
             ->all();
     }
 
     /**
-     * Get the name of the price category chosen by the person this ticket admits : chaque personne
-     * choisit la sienne (decision du 2026-10-07), l'invite comme chaque accompagnateur.
+     * Get the price category chosen by the person this ticket admits, its name and its price (0 :
+     * gratuit) : chaque personne choisit la sienne (decision du 2026-10-07), l'invite comme chaque
+     * accompagnateur. Le billet affiche les deux (decision du 2026-10-16).
+     *
+     * @return array{name: string, price: int}|null
      */
-    public function holderPriceCategoryName(): ?string
+    public function holderPriceCategory(): ?array
     {
         if (! $this->isCompanion()) {
-            return $this->registration->priceCategory?->name;
+            return self::priceCategoryData($this->registration->priceCategory);
         }
 
         // Les billets d'accompagnateurs suivent l'ordre de leur position (`IssueTicket`).
-        return $this->registration->companions->sortBy('position')->values()
-            ->get($this->holder_position - 1)?->priceCategory?->name;
+        return self::priceCategoryData(
+            $this->registration->companions->sortBy('position')->values()
+                ->get($this->holder_position - 1)?->priceCategory,
+        );
+    }
+
+    /**
+     * @return array{name: string, price: int}|null
+     */
+    private static function priceCategoryData(?EventPriceCategory $category): ?array
+    {
+        return $category === null ? null : ['name' => $category->name, 'price' => $category->price];
     }
 
     /**

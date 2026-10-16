@@ -25,6 +25,9 @@ export type TicketElements = {
     companions: boolean;
 };
 
+// Un tarif tel que le billet le montre : son nom et son prix en francs CFA, 0 pour un tarif gratuit.
+export type TicketPriceCategory = { name: string; price: number };
+
 // Le billet talon d'une personne (`App\Support\TicketCard`), le meme pour l'invite principal et
 // chacun de ses accompagnateurs, sur sa page, son lien individuel et dans le PDF.
 export type TicketCardData = {
@@ -34,12 +37,17 @@ export type TicketCardData = {
     tableNumber: number | null;
     // Faux pour un evenement sans table : le billet n'en parle pas.
     seatsAtTables: boolean;
-    // Le tarif choisi par cette personne, null pour un billet d'avant les categories.
-    priceCategory: string | null;
+    // Le tarif choisi par cette personne (nom et prix, 0 : gratuit), null pour un billet d'avant les
+    // categories.
+    priceCategory: TicketPriceCategory | null;
     // Tout le groupe sur le billet principal, 1 sur celui d'un accompagnateur.
     seats: number;
     // Accompagnateurs de l'invite principal, si le gabarit les affiche ; vide sinon.
-    companions: { name: string; unit: string; priceCategory: string | null }[];
+    companions: {
+        name: string;
+        unit: string;
+        priceCategory: TicketPriceCategory | null;
+    }[];
     // La personne qui invite un accompagnateur ; null sur le billet principal.
     host: { name: string; unit: string; reference: string | null } | null;
 };

@@ -2,9 +2,15 @@ import { CalendarDays, Check, ImageOff, QrCode } from 'lucide-react';
 import { useId } from 'react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import { useTranslation } from '@/hooks/use-translation';
+import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { cn } from '@/lib/utils';
-import type { TicketCardData, TicketCardEvent, TicketDesign } from '@/types';
+import type {
+    TicketCardData,
+    TicketCardEvent,
+    TicketDesign,
+    TicketPriceCategory,
+} from '@/types';
 
 type Props = TicketDesign & {
     event: TicketCardEvent;
@@ -50,6 +56,14 @@ export function BrandedTicket({
     // selecteur de classe brut : on les retire.
     const scopeClass = `brand-ticket-${useId().replace(/:/g, '')}`;
     const centered = model !== 'sober';
+    // Le tarif : son nom puis son prix, « Gratuit » quand il vaut 0 (le PDF fait de meme,
+    // `TicketCard::priceCategoryLabel`).
+    const priceCategoryLabel = (category: TicketPriceCategory) =>
+        `${category.name} · ${
+            category.price === 0
+                ? t('guest.registration.summary.free')
+                : formatAmount(category.price, locale)
+        }`;
     const compactCompanions = ticket.companions.length > CompactCompanionsAbove;
 
     const asset = (
@@ -280,7 +294,9 @@ export function BrandedTicket({
                                         )}
                                     </dt>
                                     <dd className="font-medium break-words">
-                                        {ticket.priceCategory}
+                                        {priceCategoryLabel(
+                                            ticket.priceCategory,
+                                        )}
                                     </dd>
                                 </div>
                             ) : null}
@@ -335,7 +351,7 @@ export function BrandedTicket({
                                                                 {' · '}
                                                                 {companion.unit}
                                                                 {companion.priceCategory
-                                                                    ? ` · ${companion.priceCategory}`
+                                                                    ? ` · ${priceCategoryLabel(companion.priceCategory)}`
                                                                     : ''}
                                                             </span>
                                                         )}

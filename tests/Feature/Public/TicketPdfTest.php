@@ -6,12 +6,14 @@ use App\Actions\Tenants\CreateTenant;
 use App\Actions\Tickets\IssueTicket;
 use App\Enums\LegalForm;
 use App\Models\Event;
+use App\Models\EventPriceCategory;
 use App\Models\PaymentAccount;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\Ticket;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\TicketCard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Spatie\LaravelPdf\PdfBuilder;
@@ -115,6 +117,39 @@ class TicketPdfTest extends TestCase
                 && $holder['host'] === null
                 && $companion['companions'] === [];
         });
+    }
+
+    public function test_le_billet_donne_le_nom_et_le_prix_du_tarif_de_chaque_personne(): void
+    {
+        Pdf::fake();
+        ['registration' => $registration] = $this->confirmedGroup();
+
+        $this->tenant->asCurrent(function () use ($registration) {
+            $paid = EventPriceCategory::factory()->create(['event_id' => $registration->event_id, 'name' => 'VIP', 'price' => 15000]);
+            $free = EventPriceCategory::factory()->create(['event_id' => $registration->event_id, 'name' => 'Enfant', 'price' => 0]);
+            $registration->update(['price_category_id' => $paid->id]);
+            $registration->companions()->orderBy('position')->first()->update(['price_category_id' => $free->id]);
+        });
+
+        $url = $this->tenant->asCurrent(fn () => $registration->fresh()->ticketsPdfUrl());
+
+        $this->get($url)->assertOk();
+
+        Pdf::assertRespondedWithPdf(function (PdfBuilder $pdf) {
+            [$holder, $companion] = $pdf->viewData['tickets'];
+
+            return $holder['priceCategory'] === ['name' => 'VIP', 'price' => 15000]
+                && $holder['companions'][0]['priceCategory'] === ['name' => 'Enfant', 'price' => 0]
+                && $companion['priceCategory'] === ['name' => 'Enfant', 'price' => 0];
+        });
+    }
+
+    public function test_le_libelle_du_tarif_dit_gratuit_quand_le_prix_est_nul(): void
+    {
+        app()->setLocale('fr');
+
+        $this->assertSame('Enfant · Gratuit', TicketCard::priceCategoryLabel(['name' => 'Enfant', 'price' => 0]));
+        $this->assertSame("VIP · 15\u{202F}000 F CFA", TicketCard::priceCategoryLabel(['name' => 'VIP', 'price' => 15000]));
     }
 
     public function test_la_liste_des_accompagnateurs_suit_le_gabarit_du_billet(): void

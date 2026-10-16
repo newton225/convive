@@ -211,6 +211,7 @@ return [
         'title' => 'Tickets: :event',
         'download' => 'Download as PDF',
         'download_all' => 'Download all tickets as PDF',
+        'preparing' => 'Preparing the PDF…',
         'download_hint' => 'Keep it on your phone: it opens even without a connection at the door.',
     ],
 

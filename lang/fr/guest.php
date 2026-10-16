@@ -211,6 +211,7 @@ return [
         'title' => 'Billets : :event',
         'download' => 'Télécharger en PDF',
         'download_all' => 'Télécharger tous les billets en PDF',
+        'preparing' => 'Préparation du PDF…',
         'download_hint' => "À garder sur votre téléphone : il s'affiche même sans connexion à l'entrée.",
     ],
 

@@ -21,7 +21,7 @@ class TicketCard
     /**
      * Get what the ticket says about the person it admits.
      *
-     * @return array{holder: array{name: string, unit: string}, qrImage: string, tableNumber: int|null, seatsAtTables: bool, priceCategory: string|null, seats: int, companions: array<int, array{name: string, unit: string, priceCategory: string|null}>, host: array{name: string, unit: string, reference: string|null}|null}
+     * @return array{holder: array{name: string, unit: string}, qrImage: string, tableNumber: int|null, seatsAtTables: bool, priceCategory: array{name: string, price: int}|null, seats: int, companions: array<int, array{name: string, unit: string, priceCategory: array{name: string, price: int}|null}>, host: array{name: string, unit: string, reference: string|null}|null}
      */
     public static function for(Ticket $ticket, TenantBranding $branding): array
     {
@@ -31,7 +31,7 @@ class TicketCard
             'tableNumber' => $ticket->registration->tableAssignment?->seatingTable->number,
             // Sans table, le billet ne parle pas de table ; le nom du tarif dit a quoi il donne droit.
             'seatsAtTables' => $ticket->registration->event->seatsAtTables(),
-            'priceCategory' => $ticket->holderPriceCategoryName(),
+            'priceCategory' => $ticket->holderPriceCategory(),
             // Le billet principal compte tout le groupe ; celui d'un accompagnateur, sa seule place.
             'seats' => $ticket->isCompanion() ? 1 : $ticket->registration->party_size,
             // La liste suit le gabarit ; la personne qui invite, jamais : c'est ce qui rattache un
@@ -41,6 +41,19 @@ class TicketCard
                 : [],
             'host' => $ticket->host(),
         ];
+    }
+
+    /**
+     * The tariff as the PDF prints it : its name, then its price, or « Gratuit » when it is 0
+     * (`resources/js/components/ticket-template/branded-ticket.tsx` does the same).
+     *
+     * @param  array{name: string, price: int}  $category
+     */
+    public static function priceCategoryLabel(array $category): string
+    {
+        $price = $category['price'] === 0 ? __('guest.registration.summary.free') : Money::format($category['price']);
+
+        return $category['name'].' · '.$price;
     }
 
     /**
