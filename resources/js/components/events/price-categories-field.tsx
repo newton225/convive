@@ -49,7 +49,9 @@ export function PriceCategoriesField({
                   {
                       name: t('events.price_categories.default_name'),
                       price: defaultPrice,
-                      quota: null,
+                      // Un seul tarif, qui couvre toute la salle tant qu'on n'en a pas decide
+                      // autrement : le nombre total de places en est la valeur de depart.
+                      quota: capacity > 0 ? capacity : null,
                   },
               ]
         ).map((category) => ({
@@ -60,6 +62,30 @@ export function PriceCategoriesField({
             locked: category.locked === true,
         })),
     );
+
+    // Le tarif par defaut suit la capacite de la salle tant que personne n'a touche a son quota :
+    // changer le nombre de tables met le quota a jour. Toucher au champ, ou ajouter un second tarif,
+    // y met fin : le quota devient une decision de l'organisateur.
+    const [followsCapacity, setFollowsCapacity] = useState(
+        defaultCategories.length === 0,
+    );
+
+    useEffect(() => {
+        if (!followsCapacity) {
+            return;
+        }
+
+        setCategories((current) =>
+            current.length === 1 && current[0].quota !== String(capacity || '')
+                ? [
+                      {
+                          ...current[0],
+                          quota: capacity > 0 ? String(capacity) : '',
+                      },
+                  ]
+                : current,
+        );
+    }, [capacity, followsCapacity]);
 
     // Le refus du serveur date du dernier envoi : des qu'on retouche un tarif, il est perime et
     // l'avertissement en direct reprend la main.
@@ -201,9 +227,10 @@ export function PriceCategoriesField({
                             min={1}
                             max={capacity > 0 ? capacity : undefined}
                             value={category.quota}
-                            onChange={(event) =>
-                                update(index, { quota: event.target.value })
-                            }
+                            onChange={(event) => {
+                                setFollowsCapacity(false);
+                                update(index, { quota: event.target.value });
+                            }}
                             required
                             data-test="price-category-quota"
                         />
@@ -242,6 +269,7 @@ export function PriceCategoriesField({
                 data-test="price-category-add"
                 onClick={() => {
                     setStaleFor(errors);
+                    setFollowsCapacity(false);
                     setCategories((current) => [
                         ...current,
                         { name: '', price: '0', quota: '', locked: false },
