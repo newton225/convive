@@ -35,13 +35,11 @@
         .stub { position: relative; height: 76.5mm; padding: 9mm 6mm 0; text-align: center; overflow: hidden; }
         .stub-background { position: absolute; top: 0; left: 0; width: 90mm; height: 76.5mm; }
         .stub-content { position: relative; }
-        .stub-table.on-image { display: inline-block; padding: 0.6mm 3mm; border-radius: 3mm; background: #fff; }
         .stub.classic { background: {{ $design['tints']['stub'] }}; }
         .qr-frame { display: inline-block; padding: 1.5mm; background: #fff; border: 0.3mm solid #e2dfda; border-radius: 1.5mm; }
         /* Avec la marge et la bordure du cadre : 52,9 mm sur 90, la part du talon que le cadre du QR
            occupe a l'ecran (188 px sur 320) et dans le repere de rognage. */
         .qr { width: 49.3mm; height: 49.3mm; }
-        .stub-table { margin-top: 2.5mm; font-size: 10pt; font-weight: 700; }
         .perforation { position: relative; height: 0; }
         .perforation-line { margin: 0 5mm; border-top: 0.6mm dotted #a8a49d; }
         /* Le fond du bas du talon, estompe comme a l'ecran (15 %), aux proportions de l'image
@@ -58,8 +56,6 @@
         .field { margin-top: 3mm; }
         .holder { font-size: 12pt; font-weight: 700; }
         .unit { font-size: 8pt; color: #6b6862; }
-        .pair { width: {{ $align === 'center' ? '100%' : '45mm' }}; margin-top: 3mm; border-collapse: collapse; }
-        .pair td { width: 50%; padding: 0; text-align: {{ $align }}; vertical-align: top; font-size: 10pt; font-weight: 600; }
         .host { margin-top: 3mm; padding: 2mm 3mm; border-radius: 1.5mm; background: {{ $design['tints']['host'] }}; }
         .host-name { font-size: 10pt; font-weight: 600; }
         .companion { font-size: 9pt; line-height: 1.45; }
@@ -89,15 +85,6 @@
                     @endif
                     <div class="stub-content">
                     <span class="qr-frame"><img class="qr" src="{{ $ticket['qrImage'] }}" alt="{{ __('ticket_template.preview.qr_of', ['name' => $ticket['holder']['name']]) }}"></span>
-                    <div class="stub-table {{ $brand['backgroundUrl'] ? 'on-image' : '' }}">
-                        @if ($ticket['tableNumber'] !== null)
-                            {{ __('guest.ticket.table', ['number' => $ticket['tableNumber']]) }}
-                        @elseif ($ticket['seatsAtTables'])
-                            {{ __('guest.ticket.no_table') }}
-                        @else
-                            {{ $ticket['priceCategory'] }}
-                        @endif
-                    </div>
                     </div>
                 </div>
 
@@ -143,15 +130,6 @@
                             <div class="holder">{{ $ticket['priceCategory'] }}</div>
                         </div>
                     @endif
-
-                    <table class="pair">
-                        <tr>
-                            @if ($ticket['seatsAtTables'])
-                                <td><div class="label">{{ __('ticket_template.preview.table') }}</div>{{ $ticket['tableNumber'] ?? '-' }}</td>
-                            @endif
-                            <td><div class="label">{{ __('ticket_template.preview.seats') }}</div>{{ $ticket['seats'] }}</td>
-                        </tr>
-                    </table>
 
                     @if ($ticket['host'])
                         <div class="host">

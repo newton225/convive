@@ -176,21 +176,6 @@ export function BrandedTicket({
                             />
                         )}
                     </span>
-                    <p
-                        className={cn(
-                            'text-sm font-semibold',
-                            brand.backgroundUrl &&
-                                'rounded-full bg-white px-3 py-0.5',
-                        )}
-                    >
-                        {ticket.tableNumber !== null
-                            ? t('guest.ticket.table', {
-                                  number: String(ticket.tableNumber),
-                              })
-                            : ticket.seatsAtTables
-                              ? t('guest.ticket.no_table')
-                              : ticket.priceCategory}
-                    </p>
                 </div>
 
                 <div className="relative z-10" aria-hidden="true">
@@ -299,31 +284,6 @@ export function BrandedTicket({
                                     </dd>
                                 </div>
                             ) : null}
-                            <div
-                                className={cn(
-                                    'grid grid-cols-2 gap-3',
-                                    !centered && 'max-w-40',
-                                )}
-                            >
-                                {ticket.seatsAtTables ? (
-                                    <div>
-                                        <dt className="text-ink/60 text-xs">
-                                            {t('ticket_template.preview.table')}
-                                        </dt>
-                                        <dd className="font-medium">
-                                            {ticket.tableNumber ?? '-'}
-                                        </dd>
-                                    </div>
-                                ) : null}
-                                <div>
-                                    <dt className="text-ink/60 text-xs">
-                                        {t('ticket_template.preview.seats')}
-                                    </dt>
-                                    <dd className="font-medium">
-                                        {ticket.seats}
-                                    </dd>
-                                </div>
-                            </div>
                             {ticket.host ? (
                                 <div
                                     className="rounded-md bg-[color:var(--brand-primary)]/6 px-3 py-2"
