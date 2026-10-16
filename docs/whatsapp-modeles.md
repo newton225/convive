@@ -67,7 +67,13 @@ expiration 10 minutes, avertissement de sécurité.
 
 > Bonjour {{1}}, voici le lien pour reprendre votre réservation pour {{2}} : {{3}} Il remplace le précédent. À bientôt !
 
-Envoyé quand l'invité a perdu le lien de sa réservation en cours (bouton « Retrouver ma réservation »).
+Envoyé quand l'invité a perdu le lien de son dossier (réservation en cours ou preuve rejetée), par le bouton
+« Retrouver ma réservation » ou par « Renvoyer le lien » de la base d'inscrits.
+
+**Soumis chez Meta le 2026-10-16** sous le nom `convive_lien_reservation` (utilitaire, français), par l'API :
+statut « en attente d'examen » à la soumission. Une fois approuvé, renseigner
+`WHATSAPP_TEMPLATE_RESUME_LINK=convive_lien_reservation` dans le `.env` du serveur, sans quoi le message part
+en texte libre, que WhatsApp refuse hors des 24 heures.
 Le lien porte le jeton de reprise : le message part tout de suite, jamais par la file d'attente.
 
 ## Rappel du jour J
