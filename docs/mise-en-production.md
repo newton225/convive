@@ -31,13 +31,13 @@ Pas prêt, et indépendant du code :
 
 ## 1. Décisions à prendre avant tout [vous]
 
-| Décision                                                                             | Pourquoi elle bloque                                                             | Ma recommandation                                                                                                    |
-| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Où héberger : le VPS Contabo existant, ou le second serveur OVH évoqué le 2026-10-03 | Fixe le système, le nginx, les sous-domaines et le coût                          | Le VPS Contabo : vous l'administrez déjà, `devultraapp.com` y pointe                                                 |
-| Adresse de l'application (`APP_URL`)                                                 | Les organisations vivent en sous-domaines de ce domaine                          | Un sous-domaine dédié, par exemple `app.devultraapp.com`, plutôt que la racine déjà prise par la vitrine DevUltraApp |
-| ~~Base de données au lancement~~                                                     | **Tranché le 2026-10-13 : PostgreSQL**, installé sur le VPS, hors des conteneurs | Chantier en cours, voir § 3 bis                                                                                      |
-| Vérification du téléphone par défaut sur les nouveaux événements                     | Voir l'interrupteur proposé                                                      | Désactivée au lancement, activée seulement quand Meta transmet les vrais messages                                    |
-| Aucune offre de paiement en ligne au lancement                                       | Stripe n'est pas disponible en Côte d'Ivoire                                     | Paiement des abonnements à la main, comme prévu                                                                      |
+| Décision | Pourquoi elle bloque | Ma recommandation |
+| --- | --- | --- |
+| Où héberger : le VPS Contabo existant, ou le second serveur OVH évoqué le 2026-10-03 | Fixe le système, le nginx, les sous-domaines et le coût | Le VPS Contabo : vous l'administrez déjà, `devultraapp.com` y pointe |
+| Adresse de l'application (`APP_URL`) | Les organisations vivent en sous-domaines de ce domaine | Un sous-domaine dédié, par exemple `app.devultraapp.com`, plutôt que la racine déjà prise par la vitrine DevUltraApp |
+| ~~Base de données au lancement~~ | **Tranché le 2026-10-13 : PostgreSQL**, installé sur le VPS, hors des conteneurs | Chantier en cours, voir § 3 bis |
+| Vérification du téléphone par défaut sur les nouveaux événements | Voir l'interrupteur proposé | Désactivée au lancement, activée seulement quand Meta transmet les vrais messages |
+| Aucune offre de paiement en ligne au lancement | Stripe n'est pas disponible en Côte d'Ivoire | Paiement des abonnements à la main, comme prévu |
 
 ## 2. Préalables hors code
 
@@ -218,14 +218,14 @@ fichier nginx séparé, des bases et un rôle à part, aucun redémarrage de Pos
 
 ### 10.1 Décisions
 
-| Décision                 | Valeur retenue                                                                                                                                       |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Forme de l'ouverture     | Pilote privé et guidé : une organisation de confiance, pas d'ouverture publique                                                                      |
-| Serveur                  | VPS OVH, AlmaLinux 10.1, 22 Go de mémoire, 8 cœurs, partagé avec `outfit` (et non le VPS Contabo du plan d'origine)                                  |
-| Adresse de l'application | `app.devultraapp.com`, les organisations en `<sous-domaine>.app.devultraapp.com`                                                                     |
-| Base de données          | PostgreSQL 16.11 déjà installé sur le serveur (hors conteneurs), une base par organisation                                                           |
-| Compte OVH de l'API      | Europe : point d'accès `ovh-eu`                                                                                                                      |
-| WhatsApp                 | Mis de côté (pas d'entité juridique pour la vérification d'entreprise Meta) : les messages WhatsApp vont dans le journal, les courriels fonctionnent |
+| Décision | Valeur retenue |
+| --- | --- |
+| Forme de l'ouverture | Pilote privé et guidé : une organisation de confiance, pas d'ouverture publique |
+| Serveur | VPS OVH, AlmaLinux 10.1, 22 Go de mémoire, 8 cœurs, partagé avec `outfit` (et non le VPS Contabo du plan d'origine) |
+| Adresse de l'application | `app.devultraapp.com`, les organisations en `<sous-domaine>.app.devultraapp.com` |
+| Base de données | PostgreSQL 16.11 déjà installé sur le serveur (hors conteneurs), une base par organisation |
+| Compte OVH de l'API | Europe : point d'accès `ovh-eu` |
+| WhatsApp | Mis de côté (pas d'entité juridique pour la vérification d'entreprise Meta) : les messages WhatsApp vont dans le journal, les courriels fonctionnent |
 
 ### 10.2 Diagnostic du serveur (lecture seule) [serveur]
 
@@ -258,10 +258,10 @@ conversation.
 Zone `devultraapp.com` (la racine reste sur un autre serveur, `194.238.26.3`, qu'on ne touche pas). Deux
 enregistrements de type **A**, vers `148.113.204.35` :
 
-| Sous-domaine | Type | Cible          |
-| ------------ | ---- | -------------- |
-| `app`        | A    | 148.113.204.35 |
-| `*.app`      | A    | 148.113.204.35 |
+| Sous-domaine | Type | Cible |
+| --- | --- | --- |
+| `app` | A | 148.113.204.35 |
+| `*.app` | A | 148.113.204.35 |
 
 Contrôle de propagation depuis un poste : `nslookup app.devultraapp.com` et `nslookup test.app.devultraapp.com`
 doivent répondre `148.113.204.35`.
@@ -330,9 +330,9 @@ cat ~/.ssh/convive_deploy.pub
    (elle commence par `ssh-ed25519` : une clé publique n'a rien de secret). **Laisser « Allow write access »
    décoché**, puis **Add key**. La clé privée `~/.ssh/convive_deploy` ne quitte jamais le serveur.
 
-    Si le clone répond `Permission denied (publickey)`, la clé n'a pas été ajoutée au bon dépôt : la
-    vérifier avec `ssh-keygen -lf ~/.ssh/convive_deploy.pub` et
-    `ssh -i ~/.ssh/convive_deploy -o IdentitiesOnly=yes -T git@github.com`.
+   Si le clone répond `Permission denied (publickey)`, la clé n'a pas été ajoutée au bon dépôt : la
+   vérifier avec `ssh-keygen -lf ~/.ssh/convive_deploy.pub` et
+   `ssh -i ~/.ssh/convive_deploy -o IdentitiesOnly=yes -T git@github.com`.
 
 3. **[serveur]** Cloner dans `/opt/convive` et fixer la clé pour tous les `git pull` à venir :
 
@@ -399,11 +399,11 @@ En cas d'erreur, `rm .env.production` et recommencer depuis le bloc `cat`. Contr
 
 Variables ajoutées ensuite, au fil des besoins :
 
-| Variable                                        | Pourquoi                                                                                                                                 | Quand                                           |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| `CONVIVE_CONSOLE_OPERATORS=isaacndri@gmail.com` | Le compte éditeur qui ouvre `/console`                                                                                                   | À l'ouverture de la console                     |
-| `LARAVEL_PDF_DRIVER=dompdf`                     | Sans elle, les PDF passent par Chrome et Node, absents de l'image : le téléchargement d'un billet renvoie une page HTML (`tickets.html`) | 2026-10-16, après l'échec constaté sur mobile   |
-| `APP_VERSION=0.2.0`                             | Numéro de version affiché dans le menu                                                                                                   | Écrit par `deploy/deploy.sh` à chaque livraison |
+| Variable | Pourquoi | Quand |
+| --- | --- | --- |
+| `CONVIVE_CONSOLE_OPERATORS=isaacndri@gmail.com` | Le compte éditeur qui ouvre `/console` | À l'ouverture de la console |
+| `LARAVEL_PDF_DRIVER=dompdf` | Sans elle, les PDF passent par Chrome et Node, absents de l'image : le téléchargement d'un billet renvoie une page HTML (`tickets.html`) | 2026-10-16, après l'échec constaté sur mobile |
+| `APP_VERSION=0.2.0` | Numéro de version affiché dans le menu | Écrit par `deploy/deploy.sh` à chaque livraison |
 
 `APP_KEY` : **à copier hors du serveur** (gestionnaire de mots de passe). Elle chiffre les clés de signature
 des billets, la double authentification et les sessions.
@@ -429,14 +429,14 @@ Aucun seeder en production : `DatabaseSeeder` refuse de s'y exécuter, les plans
 
 **Incidents rencontrés et corrigés dans le code** (chacun a son commit, ne pas les refaire) :
 
-| Symptôme                                                | Cause                                                                       | Correctif                                                                            |
-| ------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| « Please provide a valid cache path » à la construction | Dossiers `storage/framework/*` exclus par `.dockerignore`                   | `d894469` : le Dockerfile les crée                                                   |
-| « image already exists » (Docker 29)                    | `queue`, `scheduler`, `migrate` reconstruisaient la même image en parallèle | `b77b390` : seul `app` construit ; commandes `build app web` puis `up -d --no-build` |
-| 502 « upstream sent too big header »                    | Tampons FastCGI trop petits                                                 | `9129345` : `fastcgi_buffer_size 32k` et suivants                                    |
-| 502 après recréation du conteneur `app`                 | nginx gardait l'ancienne adresse du conteneur                               | `abaf040` : résolveur Docker `127.0.0.11` et adresse dynamique                       |
-| Variables de base erronées dans l'exemple               | Exemple périmé (`DB_CONNECTION=pgsql`)                                      | `8e55490` : exemple et doc corrigés                                                  |
-| Inscription impossible sur PostgreSQL                   | `CREATE DATABASE` lancé dans une transaction                                | `3f56765` : base créée hors transaction, test ajouté                                 |
+| Symptôme | Cause | Correctif |
+| --- | --- | --- |
+| « Please provide a valid cache path » à la construction | Dossiers `storage/framework/*` exclus par `.dockerignore` | `d894469` : le Dockerfile les crée |
+| « image already exists » (Docker 29) | `queue`, `scheduler`, `migrate` reconstruisaient la même image en parallèle | `b77b390` : seul `app` construit ; commandes `build app web` puis `up -d --no-build` |
+| 502 « upstream sent too big header » | Tampons FastCGI trop petits | `9129345` : `fastcgi_buffer_size 32k` et suivants |
+| 502 après recréation du conteneur `app` | nginx gardait l'ancienne adresse du conteneur | `abaf040` : résolveur Docker `127.0.0.11` et adresse dynamique |
+| Variables de base erronées dans l'exemple | Exemple périmé (`DB_CONNECTION=pgsql`) | `8e55490` : exemple et doc corrigés |
+| Inscription impossible sur PostgreSQL | `CREATE DATABASE` lancé dans une transaction | `3f56765` : base créée hors transaction, test ajouté |
 
 ### 10.9 Certificat HTTPS générique [serveur, navigateur]
 
@@ -459,7 +459,8 @@ unset AK AS CK
 sudo ls -l /etc/letsencrypt/ovh.ini
 ```
 
-Le contrôle doit afficher `-rw-------. 1 root root`. 4. **[serveur]** Obtenir le certificat, avec rechargement de nginx au renouvellement :
+   Le contrôle doit afficher `-rw-------. 1 root root`.
+4. **[serveur]** Obtenir le certificat, avec rechargement de nginx au renouvellement :
 
 ```
 sudo certbot certonly --dns-ovh --dns-ovh-credentials /etc/letsencrypt/ovh.ini --dns-ovh-propagation-seconds 60 -d app.devultraapp.com -d '*.app.devultraapp.com' --cert-name app.devultraapp.com --deploy-hook "systemctl reload nginx"
@@ -522,13 +523,13 @@ exemple, minuscules et aperçu en direct (`02d6805`, `42ee0d5`), scripts et proc
 
 ### 10.14 Mis de côté ou resté ouvert
 
-| Sujet                                                             | État                                                                                                                                                                                                                                                                           |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| WhatsApp et Meta                                                  | Mis de côté : pas d'entité juridique. Le serveur n'a aucun réglage `WHATSAPP_*`. À reprendre avec vérification d'entreprise, numéro dédié, modèle `resume_link`, application en mode Live, webhook `https://app.devultraapp.com/webhooks/whatsapp` (répond 403 sans bon jeton) |
-| Page blanche Android à la saisie d'un code 2FA expiré             | Pas reproduite ; à diagnostiquer seulement si elle se reproduit dans Chrome seul                                                                                                                                                                                               |
-| `REVOKE CONNECT` sur `outfitdb`, `listen_addresses`               | Non appliqués, à décider                                                                                                                                                                                                                                                       |
-| Sauvegardes                                                       | Destination externe, `BACKUP_ARCHIVE_PASSWORD` et exercice de restauration à faire (le `pg_dump` de l'image est plus récent que PostgreSQL 16 : vérifier la relecture)                                                                                                         |
-| `APP_KEY`                                                         | À copier hors du serveur                                                                                                                                                                                                                                                       |
-| Suite de tests complète sur PostgreSQL et grille de `SECURITY.md` | Jamais rejouées : à faire avant d'ouvrir à d'autres organisations                                                                                                                                                                                                              |
-| `convive:production-check`                                        | Échoue encore (identité légale de l'éditeur, Turnstile réel, relecture juridique) : acceptable pour le pilote privé, pas pour l'ouverture publique                                                                                                                             |
-| Incohérence de documentation                                      | `docs/whatsapp-modeles.md` (code de vérification par SMS) contre `CLAUDE.md` (message WhatsApp envoyé par l'invité) : à trancher                                                                                                                                               |
+| Sujet | État |
+| --- | --- |
+| WhatsApp et Meta | Mis de côté : pas d'entité juridique. Le serveur n'a aucun réglage `WHATSAPP_*`. À reprendre avec vérification d'entreprise, numéro dédié, modèle `resume_link`, application en mode Live, webhook `https://app.devultraapp.com/webhooks/whatsapp` (répond 403 sans bon jeton) |
+| Page blanche Android à la saisie d'un code 2FA expiré | Pas reproduite ; à diagnostiquer seulement si elle se reproduit dans Chrome seul |
+| `REVOKE CONNECT` sur `outfitdb`, `listen_addresses` | Non appliqués, à décider |
+| Sauvegardes | Destination externe, `BACKUP_ARCHIVE_PASSWORD` et exercice de restauration à faire (le `pg_dump` de l'image est plus récent que PostgreSQL 16 : vérifier la relecture) |
+| `APP_KEY` | À copier hors du serveur |
+| Suite de tests complète sur PostgreSQL et grille de `SECURITY.md` | Jamais rejouées : à faire avant d'ouvrir à d'autres organisations |
+| `convive:production-check` | Échoue encore (identité légale de l'éditeur, Turnstile réel, relecture juridique) : acceptable pour le pilote privé, pas pour l'ouverture publique |
+| Incohérence de documentation | `docs/whatsapp-modeles.md` (code de vérification par SMS) contre `CLAUDE.md` (message WhatsApp envoyé par l'invité) : à trancher |
