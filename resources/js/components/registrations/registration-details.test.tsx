@@ -47,6 +47,7 @@ const base: RegistrationRow = {
     holdActive: false,
     tableNumber: 1,
     cancellationReason: null,
+    rejection: null,
     channelLabel: 'Wave',
     receiptUrl: null,
     proofReference: 'TX-12345',
@@ -190,6 +191,34 @@ describe('RegistrationDetails', () => {
         expect(payment).toContain('Doublon');
     });
 
+    it('donne le motif du rejet de la preuve avec sa precision', () => {
+        render(
+            <RegistrationDetails
+                registration={registration({
+                    status: 'proof_rejected',
+                    rejection: {
+                        reason: 'Paiement fractionne',
+                        note: 'Deux virements',
+                    },
+                })}
+            />,
+        );
+
+        const rejection =
+            document.querySelector('[data-test="registration-rejection"]')
+                ?.textContent ?? '';
+
+        expect(rejection).toContain('Paiement fractionne');
+        expect(rejection).toContain('Deux virements');
+    });
+
+    it('ne montre aucun motif de rejet quand la preuve n est pas rejetee', () => {
+        render(<RegistrationDetails registration={registration({})} />);
+
+        expect(
+            document.querySelector('[data-test="registration-rejection"]'),
+        ).toBeNull();
+    });
     it('ne montre pas de motif d annulation quand il n y en a pas', () => {
         render(<RegistrationDetails registration={registration({})} />);
 

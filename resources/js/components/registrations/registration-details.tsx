@@ -126,6 +126,22 @@ export function RegistrationDetails({ registration }: Props) {
                               )
                             : none}
                     </dd>
+                    {registration.rejection ? (
+                        <>
+                            <dt className="text-muted-foreground">
+                                {t('registrations.details.rejection')}
+                            </dt>
+                            <dd
+                                className="break-words"
+                                data-test="registration-rejection"
+                            >
+                                {registration.rejection.reason}
+                                {registration.rejection.note
+                                    ? ` : ${registration.rejection.note}`
+                                    : ''}
+                            </dd>
+                        </>
+                    ) : null}
                     {registration.cancellationReason ? (
                         <>
                             <dt className="text-muted-foreground">

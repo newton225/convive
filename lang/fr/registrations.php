@@ -7,6 +7,7 @@ return [
     'details' => [
         'column' => 'Détail',
         'single_expand' => 'Une seule ligne ouverte à la fois',
+        'rejection' => 'Motif du rejet',
         'none' => 'Aucun',
         'payment' => 'Paiement',
         'amount_due' => 'Montant dû',

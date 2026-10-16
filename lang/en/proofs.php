@@ -128,6 +128,21 @@ return [
         'reject_confirm_description' => 'The registrant will need to submit a new proof; their seats are not released immediately.',
     ],
 
+    'rejection' => [
+        'title' => 'Reason for rejection',
+        'description' => 'The guest will read it on their file page, with the button to send a new proof.',
+        'reason' => 'Why is this proof rejected?',
+        'reason_placeholder' => 'Choose a reason',
+        'note' => 'Details',
+        'note_hint' => 'Write what the guest needs to fix.',
+        'reasons' => [
+            'edited_capture' => 'The capture looks edited or retouched: send the original capture, untouched.',
+            'incomplete_amount' => 'The amount received is incomplete: the payment must cover the full amount, transaction fees included.',
+            'split_payment' => 'The payment was split: it must be made in one go.',
+            'unreadable' => 'The capture is unreadable: send a clearer one.',
+            'other' => 'Other reason',
+        ],
+    ],
     'flash' => [
         'validated' => 'Proof validated, registration confirmed.',
         'rejected' => 'Proof rejected.',

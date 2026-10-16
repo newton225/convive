@@ -143,13 +143,58 @@ class PaymentProofControllerTest extends TestCase
         $this->joinWithPermissions($tenant, $member, [TenantPermission::ProofsView, TenantPermission::ProofsReject]);
 
         $this->actingAs($member)
-            ->post(route('tenants.events.proofs.reject', [$tenant, $event, $proof]))
+            ->post(route('tenants.events.proofs.reject', [$tenant, $event, $proof]), ['reason' => 'edited_capture'])
             ->assertRedirect(route('tenants.events.proofs.index', [$tenant, $event]));
 
         $this->assertSame(
             RegistrationStatus::ProofRejected,
             $tenant->asCurrent(fn () => $proof->fresh()->registration)->status,
         );
+    }
+
+    public function test_le_rejet_exige_un_motif_du_catalogue(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event, 'proof' => $proof] = $this->proofSubmitted($tenant);
+        $url = route('tenants.events.proofs.reject', [$tenant, $event, $proof]);
+
+        $this->actingAs($owner)->post($url)->assertSessionHasErrors('reason');
+        $this->actingAs($owner)->post($url, ['reason' => 'invente'])->assertSessionHasErrors('reason');
+
+        $this->assertSame(
+            RegistrationStatus::ProofSubmitted,
+            $tenant->asCurrent(fn () => $proof->fresh()->registration)->status,
+        );
+    }
+
+    public function test_le_motif_autre_exige_une_precision(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event, 'proof' => $proof] = $this->proofSubmitted($tenant);
+        $url = route('tenants.events.proofs.reject', [$tenant, $event, $proof]);
+
+        $this->actingAs($owner)->post($url, ['reason' => 'other'])->assertSessionHasErrors('note');
+
+        $this->actingAs($owner)->post($url, ['reason' => 'other', 'note' => 'Le recu est celui d un autre evenement'])->assertSessionHasNoErrors();
+
+        $fresh = $tenant->asCurrent(fn () => $proof->fresh());
+        $this->assertSame('Le recu est celui d un autre evenement', $fresh->rejection_note);
+    }
+
+    public function test_un_membre_sans_la_permission_est_refuse_avant_toute_validation_du_motif(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event, 'proof' => $proof] = $this->proofSubmitted($tenant);
+
+        $member = User::factory()->withTwoFactor()->create();
+        $this->joinWithPermissions($tenant, $member, [TenantPermission::ProofsView]);
+
+        $this->actingAs($member)
+            ->post(route('tenants.events.proofs.reject', [$tenant, $event, $proof]))
+            ->assertForbidden();
     }
 
     public function test_un_membre_sans_la_permission_de_rejet_ne_rejette_rien(): void

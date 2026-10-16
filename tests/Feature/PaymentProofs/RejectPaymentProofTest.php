@@ -5,6 +5,7 @@ namespace Tests\Feature\PaymentProofs;
 use App\Actions\PaymentProofs\RejectPaymentProof;
 use App\Actions\Registrations\HoldRegistration;
 use App\Actions\Tenants\CreateTenant;
+use App\Enums\ProofRejectionReason;
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
 use App\Models\PaymentProof;
@@ -49,6 +50,22 @@ class RejectPaymentProofTest extends TestCase
         $this->assertTrue($rejected);
         $this->assertSame(RegistrationStatus::ProofRejected, $tenant->asCurrent(fn () => $registration->fresh())->status);
         $this->assertContains(RegistrationStatus::ProofRejected, Registration::UnfinalizedStatuses);
+    }
+
+    public function test_le_motif_du_rejet_est_garde_sur_la_preuve_et_au_journal(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['proof' => $proof] = $this->proofSubmitted($tenant);
+
+        $tenant->asCurrent(fn () => app(RejectPaymentProof::class)->handle($proof, $owner, ProofRejectionReason::SplitPayment, 'Deux virements de 5 000'));
+
+        $fresh = $tenant->asCurrent(fn () => $proof->fresh());
+        $this->assertSame(ProofRejectionReason::SplitPayment, $fresh->rejection_reason);
+        $this->assertSame('Deux virements de 5 000', $fresh->rejection_note);
+
+        $activity = $tenant->asCurrent(fn () => Activity::where('description', 'proofs.rejected')->latest('id')->first());
+        $this->assertSame('split_payment', $activity->properties['attributes']['rejection_reason']);
     }
 
     /**

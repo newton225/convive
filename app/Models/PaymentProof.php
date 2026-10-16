@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PaymentChannel;
+use App\Enums\ProofRejectionReason;
 use App\Support\PerceptualHash;
 use Database\Factories\PaymentProofFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -27,6 +28,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property PaymentChannel $channel
  * @property string|null $reference
  * @property string|null $guest_note
+ * @property ProofRejectionReason|null $rejection_reason
+ * @property string|null $rejection_note
  * @property string|null $perceptual_hash
  * @property string $idempotency_key
  * @property Carbon|null $created_at
@@ -34,7 +37,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read Registration $registration
  * @property-read PaymentAccount $paymentAccount
  */
-#[Fillable(['registration_id', 'payment_account_id', 'channel', 'reference', 'guest_note', 'perceptual_hash', 'idempotency_key'])]
+#[Fillable(['registration_id', 'payment_account_id', 'channel', 'reference', 'guest_note', 'perceptual_hash', 'idempotency_key', 'rejection_reason', 'rejection_note'])]
 class PaymentProof extends Model implements HasMedia
 {
     /** @use HasFactory<PaymentProofFactory> */
@@ -338,6 +341,21 @@ class PaymentProof extends Model implements HasMedia
     }
 
     /**
+     * Le motif du rejet tel que l'organisation et l'invite le lisent, ou null : preuve non rejetee, ou
+     * rejetee avant que le motif existe.
+     *
+     * @return array{reason: string, note: string|null}|null
+     */
+    public function rejectionSummary(): ?array
+    {
+        if ($this->rejection_reason === null) {
+            return null;
+        }
+
+        return ['reason' => $this->rejection_reason->label(), 'note' => $this->rejection_note];
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -346,6 +364,7 @@ class PaymentProof extends Model implements HasMedia
     {
         return [
             'channel' => PaymentChannel::class,
+            'rejection_reason' => ProofRejectionReason::class,
         ];
     }
 }

@@ -44,6 +44,12 @@ export type RegistrationCompanionSummary = {
     priceCategory: RegistrationPriceSummary | null;
 };
 
+// Le motif d'un rejet de preuve, tel que l'organisation et l'invite le lisent.
+export type ProofRejection = {
+    reason: string;
+    note: string | null;
+};
+
 export type RegistrationShowStatus =
     | 'draft'
     | 'held'
@@ -101,6 +107,7 @@ export type RegistrationShow = {
     amountDue: number;
     status: RegistrationShowStatus;
     heldUntil: string | null;
+    rejection: ProofRejection | null;
     companions: RegistrationCompanionSummary[];
     ticket: TicketSummary | null;
 };
@@ -131,6 +138,7 @@ export type RegistrationRow = {
     holdActive: boolean;
     tableNumber: number | null;
     cancellationReason: string | null;
+    rejection: ProofRejection | null;
     // Canal de la derniere preuve deposee, et heure du passage a l'entree (null tant qu'absent).
     channelLabel: string | null;
     // Capture de la derniere preuve, quel que soit le statut : null sans preuve, sans capture, ou

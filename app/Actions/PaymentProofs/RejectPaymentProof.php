@@ -4,6 +4,7 @@ namespace App\Actions\PaymentProofs;
 
 use App\Actions\Notifications\SendAlert;
 use App\Enums\NotificationType;
+use App\Enums\ProofRejectionReason;
 use App\Enums\RegistrationStatus;
 use App\Models\PaymentProof;
 use App\Models\Tenant;
@@ -24,10 +25,12 @@ class RejectPaymentProof
     /**
      * Attempt to reject the given proof.
      *
+     * `$reason` et `$note` : le motif que l'invite lira sur son dossier (decision du 2026-10-16).
+     *
      * @return bool false quand la preuve n'est plus en attente de verification (deja validee,
      *              ou deja rejetee par ailleurs) : l'appelant decide de la reponse.
      */
-    public function handle(PaymentProof $proof, User $actor): bool
+    public function handle(PaymentProof $proof, User $actor, ?ProofRejectionReason $reason = null, ?string $note = null): bool
     {
         $registration = $proof->registration;
 
@@ -42,8 +45,9 @@ class RejectPaymentProof
             return false;
         }
 
-        DB::transaction(function () use ($registration, $proof, $actor) {
+        DB::transaction(function () use ($registration, $proof, $actor, $reason, $note) {
             $registration->update(['status' => RegistrationStatus::ProofRejected]);
+            $proof->update(['rejection_reason' => $reason, 'rejection_note' => $note]);
 
             activity()
                 ->performedOn($proof)
@@ -51,7 +55,7 @@ class RejectPaymentProof
                 ->event('updated')
                 ->withProperties([
                     'old' => ['status' => 'proof_submitted'],
-                    'attributes' => ['status' => 'proof_rejected'],
+                    'attributes' => ['status' => 'proof_rejected', 'rejection_reason' => $reason?->value, 'rejection_note' => $note],
                 ])
                 ->log('proofs.rejected');
         });

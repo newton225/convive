@@ -7,6 +7,7 @@ return [
     'details' => [
         'column' => 'Details',
         'single_expand' => 'Only one row open at a time',
+        'rejection' => 'Reason for rejection',
         'none' => 'None',
         'payment' => 'Payment',
         'amount_due' => 'Amount due',

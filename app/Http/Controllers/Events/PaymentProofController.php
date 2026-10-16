@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Events;
 
 use App\Actions\PaymentProofs\RejectPaymentProof;
 use App\Actions\PaymentProofs\ValidatePaymentProof;
+use App\Enums\ProofRejectionReason;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureTenantMembership;
+use App\Http\Requests\Events\RejectPaymentProofRequest;
 use App\Models\Event;
 use App\Models\PaymentProof;
 use App\Models\Registration;
@@ -81,6 +83,11 @@ class PaymentProofController extends Controller
                 'sort' => $sort,
             ],
             'hasProofs' => $this->queue($event, '', 'submitted_at')->exists(),
+            'rejectionReasons' => collect(ProofRejectionReason::cases())->map(fn (ProofRejectionReason $reason) => [
+                'value' => $reason->value,
+                'label' => $reason->label(),
+                'requiresNote' => $reason->requiresNote(),
+            ])->all(),
             // Passer d'un evenement a l'autre : un acces du support limite a un evenement ne voit que lui.
             'eventSwitcher' => ProofQueueEvents::all($event, $request->attributes->get(EnsureTenantMembership::SupportAccessAttribute)?->event_id),
         ]);
@@ -168,12 +175,9 @@ class PaymentProofController extends Controller
      * Reject the given proof : the registration returns to the unfinalized statuses, the guest
      * can retry once back on their reservation page (README 2.2).
      */
-    public function reject(Tenant $tenant, Event $event, PaymentProof $proof, RejectPaymentProof $reject): RedirectResponse
+    public function reject(RejectPaymentProofRequest $request, Tenant $tenant, Event $event, PaymentProof $proof, RejectPaymentProof $reject): RedirectResponse
     {
-        Gate::authorize('reject', [$proof, $tenant]);
-        $this->ensureBelongsToEvent($proof, $event);
-
-        $rejected = $reject->handle($proof, request()->user());
+        $rejected = $reject->handle($proof, $request->user(), $request->reason(), $request->validated('note'));
 
         Inertia::flash('toast', $rejected
             ? ['type' => 'success', 'message' => __('proofs.flash.rejected')]

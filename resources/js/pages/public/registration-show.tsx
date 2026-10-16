@@ -153,6 +153,24 @@ export default function PublicRegistrationShow({
                                             : 'guest.registration.show.expired',
                                     )}
                                 </p>
+                                {isRejected && registration.rejection ? (
+                                    <div
+                                        className="bg-muted/50 space-y-1 rounded-md p-3 text-left text-sm"
+                                        data-test="registration-rejection"
+                                    >
+                                        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                                            {t(
+                                                'guest.registration.show.rejection_label',
+                                            )}
+                                        </p>
+                                        <p>{registration.rejection.reason}</p>
+                                        {registration.rejection.note ? (
+                                            <p className="break-words">
+                                                {registration.rejection.note}
+                                            </p>
+                                        ) : null}
+                                    </div>
+                                ) : null}
                                 {resume ? (
                                     <SubmitButton
                                         type="button"

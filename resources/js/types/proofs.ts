@@ -57,3 +57,10 @@ export type PaymentProofRow = {
     duplicateReferenceMatches: DuplicateReferenceMatch[];
     signals: PaymentProofSignals;
 };
+
+// Un motif de rejet du catalogue, avec son libelle et s'il exige une precision ecrite.
+export type ProofRejectionReasonOption = {
+    value: string;
+    label: string;
+    requiresNote: boolean;
+};

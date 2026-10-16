@@ -6,10 +6,12 @@ use App\Actions\Tenants\CreateTenant;
 use App\Actions\Tickets\IssueTicket;
 use App\Enums\EventStatus;
 use App\Enums\LegalForm;
+use App\Enums\ProofRejectionReason;
 use App\Enums\RegistrationStatus;
 use App\Enums\TicketModel;
 use App\Models\Event;
 use App\Models\PaymentAccount;
+use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\Unit;
@@ -983,6 +985,37 @@ class RegistrationTest extends TestCase
 
         $this->post($this->registrationFormUrl($tenant, $event), $this->validPayload($tenant))
             ->assertSessionHasNoErrors();
+    }
+
+    public function test_l_invite_lit_le_motif_du_rejet_de_sa_preuve_sur_la_page_de_son_dossier(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        [$registration, $token] = $this->heldRegistration($tenant, $event, ['status' => RegistrationStatus::ProofRejected]);
+        $tenant->asCurrent(fn () => PaymentProof::factory()->create([
+            'registration_id' => $registration->id,
+            'rejection_reason' => ProofRejectionReason::Other,
+            'rejection_note' => 'Le recu est celui d un autre evenement',
+        ]));
+
+        $this->get($this->urlFor($tenant->subdomain, $event->public_token, "/register/{$token}"))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('registration.rejection.reason', ProofRejectionReason::Other->label())
+                ->where('registration.rejection.note', 'Le recu est celui d un autre evenement'));
+    }
+
+    public function test_sans_rejet_la_page_de_l_invite_ne_porte_aucun_motif(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        [, $token] = $this->heldRegistration($tenant, $event);
+
+        $this->get($this->urlFor($tenant->subdomain, $event->public_token, "/register/{$token}"))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('registration.rejection', null));
     }
 
     public function test_le_renvoi_du_lien_est_limite_a_trois_par_heure_et_par_numero(): void

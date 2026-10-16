@@ -137,6 +137,7 @@ return [
             'retry' => 'Check availability and try again',
             'proof_submitted' => 'Your proof was received. It is being verified.',
             'proof_rejected' => 'Your proof could not be validated. Please send a new one.',
+            'rejection_label' => 'Reason for rejection',
             'recap_title' => 'Summary',
             'seats_available' => '{0} When this page opened, no seat was left.|{1} When this page opened, 1 seat was left.|[2,*] When this page opened, :count seats were left.',
             'seats_enough' => 'When this page opened, there were enough seats for your group.',

@@ -137,6 +137,7 @@ return [
             'retry' => 'Vérifier les places et relancer',
             'proof_submitted' => 'Votre preuve a été reçue. Elle est en cours de vérification.',
             'proof_rejected' => "Votre preuve n'a pas pu être validée. Merci d'en envoyer une nouvelle.",
+            'rejection_label' => 'Motif du rejet',
             'recap_title' => 'Récapitulatif',
             'seats_available' => '{0} À l’ouverture de cette page, aucune place ne restait.|{1} À l’ouverture de cette page, il restait 1 place.|[2,*] À l’ouverture de cette page, il restait :count places.',
             'seats_enough' => 'À l’ouverture de cette page, il restait assez de places pour votre groupe.',

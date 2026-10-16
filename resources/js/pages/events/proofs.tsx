@@ -26,6 +26,7 @@ import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog'
 import { ProofConfirmSummary } from '@/components/proofs/proof-confirm-summary';
 import { ProofDetails } from '@/components/proofs/proof-details';
 import { ProofEventSwitcher } from '@/components/proofs/proof-event-switcher';
+import { ProofRejectionFields } from '@/components/proofs/proof-rejection-fields';
 import { ProofRules } from '@/components/proofs/proof-rules';
 import { ProofsToolbar } from '@/components/proofs/proofs-toolbar';
 import Heading from '@/components/heading';
@@ -70,6 +71,7 @@ import { approve, index, reject } from '@/routes/tenants/events/proofs';
 import type {
     PaymentProofRow,
     ProofEventChoice,
+    ProofRejectionReasonOption,
     TenantPermissions,
     Translations,
 } from '@/types';
@@ -95,6 +97,7 @@ type Props = {
         sort: string;
     };
     hasProofs: boolean;
+    rejectionReasons: ProofRejectionReasonOption[];
     eventSwitcher: ProofEventChoice[];
 };
 
@@ -111,10 +114,17 @@ export default function EventProofs({
     meta,
     filters,
     hasProofs,
+    rejectionReasons,
     eventSwitcher,
 }: Props) {
     const { t, locale } = useTranslation();
     const [rejecting, setRejecting] = useState<PaymentProofRow | null>(null);
+    const [rejectionReason, setRejectionReason] = useState('');
+    const [rejectionNote, setRejectionNote] = useState('');
+    const [rejectionErrors, setRejectionErrors] = useState<{
+        reason?: string;
+        note?: string;
+    }>({});
     const [approving, setApproving] = useState<PaymentProofRow | null>(null);
     const [approveProcessing, setApproveProcessing] = useState(false);
     const [receiptPreview, setReceiptPreview] = useState<ReceiptPreview | null>(
@@ -439,7 +449,12 @@ export default function EventProofs({
                             className="h-7 px-2.5 text-xs"
                             data-test="proof-reject"
                             data-tour="proof-reject"
-                            onClick={() => setRejecting(row.original)}
+                            onClick={() => {
+                                setRejectionReason('');
+                                setRejectionNote('');
+                                setRejectionErrors({});
+                                setRejecting(row.original);
+                            }}
                         >
                             {t('proofs.actions.reject')}
                         </Button>
@@ -725,6 +740,15 @@ export default function EventProofs({
                     ) : null}
                     <ProofRules />
 
+                    <ProofRejectionFields
+                        reasons={rejectionReasons}
+                        reason={rejectionReason}
+                        note={rejectionNote}
+                        onReasonChange={setRejectionReason}
+                        onNoteChange={setRejectionNote}
+                        errors={rejectionErrors}
+                    />
+
                     <DialogFooter className="gap-2">
                         <DialogClose asChild>
                             <Button variant="secondary">
@@ -735,6 +759,14 @@ export default function EventProofs({
                         <Button
                             variant="destructive"
                             data-test="proof-reject-confirm"
+                            disabled={
+                                rejectionReason === '' ||
+                                (rejectionReasons.find(
+                                    (option) =>
+                                        option.value === rejectionReason,
+                                )?.requiresNote === true &&
+                                    rejectionNote.trim() === '')
+                            }
                             onClick={() => {
                                 if (rejecting) {
                                     router.post(
@@ -743,8 +775,15 @@ export default function EventProofs({
                                             event.id,
                                             rejecting.proofId,
                                         ]).url,
-                                        {},
-                                        { onSuccess: () => setRejecting(null) },
+                                        {
+                                            reason: rejectionReason,
+                                            note: rejectionNote.trim() || null,
+                                        },
+                                        {
+                                            onSuccess: () => setRejecting(null),
+                                            onError: (errors) =>
+                                                setRejectionErrors(errors),
+                                        },
                                     );
                                 }
                             }}

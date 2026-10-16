@@ -506,6 +506,7 @@ class RegistrationController extends Controller
                 'amountDue' => $registration->amount_due,
                 'status' => $registration->status->value,
                 'heldUntil' => $registration->held_until?->toISOString(),
+                'rejection' => $registration->status === RegistrationStatus::ProofRejected ? $registration->latestProof?->rejectionSummary() : null,
                 'companions' => $registration->companions()->orderBy('position')->with(['unit', 'priceCategory'])->get()->map(
                     fn ($companion) => [
                         'name' => $companion->name,

@@ -128,6 +128,21 @@ return [
         'reject_confirm_description' => "L'inscrit devra déposer une nouvelle preuve ; les places qu'il occupe ne sont pas rendues immédiatement.",
     ],
 
+    'rejection' => [
+        'title' => 'Motif du rejet',
+        'description' => 'L’invité le lira sur la page de son dossier, avec le bouton pour envoyer une nouvelle preuve.',
+        'reason' => 'Pourquoi cette preuve est-elle rejetée ?',
+        'reason_placeholder' => 'Choisir un motif',
+        'note' => 'Précision',
+        'note_hint' => 'Écrivez ce que l’invité doit corriger.',
+        'reasons' => [
+            'edited_capture' => 'La capture semble modifiée ou retouchée : envoyez la capture d’origine, sans retouche.',
+            'incomplete_amount' => 'Le montant reçu est incomplet : le paiement doit couvrir la totalité, frais de transaction compris.',
+            'split_payment' => 'Le paiement a été fractionné : il doit être fait en une seule fois.',
+            'unreadable' => 'La capture est illisible : envoyez-en une plus nette.',
+            'other' => 'Autre motif',
+        ],
+    ],
     'flash' => [
         'validated' => 'Preuve validée, inscription confirmée.',
         'rejected' => 'Preuve rejetée.',

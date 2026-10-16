@@ -387,6 +387,7 @@ class RegistrationController extends Controller
             'holdActive' => $registration->status === RegistrationStatus::Held && ! $registration->holdHasExpired(),
             'tableNumber' => $registration->tableAssignment?->seatingTable->number,
             'cancellationReason' => $registration->cancellation_reason,
+            'rejection' => $registration->status === RegistrationStatus::ProofRejected ? $proof?->rejectionSummary() : null,
             'channelLabel' => $proof?->channel->label(),
             // La capture reste consultable quel que soit le statut : validee, annulee ou encore en
             // attente, c'est la trace du versement. Meme route journalisee que la file de preuves

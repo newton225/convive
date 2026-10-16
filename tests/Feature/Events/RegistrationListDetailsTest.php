@@ -5,6 +5,8 @@ namespace Tests\Feature\Events;
 use App\Actions\Tenants\CreateTenant;
 use App\Actions\Tickets\IssueTicket;
 use App\Enums\PaymentChannel;
+use App\Enums\ProofRejectionReason;
+use App\Enums\RegistrationStatus;
 use App\Models\Event;
 use App\Models\EventPriceCategory;
 use App\Models\PaymentAccount;
@@ -136,6 +138,27 @@ class RegistrationListDetailsTest extends TestCase
                 ->has('rows', 1)
                 ->where('rows.0.name', 'Aya Kouame')
                 ->where('rows.0.proofReference', 'TX-ABC-123'));
+    }
+
+    public function test_le_motif_du_rejet_figure_sur_la_ligne_du_dossier(): void
+    {
+        $this->tenant->asCurrent(function () {
+            $registration = Registration::factory()->create([
+                'event_id' => $this->event->id,
+                'status' => RegistrationStatus::ProofRejected,
+            ]);
+            PaymentProof::factory()->create([
+                'registration_id' => $registration->id,
+                'rejection_reason' => ProofRejectionReason::EditedCapture,
+                'rejection_note' => null,
+            ]);
+        });
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.registrations.index', [$this->tenant, $this->event]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('rows.0.rejection.reason', ProofRejectionReason::EditedCapture->label())
+                ->where('rows.0.rejection.note', null));
     }
 
     public function test_une_inscription_sans_preuve_ni_passage_n_a_ni_canal_ni_entree(): void
