@@ -9,7 +9,7 @@ return [
     ],
 
     'kpis' => [
-        'registrations' => 'Registered',
+        'registrations' => 'Registration files',
         'validated' => 'Approved proofs',
         'to_check' => 'Proofs to check',
         'without_proof' => 'Without proof',
@@ -32,7 +32,7 @@ return [
 
     // Ce que chaque bloc compte exactement, dans sa bulle d'aide.
     'help' => [
-        'registrations' => 'Every registration received for this event, whatever its state: confirmed, pending, expired or cancelled. One registration may cover several people, the guest and their companions.',
+        'registrations' => 'Every registration received for this event, whatever its state: confirmed, pending, expired or cancelled. One registration may cover several people, the guest and their companions: this figure counts registrations, while seats and table occupancy count people.',
         'validated' => 'Registrations whose proof of payment has been approved: their seats are secured. The collected amount adds up what these registrations paid, including those cancelled after approval.',
         'to_check' => 'Registrations whose proof has been submitted and is waiting to be approved or rejected in the proof queue.',
         'without_proof' => 'Registrations without a valid proof: unfinished form, hold in progress or expired, rejected proof. At the purge, those that still have submitted nothing are removed.',

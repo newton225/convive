@@ -9,7 +9,7 @@ return [
     ],
 
     'kpis' => [
-        'registrations' => 'Inscrits',
+        'registrations' => 'Dossiers d’inscription',
         'validated' => 'Preuves validées',
         'to_check' => 'Preuves à vérifier',
         'without_proof' => 'Sans preuve',
@@ -32,7 +32,7 @@ return [
 
     // Ce que chaque bloc compte exactement, dans sa bulle d'aide.
     'help' => [
-        'registrations' => 'Toutes les inscriptions reçues pour cet événement, quel que soit leur état : confirmées, en attente, expirées ou annulées. Une inscription peut compter plusieurs personnes, l’invité et ses accompagnateurs.',
+        'registrations' => 'Toutes les inscriptions reçues pour cet événement, quel que soit leur état : confirmées, en attente, expirées ou annulées. Une inscription peut compter plusieurs personnes, l’invité et ses accompagnateurs : ce chiffre compte les dossiers, alors que les places et l’occupation des tables comptent les personnes.',
         'validated' => 'Les inscriptions dont la preuve de paiement a été validée : leurs places sont acquises. Le montant encaissé additionne ce que ces inscriptions ont versé, y compris celles annulées après validation.',
         'to_check' => 'Les inscriptions dont la preuve a été déposée et attend d’être validée ou rejetée dans la file des preuves.',
         'without_proof' => 'Les inscriptions sans preuve valable : formulaire non terminé, réservation en cours ou expirée, preuve rejetée. À la purge, celles qui n’ont toujours rien déposé sont supprimées.',
