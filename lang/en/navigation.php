@@ -20,6 +20,7 @@ return [
 
     'billing' => 'Subscription',
     'audit' => 'Action history',
+    'treasury' => 'Treasury',
     'entry_control' => 'Entry control',
     'ticket_template' => 'Ticket template',
     'profiles' => 'Profiles and permissions',

@@ -20,6 +20,7 @@ return [
 
     'billing' => 'Abonnement',
     'audit' => 'Historique des actions',
+    'treasury' => 'Trésorerie',
     'entry_control' => "Contrôle à l'entrée",
     'ticket_template' => 'Gabarit du billet',
     'profiles' => 'Profils et permissions',

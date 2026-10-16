@@ -13,6 +13,7 @@ use App\Http\Controllers\Events\RegistrationResumeLinkController;
 use App\Http\Controllers\Events\ReportController;
 use App\Http\Controllers\Events\ScanController;
 use App\Http\Controllers\Events\SeatingController;
+use App\Http\Controllers\Events\TreasuryController;
 use App\Http\Middleware\EnsureTenantIsNotSuspended;
 use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Middleware\EnsureTwoFactorForProfile;
@@ -82,6 +83,11 @@ Route::prefix('{tenant}')
         // Le controle a l'entree (README ecran 26), etape 7. `entry-control` est le raccourci du
         // menu : il ouvre le scan de l'evenement du jour, ou propose un choix s'il y en a plusieurs.
         Route::get('entry-control', EntryControlController::class)->name('tenants.entry-control');
+        // La tresorerie : les totaux de toute l'organisation (decision du 2026-10-16).
+        Route::get('treasury', [TreasuryController::class, 'show'])->name('tenants.treasury');
+        Route::get('treasury/export/pdf', [TreasuryController::class, 'exportPdf'])
+            ->middleware('throttle:exports')
+            ->name('tenants.treasury.export.pdf');
         Route::get('events/{event}/scan', [ScanController::class, 'index'])->name('tenants.events.scan.index');
         Route::post('events/{event}/scan/verify', [ScanController::class, 'verify'])
             ->middleware('throttle:scan')

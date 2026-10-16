@@ -4,6 +4,7 @@ import {
     CalendarDays,
     CreditCard,
     Layers,
+    Landmark,
     LayoutGrid,
     LifeBuoy,
     ScanLine,
@@ -39,7 +40,7 @@ import { show as supportAccessShow } from '@/routes/tenants/support-access';
 import { edit as ticketTemplateEdit } from '@/routes/tenants/ticket-template';
 import { index as unitsIndex } from '@/routes/tenants/units';
 import { index as eventsIndex } from '@/routes/tenants/events';
-import { entryControl, edit as tenantEdit } from '@/routes/tenants';
+import { entryControl, edit as tenantEdit, treasury } from '@/routes/tenants';
 import { useTranslation } from '@/hooks/use-translation';
 import type { NavItem } from '@/types';
 
@@ -75,6 +76,11 @@ export function AppSidebar() {
                       icon: CalendarDays,
                       tourId: 'nav-events',
                   },
+                  ...only(allowed(Permission.ReportsView), {
+                      title: t('navigation.treasury'),
+                      href: treasury(tenant.slug),
+                      icon: Landmark,
+                  }),
                   ...only(allowed(Permission.ScanPerform), {
                       title: t('navigation.entry_control'),
                       href: entryControl(tenant.slug),

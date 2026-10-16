@@ -14,6 +14,7 @@ export type * from './proofs';
 export type * from './reconciliation';
 export type * from './registrations';
 export type * from './reports';
+export type * from './treasury';
 export type * from './scan';
 export type * from './seating';
 export type * from './site';
