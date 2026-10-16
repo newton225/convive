@@ -1,7 +1,7 @@
 import { ChevronDown, Clock, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { AccountForm } from '@/components/payment-accounts/account-form';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
@@ -46,22 +46,20 @@ export function PaymentAccountCard({
                 <div className="min-w-0 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium">{account.label}</span>
-                        <Badge
-                            variant={
-                                account.isPubliclyVisible
-                                    ? 'outline'
-                                    : 'secondary'
+                        <StatusBadge
+                            tone={
+                                account.isPubliclyVisible ? 'success' : 'muted'
                             }
                         >
                             {account.isPubliclyVisible
                                 ? t('payment_accounts.badges.visible')
                                 : t('payment_accounts.badges.hidden')}
-                        </Badge>
+                        </StatusBadge>
                         {account.pending ? (
-                            <Badge variant="secondary">
+                            <StatusBadge tone="warning">
                                 <Clock className="h-3 w-3" />
                                 {t('payment_accounts.badges.pending')}
-                            </Badge>
+                            </StatusBadge>
                         ) : null}
                     </div>
                     <p

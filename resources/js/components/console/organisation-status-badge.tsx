@@ -1,18 +1,7 @@
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { useTranslation } from '@/hooks/use-translation';
+import { organisationStatusTones } from '@/lib/status-tones';
 import type { ConsoleOrganisationStatus } from '@/types';
-
-const variants: Record<
-    ConsoleOrganisationStatus,
-    'default' | 'secondary' | 'destructive' | 'outline'
-> = {
-    trial: 'outline',
-    active: 'secondary',
-    past_due: 'destructive',
-    suspended: 'destructive',
-    deletion_scheduled: 'outline',
-    deleted_by_owner: 'destructive',
-};
 
 /**
  * L'etat d'une organisation cliente, toujours ecrit en toutes lettres : la couleur ne porte
@@ -26,8 +15,8 @@ export function OrganisationStatusBadge({
     const { t } = useTranslation();
 
     return (
-        <Badge variant={variants[status]}>
+        <StatusBadge tone={organisationStatusTones[status] ?? 'muted'}>
             {t(`console.statuses.${status}`)}
-        </Badge>
+        </StatusBadge>
     );
 }

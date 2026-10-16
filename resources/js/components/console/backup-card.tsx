@@ -1,6 +1,6 @@
 import { TriangleAlert } from 'lucide-react';
 import { RunBackupButton } from '@/components/console/run-backup-button';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatDateTime } from '@/lib/format-date';
@@ -44,15 +44,13 @@ export function BackupCard({ backup }: Props) {
                     <p>{t('console.health.backup_none')}</p>
                 ) : (
                     <div className="flex flex-wrap items-center gap-3">
-                        <Badge
-                            variant={
-                                backup.healthy ? 'secondary' : 'destructive'
-                            }
+                        <StatusBadge
+                            tone={backup.healthy ? 'success' : 'danger'}
                         >
                             {backup.healthy
                                 ? t('console.health.healthy')
                                 : t('console.health.unhealthy')}
-                        </Badge>
+                        </StatusBadge>
                         <span>
                             {t('console.health.backup_last', {
                                 date: formatDateTime(backup.lastAt, locale),

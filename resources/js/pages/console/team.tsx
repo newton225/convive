@@ -6,6 +6,7 @@ import { ConsoleTable } from '@/components/console/console-table';
 import { InviteOperatorDialog } from '@/components/console/invite-operator-dialog';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
+import { StatusBadge } from '@/components/status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -83,9 +84,9 @@ export default function Team({ isSample, operators, invitations }: Props) {
                 row.original.twoFactor ? (
                     t('console.team.two_factor_on')
                 ) : (
-                    <Badge variant="destructive">
+                    <StatusBadge tone="danger">
                         {t('console.team.two_factor_off')}
-                    </Badge>
+                    </StatusBadge>
                 ),
         },
         {

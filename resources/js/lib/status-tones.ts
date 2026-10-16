@@ -55,3 +55,46 @@ export const registrationStatusTones: Record<string, StatusTone> = {
     expired: 'muted',
     draft: 'muted',
 };
+
+export const reconciliationOutcomeTones: Record<string, StatusTone> = {
+    matched: 'success',
+    amount_mismatch: 'warning',
+    approximate_name: 'warning',
+    no_registration: 'danger',
+};
+
+export const refundStatusTones: Record<string, StatusTone> = {
+    due: 'danger',
+    refunded: 'success',
+    kept: 'neutral',
+};
+
+export const scanResultTones: Record<string, StatusTone> = {
+    accepted: 'success',
+    already_scanned: 'warning',
+    refused: 'danger',
+};
+
+export const organisationStatusTones: Record<string, StatusTone> = {
+    trial: 'info',
+    active: 'success',
+    past_due: 'warning',
+    suspended: 'danger',
+    deletion_scheduled: 'warning',
+    deleted_by_owner: 'neutral',
+};
+
+export const healthCheckTones: Record<string, StatusTone> = {
+    ok: 'success',
+    warning: 'warning',
+    failed: 'danger',
+    crashed: 'danger',
+    skipped: 'muted',
+};
+
+export const scheduledTaskTones: Record<string, StatusTone> = {
+    ok: 'success',
+    late: 'warning',
+    failed: 'danger',
+    waiting: 'muted',
+};

@@ -4,7 +4,8 @@ import {
     CircleMinus,
     TriangleAlert,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
+import { healthCheckTones } from '@/lib/status-tones';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import type { ConsoleHealthCheck } from '@/types';
@@ -61,9 +62,6 @@ export function HealthChecksCard({ checks }: Props) {
                     <ul className="divide-y text-sm">
                         {ordered.map((check) => {
                             const Icon = StatusIcons[check.status];
-                            const failing =
-                                check.status === 'failed' ||
-                                check.status === 'crashed';
                             // Un controle non joue ou impossible n'a rien a expliquer de plus
                             // que son etat.
                             const explained =
@@ -95,19 +93,16 @@ export function HealthChecksCard({ checks }: Props) {
                                             </span>
                                         ) : null}
                                     </span>
-                                    <Badge
-                                        variant={
-                                            failing
-                                                ? 'destructive'
-                                                : check.status === 'ok'
-                                                  ? 'secondary'
-                                                  : 'outline'
+                                    <StatusBadge
+                                        tone={
+                                            healthCheckTones[check.status] ??
+                                            'muted'
                                         }
                                     >
                                         {t(
                                             `console.health.check_status.${check.status}`,
                                         )}
-                                    </Badge>
+                                    </StatusBadge>
                                 </li>
                             );
                         })}

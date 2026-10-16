@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { ConsoleTable } from '@/components/console/console-table';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
+import { scheduledTaskTones } from '@/lib/status-tones';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatRelative } from '@/lib/format-date';
 import type { ConsoleScheduledTask } from '@/types';
@@ -66,17 +67,9 @@ export function ScheduledTasksTable({ tasks }: Props) {
                 const { state } = row.original;
 
                 return (
-                    <Badge
-                        variant={
-                            state === 'failed' || state === 'late'
-                                ? 'destructive'
-                                : state === 'ok'
-                                  ? 'secondary'
-                                  : 'outline'
-                        }
-                    >
+                    <StatusBadge tone={scheduledTaskTones[state] ?? 'muted'}>
                         {t(`console.health.task_states.${state}`)}
-                    </Badge>
+                    </StatusBadge>
                 );
             },
         },

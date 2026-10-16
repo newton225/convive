@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ReceiptPreviewDialog } from '@/components/proofs/receipt-preview-dialog';
 import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog';
 import { ReceiptComparisonCard } from '@/components/proofs/receipt-comparison-card';
-import { Badge } from '@/components/ui/badge';
+import { RegistrationStatusBadge } from '@/components/registrations/registration-status-badge';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -123,19 +123,14 @@ export function DuplicateImageDialog({ proof, onOpenChange }: Props) {
                                                             'status',
                                                     )}
                                                     badge={
-                                                        <Badge
-                                                            variant={
-                                                                match.status ===
-                                                                'confirmed'
-                                                                    ? 'default'
-                                                                    : match.status ===
-                                                                        'cancelled'
-                                                                      ? 'destructive'
-                                                                      : 'secondary'
+                                                        <RegistrationStatusBadge
+                                                            status={
+                                                                match.status
                                                             }
-                                                        >
-                                                            {match.statusLabel}
-                                                        </Badge>
+                                                            label={
+                                                                match.statusLabel
+                                                            }
+                                                        />
                                                     }
                                                     testId="duplicate-image-match"
                                                     onEnlarge={() =>

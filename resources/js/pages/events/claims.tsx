@@ -6,7 +6,7 @@ import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import DataTable from '@/components/data-table';
 import Heading from '@/components/heading';
 import type { PaginationMeta } from '@/components/list-pagination';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -116,14 +116,14 @@ export default function EventClaims({
             enableSorting: false,
             cell: ({ row }) =>
                 row.original.status === 'open' ? (
-                    <Badge variant="secondary">
+                    <StatusBadge tone="warning">
                         {t('claims.statuses.open')}
-                    </Badge>
+                    </StatusBadge>
                 ) : (
                     <div className="space-y-0.5">
-                        <Badge variant="outline">
+                        <StatusBadge tone="success">
                             {t('claims.statuses.resolved')}
-                        </Badge>
+                        </StatusBadge>
                         {row.original.resolvedAt ? (
                             <p className="text-muted-foreground text-xs">
                                 {t('claims.resolved_on', {

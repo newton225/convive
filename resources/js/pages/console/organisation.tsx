@@ -7,7 +7,8 @@ import { OrganisationActions } from '@/components/console/organisation-actions';
 import { QuotaUsage } from '@/components/console/quota-usage';
 import Heading from '@/components/heading';
 import { SampleBanner } from '@/components/sample-banner';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
+import { invoiceStatusTones } from '@/lib/status-tones';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatMoney } from '@/lib/format-currency';
@@ -61,15 +62,11 @@ export default function Organisation({
         {
             header: t('console.organisation.invoice_columns.status'),
             cell: ({ row }) => (
-                <Badge
-                    variant={
-                        row.original.status === 'paid'
-                            ? 'secondary'
-                            : 'destructive'
-                    }
+                <StatusBadge
+                    tone={invoiceStatusTones[row.original.status] ?? 'muted'}
                 >
                     {t(`billing.invoice_statuses.${row.original.status}`)}
-                </Badge>
+                </StatusBadge>
             ),
         },
     ];

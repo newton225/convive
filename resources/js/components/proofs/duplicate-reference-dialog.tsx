@@ -3,6 +3,7 @@ import { ReceiptComparisonCard } from '@/components/proofs/receipt-comparison-ca
 import { ReceiptPreviewDialog } from '@/components/proofs/receipt-preview-dialog';
 import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog';
 import { Badge } from '@/components/ui/badge';
+import { RegistrationStatusBadge } from '@/components/registrations/registration-status-badge';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -130,11 +131,14 @@ export function DuplicateReferenceDialog({ proof, onOpenChange }: Props) {
                                                                     )}
                                                                 </Badge>
                                                             ) : null}
-                                                            <Badge variant="secondary">
-                                                                {
+                                                            <RegistrationStatusBadge
+                                                                status={
+                                                                    match.status
+                                                                }
+                                                                label={
                                                                     match.statusLabel
                                                                 }
-                                                            </Badge>
+                                                            />
                                                         </div>
                                                     }
                                                     testId="duplicate-reference-match"

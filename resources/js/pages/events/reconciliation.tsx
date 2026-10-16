@@ -6,7 +6,7 @@ import { ConfirmSummary } from '@/components/confirm-summary';
 import DataTable from '@/components/data-table';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,6 +32,7 @@ import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { can, Permission } from '@/lib/permissions';
 import { sortingFromParam, sortingToParam } from '@/lib/server-sorting';
+import { reconciliationOutcomeTones } from '@/lib/status-tones';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import {
     importMethod,
@@ -42,7 +43,6 @@ import type {
     ReconciliationImportSummary,
     ReconciliationFilters,
     ReconciliationLineRow,
-    ReconciliationOutcome,
     ReconciliationRegistrationOption,
     ReconciliationStats,
     RegistrationsMeta,
@@ -73,15 +73,6 @@ const StatCards = [
     { key: 'approximate_name', stat: 'approximateName' },
     { key: 'no_registration', stat: 'noRegistration' },
 ] as const;
-
-const outcomeVariant = (
-    outcome: ReconciliationOutcome,
-): 'default' | 'secondary' | 'destructive' =>
-    outcome === 'matched'
-        ? 'default'
-        : outcome === 'no_registration'
-          ? 'destructive'
-          : 'secondary';
 
 /**
  * README ecran 19 : le rapprochement du releve, etape 9 de « Ordre de construction ». Les lignes
@@ -190,13 +181,18 @@ export default function EventReconciliation({
             header: t('reconciliation.columns.outcome'),
             cell: ({ row }) => (
                 <div className="flex flex-wrap items-center gap-1">
-                    <Badge variant={outcomeVariant(row.original.outcome)}>
+                    <StatusBadge
+                        tone={
+                            reconciliationOutcomeTones[row.original.outcome] ??
+                            'muted'
+                        }
+                    >
                         {row.original.outcomeLabel}
-                    </Badge>
+                    </StatusBadge>
                     {row.original.resolved ? (
-                        <Badge variant="outline">
+                        <StatusBadge tone="muted">
                             {t('reconciliation.actions.seen')}
-                        </Badge>
+                        </StatusBadge>
                     ) : null}
                 </div>
             ),

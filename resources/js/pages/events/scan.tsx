@@ -3,6 +3,7 @@ import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser';
 import { useEffect, useRef, useState } from 'react';
 import Heading from '@/components/heading';
 import { ProductTourButton } from '@/components/product-tour-button';
+import { StatusBadge } from '@/components/status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SubmitButton } from '@/components/submit-button';
@@ -43,6 +44,7 @@ import { offlineVerdict, onlineVerdict, vibrateFor } from '@/lib/scan-verdict';
 import type { ScanVerdict } from '@/lib/scan-verdict';
 import type { ScanPinVerifier } from '@/lib/scan-pin';
 import { readStation, writeStation } from '@/lib/scan-station';
+import { scanResultTones } from '@/lib/status-tones';
 import { can, Permission } from '@/lib/permissions';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import { admit, index, verify } from '@/routes/tenants/events/scan';
@@ -819,21 +821,17 @@ export default function EventScan({
                                                         </span>
                                                     ) : null}
                                                 </span>
-                                                <Badge
-                                                    variant={
-                                                        row.result ===
-                                                        'accepted'
-                                                            ? 'default'
-                                                            : row.result ===
-                                                                'refused'
-                                                              ? 'destructive'
-                                                              : 'secondary'
+                                                <StatusBadge
+                                                    tone={
+                                                        scanResultTones[
+                                                            row.result
+                                                        ] ?? 'muted'
                                                     }
                                                 >
                                                     {t(
                                                         `scan.results.${row.result}`,
                                                     )}
-                                                </Badge>
+                                                </StatusBadge>
                                             </div>
                                         ))}
                                     </div>

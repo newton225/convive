@@ -28,6 +28,7 @@ import { ProofDetails } from '@/components/proofs/proof-details';
 import { ProofEventSwitcher } from '@/components/proofs/proof-event-switcher';
 import { ProofRejectionFields } from '@/components/proofs/proof-rejection-fields';
 import { ProofRules } from '@/components/proofs/proof-rules';
+import { StatusBadge } from '@/components/status-badge';
 import { ProofsToolbar } from '@/components/proofs/proofs-toolbar';
 import Heading from '@/components/heading';
 import { ListPagination } from '@/components/list-pagination';
@@ -309,7 +310,7 @@ export default function EventProofs({
                     {row.original.signals.duplicateReference ? (
                         // Le signal ouvre les autres preuves qui portent la meme reference : le
                         // tresorier voit avec qui elle est partagee sans avoir a chercher.
-                        <Badge variant="destructive" asChild>
+                        <StatusBadge tone="danger" asChild>
                             <button
                                 type="button"
                                 className="cursor-pointer underline-offset-2 hover:underline"
@@ -335,12 +336,12 @@ export default function EventProofs({
                                     </span>
                                 ) : null}
                             </button>
-                        </Badge>
+                        </StatusBadge>
                     ) : null}
                     {row.original.signals.duplicateImage ? (
                         // Le signal ouvre les versements qui portent la meme capture : le
                         // tresorier les compare sans avoir a les chercher.
-                        <Badge variant="destructive" asChild>
+                        <StatusBadge tone="danger" asChild>
                             <button
                                 type="button"
                                 className="cursor-pointer underline-offset-2 hover:underline"
@@ -364,34 +365,31 @@ export default function EventProofs({
                                     </span>
                                 ) : null}
                             </button>
-                        </Badge>
+                        </StatusBadge>
                     ) : null}
                     {row.original.signals.referenceMissingFromStatement ? (
-                        <Badge
-                            variant="destructive"
+                        <StatusBadge
+                            tone="warning"
                             data-test="signal-reference-missing-from-statement"
                         >
                             {t(
                                 'proofs.signals.reference_missing_from_statement',
                             )}
-                        </Badge>
+                        </StatusBadge>
                     ) : null}
                     {row.original.signals.statementAmountMismatch ? (
-                        <Badge
-                            variant="destructive"
+                        <StatusBadge
+                            tone="warning"
                             data-test="signal-statement-amount-mismatch"
                         >
                             {t('proofs.signals.statement_amount_mismatch')}
-                        </Badge>
+                        </StatusBadge>
                     ) : null}
                     {row.original.guestNote ? (
-                        <Badge
-                            variant="secondary"
-                            data-test="signal-guest-note"
-                        >
+                        <StatusBadge tone="info" data-test="signal-guest-note">
                             <MessageSquareText />
                             {t('proofs.signals.guest_note')}
-                        </Badge>
+                        </StatusBadge>
                     ) : null}
                     {!Object.values(row.original.signals).some(Boolean) ? (
                         <Badge variant="outline" data-test="signal-none">

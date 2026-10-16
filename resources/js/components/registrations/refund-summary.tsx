@@ -1,7 +1,8 @@
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDate } from '@/lib/format-date';
+import { refundStatusTones } from '@/lib/status-tones';
 import type { RegistrationCancellation } from '@/types';
 
 type Props = {
@@ -51,11 +52,9 @@ export function RefundSummary({ cancellation }: Props) {
             className="flex flex-wrap items-center gap-2"
             data-test="refund-summary"
         >
-            <Badge
-                variant={refundStatus === 'due' ? 'destructive' : 'secondary'}
-            >
+            <StatusBadge tone={refundStatusTones[refundStatus] ?? 'muted'}>
                 {refundStatusLabel}
-            </Badge>
+            </StatusBadge>
             <span
                 className={
                     refundStatus === 'due'

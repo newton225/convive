@@ -5,23 +5,18 @@ import { cn } from '@/lib/utils';
 
 export function StatusBadge({
     tone,
-    children,
+    className,
     ...props
-}: {
-    tone: StatusTone;
-    children: React.ReactNode;
-} & Omit<React.ComponentProps<'span'>, 'children'>) {
+}: { tone: StatusTone } & Omit<React.ComponentProps<typeof Badge>, 'variant'>) {
     return (
         <Badge
             variant="secondary"
-            {...props}
             className={cn(
                 'border-transparent',
                 statusToneClasses[tone],
-                props.className,
+                className,
             )}
-        >
-            {children}
-        </Badge>
+            {...props}
+        />
     );
 }

@@ -1,5 +1,5 @@
 import { AccountActions } from '@/components/console/account-actions';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/status-badge';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatDate } from '@/lib/format-date';
 import type { ConsoleAccount } from '@/types';
@@ -27,15 +27,19 @@ export function AccountList({ accounts }: Props) {
                         <p className="flex flex-wrap items-center gap-2">
                             <span className="font-medium">{account.name}</span>
                             {account.blockedAt ? (
-                                <Badge variant="destructive">
+                                <StatusBadge tone="danger">
                                     {t('console.accounts.blocked_badge')}
-                                </Badge>
+                                </StatusBadge>
                             ) : null}
-                            <Badge variant="outline">
+                            <StatusBadge
+                                tone={
+                                    account.hasTwoFactor ? 'success' : 'danger'
+                                }
+                            >
                                 {account.hasTwoFactor
                                     ? t('console.accounts.two_factor_on')
                                     : t('console.accounts.two_factor_off')}
-                            </Badge>
+                            </StatusBadge>
                         </p>
                         <p className="text-muted-foreground break-all">
                             {account.email}
