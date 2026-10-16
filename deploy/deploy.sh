@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Livre la dernière version de `main` : sauvegarde, récupération, construction, migrations,
 # recréation des services, vérification.
-# Usage : bash deploy/deploy.sh [--sans-sauvegarde]
+# Usage : bash deploy/deploy.sh [--sans-sauvegarde] [--version 0.2.0]
+#
+# Le numéro de version est demandé à chaque livraison (Entrée pour garder l'actuel) et écrit dans
+# APP_VERSION de .env.production. --version le donne d'avance et évite la question.
 #
 # S'arrête au premier échec. Le commit en service est noté dans $PREVIOUS_FILE pour deploy/rollback.sh.
 
@@ -9,11 +12,18 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 require_files
 
 skip_backup=0
-for arg in "$@"; do
-    case "$arg" in
+new_version=""
+while [ "$#" -gt 0 ]; do
+    case "$1" in
         --sans-sauvegarde) skip_backup=1 ;;
-        *) fail "option inconnue : $arg" ;;
+        --version)
+            [ "$#" -ge 2 ] || fail "--version demande un numéro (par exemple 0.2.0)."
+            new_version="$2"
+            shift
+            ;;
+        *) fail "option inconnue : $1" ;;
     esac
+    shift
 done
 
 [ -z "$(git status --porcelain --untracked-files=no)" ] \
@@ -49,6 +59,28 @@ git pull --ff-only origin main
 
 step "Construction des images (app et web seulement)"
 docker compose build app web 2>&1 | tail -6
+
+step "Numéro de version"
+# Lit la seule ligne APP_VERSION : le reste du fichier (secrets) n'est jamais affiché.
+current_version="$(grep -E '^APP_VERSION=' .env.production | tail -n1 | cut -d= -f2- | tr -d '"' || true)"
+current_version="${current_version:-0.1.0}"
+if [ -n "$new_version" ]; then
+    version="$new_version"
+else
+    read -r -p "Version en service : $current_version. Nouvelle version (Entrée pour garder) : " version
+    version="${version:-$current_version}"
+fi
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "version invalide : « $version » (forme attendue : 0.2.0)."
+if [ "$version" != "$current_version" ]; then
+    if grep -qE '^APP_VERSION=' .env.production; then
+        sed -i "s/^APP_VERSION=.*/APP_VERSION=$version/" .env.production
+    else
+        printf 'APP_VERSION=%s\n' "$version" >> .env.production
+    fi
+    printf 'APP_VERSION passée de %s à %s.\n' "$current_version" "$version"
+else
+    printf 'Version inchangée : %s.\n' "$version"
+fi
 
 step "Migrations (le site tourne encore sur l'ancien code)"
 docker compose run --rm migrate

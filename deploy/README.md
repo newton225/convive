@@ -22,6 +22,9 @@ bash deploy/deploy.sh
 Le script montre ce qui va être livré et demande confirmation (`o`). Il s'arrête au premier échec : ne pas
 relancer à la main l'étape suivante, lire l'erreur.
 
+- **Numéro de version** : `deploy.sh` affiche la version en service (`APP_VERSION`) et demande la nouvelle
+  (Entrée pour garder). Il l'écrit dans `.env.production` avant les migrations, `convive:release` l'estampille.
+  `bash deploy/deploy.sh --version 0.2.0` la donne d'avance. Forme exigée : `1.2.3`.
 - `bash deploy/deploy.sh --sans-sauvegarde` : saute la sauvegarde (à éviter si le schéma change).
 - `bash deploy/check.sh` : à tout moment, pour contrôler les services, les pages (200 attendu) et les journaux.
 - `bash deploy/rollback.sh` : retour au commit noté dans `~/.convive-previous-commit`.
@@ -72,7 +75,8 @@ git checkout main                                            # avant la livraiso
 
 - **Ils n'annulent pas les migrations.** `rollback.sh` ne vaut que si elles n'ont fait qu'ajouter des tables ou
   des colonnes. Sinon : restaurer l'archive de `convive:backup`, application arrêtée (`CLAUDE.md`, « Sauvegardes »).
-- **Ils ne changent pas le numéro de version.** `APP_VERSION` se choisit à la main (`config/convive.php`).
+- **`rollback.sh` ne remet pas l'ancien numéro de version** : modifier `APP_VERSION` dans `.env.production`
+  (droits 600) puis recréer les services.
 - Ils ne touchent ni à PostgreSQL, ni au certificat, ni à nginx de l'hôte.
 - Ils ne remplacent pas le contrôle dans la console (santé technique au vert).
 

@@ -143,7 +143,7 @@ Revenir ensuite sur `main` (`git checkout main`) avant la livraison suivante.
 | Situation | À faire en plus |
 | --- | --- |
 | Nouvelle variable dans `.env.production` | Éditer le fichier (droits 600), puis recréer les services (`up -d --no-build --force-recreate`). Jamais de secret dans une conversation ou un ticket. |
-| Changement de `APP_VERSION` | Jouer `migrate` : `convive:release` l'estampille, puis recréer. |
+| Numéro de version | `deploy/deploy.sh` le demande à chaque livraison et l'écrit dans `APP_VERSION` (`--version 0.2.0` pour le donner d'avance). À la main : éditer `.env.production`, jouer `migrate` (`convive:release` l'estampille), puis recréer. |
 | Seul le front change | Les mêmes étapes : `migrate` passe à vide, sans danger. |
 | Mise à jour de Docker ou de PostgreSQL | À part, jamais dans la même livraison qu'une version de l'application. |
 
