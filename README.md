@@ -464,15 +464,18 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 15. **Gabarit du billet** — modèles, éléments activables (logo, cachet, signature, liste des
     accompagnateurs), aperçu.
 16. **Abonnement** — consommation des quotas, plans, moyen de paiement, recouvrement, factures.
-17. **Tableau de bord** — inscrits, preuves validées, preuves à vérifier, sans preuve, places
+17. **Tableau de bord** — dossiers d'inscription, preuves validées, preuves à vérifier, sans preuve, places
     restantes, inscriptions par jour, preuves par canal, occupation des tables, activité récente.
 18. **Preuves à vérifier** — file avec reçu, montant dû, canal, référence, précision de
     l'invité, unités, signaux
     d'anomalie, valider / rejeter / ouvrir le reçu.
 19. **Rapprochement** — import CSV, statistiques, table des lignes avec action par ligne.
-20. **Base d'inscrits** — recherche, filtres (tous / validées / à vérifier / sans preuve /
-    annulés), table, pagination, personnes entrées par inscription, exports Excel / PDF / CSV /
-    listes de contrôle, états vides.
+20. **Base d'inscrits** — recherche (nom, référence du dossier ou de la transaction), filtres (tous /
+    validées / à vérifier / sans preuve / annulés), table, pagination, personnes entrées par inscription,
+    exports Excel / PDF / CSV / listes de contrôle, états vides. Chaque ligne se déplie : accompagnateurs
+    (unité, tarif, entrée), paiement (dont le motif du rejet de la preuve), carte et entrée. Sous le
+    tableau, trois totaux qui suivent les filtres, sur tous les dossiers et non sur la page affichée :
+    encaissé (le chiffre du rapport), en attente de vérification, montant dû au total (payé ou non).
 21. **Plan de salle** — grille de tables, panneau de table avec occupants, regroupement par
     unité, contraintes, déplacement manuel, capacité ajustable table par table (jamais sous le
     nombre de personnes déjà placées).
