@@ -11,8 +11,10 @@ import type { TreasuryAccountRow } from '@/types';
  */
 export function TreasuryAccountsTable({
     rows,
+    actions,
 }: {
     rows: TreasuryAccountRow[];
+    actions?: React.ReactNode;
 }) {
     const { t, locale } = useTranslation();
 
@@ -55,13 +57,16 @@ export function TreasuryAccountsTable({
 
     return (
         <Card data-test="treasury-accounts">
-            <CardHeader>
-                <CardTitle className="text-base">
-                    {t('treasury.accounts.title')}
-                </CardTitle>
-                <p className="text-muted-foreground text-sm">
-                    {t('treasury.accounts.description')}
-                </p>
+            <CardHeader className="flex flex-row items-start justify-between gap-3">
+                <div className="space-y-1.5">
+                    <CardTitle className="text-base">
+                        {t('treasury.accounts.title')}
+                    </CardTitle>
+                    <p className="text-muted-foreground text-sm">
+                        {t('treasury.accounts.description')}
+                    </p>
+                </div>
+                {actions}
             </CardHeader>
             <CardContent>
                 <DataTable

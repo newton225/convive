@@ -6,6 +6,7 @@ use App\Http\Controllers\Events\EventSettingsController;
 use App\Http\Controllers\Events\EventTicketTemplateController;
 use App\Http\Controllers\Events\GuestClaimController;
 use App\Http\Controllers\Events\PaymentProofController;
+use App\Exports\TreasuryTableExport;
 use App\Http\Controllers\Events\ReconciliationController;
 use App\Http\Controllers\Events\RegistrationCardController;
 use App\Http\Controllers\Events\RegistrationController;
@@ -88,6 +89,11 @@ Route::prefix('{tenant}')
         Route::get('treasury/export/pdf', [TreasuryController::class, 'exportPdf'])
             ->middleware('throttle:exports')
             ->name('tenants.treasury.export.pdf');
+        Route::get('treasury/export/{table}/{format}', [TreasuryController::class, 'exportTable'])
+            ->whereIn('table', array_keys(TreasuryTableExport::Tables))
+            ->whereIn('format', ['excel', 'csv'])
+            ->middleware('throttle:exports')
+            ->name('tenants.treasury.export.table');
         Route::get('events/{event}/scan', [ScanController::class, 'index'])->name('tenants.events.scan.index');
         Route::post('events/{event}/scan/verify', [ScanController::class, 'verify'])
             ->middleware('throttle:scan')

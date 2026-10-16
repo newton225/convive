@@ -62,6 +62,9 @@ return [
     ],
 
     'export' => [
+        'menu' => 'Exporter',
+        'excel' => 'Excel',
+        'csv' => 'CSV',
         'pdf' => 'Exporter en PDF',
     ],
 

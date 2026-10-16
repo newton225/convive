@@ -6,6 +6,7 @@ use App\Actions\Tenants\CreateTenant;
 use App\Enums\PaymentChannel;
 use App\Enums\RefundStatus;
 use App\Enums\TenantPermission;
+use App\Exports\TreasuryTableExport;
 use App\Models\Event;
 use App\Models\PaymentAccount;
 use App\Models\PaymentProof;
@@ -14,6 +15,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Spatie\LaravelPdf\PdfBuilder;
@@ -273,5 +275,135 @@ class TreasuryTest extends TestCase
         }
 
         $this->actingAs($this->owner)->get($this->exportUrl())->assertStatus(429);
+    }
+
+    private function tableExportUrl(string $table, string $format, array $query = []): string
+    {
+        return route('tenants.treasury.export.table', [$this->tenant, $table, $format, ...$query]);
+    }
+
+    public function test_chaque_tableau_s_exporte_en_excel_et_en_csv_sous_son_nom(): void
+    {
+        Excel::fake();
+
+        foreach (['events' => 'evenements', 'accounts' => 'comptes', 'refunds' => 'remboursements'] as $table => $name) {
+            $this->actingAs($this->owner)->get($this->tableExportUrl($table, 'excel'))->assertOk();
+            $this->actingAs($this->owner)->get($this->tableExportUrl($table, 'csv'))->assertOk();
+
+            Excel::assertDownloaded("tresorerie-{$name}.xlsx");
+            Excel::assertDownloaded("tresorerie-{$name}.csv");
+        }
+    }
+
+    public function test_l_export_des_evenements_donne_des_montants_bruts_sommables(): void
+    {
+        Excel::fake();
+        $event = $this->event();
+        $this->confirmed($event, 12000);
+        $this->tenant->asCurrent(fn () => Registration::factory()->refundDue()->create(['event_id' => $event->id, 'amount_due' => 4000]));
+
+        $this->actingAs($this->owner)->get($this->tableExportUrl('events', 'excel'))->assertOk();
+
+        Excel::assertDownloaded('tresorerie-evenements.xlsx', function (TreasuryTableExport $export) use ($event) {
+            $row = $export->array()[0];
+
+            return $row[0] === $event->name && $row[2] === 16000 && $row[5] === 4000 && $row[6] === 16000;
+        });
+    }
+
+    public function test_l_export_par_compte_donne_un_compte_par_ligne(): void
+    {
+        Excel::fake();
+        $event = $this->event();
+        $wave = $this->account('Wave principal', PaymentChannel::Wave);
+        $this->confirmed($event, 10000, $wave);
+
+        $this->actingAs($this->owner)->get($this->tableExportUrl('accounts', 'csv'))->assertOk();
+
+        Excel::assertDownloaded('tresorerie-comptes.csv', fn (TreasuryTableExport $export) => count($export->array()) === 1
+            && $export->array()[0][0] === 'Wave principal'
+            && $export->array()[0][2] === 10000);
+    }
+
+    public function test_l_export_des_remboursements_est_complet_la_o_l_ecran_s_arrete_a_cinquante(): void
+    {
+        Excel::fake();
+        $event = $this->event();
+        $this->tenant->asCurrent(fn () => Registration::factory()->refundDue()->count(51)->create(['event_id' => $event->id, 'amount_due' => 1000]));
+
+        $this->show()->assertInertia(fn ($page) => $page->has('refundsDue', 50)->where('refundsDueCount', 51));
+
+        $this->actingAs($this->owner)->get($this->tableExportUrl('refunds', 'excel'))->assertOk();
+
+        Excel::assertDownloaded('tresorerie-remboursements.xlsx', fn (TreasuryTableExport $export) => count($export->array()) === 51);
+    }
+
+    public function test_un_nom_d_invite_ne_devient_pas_une_formule_dans_l_export(): void
+    {
+        Excel::fake();
+        $event = $this->event();
+        $this->tenant->asCurrent(fn () => Registration::factory()->refundDue()->create(['event_id' => $event->id, 'amount_due' => 1000, 'name' => '=1+1']));
+
+        $this->actingAs($this->owner)->get($this->tableExportUrl('refunds', 'excel'))->assertOk();
+
+        Excel::assertDownloaded('tresorerie-remboursements.xlsx', fn (TreasuryTableExport $export) => $export->array()[0][0] === "'=1+1");
+    }
+
+    public function test_l_export_tableur_respecte_la_periode_choisie(): void
+    {
+        Excel::fake();
+        $october = $this->event(['starts_at' => '2026-10-10 18:00:00']);
+        $december = $this->event(['starts_at' => '2026-12-18 18:00:00']);
+        $this->confirmed($october, 7000);
+        $this->confirmed($december, 9000);
+
+        $this->actingAs($this->owner)->get($this->tableExportUrl('events', 'excel', ['from' => '2026-12-01', 'to' => '2026-12-31']))->assertOk();
+
+        Excel::assertDownloaded('tresorerie-evenements.xlsx', fn (TreasuryTableExport $export) => count($export->array()) === 1
+            && $export->array()[0][2] === 9000);
+    }
+
+    public function test_un_tableau_ou_un_format_inconnu_recoit_404(): void
+    {
+        Excel::fake();
+
+        $this->actingAs($this->owner)->get($this->tableExportUrl('inconnu', 'excel'))->assertNotFound();
+        $this->actingAs($this->owner)->get($this->tableExportUrl('events', 'docx'))->assertNotFound();
+    }
+
+    public function test_l_export_tableur_exige_la_permission_d_export_et_un_tiers_recoit_404(): void
+    {
+        Excel::fake();
+        $member = User::factory()->withTwoFactor()->create();
+        $this->joinWithPermissions($this->tenant, $member, [TenantPermission::ReportsView]);
+        $stranger = User::factory()->withTwoFactor()->create();
+
+        $this->actingAs($member)->get($this->tableExportUrl('events', 'excel'))->assertForbidden();
+        $this->actingAs($stranger)->get($this->tableExportUrl('events', 'excel'))->assertNotFound();
+    }
+
+    public function test_l_export_tableur_est_journalise_avec_son_tableau_et_son_format(): void
+    {
+        Excel::fake();
+
+        $this->actingAs($this->owner)->get($this->tableExportUrl('accounts', 'csv'))->assertOk();
+
+        $activity = $this->tenant->asCurrent(fn () => Activity::where('description', 'treasury.exported')->latest('id')->first());
+
+        $this->assertNotNull($activity);
+        $this->assertSame($this->owner->id, $activity->causer_id);
+        $this->assertSame('accounts', $activity->properties['table']);
+        $this->assertSame('csv', $activity->properties['format']);
+    }
+
+    public function test_l_export_tableur_est_limite_en_debit(): void
+    {
+        Excel::fake();
+
+        for ($i = 0; $i < AppServiceProvider::ExportsPerHour; $i++) {
+            $this->actingAs($this->owner)->get($this->tableExportUrl('events', 'csv'))->assertOk();
+        }
+
+        $this->actingAs($this->owner)->get($this->tableExportUrl('events', 'csv'))->assertStatus(429);
     }
 }

@@ -5,6 +5,7 @@ import { TreasuryAccountsTable } from '@/components/treasury/treasury-accounts-t
 import { TreasuryEventsTable } from '@/components/treasury/treasury-events-table';
 import { TreasuryPeriodFilter } from '@/components/treasury/treasury-period-filter';
 import { TreasuryRefundsDue } from '@/components/treasury/treasury-refunds-due';
+import { TreasuryTableExport } from '@/components/treasury/treasury-table-export';
 import { TreasuryTotalsCards } from '@/components/treasury/treasury-totals-cards';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { can, Permission } from '@/lib/permissions';
@@ -49,6 +50,15 @@ export default function Treasury({
     refundListLimit,
 }: Props) {
     const { t } = useTranslation();
+    const canExport = can(permissions, Permission.ReportsExport);
+    const exportOf = (table: 'events' | 'accounts' | 'refunds') =>
+        canExport ? (
+            <TreasuryTableExport
+                tenantSlug={tenant.slug}
+                table={table}
+                filters={filters}
+            />
+        ) : undefined;
 
     return (
         <>
@@ -62,7 +72,7 @@ export default function Treasury({
                         description={t('treasury.description')}
                     />
 
-                    {can(permissions, Permission.ReportsExport) ? (
+                    {canExport ? (
                         <DownloadButton
                             variant="outline"
                             href={
@@ -85,12 +95,19 @@ export default function Treasury({
                     filters={filters}
                 />
                 <TreasuryTotalsCards totals={totals} />
-                <TreasuryEventsTable rows={events} />
-                <TreasuryAccountsTable rows={accounts} />
+                <TreasuryEventsTable
+                    rows={events}
+                    actions={exportOf('events')}
+                />
+                <TreasuryAccountsTable
+                    rows={accounts}
+                    actions={exportOf('accounts')}
+                />
                 <TreasuryRefundsDue
                     rows={refundsDue}
                     count={refundsDueCount}
                     limit={refundListLimit}
+                    actions={exportOf('refunds')}
                 />
             </div>
         </>

@@ -10,7 +10,13 @@ import type { TreasuryEventRow } from '@/types';
 /**
  * L'argent de chaque evenement de la periode, du plus recent au plus ancien.
  */
-export function TreasuryEventsTable({ rows }: { rows: TreasuryEventRow[] }) {
+export function TreasuryEventsTable({
+    rows,
+    actions,
+}: {
+    rows: TreasuryEventRow[];
+    actions?: React.ReactNode;
+}) {
     const { t, locale } = useTranslation();
 
     const amount = (value: number) => formatAmount(value, locale);
@@ -75,10 +81,11 @@ export function TreasuryEventsTable({ rows }: { rows: TreasuryEventRow[] }) {
 
     return (
         <Card data-test="treasury-events">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-start justify-between gap-3">
                 <CardTitle className="text-base">
                     {t('treasury.events.title')}
                 </CardTitle>
+                {actions}
             </CardHeader>
             <CardContent>
                 <DataTable

@@ -33,7 +33,7 @@ final class TreasuryOverview
      *     refundsDueCount: int
      * }
      */
-    public static function for(Tenant $tenant, ?Carbon $from, ?Carbon $to): array
+    public static function for(Tenant $tenant, ?Carbon $from, ?Carbon $to, ?int $refundLimit = self::RefundListLimit): array
     {
         $events = Event::query()
             ->when($from !== null, fn ($query) => $query->where('starts_at', '>=', $from->copy()->startOfDay()))
@@ -67,7 +67,7 @@ final class TreasuryOverview
             ],
             'events' => $rows->all(),
             'accounts' => self::accounts($events->pluck('id')->all()),
-            ...self::refundsDue($tenant, $events),
+            ...self::refundsDue($tenant, $events, $refundLimit),
         ];
     }
 
@@ -109,9 +109,10 @@ final class TreasuryOverview
 
     /**
      * @param  Collection<int, Event>  $events
+     *                                          `$limit` nul : toute la liste, pour l'export (l'ecran s'arrete a `RefundListLimit`).
      * @return array{refundsDue: array<int, array<string, mixed>>, refundsDueCount: int}
      */
-    private static function refundsDue(Tenant $tenant, $events): array
+    private static function refundsDue(Tenant $tenant, $events, ?int $limit): array
     {
         $query = Registration::query()
             ->whereIn('event_id', $events->pluck('id'))
@@ -123,7 +124,7 @@ final class TreasuryOverview
             'refundsDueCount' => (clone $query)->count(),
             'refundsDue' => $query
                 ->orderBy('cancelled_at')
-                ->limit(self::RefundListLimit)
+                ->when($limit !== null, fn ($query) => $query->limit($limit))
                 ->get()
                 ->map(fn (Registration $registration) => [
                     'id' => $registration->id,

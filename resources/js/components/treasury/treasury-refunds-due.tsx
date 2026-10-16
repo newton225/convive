@@ -12,13 +12,14 @@ type Props = {
     rows: TreasuryRefundDue[];
     count: number;
     limit: number;
+    actions?: React.ReactNode;
 };
 
 /**
  * Tout ce qui reste a rembourser dans l'organisation, du plus ancien au plus recent. Le geste de
  * remboursement se fait dans la base d'inscrits de l'evenement : chaque ligne y mene.
  */
-export function TreasuryRefundsDue({ rows, count, limit }: Props) {
+export function TreasuryRefundsDue({ rows, count, limit, actions }: Props) {
     const { t, locale } = useTranslation();
 
     const columns: ColumnDef<TreasuryRefundDue>[] = [
@@ -76,13 +77,16 @@ export function TreasuryRefundsDue({ rows, count, limit }: Props) {
 
     return (
         <Card data-test="treasury-refunds">
-            <CardHeader>
-                <CardTitle className="text-base">
-                    {t('treasury.refunds.title')}
-                </CardTitle>
-                <p className="text-muted-foreground text-sm">
-                    {t('treasury.refunds.count', { count })}
-                </p>
+            <CardHeader className="flex flex-row items-start justify-between gap-3">
+                <div className="space-y-1.5">
+                    <CardTitle className="text-base">
+                        {t('treasury.refunds.title')}
+                    </CardTitle>
+                    <p className="text-muted-foreground text-sm">
+                        {t('treasury.refunds.count', { count })}
+                    </p>
+                </div>
+                {actions}
             </CardHeader>
             <CardContent className="space-y-3">
                 <DataTable
