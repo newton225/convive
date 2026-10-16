@@ -445,7 +445,8 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 ### Back-office
 
 12. **Mes événements** — cartes avec statut, remplissage, montant collecté, preuves en attente ;
-    créer, dupliquer, partir d'un modèle.
+    créer, dupliquer, partir d'un modèle. Le menu « ... » de chaque carte donne accès aux listes de
+    contrôle par table (jour J, événements avec tables), à imprimer avec cachet et signature.
 13. **Nouvel événement** — assistant 3 étapes : identité (nom, sous-titre, date, heure, lieu,
     visuel, couleurs) / places & tarif (groupes de tables, par exemple « 3 tables de 12 » et
     « 20 tables de 8 », tarif, plafond d'accompagnateurs, comptes de versement) / échéances
@@ -454,7 +455,7 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
     nombre de places).
 14. **Espace & marque** — le formulaire d'organisation décrit en §3.
 15. **Gabarit du billet** — modèles, éléments activables (logo, cachet, signature, liste des
-    accompagnateurs), aperçu, impression des listes de contrôle par table.
+    accompagnateurs), aperçu.
 16. **Abonnement** — consommation des quotas, plans, moyen de paiement, recouvrement, factures.
 17. **Tableau de bord** — inscrits, preuves validées, preuves à vérifier, sans preuve, places
     restantes, inscriptions par jour, preuves par canal, occupation des tables, activité récente.
