@@ -161,6 +161,77 @@ class RegistrationListDetailsTest extends TestCase
                 ->where('rows.0.rejection.note', null));
     }
 
+    private function mixedMoney(): void
+    {
+        $this->tenant->asCurrent(function () {
+            Registration::factory()->confirmed()->create(['event_id' => $this->event->id, 'amount_due' => 10000, 'name' => 'Aya Kouame']);
+            Registration::factory()->proofSubmitted()->create(['event_id' => $this->event->id, 'amount_due' => 5000, 'name' => 'Koffi Brou']);
+            Registration::factory()->proofRejected()->create(['event_id' => $this->event->id, 'amount_due' => 3000, 'name' => 'Marie Yao']);
+            Registration::factory()->refundDue()->create(['event_id' => $this->event->id, 'amount_due' => 4000, 'name' => 'Paul Koffi']);
+        });
+    }
+
+    public function test_les_totaux_distinguent_l_encaisse_l_en_attente_et_le_montant_du(): void
+    {
+        $this->mixedMoney();
+
+        $expected = $this->tenant->asCurrent(fn () => $this->event->fresh()->paymentTotals());
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.registrations.index', [$this->tenant, $this->event]))
+            ->assertInertia(fn (Assert $page) => $page
+                // Le meme chiffre que le rapport de l'evenement, sans filtre.
+                ->where('totals.collected', $expected['collected'])
+                ->where('totals.collected', 14000)
+                ->where('totals.pending', 5000)
+                ->where('totals.due', 22000));
+    }
+
+    public function test_les_totaux_suivent_le_filtre_de_statut(): void
+    {
+        $this->mixedMoney();
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.registrations.index', [$this->tenant, $this->event]).'?filter[status]=confirmed')
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('totals.collected', 10000)
+                ->where('totals.pending', 0)
+                ->where('totals.due', 10000));
+    }
+
+    public function test_les_totaux_suivent_la_recherche(): void
+    {
+        $this->mixedMoney();
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.registrations.index', [$this->tenant, $this->event]).'?filter[search]=koffi')
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('totals.pending', 5000)
+                ->where('totals.collected', 4000)
+                ->where('totals.due', 9000));
+    }
+
+    public function test_les_totaux_couvrent_toutes_les_pages_pas_seulement_celle_qui_s_affiche(): void
+    {
+        $this->tenant->asCurrent(fn () => Registration::factory()->confirmed()->count(30)->create(['event_id' => $this->event->id, 'amount_due' => 1000]));
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.registrations.index', [$this->tenant, $this->event]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('rows', 25)
+                ->where('totals.collected', 30000));
+    }
+
+    public function test_sans_dossier_les_totaux_sont_a_zero(): void
+    {
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.registrations.index', [$this->tenant, $this->event]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('totals.collected', 0)
+                ->where('totals.pending', 0)
+                ->where('totals.due', 0));
+    }
+
     public function test_une_inscription_sans_preuve_ni_passage_n_a_ni_canal_ni_entree(): void
     {
         $this->tenant->asCurrent(fn () => Registration::factory()->held()->create(['event_id' => $this->event->id]));

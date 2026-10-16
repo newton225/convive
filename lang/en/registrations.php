@@ -4,6 +4,15 @@ return [
     'title' => 'Registrations',
     'description' => 'Search, filter and export this event\'s registrations.',
 
+    'totals' => [
+        'collected' => 'Collected',
+        'collected_hint' => 'Validated files, as in the report',
+        'pending' => 'Awaiting verification',
+        'pending_hint' => 'Proofs to check',
+        'due' => 'Total amount due',
+        'due_hint' => 'Every file shown, paid or not',
+    ],
+
     'details' => [
         'column' => 'Details',
         'single_expand' => 'Only one row open at a time',

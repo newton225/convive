@@ -12,6 +12,7 @@ import { CancellationsCard } from '@/components/registrations/cancellations-card
 import { InvitationCardDialog } from '@/components/registrations/invitation-card-dialog';
 import { RegistrationDetails } from '@/components/registrations/registration-details';
 import { RegistrationStatusBadge } from '@/components/registrations/registration-status-badge';
+import { RegistrationTotals } from '@/components/registrations/registration-totals';
 import { SingleExpandToggle } from '@/components/single-expand-toggle';
 import Heading from '@/components/heading';
 import { StatusBadge } from '@/components/status-badge';
@@ -59,6 +60,7 @@ import type {
     RegistrationRow,
     RegistrationsFilters,
     RegistrationsMeta,
+    RegistrationTotals as RegistrationTotalsData,
     TenantPermissions,
     Translations,
 } from '@/types';
@@ -71,6 +73,7 @@ type Props = {
     meta: RegistrationsMeta;
     filters: RegistrationsFilters;
     cancellations: RegistrationCancellation[];
+    totals: RegistrationTotalsData;
     refundChannels: RefundChannelOption[];
 };
 
@@ -95,6 +98,7 @@ export default function EventRegistrations({
     meta,
     filters,
     cancellations,
+    totals,
     refundChannels,
 }: Props) {
     const { t, locale } = useTranslation();
@@ -561,6 +565,8 @@ export default function EventRegistrations({
                         </>
                     }
                 />
+
+                <RegistrationTotals totals={totals} />
 
                 <CancellationsCard
                     tenantSlug={tenant.slug}

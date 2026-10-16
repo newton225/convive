@@ -44,6 +44,14 @@ export type RegistrationCompanionSummary = {
     priceCategory: RegistrationPriceSummary | null;
 };
 
+// L'argent des dossiers du filtre actif (tous les dossiers, pas la page affichee) : ce qui est encaisse,
+// ce qui attend une verification et le montant du au total, dossiers non payes compris.
+export type RegistrationTotals = {
+    collected: number;
+    pending: number;
+    due: number;
+};
+
 // Le motif d'un rejet de preuve, tel que l'organisation et l'invite le lisent.
 export type ProofRejection = {
     reason: string;

@@ -4,6 +4,15 @@ return [
     'title' => 'Base d\'inscrits',
     'description' => 'Recherche, filtres et export des inscriptions de cet événement.',
 
+    'totals' => [
+        'collected' => 'Encaissé',
+        'collected_hint' => 'Dossiers validés, comme dans le rapport',
+        'pending' => 'En attente de vérification',
+        'pending_hint' => 'Preuves à vérifier',
+        'due' => 'Montant dû au total',
+        'due_hint' => 'Tous les dossiers affichés, payés ou non',
+    ],
+
     'details' => [
         'column' => 'Détail',
         'single_expand' => 'Une seule ligne ouverte à la fois',

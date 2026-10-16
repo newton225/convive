@@ -94,6 +94,7 @@ class RegistrationController extends Controller
                 'status' => $request->string('filter.status')->toString() ?: null,
                 'sort' => $request->string('sort')->toString() ?: null,
             ],
+            'totals' => $this->totals($request, $event),
             'cancellations' => $this->recentCancellations($event),
             // Moyens proposes pour un remboursement (README 2.11) : les memes canaux que les
             // versements, l'argent repart par ou il est venu ou par un autre moyen connu.
@@ -361,6 +362,34 @@ class RegistrationController extends Controller
             )
             ->defaultSort('-created_at')
             ->allowedSorts('name', 'created_at', 'amount_due', 'party_size');
+    }
+
+    /**
+     * L'argent des dossiers du filtre actif, tous les dossiers et non la page affichee (decision du
+     * 2026-10-16). « Encaisse » suit la regle du rapport (`Event::collectedAmount()`) : un dossier valide,
+     * ou annule apres paiement. « En attente » : les preuves a verifier. « Du » : tout le filtre, y compris
+     * ce qui n'est pas paye, d'ou les trois chiffres plutot qu'un total qui ressemblerait a des recettes.
+     *
+     * @return array{collected: int, pending: int, due: int}
+     */
+    private function totals(Request $request, Event $event): array
+    {
+        $row = $this->filteredQuery($request, $event)
+            ->reorder()
+            ->toBase()
+            ->selectRaw(
+                'COALESCE(SUM(amount_due), 0) as due, '
+                .'COALESCE(SUM(CASE WHEN status = ? OR refund_status IS NOT NULL THEN amount_due ELSE 0 END), 0) as collected, '
+                .'COALESCE(SUM(CASE WHEN status = ? THEN amount_due ELSE 0 END), 0) as pending',
+                [RegistrationStatus::Confirmed->value, RegistrationStatus::ProofSubmitted->value],
+            )
+            ->first();
+
+        return [
+            'collected' => (int) $row->collected,
+            'pending' => (int) $row->pending,
+            'due' => (int) $row->due,
+        ];
     }
 
     /**
