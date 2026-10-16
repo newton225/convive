@@ -39,13 +39,6 @@ return [
         'copyright' => '© :year Convive',
     ],
 
-    'print' => [
-        'title' => 'Listes de contrôle par table',
-        'description' => 'Imprimez, pour chaque événement, la liste des inscrits confirmés table par table, avec cachet et signature.',
-        'button' => 'Imprimer',
-        'empty' => 'Aucun événement à imprimer pour le moment.',
-    ],
-
     'flash' => [
         'updated' => 'Gabarit du billet mis à jour.',
     ],

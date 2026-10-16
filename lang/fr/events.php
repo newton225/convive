@@ -142,6 +142,7 @@ return [
         'seating' => 'Plan de salle',
         'ticket_template' => 'Gabarit du billet',
         'scan' => 'Scan',
+        'checklists' => 'Listes de contrôle',
         'registrations' => 'Base d\'inscrits',
         'report' => 'Rapport',
         'reconciliation' => 'Rapprochement',

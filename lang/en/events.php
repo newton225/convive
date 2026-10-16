@@ -142,6 +142,7 @@ return [
         'seating' => 'Seating plan',
         'ticket_template' => 'Ticket template',
         'scan' => 'Scan',
+        'checklists' => 'Checklists by table',
         'registrations' => 'Registrations',
         'report' => 'Report',
         'reconciliation' => 'Reconciliation',

@@ -39,13 +39,6 @@ return [
         'copyright' => '© :year Convive',
     ],
 
-    'print' => [
-        'title' => 'Checklists by table',
-        'description' => 'Print, for each event, the confirmed guests table by table, with stamp and signature.',
-        'button' => 'Print',
-        'empty' => 'No event to print yet.',
-    ],
-
     'flash' => [
         'updated' => 'Ticket template updated.',
     ],

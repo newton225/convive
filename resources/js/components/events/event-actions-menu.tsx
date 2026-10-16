@@ -11,6 +11,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useFileDownload } from '@/hooks/use-file-download';
 import { useGettingStartedReturn } from '@/hooks/use-getting-started-return';
 import { useTranslation } from '@/hooks/use-translation';
 import { can, Permission } from '@/lib/permissions';
@@ -19,6 +20,7 @@ import { index as claimsIndex } from '@/routes/tenants/events/claims';
 import { index as proofsIndex } from '@/routes/tenants/events/proofs';
 import { index as reconciliationIndex } from '@/routes/tenants/events/reconciliation';
 import { index as registrationsIndex } from '@/routes/tenants/events/registrations';
+import { checklists } from '@/routes/tenants/events/registrations/export';
 import { show as reportShow } from '@/routes/tenants/events/report';
 import { index as scanIndex } from '@/routes/tenants/events/scan';
 import { index as seatingIndex } from '@/routes/tenants/events/seating';
@@ -44,6 +46,7 @@ export function EventActionsMenu({
     onClose,
 }: Props) {
     const { t } = useTranslation();
+    const { download } = useFileDownload();
     // Venu de la carte « Premiers pas » : la publication depuis la fiche ramene au tableau de bord.
     const gettingStartedReturn = useGettingStartedReturn();
     const target: [string, number] = [tenantSlug, event.id];
@@ -101,6 +104,10 @@ export function EventActionsMenu({
         },
     ].filter((item) => item !== false);
 
+    // La liste des inscrits confirmes table par table : sans tables, il n'y a rien a cocher.
+    const showChecklists =
+        allowed(Permission.RegistrationsExport) && event.seatsAtTables;
+
     const sheet = [
         {
             href: edit(target, gettingStartedReturn).url,
@@ -152,7 +159,7 @@ export function EventActionsMenu({
                     </DropdownMenuGroup>
                 ) : null}
 
-                {dayOf.length > 0 ? (
+                {dayOf.length > 0 || showChecklists ? (
                     <>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
@@ -169,6 +176,16 @@ export function EventActionsMenu({
                                     </Link>
                                 </DropdownMenuItem>
                             ))}
+                            {showChecklists ? (
+                                <DropdownMenuItem
+                                    onSelect={() =>
+                                        void download(checklists(target).url)
+                                    }
+                                    data-test="event-checklists"
+                                >
+                                    {t('events.actions.checklists')}
+                                </DropdownMenuItem>
+                            ) : null}
                         </DropdownMenuGroup>
                     </>
                 ) : null}
