@@ -162,6 +162,11 @@ return [
             'title' => 'Decline this invitation?',
             'description' => 'The invitation from :tenant will be deleted. To join this organisation later, it will have to invite you again.',
         ],
+        'confirm_leave' => [
+            'title' => 'Invitations are still waiting',
+            'description' => '{1} You still have 1 pending invitation. It stays valid until it expires and will show on your dashboard.|[2,*] You still have :count pending invitations. They stay valid until they expire and will show on your dashboard.',
+            'confirm' => 'Go to my dashboard',
+        ],
         'empty' => 'No pending invitation for your address.',
         'no_organisation' => 'You do not belong to any organisation yet. You can create your own at any time.',
         'create_organisation' => 'Create my organisation',

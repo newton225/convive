@@ -162,6 +162,11 @@ return [
             'title' => 'Refuser cette invitation ?',
             'description' => "L'invitation de :tenant sera supprimée. Pour rejoindre cette organisation plus tard, il faudra qu'elle vous invite de nouveau.",
         ],
+        'confirm_leave' => [
+            'title' => 'Des invitations restent à traiter',
+            'description' => '{1} Vous avez encore 1 invitation en attente. Elle reste valable jusqu’à son expiration et s’affichera sur votre tableau de bord.|[2,*] Vous avez encore :count invitations en attente. Elles restent valables jusqu’à leur expiration et s’afficheront sur votre tableau de bord.',
+            'confirm' => 'Aller au tableau de bord',
+        ],
         'empty' => 'Aucune invitation en attente pour votre adresse.',
         'no_organisation' => "Vous n'appartenez encore à aucune organisation. Vous pouvez créer la vôtre à tout moment.",
         'create_organisation' => 'Créer mon organisation',

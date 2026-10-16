@@ -35,6 +35,7 @@ export default function Invitations({
     const { t } = useTranslation();
     const [declining, setDeclining] = useState<InvitationHomeItem | null>(null);
     const [processing, setProcessing] = useState<string | null>(null);
+    const [leaving, setLeaving] = useState(false);
 
     const switchAccount = (invitation: InvitationMismatch) =>
         router.post(
@@ -172,11 +173,26 @@ export default function Invitations({
                 )}
 
                 {hasOrganisation && dashboardUrl ? (
-                    <Button variant="outline" asChild>
-                        <Link href={dashboardUrl}>
+                    // Des invitations non traitees : on demande avant de partir, elles ne
+                    // disparaissent pas mais la personne doit savoir qu'elle les laisse.
+                    invitations.length > 0 ? (
+                        <Button
+                            variant="outline"
+                            data-test="invitations-to-dashboard"
+                            onClick={() => setLeaving(true)}
+                        >
                             {t('tenants.invitations_home.to_dashboard')}
-                        </Link>
-                    </Button>
+                        </Button>
+                    ) : (
+                        <Button variant="outline" asChild>
+                            <Link
+                                href={dashboardUrl}
+                                data-test="invitations-to-dashboard"
+                            >
+                                {t('tenants.invitations_home.to_dashboard')}
+                            </Link>
+                        </Button>
+                    )
                 ) : (
                     <div className="space-y-3 text-center">
                         <p className="text-muted-foreground text-sm">
@@ -195,6 +211,27 @@ export default function Invitations({
                     </div>
                 )}
             </div>
+
+            <ConfirmActionDialog
+                open={leaving}
+                onOpenChange={setLeaving}
+                title={t('tenants.invitations_home.confirm_leave.title')}
+                description={t(
+                    'tenants.invitations_home.confirm_leave.description',
+                    { count: invitations.length },
+                )}
+                confirmLabel={t(
+                    'tenants.invitations_home.confirm_leave.confirm',
+                )}
+                testId="invitations-leave-confirm"
+                onConfirm={() => {
+                    if (dashboardUrl) {
+                        router.visit(dashboardUrl, {
+                            onFinish: () => setLeaving(false),
+                        });
+                    }
+                }}
+            />
 
             <ConfirmActionDialog
                 open={declining !== null}
