@@ -21,6 +21,44 @@ Note sur le prototype : c'est une maquette a donnees factices. Le decompte de re
 QR et la disponibilite y sont simules cote client. Aucun de ces mecanismes ne doit etre porte
 tel quel : ils appartiennent au serveur.
 
+## Application en ligne : toute evolution se fait avec precaution, sans regression
+
+Depuis le 2026-10-15, l'application est **en ligne** (pilote prive, `app.devultraapp.com`). Des
+personnes reelles y creent des organisations, des evenements et des inscriptions : une
+modification n'est plus un essai, c'est une livraison sur des donnees vivantes. Decision du
+proprietaire du projet (2026-10-16) : **toute modification ou evolution se fait avec precaution et
+sans regression.** Concretement :
+
+- **Aucune regression sur l'existant.** Une evolution ne change ni ne retire un comportement deja
+  livre sans decision explicite du proprietaire. Un controle de ce document (C1 a M8, grille de
+  test) ne s'affaiblit jamais pour faciliter un ajout.
+- **Test avant code**, et un test pour chaque correction de bogue (`CLAUDE.md`, « Methode »). Les
+  tests ne se lancent qu'avec l'accord du proprietaire, avant chaque execution. Une suite non
+  rejouee n'est pas une preuve : l'ecrire dans le compte rendu de livraison.
+- **Les deux moteurs.** Ce qui marche en SQLite doit marcher sur PostgreSQL, et inversement
+  (`CLAUDE.md`, « Base de donnees »). Un bogue d'inscription n'etait visible que sur PostgreSQL
+  (`CREATE DATABASE` dans une transaction) : tester sur le moteur de production ce qui touche aux
+  transactions, aux verrous et aux bases des organisations.
+- **Migrations qui ajoutent, jamais qui cassent.** Pas de renommage ni de suppression d'une
+  structure existante sans accord ; une migration ne s'annule pas a chaud. Le site tourne sur
+  l'ancien code pendant `migrate` : le schema doit rester compatible avec lui.
+- **Ce qui est deja distribue ne bouge pas** : adresses des liens publics (jeton, sous-domaine
+  fige a la premiere publication), billets et QR emis, delais d'activation des comptes de
+  versement, liens de reprise. Les changer casserait ce que des invites ont deja en main.
+- **Une livraison suit la procedure** de `docs/conteneurisation.md` (scripts `deploy/`) : sauvegarde
+  avant, point de retour note, verification apres (pages en 200, journaux, sante technique de la
+  console), retour arriere prevu. Jamais de modification directe sur le serveur hors procedure, sauf
+  urgence consignee.
+- **Une chose a la fois.** Une livraison par sujet, petite et lisible ; pas de mise a jour de Docker,
+  de PostgreSQL ou du serveur dans la meme livraison qu'une version de l'application.
+- **Secrets** : jamais dans le depot, une conversation ou un ticket ; saisis sur le serveur
+  uniquement. Une rotation ne se fait pas dans la meme livraison qu'un changement de code.
+- **Documents et numero de version dans le meme changement** : textes juridiques (et leur version),
+  documentation, numero de version choisi a chaque livraison (`deploy/deploy.sh`).
+- **Avant d'ouvrir a d'autres organisations** : suite complete rejouee sur PostgreSQL et grille de
+  test ci-dessous (concurrence sur la derniere place comprise), `convive:production-check` au vert,
+  sauvegardes externes chiffrees avec une restauration eprouvee.
+
 ---
 
 ## Severite critique
