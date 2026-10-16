@@ -70,7 +70,12 @@ export function InvitationCardPerson({
             return;
         }
 
-        window.open(person.url, '_blank', 'noopener,noreferrer');
+        // `preview=1` : la page se reformule pour l'organisation (bandeau, pas de partage ni de
+        // reclamation), elle n'est pas la carte de celui qui la regarde.
+        const target = new URL(person.url);
+        target.searchParams.set('preview', '1');
+
+        window.open(target.toString(), '_blank', 'noopener,noreferrer');
         trace('preview');
     };
 

@@ -204,6 +204,46 @@ class PerPersonTicketTest extends TestCase
                 ->where('registration.ticket.cardUrl', $url));
     }
 
+    public function test_l_apercu_de_l_organisation_se_reconnait_a_son_parametre_sur_la_page_de_l_invite(): void
+    {
+        ['registration' => $registration] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $registration->fresh()->signedResumeUrl());
+
+        $this->get($url.'&preview=1')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('preview', true));
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('preview', false));
+    }
+
+    public function test_l_apercu_ne_remplace_pas_la_signature_du_lien(): void
+    {
+        ['registration' => $registration] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $registration->fresh()->signedResumeUrl());
+        $unsigned = preg_replace('/signature=[^&]+/', 'signature=faux', $url).'&preview=1';
+
+        $this->get($unsigned)->assertNotFound();
+    }
+
+    public function test_l_apercu_se_reconnait_aussi_sur_le_billet_d_un_accompagnateur(): void
+    {
+        ['registration' => $registration] = $this->confirmedGroup();
+        $ticket = $this->tenant->asCurrent(fn () => Ticket::where('registration_id', $registration->id)->where('holder_position', 1)->firstOrFail());
+        $url = $this->tenant->asCurrent(fn () => $ticket->fresh()->shareUrl());
+
+        $this->get($url.'&preview=1')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('preview', true));
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('preview', false));
+    }
+
     public function test_le_lien_individuel_porte_le_meme_billet_et_le_gabarit_de_l_organisation(): void
     {
         ['tickets' => $tickets] = $this->confirmedGroup();

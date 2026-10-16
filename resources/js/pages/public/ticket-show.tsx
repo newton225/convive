@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import { OfflineBanner } from '@/components/offline-banner';
 import { DirectionsLink } from '@/components/public/directions-link';
+import { PreviewBanner } from '@/components/public/preview-banner';
 import { TicketPdfDownload } from '@/components/public/ticket-pdf-download';
 import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
 import { useTranslation } from '@/hooks/use-translation';
@@ -27,6 +28,8 @@ type Props = {
     card: TicketCardData;
     ticketEvent: TicketCardEvent;
     design: TicketDesign;
+    // L'organisation regarde le billet avant de l'envoyer : un bandeau le dit.
+    preview: boolean;
 };
 
 /**
@@ -40,6 +43,7 @@ export default function PublicTicketShow({
     card,
     ticketEvent,
     design,
+    preview,
 }: Props) {
     const { t, locale } = useTranslation();
     const title = t('guest.ticket.single_title', { name: ticket.name });
@@ -51,6 +55,7 @@ export default function PublicTicketShow({
             <OfflineBanner />
 
             <main className="w-full max-w-md space-y-6 pt-12">
+                {preview ? <PreviewBanner name={ticket.name} /> : null}
                 <div className="space-y-1 text-center">
                     {tenant.logoUrl ? (
                         <img
@@ -91,7 +96,7 @@ export default function PublicTicketShow({
                 </section>
 
                 {ticket.pdfUrl ? (
-                    <TicketPdfDownload url={ticket.pdfUrl} />
+                    <TicketPdfDownload url={ticket.pdfUrl} preview={preview} />
                 ) : null}
             </main>
         </div>

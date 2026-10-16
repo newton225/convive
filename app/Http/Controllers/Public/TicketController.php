@@ -51,6 +51,8 @@ class TicketController extends Controller
         $branding = $tenant->brandingOrCreate();
 
         return Inertia::render('public/ticket-show', [
+            // Apercu de l'organisation (`?preview=1`) : un bandeau le dit, rien d'autre ne change.
+            'preview' => $request->boolean('preview'),
             'event' => [
                 'name' => $event->name,
                 'startsAt' => $event->starts_at?->toISOString(),

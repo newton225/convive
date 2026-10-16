@@ -7,6 +7,8 @@ import type { TicketCardEvent } from '@/types';
 type Props = {
     url: string;
     event: TicketCardEvent;
+    // Le lien rouvre aussi les billets des accompagnateurs : le message et la mise en garde le disent.
+    companions: number;
 };
 
 /**
@@ -15,10 +17,16 @@ type Props = {
  * envoyer tant que l'invite n'a pas choisi le destinataire. Ce lien rouvre tout le groupe : le texte
  * le dit, il ne se transmet qu'a ceux que l'invite veut faire entrer.
  */
-export function GuestCardShare({ url, event }: Props) {
+export function GuestCardShare({ url, event, companions }: Props) {
     const { t } = useTranslation();
+    const withGroup = companions > 0;
     const href = `https://wa.me/?text=${encodeURIComponent(
-        t('guest.ticket.own_share_message', { event: event.name, url }),
+        t(
+            withGroup
+                ? 'guest.ticket.own_share_group_message'
+                : 'guest.ticket.own_share_message',
+            { event: event.name, url },
+        ),
     )}`;
 
     return (
@@ -46,7 +54,11 @@ export function GuestCardShare({ url, event }: Props) {
                 />
             </div>
             <p className="text-muted-foreground text-center text-xs">
-                {t('guest.ticket.own_share_hint')}
+                {t(
+                    withGroup
+                        ? 'guest.ticket.own_share_group_hint'
+                        : 'guest.ticket.own_share_hint',
+                )}
             </p>
         </div>
     );

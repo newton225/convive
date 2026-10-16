@@ -1,6 +1,7 @@
 import { Form, Head, router } from '@inertiajs/react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import { GuestClaimCard } from '@/components/public/guest-claim-card';
+import { PreviewBanner } from '@/components/public/preview-banner';
 import { ResumeLinkCard } from '@/components/public/resume-link-card';
 import { RegistrationRecap } from '@/components/public/registration-recap';
 import { RegistrationSummaryCard } from '@/components/public/registration-summary-card';
@@ -58,6 +59,8 @@ type Props = {
     // le jeton de reprise de l'invite (voir `RegistrationController::render()`) : relancer une
     // reservation ou deposer une preuve reste alors hors de portee, la page masque ces actions.
     resume: string | null;
+    // L'organisation regarde la carte avant de l'envoyer : la page ne s'adresse plus a l'invite.
+    preview: boolean;
 };
 
 /**
@@ -75,6 +78,7 @@ export default function PublicRegistrationShow({
     token,
     claim,
     resume,
+    preview,
 }: Props) {
     const { t, locale } = useTranslation();
     const { remainingSeconds, hasExpired } = useCountdown(
@@ -102,6 +106,7 @@ export default function PublicRegistrationShow({
             <OfflineBanner />
 
             <main className="w-full max-w-lg space-y-6 pt-12">
+                {preview ? <PreviewBanner name={registration.name} /> : null}
                 <div className="space-y-1 text-center">
                     <h1 className="text-2xl font-semibold">{event.name}</h1>
                     <p className="text-muted-foreground text-sm">
@@ -219,22 +224,30 @@ export default function PublicRegistrationShow({
                                 <TicketPdfDownload
                                     url={ticket.pdfUrl}
                                     all={ticket.passes.length > 0}
+                                    preview={preview}
                                 />
                             ) : null}
-                            {ticket.cardUrl ? (
+                            {ticket.cardUrl && !preview ? (
                                 <GuestCardShare
                                     url={ticket.cardUrl}
                                     event={ticket.event}
+                                    companions={ticket.passes.length}
                                 />
                             ) : null}
                             {ticket.scheduledSendAt ? (
                                 <p className="text-muted-foreground text-center text-sm">
-                                    {t('guest.ticket.scheduled_send', {
-                                        date: formatDateTime(
-                                            ticket.scheduledSendAt,
-                                            locale,
-                                        ),
-                                    })}
+                                    {t(
+                                        preview
+                                            ? 'guest.preview.scheduled_send'
+                                            : 'guest.ticket.scheduled_send',
+                                        {
+                                            name: registration.name,
+                                            date: formatDateTime(
+                                                ticket.scheduledSendAt,
+                                                locale,
+                                            ),
+                                        },
+                                    )}
                                 </p>
                             ) : null}
                             {ticket.passes.length > 0 ? (
@@ -533,7 +546,9 @@ export default function PublicRegistrationShow({
                         }
                     />
                 ) : null}
-                <GuestClaimCard token={token} claim={claim} />
+                {preview ? null : (
+                    <GuestClaimCard token={token} claim={claim} />
+                )}
             </main>
         </div>
     );

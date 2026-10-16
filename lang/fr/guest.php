@@ -205,10 +205,17 @@ return [
         'share_all_line' => ':name : :url',
         'own_share_whatsapp' => 'M’envoyer ma carte par WhatsApp',
         'own_share_message' => 'Ma carte pour :event : :url',
-        'own_share_hint' => 'Gardez ce lien dans vos messages : il rouvre vos billets à tout moment. Il donne accès à tout votre groupe, ne le transmettez qu’à ceux que vous voulez faire entrer.',
+        'own_share_group_message' => 'Ma carte et celles de mes accompagnateurs pour :event : :url',
+        'own_share_hint' => 'Gardez ce lien dans vos messages : il rouvre votre billet à tout moment. Ne le transmettez qu’à ceux que vous voulez faire entrer.',
+        'own_share_group_hint' => 'Gardez ce lien dans vos messages : il rouvre votre billet et ceux de vos accompagnateurs à tout moment. Il donne accès à tout votre groupe, ne le transmettez qu’à ceux que vous voulez faire entrer.',
         'share_unavailable' => 'Présentez ce code depuis votre téléphone : le lien individuel sera disponible quand l\'organisation aura choisi son adresse.',
         'single_title' => 'Billet de :name',
         'single_notice' => 'Ce billet fait entrer une seule personne et ne sert qu\'une fois. Présentez-le à l\'entrée.',
+    ],
+
+    'preview' => [
+        'banner' => 'Aperçu pour l’organisation : voici la page de :name, telle qu’elle la voit. Rien n’est envoyé depuis cette page.',
+        'scheduled_send' => 'La carte sera envoyée à :name par WhatsApp (et par email s’il en a renseigné un) le :date.',
     ],
 
     'ticket_pdf' => [
@@ -281,7 +288,7 @@ return [
             'payment_account' => 'Compte de versement utilisé',
             'payment_account_placeholder' => 'Choisir le compte utilisé',
             'reference' => 'Référence de la transaction',
-            'guest_note' => 'Une précision sur ce paiement ? (facultatif)',
+            'guest_note' => 'Une précision sur ce paiement ?',
             'guest_note_placeholder' => 'Par exemple : payé en deux fois, envoyé depuis le numéro d’un proche…',
             'receipt' => 'Capture du reçu',
         ],

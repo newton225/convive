@@ -7,6 +7,8 @@ type Props = {
     url: string;
     // Plusieurs billets (tout le groupe) ou un seul : le libelle le dit.
     all?: boolean;
+    // Apercu de l'organisation : le conseil « a garder sur votre telephone » ne lui est pas adresse.
+    preview?: boolean;
 };
 
 /**
@@ -16,7 +18,11 @@ type Props = {
  * laisse pas cliquer deux fois, voir `useFileDownload`. Pas une visite Inertia, qui ne sait pas
  * afficher un fichier.
  */
-export function TicketPdfDownload({ url, all = false }: Props) {
+export function TicketPdfDownload({
+    url,
+    all = false,
+    preview = false,
+}: Props) {
     const { t } = useTranslation();
     const { downloading, download } = useFileDownload();
 
@@ -38,9 +44,11 @@ export function TicketPdfDownload({ url, all = false }: Props) {
                           : 'guest.ticket_pdf.download',
                 )}
             </SubmitButton>
-            <p className="text-muted-foreground text-xs">
-                {t('guest.ticket_pdf.download_hint')}
-            </p>
+            {preview ? null : (
+                <p className="text-muted-foreground text-xs">
+                    {t('guest.ticket_pdf.download_hint')}
+                </p>
+            )}
         </div>
     );
 }

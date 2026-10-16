@@ -424,7 +424,7 @@ class RegistrationController extends Controller
             404,
         );
 
-        return $this->render($token, $event, $registration);
+        return $this->render($token, $event, $registration, preview: $request->boolean('preview'));
     }
 
     /**
@@ -438,7 +438,7 @@ class RegistrationController extends Controller
      * actions plutot que de construire une URL invalide (README 2.7, a completer separement par
      * un couple d'actions signees dediees, sur le meme principe que ce lien lui-meme).
      */
-    private function render(string $token, Event $event, Registration $registration, ?string $resume = null): Response
+    private function render(string $token, Event $event, Registration $registration, ?string $resume = null, bool $preview = false): Response
     {
         // Relance paresseuse : le decompte peut avoir expire depuis la derniere lecture, sans
         // que la tache planifiee (README 2.4) ne soit encore passee. Le statut stocke doit deja
@@ -454,6 +454,9 @@ class RegistrationController extends Controller
         return Inertia::render('public/registration-show', [
             'token' => $token,
             'resume' => $resume,
+            // Apercu de l'organisation (`?preview=1` sur le lien signe) : la page ne parle plus a
+            // l'invite. Cosmetique : ne change aucun droit, le lien signe reste la seule cle.
+            'preview' => $preview,
             // La reclamation s'adresse par la signature du lien de retour, que la page connait deja
             // des qu'on l'a ouverte (jeton de reprise ou lien signe).
             'claim' => [

@@ -205,10 +205,17 @@ return [
         'share_all_line' => ':name: :url',
         'own_share_whatsapp' => 'Send my card to my WhatsApp',
         'own_share_message' => 'My card for :event: :url',
-        'own_share_hint' => 'Keep this link in your messages: it reopens your tickets at any time. It gives access to your whole group, so only share it with people you want to let in.',
+        'own_share_group_message' => 'My card and my companions cards for :event: :url',
+        'own_share_hint' => 'Keep this link in your messages: it reopens your ticket at any time. Only share it with people you want to let in.',
+        'own_share_group_hint' => 'Keep this link in your messages: it reopens your ticket and your companions tickets at any time. It gives access to your whole group, so only share it with people you want to let in.',
         'share_unavailable' => 'Show this code from your phone: the individual link will be available once the organisation has chosen its address.',
         'single_title' => 'Ticket for :name',
         'single_notice' => 'This ticket admits one person and can only be used once. Show it at the entrance.',
+    ],
+
+    'preview' => [
+        'banner' => 'Organisation preview: this is the page of :name, as they see it. Nothing is sent from this page.',
+        'scheduled_send' => 'The card will be sent to :name by WhatsApp (and by email if they provided one) on :date.',
     ],
 
     'ticket_pdf' => [
@@ -281,7 +288,7 @@ return [
             'payment_account' => 'Account you paid into',
             'payment_account_placeholder' => 'Choose the account you used',
             'reference' => 'Transaction reference',
-            'guest_note' => 'Anything to add about this payment? (optional)',
+            'guest_note' => 'Anything to add about this payment?',
             'guest_note_placeholder' => 'For example: paid in two instalments, sent from a relative’s number…',
             'receipt' => 'Receipt capture',
         ],
