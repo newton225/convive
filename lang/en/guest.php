@@ -215,6 +215,7 @@ return [
 
     'preview' => [
         'banner' => 'Organisation preview: this is the page of :name, as they see it. Nothing is sent from this page.',
+        'passes_description' => 'Everyone enters with their own ticket. The individual links are sent from the Card window of the registrations list.',
         'scheduled_send' => 'The card will be sent to :name by WhatsApp (and by email if they provided one) on :date.',
     ],
 

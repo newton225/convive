@@ -263,20 +263,25 @@ export default function PublicRegistrationShow({
                                         </p>
                                         <p className="text-muted-foreground text-sm">
                                             {t(
-                                                'guest.ticket.passes_description',
+                                                preview
+                                                    ? 'guest.preview.passes_description'
+                                                    : 'guest.ticket.passes_description',
                                             )}
                                         </p>
                                     </div>
-                                    <ShareAllTicketsButton
-                                        passes={ticket.passes}
-                                        eventName={ticket.event.name}
-                                    />
+                                    {preview ? null : (
+                                        <ShareAllTicketsButton
+                                            passes={ticket.passes}
+                                            eventName={ticket.event.name}
+                                        />
+                                    )}
                                     {ticket.passes.map((pass) => (
                                         <CompanionTicketPassCard
                                             key={pass.id}
                                             pass={pass}
                                             design={ticket}
                                             event={ticket.event}
+                                            preview={preview}
                                         />
                                     ))}
                                 </div>

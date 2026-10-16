@@ -13,6 +13,9 @@ type Props = {
     pass: CompanionTicketPass;
     design: TicketDesign;
     event: TicketCardEvent;
+    // Apercu de l'organisation : ni partage ni copie, ils s'adressent a l'invite. L'organisation
+    // transmet les liens depuis la fenetre « Carte » de la base d'inscrits.
+    preview?: boolean;
 };
 
 /**
@@ -21,7 +24,12 @@ type Props = {
  * passe par `wa.me`, qui ouvre WhatsApp sans rien envoyer tant que l'invite n'a pas choisi le
  * destinataire.
  */
-export function CompanionTicketPassCard({ pass, design, event }: Props) {
+export function CompanionTicketPassCard({
+    pass,
+    design,
+    event,
+    preview = false,
+}: Props) {
     const { t } = useTranslation();
     const shareHref = pass.shareUrl
         ? `https://wa.me/?text=${encodeURIComponent(
@@ -35,7 +43,7 @@ export function CompanionTicketPassCard({ pass, design, event }: Props) {
     return (
         <div className="space-y-3" data-test="ticket-pass">
             <BrandedTicket {...design} event={event} ticket={pass.card} />
-            {shareHref && pass.shareUrl ? (
+            {preview ? null : shareHref && pass.shareUrl ? (
                 // Empiles sur toute la largeur du billet, de meme taille : les libelles portent le nom
                 // de la personne et sont longs, ils passent a la ligne plutot que de decaler les
                 // boutons. 44 px au moins (cible tactile du parcours invite).

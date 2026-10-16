@@ -215,6 +215,7 @@ return [
 
     'preview' => [
         'banner' => 'Aperçu pour l’organisation : voici la page de :name, telle qu’elle la voit. Rien n’est envoyé depuis cette page.',
+        'passes_description' => 'Chaque personne entre avec son propre billet. Les liens individuels se transmettent depuis la fenêtre « Carte » de la base d’inscrits.',
         'scheduled_send' => 'La carte sera envoyée à :name par WhatsApp (et par email s’il en a renseigné un) le :date.',
     ],
 
