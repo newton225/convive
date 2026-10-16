@@ -30,5 +30,7 @@ sleep 10
 
 bash "$ROOT/deploy/check.sh"
 
+git rev-parse HEAD > "$DELIVERED_FILE"
+
 printf '\nRetour effectué sur %s (tête détachée). Avant la prochaine livraison : deploy.sh repasse sur main.\n' \
     "$(git rev-parse --short HEAD)"

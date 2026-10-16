@@ -30,16 +30,30 @@ done
     || fail "le dépôt a des modifications locales. Ne pas forcer : les comprendre d'abord."
 
 current="$(git rev-parse HEAD)"
-step "Commit en service : $(git rev-parse --short HEAD)"
 git fetch origin main
 incoming="$(git rev-parse origin/main)"
 
-if [ "$current" = "$incoming" ]; then
-    printf 'Déjà à jour (%s). ' "$(git rev-parse --short HEAD)"
+# Ce que les conteneurs servent vraiment : le dernier commit livré par ce script. Le code du dépôt
+# (HEAD) peut déjà être plus récent si quelqu'un a fait un `git pull` seul : il n'a alors rien livré.
+delivered="$(cat "$DELIVERED_FILE" 2>/dev/null || true)"
+if [ -n "$delivered" ] && ! git cat-file -e "$delivered^{commit}" 2>/dev/null; then
+    delivered=""
+fi
+
+step "Code du dépôt : $(git rev-parse --short HEAD)"
+if [ -z "$delivered" ]; then
+    printf 'Aucune livraison enregistrée par ce script : les conteneurs peuvent servir une version plus ancienne que le code.\n'
+    if [ "$current" != "$incoming" ]; then
+        printf 'À récupérer :\n'
+        git log --oneline "$current..$incoming" | head -20
+    fi
+    confirm "Livrer ?"
+elif [ "$delivered" = "$incoming" ]; then
+    printf 'Déjà livré (%s) : les conteneurs servent le dernier code. ' "$(git rev-parse --short "$delivered")"
     confirm "Reconstruire et relivrer quand même ?"
 else
-    printf 'À livrer :\n'
-    git log --oneline "$current..$incoming" | head -20
+    printf 'Les conteneurs servent %s. À livrer :\n' "$(git rev-parse --short "$delivered")"
+    git log --oneline "$delivered..$incoming" | head -20
     confirm "Livrer ces modifications ?"
 fi
 
@@ -50,8 +64,10 @@ else
     printf '\nSauvegarde ignorée à votre demande.\n'
 fi
 
-printf '%s\n' "$current" > "$PREVIOUS_FILE"
-printf 'Point de retour noté : %s\n' "$(git rev-parse --short "$current")"
+# Le point de retour est ce que les conteneurs servaient, pas le code du dépôt s'il avait déjà avancé.
+previous="${delivered:-$current}"
+printf '%s\n' "$previous" > "$PREVIOUS_FILE"
+printf 'Point de retour noté : %s\n' "$(git rev-parse --short "$previous")"
 
 step "Récupération du code"
 git checkout main
@@ -92,5 +108,7 @@ step "Attente du démarrage"
 sleep 10
 
 bash "$ROOT/deploy/check.sh"
+
+git rev-parse HEAD > "$DELIVERED_FILE"
 
 printf '\nLivraison terminée : %s. Retour arrière : bash deploy/rollback.sh\n' "$(git rev-parse --short HEAD)"

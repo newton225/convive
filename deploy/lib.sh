@@ -11,6 +11,9 @@ export COMPOSE_ENV_FILES="${COMPOSE_ENV_FILES:-.env.production}"
 
 PUBLIC_URL="${PUBLIC_URL:-https://app.devultraapp.com}"
 PREVIOUS_FILE="${PREVIOUS_FILE:-$HOME/.convive-previous-commit}"
+# Le dernier commit reellement livre (images construites et migrations jouees) : un `git pull` seul
+# deplace le code du serveur sans changer ce que les conteneurs servent.
+DELIVERED_FILE="${DELIVERED_FILE:-$HOME/.convive-delivered-commit}"
 
 step() { printf '\n== %s\n' "$1"; }
 fail() { printf 'ERREUR : %s\n' "$1" >&2; exit 1; }
