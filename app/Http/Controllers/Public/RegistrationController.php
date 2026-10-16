@@ -668,6 +668,10 @@ class RegistrationController extends Controller
             'tableNumber' => $registration->tableAssignment?->seatingTable->number,
             // Tous les billets du groupe en un PDF (README 2.8), pour l'entree sans connexion.
             'pdfUrl' => $registration->ticketsPdfUrl(),
+            // Le lien signe de la carte, le meme que celui des rappels : l'invite peut se l'envoyer par
+            // WhatsApp pour retrouver ses billets. Il rouvre tout le groupe, jamais la reprise du
+            // dossier (pas de relance ni de preuve depuis ce lien).
+            'cardUrl' => $registration->signedResumeUrl(),
             'scheduledSendAt' => $event->invitations_send_at?->toISOString(),
             ...$design,
         ];

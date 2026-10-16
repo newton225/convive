@@ -8,6 +8,7 @@ import { OfflineBanner } from '@/components/offline-banner';
 import { useState } from 'react';
 import { CopyButton } from '@/components/copy-button';
 import { CompanionTicketPassCard } from '@/components/public/companion-ticket-pass-card';
+import { GuestCardShare } from '@/components/public/guest-card-share';
 import { ShareAllTicketsButton } from '@/components/public/share-all-tickets-button';
 import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
 import { TicketPdfDownload } from '@/components/public/ticket-pdf-download';
@@ -218,6 +219,12 @@ export default function PublicRegistrationShow({
                                 <TicketPdfDownload
                                     url={ticket.pdfUrl}
                                     all={ticket.passes.length > 0}
+                                />
+                            ) : null}
+                            {ticket.cardUrl ? (
+                                <GuestCardShare
+                                    url={ticket.cardUrl}
+                                    event={ticket.event}
                                 />
                             ) : null}
                             {ticket.scheduledSendAt ? (

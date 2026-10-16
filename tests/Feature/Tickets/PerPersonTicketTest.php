@@ -192,6 +192,18 @@ class PerPersonTicketTest extends TestCase
             );
     }
 
+    public function test_la_page_de_l_invite_donne_le_lien_signe_de_sa_carte_a_s_envoyer(): void
+    {
+        ['registration' => $registration] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $registration->fresh()->signedResumeUrl());
+
+        $this->get($url)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('registration.ticket.cardUrl', $url));
+    }
+
     public function test_le_lien_individuel_porte_le_meme_billet_et_le_gabarit_de_l_organisation(): void
     {
         ['tickets' => $tickets] = $this->confirmedGroup();

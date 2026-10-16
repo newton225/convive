@@ -72,6 +72,8 @@ export type TicketSummary = TicketDesign & {
     tableNumber: number | null;
     // Tous les billets du groupe en un PDF (README 2.8), null sans sous-domaine ni lien public.
     pdfUrl: string | null;
+    // Le lien de la carte, a s'envoyer par WhatsApp pour la retrouver ; null sans sous-domaine.
+    cardUrl: string | null;
     scheduledSendAt: string | null;
 };
 

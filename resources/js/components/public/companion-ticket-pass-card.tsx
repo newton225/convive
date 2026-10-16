@@ -47,12 +47,16 @@ export function CompanionTicketPassCard({ pass, design, event }: Props) {
                             data-test="ticket-pass-share"
                         >
                             <MessageCircle />
-                            {t('guest.ticket.share_whatsapp')}
+                            {t('guest.ticket.share_pass_whatsapp', {
+                                name: pass.name,
+                            })}
                         </a>
                     </Button>
                     <CopyButton
                         value={pass.shareUrl}
-                        label={t('guest.ticket.copy_link')}
+                        label={t('guest.ticket.copy_pass_link', {
+                            name: pass.name,
+                        })}
                         className="h-11"
                     />
                 </div>
