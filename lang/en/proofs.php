@@ -59,6 +59,12 @@ return [
         'guest_note' => 'Guest’s note',
     ],
 
+    'rules' => [
+        'title' => 'To check before deciding',
+        'original' => 'The screenshot is the original: one that has been edited, altered or retouched is always rejected.',
+        'complete' => 'The amount is complete and arrived in a single payment, transaction fees included: a partial or split payment is rejected.',
+    ],
+
     'details' => [
         'column' => 'Details',
         'show' => 'Show details for :name',

@@ -26,6 +26,7 @@ import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog'
 import { ProofConfirmSummary } from '@/components/proofs/proof-confirm-summary';
 import { ProofDetails } from '@/components/proofs/proof-details';
 import { ProofEventSwitcher } from '@/components/proofs/proof-event-switcher';
+import { ProofRules } from '@/components/proofs/proof-rules';
 import { ProofsToolbar } from '@/components/proofs/proofs-toolbar';
 import Heading from '@/components/heading';
 import { ListPagination } from '@/components/list-pagination';
@@ -698,6 +699,7 @@ export default function EventProofs({
                 {approving ? (
                     <ProofConfirmSummary proof={approving} testId="approve" />
                 ) : null}
+                <ProofRules />
             </ConfirmActionDialog>
 
             <Dialog
@@ -721,6 +723,7 @@ export default function EventProofs({
                             testId="reject"
                         />
                     ) : null}
+                    <ProofRules />
 
                     <DialogFooter className="gap-2">
                         <DialogClose asChild>

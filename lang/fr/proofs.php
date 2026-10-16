@@ -59,6 +59,12 @@ return [
         'guest_note' => 'Précision de l’invité',
     ],
 
+    'rules' => [
+        'title' => 'À contrôler avant de décider',
+        'original' => 'La capture est l’originale : une capture éditée, modifiée ou retouchée se rejette systématiquement.',
+        'complete' => 'Le montant est complet et arrivé en un seul paiement, frais de transaction compris : un paiement partiel ou fractionné se rejette.',
+    ],
+
     'details' => [
         'column' => 'Détail',
         'show' => 'Afficher le détail de :name',
