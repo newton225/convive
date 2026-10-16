@@ -2,6 +2,7 @@
 
 return [
     'unsaved_changes' => 'Unsaved changes',
+    'leave_unsaved' => 'Some changes are not saved. Leaving this page will lose them. Leave anyway?',
     'required' => 'required',
     'for_publishing' => 'to publish',
     'required_note' => 'Fields marked with * are required.',

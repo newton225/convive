@@ -2,6 +2,7 @@
 
 return [
     'unsaved_changes' => 'Modifications non enregistrées',
+    'leave_unsaved' => 'Des modifications ne sont pas enregistrées. Quitter cette page les perdra. Quitter quand même ?',
     'required' => 'obligatoire',
     'for_publishing' => 'pour publier',
     'required_note' => "Les champs marqués d'un * sont obligatoires.",

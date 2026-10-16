@@ -6,6 +6,7 @@ return [
 
     'models' => [
         'title' => 'Model',
+        'unsaved' => 'This model is not applied yet: click Save to keep it.',
         'classic' => ['label' => 'Classic', 'hint' => 'Centred title, thin frame.'],
         'sober' => ['label' => 'Sober', 'hint' => 'No ornament, quick to read.'],
         'elegant' => ['label' => 'Elegant', 'hint' => 'Serif title, golden rule.'],

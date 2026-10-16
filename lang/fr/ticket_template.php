@@ -6,6 +6,7 @@ return [
 
     'models' => [
         'title' => 'Modèle',
+        'unsaved' => 'Ce modèle n’est pas encore appliqué : cliquez sur Enregistrer pour le garder.',
         'classic' => ['label' => 'Classique', 'hint' => 'Titre centré, encadré fin.'],
         'sober' => ['label' => 'Sobre', 'hint' => 'Sans ornement, lecture rapide.'],
         'elegant' => ['label' => 'Élégant', 'hint' => 'Titre en serif, filet doré.'],

@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useTranslation } from '@/hooks/use-translation';
+import { useUnsavedChangesGuard } from '@/hooks/use-unsaved-changes-guard';
 import { Duration, EaseOut } from '@/lib/motion';
 import { sampleTicket } from '@/lib/sample-tickets';
 import type { SampleTicketHolder } from '@/lib/sample-tickets';
@@ -91,6 +92,8 @@ export function TicketTemplateEditor({
         model !== initialModel ||
         JSON.stringify(elements) !== JSON.stringify(initialElements);
 
+    useUnsavedChangesGuard(dirty);
+
     const save = () => {
         const payload: Record<string, boolean | string> = {
             ...extraPayload,
@@ -169,6 +172,14 @@ export function TicketTemplateEditor({
                                 </button>
                             ))}
                         </div>
+                        {model !== initialModel ? (
+                            <p
+                                className="text-muted-foreground mt-3 text-sm"
+                                data-test="ticket-model-unsaved"
+                            >
+                                {t('ticket_template.models.unsaved')}
+                            </p>
+                        ) : null}
                     </CardContent>
                 </Card>
 
