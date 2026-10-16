@@ -51,7 +51,7 @@ return [
         'recovery' => [
             'hint' => 'Lost the link to your reservation? We send it again by WhatsApp to the number of that reservation.',
             'action' => 'Find my reservation',
-            'sent' => 'If a reservation is in progress for this number, its link has just been sent by WhatsApp. It replaces the previous one.',
+            'sent' => 'If a reservation is in progress or a proof is to be redone for this number, its link has just been sent by WhatsApp. It replaces the previous one.',
             'failed' => 'The message could not be sent. Try again in a few moments.',
         ],
         'ongoing' => [
@@ -65,6 +65,7 @@ return [
             'phone_invalid' => 'This number is not valid for the selected country. Check the country chosen in front of the field, then the number.',
             'phone_already_active' => 'A reservation is already in progress for this number. Finish it, or wait for its time limit to end before creating another.',
             'phone_proof_pending' => 'A payment proof is already being checked for this number. Wait for it to be processed before registering again with this number.',
+            'phone_proof_rejected' => 'The payment proof for this number was rejected: your file is waiting for a new proof. Find it with the button below instead of registering again.',
             'bot_check' => 'The anti-robot check did not complete. Wait a moment for it to finish, then send the form again.',
             'already_confirmed' => 'This number already has a confirmed registration for this event. If you want to register other people, you can create an additional registration: it will have its own payment and its own tickets.',
             'too_many_codes' => 'Too many codes were sent to this number. Please try again in an hour.',

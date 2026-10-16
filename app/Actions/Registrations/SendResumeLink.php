@@ -31,9 +31,11 @@ class SendResumeLink
      */
     public function handle(Event $event, string $phone): bool
     {
-        $registration = Registration::phoneHolder($event, $phone);
+        // Une reservation avec decompte, ou un dossier dont la preuve a ete rejetee (il attend une
+        // nouvelle preuve : sans ce lien, l'invite ne le retrouve pas).
+        $registration = Registration::phoneHolder($event, $phone) ?? Registration::rejectedHolder($event, $phone);
 
-        if ($registration === null || $registration->status !== RegistrationStatus::Held) {
+        if ($registration === null || ! in_array($registration->status, [RegistrationStatus::Held, RegistrationStatus::ProofRejected], true)) {
             return false;
         }
 

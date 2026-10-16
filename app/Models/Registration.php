@@ -353,6 +353,21 @@ class Registration extends Model
     }
 
     /**
+     * Get the registration of the event whose payment proof was rejected for this phone number, or
+     * null (decision du 2026-10-16). Ce dossier attend une nouvelle preuve : tant qu'il existe, le
+     * numero ne s'inscrit pas de nouveau, l'invite retrouve son dossier (`SendResumeLink`). Annuler
+     * ou purger le dossier libere le numero.
+     */
+    public static function rejectedHolder(Event $event, string $phone): ?self
+    {
+        return self::query()
+            ->where('event_id', $event->id)
+            ->where('status', RegistrationStatus::ProofRejected)
+            ->get()
+            ->first(fn (self $other) => PhoneNumber::same($other->phone, $phone));
+    }
+
+    /**
      * Determine whether this phone already has a confirmed registration on the event : une
      * nouvelle inscription n'est alors qu'additionnelle, l'invite doit le confirmer (decision du
      * proprietaire du projet, 2026-10-03).

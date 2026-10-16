@@ -123,6 +123,14 @@ class RegistrationController extends Controller
             return back()->withInput()->withErrors(['phone' => $this->phoneBusyMessage($holder)]);
         }
 
+        // Une preuve rejetee attend d'etre refaite sur le meme dossier : pas de doublon, l'invite
+        // retrouve son lien (decision du 2026-10-16).
+        if (Registration::rejectedHolder($event, (string) $request->validated('phone')) !== null) {
+            Inertia::flash('recoverable', true);
+
+            return back()->withInput()->withErrors(['phone' => __('guest.registration.errors.phone_proof_rejected')]);
+        }
+
         // Une inscription confirmee existe deja pour ce numero : la nouvelle n'est possible que comme
         // inscription additionnelle, apres que l'invite l'a confirme.
         if (! $request->boolean('confirm_additional') && Registration::phoneHasConfirmed($event, (string) $request->validated('phone'))) {

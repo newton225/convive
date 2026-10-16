@@ -935,6 +935,56 @@ class RegistrationTest extends TestCase
         Notification::assertNothingSent();
     }
 
+    public function test_le_lien_d_un_dossier_dont_la_preuve_a_ete_rejetee_est_renvoye_et_remplace_l_ancien(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        [, $oldToken] = $this->heldRegistration($tenant, $event, ['status' => RegistrationStatus::ProofRejected]);
+
+        $this->post($this->urlFor($tenant->subdomain, $event->public_token, '/register/recover'), ['phone' => '07 07 12 34 56'])
+            ->assertRedirect();
+
+        $newLink = null;
+        Notification::assertSentOnDemand(ResumeLink::class, function (ResumeLink $notification, array $channels, $notifiable) use (&$newLink) {
+            $newLink = $notification->link;
+
+            return $notifiable->routes['whatsapp'] === '+225 07 07 12 34 56';
+        });
+
+        $this->get($this->urlFor($tenant->subdomain, $event->public_token, "/register/{$oldToken}"))->assertNotFound();
+
+        $newToken = basename(parse_url((string) $newLink, PHP_URL_PATH));
+        $this->get($this->urlFor($tenant->subdomain, $event->public_token, "/register/{$newToken}"))->assertOk();
+    }
+
+    public function test_un_numero_dont_la_preuve_a_ete_rejetee_ne_peut_pas_s_inscrire_de_nouveau_et_peut_retrouver_son_dossier(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $this->heldRegistration($tenant, $event, ['status' => RegistrationStatus::ProofRejected]);
+
+        $this->followingRedirects()
+            ->post($this->registrationFormUrl($tenant, $event), $this->validPayload($tenant))
+            ->assertInertia(fn ($page) => $page->hasFlash('recoverable', true));
+
+        $this->assertSame(1, $tenant->asCurrent(fn () => Registration::query()->count()));
+    }
+
+    public function test_un_dossier_annule_apres_le_rejet_libere_le_numero(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+        $this->heldRegistration($tenant, $event, ['status' => RegistrationStatus::Cancelled]);
+
+        $this->post($this->registrationFormUrl($tenant, $event), $this->validPayload($tenant))
+            ->assertSessionHasNoErrors();
+    }
+
     public function test_le_renvoi_du_lien_est_limite_a_trois_par_heure_et_par_numero(): void
     {
         Notification::fake();
