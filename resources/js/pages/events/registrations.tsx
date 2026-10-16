@@ -41,7 +41,11 @@ import { can, Permission } from '@/lib/permissions';
 import { registrationReceiptFacts } from '@/lib/receipt-facts';
 import { sortingFromParam, sortingToParam } from '@/lib/server-sorting';
 import { index as eventsIndex } from '@/routes/tenants/events';
-import { index, purge } from '@/routes/tenants/events/registrations';
+import {
+    index,
+    purge,
+    resumeLink,
+} from '@/routes/tenants/events/registrations';
 import {
     checklists,
     csv,
@@ -96,6 +100,7 @@ export default function EventRegistrations({
     const { t, locale } = useTranslation();
     const [search, setSearch] = useState(filters.search ?? '');
     const [cancelling, setCancelling] = useState<RegistrationRow | null>(null);
+    const [resending, setResending] = useState<RegistrationRow | null>(null);
     const { expanded, onExpandedChange, singleExpand, toggleSingleExpand } =
         useExpandedRows('registrations.single-expand');
     const [cardFor, setCardFor] = useState<
@@ -113,6 +118,7 @@ export default function EventRegistrations({
     const canCancel = can(permissions, Permission.RegistrationsCancel);
     const canRefund = can(permissions, Permission.RegistrationsRefund);
     const canPurge = can(permissions, Permission.RegistrationsPurge);
+    const canResendLink = can(permissions, Permission.RegistrationsClaims);
     const canExport = can(permissions, Permission.RegistrationsExport);
 
     // Les exports reprennent le filtre affiche a l'ecran. Un telechargement est un lien simple,
@@ -338,6 +344,18 @@ export default function EventRegistrations({
                                 }
                             >
                                 {t('registrations.card.open')}
+                            </Button>
+                        ) : null}
+                        {canResendLink &&
+                        (row.original.status === 'held' ||
+                            row.original.status === 'proof_rejected') ? (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                data-test="registration-resume-link"
+                                onClick={() => setResending(row.original)}
+                            >
+                                {t('registrations.resume_link.action')}
                             </Button>
                         ) : null}
                         {canCancel && row.original.status !== 'cancelled' ? (
@@ -572,6 +590,30 @@ export default function EventRegistrations({
                     onClose={() => setCancelling(null)}
                 />
             ) : null}
+
+            <ConfirmActionDialog
+                open={resending !== null}
+                onOpenChange={(open) => !open && setResending(null)}
+                title={t('registrations.resume_link.title')}
+                description={t('registrations.resume_link.description', {
+                    name: resending?.name ?? '',
+                })}
+                confirmLabel={t('registrations.resume_link.submit')}
+                testId="registration-resume-link-confirm"
+                onConfirm={() =>
+                    resending
+                        ? router.post(
+                              resumeLink([tenant.slug, event.id, resending.id])
+                                  .url,
+                              {},
+                              {
+                                  preserveScroll: true,
+                                  onFinish: () => setResending(null),
+                              },
+                          )
+                        : undefined
+                }
+            />
 
             <ReceiptPreviewDialog
                 receipt={receiptPreview}

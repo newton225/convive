@@ -62,6 +62,15 @@ class RegistrationPolicy
     }
 
     /**
+     * Determine whether the user can send the guest a fresh link to a dossier waiting on them
+     * (decision du 2026-10-16) : la permission des reclamations, qui sert deja a rappeler les invites.
+     */
+    public function resendResumeLink(User $user, Registration $registration, Tenant $tenant): bool
+    {
+        return $user->hasTenantPermission($tenant, TenantPermission::RegistrationsClaims);
+    }
+
+    /**
      * Determine whether the user can decide what happens to the payment of a cancelled
      * registration (README 2.11).
      */

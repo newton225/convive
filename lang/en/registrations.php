@@ -156,6 +156,19 @@ return [
         ],
     ],
 
+    'resume_link' => [
+        'action' => 'Resend the link',
+        'title' => 'Resend the link to the file',
+        'description' => 'A new link is sent to :name, by WhatsApp and by email if they gave one. It replaces the previous one, which will stop working. You do not see the link: it lets someone upload a proof in the guest\'s name.',
+        'submit' => 'Resend the link',
+        'flash' => [
+            'sent' => 'Link sent again to :name.',
+        ],
+        'errors' => [
+            'not_sent' => 'The link was not sent: the file no longer waits on the guest, the plan\'s sending quota is reached, or the link cannot be built.',
+        ],
+    ],
+
     'refund' => [
         'title' => 'Payment',
         'question' => 'What happens to the :amount payment?',

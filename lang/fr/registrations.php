@@ -156,6 +156,19 @@ return [
         ],
     ],
 
+    'resume_link' => [
+        'action' => 'Renvoyer le lien',
+        'title' => 'Renvoyer le lien du dossier',
+        'description' => "Un nouveau lien part à :name, par WhatsApp et par email s'il en a donné un. Il remplace le précédent, qui cessera de fonctionner. Vous ne voyez pas le lien : il permet de déposer une preuve au nom de l'invité.",
+        'submit' => 'Renvoyer le lien',
+        'flash' => [
+            'sent' => 'Lien renvoyé à :name.',
+        ],
+        'errors' => [
+            'not_sent' => "Le lien n'est pas parti : le dossier n'attend plus l'invité, le quota d'envois du plan est atteint, ou le lien ne peut pas être construit.",
+        ],
+    ],
+
     'refund' => [
         'title' => 'Paiement',
         'question' => 'Que devient le paiement de :amount ?',

@@ -9,6 +9,7 @@ use App\Http\Controllers\Events\PaymentProofController;
 use App\Http\Controllers\Events\ReconciliationController;
 use App\Http\Controllers\Events\RegistrationCardController;
 use App\Http\Controllers\Events\RegistrationController;
+use App\Http\Controllers\Events\RegistrationResumeLinkController;
 use App\Http\Controllers\Events\ReportController;
 use App\Http\Controllers\Events\ScanController;
 use App\Http\Controllers\Events\SeatingController;
@@ -109,6 +110,8 @@ Route::prefix('{tenant}')
         // Carte d'invitation a la main (README 2.7) : envoi par l'application, trace d'un partage.
         Route::post('events/{event}/registrations/{registration}/card', [RegistrationCardController::class, 'send'])->name('tenants.events.registrations.card.send');
         Route::post('events/{event}/registrations/{registration}/card/shared', [RegistrationCardController::class, 'shared'])->name('tenants.events.registrations.card.shared');
+        // Lien du dossier renvoye a l'invite qui l'a perdu (reservation en cours, preuve rejetee).
+        Route::post('events/{event}/registrations/{registration}/resume-link', [RegistrationResumeLinkController::class, 'send'])->name('tenants.events.registrations.resume-link');
         // Sort du paiement d'une inscription annulee (README 2.11).
         Route::post('events/{event}/registrations/{registration}/refund', [RegistrationController::class, 'refund'])->name('tenants.events.registrations.refund');
         Route::post('events/{event}/registrations/purge', [RegistrationController::class, 'purge'])->name('tenants.events.registrations.purge');
