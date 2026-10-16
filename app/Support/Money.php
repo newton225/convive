@@ -11,12 +11,14 @@ namespace App\Support;
  * `number_format()` plutot que `NumberFormatter` : ce dernier exige l'extension `intl`, absente de
  * nombreux PHP (dont celui du developpement, erreur 500 sur l'export PDF le 2026-09-27). Montant
  * entier et deux langues servies seulement : les separateurs se declarent ici, a l'identique de ce
- * que `Intl.NumberFormat` produit dans le navigateur (espace fine insecable en francais).
+ * que `Intl.NumberFormat` produit dans le navigateur, a une nuance pres : l'espace insecable ordinaire
+ * (U+00A0) et non l'espace fine insecable (U+202F), que la police du moteur PDF ne connait pas et
+ * rend « ? » (« 10?000 F CFA » sur le billet, 2026-10-16).
  */
 class Money
 {
     private const ThousandsSeparators = [
-        'fr' => "\u{202F}",
+        'fr' => "\u{00A0}",
         'en' => ',',
     ];
 

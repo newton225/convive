@@ -149,7 +149,7 @@ class TicketPdfTest extends TestCase
         app()->setLocale('fr');
 
         $this->assertSame('Enfant · Gratuit', TicketCard::priceCategoryLabel(['name' => 'Enfant', 'price' => 0]));
-        $this->assertSame("VIP · 15\u{202F}000 F CFA", TicketCard::priceCategoryLabel(['name' => 'VIP', 'price' => 15000]));
+        $this->assertSame("VIP · 15\u{00A0}000 F CFA", TicketCard::priceCategoryLabel(['name' => 'VIP', 'price' => 15000]));
     }
 
     public function test_la_liste_des_accompagnateurs_suit_le_gabarit_du_billet(): void

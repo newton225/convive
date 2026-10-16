@@ -13,11 +13,11 @@ use Tests\TestCase;
  */
 class MoneyTest extends TestCase
 {
-    public function test_en_francais_les_milliers_sont_separes_par_une_espace_fine_insecable(): void
+    public function test_en_francais_les_milliers_sont_separes_par_une_espace_insecable(): void
     {
         App::setLocale('fr');
 
-        $this->assertSame("1\u{202F}250\u{202F}000 F CFA", Money::format(1250000));
+        $this->assertSame("1\u{00A0}250\u{00A0}000 F CFA", Money::format(1250000));
     }
 
     public function test_en_anglais_les_milliers_sont_separes_par_une_virgule(): void
