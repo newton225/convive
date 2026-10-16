@@ -17,7 +17,7 @@ return [
 
     'toolbar' => [
         'search' => 'Rechercher',
-        'search_placeholder' => 'Nom, référence, téléphone, unité, accompagnateur',
+        'search_placeholder' => 'Nom, référence du dossier ou de la transaction, téléphone, unité, accompagnateur',
         'filter_label' => 'Filtrer par signal',
         'count' => '{0} Aucune preuve|{1} 1 preuve|[2,*] :count preuves',
     ],

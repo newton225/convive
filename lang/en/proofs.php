@@ -17,7 +17,7 @@ return [
 
     'toolbar' => [
         'search' => 'Search',
-        'search_placeholder' => 'Name, reference, phone, unit, companion',
+        'search_placeholder' => 'Name, registration or transaction reference, phone, unit, companion',
         'filter_label' => 'Filter by signal',
         'count' => '{0} No proof|{1} 1 proof|[2,*] :count proofs',
     ],

@@ -70,7 +70,7 @@ return [
         'proof_submitted' => 'À vérifier',
         'without_proof' => 'Sans preuve',
         'cancelled' => 'Annulées',
-        'search_placeholder' => 'Nom, référence, téléphone ou email',
+        'search_placeholder' => 'Nom, référence du dossier ou de la transaction, téléphone ou email',
     ],
 
     'statuses' => [

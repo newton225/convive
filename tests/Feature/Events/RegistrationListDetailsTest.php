@@ -115,6 +115,29 @@ class RegistrationListDetailsTest extends TestCase
                 ->where('rows.0.people.0.entered', null));
     }
 
+    public function test_la_recherche_trouve_une_inscription_par_la_reference_de_sa_transaction(): void
+    {
+        $this->tenant->asCurrent(function () {
+            $account = PaymentAccount::factory()->create();
+
+            foreach (['Aya Kouame' => 'TX-ABC-123', 'Koffi Brou' => 'TX-ZZZ-999'] as $name => $reference) {
+                $registration = Registration::factory()->confirmed()->create(['event_id' => $this->event->id, 'name' => $name]);
+                PaymentProof::factory()->create([
+                    'registration_id' => $registration->id,
+                    'payment_account_id' => $account->id,
+                    'reference' => $reference,
+                ]);
+            }
+        });
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.registrations.index', [$this->tenant, $this->event]).'?filter[search]=abc-123')
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('rows', 1)
+                ->where('rows.0.name', 'Aya Kouame')
+                ->where('rows.0.proofReference', 'TX-ABC-123'));
+    }
+
     public function test_une_inscription_sans_preuve_ni_passage_n_a_ni_canal_ni_entree(): void
     {
         $this->tenant->asCurrent(fn () => Registration::factory()->held()->create(['event_id' => $this->event->id]));

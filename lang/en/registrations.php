@@ -70,7 +70,7 @@ return [
         'proof_submitted' => 'Pending review',
         'without_proof' => 'Without proof',
         'cancelled' => 'Cancelled',
-        'search_placeholder' => 'Name, reference, phone or email',
+        'search_placeholder' => 'Name, registration or transaction reference, phone or email',
     ],
 
     'statuses' => [

@@ -342,8 +342,12 @@ class RegistrationController extends Controller
     {
         return QueryBuilder::for(Registration::where('event_id', $event->id))
             ->allowedFilters(
+                // Le dossier lui-meme, ou la reference de la transaction de sa derniere preuve : le code
+                // d'un SMS de paiement se retrouve ici une fois la preuve sortie de la file.
                 AllowedFilter::callback('search', function (Builder $query, string $value) {
-                    UnaccentedSearch::apply($query, ['name', 'reference', 'phone', 'email'], $value);
+                    $query->where(fn (Builder $any) => $any
+                        ->where(fn (Builder $own) => UnaccentedSearch::apply($own, ['name', 'reference', 'phone', 'email'], $value))
+                        ->orWhereHas('latestProof', fn (Builder $proof) => UnaccentedSearch::apply($proof, ['reference'], $value)));
                 }),
                 AllowedFilter::callback('status', function (Builder $query, string $value) {
                     match ($value) {
