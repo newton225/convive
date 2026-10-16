@@ -5,6 +5,13 @@
 > sont dans **`CLAUDE.md`**, lu automatiquement par Claude Code à chaque session.
 > Maquette interactive de référence : `Convive.dc.html` (prototype HTML, données factices).
 
+> **État du projet : l'application est en production** (pilote, depuis le 2026-10-15). Des organisations
+> et des invités l'utilisent : toute évolution se fait désormais **avec précaution et sans régression**.
+> Une modification commence par un test, ajoute sans casser (migrations qui n'effacent ni ne renomment
+> rien), garde les deux moteurs (SQLite en développement, PostgreSQL en production), ne change pas ce
+> qui est déjà distribué (adresses de liens, jetons, formats de QR) et se livre par sujet. La règle
+> détaillée est dans `SECURITY.md`, section « Application en ligne », et dans `CLAUDE.md`.
+
 ---
 
 ## 1. Le produit en une page
@@ -471,6 +478,12 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
     nombre de personnes déjà placées).
 22. **Rapports post-événement** — présence et absents comptés par personne, recettes, durée
     moyenne de contrôle, présence et recettes par unité, export PDF.
+22 bis. **Trésorerie** — les totaux de toute l'organisation (décision du 2026-10-16) : encaissé,
+    remboursé (frais retenus compris), à rembourser et net, par événement et par compte de versement,
+    plus la liste de tous les remboursements à faire. Filtre de période (événements dont la date tombe
+    dans la période), export PDF. Mêmes chiffres que les rapports d'événement, additionnés ; mêmes
+    droits (`reports.view`, `reports.export`). Numérotée « 22 bis » pour ne pas décaler les écrans
+    existants.
 23. **Historique des actions** — date, action, ce qui s'est passé, par qui, depuis quelle
     adresse ; conservation 24 mois, sans modification ni effacement possibles.
 24. **Réglages événement** — identité visuelle, places totales, échéances, rappels, règles
