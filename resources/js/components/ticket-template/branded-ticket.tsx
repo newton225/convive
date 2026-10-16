@@ -300,6 +300,17 @@ export function BrandedTicket({
                                     </dd>
                                 </div>
                             ) : null}
+                            {ticket.seatsAtTables &&
+                            ticket.tableNumber !== null ? (
+                                <div data-test="ticket-table">
+                                    <dt className="text-ink/60 text-xs">
+                                        {t('ticket_template.preview.table')}
+                                    </dt>
+                                    <dd className="font-medium">
+                                        {ticket.tableNumber}
+                                    </dd>
+                                </div>
+                            ) : null}
                             {ticket.host ? (
                                 <div
                                     className="rounded-md bg-[color:var(--brand-primary)]/6 px-3 py-2"

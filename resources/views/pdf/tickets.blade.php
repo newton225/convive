@@ -131,6 +131,13 @@
                         </div>
                     @endif
 
+                    @if ($ticket['seatsAtTables'] && $ticket['tableNumber'] !== null)
+                        <div class="field">
+                            <div class="label">{{ __('ticket_template.preview.table') }}</div>
+                            <div class="holder">{{ $ticket['tableNumber'] }}</div>
+                        </div>
+                    @endif
+
                     @if ($ticket['host'])
                         <div class="host">
                             <div class="label">{{ __('ticket_template.preview.host') }}</div>
