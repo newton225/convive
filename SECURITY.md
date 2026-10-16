@@ -1,17 +1,23 @@
 # Revue de securite — Convive
 
 Revue conduite sur les specifications (`README.md`, `CLAUDE.md`) et le prototype
-`Convive.dc.html`. Ce document est une modelisation de menaces, a traiter comme une liste
-d'exigences pendant le developpement, puis comme une grille de test avant mise en production.
+`Convive.dc.html`. Ce document est une modelisation de menaces : il a servi de liste
+d'exigences pendant le developpement, il sert maintenant de **grille de test** avant chaque
+ouverture a de nouvelles organisations et a chaque evolution qui touche a l'argent, aux places,
+aux acces ou aux donnees d'une organisation.
 
-Au moment de la redaction, aucun code metier n'existait. Le socle est aujourd'hui en place
-(locataires, utilisateurs, invitations, authentification et 2FA) ; le reste des controles
-decrits ici est a implementer au fur et a mesure des etapes de construction.
+**Etat au 2026-10-16.** L'application est **en production** (pilote, sur PostgreSQL 16, hors des
+conteneurs), et le code decrit ici existe. Les controles listes ci-dessous ne sont pas tous
+verifies pour autant : la grille de test de ce document n'a pas ete rejouee en entier sur
+PostgreSQL, et c'est un prealable a l'ouverture publique (voir « Application en ligne »).
 
-Le projet tourne sur **SQLite** par decision du proprietaire. Deux controles cites plus bas
-sont donc indisponibles et compenses autrement : la Row Level Security (C4) et le
-verrouillage de ligne `SELECT ... FOR UPDATE` (H4). Voir `CLAUDE.md`, section
-« Base de donnees ».
+**Moteurs de base de donnees.** La production tourne sur **PostgreSQL**, une base par
+organisation (`stancl/tenancy`). SQLite reste le moteur du developpement et de la suite de
+tests, et les deux doivent continuer de fonctionner. Le verrouillage de ligne
+`SELECT ... FOR UPDATE` (H4) est actif sur PostgreSQL et sans effet sur SQLite, ou la contrainte
+d'unicite en base et le verrou applicatif prennent le relais. La Row Level Security n'est plus le
+moyen du cloisonnement : il repose sur la separation physique des bases (C4). Voir `CLAUDE.md`,
+sections « Base de donnees » et « Multi-locataire ».
 
 Chaque entree suit le meme format : l'attaque, son impact, le controle obligatoire.
 Les severites sont evaluees dans le contexte du produit : argent detourne, places vendues
@@ -158,8 +164,8 @@ le captcha restent entierement a construire avec l'ecran 4.
 
 **Decision d'architecture.** Le cloisonnement repose desormais sur une **base de donnees
 separee par locataire** (`stancl/tenancy`), pas sur un scope applicatif filtrant `tenant_id`
-dans une base partagee. Cette section decrit le modele de menace **cible** ; le code n'est pas
-encore migre, voir `CLAUDE.md` section « Multi-locataire » pour l'etat exact.
+dans une base partagee. Cette section decrit le modele de menace de l'architecture en place :
+une base par organisation, voir `CLAUDE.md` section « Multi-locataire ».
 
 **Attaque.** Avec une base separee, l'essentiel des vecteurs traditionnels (oubli de scope,
 `withoutGlobalScopes()` laisse en debug, requete SQL brute qui ignore le filtre) disparait :
