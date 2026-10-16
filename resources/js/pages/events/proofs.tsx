@@ -5,7 +5,6 @@ import {
     getExpandedRowModel,
     useReactTable,
     type ColumnDef,
-    type ExpandedState,
     type SortingState,
     type Updater,
 } from '@tanstack/react-table';
@@ -57,7 +56,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { useLocalPreference } from '@/hooks/use-local-preference';
+import { useExpandedRows } from '@/hooks/use-expanded-rows';
 import { useServerList } from '@/hooks/use-server-list';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
@@ -124,7 +123,6 @@ export default function EventProofs({
         useState<PaymentProofRow | null>(null);
     const [duplicateReferenceOf, setDuplicateReferenceOf] =
         useState<PaymentProofRow | null>(null);
-    const [expanded, setExpanded] = useState<ExpandedState>({});
     const { search, setSearch, visit } = useServerList({
         url: index([tenant.slug, event.id]).url,
         filters: { search: filters.search, signal: filters.signal },
@@ -151,40 +149,8 @@ export default function EventProofs({
 
         visit({ sort: key ? (first?.desc ? '-' : '') + key : null });
     };
-    const [singleExpand, setSingleExpand] = useLocalPreference(
-        'proofs.single-expand',
-        false,
-    );
-
-    // Une seule ligne ouverte a la fois, si le tresorier l'a choisi : ouvrir une ligne referme
-    // les autres. Sinon, TanStack Table garde toutes les lignes ouvertes.
-    const changeExpanded = (updater: Updater<ExpandedState>) =>
-        setExpanded((previous) => {
-            const next =
-                typeof updater === 'function' ? updater(previous) : updater;
-
-            if (!singleExpand || next === true) {
-                return next;
-            }
-
-            const opened = Object.keys(next).filter(
-                (id) => next[id] && !(previous !== true && previous[id]),
-            );
-
-            return opened.length > 0
-                ? { [opened[opened.length - 1]]: true }
-                : next;
-        });
-
-    const toggleSingleExpand = (checked: boolean) => {
-        setSingleExpand(checked);
-
-        // En passant a une seule ligne, on repart d'un tableau replie plutot que de choisir
-        // arbitrairement laquelle des lignes deja ouvertes garder.
-        if (checked) {
-            setExpanded({});
-        }
-    };
+    const { expanded, onExpandedChange, singleExpand, toggleSingleExpand } =
+        useExpandedRows('proofs.single-expand');
 
     const canApprove = can(permissions, Permission.ProofsApprove);
     const canReject = can(permissions, Permission.ProofsReject);
@@ -505,7 +471,7 @@ export default function EventProofs({
             expanded,
             sorting,
         },
-        onExpandedChange: changeExpanded,
+        onExpandedChange,
         onSortingChange: setSorting,
         getRowCanExpand: () => true,
         getCoreRowModel: getCoreRowModel(),

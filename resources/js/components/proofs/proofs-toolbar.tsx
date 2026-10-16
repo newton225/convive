@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
+import { SingleExpandToggle } from '@/components/single-expand-toggle';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -90,16 +90,14 @@ export function ProofsToolbar({
                 {t('proofs.toolbar.count', { count })}
             </p>
 
-            <label className="ml-auto flex min-h-9 items-center gap-2 text-sm">
-                <Checkbox
+            <div className="ml-auto">
+                <SingleExpandToggle
                     checked={singleExpand}
-                    onCheckedChange={(checked) =>
-                        onSingleExpandChange(checked === true)
-                    }
-                    data-test="proofs-single-expand"
+                    onCheckedChange={onSingleExpandChange}
+                    label={t('proofs.details.single_expand')}
+                    testId="proofs-single-expand"
                 />
-                {t('proofs.details.single_expand')}
-            </label>
+            </div>
         </div>
     );
 }

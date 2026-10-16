@@ -66,6 +66,10 @@ type Expansion<TData> = {
     // preuves). Les lignes ouvertes se retiennent par identifiant, donc elles ne suivent pas une
     // autre ligne a la page suivante.
     getRowId: (row: TData) => string;
+    // Les lignes ouvertes sont tenues par l'ecran (`useExpandedRows`), qui y ajoute le choix « une
+    // seule ligne a la fois » : le meme comportement que la file des preuves.
+    expanded: ExpandedState;
+    onExpandedChange: (updater: Updater<ExpandedState>) => void;
     renderDetails: (row: TData) => React.ReactNode;
     columnLabel: string;
     showLabel: (row: TData) => string;
@@ -97,7 +101,6 @@ type Props<TData> = {
  */
 export default function DataTable<TData>(props: Props<TData>) {
     const { data, emptyState, rowTestId, selection, expansion } = props;
-    const [expanded, setExpanded] = useState<ExpandedState>({});
     const isClient = props.mode === 'client';
     const [clientSorting, setClientSorting] = useState<SortingState>(
         props.mode === 'client' ? (props.initialSorting ?? []) : [],
@@ -207,7 +210,7 @@ export default function DataTable<TData>(props: Props<TData>) {
             ? {
                   getRowCanExpand: () => true,
                   getExpandedRowModel: getExpandedRowModel(),
-                  onExpandedChange: setExpanded,
+                  onExpandedChange: expansion.onExpandedChange,
                   getRowId: (row: TData) => expansion.getRowId(row),
               }
             : {}),
@@ -227,7 +230,7 @@ export default function DataTable<TData>(props: Props<TData>) {
         state: {
             sorting: isClient ? clientSorting : (serverSorting ?? []),
             ...(selection ? { rowSelection: selection.selected } : {}),
-            ...(expansion ? { expanded } : {}),
+            ...(expansion ? { expanded: expansion.expanded } : {}),
         },
         onSortingChange: changeSorting,
         enableSorting: isClient || onServerSortingChange !== undefined,

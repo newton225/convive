@@ -6,6 +6,15 @@ return [
 
     'details' => [
         'column' => 'Details',
+        'single_expand' => 'Only one row open at a time',
+        'none' => 'None',
+        'payment' => 'Payment',
+        'amount_due' => 'Amount due',
+        'channel' => 'Channel',
+        'reference' => 'Reference',
+        'deposited_at' => 'Proof submitted on',
+        'cancellation' => 'Cancellation reason',
+        'card_and_entry' => 'Card and entry',
         'show' => 'Show the registration details of :name',
         'hide' => 'Hide the registration details of :name',
         'people' => '{1} 1 person in this registration|[2,*] :count people in this registration',

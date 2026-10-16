@@ -6,6 +6,15 @@ return [
 
     'details' => [
         'column' => 'Détail',
+        'single_expand' => 'Une seule ligne ouverte à la fois',
+        'none' => 'Aucun',
+        'payment' => 'Paiement',
+        'amount_due' => 'Montant dû',
+        'channel' => 'Canal',
+        'reference' => 'Référence',
+        'deposited_at' => 'Preuve déposée le',
+        'cancellation' => 'Motif d’annulation',
+        'card_and_entry' => 'Carte et entrée',
         'show' => 'Voir le détail du dossier de :name',
         'hide' => 'Masquer le détail du dossier de :name',
         'people' => '{1} 1 personne dans ce dossier|[2,*] :count personnes dans ce dossier',

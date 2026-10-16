@@ -11,6 +11,7 @@ import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog'
 import { CancellationsCard } from '@/components/registrations/cancellations-card';
 import { InvitationCardDialog } from '@/components/registrations/invitation-card-dialog';
 import { RegistrationDetails } from '@/components/registrations/registration-details';
+import { SingleExpandToggle } from '@/components/single-expand-toggle';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useExpandedRows } from '@/hooks/use-expanded-rows';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
@@ -93,6 +95,8 @@ export default function EventRegistrations({
     const { t, locale } = useTranslation();
     const [search, setSearch] = useState(filters.search ?? '');
     const [cancelling, setCancelling] = useState<RegistrationRow | null>(null);
+    const { expanded, onExpandedChange, singleExpand, toggleSingleExpand } =
+        useExpandedRows('registrations.single-expand');
     const [cardFor, setCardFor] = useState<
         (RegistrationRow & { card: RegistrationCard }) | null
     >(null);
@@ -429,6 +433,13 @@ export default function EventRegistrations({
                         </SelectContent>
                     </Select>
 
+                    <SingleExpandToggle
+                        checked={singleExpand}
+                        onCheckedChange={toggleSingleExpand}
+                        label={t('registrations.details.single_expand')}
+                        testId="registrations-single-expand"
+                    />
+
                     {canExport ? (
                         <div
                             className="flex flex-wrap items-center gap-2 sm:ml-auto"
@@ -494,6 +505,8 @@ export default function EventRegistrations({
                     rowTestId="registration-row"
                     expansion={{
                         getRowId: (row) => String(row.id),
+                        expanded,
+                        onExpandedChange,
                         renderDetails: (row) => (
                             <RegistrationDetails registration={row} />
                         ),
