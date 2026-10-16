@@ -191,7 +191,11 @@ export default function EventForm({
                                         event={event}
                                         paymentAccounts={paymentAccounts}
                                         firstPublication={
-                                            !tenant.paymentDelayActive
+                                            !tenant.paymentDelayActive &&
+                                            event.priceCategories.some(
+                                                (category) =>
+                                                    category.price > 0,
+                                            )
                                         }
                                     />
                                 </>

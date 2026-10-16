@@ -17,10 +17,11 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 /**
- * Le delai de 24 heures des comptes de versement part de la premiere publication (decision du
- * proprietaire du projet, 2026-10-07) : avant, aucun invite ne voit de compte, un changement
- * s'applique tout de suite apres un apercu et une confirmation ; apres, le delai s'applique pour
- * toujours, meme une fois tous les evenements clotures.
+ * Le delai de 24 heures des comptes de versement part de la premiere publication d'un evenement
+ * payant (decision du proprietaire du projet, 2026-10-07, precisee le 2026-10-16) : avant, aucun
+ * invite ne voit de compte, un changement s'applique tout de suite apres un apercu et une
+ * confirmation ; apres, le delai s'applique pour toujours, meme une fois tous les evenements
+ * clotures. Un evenement gratuit n'affiche aucun compte : le publier ne demarre rien.
  */
 class PaymentAccountFirstPublicationTest extends TestCase
 {
@@ -138,7 +139,7 @@ class PaymentAccountFirstPublicationTest extends TestCase
         $this->assertSame('Wave du bureau', $this->account()->label);
     }
 
-    public function test_publier_un_premier_evenement_demarre_le_delai(): void
+    private function readyToPublish(): void
     {
         $this->tenant->brandingOrCreate()->fill([
             'display_name' => 'Convive',
@@ -153,14 +154,27 @@ class PaymentAccountFirstPublicationTest extends TestCase
             'phone' => '+225 07 07 12 34 56',
         ])->save();
         $this->tenant->update(['subdomain' => 'convive-ci']);
+    }
 
-        $event = $this->tenant->asCurrent(function () {
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function draftEvent(array $attributes = []): Event
+    {
+        $this->readyToPublish();
+
+        return $this->tenant->asCurrent(function () use ($attributes) {
             $account = PaymentAccount::factory()->create();
-            $event = Event::factory()->create();
+            $event = Event::factory()->create($attributes);
             $event->paymentAccounts()->sync([$account->id]);
 
             return $event;
         });
+    }
+
+    public function test_publier_un_premier_evenement_payant_demarre_le_delai(): void
+    {
+        $event = $this->draftEvent();
 
         $this->assertNull($this->tenant->fresh()->first_published_at);
 
@@ -169,6 +183,62 @@ class PaymentAccountFirstPublicationTest extends TestCase
             ->assertRedirect();
 
         $this->assertNotNull($this->tenant->fresh()->first_published_at);
+    }
+
+    public function test_publier_un_evenement_gratuit_ne_demarre_pas_le_delai(): void
+    {
+        $event = $this->draftEvent(['price_per_person' => 0]);
+
+        $this->actingAs($this->owner)
+            ->post(route('tenants.events.publish', [$this->tenant, $event]))
+            ->assertRedirect();
+
+        $this->assertNull($this->tenant->fresh()->first_published_at);
+        $this->assertFalse($this->tenant->fresh()->paymentAccountDelayApplies());
+    }
+
+    public function test_un_evenement_publie_gratuit_qui_devient_payant_demarre_le_delai(): void
+    {
+        $this->readyToPublish();
+
+        $this->tenant->asCurrent(function () {
+            $event = Event::factory()->published()->create(['price_per_person' => 0]);
+            $this->tenant->markFirstPaidPublication($event);
+        });
+
+        $this->assertNull($this->tenant->fresh()->first_published_at);
+
+        $this->tenant->asCurrent(function () {
+            $event = Event::firstOrFail();
+            $event->priceCategories()->update(['price' => 5000]);
+            $this->tenant->markFirstPaidPublication($event->fresh());
+        });
+
+        $this->assertNotNull($this->tenant->fresh()->first_published_at);
+    }
+
+    public function test_un_evenement_payant_encore_brouillon_ne_demarre_pas_le_delai(): void
+    {
+        $event = $this->draftEvent();
+
+        $this->tenant->asCurrent(fn () => $this->tenant->markFirstPaidPublication($event));
+
+        $this->assertNull($this->tenant->fresh()->first_published_at);
+    }
+
+    public function test_un_compte_s_edite_tout_de_suite_apres_la_publication_d_un_evenement_gratuit(): void
+    {
+        $event = $this->draftEvent(['price_per_person' => 0]);
+
+        $this->actingAs($this->owner)
+            ->post(route('tenants.events.publish', [$this->tenant, $event]));
+
+        $this->actingAsConfirmed($this->owner)
+            ->post(route('tenants.payment-accounts.store', $this->tenant), $this->payload(['confirmed' => true]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertFalse($this->account()->hasPendingChange());
+        $this->assertTrue($this->account()->isPubliclyVisible());
     }
 
     public function test_apres_la_premiere_publication_une_creation_attend_vingt_quatre_heures(): void
@@ -197,7 +267,19 @@ class PaymentAccountFirstPublicationTest extends TestCase
         $this->assertTrue($this->account()->hasPendingChange());
     }
 
-    public function test_une_organisation_qui_avait_deja_publie_garde_le_delai(): void
+    public function test_une_organisation_qui_n_avait_publie_que_du_gratuit_n_a_pas_de_delai(): void
+    {
+        $this->tenant->asCurrent(fn () => Event::factory()->published()->create(['price_per_person' => 0]));
+
+        $this->actingAsConfirmed($this->owner)
+            ->post(route('tenants.payment-accounts.store', $this->tenant), $this->payload(['confirmed' => true]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertFalse($this->account()->hasPendingChange());
+        $this->assertNull($this->tenant->fresh()->first_published_at);
+    }
+
+    public function test_une_organisation_qui_avait_deja_publie_du_payant_garde_le_delai(): void
     {
         // Ouverte avant la colonne : la publication se lit sur ses evenements, puis est retenue.
         $this->tenant->asCurrent(fn () => Event::factory()->published()->create());
@@ -254,5 +336,32 @@ class PaymentAccountFirstPublicationTest extends TestCase
         $this->actingAsConfirmed($this->owner)
             ->get(route('tenants.payment-accounts.index', $this->tenant))
             ->assertInertia(fn (Assert $page) => $page->where('delayActive', true));
+    }
+
+    private function runResetMigration(): void
+    {
+        $migration = require database_path('migrations/tenant/2026_10_16_100000_reset_payment_delay_for_organisations_without_paid_event.php');
+
+        $this->tenant->run(fn () => $migration->up());
+    }
+
+    public function test_la_migration_retire_le_delai_a_une_organisation_sans_evenement_payant_publie(): void
+    {
+        $this->tenant->forceFill(['first_published_at' => now()])->save();
+        $this->tenant->asCurrent(fn () => Event::factory()->published()->create(['price_per_person' => 0]));
+
+        $this->runResetMigration();
+
+        $this->assertNull($this->tenant->fresh()->first_published_at);
+    }
+
+    public function test_la_migration_garde_le_delai_d_une_organisation_qui_a_publie_du_payant(): void
+    {
+        $this->tenant->forceFill(['first_published_at' => now()])->save();
+        $this->tenant->asCurrent(fn () => Event::factory()->published()->create());
+
+        $this->runResetMigration();
+
+        $this->assertNotNull($this->tenant->fresh()->first_published_at);
     }
 }

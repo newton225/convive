@@ -698,6 +698,22 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Scope the query to the events that cost something : au moins un tarif au-dessus de 0, ou, sans
+     * categorie (cas d'avant leur creation), un tarif unique non nul. Le miroir de `isFree()`, pour
+     * une requete sur plusieurs evenements.
+     *
+     * @param  Builder<Event>  $query
+     */
+    public function scopePaid(Builder $query): void
+    {
+        $query->where(fn (Builder $paid) => $paid
+            ->whereHas('priceCategories', fn (Builder $categories) => $categories->where('price', '>', 0))
+            ->orWhere(fn (Builder $legacy) => $legacy
+                ->whereDoesntHave('priceCategories')
+                ->where('price_per_person', '>', 0)));
+    }
+
+    /**
      * Scope the query to the events whose doors may open today : published, not closed, and either
      * starting today or already running (a soiree begun the day before stays reachable after
      * midnight).

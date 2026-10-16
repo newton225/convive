@@ -4,7 +4,7 @@ return [
     'title' => 'Payment accounts',
     'description' => 'The accounts your guests pay into. Any change only becomes public after a :hours hour delay.',
 
-    'description_before_publication' => 'The accounts your guests will pay into. Until an event is published, a change applies straight away, after review. From the first publication on, any new account or change will wait :hours hours before becoming visible.',
+    'description_before_publication' => 'The accounts your guests will pay into. Until a paid event is published, a change applies straight away, after review. From the first publication of a paid event on, any new account or change will wait :hours hours before becoming visible.',
 
     'confirm_immediate' => [
         'title' => 'Check the details',
@@ -51,6 +51,13 @@ return [
         'cancel_change' => 'Cancel the change',
         'cancel_creation' => 'Cancel the creation',
         'delete' => 'Delete account',
+    ],
+
+    'card' => [
+        'edit' => 'Edit',
+        'close' => 'Close',
+        'to_fill' => 'To fill in',
+        'no_live' => 'No live details yet: the new account is waiting for its activation.',
     ],
 
     'badges' => [

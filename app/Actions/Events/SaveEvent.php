@@ -55,6 +55,9 @@ class SaveEvent
                 $this->syncPriceCategories($event, $priceCategories);
             }
 
+            // Un evenement deja publie qui devient payant montre desormais un compte aux invites.
+            Tenant::current()?->markFirstPaidPublication($event);
+
             // Les tables existent des l'enregistrement : c'est leur capacite, table par table, qui
             // fait celle de l'evenement (decision du 2026-09-29). Les conflits avec des invites
             // deja places ont ete refuses par `SaveEventRequest`.
@@ -226,8 +229,9 @@ class SaveEvent
             $event->published_at ??= now();
             $event->save();
 
-            // Des la premiere publication, un changement de compte de versement attend 24 heures.
-            Tenant::current()?->markFirstPublication();
+            // Des la premiere publication d'un evenement payant, un changement de compte de versement
+            // attend 24 heures : c'est a ce moment que des invites voient un compte.
+            Tenant::current()?->markFirstPaidPublication($event);
 
             activity()
                 ->performedOn($event)

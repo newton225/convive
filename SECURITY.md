@@ -84,8 +84,9 @@ plateforme.
 - Tant qu'aucun evenement n'a jamais ete publie, creation et modification du canal, du numero
   et du titulaire prennent effet apres un apercu et une confirmation explicite : aucun invite ne
   peut encore voir ces coordonnees ni y verser.
-- Des la premiere publication (`tenants.first_published_at`, pose a la publication et jamais
-  retire), le delai d'activation de 24 h
+- Des la premiere publication d'un evenement payant (`tenants.first_published_at`, pose a la
+  publication d'un evenement avec un tarif au-dessus de 0, ou quand un evenement publie le devient,
+  et jamais retire ; decision du 2026-10-16), le delai d'activation de 24 h
   s'applique a toute creation ou modification du canal, du numero et du titulaire. L'ancien
   numero reste affiche pendant ce delai. Le delai reste actif apres la cloture de l'evenement.
   Un second Proprietaire peut toujours l'ecourter, jamais la personne qui a demande le changement.
@@ -93,7 +94,7 @@ plateforme.
   tout changement.
 - Aucun numero de versement modifiable par import, par API ou par un webhook.
 
-**Etat.** La regle d'activation immediate avant la premiere publication, avec apercu et
+**Etat.** La regle d'activation immediate avant la premiere publication payante, avec apercu et
 confirmation (`confirmed` exige par `SavePaymentAccount`), est implementee le 2026-10-07 ; la
 confirmation de la premiere publication annonce le delai qui commence. Permission dediee,
 delai de 24 h, validation anticipee par un second Proprietaire qui ne peut pas etre le demandeur,

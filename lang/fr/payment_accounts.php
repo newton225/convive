@@ -4,7 +4,7 @@ return [
     'title' => 'Comptes de versement',
     'description' => "Les comptes sur lesquels vos invités versent. Toute modification n'apparaît publiquement qu'après un délai de :hours heures.",
 
-    'description_before_publication' => "Les comptes sur lesquels vos invités verseront. Tant qu'aucun événement n'est publié, une modification s'applique tout de suite, après relecture. Dès la première publication, toute création ou modification attendra :hours heures avant d'être visible.",
+    'description_before_publication' => "Les comptes sur lesquels vos invités verseront. Tant qu'aucun événement payant n'est publié, une modification s'applique tout de suite, après relecture. Dès la première publication d'un événement payant, toute création ou modification attendra :hours heures avant d'être visible.",
 
     'confirm_immediate' => [
         'title' => 'Vérifier les coordonnées',
@@ -51,6 +51,13 @@ return [
         'cancel_change' => 'Annuler la modification',
         'cancel_creation' => 'Annuler la création',
         'delete' => 'Supprimer le compte',
+    ],
+
+    'card' => [
+        'edit' => 'Modifier',
+        'close' => 'Fermer',
+        'to_fill' => 'À remplir',
+        'no_live' => 'Pas encore de coordonnées actives : la création attend son activation.',
     ],
 
     'badges' => [

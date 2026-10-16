@@ -491,11 +491,12 @@ class Tenant extends Model implements TenantWithDatabase
     /**
      * Determine whether a change of payment account waits for the activation delay.
      *
-     * Le delai part de la premiere publication d'un evenement et ne s'arrete plus ensuite, meme
-     * une fois tous les evenements clotures (decision du proprietaire du projet, 2026-10-07) :
-     * avant, aucun invite ne voit de compte, il n'y a rien a detourner. Une organisation qui avait
-     * deja publie avant que la date ne soit retenue la retrouve sur ses evenements, corbeille
-     * comprise, et la garde.
+     * Le delai part de la premiere publication d'un evenement **payant** et ne s'arrete plus
+     * ensuite, meme une fois tous les evenements clotures (decision du proprietaire du projet,
+     * 2026-10-07, precisee le 2026-10-16) : avant, aucun invite ne voit de compte a qui verser, il
+     * n'y a rien a detourner, et un evenement gratuit n'en montre aucun. Une organisation dont la
+     * date n'est pas retenue la retrouve sur ses evenements publies et payants, corbeille comprise,
+     * et la garde.
      */
     public function paymentAccountDelayApplies(): bool
     {
@@ -504,7 +505,7 @@ class Tenant extends Model implements TenantWithDatabase
         }
 
         $firstPublication = $this->run(
-            fn () => Event::withTrashed()->whereNotNull('published_at')->min('published_at'),
+            fn () => Event::withTrashed()->published()->paid()->min('published_at'),
         );
 
         if ($firstPublication === null) {
@@ -517,11 +518,14 @@ class Tenant extends Model implements TenantWithDatabase
     }
 
     /**
-     * Remember the first publication of an event : from now on, payment account changes wait.
+     * Remember the first publication of a paid event : from now on, payment account changes wait.
+     * Appele a la publication et a chaque enregistrement d'un evenement publie, pour qu'un evenement
+     * deja publie qui devient payant demarre le delai lui aussi. Sans effet pour un evenement gratuit
+     * ou pas encore publie. La colonne garde son nom d'origine : elle ne se renomme pas.
      */
-    public function markFirstPublication(): void
+    public function markFirstPaidPublication(Event $event): void
     {
-        if ($this->first_published_at === null) {
+        if ($this->first_published_at === null && $event->isPublished() && ! $event->isFree()) {
             $this->forceFill(['first_published_at' => now()])->save();
         }
     }

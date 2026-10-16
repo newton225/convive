@@ -1082,13 +1082,18 @@ parfaitement authentiques. Les controles sont ceux de `SECURITY.md` C1, aucun n'
   pendant le delai**.
 - **Delai d'activation de 24 h** sur le canal, le numero et le titulaire. Le libelle, la
   consigne et l'activation prennent effet tout de suite : ils ne designent pas ou va l'argent.
-- **Le delai part de la premiere publication** (decision du proprietaire du projet, 2026-10-07) :
-  tant que l'organisation n'a publie aucun evenement, aucun invite ne voit de compte ; creation et
-  modification s'appliquent tout de suite, apres un apercu confirme (`confirmed`, exige par
-  `SavePaymentAccount::applyImmediately()`), et l'alerte part quand meme.
-  `Tenant::paymentAccountDelayApplies()` tranche, sur `tenants.first_published_at`, pose par
-  `SaveEvent::publish()` et jamais retire : le delai reste meme une fois tous les evenements
-  clotures. La confirmation de la premiere publication l'annonce.
+- **Le delai part de la premiere publication d'un evenement payant** (decision du proprietaire du
+  projet, 2026-10-07, precisee le 2026-10-16) : tant que l'organisation n'a publie aucun evenement
+  avec un tarif au-dessus de 0, aucun invite ne voit de compte a qui verser (un evenement gratuit n'en
+  montre aucun) ; creation et modification s'appliquent tout de suite, apres un apercu confirme
+  (`confirmed`, exige par `SavePaymentAccount::applyImmediately()`), et l'alerte part quand meme.
+  `Tenant::paymentAccountDelayApplies()` tranche, sur `tenants.first_published_at` (nom d'origine,
+  garde : on ne renomme pas une colonne), pose par `Tenant::markFirstPaidPublication()` a la
+  publication et a chaque enregistrement d'un evenement publie, donc aussi quand un evenement publie
+  gratuit devient payant ; jamais retire : le delai reste meme une fois tous les evenements
+  clotures. La confirmation de la premiere publication payante l'annonce. La migration
+  d'organisation `2026_10_16_100000` a retire le delai aux organisations qui n'avaient publie que du
+  gratuit. Creer un brouillon payant ne demarre rien : aucun invite ne voit encore de compte.
 - **Un compte tout juste cree n'a pas de valeur vivante** (une fois le delai en vigueur) et
   n'apparait donc nulle part avant la fin du delai. Sans cette regle, il suffirait d'ajouter un compte plutot que d'en modifier
   un pour contourner le delai.

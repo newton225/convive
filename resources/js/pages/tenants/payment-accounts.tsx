@@ -1,11 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { AlertTriangle, Clock, Trash2 } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ConfirmSummary } from '@/components/confirm-summary';
-import { AccountForm } from '@/components/payment-accounts/account-form';
+import { AddPaymentAccount } from '@/components/payment-accounts/add-payment-account';
+import { PaymentAccountCard } from '@/components/payment-accounts/payment-account-card';
 import Heading from '@/components/heading';
-import { Badge } from '@/components/ui/badge';
 import { TwoFactorReconfirmDialog } from '@/components/two-factor-reconfirm-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -26,8 +26,6 @@ import {
     cancel,
     destroy,
     index,
-    store,
-    update,
 } from '@/routes/tenants/payment-accounts';
 import { edit as securityEdit } from '@/routes/security';
 import type {
@@ -126,175 +124,31 @@ export default function PaymentAccounts({
                     </p>
                 ) : null}
 
-                <div className="space-y-4">
-                    {accounts.map((account) => (
-                        <div
-                            key={account.id}
-                            data-test="payment-account-row"
-                            className="space-y-4 rounded-lg border p-4"
-                        >
-                            <div className="flex flex-wrap items-center gap-2">
-                                <span className="font-medium">
-                                    {account.label}
-                                </span>
-                                <Badge
-                                    variant={
-                                        account.isPubliclyVisible
-                                            ? 'outline'
-                                            : 'secondary'
-                                    }
-                                >
-                                    {account.isPubliclyVisible
-                                        ? t('payment_accounts.badges.visible')
-                                        : t('payment_accounts.badges.hidden')}
-                                </Badge>
-                                {account.pending ? (
-                                    <Badge variant="secondary">
-                                        <Clock className="h-3 w-3" />
-                                        {t('payment_accounts.badges.pending')}
-                                    </Badge>
-                                ) : null}
-                            </div>
+                <AddPaymentAccount
+                    key={accounts.length}
+                    tenantSlug={tenant.slug}
+                    gettingStartedReturn={gettingStartedReturn}
+                    channels={channels}
+                    delayActive={delayActive}
+                    hasAccounts={accounts.length > 0}
+                />
 
-                            {account.pending ? (
-                                <div
-                                    className="bg-muted space-y-1 rounded-md p-3 text-sm"
-                                    data-test="payment-account-pending"
-                                >
-                                    <p className="font-medium">
-                                        {t('payment_accounts.pending.title')}
-                                    </p>
-                                    {/* Toute la demande, pas seulement le numero : les champs du
-                                        formulaire montrent les valeurs actives, vides pour un
-                                        compte neuf. */}
-                                    <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5">
-                                        <dt className="text-muted-foreground">
-                                            {t(
-                                                'payment_accounts.fields.channel',
-                                            )}
-                                        </dt>
-                                        <dd>
-                                            {account.pending.channelLabel ?? ''}
-                                        </dd>
-                                        <dt className="text-muted-foreground">
-                                            {t(
-                                                'payment_accounts.fields.account_number',
-                                            )}
-                                        </dt>
-                                        <dd>
-                                            {account.pending.accountNumber ??
-                                                t(
-                                                    'payment_accounts.pending.none',
-                                                )}
-                                        </dd>
-                                        <dt className="text-muted-foreground">
-                                            {t(
-                                                'payment_accounts.fields.holder_name',
-                                            )}
-                                        </dt>
-                                        <dd>
-                                            {account.pending.holderName ??
-                                                t(
-                                                    'payment_accounts.pending.none',
-                                                )}
-                                        </dd>
-                                    </dl>
-                                    <p className="text-muted-foreground">
-                                        {t(
-                                            'payment_accounts.pending.requested_by',
-                                            {
-                                                name:
-                                                    account.pending
-                                                        .requestedBy ?? '',
-                                            },
-                                        )}{' '}
-                                        {t(
-                                            account.neverActive
-                                                ? 'payment_accounts.pending.activates_at_new'
-                                                : 'payment_accounts.pending.activates_at',
-                                            {
-                                                date: formatDateTime(
-                                                    account.pending
-                                                        .activatesAt ?? '',
-                                                    locale,
-                                                ),
-                                            },
-                                        )}
-                                    </p>
-
-                                    <div className="flex flex-wrap gap-2 pt-2">
-                                        {account.pending.mayApprove ? (
-                                            <Button
-                                                size="sm"
-                                                data-test="payment-account-approve"
-                                                onClick={() =>
-                                                    setApproving(account)
-                                                }
-                                            >
-                                                {t(
-                                                    'payment_accounts.actions.approve',
-                                                )}
-                                            </Button>
-                                        ) : (
-                                            <span className="text-muted-foreground text-xs">
-                                                {t(
-                                                    'payment_accounts.pending.not_the_requester',
-                                                )}
-                                            </span>
-                                        )}
-
-                                        <Button
-                                            size="sm"
-                                            variant="secondary"
-                                            data-test="payment-account-cancel"
-                                            onClick={() =>
-                                                setCancelling(account)
-                                            }
-                                        >
-                                            {t(
-                                                account.neverActive
-                                                    ? 'payment_accounts.actions.cancel_creation'
-                                                    : 'payment_accounts.actions.cancel_change',
-                                            )}
-                                        </Button>
-                                    </div>
-                                </div>
-                            ) : null}
-
-                            <AccountForm
-                                action={update.form([tenant.slug, account.id])}
+                {accounts.length > 0 ? (
+                    <div className="space-y-4">
+                        {accounts.map((account) => (
+                            <PaymentAccountCard
+                                key={account.id}
+                                tenantSlug={tenant.slug}
                                 account={account}
                                 channels={channels}
                                 delayActive={delayActive}
+                                onApprove={setApproving}
+                                onCancel={setCancelling}
+                                onDelete={setDeleting}
                             />
-
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                data-test="payment-account-delete"
-                                onClick={() => setDeleting(account)}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                                {t('payment_accounts.actions.delete')}
-                            </Button>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="space-y-4 rounded-lg border border-dashed p-4">
-                    <Heading
-                        variant="small"
-                        title={t('payment_accounts.actions.create')}
-                        description=""
-                    />
-
-                    <AccountForm
-                        action={store.form(tenant.slug, gettingStartedReturn)}
-                        account={null}
-                        channels={channels}
-                        delayActive={delayActive}
-                    />
-                </div>
+                        ))}
+                    </div>
+                ) : null}
             </div>
 
             <TwoFactorReconfirmDialog />
