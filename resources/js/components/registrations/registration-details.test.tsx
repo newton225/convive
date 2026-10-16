@@ -71,27 +71,25 @@ const texts = (selector: string) =>
     );
 
 describe('RegistrationDetails', () => {
-    it('liste l invite puis ses accompagnateurs', () => {
+    const guest = {
+        name: 'Aya Kouassi',
+        unit: 'ELIAKIM',
+        isGuest: true,
+        priceCategory: { name: 'VIP', price: 15000 },
+        entered: true,
+    };
+    const companion = {
+        name: 'Kofi Kouassi',
+        unit: 'QODESH',
+        isGuest: false,
+        priceCategory: { name: 'Enfant', price: 0 },
+        entered: false,
+    };
+
+    it('ne liste que les accompagnateurs, pas l invite deja sur la ligne', () => {
         render(
             <RegistrationDetails
-                registration={registration({
-                    people: [
-                        {
-                            name: 'Aya Kouassi',
-                            unit: 'ELIAKIM',
-                            isGuest: true,
-                            priceCategory: { name: 'VIP', price: 15000 },
-                            entered: true,
-                        },
-                        {
-                            name: 'Kofi Kouassi',
-                            unit: 'QODESH',
-                            isGuest: false,
-                            priceCategory: { name: 'Enfant', price: 0 },
-                            entered: false,
-                        },
-                    ],
-                })}
+                registration={registration({ people: [guest, companion] })}
             />,
         );
 
@@ -99,13 +97,25 @@ describe('RegistrationDetails', () => {
             '[data-test="registration-person"]',
         );
 
-        expect(people).toHaveLength(2);
-        expect(people[0].textContent).toContain('Aya Kouassi');
-        expect(people[0].textContent).toContain('registrations.details.guest');
-        expect(people[1].textContent).toContain('Kofi Kouassi');
-        expect(people[1].textContent).toContain(
-            'registrations.details.companion',
+        expect(people).toHaveLength(1);
+        expect(people[0].textContent).toContain('Kofi Kouassi');
+        expect(people[0].textContent).not.toContain('Aya Kouassi');
+    });
+
+    it('dit qu il n y a aucun accompagnateur quand l invite est seul', () => {
+        render(
+            <RegistrationDetails
+                registration={registration({ people: [guest] })}
+            />,
         );
+
+        expect(
+            document.querySelectorAll('[data-test="registration-person"]'),
+        ).toHaveLength(0);
+        expect(
+            document.querySelector('[data-test="registration-no-companions"]')
+                ?.textContent,
+        ).toBe('registrations.details.no_companions');
     });
 
     it('dit gratuit pour un tarif a 0 et donne le prix sinon', () => {
@@ -113,19 +123,12 @@ describe('RegistrationDetails', () => {
             <RegistrationDetails
                 registration={registration({
                     people: [
+                        guest,
+                        companion,
                         {
-                            name: 'Aya',
-                            unit: 'U',
-                            isGuest: true,
+                            ...companion,
+                            name: 'Awa',
                             priceCategory: { name: 'VIP', price: 15000 },
-                            entered: null,
-                        },
-                        {
-                            name: 'Kofi',
-                            unit: 'U',
-                            isGuest: false,
-                            priceCategory: { name: 'Enfant', price: 0 },
-                            entered: null,
                         },
                     ],
                 })}
@@ -134,21 +137,25 @@ describe('RegistrationDetails', () => {
 
         const tariffs = texts('[data-test="registration-person-tariff"]');
 
-        expect(tariffs[0]).toMatch(/^VIP · 15\D000 F CFA$/);
-        expect(tariffs[1]).toBe('Enfant · guest.registration.summary.free');
+        expect(tariffs[0]).toBe('Enfant · guest.registration.summary.free');
+        expect(tariffs[1]).toMatch(/^VIP · 15\D000 F CFA$/);
     });
 
     it('distingue entre, pas encore entre et billet pas encore emis', () => {
         render(
             <RegistrationDetails
                 registration={registration({
-                    people: [true, false, null].map((entered, index) => ({
-                        name: `Personne ${index}`,
-                        unit: 'U',
-                        isGuest: index === 0,
-                        priceCategory: null,
-                        entered,
-                    })),
+                    people: [guest, true, false, null].map((entered, index) =>
+                        entered === guest
+                            ? guest
+                            : {
+                                  name: `Personne ${index}`,
+                                  unit: 'U',
+                                  isGuest: false,
+                                  priceCategory: null,
+                                  entered: entered as boolean | null,
+                              },
+                    ),
                 })}
             />,
         );

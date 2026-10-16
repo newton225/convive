@@ -12,14 +12,17 @@ type Props = {
 /**
  * Le detail d'un dossier, deplie sous sa ligne dans la base d'inscrits, construit comme celui de la
  * file des preuves (`ProofDetails`) : trois sections titrees, ouverture animee, ligne compacte tant
- * qu'on ne l'ouvre pas. Les personnes du dossier (l'invite puis ses accompagnateurs, avec unite,
- * tarif et entree), le paiement, la carte et l'entree. Rien qui ne soit deja dans la ligne : pas de
+ * qu'on ne l'ouvre pas. Les accompagnateurs (avec unite, tarif et entree), le paiement, la carte et
+ * l'entree. Rien qui ne soit deja dans la ligne : pas de
  * telephone, pas de lien, pas de precision de l'invite (elle vient de la preuve et suit son droit).
  */
 export function RegistrationDetails({ registration }: Props) {
     const { t, locale } = useTranslation();
     const reduceMotion = useReducedMotion() === true;
     const none = t('registrations.details.none');
+    // L'invite est deja sur la ligne : le detail ne montre que ceux qui l'accompagnent, comme la file
+    // des preuves.
+    const companions = registration.people.filter((person) => !person.isGuest);
 
     const tariff = (person: RegistrationPerson) => {
         if (person.priceCategory === null) {
@@ -51,45 +54,42 @@ export function RegistrationDetails({ registration }: Props) {
         >
             <section className="space-y-2">
                 <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                    {t('registrations.details.people', {
-                        count: registration.people.length,
-                    })}
+                    {t('registrations.details.companions')}
                 </h3>
-                <ol className="divide-y" data-test="registration-people">
-                    {registration.people.map((person, index) => (
-                        <li
-                            key={`${person.name}-${index}`}
-                            className="grid items-baseline gap-x-4 gap-y-1 py-2 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)]"
-                            data-test="registration-person"
-                        >
-                            <span className="break-words">
-                                <span className="font-medium">
+                {companions.length === 0 ? (
+                    <p
+                        className="text-muted-foreground"
+                        data-test="registration-no-companions"
+                    >
+                        {t('registrations.details.no_companions')}
+                    </p>
+                ) : (
+                    <ol className="divide-y" data-test="registration-people">
+                        {companions.map((person, index) => (
+                            <li
+                                key={`${person.name}-${index}`}
+                                className="grid items-baseline gap-x-4 gap-y-1 py-2 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)]"
+                                data-test="registration-person"
+                            >
+                                <span className="font-medium break-words">
                                     {person.name}
                                 </span>
-                                <span className="text-muted-foreground text-xs">
-                                    {' · '}
-                                    {t(
-                                        person.isGuest
-                                            ? 'registrations.details.guest'
-                                            : 'registrations.details.companion',
-                                    )}
+                                <span className="text-muted-foreground">
+                                    {person.unit}
                                 </span>
-                            </span>
-                            <span className="text-muted-foreground">
-                                {person.unit}
-                            </span>
-                            <span data-test="registration-person-tariff">
-                                {tariff(person)}
-                            </span>
-                            <span
-                                className="text-muted-foreground"
-                                data-test="registration-person-entry"
-                            >
-                                {entry(person)}
-                            </span>
-                        </li>
-                    ))}
-                </ol>
+                                <span data-test="registration-person-tariff">
+                                    {tariff(person)}
+                                </span>
+                                <span
+                                    className="text-muted-foreground"
+                                    data-test="registration-person-entry"
+                                >
+                                    {entry(person)}
+                                </span>
+                            </li>
+                        ))}
+                    </ol>
+                )}
             </section>
 
             <section className="space-y-2" data-test="registration-payment">
