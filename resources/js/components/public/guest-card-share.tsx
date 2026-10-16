@@ -23,8 +23,12 @@ export function GuestCardShare({ url, event }: Props) {
 
     return (
         <div className="space-y-2" data-test="guest-card-share">
-            <div className="flex flex-wrap items-center justify-center gap-2">
-                <Button asChild size="sm" className="h-11">
+            <div className="grid gap-2">
+                <Button
+                    asChild
+                    size="sm"
+                    className="h-auto min-h-11 w-full py-2 whitespace-normal"
+                >
                     <a
                         href={href}
                         target="_blank"
@@ -38,7 +42,7 @@ export function GuestCardShare({ url, event }: Props) {
                 <CopyButton
                     value={url}
                     label={t('guest.ticket.copy_link')}
-                    className="h-11"
+                    className="h-auto min-h-11 w-full py-2 whitespace-normal"
                 />
             </div>
             <p className="text-muted-foreground text-center text-xs">

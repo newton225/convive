@@ -36,10 +36,15 @@ export function CompanionTicketPassCard({ pass, design, event }: Props) {
         <div className="space-y-3" data-test="ticket-pass">
             <BrandedTicket {...design} event={event} ticket={pass.card} />
             {shareHref && pass.shareUrl ? (
-                // Une hauteur fixe et commune, 44 px (cible tactile du parcours invite) : les deux
-                // boutons n'ont pas la meme variante, ils ne doivent pas pour autant se decaler.
-                <div className="flex flex-wrap items-center gap-2">
-                    <Button asChild size="sm" className="h-11">
+                // Empiles sur toute la largeur du billet, de meme taille : les libelles portent le nom
+                // de la personne et sont longs, ils passent a la ligne plutot que de decaler les
+                // boutons. 44 px au moins (cible tactile du parcours invite).
+                <div className="grid gap-2">
+                    <Button
+                        asChild
+                        size="sm"
+                        className="h-auto min-h-11 w-full py-2 whitespace-normal"
+                    >
                         <a
                             href={shareHref}
                             target="_blank"
@@ -57,7 +62,7 @@ export function CompanionTicketPassCard({ pass, design, event }: Props) {
                         label={t('guest.ticket.copy_pass_link', {
                             name: pass.name,
                         })}
-                        className="h-11"
+                        className="h-auto min-h-11 w-full py-2 whitespace-normal"
                     />
                 </div>
             ) : (
