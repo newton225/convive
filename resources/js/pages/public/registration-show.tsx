@@ -1,4 +1,5 @@
 import { Form, Head, router } from '@inertiajs/react';
+import { TriangleAlert } from 'lucide-react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import { GuestClaimCard } from '@/components/public/guest-claim-card';
 import { PreviewBanner } from '@/components/public/preview-banner';
@@ -30,6 +31,7 @@ import {
 } from '@/components/ui/select';
 import { formatCountdown, useCountdown } from '@/hooks/use-countdown';
 import { useTranslation } from '@/hooks/use-translation';
+import { formatAmount } from '@/lib/format-currency';
 import { formatDateTime } from '@/lib/format-date';
 import { cn } from '@/lib/utils';
 import { retry } from '@/routes/public/registrations';
@@ -387,6 +389,21 @@ export default function PublicRegistrationShow({
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
+                                            <p
+                                                className="text-foreground flex items-start gap-2 text-sm"
+                                                data-test="proof-full-payment"
+                                            >
+                                                <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+                                                {t(
+                                                    'guest.proof.help.full_payment',
+                                                    {
+                                                        amount: formatAmount(
+                                                            registration.amountDue,
+                                                            locale,
+                                                        ),
+                                                    },
+                                                )}
+                                            </p>
                                             <RequiredFieldsNote />
                                             <input
                                                 type="hidden"
@@ -512,8 +529,19 @@ export default function PublicRegistrationShow({
                                                     type="file"
                                                     accept="image/jpeg,image/png,image/webp"
                                                     required
+                                                    aria-describedby="receipt-authentic"
                                                     data-test="proof-receipt"
                                                 />
+                                                <p
+                                                    id="receipt-authentic"
+                                                    className="text-foreground flex items-start gap-2 text-sm"
+                                                    data-test="proof-receipt-authentic"
+                                                >
+                                                    <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+                                                    {t(
+                                                        'guest.proof.help.receipt_authentic',
+                                                    )}
+                                                </p>
                                                 <InputError
                                                     message={errors.receipt}
                                                 />
