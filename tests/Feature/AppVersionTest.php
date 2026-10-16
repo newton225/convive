@@ -66,6 +66,28 @@ class AppVersionTest extends TestCase
             );
     }
 
+    public function test_les_pages_de_connexion_et_d_inscription_montrent_le_numero_seul(): void
+    {
+        Release::stamp('0741e99');
+
+        foreach (['login', 'register'] as $route) {
+            $this->get(route($route))
+                ->assertOk()
+                ->assertInertia(fn ($page) => $page
+                    ->where('publicVersion', '2.4.1')
+                    ->where('appVersion', null)
+                    ->where('appRelease', null),
+                );
+        }
+    }
+
+    public function test_une_autre_page_publique_ne_recoit_pas_le_numero(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->missing('publicVersion'));
+    }
+
     public function test_sans_livraison_estampillee_seul_le_numero_s_affiche(): void
     {
         $this->actingAs($this->member())

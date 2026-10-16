@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import LocaleSwitcher from '@/components/locale-switcher';
+import { PublicAppVersion } from '@/components/public-app-version';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 
@@ -38,6 +39,8 @@ export default function AuthSimpleLayout({
                     {children}
                 </div>
             </div>
+
+            <PublicAppVersion />
         </div>
     );
 }

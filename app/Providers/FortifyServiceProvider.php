@@ -75,6 +75,10 @@ class FortifyServiceProvider extends ServiceProvider
             'canResetPassword' => Features::enabled(Features::resetPasswords()),
             'status' => $request->session()->get('status'),
             'tenantInvitation' => $this->tenantInvitation($request),
+            // Le numero seul, pour le pied de cette page (decision du 2026-10-16) : la propriete partagee
+            // `appVersion` reste reservee aux membres connectes, et ni la date de livraison ni la
+            // modification ne sont montrees a un visiteur.
+            'publicVersion' => config('convive.version'),
         ]));
 
         Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/reset-password', [
@@ -94,6 +98,7 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::registerView(fn (Request $request) => Inertia::render('auth/register', [
             'tenantInvitation' => $this->tenantInvitation($request),
+            'publicVersion' => config('convive.version'),
             // Le pays propose devant le telephone, deduit de l'adresse IP (Cote d'Ivoire a defaut).
             'defaultCountry' => VisitorCountry::from($request),
             // Les regles du mot de passe, pour le gestionnaire de mots de passe du navigateur et

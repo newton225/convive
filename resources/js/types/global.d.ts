@@ -36,6 +36,8 @@ declare module '@inertiajs/core' {
             canAccessConsole: boolean;
             consoleAreas: string[];
             appVersion: string | null;
+            // Le numero seul, sur les pages de connexion et d'inscription (visiteur anonyme).
+            publicVersion?: string;
             // Livraison en service : sa date et l'identifiant de sa modification.
             appRelease: { releasedAt: string; commit: string | null } | null;
             supportAccess: SupportAccessNotice | null;
