@@ -12,13 +12,13 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 /**
- * Trace d'un lien de carte ou de billet copie, ou envoye par le WhatsApp de l'organisateur
- * (README 2.7). `ticket` nul : la carte de l'invite principal ; sinon, le billet d'un
+ * Trace d'un lien de carte ou de billet copie, envoye par le WhatsApp de l'organisateur ou ouvert
+ * pour voir la carte avant l'envoi (README 2.7 ; le lien permet d'entrer, le voir aussi est trace). `ticket` nul : la carte de l'invite principal ; sinon, le billet d'un
  * accompagnateur, qui doit appartenir a cette inscription.
  */
 class RecordCardShareRequest extends FormRequest
 {
-    public const Channels = ['copy', 'whatsapp'];
+    public const Channels = ['copy', 'whatsapp', 'preview'];
 
     public function authorize(): bool
     {

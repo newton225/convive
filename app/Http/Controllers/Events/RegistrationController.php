@@ -21,6 +21,7 @@ use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\SeatingTable;
 use App\Models\Tenant;
+use App\Models\Ticket;
 use App\Models\User;
 use App\Support\InvitationCardMessage;
 use App\Support\PdfLetterhead;
@@ -67,7 +68,7 @@ class RegistrationController extends Controller
         $canSendCards = $request->user()->hasTenantPermission($tenant, TenantPermission::MessagesSend);
 
         $registrations = $this->filteredQuery($request, $event)
-            ->with(['unit', 'tableAssignment.seatingTable', 'latestProof.media', 'tickets.arrival'])
+            ->with(['unit', 'priceCategory', 'companions.unit', 'companions.priceCategory', 'tableAssignment.seatingTable', 'latestProof.media', 'tickets.arrival'])
             ->paginate(25)
             ->withQueryString();
 
@@ -396,10 +397,47 @@ class RegistrationController extends Controller
             'enteredCount' => $arrivals->count(),
             'enteredAt' => $arrivals->min('created_at')?->toISOString(),
             'cardSentAt' => $registration->card_sent_at?->toISOString(),
+            'people' => $this->people($registration),
             'card' => $withCardLinks && $registration->status === RegistrationStatus::Confirmed
                 ? $this->card($registration)
                 : null,
         ];
+    }
+
+    /**
+     * Each person of the group, for the row that unfolds under the registration : the guest, then
+     * each companion in the order they were entered, with unit, tariff (name and price, 0 meaning
+     * free) and whether they came through the door (null while no ticket exists, before validation).
+     * Jamais un telephone ni un lien : le detail dit qui vient et a quel tarif, rien de plus.
+     *
+     * @return array<int, array{name: string, unit: string, isGuest: bool, priceCategory: array{name: string, price: int}|null, entered: bool|null}>
+     */
+    private function people(Registration $registration): array
+    {
+        $tickets = $registration->tickets->keyBy('holder_position');
+        $entered = fn (int $position): ?bool => $tickets->has($position) ? $tickets->get($position)->arrival !== null : null;
+        $tariff = fn ($category): ?array => $category === null ? null : ['name' => $category->name, 'price' => $category->price];
+
+        $people = [[
+            'name' => $registration->name,
+            'unit' => $registration->unit->name,
+            'isGuest' => true,
+            'priceCategory' => $tariff($registration->priceCategory),
+            'entered' => $entered(Ticket::GuestPosition),
+        ]];
+
+        // Les billets d'accompagnateurs suivent l'ordre de leur position (`IssueTicket`).
+        foreach ($registration->companions->sortBy('position')->values() as $index => $companion) {
+            $people[] = [
+                'name' => $companion->name,
+                'unit' => $companion->unit->name,
+                'isGuest' => false,
+                'priceCategory' => $tariff($companion->priceCategory),
+                'entered' => $entered($index + 1),
+            ];
+        }
+
+        return $people;
     }
 
     /**

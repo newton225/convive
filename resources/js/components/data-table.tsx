@@ -1,16 +1,20 @@
 import {
     flexRender,
     getCoreRowModel,
+    getExpandedRowModel,
     getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
     type ColumnDef,
+    type ExpandedState,
     type RowSelectionState,
     type SortingState,
     type Updater,
 } from '@tanstack/react-table';
-import { useState } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { Fragment, useState } from 'react';
 import { DataTableSortHeader } from '@/components/data-table-sort-header';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
     Table,
@@ -57,12 +61,25 @@ type Selection<TData> = {
     selectRowLabel: (row: TData) => string;
 };
 
+type Expansion<TData> = {
+    // Le detail s'ouvre sous la ligne plutot que d'allonger toutes les lignes (comme la file des
+    // preuves). Les lignes ouvertes se retiennent par identifiant, donc elles ne suivent pas une
+    // autre ligne a la page suivante.
+    getRowId: (row: TData) => string;
+    renderDetails: (row: TData) => React.ReactNode;
+    columnLabel: string;
+    showLabel: (row: TData) => string;
+    hideLabel: (row: TData) => string;
+    detailsTestId?: string;
+};
+
 type Props<TData> = {
     columns: ColumnDef<TData, unknown>[];
     data: TData[];
     emptyState: React.ReactNode;
     rowTestId?: string;
     selection?: Selection<TData>;
+    expansion?: Expansion<TData>;
 } & (ServerProps | ClientProps);
 
 /**
@@ -79,7 +96,8 @@ type Props<TData> = {
  * filtres restent a chaque ecran : trop propres a chacun pour etre generiques.
  */
 export default function DataTable<TData>(props: Props<TData>) {
-    const { data, emptyState, rowTestId, selection } = props;
+    const { data, emptyState, rowTestId, selection, expansion } = props;
+    const [expanded, setExpanded] = useState<ExpandedState>({});
     const isClient = props.mode === 'client';
     const [clientSorting, setClientSorting] = useState<SortingState>(
         props.mode === 'client' ? (props.initialSorting ?? []) : [],
@@ -104,12 +122,14 @@ export default function DataTable<TData>(props: Props<TData>) {
         onServerSortingChange?.(next);
     };
 
-    const columns: ColumnDef<TData, unknown>[] = selection
+    const withSelection: ColumnDef<TData, unknown>[] = selection
         ? [
               {
                   id: 'select',
                   header: ({ table }) =>
-                      table.getCoreRowModel().rows.some((row) => row.getCanSelect()) ? (
+                      table
+                          .getCoreRowModel()
+                          .rows.some((row) => row.getCanSelect()) ? (
                           <Checkbox
                               checked={
                                   table.getIsAllPageRowsSelected()
@@ -119,7 +139,9 @@ export default function DataTable<TData>(props: Props<TData>) {
                                         : false
                               }
                               onCheckedChange={(value) =>
-                                  table.toggleAllPageRowsSelected(value === true)
+                                  table.toggleAllPageRowsSelected(
+                                      value === true,
+                                  )
                               }
                               aria-label={selection.selectAllLabel}
                               data-test="select-all-rows"
@@ -132,7 +154,9 @@ export default function DataTable<TData>(props: Props<TData>) {
                               onCheckedChange={(value) =>
                                   row.toggleSelected(value === true)
                               }
-                              aria-label={selection.selectRowLabel(row.original)}
+                              aria-label={selection.selectRowLabel(
+                                  row.original,
+                              )}
                               data-test="select-row"
                           />
                       ) : null,
@@ -142,10 +166,51 @@ export default function DataTable<TData>(props: Props<TData>) {
           ]
         : props.columns;
 
+    const columns: ColumnDef<TData, unknown>[] = expansion
+        ? [
+              {
+                  id: 'expand',
+                  header: () => (
+                      <span className="sr-only">{expansion.columnLabel}</span>
+                  ),
+                  cell: ({ row }) => (
+                      <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8"
+                          aria-expanded={row.getIsExpanded()}
+                          aria-label={
+                              row.getIsExpanded()
+                                  ? expansion.hideLabel(row.original)
+                                  : expansion.showLabel(row.original)
+                          }
+                          data-test="row-expand"
+                          onClick={row.getToggleExpandedHandler()}
+                      >
+                          <ChevronRight
+                              className={`transition-transform duration-200 ${row.getIsExpanded() ? 'rotate-90' : ''}`}
+                          />
+                      </Button>
+                  ),
+                  enableSorting: false,
+              },
+              ...withSelection,
+          ]
+        : withSelection;
+
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        ...(expansion
+            ? {
+                  getRowCanExpand: () => true,
+                  getExpandedRowModel: getExpandedRowModel(),
+                  onExpandedChange: setExpanded,
+                  getRowId: (row: TData) => expansion.getRowId(row),
+              }
+            : {}),
         ...(selection
             ? {
                   getRowId: (row: TData) => selection.getRowId(row),
@@ -162,6 +227,7 @@ export default function DataTable<TData>(props: Props<TData>) {
         state: {
             sorting: isClient ? clientSorting : (serverSorting ?? []),
             ...(selection ? { rowSelection: selection.selected } : {}),
+            ...(expansion ? { expanded } : {}),
         },
         onSortingChange: changeSorting,
         enableSorting: isClient || onServerSortingChange !== undefined,
@@ -258,16 +324,42 @@ export default function DataTable<TData>(props: Props<TData>) {
                     </TableHeader>
                     <TableBody>
                         {table.getRowModel().rows.map((row) => (
-                            <TableRow key={row.id} data-test={rowTestId}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <TableCell key={cell.id}>
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext(),
-                                        )}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
+                            <Fragment key={row.id}>
+                                <TableRow
+                                    data-test={rowTestId}
+                                    data-state={
+                                        row.getIsExpanded()
+                                            ? 'selected'
+                                            : undefined
+                                    }
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <TableCell key={cell.id}>
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext(),
+                                            )}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                                {expansion && row.getIsExpanded() ? (
+                                    <TableRow
+                                        className="hover:bg-transparent"
+                                        data-test={expansion.detailsTestId}
+                                    >
+                                        <TableCell
+                                            colSpan={
+                                                row.getVisibleCells().length
+                                            }
+                                            className="bg-muted/40 whitespace-normal"
+                                        >
+                                            {expansion.renderDetails(
+                                                row.original,
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ) : null}
+                            </Fragment>
                         ))}
                     </TableBody>
                 </Table>

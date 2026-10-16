@@ -10,6 +10,7 @@ import { ReceiptPreviewDialog } from '@/components/proofs/receipt-preview-dialog
 import type { ReceiptPreview } from '@/components/proofs/receipt-preview-dialog';
 import { CancellationsCard } from '@/components/registrations/cancellations-card';
 import { InvitationCardDialog } from '@/components/registrations/invitation-card-dialog';
+import { RegistrationDetails } from '@/components/registrations/registration-details';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -378,9 +379,12 @@ export default function EventRegistrations({
                                     data-test="registrations-purge-selection"
                                     onClick={() => setPurgingSelection(true)}
                                 >
-                                    {t('registrations.actions.purge_selection', {
-                                        count: selectedRows.length,
-                                    })}
+                                    {t(
+                                        'registrations.actions.purge_selection',
+                                        {
+                                            count: selectedRows.length,
+                                        },
+                                    )}
                                 </Button>
                             ) : null}
                             <Button
@@ -488,6 +492,18 @@ export default function EventRegistrations({
                         navigate({ sort: sortingToParam(sorting) ?? null })
                     }
                     rowTestId="registration-row"
+                    expansion={{
+                        getRowId: (row) => String(row.id),
+                        renderDetails: (row) => (
+                            <RegistrationDetails registration={row} />
+                        ),
+                        columnLabel: t('registrations.details.column'),
+                        showLabel: (row) =>
+                            t('registrations.details.show', { name: row.name }),
+                        hideLabel: (row) =>
+                            t('registrations.details.hide', { name: row.name }),
+                        detailsTestId: 'registration-details',
+                    }}
                     selection={
                         canPurge
                             ? {

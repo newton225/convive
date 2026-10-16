@@ -103,6 +103,16 @@ export type RegistrationShow = {
     ticket: TicketSummary | null;
 };
 
+// Une personne du dossier, pour la ligne qui se deplie dans la base d'inscrits : l'invite principal
+// puis chaque accompagnateur. `entered` est nul tant qu'aucun billet n'existe (avant la validation).
+export type RegistrationPerson = {
+    name: string;
+    unit: string;
+    isGuest: boolean;
+    priceCategory: RegistrationPriceSummary | null;
+    entered: boolean | null;
+};
+
 export type RegistrationRow = {
     id: number;
     reference: string | null;
@@ -130,6 +140,7 @@ export type RegistrationRow = {
     enteredCount: number;
     enteredAt: string | null;
     cardSentAt: string | null;
+    people: RegistrationPerson[];
     // Liens de la carte et des billets (README 2.7) : null sans la permission d'envoi, ou pour
     // une inscription qui n'est pas validee.
     card: RegistrationCard | null;

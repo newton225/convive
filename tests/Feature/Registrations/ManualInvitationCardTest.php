@@ -193,6 +193,23 @@ class ManualInvitationCardTest extends TestCase
         $this->assertSame('whatsapp', $activity->properties['via']);
     }
 
+    public function test_la_consultation_de_la_carte_avant_l_envoi_est_journalisee(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['event' => $event, 'registration' => $registration] = $this->confirmedGroup($tenant);
+
+        $this->actingAs($owner)
+            ->post(route('tenants.events.registrations.card.shared', [$tenant, $event, $registration]), ['via' => 'preview'])
+            ->assertRedirect();
+
+        $activity = $tenant->asCurrent(fn () => Activity::where('description', 'registrations.card_shared')->latest('id')->first());
+
+        $this->assertNotNull($activity);
+        $this->assertSame($owner->id, $activity->causer_id);
+        $this->assertSame('preview', $activity->properties['via']);
+    }
+
     public function test_le_billet_d_une_autre_inscription_ne_se_partage_pas_depuis_celle_ci(): void
     {
         $owner = User::factory()->withTwoFactor()->create();

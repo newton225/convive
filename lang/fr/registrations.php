@@ -4,6 +4,19 @@ return [
     'title' => 'Base d\'inscrits',
     'description' => 'Recherche, filtres et export des inscriptions de cet événement.',
 
+    'details' => [
+        'column' => 'Détail',
+        'show' => 'Voir le détail du dossier de :name',
+        'hide' => 'Masquer le détail du dossier de :name',
+        'people' => '{1} 1 personne dans ce dossier|[2,*] :count personnes dans ce dossier',
+        'guest' => 'Invité',
+        'companion' => 'Accompagnateur',
+        'no_tariff' => 'Sans tarif',
+        'entered' => 'Entré',
+        'not_entered' => 'Pas encore entré',
+        'no_ticket' => 'Billet pas encore émis',
+    ],
+
     'entry' => [
         'entered' => 'Entré à :time',
         'group' => ':count sur :total entrés, dès :time',
@@ -118,11 +131,13 @@ return [
         'send' => "Envoyer depuis l'application",
         'resend' => "Renvoyer depuis l'application",
         'send_hint' => 'Par WhatsApp, et par email si l\'invité en a donné un.',
+        'preview' => 'Voir la carte',
+        'message_preview' => 'Voir le message qui sera envoyé',
         'copy' => 'Copier le lien',
         'copied' => 'Lien copié',
         'whatsapp' => 'Ouvrir WhatsApp',
         'no_link' => "Le lien ne peut pas être construit : l'organisation n'a pas de sous-domaine ou l'événement n'est pas publié.",
-        'traced' => 'Chaque envoi, copie ou ouverture de WhatsApp est journalisé : le lien permet d\'entrer.',
+        'traced' => 'Chaque envoi, copie, consultation de la carte ou ouverture de WhatsApp est journalisé : le lien permet d\'entrer.',
         'flash' => [
             'sent' => 'Carte envoyée à :name.',
         ],

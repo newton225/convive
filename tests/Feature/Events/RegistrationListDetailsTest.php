@@ -6,11 +6,13 @@ use App\Actions\Tenants\CreateTenant;
 use App\Actions\Tickets\IssueTicket;
 use App\Enums\PaymentChannel;
 use App\Models\Event;
+use App\Models\EventPriceCategory;
 use App\Models\PaymentAccount;
 use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\TicketArrival;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -62,6 +64,55 @@ class RegistrationListDetailsTest extends TestCase
                 ->where('rows.0.phone', '+225 07 07 12 34 56')
                 ->where('rows.0.channelLabel', PaymentChannel::Wave->label())
                 ->where('rows.0.enteredAt', fn ($value) => is_string($value)));
+    }
+
+    public function test_chaque_ligne_detaille_les_personnes_du_dossier_avec_leur_tarif_et_leur_entree(): void
+    {
+        $this->tenant->asCurrent(function () {
+            $paid = EventPriceCategory::factory()->create(['event_id' => $this->event->id, 'name' => 'VIP', 'price' => 15000]);
+            $free = EventPriceCategory::factory()->create(['event_id' => $this->event->id, 'name' => 'Enfant', 'price' => 0]);
+            $registration = Registration::factory()->confirmed()->create([
+                'event_id' => $this->event->id,
+                'name' => 'Aya Kouassi',
+                'party_size' => 2,
+                'price_category_id' => $paid->id,
+            ]);
+            $registration->companions()->create([
+                'name' => 'Kofi Kouassi',
+                'unit_id' => Unit::query()->value('id'),
+                'position' => 0,
+                'price_category_id' => $free->id,
+            ]);
+            $guestTicket = app(IssueTicket::class)->handle($registration);
+            TicketArrival::create(['ticket_id' => $guestTicket->id, 'performed_by_user_id' => $this->owner->id]);
+        });
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.registrations.index', [$this->tenant, $this->event]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('rows.0.people', 2)
+                ->where('rows.0.people.0.name', 'Aya Kouassi')
+                ->where('rows.0.people.0.isGuest', true)
+                ->where('rows.0.people.0.priceCategory.name', 'VIP')
+                ->where('rows.0.people.0.priceCategory.price', 15000)
+                ->where('rows.0.people.0.entered', true)
+                ->where('rows.0.people.1.name', 'Kofi Kouassi')
+                ->where('rows.0.people.1.isGuest', false)
+                ->where('rows.0.people.1.priceCategory.name', 'Enfant')
+                ->where('rows.0.people.1.priceCategory.price', 0)
+                ->where('rows.0.people.1.entered', false));
+    }
+
+    public function test_avant_la_validation_le_detail_n_a_que_l_invite_et_aucune_entree(): void
+    {
+        $this->tenant->asCurrent(fn () => Registration::factory()->held()->create(['event_id' => $this->event->id]));
+
+        $this->actingAs($this->owner)
+            ->get(route('tenants.events.registrations.index', [$this->tenant, $this->event]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('rows.0.people', 1)
+                ->where('rows.0.people.0.isGuest', true)
+                ->where('rows.0.people.0.entered', null));
     }
 
     public function test_une_inscription_sans_preuve_ni_passage_n_a_ni_canal_ni_entree(): void

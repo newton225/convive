@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { Copy, MessageCircle, Send } from 'lucide-react';
+import { Copy, Eye, MessageCircle, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { SubmitButton } from '@/components/submit-button';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,7 @@ export function InvitationCardPerson({
 }: Props) {
     const { t } = useTranslation();
 
-    const trace = (via: 'copy' | 'whatsapp') =>
+    const trace = (via: 'copy' | 'whatsapp' | 'preview') =>
         router.post(
             shared([tenantSlug, eventId, registrationId]).url,
             { ticket: person.ticketId, via },
@@ -61,6 +61,17 @@ export function InvitationCardPerson({
         } catch {
             toast.error(t('registrations.card.errors.copy_failed'));
         }
+    };
+
+    // Voir la carte telle que la personne la recevra, avant de l'envoyer : le lien s'ouvre dans un
+    // autre onglet, dans le geste du clic, puis la consultation est tracee comme tout lien qui sort.
+    const preview = () => {
+        if (person.url === null) {
+            return;
+        }
+
+        window.open(person.url, '_blank', 'noopener,noreferrer');
+        trace('preview');
     };
 
     const openWhatsApp = () => {
@@ -114,6 +125,16 @@ export function InvitationCardPerson({
                 </p>
             ) : (
                 <div className="flex flex-wrap gap-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={preview}
+                        data-test="invitation-card-preview"
+                    >
+                        <Eye />
+                        {t('registrations.card.preview')}
+                    </Button>
                     {onSend ? (
                         <SubmitButton
                             type="button"
@@ -152,6 +173,20 @@ export function InvitationCardPerson({
                     </Button>
                 </div>
             )}
+
+            {person.message !== null ? (
+                <details
+                    className="text-sm"
+                    data-test="invitation-card-message"
+                >
+                    <summary className="text-muted-foreground cursor-pointer">
+                        {t('registrations.card.message_preview')}
+                    </summary>
+                    <p className="bg-muted mt-2 rounded-md p-3 whitespace-pre-line">
+                        {person.message}
+                    </p>
+                </details>
+            ) : null}
         </li>
     );
 }

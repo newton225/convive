@@ -4,6 +4,19 @@ return [
     'title' => 'Registrations',
     'description' => 'Search, filter and export this event\'s registrations.',
 
+    'details' => [
+        'column' => 'Details',
+        'show' => 'Show the registration details of :name',
+        'hide' => 'Hide the registration details of :name',
+        'people' => '{1} 1 person in this registration|[2,*] :count people in this registration',
+        'guest' => 'Guest',
+        'companion' => 'Companion',
+        'no_tariff' => 'No tariff',
+        'entered' => 'Entered',
+        'not_entered' => 'Not in yet',
+        'no_ticket' => 'Ticket not issued yet',
+    ],
+
     'entry' => [
         'entered' => 'Entered at :time',
         'group' => ':count of :total entered, from :time',
@@ -118,11 +131,13 @@ return [
         'send' => 'Send from the application',
         'resend' => 'Send again from the application',
         'send_hint' => 'By WhatsApp, and by email if the guest gave one.',
+        'preview' => 'View the card',
+        'message_preview' => 'View the message that will be sent',
         'copy' => 'Copy the link',
         'copied' => 'Link copied',
         'whatsapp' => 'Open WhatsApp',
         'no_link' => 'The link cannot be built: the organisation has no subdomain or the event is not published.',
-        'traced' => 'Every sending, copy or WhatsApp opening is logged: the link lets someone in.',
+        'traced' => 'Every sending, copy, card preview or WhatsApp opening is logged: the link lets someone in.',
         'flash' => [
             'sent' => 'Card sent to :name.',
         ],
