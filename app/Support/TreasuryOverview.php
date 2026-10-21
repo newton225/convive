@@ -90,12 +90,12 @@ final class TreasuryOverview
             ->get();
 
         return $registrations
-            ->groupBy(fn (Registration $registration) => $registration->latestProof?->paymentAccount?->id ?? 0)
+            ->groupBy(fn (Registration $registration) => $registration->latestProof?->paymentAccount->id ?? 0)
             ->map(function ($group) {
                 $account = $group->first()->latestProof?->paymentAccount;
 
                 return [
-                    'label' => $account?->label ?? __('treasury.accounts.unknown'),
+                    'label' => $account->label ?? __('treasury.accounts.unknown'),
                     'channelLabel' => $account?->channel?->label(),
                     'collected' => (int) $group->sum('amount_due'),
                     'refunded' => (int) $group->where('refund_status', RefundStatus::Refunded)->sum('amount_due'),
@@ -108,9 +108,10 @@ final class TreasuryOverview
     }
 
     /**
+     * `$limit` nul : toute la liste, pour l'export (l'ecran s'arrete a `RefundListLimit`).
+     *
      * @param  Collection<int, Event>  $events
-     *                                          `$limit` nul : toute la liste, pour l'export (l'ecran s'arrete a `RefundListLimit`).
-     * @return array{refundsDue: array<int, array<string, mixed>>, refundsDueCount: int}
+     * @return array{refundsDue: array<int, array{id: int, reference: string|null, name: string, eventName: string, amount: int, cancelledAt: string|null, registrationsUrl: string}>, refundsDueCount: int}
      */
     private static function refundsDue(Tenant $tenant, $events, ?int $limit): array
     {

@@ -1,12 +1,12 @@
 <?php
 
+use App\Enums\TreasuryTable;
 use App\Http\Controllers\Events\EntryControlController;
 use App\Http\Controllers\Events\EventController;
 use App\Http\Controllers\Events\EventSettingsController;
 use App\Http\Controllers\Events\EventTicketTemplateController;
 use App\Http\Controllers\Events\GuestClaimController;
 use App\Http\Controllers\Events\PaymentProofController;
-use App\Exports\TreasuryTableExport;
 use App\Http\Controllers\Events\ReconciliationController;
 use App\Http\Controllers\Events\RegistrationCardController;
 use App\Http\Controllers\Events\RegistrationController;
@@ -90,7 +90,7 @@ Route::prefix('{tenant}')
             ->middleware('throttle:exports')
             ->name('tenants.treasury.export.pdf');
         Route::get('treasury/export/{table}/{format}', [TreasuryController::class, 'exportTable'])
-            ->whereIn('table', array_keys(TreasuryTableExport::Tables))
+            ->whereIn('table', array_column(TreasuryTable::cases(), 'value'))
             ->whereIn('format', ['excel', 'csv'])
             ->middleware('throttle:exports')
             ->name('tenants.treasury.export.table');

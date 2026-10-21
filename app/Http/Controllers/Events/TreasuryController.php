@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Events;
 
+use App\Enums\TreasuryTable;
 use App\Exports\TreasuryTableExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\TreasuryExportRequest;
@@ -76,6 +77,7 @@ class TreasuryController extends Controller
      */
     public function exportTable(TreasuryExportRequest $request, Tenant $tenant, string $table, string $format): BinaryFileResponse
     {
+        $table = TreasuryTable::from($table);
         $overview = TreasuryOverview::for($tenant, $request->from(), $request->to(), refundLimit: null);
         $extension = $format === 'csv' ? 'csv' : 'xlsx';
 
@@ -85,11 +87,11 @@ class TreasuryController extends Controller
             ->event('exported')
             ->withProperties([
                 'format' => $extension,
-                'table' => $table,
+                'table' => $table->value,
                 'rows' => count(match ($table) {
-                    'events' => $overview['events'],
-                    'accounts' => $overview['accounts'],
-                    'refunds' => $overview['refundsDue'],
+                    TreasuryTable::Events => $overview['events'],
+                    TreasuryTable::Accounts => $overview['accounts'],
+                    TreasuryTable::Refunds => $overview['refundsDue'],
                 }),
                 'from' => $request->validated('from'),
                 'to' => $request->validated('to'),
@@ -98,7 +100,7 @@ class TreasuryController extends Controller
 
         return Excel::download(
             new TreasuryTableExport($table, $overview),
-            TreasuryTableExport::filename($table).'.'.$extension,
+            $table->filename().'.'.$extension,
             $format === 'csv' ? ExcelFormat::CSV : ExcelFormat::XLSX,
         );
     }

@@ -126,10 +126,10 @@ return [
         'submit' => 'Continue registration',
         'review' => [
             'title' => 'Check your details',
-            'description' => "Read your details again before continuing, especially your phone number. You will not be able to change them afterwards.",
+            'description' => 'Read your details again before continuing, especially your phone number. You will not be able to change them afterwards.',
             'edit' => 'Edit',
             'confirm' => 'Confirm and book',
-            'phone_warning' => "Your number is used to send your card, tickets and reminders on WhatsApp. If it is wrong, they will not reach you.",
+            'phone_warning' => 'Your number is used to send your card, tickets and reminders on WhatsApp. If it is wrong, they will not reach you.',
         ],
         'show' => [
             'countdown_label' => 'Time left to send your payment proof',

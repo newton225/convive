@@ -118,13 +118,13 @@ return [
         ],
         'purge' => [
             'title' => 'Purger les inscriptions non finalisées',
-            'description' => "Les dossiers brouillon, en réservation expirée ou à preuve rejetée sont supprimés. Les réservations dont le décompte tourne encore sont conservées : un invité est peut-être en train de payer. Pour en supprimer certains seulement, cochez-les dans la liste.",
+            'description' => 'Les dossiers brouillon, en réservation expirée ou à preuve rejetée sont supprimés. Les réservations dont le décompte tourne encore sont conservées : un invité est peut-être en train de payer. Pour en supprimer certains seulement, cochez-les dans la liste.',
             'submit' => 'Confirmer la purge',
         ],
         'purge_selection' => [
             'title' => '{1} Purger 1 dossier|[2,*] Purger :count dossiers',
             'description' => 'Ces dossiers non finalisés sont supprimés définitivement. Une inscription validée ou à preuve en attente ne peut pas être purgée.',
-            'active_warning' => "{1} 1 réservation a encore son décompte en cours : son invité est peut-être en train de payer et perdra sa place.|[2,*] :count réservations ont encore leur décompte en cours : leurs invités sont peut-être en train de payer et perdront leur place.",
+            'active_warning' => '{1} 1 réservation a encore son décompte en cours : son invité est peut-être en train de payer et perdra sa place.|[2,*] :count réservations ont encore leur décompte en cours : leurs invités sont peut-être en train de payer et perdront leur place.',
             'submit' => 'Confirmer la purge',
         ],
     ],

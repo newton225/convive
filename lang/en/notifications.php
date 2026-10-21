@@ -13,7 +13,7 @@ return [
 
     'types' => [
         'proof_received' => ':name submitted a payment proof for :event.',
-        'claim_received' => ":name sent a claim for :event.",
+        'claim_received' => ':name sent a claim for :event.',
         'event_created' => ':actor created the event :event.',
         'event_published' => ':actor published :event: its link is now open for registrations.',
         'event_closed' => ':actor closed :event.',
@@ -47,7 +47,7 @@ return [
         'saved' => 'Preferences saved.',
         'types' => [
             'proof_received' => 'Payment proof received',
-            'claim_received' => "Guest claim",
+            'claim_received' => 'Guest claim',
             'event_created' => 'Event created',
             'event_published' => 'Event published',
             'event_closed' => 'Event closed',

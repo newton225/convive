@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Enums\TreasuryTable;
 use App\Support\SpreadsheetSafe;
 use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -19,20 +20,10 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
  */
 class TreasuryTableExport implements FromArray, WithCustomCsvSettings, WithHeadings
 {
-    public const Tables = ['events' => 'evenements', 'accounts' => 'comptes', 'refunds' => 'remboursements'];
-
     /**
      * @param  array<string, mixed>  $overview  le resultat de `TreasuryOverview::for()` sans plafond de liste
      */
-    public function __construct(private readonly string $table, private readonly array $overview) {}
-
-    /**
-     * Le nom du fichier, sans extension.
-     */
-    public static function filename(string $table): string
-    {
-        return 'tresorerie-'.self::Tables[$table];
-    }
+    public function __construct(private readonly TreasuryTable $table, private readonly array $overview) {}
 
     /**
      * Meme reglage que l'export des inscrits : un CSV qu'Excel ouvre tel quel en francais.
@@ -50,7 +41,7 @@ class TreasuryTableExport implements FromArray, WithCustomCsvSettings, WithHeadi
     public function headings(): array
     {
         return match ($this->table) {
-            'events' => [
+            TreasuryTable::Events => [
                 __('treasury.events.name'),
                 __('treasury.events.date'),
                 __('treasury.events.collected'),
@@ -59,14 +50,14 @@ class TreasuryTableExport implements FromArray, WithCustomCsvSettings, WithHeadi
                 __('treasury.events.due'),
                 __('treasury.events.net'),
             ],
-            'accounts' => [
+            TreasuryTable::Accounts => [
                 __('treasury.accounts.label'),
                 __('treasury.accounts.channel'),
                 __('treasury.accounts.collected'),
                 __('treasury.accounts.refunded'),
                 __('treasury.accounts.due'),
             ],
-            'refunds' => [
+            TreasuryTable::Refunds => [
                 __('treasury.refunds.name'),
                 __('treasury.refunds.reference'),
                 __('treasury.refunds.event'),
@@ -82,7 +73,7 @@ class TreasuryTableExport implements FromArray, WithCustomCsvSettings, WithHeadi
     public function array(): array
     {
         return match ($this->table) {
-            'events' => array_map(fn (array $row) => [
+            TreasuryTable::Events => array_map(fn (array $row) => [
                 SpreadsheetSafe::cell($row['name']),
                 $this->date($row['startsAt']),
                 $row['collected'],
@@ -91,14 +82,14 @@ class TreasuryTableExport implements FromArray, WithCustomCsvSettings, WithHeadi
                 $row['due'],
                 $row['net'],
             ], $this->overview['events']),
-            'accounts' => array_map(fn (array $row) => [
+            TreasuryTable::Accounts => array_map(fn (array $row) => [
                 SpreadsheetSafe::cell($row['label']),
                 $row['channelLabel'],
                 $row['collected'],
                 $row['refunded'],
                 $row['due'],
             ], $this->overview['accounts']),
-            'refunds' => array_map(fn (array $row) => [
+            TreasuryTable::Refunds => array_map(fn (array $row) => [
                 SpreadsheetSafe::cell($row['name']),
                 $row['reference'],
                 SpreadsheetSafe::cell($row['eventName']),

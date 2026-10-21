@@ -118,13 +118,13 @@ return [
         ],
         'purge' => [
             'title' => 'Purge unfinalized registrations',
-            'description' => "Draft, expired and rejected-proof records are deleted. Reservations whose countdown is still running are kept: a guest may be paying. To delete only some, tick them in the list.",
+            'description' => 'Draft, expired and rejected-proof records are deleted. Reservations whose countdown is still running are kept: a guest may be paying. To delete only some, tick them in the list.',
             'submit' => 'Confirm purge',
         ],
         'purge_selection' => [
             'title' => '{1} Purge 1 record|[2,*] Purge :count records',
             'description' => 'These unfinalized records are permanently deleted. A confirmed registration, or one with a proof awaiting review, cannot be purged.',
-            'active_warning' => "{1} 1 reservation still has its countdown running: the guest may be paying and will lose their place.|[2,*] :count reservations still have their countdown running: the guests may be paying and will lose their place.",
+            'active_warning' => '{1} 1 reservation still has its countdown running: the guest may be paying and will lose their place.|[2,*] :count reservations still have their countdown running: the guests may be paying and will lose their place.',
             'submit' => 'Confirm purge',
         ],
     ],

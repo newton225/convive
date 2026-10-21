@@ -13,11 +13,11 @@ return [
 
     'types' => [
         'proof_received' => ':name a déposé une preuve de paiement pour :event.',
-        'claim_received' => ":name a envoyé une réclamation pour :event.",
+        'claim_received' => ':name a envoyé une réclamation pour :event.',
         'event_created' => ":actor a créé l'événement :event.",
-        'event_published' => ":actor a publié :event : son lien est ouvert aux inscriptions.",
-        'event_closed' => ":actor a clôturé :event.",
-        'event_ended' => "{0} :event est terminé, sans inscription confirmée.|{1} :event est terminé : 1 inscription confirmée.|[2,*] :event est terminé : :count inscriptions confirmées.",
+        'event_published' => ':actor a publié :event : son lien est ouvert aux inscriptions.',
+        'event_closed' => ':actor a clôturé :event.',
+        'event_ended' => '{0} :event est terminé, sans inscription confirmée.|{1} :event est terminé : 1 inscription confirmée.|[2,*] :event est terminé : :count inscriptions confirmées.',
         'registrations_closed' => "{0} La date limite d'inscription de :event est atteinte, sans inscription confirmée.|{1} La date limite d'inscription de :event est atteinte : 1 inscription confirmée.|[2,*] La date limite d'inscription de :event est atteinte : :count inscriptions confirmées.",
         'registration_received' => '{1} 1 nouvelle inscription pour :event.|[2,*] :count nouvelles inscriptions pour :event.',
         'registration_confirmed' => '{1} 1 inscription confirmée pour :event.|[2,*] :count inscriptions confirmées pour :event.',
@@ -47,7 +47,7 @@ return [
         'saved' => 'Préférences enregistrées.',
         'types' => [
             'proof_received' => 'Preuve de paiement reçue',
-            'claim_received' => "Réclamation d’un invité",
+            'claim_received' => 'Réclamation d’un invité',
             'event_created' => 'Événement créé',
             'event_published' => 'Événement publié',
             'event_closed' => 'Événement clôturé',

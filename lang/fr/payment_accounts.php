@@ -13,7 +13,7 @@ return [
     ],
 
     'form' => [
-        'pending_hint' => "Le formulaire montre votre demande en attente. Corrigez-la ici sans toucher aux coordonnées que vos invités voient encore ; remettre les anciennes valeurs annule la demande.",
+        'pending_hint' => 'Le formulaire montre votre demande en attente. Corrigez-la ici sans toucher aux coordonnées que vos invités voient encore ; remettre les anciennes valeurs annule la demande.',
     ],
 
     'channels' => [

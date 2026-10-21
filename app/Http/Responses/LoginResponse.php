@@ -4,8 +4,8 @@ namespace App\Http\Responses;
 
 use App\Http\Responses\Concerns\RedirectsToCurrentTenant;
 use Illuminate\Http\JsonResponse;
-use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Inertia\Inertia;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Fortify;
 use Symfony\Component\HttpFoundation\Response;
 
