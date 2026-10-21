@@ -104,9 +104,9 @@ Chaque purge écrit une entrée dans le journal (nombre de dossiers, places lib�
 - Jusqu'à **10 accompagnateurs** par inscription (plafond paramétrable par événement).
 - Le participant **et chaque accompagnateur** doivent renseigner une **unité** obligatoire.
   Liste fermée : `ÉLIAKIM`, `QODESH`, `SENTINELLES`, `ELISHAMA`, `CHOSEN`, `ÉTAT MAJOR`,
-  `Aucune`. La valeur `Aucune` est un choix valide ; un champ vide bloque la validation.
+  `Invité spécial`. La valeur `Invité spécial` est un choix valide ; un champ vide bloque la validation.
   Cette liste doit être **paramétrable par organisation** (ce sont des données de tenant, pas
-  des constantes du code), à une exception près : `Aucune` reste toujours en dernière position
+  des constantes du code), à une exception près : `Invité spécial` reste toujours en dernière position
   et ne se renomme, ne se désactive ni ne se supprime.
 - Montant dû = `tarif_par_personne × (1 + nombre d'accompagnateurs)`. Le tarif est toujours
   renseigné : **0 signifie un événement gratuit**, dont l'inscription est confirmée dès la
