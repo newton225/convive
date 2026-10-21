@@ -8941,7 +8941,7 @@
                                                             1. KOUADIO JESSICA —
                                                             ÉLIAKIM<br />2.
                                                             BAMBA ESTHER —
-                                                            Aucune
+                                                            Invité spécial
                                                         </div>
                                                     </sc-if>
                                                     <div
@@ -13197,7 +13197,7 @@
                   formTitle: 'Registration', step1: 'Step 1 of 3 · your details',
                   fName: 'Full name *', fNamePh: 'e.g. Jessica Kouadio', fNameErr: 'Please enter your full name.',
                   fTel: 'Phone number *', fTelErr: 'Invalid number: 10 digits expected.',
-                  fUnit: 'Your unit *', fUnitErr: 'Select your unit — choose "Aucune" if you have none.',
+                  fUnit: 'Your unit *', fUnitErr: 'Select your unit — choose "Invité spécial" if you have none.',
                   fAcc: 'Number of companions *', fAccMax: '10 maximum', fAccTotal: 'Including you: ',
                   fAccPeople: ' person(s) in total.', fAccMaxed: 'Maximum reached: 10 companions per registration.',
                   accTitle: 'Your companions', accName: 'Full name', accUnit: 'Unit *',
@@ -13257,7 +13257,7 @@
                   formTitle: 'Fiche d\'inscription', step1: 'Étape 1 sur 3 · vos informations',
                   fName: 'Nom et prénom *', fNamePh: 'Ex : Kouadio Jessica', fNameErr: 'Merci d\'indiquer votre nom complet.',
                   fTel: 'Numéro de téléphone *', fTelErr: 'Numéro invalide : 10 chiffres attendus.',
-                  fUnit: 'Votre unité *', fUnitErr: 'Sélectionnez votre unité — « Aucune » si vous n\'en avez pas.',
+                  fUnit: 'Votre unité *', fUnitErr: 'Sélectionnez votre unité — « Invité spécial » si vous n\'en avez pas.',
                   fAcc: 'Nombre d\'accompagnateurs *', fAccMax: '10 maximum', fAccTotal: 'Vous compris : ',
                   fAccPeople: ' personne(s) au total.', fAccMaxed: 'Maximum atteint : 10 accompagnateurs par inscription.',
                   accTitle: 'Vos accompagnateurs', accName: 'Nom et prénom', accUnit: 'Unité *',
@@ -13335,7 +13335,7 @@
                   .concat(acc.map((a, i) => ({
                     i: i + 2,
                     name: (a.trim() || 'Accompagnant ' + (i + 1)).toUpperCase(),
-                    role: 'Accompagnant · unité : ' + (units[i].trim() || 'Aucune')
+                    role: 'Accompagnant · unité : ' + (units[i].trim() || 'Invité spécial')
                   })));
 
                 const chartData = [[4, 1], [6, 2], [3, 1], [9, 3], [7, 2], [12, 4], [8, 1], [14, 5], [11, 2], [17, 6], [13, 3], [19, 4]];
@@ -13369,7 +13369,7 @@
                     onRef: e => this.setState({ ref: e.target.value })
                   },
                   err: { nom: !!st.err.nom, tel: !!st.err.tel, unit: !!st.err.unit, ref: !!st.err.ref, proof: !!st.err.proof },
-                  myUnitChips: ['ÉLIAKIM', 'QODESH', 'SENTINELLES', 'ELISHAMA', 'CHOSEN', 'ÉTAT MAJOR', 'Aucune'].map(u => ({
+                  myUnitChips: ['ÉLIAKIM', 'QODESH', 'SENTINELLES', 'ELISHAMA', 'CHOSEN', 'ÉTAT MAJOR', 'Invité spécial'].map(u => ({
                     u, active: st.unit === u, idle: st.unit !== u,
                     go: () => this.setState({ unit: u })
                   })),
@@ -13379,10 +13379,10 @@
                   accMinus: () => this.setState(s => ({ places: Math.max(1, s.places - 1) })),
                   accPlus: () => this.setState(s => ({ places: Math.min(11, s.places + 1) })),
                   hasAcc: accCount > 0,
-                  unitOptions: ['ÉLIAKIM', 'QODESH', 'SENTINELLES', 'ELISHAMA', 'CHOSEN', 'ÉTAT MAJOR', 'Aucune'],
+                  unitOptions: ['ÉLIAKIM', 'QODESH', 'SENTINELLES', 'ELISHAMA', 'CHOSEN', 'ÉTAT MAJOR', 'Invité spécial'],
                   accList: acc.map((v, i) => ({
                     value: v, unit: units[i], title: 'Accompagnateur ' + (i + 1),
-                    chips: ['ÉLIAKIM', 'QODESH', 'SENTINELLES', 'ELISHAMA', 'CHOSEN', 'ÉTAT MAJOR', 'Aucune'].map(u => ({
+                    chips: ['ÉLIAKIM', 'QODESH', 'SENTINELLES', 'ELISHAMA', 'CHOSEN', 'ÉTAT MAJOR', 'Invité spécial'].map(u => ({
                       u, active: units[i] === u, idle: units[i] !== u,
                       go: () => { const next = units.slice(); next[i] = u; this.setState({ units: next }); }
                     })),
@@ -13440,7 +13440,7 @@
 
                   notes: [
                     { i: 1, t: 'Le lien public suit l\'événement actif : titre, date, tarif et capacité viennent de sa fiche.' },
-                    { i: 2, t: 'Nom, téléphone et unité sont demandés au participant ; chaque accompagnateur exige aussi une unité, « Aucune » comprise.' },
+                    { i: 2, t: 'Nom, téléphone et unité sont demandés au participant ; chaque accompagnateur exige aussi une unité, « Invité spécial » comprise.' },
                     { i: 3, t: 'Aucun encaissement dans l\'application : l\'invité verse sur un compte affiché puis joint canal, référence et capture du reçu.' },
                     { i: 4, t: 'La preuve part en file de vérification. La validation attribue la table ; les cartes partent ensuite à la date d\'envoi programmée.' },
                     { i: 5, t: 'Un décompte de 10 minutes bloque la place pendant le règlement. À son terme, l\'envoi est bloqué et il faut relancer — chaque relance revérifie le stock.' },
@@ -13603,9 +13603,9 @@
                     { ref: 'FA-2026-0065', date: '01/06/2026', amount: '15 000 F', state: 'Payée' }
                   ],
                   proofs: [
-                    { name: 'Zadi Christelle', ref: 'SP-2026-0045', places: '2 places · 50 000 F', channel: 'Virement bancaire', txn: 'VIR-240918-8841', when: 'il y a 38 min', file: 'recu-virement.pdf', units: 'Accompagnateur : Zadi Yves — Aucune', flags: [{ t: 'Aucune anomalie détectée', bg: 'oklch(0.95 0.05 145)', fg: 'oklch(0.42 0.13 145)' }] },
+                    { name: 'Zadi Christelle', ref: 'SP-2026-0045', places: '2 places · 50 000 F', channel: 'Virement bancaire', txn: 'VIR-240918-8841', when: 'il y a 38 min', file: 'recu-virement.pdf', units: 'Accompagnateur : Zadi Yves — Invité spécial', flags: [{ t: 'Aucune anomalie détectée', bg: 'oklch(0.95 0.05 145)', fg: 'oklch(0.42 0.13 145)' }] },
                     { name: 'N\'Guessan Paul', ref: 'SP-2026-0051', places: '1 place · 25 000 F', channel: 'Wave', txn: 'PP240918.1120.C77', when: 'il y a 2 h', file: 'capture-wave.jpg', units: 'Aucun accompagnateur', flags: [{ t: 'Capture déjà vue sur SP-2026-0029', bg: 'oklch(0.95 0.04 25)', fg: 'oklch(0.46 0.16 25)' }, { t: 'Référence absente du relevé', bg: 'oklch(0.96 0.05 85)', fg: 'oklch(0.48 0.12 70)' }] },
-                    { name: 'Coulibaly Awa', ref: 'SP-2026-0053', places: '3 places · 75 000 F', channel: 'Orange Money', txn: 'OM-9920-4471', when: 'il y a 5 h', file: 'recu-om.png', units: 'Accompagnateurs : ELISHAMA, Aucune', flags: [{ t: 'Montant relevé 60 000 F ≠ 75 000 F déclarés', bg: 'oklch(0.96 0.05 85)', fg: 'oklch(0.48 0.12 70)' }] }
+                    { name: 'Coulibaly Awa', ref: 'SP-2026-0053', places: '3 places · 75 000 F', channel: 'Orange Money', txn: 'OM-9920-4471', when: 'il y a 5 h', file: 'recu-om.png', units: 'Accompagnateurs : ELISHAMA, Invité spécial', flags: [{ t: 'Montant relevé 60 000 F ≠ 75 000 F déclarés', bg: 'oklch(0.96 0.05 85)', fg: 'oklch(0.48 0.12 70)' }] }
                   ].map(p => Object.assign({}, p, {
                     approve: () => this.flash('Preuve validée — ' + p.name + ' · table attribuée · carte au prochain envoi programmé'),
                     reject: () => this.flash('Preuve rejetée — ' + p.name + ' notifié par WhatsApp')
@@ -13630,9 +13630,9 @@
                   selTable: (() => {
                     const t = this.tableData()[st.selTable - 1];
                     const names = [
-                      ['Kouadio Jessica', 'ÉLIAKIM'], ['Bamba Esther', 'Aucune'],
+                      ['Kouadio Jessica', 'ÉLIAKIM'], ['Bamba Esther', 'Invité spécial'],
                       ['Traoré Ibrahim', 'QODESH'], ['Yao Serge', 'SENTINELLES'],
-                      ['Konan Aline', 'Aucune'], ['Ouattara Karim', 'CHOSEN']
+                      ['Konan Aline', 'Invité spécial'], ['Ouattara Karim', 'CHOSEN']
                     ];
                     const shown = Math.min(6, t.occ);
                     return {
