@@ -19,7 +19,7 @@ return [
 
     'badges' => [
         'inactive' => 'Non proposée',
-        'none' => 'Choix « aucune »',
+        'none' => 'Choix « invité spécial »',
     ],
 
     'none_locked' => "Toujours proposée en dernier, pour qui n'appartient à aucune unité. Elle ne se renomme pas, ne se désactive pas et ne se supprime pas.",

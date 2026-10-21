@@ -19,7 +19,7 @@ return [
 
     'badges' => [
         'inactive' => 'Not offered',
-        'none' => '"None" choice',
+        'none' => '"Special guest" choice',
     ],
 
     'none_locked' => 'Always offered last, for people who belong to no unit. It cannot be renamed, deactivated or deleted.',

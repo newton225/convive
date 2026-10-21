@@ -306,7 +306,7 @@ class UnitTest extends TestCase
         $tenant = $this->tenantOwnedBy($owner);
 
         // Une unite ajoutee apres coup, puis une autre deplacee tout au bout de la liste : ni
-        // l'une ni l'autre ne passe apres « Aucune ».
+        // l'une ni l'autre ne passe apres « Invité spécial ».
         $this->actingAs($owner)
             ->post(route('tenants.units.store', $tenant), ['name' => 'BETHEL'])
             ->assertRedirect();

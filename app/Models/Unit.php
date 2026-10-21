@@ -67,7 +67,7 @@ class Unit extends Model
     /**
      * Le nom de l'unite qui vaut « pas d'unite ». C'est un choix, pas une absence de choix.
      */
-    public const None = 'Aucune';
+    public const None = 'Invité spécial';
 
     /**
      * Les unites creees a l'ouverture d'un espace. Point de depart remaniable, comme les
@@ -96,7 +96,7 @@ class Unit extends Model
     }
 
     /**
-     * Scope the query to the display order chosen by the operator, « Aucune » always last
+     * Scope the query to the display order chosen by the operator, « Invité spécial » always last
      * whatever the positions given to the other units.
      *
      * @param  Builder<Unit>  $query

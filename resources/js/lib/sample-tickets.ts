@@ -37,7 +37,7 @@ const SampleCompanions: TicketCardData['companions'] = [
     },
     {
         name: 'Ibrahim Traoré',
-        unit: 'Aucune',
+        unit: 'Invité spécial',
         priceCategory: { name: 'Standard', price: 5000 },
     },
     {

@@ -30,7 +30,7 @@ class UnitPolicy
     /**
      * Determine whether the user can update the given unit.
      *
-     * « Aucune » ne se renomme, ne se desactive ni ne se supprime (decision du 2026-10-07) : c'est
+     * « Invité spécial » ne se renomme, ne se desactive ni ne se supprime (decision du 2026-10-07) : c'est
      * le choix de qui n'appartient a aucune unite, il doit toujours etre propose.
      */
     public function update(User $user, Unit $unit, Tenant $tenant): bool

@@ -26,14 +26,14 @@ return new class extends Migration
         });
 
         $updated = DB::table('units')
-            ->where('name', Unit::None)
+            ->where('name', 'Aucune')
             ->update(['is_none' => true, 'is_active' => true]);
 
         // Une base vide est celle d'une organisation en cours d'ouverture : `CreateStarterUnits`
         // va y creer « Aucune » juste apres les migrations.
         if ($updated === 0 && DB::table('units')->exists()) {
             DB::table('units')->insert([
-                'name' => Unit::None,
+                'name' => 'Aucune',
                 'position' => (int) DB::table('units')->max('position') + 1,
                 'is_active' => true,
                 'is_none' => true,

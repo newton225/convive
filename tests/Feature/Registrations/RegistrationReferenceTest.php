@@ -38,7 +38,7 @@ class RegistrationReferenceTest extends TestCase
             'name' => 'Kouadio Jessica',
             'phone' => '+225 07 07 12 34 56',
             'email' => null,
-            'unit_id' => Unit::where('name', 'Aucune')->value('id'),
+            'unit_id' => Unit::where('name', Unit::None)->value('id'),
             'companions' => [],
         ])['registration'];
     }

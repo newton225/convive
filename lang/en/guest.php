@@ -89,7 +89,7 @@ return [
         ],
         'help' => [
             'phone' => 'It is used to send your invitation card and reminders by WhatsApp. Foreign number: add the country code (+33, +1…). One reservation at a time per number.',
-            'unit' => 'It is used to seat members of the same unit at the same tables. If none fits you, choose "None".',
+            'unit' => 'It is used to seat members of the same unit at the same tables. If none fits you, choose "Special guest".',
             'companions' => 'The people coming with you. Each one takes a seat, pays the price and gets their own ticket, which you can pass on to them.',
         ],
         'phone_country' => [

@@ -14,7 +14,7 @@ class CreateStarterUnits
     /**
      * Create the units a tenant starts with.
      *
-     * Un point de depart : l'exploitant renomme, ajoute et desactive a sa guise, sauf `Aucune`,
+     * Un point de depart : l'exploitant renomme, ajoute et desactive a sa guise, sauf `Invité spécial`,
      * protegee et toujours en dernier (voir `Unit::isNone()`).
      */
     public function handle(): void

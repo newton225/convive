@@ -30,7 +30,7 @@ class ProofQueueDetailsTest extends TestCase
             $registration = Registration::factory()->proofSubmitted()->create(['event_id' => $event->id, 'party_size' => 2]);
             $registration->companions()->create([
                 'name' => 'Zadi Yves',
-                'unit_id' => Unit::where('name', 'Aucune')->value('id'),
+                'unit_id' => Unit::where('name', Unit::None)->value('id'),
                 'position' => 1,
             ]);
             PaymentProof::factory()->create(['registration_id' => $registration->id]);
@@ -42,6 +42,6 @@ class ProofQueueDetailsTest extends TestCase
             ->get(route('tenants.events.proofs.index', [$tenant, $event]))
             ->assertInertia(fn (Assert $page) => $page
                 ->where('rows.0.companions.0.name', 'Zadi Yves')
-                ->where('rows.0.companions.0.unit', 'Aucune'));
+                ->where('rows.0.companions.0.unit', Unit::None));
     }
 }
