@@ -37,6 +37,7 @@ export function TwoFactorReconfirmDialog() {
     const form = useForm({ code: '' });
     // Ce qui a lance le dernier envoi (bouton, ou formulaire valide par Entree), puis celui que le
     // serveur a refuse faute de code, a rejouer.
+    const formElement = useRef<HTMLFormElement>(null);
     const lastTrigger = useRef<HTMLElement | null>(null);
     const refused = useRef<HTMLElement | null>(null);
 
@@ -106,6 +107,7 @@ export function TwoFactorReconfirmDialog() {
             <Dialog open={open} onOpenChange={(next) => !next && close()}>
                 <DialogContent data-test="two-factor-reconfirm-dialog">
                     <form
+                        ref={formElement}
                         className="space-y-6"
                         onSubmit={(event) => {
                             event.preventDefault();
@@ -147,6 +149,16 @@ export function TwoFactorReconfirmDialog() {
                                 }
                                 disabled={form.processing}
                                 pattern={REGEXP_ONLY_DIGITS}
+                                pasteTransformer={(pasted) =>
+                                    pasted.replace(/\D/g, '')
+                                }
+                                onComplete={() =>
+                                    setTimeout(
+                                        () =>
+                                            formElement.current?.requestSubmit(),
+                                        0,
+                                    )
+                                }
                                 autoFocus
                             >
                                 <InputOTPGroup>

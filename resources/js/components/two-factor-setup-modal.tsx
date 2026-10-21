@@ -1,3 +1,4 @@
+import type { FormComponentRef } from '@inertiajs/core';
 import { Form } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { Check, Copy, ScanLine } from 'lucide-react';
@@ -154,6 +155,7 @@ function TwoFactorVerificationStep({
     const { t } = useTranslation();
     const [code, setCode] = useState<string>('');
     const pinInputContainerRef = useRef<HTMLDivElement>(null);
+    const formRef = useRef<FormComponentRef>(null);
 
     useEffect(() => {
         setTimeout(() => {
@@ -164,6 +166,7 @@ function TwoFactorVerificationStep({
     return (
         <Form
             {...confirm.form()}
+            ref={formRef}
             onSuccess={() => onClose()}
             resetOnError
             resetOnSuccess
@@ -188,6 +191,15 @@ function TwoFactorVerificationStep({
                                 onChange={setCode}
                                 disabled={processing}
                                 pattern={REGEXP_ONLY_DIGITS}
+                                pasteTransformer={(pasted) =>
+                                    pasted.replace(/\D/g, '')
+                                }
+                                onComplete={() =>
+                                    setTimeout(
+                                        () => formRef.current?.submit(),
+                                        0,
+                                    )
+                                }
                                 autoFocus
                             >
                                 <InputOTPGroup>
