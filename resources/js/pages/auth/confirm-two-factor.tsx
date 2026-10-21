@@ -1,6 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
+import type { FormComponentRef } from '@inertiajs/core';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import {
@@ -22,12 +23,13 @@ import type { Translations } from '@/types';
 export default function ConfirmTwoFactor() {
     const { t } = useTranslation();
     const [code, setCode] = useState<string>('');
+    const formRef = useRef<FormComponentRef>(null);
 
     return (
         <>
             <Head title={t('account.two_factor_reconfirm.head')} />
 
-            <Form {...store.form()} resetOnError>
+            <Form {...store.form()} ref={formRef} resetOnError>
                 {({ processing, errors }) => (
                     <div className="space-y-6">
                         <div className="flex flex-col items-center justify-center space-y-3">
@@ -38,6 +40,15 @@ export default function ConfirmTwoFactor() {
                                 onChange={(value) => setCode(value)}
                                 disabled={processing}
                                 pattern={REGEXP_ONLY_DIGITS}
+                                pasteTransformer={(pasted) =>
+                                    pasted.replace(/\D/g, '')
+                                }
+                                onComplete={() =>
+                                    setTimeout(
+                                        () => formRef.current?.submit(),
+                                        0,
+                                    )
+                                }
                                 autoFocus
                             >
                                 <InputOTPGroup>

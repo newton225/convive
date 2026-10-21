@@ -1,6 +1,7 @@
 import { Form, Head, setLayoutProps } from '@inertiajs/react';
+import type { FormComponentRef } from '@inertiajs/core';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ export default function TwoFactorChallenge() {
     const { t } = useTranslation();
     const [showRecoveryInput, setShowRecoveryInput] = useState<boolean>(false);
     const [code, setCode] = useState<string>('');
+    const formRef = useRef<FormComponentRef>(null);
 
     const authConfigContent = useMemo<{
         title: string;
@@ -56,6 +58,7 @@ export default function TwoFactorChallenge() {
             <div className="space-y-6">
                 <Form
                     {...store.form()}
+                    ref={formRef}
                     className="space-y-4"
                     resetOnError
                     resetOnSuccess={!showRecoveryInput}
@@ -87,6 +90,16 @@ export default function TwoFactorChallenge() {
                                             onChange={(value) => setCode(value)}
                                             disabled={processing}
                                             pattern={REGEXP_ONLY_DIGITS}
+                                            pasteTransformer={(pasted) =>
+                                                pasted.replace(/\D/g, '')
+                                            }
+                                            onComplete={() =>
+                                                setTimeout(
+                                                    () =>
+                                                        formRef.current?.submit(),
+                                                    0,
+                                                )
+                                            }
                                             autoFocus
                                         >
                                             <InputOTPGroup>
