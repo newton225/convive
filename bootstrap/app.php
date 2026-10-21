@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Session\Middleware\AuthenticateSession;
+use Inertia\EncryptHistoryMiddleware;
 use Inertia\Inertia;
 use Stancl\Tenancy\Contracts\TenantCouldNotBeIdentifiedException;
 use Stancl\Tenancy\Exceptions\NotASubdomainException;
@@ -65,6 +66,10 @@ return Application::configure(basePath: dirname(__DIR__))
             SetSecurityHeaders::class,
             HandleAppearance::class,
             SetLocale::class,
+            // Historique chiffre : au retour arriere, Inertia relit la page gardee par le navigateur sans
+            // interroger le serveur, donc sans passer par `guest`. Chiffree, puis rendue illisible par
+            // `Inertia::clearHistory()` a la connexion, elle est redemandee au serveur.
+            EncryptHistoryMiddleware::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             SetTenantUrlDefaults::class,
