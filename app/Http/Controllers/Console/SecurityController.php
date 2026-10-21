@@ -24,6 +24,8 @@ class SecurityController extends Controller
             'isSample' => false,
             // La limite d'exports par heure en vigueur, reglee depuis cet ecran (SECURITY.md M3).
             'exportsPerHour' => $protection->exports_per_hour,
+            // Une nouvelle connexion ferme-t-elle les autres sessions du meme compte ?
+            'singleSession' => $protection->single_session,
             // Les durees qu'une organisation peut choisir pour un acces de support.
             'supportDurations' => $support->durations,
             // Les bornes de la duree de reservation proposee aux organisateurs.

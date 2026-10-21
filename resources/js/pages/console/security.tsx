@@ -4,6 +4,7 @@ import { CircleAlert, CircleCheck } from 'lucide-react';
 import { ConsoleTable } from '@/components/console/console-table';
 import type { PaginationMeta } from '@/components/list-pagination';
 import { ExportLimitDialog } from '@/components/console/export-limit-dialog';
+import { SingleSessionToggle } from '@/components/console/single-session-toggle';
 import { ReservationBoundsDialog } from '@/components/console/reservation-bounds-dialog';
 import { SupportDurationsDialog } from '@/components/console/support-durations-dialog';
 import Heading from '@/components/heading';
@@ -26,6 +27,7 @@ type Props = {
     events: ConsoleSecurityEvent[];
     eventsMeta: PaginationMeta;
     exportsPerHour: number;
+    singleSession: boolean;
     supportDurations: number[];
     reservationBounds: { min: number; max: number };
 };
@@ -41,6 +43,7 @@ export default function ConsoleSecurity({
     events,
     eventsMeta,
     exportsPerHour,
+    singleSession,
     supportDurations,
     reservationBounds,
 }: Props) {
@@ -105,6 +108,20 @@ export default function ConsoleSecurity({
                         {t('console.security.export_limit.current', {
                             count: exportsPerHour,
                         })}
+                    </CardContent>
+                </Card>
+
+                <Card data-test="console-single-session">
+                    <CardHeader className="space-y-1">
+                        <CardTitle>
+                            {t('console.security.single_session.title')}
+                        </CardTitle>
+                        <p className="text-muted-foreground text-sm">
+                            {t('console.security.single_session.hint')}
+                        </p>
+                    </CardHeader>
+                    <CardContent>
+                        <SingleSessionToggle singleSession={singleSession} />
                     </CardContent>
                 </Card>
 

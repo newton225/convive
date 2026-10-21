@@ -399,7 +399,7 @@ return [
     'security' => [
         'reservation_bounds' => [
             'title' => 'Durée de réservation',
-            'hint' => "Les bornes entre lesquelles un organisateur choisit la durée pendant laquelle une place reste réservée en attendant le paiement.",
+            'hint' => 'Les bornes entre lesquelles un organisateur choisit la durée pendant laquelle une place reste réservée en attendant le paiement.',
             'current' => 'De :min à :max minutes',
             'dialog' => "Sans effet sur les réservations en cours. La durée d'un événement est ramenée entre ces bornes à sa prochaine modification.",
             'min' => 'Minimum (minutes)',
@@ -415,6 +415,13 @@ return [
             'invalid' => 'Saisissez des nombres d’heures entiers, de 1 à :max, séparés par des virgules.',
             'too_many' => 'Huit durées au plus.',
             'flash' => 'Les durées d’accès du support sont mises à jour.',
+        ],
+        'single_session' => [
+            'title' => 'Une seule session par compte',
+            'hint' => 'Ouvert, une nouvelle connexion ferme les autres sessions du même compte : l’ancien navigateur est renvoyé à la connexion à sa prochaine action. Le réglage vaut pour tous les comptes et joue à la connexion suivante, il ne ferme pas les sessions déjà ouvertes.',
+            'label' => 'Interdire les connexions simultanées sur un même compte',
+            'flash_on' => 'Une seule session par compte : réglage activé.',
+            'flash_off' => 'Les connexions simultanées sont de nouveau permises.',
         ],
         'export_limit' => [
             'title' => 'Limite d’exports',
@@ -691,6 +698,7 @@ return [
             'plan_updated' => 'Plan modifié',
             'trial_settings_updated' => 'Période d’essai réglée',
             'export_limit_updated' => 'Limite d’exports réglée',
+            'single_session_updated' => 'Session unique réglée',
             'support_durations_updated' => 'Durées d’accès du support réglées',
             'reservation_bounds_updated' => 'Durée de réservation réglée',
             'database_repaired' => 'Base réparée',
@@ -724,6 +732,7 @@ return [
             'plan_updated' => ':actor a modifié les prix ou les quotas d’un plan',
             'trial_settings_updated' => ':actor a modifié les réglages de la période d’essai',
             'export_limit_updated' => ':actor a modifié la limite d’exports par heure',
+            'single_session_updated' => ':actor a modifié le réglage « une seule session par compte »',
             'support_durations_updated' => ':actor a modifié les durées proposées pour un accès de support',
             'reservation_bounds_updated' => ':actor a modifié les bornes de la durée de réservation',
             'database_repaired' => ':actor a rejoué les migrations de :organisation',
