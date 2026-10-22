@@ -80,6 +80,7 @@ export function AppSidebar() {
                       title: t('navigation.treasury'),
                       href: treasury(tenant.slug),
                       icon: Landmark,
+                      tourId: 'nav-treasury',
                   }),
                   ...only(allowed(Permission.ScanPerform), {
                       title: t('navigation.entry_control'),

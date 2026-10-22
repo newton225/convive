@@ -53,11 +53,22 @@ class TenantMemberController extends Controller
 
         abort_if($tenant->owner()?->is($member), 403, __('tenants.errors.owner_cannot_be_removed'));
 
+        $previous = $member->tenantProfile($tenant);
+
         $tenant->memberships()
             ->where('user_id', $member->id)
             ->delete();
 
         $member->removeTenantProfile($tenant);
+
+        activity()
+            ->performedOn($member)
+            ->event('deleted')
+            ->withProperties([
+                'old' => ['profile' => $previous?->name],
+                'tenant_id' => $tenant->id,
+            ])
+            ->log('tenant_member.removed');
 
         if ($member->isCurrentTenant($tenant)) {
             $member->switchTenant($member->personalTenant());

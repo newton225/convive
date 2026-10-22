@@ -9,7 +9,9 @@ export type ProductTourId =
     | 'welcome'
     | 'first_event'
     | 'proofs'
-    | 'entry_control';
+    | 'entry_control'
+    | 'seating'
+    | 'treasury';
 
 export type ProductTourStep = {
     // Le repere vise, sans le selecteur : `nav-events` pour `[data-tour="nav-events"]`.
@@ -25,6 +27,7 @@ export const productTours: Record<ProductTourId, ProductTourStep[]> = {
         { anchor: 'tenant-switcher', key: 'tenant', side: 'right' },
         { anchor: 'nav-dashboard', key: 'dashboard', side: 'right' },
         { anchor: 'nav-events', key: 'events', side: 'right' },
+        { anchor: 'nav-treasury', key: 'treasury', side: 'right' },
         { anchor: 'nav-entry-control', key: 'entry_control', side: 'right' },
         { anchor: 'nav-organisation', key: 'organisation', side: 'right' },
         { anchor: 'notifications', key: 'notifications', side: 'bottom' },
@@ -58,9 +61,26 @@ export const productTours: Record<ProductTourId, ProductTourStep[]> = {
         { anchor: 'scan-pin', key: 'pin', side: 'bottom' },
         { anchor: 'scan-viewfinder', key: 'viewfinder', side: 'right' },
         { key: 'results' },
+        { anchor: 'scan-lookup', key: 'lookup', side: 'top' },
         { anchor: 'scan-station', key: 'station', side: 'right' },
         { anchor: 'scan-counter', key: 'counter', side: 'right' },
         { anchor: 'scan-recent', key: 'recent', side: 'left' },
         { key: 'offline' },
+    ],
+    seating: [
+        { key: 'intro' },
+        { anchor: 'seating-tables', key: 'tables', side: 'top' },
+        { anchor: 'seating-unseated', key: 'unseated', side: 'top' },
+        { anchor: 'seating-constraints', key: 'constraints', side: 'top' },
+        { key: 'after' },
+    ],
+    treasury: [
+        { key: 'intro' },
+        { anchor: 'treasury-period', key: 'period', side: 'bottom' },
+        { anchor: 'treasury-totals', key: 'totals', side: 'bottom' },
+        { anchor: 'treasury-events', key: 'events', side: 'top' },
+        { anchor: 'treasury-accounts', key: 'accounts', side: 'top' },
+        { anchor: 'treasury-refunds', key: 'refunds', side: 'top' },
+        { anchor: 'treasury-export', key: 'export', side: 'left' },
     ],
 };

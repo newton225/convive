@@ -23,15 +23,19 @@ return [
         ],
         'events' => [
             'title' => 'Événements',
-            'body' => "Créez un événement, publiez son lien, puis retrouvez depuis sa ligne les preuves, le plan de salle, la base d'inscrits et le rapport.",
+            'body' => "Créez un événement, publiez son lien, puis retrouvez depuis sa ligne les preuves, le plan de salle, la base d'inscrits, les réclamations et le rapport.",
+        ],
+        'treasury' => [
+            'title' => 'Trésorerie',
+            'body' => "L'argent de toute l'organisation : ce qui a été encaissé, remboursé et ce qui reste à rendre, par événement et par compte de versement.",
         ],
         'entry_control' => [
             'title' => "Contrôle à l'entrée",
-            'body' => "Le soir venu, l'hôtesse ouvre ce raccourci sur son téléphone et scanne les billets.",
+            'body' => "Le soir venu, l'hôtesse ouvre ce raccourci sur son téléphone et scanne les billets. Si le QR est illisible, elle retrouve l'invité par son nom, selon son profil.",
         ],
         'organisation' => [
             'title' => 'Organisation',
-            'body' => 'Identité légale et marque, comptes de versement, unités, équipe, abonnement : tout ce qui concerne votre organisation est rangé ici. Complétez-les avant de publier votre premier événement.',
+            'body' => "Identité légale et marque, comptes de versement, unités, équipe et profils, gabarit du billet, abonnement et historique des actions : tout ce qui concerne votre organisation est rangé ici. Complétez l'identité légale et un compte de versement avant de publier votre premier événement.",
         ],
         'notifications' => [
             'title' => 'Alertes',
@@ -50,19 +54,19 @@ return [
         ],
         'identity' => [
             'title' => '1. Identité',
-            'body' => 'Nom, date, heure et lieu, tels que les invités les liront sur le lien et le billet.',
+            'body' => "Nom, date, heure de début, fin facultative et lieu (avec un lien de carte si vous le souhaitez), tels que les invités les liront sur le lien et le billet. La fenêtre d'entrée du billet se règle ici aussi.",
         ],
         'seating' => [
-            'title' => '2. Places et tarif',
-            'body' => 'Décrivez la salle par groupes de tables de même taille : la capacité est la somme de leurs places, et le plan de salle fait foi le jour J.',
+            'title' => '2. Places et tarifs',
+            'body' => 'Décrivez la salle par groupes de tables de même taille, ou choisissez un événement sans tables et indiquez un nombre de places. Créez ensuite vos catégories de tarifs (nom, prix, quota) : chaque personne choisit la sienne, et un prix à 0 veut dire gratuit.',
         ],
         'payment_accounts' => [
             'title' => 'Comptes de versement',
-            'body' => "Cochez au moins un compte : c'est là que les invités verseront leur participation.",
+            'body' => "Cochez au moins un compte : c'est là que les invités verseront leur participation. Un événement entièrement gratuit n'en demande aucun.",
         ],
         'deadlines' => [
             'title' => '3. Échéances',
-            'body' => "Date limite d'inscription, purge des dossiers sans preuve, durée de réservation d'une place.",
+            'body' => "Date limite d'inscription, purge des dossiers sans preuve, durée de réservation d'une place et envoi des cartes.",
         ],
         'save' => [
             'title' => 'Enregistrer',
@@ -70,18 +74,18 @@ return [
         ],
         'publish' => [
             'title' => 'Publier',
-            'body' => "Une fois l'identité de l'organisation et un compte de versement prêts, ce bouton ouvre les inscriptions.",
+            'body' => "Quand l'identité légale de l'organisation, son sous-domaine, un lieu, une date à venir et, si l'événement est payant, un compte de versement sont prêts, ce bouton ouvre les inscriptions. La fiche nomme ce qui manque encore.",
         ],
         'share' => [
             'title' => 'Partager le lien',
-            'body' => 'Dans la liste des événements, « Copier le lien » donne l\'adresse à envoyer aux invités.',
+            'body' => 'Dans la liste des événements, « Copier le lien » donne l\'adresse à envoyer aux invités. Vous pouvez aussi annoncer l\'événement sur la vitrine du site Convive.',
         ],
     ],
 
     'proofs' => [
         'intro' => [
             'title' => 'Vérifier les preuves',
-            'body' => 'Chaque invité dépose la capture de son versement. Rien ne se confirme sans votre validation.',
+            'body' => "Chaque invité dépose la capture de son versement. Rien ne se confirme sans votre validation (un événement gratuit n'en demande pas).",
         ],
         'queue' => [
             'title' => 'La file',
@@ -89,15 +93,15 @@ return [
         ],
         'receipt' => [
             'title' => 'Le reçu',
-            'body' => 'Ouvrez la capture et comparez-la au montant et à la référence de la ligne.',
+            'body' => "Ouvrez la capture et comparez-la au montant et à la référence de la ligne. Elle doit être l'originale, et le montant complet, en un seul paiement : sinon, rejetez.",
         ],
         'signals' => [
             'title' => 'Signaux de doute',
-            'body' => 'Référence déjà utilisée, capture déjà vue, montant différent du relevé : un signal invite à regarder de plus près.',
+            'body' => "Référence déjà utilisée, capture déjà vue, référence absente du relevé, montant différent, précision laissée par l'invité : un signal invite à regarder de plus près.",
         ],
         'approve' => [
             'title' => 'Valider',
-            'body' => "La validation confirme l'inscription, attribue une table et émet un billet par personne.",
+            'body' => "La validation confirme l'inscription, attribue une table (sauf pour un événement sans tables) et émet un billet par personne.",
         ],
         'reject' => [
             'title' => 'Rejeter',
@@ -105,7 +109,7 @@ return [
         ],
         'after' => [
             'title' => 'Et ensuite',
-            'body' => 'Le rapprochement avec votre relevé bancaire se fait depuis la ligne de l\'événement, « Rapprochement ».',
+            'body' => 'Le rapprochement avec votre relevé bancaire se fait depuis la ligne de l\'événement, « Rapprochement ». Les remboursements dus après une annulation se suivent dans la Trésorerie.',
         ],
     ],
 
@@ -126,6 +130,10 @@ return [
             'title' => 'Trois résultats',
             'body' => "Valide : la personne entre. Déjà scanné : l'heure du premier passage s'affiche. Refusé : orientez l'invité vers l'accueil.",
         ],
+        'lookup' => [
+            'title' => 'Sans scan',
+            'body' => "QR illisible ou billet oublié : cherchez l'invité par son nom ou la référence de son dossier, puis validez son entrée. Ce geste demande une permission dédiée et prévient les responsables.",
+        ],
         'station' => [
             'title' => 'Votre poste',
             'body' => 'Nommez votre entrée (porte A, parking) : le journal dira qui a scanné où.',
@@ -140,7 +148,61 @@ return [
         ],
         'offline' => [
             'title' => 'Sans réseau',
-            'body' => 'Le scan continue hors ligne : les billets sont vérifiés sur le téléphone et envoyés dès que le réseau revient.',
+            'body' => 'Le scan continue hors ligne : les billets sont vérifiés sur le téléphone et envoyés dès que le réseau revient. La recherche sans scan, elle, demande le réseau.',
+        ],
+    ],
+
+    'seating' => [
+        'intro' => [
+            'title' => 'Le plan de salle',
+            'body' => 'Chaque inscription confirmée est placée à une table automatiquement. Ici, vous voyez la salle le jour J et vous ajustez à la main.',
+        ],
+        'tables' => [
+            'title' => 'Les tables',
+            'body' => "Chaque table avec ses occupants, regroupés par unité (une couleur par unité). Vous pouvez changer le nombre de places d'une table, jamais en dessous des personnes déjà placées.",
+        ],
+        'unseated' => [
+            'title' => 'Sans table',
+            'body' => 'Les inscriptions confirmées qui n\'ont pas de table : placez-les à la main.',
+        ],
+        'constraints' => [
+            'title' => 'Séparer des unités',
+            'body' => 'Deux unités séparées ne partagent jamais une même table, y compris pour le placement automatique.',
+        ],
+        'after' => [
+            'title' => 'Tout est conservé',
+            'body' => "Chaque placement, déplacement ou contrainte est inscrit à l'historique des actions, avec son auteur.",
+        ],
+    ],
+
+    'treasury' => [
+        'intro' => [
+            'title' => 'La trésorerie',
+            'body' => "L'argent de toute l'organisation, tous événements confondus, en francs CFA.",
+        ],
+        'period' => [
+            'title' => 'La période',
+            'body' => 'Limitez les chiffres aux événements dont la date tombe dans la période choisie.',
+        ],
+        'totals' => [
+            'title' => 'Les totaux',
+            'body' => 'Encaissé (preuves validées, annulations comprises), remboursé, à rembourser, et le net : encaissé moins remboursé.',
+        ],
+        'events' => [
+            'title' => 'Par événement',
+            'body' => 'Une ligne par événement, avec un accès direct à ses inscrits pour comprendre un écart.',
+        ],
+        'accounts' => [
+            'title' => 'Par compte de versement',
+            'body' => 'Chaque montant est rangé sous le compte de la preuve de paiement du dossier.',
+        ],
+        'refunds' => [
+            'title' => 'Remboursements à faire',
+            'body' => "Les annulations dont le remboursement reste à faire, les plus anciennes d'abord. Ouvrez le dossier pour l'enregistrer une fois rendu.",
+        ],
+        'export' => [
+            'title' => 'Exporter',
+            'body' => "Téléchargez le PDF de la période ; chaque tableau a aussi son export. Chaque export est inscrit à l'historique des actions.",
         ],
     ],
 ];

@@ -23,15 +23,19 @@ return [
         ],
         'events' => [
             'title' => 'Events',
-            'body' => 'Create an event, publish its link, then reach its proofs, seating plan, registrations and report from its row.',
+            'body' => 'Create an event, publish its link, then reach its proofs, seating plan, registrations, claims and report from its row.',
+        ],
+        'treasury' => [
+            'title' => 'Treasury',
+            'body' => 'The money of the whole organisation: what was collected, refunded and what is still owed, by event and by payout account.',
         ],
         'entry_control' => [
             'title' => 'Entry control',
-            'body' => 'On the night, the host opens this shortcut on their phone and scans tickets.',
+            'body' => 'On the night, the host opens this shortcut on their phone and scans tickets. If a QR code cannot be read, they can find the guest by name, depending on their profile.',
         ],
         'organisation' => [
             'title' => 'Organisation',
-            'body' => 'Legal identity and brand, payout accounts, units, team, subscription: everything about your organisation lives here. Fill them in before publishing your first event.',
+            'body' => 'Legal identity and brand, payout accounts, units, team and profiles, ticket template, subscription and action history: everything about your organisation lives here. Fill in the legal identity and a payout account before publishing your first event.',
         ],
         'notifications' => [
             'title' => 'Alerts',
@@ -50,19 +54,19 @@ return [
         ],
         'identity' => [
             'title' => '1. Identity',
-            'body' => 'Name, date, time and venue, as guests will read them on the link and the ticket.',
+            'body' => 'Name, date, start time, optional end and venue (with a map link if you like), as guests will read them on the link and the ticket. The ticket entry window is set here too.',
         ],
         'seating' => [
-            'title' => '2. Seats and price',
-            'body' => 'Describe the room in groups of tables of the same size: capacity is the sum of their seats, and the seating plan is what counts on the day.',
+            'title' => '2. Seats and prices',
+            'body' => 'Describe the room in groups of tables of the same size, or choose an event without tables and enter a number of seats. Then create your price categories (name, price, quota): each person picks theirs, and a price of 0 means free.',
         ],
         'payment_accounts' => [
             'title' => 'Payout accounts',
-            'body' => 'Tick at least one account: this is where guests will send their contribution.',
+            'body' => 'Tick at least one account: this is where guests will send their contribution. A fully free event needs none.',
         ],
         'deadlines' => [
             'title' => '3. Deadlines',
-            'body' => 'Registration deadline, purge of registrations without proof, how long a seat stays held.',
+            'body' => 'Registration deadline, purge of registrations without proof, how long a seat stays held and when cards are sent.',
         ],
         'save' => [
             'title' => 'Save',
@@ -70,18 +74,18 @@ return [
         ],
         'publish' => [
             'title' => 'Publish',
-            'body' => 'Once the organisation identity and a payout account are ready, this button opens registrations.',
+            'body' => 'Once the organisation legal identity, its subdomain, a venue, an upcoming date and, for a paid event, a payout account are ready, this button opens registrations. The page names what is still missing.',
         ],
         'share' => [
             'title' => 'Share the link',
-            'body' => 'In the event list, "Copy link" gives the address to send to guests.',
+            'body' => 'In the event list, "Copy link" gives the address to send to guests. You can also announce the event on the Convive showcase.',
         ],
     ],
 
     'proofs' => [
         'intro' => [
             'title' => 'Check proofs',
-            'body' => 'Each guest uploads a screenshot of their payment. Nothing is confirmed without your approval.',
+            'body' => 'Each guest uploads a screenshot of their payment. Nothing is confirmed without your approval (a free event does not ask for one).',
         ],
         'queue' => [
             'title' => 'The queue',
@@ -89,15 +93,15 @@ return [
         ],
         'receipt' => [
             'title' => 'The receipt',
-            'body' => 'Open the screenshot and compare it with the amount and reference on the row.',
+            'body' => 'Open the screenshot and compare it with the amount and reference on the row. It must be the original and the amount complete, in a single payment: otherwise, reject.',
         ],
         'signals' => [
             'title' => 'Warning signs',
-            'body' => 'Reference already used, screenshot already seen, amount different from the statement: a sign asks for a closer look.',
+            'body' => 'Reference already used, screenshot already seen, reference missing from the statement, different amount, a note left by the guest: a sign asks for a closer look.',
         ],
         'approve' => [
             'title' => 'Approve',
-            'body' => 'Approving confirms the registration, assigns a table and issues one ticket per person.',
+            'body' => 'Approving confirms the registration, assigns a table (except for an event without tables) and issues one ticket per person.',
         ],
         'reject' => [
             'title' => 'Reject',
@@ -105,7 +109,7 @@ return [
         ],
         'after' => [
             'title' => 'What next',
-            'body' => 'Matching against your bank statement happens from the event row, "Reconciliation".',
+            'body' => 'Matching against your bank statement happens from the event row, "Reconciliation". Refunds owed after a cancellation are followed in Treasury.',
         ],
     ],
 
@@ -126,6 +130,10 @@ return [
             'title' => 'Three results',
             'body' => 'Valid: the person comes in. Already scanned: the time of the first entry is shown. Refused: send the guest to the welcome desk.',
         ],
+        'lookup' => [
+            'title' => 'Without a scan',
+            'body' => 'QR code unreadable or ticket forgotten: search the guest by name or booking reference, then confirm their entry. This needs a dedicated permission and alerts the managers.',
+        ],
         'station' => [
             'title' => 'Your station',
             'body' => 'Name your entrance (gate A, car park): the log will show who scanned where.',
@@ -140,7 +148,61 @@ return [
         ],
         'offline' => [
             'title' => 'No network',
-            'body' => 'Scanning keeps working offline: tickets are checked on the phone and sent as soon as the network is back.',
+            'body' => 'Scanning keeps working offline: tickets are checked on the phone and sent as soon as the network is back. The search without a scan, however, needs the network.',
+        ],
+    ],
+
+    'seating' => [
+        'intro' => [
+            'title' => 'The seating plan',
+            'body' => 'Each confirmed registration is seated at a table automatically. Here you see the room on the day and adjust by hand.',
+        ],
+        'tables' => [
+            'title' => 'The tables',
+            'body' => 'Each table with its occupants, grouped by unit (one colour per unit). You can change the number of seats of a table, never below the people already seated.',
+        ],
+        'unseated' => [
+            'title' => 'Without a table',
+            'body' => 'Confirmed registrations that have no table: seat them by hand.',
+        ],
+        'constraints' => [
+            'title' => 'Keep units apart',
+            'body' => 'Two separated units never share a table, automatic seating included.',
+        ],
+        'after' => [
+            'title' => 'Everything is kept',
+            'body' => 'Every seating, move or rule is written to the action history, with its author.',
+        ],
+    ],
+
+    'treasury' => [
+        'intro' => [
+            'title' => 'Treasury',
+            'body' => 'The money of the whole organisation, all events together, in CFA francs.',
+        ],
+        'period' => [
+            'title' => 'The period',
+            'body' => 'Limit the figures to events whose date falls within the chosen period.',
+        ],
+        'totals' => [
+            'title' => 'The totals',
+            'body' => 'Collected (validated proofs, cancellations included), refunded, to refund, and the net: collected minus refunded.',
+        ],
+        'events' => [
+            'title' => 'By event',
+            'body' => 'One row per event, with a direct link to its registrations to understand a gap.',
+        ],
+        'accounts' => [
+            'title' => 'By payout account',
+            'body' => "Each amount is filed under the account of the registration's payment proof.",
+        ],
+        'refunds' => [
+            'title' => 'Refunds to make',
+            'body' => 'Cancellations whose refund is still to be made, oldest first. Open the registration to record it once paid back.',
+        ],
+        'export' => [
+            'title' => 'Export',
+            'body' => 'Download the PDF of the period; each table also has its own export. Every export is written to the action history.',
         ],
     ],
 ];

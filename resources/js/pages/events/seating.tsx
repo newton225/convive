@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ConfirmSummary } from '@/components/confirm-summary';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { TableCapacityControl } from '@/components/seating/table-capacity-control';
 import { SubmitButton } from '@/components/submit-button';
 import { Badge } from '@/components/ui/badge';
@@ -108,13 +109,19 @@ export default function EventSeating({
             <Head title={t('seating.title')} />
 
             <div className="flex flex-col space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('seating.title')}
-                    description={event.name}
-                />
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Heading
+                        variant="small"
+                        title={t('seating.title')}
+                        description={event.name}
+                    />
+                    <ProductTourButton
+                        tour="seating"
+                        autoStart={tables.length > 0}
+                    />
+                </div>
 
-                <div>
+                <div data-tour="seating-tables">
                     <h2 className="mb-3 text-sm font-medium">
                         {t('seating.tables.title')}
                     </h2>
@@ -244,7 +251,7 @@ export default function EventSeating({
                     )}
                 </div>
 
-                <div>
+                <div data-tour="seating-unseated">
                     <h2 className="mb-3 text-sm font-medium">
                         {t('seating.unseated.title')}
                     </h2>
@@ -429,7 +436,7 @@ function SeatingConstraints({
     }
 
     return (
-        <div>
+        <div data-tour="seating-constraints">
             <h2 className="mb-1 text-sm font-medium">
                 {t('seating.constraints.title')}
             </h2>

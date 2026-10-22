@@ -63,6 +63,12 @@ enum AuditLogType: string
     case UnitDeleted = 'unit.deleted';
 
     case TenantMemberProfileAssigned = 'tenant_member.profile_assigned';
+    case TenantMemberRemoved = 'tenant_member.removed';
+
+    case TenantInvitationSent = 'tenant_invitation.sent';
+    case TenantInvitationCancelled = 'tenant_invitation.cancelled';
+    case TenantInvitationAccepted = 'tenant_invitation.accepted';
+    case TenantInvitationDeclined = 'tenant_invitation.declined';
 
     /**
      * @return array<int, string>

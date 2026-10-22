@@ -2,7 +2,9 @@
 
 namespace App\Listeners;
 
+use App\Models\SecurityEvent;
 use App\Settings\ProtectionSettings;
+use App\Support\Console\SecurityJournal;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Session\DatabaseSessionHandler;
 use Illuminate\Support\Facades\DB;
@@ -33,10 +35,18 @@ class EndOtherSessions
             return;
         }
 
-        DB::connection(config('session.connection'))
+        $closed = DB::connection(config('session.connection'))
             ->table(config('session.table', 'sessions'))
             ->where('user_id', $event->user->getAuthIdentifier())
             ->where('id', '!=', request()->session()->getId())
             ->delete();
+
+        if ($closed > 0) {
+            SecurityJournal::access(
+                SecurityEvent::SessionsEnded,
+                ($event->user->email ?? '').' ('.$closed.')',
+                (int) $event->user->getAuthIdentifier(),
+            );
+        }
     }
 }

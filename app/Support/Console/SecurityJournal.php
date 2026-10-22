@@ -132,11 +132,22 @@ class SecurityJournal
         return SecurityEvent::where('created_at', '<', now()->subDays(SecurityEvent::RetentionDays))->delete();
     }
 
-    private static function record(string $type, Request $request, ?string $subject): void
+    /**
+     * Record a fact about an access (sign-in, sign-out, second factor, password, closed sessions).
+     * Contrairement aux blocages, chaque fait est ecrit : le but est de pouvoir retracer qui s'est
+     * connecte et quand, pas de limiter le bruit. Seul l'echec de connexion est regroupe par
+     * minute, un echec repete etant deja borne par la limite de debit.
+     */
+    public static function access(string $type, ?string $subject, ?int $userId = null): void
+    {
+        self::record($type, request(), $subject, $userId, $type === SecurityEvent::LoginFailed || $type === SecurityEvent::TwoFactorFailed);
+    }
+
+    private static function record(string $type, Request $request, ?string $subject, ?int $userId = null, bool $collapse = true): void
     {
         // Une ecriture de journal ne doit jamais faire echouer la reponse qu'elle accompagne.
-        rescue(function () use ($type, $request, $subject) {
-            if (! Cache::add('security:'.sha1($type.'|'.$request->ip().'|'.$subject), true, 60)) {
+        rescue(function () use ($type, $request, $subject, $userId, $collapse) {
+            if ($collapse && ! Cache::add('security:'.sha1($type.'|'.$request->ip().'|'.$subject), true, 60)) {
                 return;
             }
 
@@ -144,7 +155,7 @@ class SecurityJournal
                 'type' => $type,
                 'subject' => $subject === null ? null : mb_substr($subject, 0, 255),
                 'tenant_id' => tenant('id'),
-                'user_id' => $request->user()?->id,
+                'user_id' => $userId ?? $request->user()?->id,
                 'ip' => $request->ip(),
                 'created_at' => now(),
             ]);

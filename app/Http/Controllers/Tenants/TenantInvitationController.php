@@ -17,6 +17,7 @@ use App\Support\GettingStarted;
 use App\Support\PendingTenantInvitation;
 use App\Support\PlanLimits;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
@@ -51,6 +52,8 @@ class TenantInvitationController extends Controller
             'expires_at' => now()->addDays(3),
         ]);
 
+        $this->journal('sent', $invitation, $request->user());
+
         Notification::route('mail', $invitation->email)
             ->notify(new TenantInvitationNotification($invitation));
 
@@ -75,11 +78,13 @@ class TenantInvitationController extends Controller
     /**
      * Cancel the specified invitation.
      */
-    public function destroy(Tenant $tenant, TenantInvitation $invitation): RedirectResponse
+    public function destroy(Request $request, Tenant $tenant, TenantInvitation $invitation): RedirectResponse
     {
         abort_unless($invitation->tenant_id === $tenant->id, 404);
 
         Gate::authorize('cancelInvitation', $tenant);
+
+        $this->journal('cancelled', $invitation, $request->user());
 
         $invitation->delete();
 
@@ -110,6 +115,8 @@ class TenantInvitationController extends Controller
 
         PendingTenantInvitation::forget($request);
 
+        $this->journal('accepted', $invitation, $user);
+
         // Tous les Proprietaires apprennent l'arrivee du nouveau membre, dans l'application et par
         // courriel par defaut, chacun selon son reglage (TODO du 2026-10-07, point 9).
         Notification::send(
@@ -133,6 +140,8 @@ class TenantInvitationController extends Controller
      */
     public function decline(RespondToTenantInvitationRequest $request, TenantInvitation $invitation): RedirectResponse
     {
+        $this->journal('declined', $invitation, $request->user());
+
         $invitation->delete();
 
         PendingTenantInvitation::forget($request);
@@ -144,5 +153,23 @@ class TenantInvitationController extends Controller
         $tenant = $user->currentTenant ?? $user->personalTenant() ?? $user->tenants()->first();
 
         return $tenant !== null ? to_route('dashboard', $tenant) : to_route('invitations.index');
+    }
+
+    /**
+     * Write one step of the invitation's life to the organisation's audit log. L'invitation vit dans
+     * la base centrale : accepter ou refuser se joue hors du contexte de l'organisation, d'ou le
+     * `run()` qui ecrit dans son journal. L'adresse invitee est gardee ici : l'invitation, elle,
+     * disparait quand elle est annulee ou refusee.
+     */
+    private function journal(string $step, TenantInvitation $invitation, ?User $actor): void
+    {
+        $invitation->tenant->run(fn () => activity()
+            ->causedBy($actor)
+            ->event('updated')
+            ->withProperties([
+                'attributes' => ['name' => $invitation->email, 'profile' => $invitation->profile_name],
+                'tenant_id' => $invitation->tenant_id,
+            ])
+            ->log('tenant_invitation.'.$step));
     }
 }

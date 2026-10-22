@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { DownloadButton } from '@/components/download-button';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { TreasuryAccountsTable } from '@/components/treasury/treasury-accounts-table';
 import { TreasuryEventsTable } from '@/components/treasury/treasury-events-table';
 import { TreasuryPeriodFilter } from '@/components/treasury/treasury-period-filter';
@@ -72,43 +73,58 @@ export default function Treasury({
                         description={t('treasury.description')}
                     />
 
-                    {canExport ? (
-                        <DownloadButton
-                            variant="outline"
-                            href={
-                                exportPdf(tenant.slug, {
-                                    query: {
-                                        from: filters.from ?? undefined,
-                                        to: filters.to ?? undefined,
-                                    },
-                                }).url
-                            }
-                            data-test="treasury-export-pdf"
-                        >
-                            {t('treasury.export.pdf')}
-                        </DownloadButton>
-                    ) : null}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <ProductTourButton tour="treasury" />
+                        {canExport ? (
+                            <span data-tour="treasury-export">
+                                <DownloadButton
+                                    variant="outline"
+                                    href={
+                                        exportPdf(tenant.slug, {
+                                            query: {
+                                                from: filters.from ?? undefined,
+                                                to: filters.to ?? undefined,
+                                            },
+                                        }).url
+                                    }
+                                    data-test="treasury-export-pdf"
+                                >
+                                    {t('treasury.export.pdf')}
+                                </DownloadButton>
+                            </span>
+                        ) : null}
+                    </div>
                 </div>
 
-                <TreasuryPeriodFilter
-                    tenantSlug={tenant.slug}
-                    filters={filters}
-                />
-                <TreasuryTotalsCards totals={totals} />
-                <TreasuryEventsTable
-                    rows={events}
-                    actions={exportOf('events')}
-                />
-                <TreasuryAccountsTable
-                    rows={accounts}
-                    actions={exportOf('accounts')}
-                />
-                <TreasuryRefundsDue
-                    rows={refundsDue}
-                    count={refundsDueCount}
-                    limit={refundListLimit}
-                    actions={exportOf('refunds')}
-                />
+                <div data-tour="treasury-period">
+                    <TreasuryPeriodFilter
+                        tenantSlug={tenant.slug}
+                        filters={filters}
+                    />
+                </div>
+                <div data-tour="treasury-totals">
+                    <TreasuryTotalsCards totals={totals} />
+                </div>
+                <div data-tour="treasury-events">
+                    <TreasuryEventsTable
+                        rows={events}
+                        actions={exportOf('events')}
+                    />
+                </div>
+                <div data-tour="treasury-accounts">
+                    <TreasuryAccountsTable
+                        rows={accounts}
+                        actions={exportOf('accounts')}
+                    />
+                </div>
+                <div data-tour="treasury-refunds">
+                    <TreasuryRefundsDue
+                        rows={refundsDue}
+                        count={refundsDueCount}
+                        limit={refundListLimit}
+                        actions={exportOf('refunds')}
+                    />
+                </div>
             </div>
         </>
     );

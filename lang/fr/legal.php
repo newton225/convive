@@ -98,6 +98,7 @@ return [
                         'Organisation supprimée : invisible immédiatement, puis effacée définitivement 30 jours plus tard.',
                         'Événement supprimé : effacé définitivement 30 jours plus tard.',
                         'Journal des actions : 24 mois.',
+                        'Journal de sécurité (connexions, déconnexions, blocages) : 90 jours.',
                         'Session de connexion : 12 heures au plus, puis il faut se reconnecter.',
                         'Copies de sauvegarde : un an au plus.',
                         'Factures et pièces comptables : pendant la durée exigée par la réglementation comptable.',

@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Stancl\Tenancy\Database\Concerns\CentralConnection;
 
 /**
- * Un fait de securite montre a l'equipe Convive (README section 3) : une limite de debit atteinte
- * ou une connexion verrouillee apres trop d'echecs. Ecriture seule, purgee au bout de 90 jours.
+ * Un fait de securite montre a l'equipe Convive (README section 3) : une limite de debit atteinte,
+ * une connexion verrouillee apres trop d'echecs, et la vie des acces (connexions reussies ou
+ * echouees, deconnexions, double authentification, mot de passe, sessions fermees). Ecriture seule,
+ * purgee au bout de 90 jours.
  *
  * @property int $id
  * @property string $type
@@ -27,6 +29,22 @@ class SecurityEvent extends Model
     public const RateLimited = 'rate_limited';
 
     public const LoginLockout = 'login_lockout';
+
+    public const LoginSucceeded = 'login_succeeded';
+
+    public const LoginFailed = 'login_failed';
+
+    public const Logout = 'logout';
+
+    public const TwoFactorEnabled = 'two_factor_enabled';
+
+    public const TwoFactorDisabled = 'two_factor_disabled';
+
+    public const TwoFactorFailed = 'two_factor_failed';
+
+    public const PasswordChanged = 'password_changed';
+
+    public const SessionsEnded = 'sessions_ended';
 
     public const RetentionDays = 90;
 

@@ -439,9 +439,9 @@ return [
         'chains_ok' => '{1} 1 journal vérifié, intact. Dernière vérification complète : :date.|[2,*] :count journaux vérifiés, tous intacts. Dernière vérification complète : :date.',
         'central_log' => 'Journal central de Convive',
         'chain_broken' => ': chaîne rompue à l’entrée n° :entry, constatée le :date. Une entrée a été modifiée ou supprimée : à examiner sans attendre.',
-        'events' => 'Blocages',
+        'events' => 'Accès et blocages',
         'events_day' => 'Sur les dernières 24 heures : :limited limites de débit atteintes, :lockouts connexions verrouillées. Une même adresse qui insiste n’est comptée qu’une fois par minute.',
-        'events_empty' => 'Aucun blocage enregistré.',
+        'events_empty' => 'Aucun fait enregistré.',
         'columns' => [
             'date' => 'Date',
             'type' => 'Type',
@@ -451,6 +451,14 @@ return [
         'types' => [
             'rate_limited' => 'Limite de débit',
             'login_lockout' => 'Connexion verrouillée',
+            'login_succeeded' => 'Connexion réussie',
+            'login_failed' => 'Connexion échouée',
+            'logout' => 'Déconnexion',
+            'two_factor_enabled' => 'Double authentification activée',
+            'two_factor_disabled' => 'Double authentification désactivée',
+            'two_factor_failed' => 'Code de double authentification refusé',
+            'password_changed' => 'Mot de passe changé',
+            'sessions_ended' => 'Autres sessions fermées',
         ],
     ],
 

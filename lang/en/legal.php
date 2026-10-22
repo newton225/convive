@@ -96,6 +96,7 @@ return [
                         'Deleted organisation: invisible immediately, then erased for good 30 days later.',
                         'Deleted event: erased for good 30 days later.',
                         'Action log: 24 months.',
+                        'Security log (sign-ins, sign-outs, blocks): 90 days.',
                         'Login session: 12 hours at most, after which you must sign in again.',
                         'Backup copies: one year at most.',
                         'Invoices and accounting records: for the period required by accounting regulations.',

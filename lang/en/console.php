@@ -439,9 +439,9 @@ return [
         'chains_ok' => '{1} 1 log verified, intact. Last full verification: :date.|[2,*] :count logs verified, all intact. Last full verification: :date.',
         'central_log' => 'Central log of Convive',
         'chain_broken' => ': chain broken at entry no. :entry, found on :date. An entry was changed or removed: to be examined without delay.',
-        'events' => 'Blocks',
+        'events' => 'Access and blocks',
         'events_day' => 'Over the last 24 hours: :limited rate limits reached, :lockouts locked sign-ins. An address that keeps trying is only counted once a minute.',
-        'events_empty' => 'No block recorded.',
+        'events_empty' => 'Nothing recorded.',
         'columns' => [
             'date' => 'Date',
             'type' => 'Type',
@@ -451,6 +451,14 @@ return [
         'types' => [
             'rate_limited' => 'Rate limit',
             'login_lockout' => 'Locked sign-in',
+            'login_succeeded' => 'Signed in',
+            'login_failed' => 'Failed sign-in',
+            'logout' => 'Signed out',
+            'two_factor_enabled' => 'Two-factor authentication enabled',
+            'two_factor_disabled' => 'Two-factor authentication disabled',
+            'two_factor_failed' => 'Two-factor code refused',
+            'password_changed' => 'Password changed',
+            'sessions_ended' => 'Other sessions closed',
         ],
     ],
 

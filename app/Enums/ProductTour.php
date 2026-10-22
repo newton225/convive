@@ -12,4 +12,6 @@ enum ProductTour: string
     case FirstEvent = 'first_event';
     case Proofs = 'proofs';
     case EntryControl = 'entry_control';
+    case Seating = 'seating';
+    case Treasury = 'treasury';
 }

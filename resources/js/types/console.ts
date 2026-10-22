@@ -247,7 +247,17 @@ export type ConsoleAuditChains = {
 export type ConsoleSecurityEvent = {
     id: number;
     at: string;
-    type: 'rate_limited' | 'login_lockout';
+    type:
+        | 'rate_limited'
+        | 'login_lockout'
+        | 'login_succeeded'
+        | 'login_failed'
+        | 'logout'
+        | 'two_factor_enabled'
+        | 'two_factor_disabled'
+        | 'two_factor_failed'
+        | 'password_changed'
+        | 'sessions_ended';
     subject: string | null;
     ip: string | null;
 };
