@@ -200,6 +200,7 @@ return [
         'pass_alt' => 'Billet de :name',
         'share_pass_whatsapp' => 'Envoyer le billet de :name par WhatsApp',
         'copy_pass_link' => 'Copier le lien du billet de :name',
+        'download_pass' => 'Télécharger le billet de :name en PDF',
         'copy_link' => 'Copier le lien',
         'share_message' => 'Votre billet pour :event : :url',
         'share_all_whatsapp' => 'Envoyer tous les billets par WhatsApp',

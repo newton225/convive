@@ -75,6 +75,8 @@ export type CompanionTicketPass = {
     unit: string;
     qrImage: string;
     shareUrl: string | null;
+    // Ce billet seul en PDF, par son lien individuel ; null sans sous-domaine ni lien public.
+    pdfUrl: string | null;
     card: TicketCardData;
 };
 

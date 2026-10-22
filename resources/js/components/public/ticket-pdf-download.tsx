@@ -7,6 +7,10 @@ type Props = {
     url: string;
     // Plusieurs billets (tout le groupe) ou un seul : le libelle le dit.
     all?: boolean;
+    // Libelle du bouton quand le generique ne suffit pas (une carte parmi plusieurs, qui nomme sa personne).
+    label?: string;
+    // Sans le conseil sous le bouton : repete sous chaque carte, il noierait la page.
+    compact?: boolean;
     // Apercu de l'organisation : le conseil « a garder sur votre telephone » ne lui est pas adresse.
     preview?: boolean;
 };
@@ -21,6 +25,8 @@ type Props = {
 export function TicketPdfDownload({
     url,
     all = false,
+    label,
+    compact = false,
     preview = false,
 }: Props) {
     const { t } = useTranslation();
@@ -36,15 +42,16 @@ export function TicketPdfDownload({
                 onClick={() => void download(url)}
             >
                 {downloading ? null : <Download />}
-                {t(
-                    downloading
-                        ? 'guest.ticket_pdf.preparing'
-                        : all
-                          ? 'guest.ticket_pdf.download_all'
-                          : 'guest.ticket_pdf.download',
-                )}
+                {downloading
+                    ? t('guest.ticket_pdf.preparing')
+                    : (label ??
+                      t(
+                          all
+                              ? 'guest.ticket_pdf.download_all'
+                              : 'guest.ticket_pdf.download',
+                      ))}
             </SubmitButton>
-            {preview ? null : (
+            {preview || compact ? null : (
                 <p className="text-muted-foreground text-xs">
                     {t('guest.ticket_pdf.download_hint')}
                 </p>

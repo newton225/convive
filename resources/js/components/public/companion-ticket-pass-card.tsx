@@ -1,5 +1,6 @@
 import { MessageCircle } from 'lucide-react';
 import { CopyButton } from '@/components/copy-button';
+import { TicketPdfDownload } from '@/components/public/ticket-pdf-download';
 import { BrandedTicket } from '@/components/ticket-template/branded-ticket';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/use-translation';
@@ -72,6 +73,15 @@ export function CompanionTicketPassCard({
                         })}
                         className="h-auto min-h-11 w-full py-2 whitespace-normal"
                     />
+                    {pass.pdfUrl ? (
+                        <TicketPdfDownload
+                            url={pass.pdfUrl}
+                            compact
+                            label={t('guest.ticket.download_pass', {
+                                name: pass.name,
+                            })}
+                        />
+                    ) : null}
                 </div>
             ) : (
                 <p className="text-muted-foreground text-xs">

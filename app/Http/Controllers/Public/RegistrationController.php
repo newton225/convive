@@ -673,6 +673,7 @@ class RegistrationController extends Controller
                     'unit' => $pass->holderUnitName(),
                     'qrImage' => TicketQrCode::dataUri($pass->signedToken()),
                     'shareUrl' => $pass->shareUrl(),
+                    'pdfUrl' => $pass->pdfUrl(),
                     'card' => TicketCard::for($pass, $branding),
                 ])
                 ->values()

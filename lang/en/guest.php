@@ -199,6 +199,7 @@ return [
         'passes_description' => 'Everyone enters with their own ticket. Send one to a companion who will arrive without you.',
         'pass_alt' => 'Ticket for :name',
         'share_pass_whatsapp' => 'Send the ticket of :name by WhatsApp',
+        'download_pass' => 'Download the ticket of :name as a PDF',
         'copy_pass_link' => 'Copy the link to the ticket of :name',
         'copy_link' => 'Copy link',
         'share_message' => 'Your ticket for :event: :url',
