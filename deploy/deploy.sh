@@ -74,7 +74,12 @@ git checkout main
 git pull --ff-only origin main
 
 step "Construction des images (app et web seulement)"
-docker compose build app web 2>&1 | tail -6
+# `--pull` : sans lui, Docker garde l'image PHP deja presente sur le serveur et ne recoit jamais les
+# correctifs de securite de PHP (php2shell, CVE-2026-109618 et CVE-2026-109619, corriges en 8.3.36).
+docker compose build --pull app web 2>&1 | tail -6
+
+step "Version de PHP embarquee"
+docker compose run --rm --no-deps app php -v | head -1
 
 step "Numéro de version"
 # Lit la seule ligne APP_VERSION : le reste du fichier (secrets) n'est jamais affiché.
