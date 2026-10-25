@@ -19,6 +19,8 @@ use App\Models\RegistrationEvent;
 use App\Models\Tenant;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\RegistrationChain;
+use App\Support\RegistrationJournal;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -137,6 +139,39 @@ class RegistrationHistoryTest extends TestCase
 
             $this->assertNull($old->fresh()->ip_address);
             $this->assertSame('203.0.113.8', $recent->fresh()->ip_address);
+        });
+    }
+
+    public function test_la_chaine_d_un_dossier_est_intacte_puis_se_rompt_si_une_ligne_est_modifiee_ou_retiree(): void
+    {
+        $this->tenant->asCurrent(function () {
+            $registration = Registration::factory()->held()->create(['event_id' => $this->event->id]);
+            $other = Registration::factory()->held()->create(['event_id' => $this->event->id]);
+
+            foreach ([RegistrationEventType::Held, RegistrationEventType::ProofSubmitted, RegistrationEventType::TicketsIssued] as $type) {
+                RegistrationJournal::guest($type, $registration);
+            }
+            RegistrationJournal::guest(RegistrationEventType::Held, $other);
+
+            $facts = RegistrationEvent::where('registration_id', $registration->id)->orderBy('id')->get();
+
+            $this->assertCount(3, $facts);
+            $this->assertNull($facts[0]->previous_hash);
+            $this->assertSame($facts[0]->hash, $facts[1]->previous_hash);
+            $this->assertNull(RegistrationChain::firstBrokenEvent());
+
+            // L'effacement prevu de l'adresse IP ne casse pas la chaine.
+            RegistrationEvent::query()->update(['ip_address' => null]);
+            $this->assertNull(RegistrationChain::firstBrokenEvent());
+
+            RegistrationEvent::whereKey($facts[1]->id)->update(['type' => RegistrationEventType::HoldExpired->value]);
+            $this->assertSame($facts[1]->id, RegistrationChain::firstBrokenEvent());
+
+            RegistrationEvent::whereKey($facts[1]->id)->update(['type' => RegistrationEventType::ProofSubmitted->value]);
+            $this->assertNull(RegistrationChain::firstBrokenEvent());
+
+            RegistrationEvent::whereKey($facts[1]->id)->delete();
+            $this->assertSame($facts[2]->id, RegistrationChain::firstBrokenEvent());
         });
     }
 

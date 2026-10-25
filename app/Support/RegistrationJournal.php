@@ -5,7 +5,6 @@ namespace App\Support;
 use App\Enums\RegistrationEventActor;
 use App\Enums\RegistrationEventType;
 use App\Models\Registration;
-use App\Models\RegistrationEvent;
 use App\Models\WaitlistEntry;
 
 /**
@@ -28,7 +27,7 @@ class RegistrationJournal
         array $properties = [],
         bool $withIp = true,
     ): void {
-        rescue(fn () => RegistrationEvent::create([
+        rescue(fn () => RegistrationChain::append([
             'event_id' => $subject->event_id,
             'registration_id' => $subject instanceof Registration ? $subject->id : null,
             'waitlist_entry_id' => $subject instanceof WaitlistEntry ? $subject->id : null,

@@ -21,10 +21,12 @@ use Illuminate\Support\Carbon;
  * @property RegistrationEventActor $actor
  * @property string|null $ip_address
  * @property array<string, mixed>|null $properties
+ * @property string|null $previous_hash
+ * @property string|null $hash
  * @property Carbon|null $created_at
  * @property-read Registration|null $registration
  */
-#[Fillable(['event_id', 'registration_id', 'waitlist_entry_id', 'type', 'actor', 'ip_address', 'properties'])]
+#[Fillable(['event_id', 'registration_id', 'waitlist_entry_id', 'type', 'actor', 'ip_address', 'properties', 'previous_hash', 'hash'])]
 class RegistrationEvent extends Model
 {
     public const UPDATED_AT = null;
