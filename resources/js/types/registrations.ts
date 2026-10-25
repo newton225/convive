@@ -230,3 +230,15 @@ export type PublicPaymentAccount = {
     holderName: string | null;
     instructions: string | null;
 };
+
+// Un fait de l'historique d'un dossier : fait de l'invite ou du systeme, ou geste de l'equipe.
+export type RegistrationHistoryEntry = {
+    key: string;
+    kind: 'guest' | 'system' | 'team';
+    label: string;
+    detail: string | null;
+    actor: string;
+    // Null sans la permission de lire le journal d'audit, ou quand l'adresse a ete effacee (12 mois).
+    ip: string | null;
+    at: string | null;
+};

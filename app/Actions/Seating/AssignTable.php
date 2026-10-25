@@ -2,11 +2,13 @@
 
 namespace App\Actions\Seating;
 
+use App\Enums\RegistrationEventType;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\RegistrationTableAssignment;
 use App\Models\SeatingTable;
 use App\Models\UnitSeparationRule;
+use App\Support\RegistrationJournal;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -60,11 +62,17 @@ class AssignTable
                 return null;
             }
 
-            return DB::transaction(fn () => RegistrationTableAssignment::create([
+            $assignment = DB::transaction(fn () => RegistrationTableAssignment::create([
                 'registration_id' => $registration->id,
                 'seating_table_id' => $table->id,
                 'assigned_manually' => false,
             ]));
+
+            RegistrationJournal::system(RegistrationEventType::TableAssigned, $registration, [
+                'table_number' => $table->number,
+            ]);
+
+            return $assignment;
         });
     }
 

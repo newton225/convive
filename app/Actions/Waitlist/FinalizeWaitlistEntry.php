@@ -4,9 +4,11 @@ namespace App\Actions\Waitlist;
 
 use App\Actions\Registrations\CreateRegistration;
 use App\Actions\Registrations\HoldRegistration;
+use App\Enums\RegistrationEventType;
 use App\Enums\WaitlistStatus;
 use App\Models\Registration;
 use App\Models\WaitlistEntry;
+use App\Support\RegistrationJournal;
 
 /**
  * Transforme une entree de liste d'attente invitee en une vraie inscription reservee
@@ -43,6 +45,10 @@ class FinalizeWaitlistEntry
         }
 
         $entry->update(['status' => WaitlistStatus::Converted]);
+
+        RegistrationJournal::guest(RegistrationEventType::WaitlistConverted, $registration, [
+            'waitlist_entry_id' => $entry->id,
+        ]);
 
         return $created;
     }

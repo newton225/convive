@@ -5,9 +5,11 @@ namespace App\Actions\Claims;
 use App\Actions\Notifications\SendAlert;
 use App\Enums\ClaimCategory;
 use App\Enums\NotificationType;
+use App\Enums\RegistrationEventType;
 use App\Models\GuestClaim;
 use App\Models\Registration;
 use App\Models\Tenant;
+use App\Support\RegistrationJournal;
 
 /**
  * Enregistre la reclamation d'un invite sur son dossier et previent l'organisation (decision du
@@ -29,6 +31,11 @@ class SubmitGuestClaim
         $claim = $registration->claims()->create([
             'category' => $category,
             'message' => trim($message),
+        ]);
+
+        RegistrationJournal::guest(RegistrationEventType::ClaimSubmitted, $registration, [
+            'claim_id' => $claim->id,
+            'category' => $category->value,
         ]);
 
         // Le texte vient d'un inconnu : il n'entre pas dans l'alerte, seulement son auteur.

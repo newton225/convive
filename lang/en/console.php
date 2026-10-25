@@ -547,6 +547,7 @@ return [
         'tasks' => 'Scheduled tasks',
         'tasks_empty' => 'No task recorded: the scheduler has never run on this server yet.',
         'task_labels' => [
+            'erase_the_ip_addresses_of_registration_history_entries_older_than_12_months' => 'Erasing the IP addresses of registration history after 12 months',
             'delete_expired_tenant_invitations' => 'Removal of expired invitations',
             'delete_webhook_calls_older_than_thirty_days' => 'Removal of received notifications (Stripe, WhatsApp) older than thirty days',
             'activate_due_payment_account_changes' => 'Activation of payout account changes',

@@ -2,11 +2,13 @@
 
 namespace App\Actions\Registrations;
 
+use App\Enums\RegistrationEventType;
 use App\Enums\RegistrationStatus;
 use App\Models\Registration;
 use App\Models\WhatsAppPhoneCheck;
 use App\Notifications\Registrations\PhoneVerifiedByWhatsApp;
 use App\Support\PhoneNumber;
+use App\Support\RegistrationJournal;
 use Illuminate\Support\Facades\Notification;
 
 /**
@@ -39,6 +41,9 @@ class ConfirmPhoneByWhatsApp
                 }
 
                 $registration->update(['phone_verified_at' => now(), 'phone_code_expires_at' => null]);
+
+                // L'appel vient de Meta, pas de l'invite : pas d'adresse IP a relever.
+                RegistrationJournal::guest(RegistrationEventType::PhoneVerified, $registration, ['method' => 'whatsapp'], withIp: false);
 
                 return true;
             });

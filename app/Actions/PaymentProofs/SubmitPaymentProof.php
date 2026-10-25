@@ -5,11 +5,13 @@ namespace App\Actions\PaymentProofs;
 use App\Actions\Notifications\SendAlert;
 use App\Enums\EventStatus;
 use App\Enums\NotificationType;
+use App\Enums\RegistrationEventType;
 use App\Enums\RegistrationStatus;
 use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Support\PerceptualHash;
+use App\Support\RegistrationJournal;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -86,6 +88,11 @@ class SubmitPaymentProof
                 unlink($reencodedPath);
             }
         }
+
+        RegistrationJournal::guest(RegistrationEventType::ProofSubmitted, $registration, [
+            'proof_id' => $proof->id,
+            'channel' => $data['channel'],
+        ]);
 
         // Apres la transaction et apres le retour anticipe de l'idempotence : un rejeu reseau
         // de la meme preuve ne previent pas deux fois l'equipe.

@@ -13,6 +13,53 @@ return [
         'due_hint' => 'Every file shown, paid or not',
     ],
 
+    'history' => [
+        'open' => 'History',
+        'title' => 'Registration history',
+        'description' => 'What happened on this registration, in order, with who did each thing.',
+        'back' => 'Back to registrations',
+        'empty' => 'Nothing recorded for this registration.',
+        'columns' => [
+            'date' => 'Date',
+            'what' => 'What happened',
+            'actor' => 'By',
+            'ip' => 'IP address',
+        ],
+        'kinds' => [
+            'guest' => 'Guest',
+            'system' => 'System',
+            'team' => 'Team',
+        ],
+        'actors' => [
+            'guest' => 'The guest',
+            'system' => 'The system',
+        ],
+        'retention' => 'Entries follow the registration. The IP address is erased after 12 months. Team actions come from the organisation\'s action history.',
+        'types' => [
+            'phone_verified' => 'Phone verified',
+            'held' => 'Seat reserved',
+            'proof_submitted' => 'Payment proof submitted',
+            'hold_expired' => 'Countdown expired',
+            'waitlist_joined' => 'Joined the waitlist',
+            'waitlist_invited' => 'Seat offered from the waitlist',
+            'waitlist_converted' => 'Waitlist turned into a reservation',
+            'table_assigned' => 'Table assigned automatically',
+            'tickets_issued' => 'Tickets issued',
+            'claim_submitted' => 'Claim submitted',
+        ],
+        'details' => [
+            'held' => ':count person(s), :kind',
+            'held_new' => 'new reservation',
+            'held_renewed' => 'after an expiry',
+            'held_free' => 'free event, confirmed at once',
+            'waitlist' => 'waitlist',
+            'table' => 'Table :number',
+            'tickets' => ':count ticket(s)',
+            'phone_sms' => 'By SMS code',
+            'phone_whatsapp' => 'By WhatsApp message',
+        ],
+    ],
+
     'details' => [
         'column' => 'Details',
         'single_expand' => 'Only one row open at a time',

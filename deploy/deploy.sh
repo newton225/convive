@@ -78,8 +78,12 @@ step "Construction des images (app et web seulement)"
 # correctifs de securite de PHP (php2shell, CVE-2026-109618 et CVE-2026-109619, corriges en 8.3.36).
 docker compose build --pull app web 2>&1 | tail -6
 
-step "Version de PHP embarquee"
-docker compose run --rm --no-deps app php -v | head -1
+step "Versions embarquees (PHP, Laravel, base de donnees)"
+# Le point d'entree de l'image joue d'abord `artisan config:cache` et ses lignes passent avant celles
+# des versions : `head -1` lisait une ligne vide. On filtre donc les lignes utiles. `db:show` ouvre la
+# base centrale (la premiere ligne donne le moteur et sa version) ; sans acces, le reste s'affiche quand meme.
+docker compose run --rm --no-deps -T app sh -c 'php -v; php artisan --version --no-ansi; php artisan db:show --no-ansi' 2>&1 \
+    | grep -E '^PHP |^Laravel Framework|PostgreSQL|MySQL|MariaDB|SQLite|SQLSTATE' | head -6 || true
 
 step "Numéro de version"
 # Lit la seule ligne APP_VERSION : le reste du fichier (secrets) n'est jamais affiché.

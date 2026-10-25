@@ -2,9 +2,11 @@
 
 namespace App\Actions\Waitlist;
 
+use App\Enums\RegistrationEventType;
 use App\Enums\WaitlistStatus;
 use App\Models\Event;
 use App\Models\WaitlistEntry;
+use App\Support\RegistrationJournal;
 
 /**
  * Des qu'une place se libere (purge, expiration, annulation), invite le premier de la liste
@@ -36,6 +38,10 @@ class PromoteNextWaitlistEntry
             'status' => WaitlistStatus::Invited,
             'invited_at' => now(),
             'expires_at' => now()->addHours(WaitlistEntry::InviteDurationHours),
+        ]);
+
+        RegistrationJournal::system(RegistrationEventType::WaitlistInvited, $next, [
+            'expires_at' => $next->expires_at?->toISOString(),
         ]);
 
         return $next;

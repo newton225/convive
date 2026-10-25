@@ -2,8 +2,10 @@
 
 namespace App\Actions\Tickets;
 
+use App\Enums\RegistrationEventType;
 use App\Models\Registration;
 use App\Models\Ticket;
+use App\Support\RegistrationJournal;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -31,10 +33,14 @@ class IssueTicket
             $keyPair = $registration->event->ensureSigningKeyPair();
             $existing = Ticket::where('registration_id', $registration->id)->pluck('holder_position')->all();
 
-            $issue = function (int $position, ?string $name, ?int $unitId) use ($registration, $keyPair, $existing): void {
+            $issued = 0;
+
+            $issue = function (int $position, ?string $name, ?int $unitId) use ($registration, $keyPair, $existing, &$issued): void {
                 if (in_array($position, $existing, true)) {
                     return;
                 }
+
+                $issued++;
 
                 Ticket::create([
                     'registration_id' => $registration->id,
@@ -51,6 +57,10 @@ class IssueTicket
 
             foreach ($registration->companions()->orderBy('position')->get() as $index => $companion) {
                 $issue($index + 1, $companion->name, $companion->unit_id);
+            }
+
+            if ($issued > 0) {
+                RegistrationJournal::system(RegistrationEventType::TicketsIssued, $registration, ['count' => $issued]);
             }
 
             return Ticket::where('registration_id', $registration->id)

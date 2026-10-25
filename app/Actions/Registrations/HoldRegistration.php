@@ -4,6 +4,7 @@ namespace App\Actions\Registrations;
 
 use App\Actions\Notifications\SendAlert;
 use App\Enums\NotificationType;
+use App\Enums\RegistrationEventType;
 use App\Enums\RegistrationStatus;
 use App\Exceptions\ReservationBusy;
 use App\Models\Event;
@@ -11,6 +12,7 @@ use App\Models\EventPriceCategory;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Support\PlanLimits;
+use App\Support\RegistrationJournal;
 use Illuminate\Contracts\Cache\Lock;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\DeadlockException;
@@ -105,6 +107,12 @@ class HoldRegistration
 
                 // Hors du `try` : une erreur d'envoi de l'alerte ne doit jamais etre prise pour
                 // une collision de sequence et relancer une reservation deja reussie.
+                RegistrationJournal::guest(RegistrationEventType::Held, $registration, [
+                    'party_size' => $registration->party_size,
+                    'free' => $registration->isFreeOfCharge(),
+                    'renewed' => $lapsedBefore,
+                ]);
+
                 $this->alertIfSeatsExhausted($event);
                 $this->alertIfSeatsLow($event);
 

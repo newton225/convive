@@ -5,10 +5,12 @@ namespace App\Actions\Registrations;
 use App\Actions\Notifications\SendAlert;
 use App\Actions\Waitlist\PromoteNextWaitlistEntry;
 use App\Enums\NotificationType;
+use App\Enums\RegistrationEventType;
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\Tenant;
+use App\Support\RegistrationJournal;
 
 /**
  * Marque `Expired` toute reservation dont le decompte est ecoule (README 2.1 et 2.2) : la
@@ -29,15 +31,22 @@ class ExpireHolds
      */
     public function handle(Event $event): int
     {
-        $expired = Registration::query()
+        $lapsed = Registration::query()
             ->where('event_id', $event->id)
             ->where('status', RegistrationStatus::Held)
             ->where('held_until', '<=', now())
+            ->get();
+
+        $expired = Registration::query()
+            ->whereIn('id', $lapsed->modelKeys())
+            ->where('status', RegistrationStatus::Held)
             ->update(['status' => RegistrationStatus::Expired]);
 
         if ($expired === 0) {
             return 0;
         }
+
+        $lapsed->each(fn (Registration $registration) => RegistrationJournal::system(RegistrationEventType::HoldExpired, $registration));
 
         app(SendAlert::class)->toTenantMembers(
             NotificationType::HoldsExpired,

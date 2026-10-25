@@ -99,6 +99,7 @@ return [
                         'Événement supprimé : effacé définitivement 30 jours plus tard.',
                         'Journal des actions : 24 mois.',
                         'Journal de sécurité (connexions, déconnexions, blocages) : 90 jours.',
+                        'Historique des dossiers (réservation, preuve déposée, expiration, liste d’attente, billets) : gardé avec le dossier, l’adresse IP de l’invité n’étant gardée que 12 mois.',
                         'Session de connexion : 12 heures au plus, puis il faut se reconnecter.',
                         'Copies de sauvegarde : un an au plus.',
                         'Factures et pièces comptables : pendant la durée exigée par la réglementation comptable.',

@@ -7,6 +7,7 @@ use App\Actions\Events\PurgeDeletedEvents;
 use App\Actions\Notifications\NotifyEventMilestones;
 use App\Actions\Notifications\NotifyUpcomingPurge;
 use App\Actions\Registrations\ExpireHolds;
+use App\Actions\Registrations\PruneRegistrationEventIps;
 use App\Actions\Registrations\PurgeRegistrations;
 use App\Actions\Tenants\ManageSupportAccess;
 use App\Actions\Tenants\SavePaymentAccount;
@@ -272,6 +273,14 @@ Schedule::call(fn (PurgeAuditLog $purge) => $purge->handle())
 Schedule::call(function (PurgeAuditLog $purge) {
     Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(fn () => $purge->handle()));
 })->daily()->description('Purge each tenant\'s audit log entries older than 24 months');
+
+/*
+ * Historique des dossiers : l'adresse IP des faits de l'invite ne se garde que douze mois, le fait reste
+ * avec son dossier.
+ */
+Schedule::call(function (PruneRegistrationEventIps $prune) {
+    Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(fn () => $prune->handle()));
+})->daily()->description('Erase the IP addresses of registration history entries older than 12 months');
 
 /*
  * Verification quotidienne de la chaine d'empreintes du journal (SECURITY.md M6). Une rupture est

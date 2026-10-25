@@ -547,6 +547,7 @@ return [
         'tasks' => 'Tâches planifiées',
         'tasks_empty' => 'Aucune tâche relevée : le planificateur n’a encore jamais tourné sur ce serveur.',
         'task_labels' => [
+            'erase_the_ip_addresses_of_registration_history_entries_older_than_12_months' => 'Effacement des adresses IP de l’historique des dossiers au bout de 12 mois',
             'delete_expired_tenant_invitations' => 'Suppression des invitations expirées',
             'delete_webhook_calls_older_than_thirty_days' => 'Suppression des notifications reçues (Stripe, WhatsApp) de plus de trente jours',
             'activate_due_payment_account_changes' => 'Activation des changements de compte de versement',

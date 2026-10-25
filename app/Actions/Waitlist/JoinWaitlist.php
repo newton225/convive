@@ -4,10 +4,12 @@ namespace App\Actions\Waitlist;
 
 use App\Actions\Notifications\SendAlert;
 use App\Enums\NotificationType;
+use App\Enums\RegistrationEventType;
 use App\Enums\WaitlistStatus;
 use App\Models\Event;
 use App\Models\Tenant;
 use App\Models\WaitlistEntry;
+use App\Support\RegistrationJournal;
 
 /**
  * Inscrit un invite en liste d'attente (README 2.3), quand l'evenement est complet.
@@ -33,6 +35,8 @@ class JoinWaitlist
             'companions' => $data['companions'],
             'resume_token_hash' => WaitlistEntry::hashResumeToken($resumeToken),
         ]);
+
+        RegistrationJournal::guest(RegistrationEventType::WaitlistJoined, $entry, ['party_size' => $entry->party_size]);
 
         app(SendAlert::class)->toTenantMembersGrouped(
             NotificationType::WaitlistJoined,

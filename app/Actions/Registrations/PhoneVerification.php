@@ -3,11 +3,13 @@
 namespace App\Actions\Registrations;
 
 use App\Enums\PhoneCodeResult;
+use App\Enums\RegistrationEventType;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\WhatsAppPhoneCheck;
 use App\Notifications\Registrations\PhoneVerificationCode;
 use App\Support\PhoneNumber;
+use App\Support\RegistrationJournal;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
@@ -215,6 +217,8 @@ class PhoneVerification
             'phone_code_expires_at' => null,
             'phone_verified_at' => now(),
         ]);
+
+        RegistrationJournal::guest(RegistrationEventType::PhoneVerified, $registration, ['method' => 'sms']);
 
         return PhoneCodeResult::Verified;
     }

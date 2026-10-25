@@ -13,6 +13,53 @@ return [
         'due_hint' => 'Tous les dossiers affichés, payés ou non',
     ],
 
+    'history' => [
+        'open' => 'Historique',
+        'title' => 'Historique du dossier',
+        'description' => 'Ce qui s’est passé sur ce dossier, dans l’ordre, avec l’auteur de chaque fait.',
+        'back' => 'Retour aux inscrits',
+        'empty' => 'Aucun fait enregistré pour ce dossier.',
+        'columns' => [
+            'date' => 'Date',
+            'what' => 'Ce qui s’est passé',
+            'actor' => 'Auteur',
+            'ip' => 'Adresse IP',
+        ],
+        'kinds' => [
+            'guest' => 'Invité',
+            'system' => 'Système',
+            'team' => 'Équipe',
+        ],
+        'actors' => [
+            'guest' => 'L’invité',
+            'system' => 'Le système',
+        ],
+        'retention' => 'Les faits suivent le dossier. L’adresse IP est effacée au bout de 12 mois. Les gestes de l’équipe viennent de l’historique des actions de l’organisation.',
+        'types' => [
+            'phone_verified' => 'Téléphone vérifié',
+            'held' => 'Place réservée',
+            'proof_submitted' => 'Preuve de paiement déposée',
+            'hold_expired' => 'Décompte expiré',
+            'waitlist_joined' => 'Entrée en liste d’attente',
+            'waitlist_invited' => 'Place proposée depuis la liste d’attente',
+            'waitlist_converted' => 'Liste d’attente convertie en réservation',
+            'table_assigned' => 'Table attribuée automatiquement',
+            'tickets_issued' => 'Billets émis',
+            'claim_submitted' => 'Réclamation déposée',
+        ],
+        'details' => [
+            'held' => ':count personne(s), :kind',
+            'held_new' => 'nouvelle réservation',
+            'held_renewed' => 'après une expiration',
+            'held_free' => 'événement gratuit, confirmée aussitôt',
+            'waitlist' => 'liste d’attente',
+            'table' => 'Table :number',
+            'tickets' => ':count billet(s)',
+            'phone_sms' => 'Par code SMS',
+            'phone_whatsapp' => 'Par message WhatsApp',
+        ],
+    ],
+
     'details' => [
         'column' => 'Détail',
         'single_expand' => 'Une seule ligne ouverte à la fois',

@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import type { ColumnDef, RowSelectionState } from '@tanstack/react-table';
 import { Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -43,6 +43,7 @@ import { registrationReceiptFacts } from '@/lib/receipt-facts';
 import { sortingFromParam, sortingToParam } from '@/lib/server-sorting';
 import { index as eventsIndex } from '@/routes/tenants/events';
 import {
+    history,
     index,
     purge,
     resumeLink,
@@ -362,6 +363,22 @@ export default function EventRegistrations({
                                 {t('registrations.resume_link.action')}
                             </Button>
                         ) : null}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            data-test="registration-history"
+                        >
+                            <Link
+                                href={history([
+                                    tenant.slug,
+                                    event.id,
+                                    row.original.id,
+                                ])}
+                            >
+                                {t('registrations.history.open')}
+                            </Link>
+                        </Button>
                         {canCancel && row.original.status !== 'cancelled' ? (
                             <Button
                                 variant="secondary"
