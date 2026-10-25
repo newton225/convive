@@ -29,8 +29,6 @@ use App\Models\WaitlistEntry;
 use App\Support\Console\MessageJournal;
 use App\Support\Console\SecurityJournal;
 use App\Support\Console\TenantUsageRecorder;
-use App\Support\RegistrationChain;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
 use Spatie\Health\Commands\DispatchQueueCheckJobsCommand;
 use Spatie\Health\Commands\RunHealthChecksCommand;
@@ -284,12 +282,7 @@ Schedule::call(function (PruneRegistrationEventIps $prune) {
     Tenant::query()->each(fn (Tenant $tenant) => $tenant->asCurrent(function () use ($prune, $tenant) {
         $prune->handle();
 
-        // Une rupture de l'historique d'un dossier est signalee au niveau critique, comme celle du journal d'audit.
-        $broken = RegistrationChain::firstBrokenEvent();
-
-        if ($broken !== null) {
-            Log::critical('Registration history chain broken', ['tenant_id' => $tenant->id, 'entry_id' => $broken]);
-        }
+        SecurityJournal::checkRegistrationChain($tenant);
     }));
 })->daily()->description('Erase the IP addresses of registration history entries older than 12 months');
 

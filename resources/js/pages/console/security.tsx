@@ -209,6 +209,11 @@ export default function ConsoleSecurity({
                                                     t(
                                                         'console.security.central_log',
                                                     )}
+                                                {chain.scope.startsWith(
+                                                    'registrations:',
+                                                )
+                                                    ? ` (${t('console.security.registrations_chain')})`
+                                                    : ''}
                                             </span>{' '}
                                             {t(
                                                 'console.security.chain_broken',

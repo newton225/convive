@@ -19,6 +19,7 @@ use App\Models\RegistrationEvent;
 use App\Models\Tenant;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\Console\SecurityJournal;
 use App\Support\RegistrationChain;
 use App\Support\RegistrationJournal;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -172,6 +173,24 @@ class RegistrationHistoryTest extends TestCase
 
             RegistrationEvent::whereKey($facts[1]->id)->delete();
             $this->assertSame($facts[2]->id, RegistrationChain::firstBrokenEvent());
+        });
+    }
+
+    public function test_la_verification_nocturne_signale_une_rupture_a_la_console(): void
+    {
+        $this->tenant->asCurrent(function () {
+            $registration = Registration::factory()->held()->create(['event_id' => $this->event->id]);
+            RegistrationJournal::guest(RegistrationEventType::Held, $registration);
+            RegistrationJournal::guest(RegistrationEventType::ProofSubmitted, $registration);
+
+            $this->assertNull(SecurityJournal::checkRegistrationChain($this->tenant)->broken_entry_id);
+
+            RegistrationEvent::where('type', RegistrationEventType::Held->value)->update(['type' => RegistrationEventType::HoldExpired->value]);
+
+            $check = SecurityJournal::checkRegistrationChain($this->tenant);
+
+            $this->assertTrue($check->isBroken());
+            $this->assertSame('registrations:'.$this->tenant->id, $check->scope);
         });
     }
 

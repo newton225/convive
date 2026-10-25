@@ -1,5 +1,6 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
+import { useRef } from 'react';
 import type { FormEvent } from 'react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import InputError from '@/components/input-error';
@@ -58,6 +59,7 @@ export default function RegistrationVerify({
     const { t } = useTranslation();
     const { errors } = usePage<{ errors: Record<string, string> }>().props;
     const form = useForm({ code: '' });
+    const formRef = useRef<HTMLFormElement>(null);
 
     const submit = (submitEvent: FormEvent) => {
         submitEvent.preventDefault();
@@ -102,6 +104,7 @@ export default function RegistrationVerify({
                     <Card>
                         <CardContent className="pt-6">
                             <form
+                                ref={formRef}
                                 onSubmit={submit}
                                 className="space-y-5"
                                 data-test="phone-verification-form"
@@ -128,6 +131,17 @@ export default function RegistrationVerify({
                                         }
                                         pattern={REGEXP_ONLY_DIGITS}
                                         inputMode="numeric"
+                                        pasteTransformer={(pasted) =>
+                                            pasted.replace(/\D/g, '')
+                                        }
+                                        onComplete={() =>
+                                            // Le dernier chiffre envoie le code, apres le rendu qui le porte ; le bouton reste pour le clavier.
+                                            setTimeout(
+                                                () =>
+                                                    formRef.current?.requestSubmit(),
+                                                0,
+                                            )
+                                        }
                                         autoComplete="one-time-code"
                                         autoFocus
                                     >

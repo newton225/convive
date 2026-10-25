@@ -4,6 +4,7 @@ namespace App\Http\Responses;
 
 use App\Http\Responses\Concerns\RedirectsToCurrentTenant;
 use Illuminate\Http\JsonResponse;
+use Inertia\Inertia;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,6 +20,9 @@ class RegisterResponse implements RegisterResponseContract
      */
     public function toResponse($request): Response
     {
+        // Comme a la connexion : le bouton « retour » ne ramene pas au formulaire d'inscription.
+        Inertia::clearHistory();
+
         if ($request->wantsJson()) {
             return new JsonResponse(['two_factor' => false], 201);
         }

@@ -7,6 +7,7 @@ use App\Models\SecurityEvent;
 use App\Models\Tenant;
 use App\Support\AuditChain;
 use App\Support\ListPage;
+use App\Support\RegistrationChain;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -63,6 +64,27 @@ class SecurityJournal
         return AuditChainCheck::updateOrCreate(['scope' => $scope], [
             'tenant_id' => $tenant?->id,
             'organisation' => $tenant?->name,
+            'checked_at' => now(),
+            'broken_entry_id' => $brokenId,
+        ]);
+    }
+
+    /**
+     * Verify the registration history chains of the current organisation and keep the result, next to
+     * the audit log one (même écran, même contrôle de santé).
+     */
+    public static function checkRegistrationChain(Tenant $tenant): AuditChainCheck
+    {
+        $brokenId = RegistrationChain::firstBrokenEvent();
+        $scope = "registrations:{$tenant->id}";
+
+        if ($brokenId !== null) {
+            Log::critical('Registration history chain broken', ['scope' => $scope, 'entry_id' => $brokenId]);
+        }
+
+        return AuditChainCheck::updateOrCreate(['scope' => $scope], [
+            'tenant_id' => $tenant->id,
+            'organisation' => $tenant->name,
             'checked_at' => now(),
             'broken_entry_id' => $brokenId,
         ]);
