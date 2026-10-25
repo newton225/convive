@@ -11,6 +11,11 @@ export type TurnstileOptions = {
     language?: string;
     // Le jeton est pose par le widget dans un champ cache `cf-turnstile-response` du formulaire.
     'response-field'?: boolean;
+    // Le theme de la page (le choix du membre, pas seulement celui du systeme), la largeur du formulaire, et
+    // un affichage seulement quand Cloudflare doute de la personne.
+    theme?: 'light' | 'dark' | 'auto';
+    size?: 'normal' | 'flexible' | 'compact';
+    appearance?: 'always' | 'execute' | 'interaction-only';
 };
 
 export type Turnstile = {

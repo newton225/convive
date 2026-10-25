@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import InputError from '@/components/input-error';
+import { useAppearance } from '@/hooks/use-appearance';
 import { useTranslation } from '@/hooks/use-translation';
 import { loadTurnstile } from '@/lib/turnstile';
 
@@ -16,6 +17,7 @@ type Props = {
  */
 export function BotCheck({ siteKey, resetKey, error }: Props) {
     const { locale } = useTranslation();
+    const { resolvedAppearance } = useAppearance();
     const container = useRef<HTMLDivElement>(null);
     const widgetId = useRef<string | null>(null);
 
@@ -32,6 +34,9 @@ export function BotCheck({ siteKey, resetKey, error }: Props) {
                     sitekey: siteKey,
                     language: locale,
                     'response-field': true,
+                    theme: resolvedAppearance,
+                    size: 'flexible',
+                    appearance: 'interaction-only',
                 });
             })
             // Script bloque ou injoignable : le serveur refusera l'envoi avec un message clair.
@@ -45,7 +50,7 @@ export function BotCheck({ siteKey, resetKey, error }: Props) {
                 widgetId.current = null;
             }
         };
-    }, [siteKey, locale]);
+    }, [siteKey, locale, resolvedAppearance]);
 
     useEffect(() => {
         if (resetKey > 0 && widgetId.current !== null) {
