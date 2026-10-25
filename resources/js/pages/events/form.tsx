@@ -138,7 +138,7 @@ export default function EventForm({
                     {event ? (
                         <div className="flex flex-wrap items-center gap-2">
                             <StatusBadge
-                                tone={eventStatusTones[event.status] ?? 'muted'}
+                                tone={eventStatusTones[event.displayStatus] ?? 'muted'}
                             >
                                 {event.statusLabel}
                             </StatusBadge>

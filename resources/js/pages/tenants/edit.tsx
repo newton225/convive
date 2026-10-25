@@ -3,6 +3,7 @@ import { ChevronDown, Mail, UserPlus, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import CancelInvitationModal from '@/components/cancel-invitation-modal';
 import DeleteTenantModal from '@/components/delete-tenant-modal';
+import { ProductTourButton } from '@/components/product-tour-button';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import InviteMemberModal from '@/components/invite-member-modal';
@@ -155,7 +156,7 @@ export default function TenantEdit({
                     )}
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-6" data-tour="team-members">
                     <div className="flex items-center justify-between">
                         <Heading
                             variant="small"
@@ -168,9 +169,11 @@ export default function TenantEdit({
                         />
 
                         <div className="flex items-center gap-2">
+                            <ProductTourButton tour="team" />
                             {can(permissions, Permission.TeamInvite) ? (
                                 <Button
                                     data-test="invite-member-button"
+                                    data-tour="team-invite"
                                     onClick={() => setInviteDialogOpen(true)}
                                 >
                                     <UserPlus /> {t('tenants.members.invite')}
@@ -285,7 +288,7 @@ export default function TenantEdit({
                 </div>
 
                 {invitations.length > 0 ? (
-                    <div className="space-y-6">
+                    <div className="space-y-6" data-tour="team-invitations">
                         <Heading
                             variant="small"
                             title={t('tenants.invitations.title')}

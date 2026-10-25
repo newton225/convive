@@ -205,4 +205,96 @@ return [
             'body' => 'Download the PDF of the period; each table also has its own export. Every export is written to the action history.',
         ],
     ],
+
+    'registrations' => [
+        'intro' => [
+            'title' => 'The registrations',
+            'body' => 'Every registration of the event, with its status, amount and unit. The list is paginated by 25 and filtered by the server.',
+        ],
+        'filters' => [
+            'title' => 'Search and filter',
+            'body' => 'Search by name, phone, email, registration reference or transaction reference, accents ignored, then filter by status: reservation in progress, proof to check, confirmed, cancelled.',
+        ],
+        'table' => [
+            'title' => 'The registrations',
+            'body' => 'Unfold a row to see each person of the group with their price and attendance. From the row: the registration history (what happened and who did it), the invitation card, resending the booking link and cancelling.',
+        ],
+        'exports' => [
+            'title' => 'Export',
+            'body' => 'Excel, CSV, PDF and check lists follow the filter shown. Every export is written to the action history.',
+        ],
+        'purge' => [
+            'title' => 'Purge',
+            'body' => 'Deletes unfinished registrations, those without an approved proof: all of them, or the ones you tick. "Purge all" spares reservations whose countdown is still running, in case the guest is paying.',
+        ],
+        'after' => [
+            'title' => 'What next',
+            'body' => 'A cancellation asks what becomes of the payment; refunds still to make are followed in Treasury.',
+        ],
+    ],
+
+    'report' => [
+        'intro' => [
+            'title' => 'The report',
+            'body' => 'The event summary: attendance, no-shows, takings and entry control.',
+        ],
+        'cards' => [
+            'title' => 'Key figures',
+            'body' => 'Confirmed registrations, present and absent, takings, refunded, to refund, and the net: takings minus refunds. The average check time measures throughput at the door.',
+        ],
+        'units' => [
+            'title' => 'By unit',
+            'body' => "Each registration is counted in its main guest's unit: confirmed, present and takings.",
+        ],
+        'export' => [
+            'title' => 'Export',
+            'body' => "Download the report as a PDF, on the organisation's letterhead. The export is written to the action history.",
+        ],
+    ],
+
+    'team' => [
+        'intro' => [
+            'title' => 'The team',
+            'body' => 'The people who work with your organisation, and what each can do through their profile.',
+        ],
+        'members' => [
+            'title' => 'The members',
+            'body' => 'Change a member\'s profile, or remove them. An organisation always keeps at least one Owner, and you cannot change your own profile.',
+        ],
+        'invite' => [
+            'title' => 'Invite',
+            'body' => "Enter the person's address and choose their profile: they receive a link. Until they accept, the invitation stays pending.",
+        ],
+        'invitations' => [
+            'title' => 'Pending invitations',
+            'body' => 'Those not accepted yet. You can cancel one as long as it has not been accepted.',
+        ],
+        'after' => [
+            'title' => 'Everything is kept',
+            'body' => 'Every invitation, removal and profile change is written to the action history, with its author.',
+        ],
+    ],
+
+    'profiles' => [
+        'intro' => [
+            'title' => 'Profiles',
+            'body' => 'A profile is a set of permissions you give to members. You build your own from a fixed catalogue.',
+        ],
+        'create' => [
+            'title' => 'Create a profile',
+            'body' => 'Name it and tick its permissions. You can only grant permissions you hold yourself.',
+        ],
+        'list' => [
+            'title' => 'Your profiles',
+            'body' => 'The Owner and the base profiles (treasurer, host, read-only) are locked: duplicate one for a variant. You can hide a base profile; its holders keep it. A profile held by members cannot be deleted until they are reassigned.',
+        ],
+        'two_factor' => [
+            'title' => 'Two-factor authentication',
+            'body' => 'A profile can require it: its holders only reach the organisation once two-factor authentication is on. The Owner and treasurer profiles require it by default, as they handle money.',
+        ],
+        'after' => [
+            'title' => 'Immediate effect',
+            'body' => 'A change takes effect at once and is written to the action history, with the before and after.',
+        ],
+    ],
 ];

@@ -205,4 +205,96 @@ return [
             'body' => "Téléchargez le PDF de la période ; chaque tableau a aussi son export. Chaque export est inscrit à l'historique des actions.",
         ],
     ],
+
+    'registrations' => [
+        'intro' => [
+            'title' => "La base d'inscrits",
+            'body' => "Tous les dossiers de l'événement, avec leur état, leur montant et leur unité. La liste est paginée par 25 et filtrée par le serveur.",
+        ],
+        'filters' => [
+            'title' => 'Rechercher et filtrer',
+            'body' => "Cherchez par nom, téléphone, courriel, référence du dossier ou référence d'une transaction, sans tenir compte des accents, puis filtrez par état : réservation en cours, preuve à vérifier, confirmée, annulée.",
+        ],
+        'table' => [
+            'title' => 'Les dossiers',
+            'body' => "Dépliez une ligne pour voir chaque personne du groupe avec son tarif et sa présence. Depuis la ligne : l'historique du dossier (ce qui s'est passé et qui en est l'auteur), la carte d'invitation, le renvoi du lien de réservation et l'annulation.",
+        ],
+        'exports' => [
+            'title' => 'Exporter',
+            'body' => "Excel, CSV, PDF et listes de contrôle suivent le filtre affiché. Chaque export est inscrit à l'historique des actions.",
+        ],
+        'purge' => [
+            'title' => 'Purger',
+            'body' => "Efface les dossiers non finalisés, sans preuve validée : tous, ou ceux que vous cochez. « Tout purger » épargne les réservations dont le décompte tourne encore, au cas où l'invité serait en train de payer.",
+        ],
+        'after' => [
+            'title' => 'Et ensuite',
+            'body' => 'Une annulation demande ce que devient le paiement ; les remboursements à faire se suivent dans la Trésorerie.',
+        ],
+    ],
+
+    'report' => [
+        'intro' => [
+            'title' => 'Le rapport',
+            'body' => "Le bilan de l'événement : présence, absents, recettes et contrôle à l'entrée.",
+        ],
+        'cards' => [
+            'title' => 'Les chiffres clés',
+            'body' => 'Inscriptions confirmées, présents et absents, recettes, remboursé, à rembourser, et le net : recettes moins remboursements. La durée moyenne de contrôle mesure le débit à la porte.',
+        ],
+        'units' => [
+            'title' => 'Par unité',
+            'body' => "Chaque dossier est compté dans l'unité de son participant principal : confirmées, présents et recettes.",
+        ],
+        'export' => [
+            'title' => 'Exporter',
+            'body' => "Téléchargez le rapport en PDF, à l'en-tête de l'organisation. L'export est inscrit à l'historique des actions.",
+        ],
+    ],
+
+    'team' => [
+        'intro' => [
+            'title' => "L'équipe",
+            'body' => 'Les personnes qui travaillent avec votre organisation, et ce que chacune peut faire grâce à son profil.',
+        ],
+        'members' => [
+            'title' => 'Les membres',
+            'body' => "Changez le profil d'un membre, ou retirez-le. Une organisation garde toujours au moins un Propriétaire, et vous ne changez pas votre propre profil.",
+        ],
+        'invite' => [
+            'title' => 'Inviter',
+            'body' => "Saisissez l'adresse de la personne et choisissez son profil : elle reçoit un lien. Tant qu'elle n'a pas accepté, l'invitation reste en attente.",
+        ],
+        'invitations' => [
+            'title' => 'Invitations en attente',
+            'body' => "Celles qui n'ont pas encore été acceptées. Vous pouvez en annuler une tant qu'elle n'est pas acceptée.",
+        ],
+        'after' => [
+            'title' => 'Tout est conservé',
+            'body' => "Chaque invitation, retrait et changement de profil est inscrit à l'historique des actions, avec son auteur.",
+        ],
+    ],
+
+    'profiles' => [
+        'intro' => [
+            'title' => 'Les profils',
+            'body' => "Un profil est un ensemble de permissions que vous donnez à des membres. Vous composez les vôtres à partir d'un catalogue fixe.",
+        ],
+        'create' => [
+            'title' => 'Créer un profil',
+            'body' => 'Nommez-le et cochez ses permissions. Vous ne pouvez accorder que des permissions que vous détenez vous-même.',
+        ],
+        'list' => [
+            'title' => 'Vos profils',
+            'body' => 'Le Propriétaire et les profils de base (Trésorier, Hôtesse, Lecture) sont figés : pour une variante, dupliquez-en un. Vous pouvez masquer un profil de base ; ses porteurs le gardent. Un profil porté par des membres ne se supprime pas avant leur réaffectation.',
+        ],
+        'two_factor' => [
+            'title' => 'Double authentification',
+            'body' => "Un profil peut l'exiger : ses porteurs n'atteignent l'organisation qu'une fois la double authentification activée. Propriétaire et Trésorier l'exigent d'office, car ils touchent à l'argent.",
+        ],
+        'after' => [
+            'title' => 'Effet immédiat',
+            'body' => "Une modification prend effet tout de suite et s'inscrit à l'historique des actions, avec l'avant et l'après.",
+        ],
+    ],
 ];

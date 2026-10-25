@@ -439,6 +439,7 @@ class Event extends Model implements HasMedia
     {
         return $this->status->acceptsRegistrations()
             && ! $this->isFull()
+            && ! $this->hasEnded()
             && ! $this->registrationDeadlineHasPassed()
             && ! (Tenant::current()?->isSuspended() ?? false);
     }
@@ -671,6 +672,40 @@ class Event extends Model implements HasMedia
     public function hasEnded(): bool
     {
         return $this->endsOrStartsAt()?->isPast() ?? false;
+    }
+
+    /**
+     * The status the screens show (decision du 2026-10-25) : calcule, jamais stocke, comme « Complet ».
+     * Un evenement publie est « En cours » entre son debut et sa fin, « Termine » une fois sa fin passee,
+     * sans que personne ait a le cloturer. Le statut stocke ne change pas : la cloture reste un geste de
+     * l'equipe, elle invalide les billets, et la tolerance d'entree apres la fin continue de courir.
+     */
+    public function displayStatus(): EventStatus
+    {
+        if ($this->status !== EventStatus::Open && $this->status !== EventStatus::Ongoing) {
+            return $this->status;
+        }
+
+        if ($this->hasEnded()) {
+            return EventStatus::Closed;
+        }
+
+        return $this->starts_at?->isPast() ? EventStatus::Ongoing : $this->status;
+    }
+
+    /**
+     * Scope the query to the events that are over for the screens : closed by hand, or published and
+     * past their end (their start when no end is given). Le miroir SQL de `displayStatus()`.
+     *
+     * @param  Builder<Event>  $query
+     */
+    public function scopeFinished(Builder $query): void
+    {
+        $query->where(fn (Builder $query) => $query
+            ->where('status', EventStatus::Closed)
+            ->orWhere(fn (Builder $over) => $over
+                ->whereIn('status', [EventStatus::Open, EventStatus::Ongoing])
+                ->whereRaw('COALESCE(ends_at, starts_at) <= ?', [now()->format('Y-m-d H:i:s')])));
     }
 
     /**

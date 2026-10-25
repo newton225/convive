@@ -15,7 +15,9 @@ export type EventSummary = {
     id: number;
     name: string;
     subtitle: string | null;
+    // Le statut stocke, et celui que l'ecran affiche (calcule d'apres les dates : « En cours », « Termine »).
     status: string;
+    displayStatus: string;
     statusLabel: string;
     startsAt: string | null;
     venue: string | null;

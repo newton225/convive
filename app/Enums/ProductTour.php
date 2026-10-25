@@ -14,4 +14,8 @@ enum ProductTour: string
     case EntryControl = 'entry_control';
     case Seating = 'seating';
     case Treasury = 'treasury';
+    case Registrations = 'registrations';
+    case Report = 'report';
+    case Team = 'team';
+    case Profiles = 'profiles';
 }

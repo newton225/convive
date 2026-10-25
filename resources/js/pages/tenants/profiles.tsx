@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 import DeleteProfileModal from '@/components/delete-profile-modal';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { PermissionMatrix } from '@/components/profiles/permission-matrix';
 import { ProfileMembersDialog } from '@/components/profiles/profile-members-dialog';
 import { Badge } from '@/components/ui/badge';
@@ -88,14 +89,20 @@ export default function TenantProfiles({ tenant, profiles, catalogue }: Props) {
                         description={t('profiles.description')}
                     />
 
-                    <Button data-test="profile-create-button" asChild>
+                    <ProductTourButton tour="profiles" />
+
+                    <Button
+                        data-test="profile-create-button"
+                        data-tour="profiles-create"
+                        asChild
+                    >
                         <Link href={create(tenant.slug)}>
                             <Plus /> {t('profiles.actions.create')}
                         </Link>
                     </Button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-6" data-tour="profiles-list">
                     {profileSections.map((section) => (
                         <section
                             key={section.key}

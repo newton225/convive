@@ -47,7 +47,7 @@ export function EventCard({ tenantSlug, event, permissions, onClose }: Props) {
         }
 
         if (
-            event.status === 'closed' &&
+            event.displayStatus === 'closed' &&
             can(permissions, Permission.ReportsView)
         ) {
             return {
@@ -57,7 +57,7 @@ export function EventCard({ tenantSlug, event, permissions, onClose }: Props) {
         }
 
         if (
-            event.status === 'ongoing' &&
+            event.displayStatus === 'ongoing' &&
             can(permissions, Permission.ScanPerform)
         ) {
             return {
@@ -132,7 +132,7 @@ export function EventCard({ tenantSlug, event, permissions, onClose }: Props) {
 
                     <div className="flex flex-wrap gap-1.5">
                         <StatusBadge
-                            tone={eventStatusTones[event.status] ?? 'muted'}
+                            tone={eventStatusTones[event.displayStatus] ?? 'muted'}
                         >
                             {event.statusLabel}
                         </StatusBadge>

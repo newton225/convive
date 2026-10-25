@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Events;
 
 use App\Actions\Events\SaveEvent;
 use App\Actions\Seating\SyncSeatingTables;
-use App\Enums\EventStatus;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureTenantMembership;
@@ -82,8 +81,8 @@ class EventController extends Controller
             ->when($this->supportEventId($request), fn (Builder $query, int $eventId) => $query->whereKey($eventId))
             // Le nom, le sous-titre et le lieu : ce qu'on se rappelle d'un evenement qu'on cherche.
             ->when($search !== '', fn (Builder $query) => UnaccentedSearch::apply($query, ['name', 'subtitle', 'venue'], $search))
-            ->when($status === 'closed', fn (Builder $query) => $query->where('status', EventStatus::Closed))
-            ->when($status === 'active', fn (Builder $query) => $query->where('status', '!=', EventStatus::Closed));
+            ->when($status === 'closed', fn (Builder $query) => $query->finished())
+            ->when($status === 'active', fn (Builder $query) => $query->whereNot(fn (Builder $over) => $over->finished()));
     }
 
     /**
@@ -338,7 +337,9 @@ class EventController extends Controller
             'name' => $event->name,
             'subtitle' => $event->subtitle,
             'status' => $event->status->value,
-            'statusLabel' => $event->status->label(),
+            // Ce que l'ecran affiche : calcule d'apres les dates (`Event::displayStatus()`), `status` reste le statut stocke.
+            'displayStatus' => $event->displayStatus()->value,
+            'statusLabel' => $event->displayStatus()->label(),
             'startsAt' => $event->starts_at?->toISOString(),
             'venue' => $event->venue,
             'capacity' => $event->capacity(),

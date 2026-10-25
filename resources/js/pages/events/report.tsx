@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -98,11 +99,14 @@ export default function EventReportPage({
                         description={event.name}
                     />
 
+                    <ProductTourButton tour="report" />
+
                     {can(permissions, Permission.ReportsExport) ? (
                         <Button
                             variant="outline"
                             size="sm"
                             data-test="report-export-pdf"
+                            data-tour="report-export"
                             asChild
                         >
                             <a href={pdf([tenant.slug, event.id]).url}>
@@ -112,7 +116,10 @@ export default function EventReportPage({
                     ) : null}
                 </div>
 
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div
+                    className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-3 sm:grid-cols-2 lg:grid-cols-4"
+                    data-tour="report-cards"
+                >
                     {cards.map((card) => (
                         <Card key={card.key} data-test={`report-${card.key}`}>
                             <CardHeader>
@@ -145,7 +152,7 @@ export default function EventReportPage({
                           })}
                 </p>
 
-                <div className="space-y-2">
+                <div className="space-y-2" data-tour="report-units">
                     <Heading variant="small" title={t('reports.units.title')} />
 
                     {report.units.length === 0 ? (

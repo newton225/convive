@@ -15,6 +15,7 @@ import { RegistrationStatusBadge } from '@/components/registrations/registration
 import { RegistrationTotals } from '@/components/registrations/registration-totals';
 import { SingleExpandToggle } from '@/components/single-expand-toggle';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -407,8 +408,16 @@ export default function EventRegistrations({
                         description={event.name}
                     />
 
+                    <ProductTourButton
+                        tour="registrations"
+                        autoStart={rows.length > 0}
+                    />
+
                     {canPurge ? (
-                        <div className="flex flex-wrap gap-2">
+                        <div
+                            className="flex flex-wrap gap-2"
+                            data-tour="registrations-purge"
+                        >
                             {selectedRows.length > 0 ? (
                                 <Button
                                     variant="destructive"
@@ -436,7 +445,10 @@ export default function EventRegistrations({
                     ) : null}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div
+                    className="flex flex-wrap items-center gap-2"
+                    data-tour="registrations-filters"
+                >
                     <Input
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
@@ -477,6 +489,7 @@ export default function EventRegistrations({
                         <div
                             className="flex flex-wrap items-center gap-2 sm:ml-auto"
                             data-test="registrations-exports"
+                            data-tour="registrations-exports"
                         >
                             <span className="text-muted-foreground text-sm">
                                 {t('registrations.actions.export')}
@@ -526,62 +539,71 @@ export default function EventRegistrations({
                     ) : null}
                 </div>
 
-                <DataTable
-                    columns={columns}
-                    data={rows}
-                    meta={meta}
-                    onPageChange={(page) => navigate({ page })}
-                    sorting={sortingFromParam(filters.sort)}
-                    onSortingChange={(sorting) =>
-                        navigate({ sort: sortingToParam(sorting) ?? null })
-                    }
-                    rowTestId="registration-row"
-                    expansion={{
-                        getRowId: (row) => String(row.id),
-                        expanded,
-                        onExpandedChange,
-                        renderDetails: (row) => (
-                            <RegistrationDetails registration={row} />
-                        ),
-                        columnLabel: t('registrations.details.column'),
-                        showLabel: (row) =>
-                            t('registrations.details.show', { name: row.name }),
-                        hideLabel: (row) =>
-                            t('registrations.details.hide', { name: row.name }),
-                        detailsTestId: 'registration-details',
-                    }}
-                    selection={
-                        canPurge
-                            ? {
-                                  selected,
-                                  onSelectedChange: setSelected,
-                                  getRowId: (row) => String(row.id),
-                                  isSelectable: (row) => row.purgeable,
-                                  selectAllLabel: t(
-                                      'registrations.selection.select_all',
-                                  ),
-                                  selectRowLabel: (row) =>
-                                      t('registrations.selection.select_row', {
-                                          name: row.name,
-                                      }),
-                              }
-                            : undefined
-                    }
-                    emptyState={
-                        <>
-                            <p className="font-medium">
-                                {t(
-                                    `registrations.empty.${filters.status ?? 'all'}.title`,
-                                )}
-                            </p>
-                            <p className="text-muted-foreground text-sm">
-                                {t(
-                                    `registrations.empty.${filters.status ?? 'all'}.description`,
-                                )}
-                            </p>
-                        </>
-                    }
-                />
+                <div data-tour="registrations-table">
+                    <DataTable
+                        columns={columns}
+                        data={rows}
+                        meta={meta}
+                        onPageChange={(page) => navigate({ page })}
+                        sorting={sortingFromParam(filters.sort)}
+                        onSortingChange={(sorting) =>
+                            navigate({ sort: sortingToParam(sorting) ?? null })
+                        }
+                        rowTestId="registration-row"
+                        expansion={{
+                            getRowId: (row) => String(row.id),
+                            expanded,
+                            onExpandedChange,
+                            renderDetails: (row) => (
+                                <RegistrationDetails registration={row} />
+                            ),
+                            columnLabel: t('registrations.details.column'),
+                            showLabel: (row) =>
+                                t('registrations.details.show', {
+                                    name: row.name,
+                                }),
+                            hideLabel: (row) =>
+                                t('registrations.details.hide', {
+                                    name: row.name,
+                                }),
+                            detailsTestId: 'registration-details',
+                        }}
+                        selection={
+                            canPurge
+                                ? {
+                                      selected,
+                                      onSelectedChange: setSelected,
+                                      getRowId: (row) => String(row.id),
+                                      isSelectable: (row) => row.purgeable,
+                                      selectAllLabel: t(
+                                          'registrations.selection.select_all',
+                                      ),
+                                      selectRowLabel: (row) =>
+                                          t(
+                                              'registrations.selection.select_row',
+                                              {
+                                                  name: row.name,
+                                              },
+                                          ),
+                                  }
+                                : undefined
+                        }
+                        emptyState={
+                            <>
+                                <p className="font-medium">
+                                    {t(
+                                        `registrations.empty.${filters.status ?? 'all'}.title`,
+                                    )}
+                                </p>
+                                <p className="text-muted-foreground text-sm">
+                                    {t(
+                                        `registrations.empty.${filters.status ?? 'all'}.description`,
+                                    )}
+                                </p>
+                            </>
+                        }
+                    />
+                </div>
 
                 <RegistrationTotals totals={totals} />
 

@@ -11,7 +11,11 @@ export type ProductTourId =
     | 'proofs'
     | 'entry_control'
     | 'seating'
-    | 'treasury';
+    | 'treasury'
+    | 'registrations'
+    | 'report'
+    | 'team'
+    | 'profiles';
 
 export type ProductTourStep = {
     // Le repere vise, sans le selecteur : `nav-events` pour `[data-tour="nav-events"]`.
@@ -82,5 +86,33 @@ export const productTours: Record<ProductTourId, ProductTourStep[]> = {
         { anchor: 'treasury-accounts', key: 'accounts', side: 'top' },
         { anchor: 'treasury-refunds', key: 'refunds', side: 'top' },
         { anchor: 'treasury-export', key: 'export', side: 'left' },
+    ],
+    registrations: [
+        { key: 'intro' },
+        { anchor: 'registrations-filters', key: 'filters', side: 'bottom' },
+        { anchor: 'registrations-table', key: 'table', side: 'top' },
+        { anchor: 'registrations-exports', key: 'exports', side: 'bottom' },
+        { anchor: 'registrations-purge', key: 'purge', side: 'left' },
+        { key: 'after' },
+    ],
+    report: [
+        { key: 'intro' },
+        { anchor: 'report-cards', key: 'cards', side: 'bottom' },
+        { anchor: 'report-units', key: 'units', side: 'top' },
+        { anchor: 'report-export', key: 'export', side: 'left' },
+    ],
+    team: [
+        { key: 'intro' },
+        { anchor: 'team-members', key: 'members', side: 'top' },
+        { anchor: 'team-invite', key: 'invite', side: 'left' },
+        { anchor: 'team-invitations', key: 'invitations', side: 'top' },
+        { key: 'after' },
+    ],
+    profiles: [
+        { key: 'intro' },
+        { anchor: 'profiles-create', key: 'create', side: 'left' },
+        { anchor: 'profiles-list', key: 'list', side: 'top' },
+        { key: 'two_factor' },
+        { key: 'after' },
     ],
 };
