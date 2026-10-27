@@ -39,7 +39,7 @@ import {
     type ExpectedEvent,
 } from '@/lib/ticket-verifier';
 import { rememberEntryControl } from '@/lib/entry-control-memory';
-import { formatDateTime } from '@/lib/format-date';
+import { formatDateParts, formatDateTime } from '@/lib/format-date';
 import { offlineVerdict, onlineVerdict, vibrateFor } from '@/lib/scan-verdict';
 import type { ScanVerdict } from '@/lib/scan-verdict';
 import type { ScanPinVerifier } from '@/lib/scan-pin';
@@ -808,6 +808,43 @@ export default function EventScan({
                                             >
                                                 <span>
                                                     {row.name ?? '-'}
+                                                    <span className="text-muted-foreground block text-xs">
+                                                        {[
+                                                            row.scannedAt
+                                                                ? formatDateParts(
+                                                                      row.scannedAt,
+                                                                      locale,
+                                                                  ).time
+                                                                : null,
+                                                            row.unit,
+                                                            row.tableNumber !==
+                                                            null
+                                                                ? t(
+                                                                      'scan.recent.table',
+                                                                      {
+                                                                          number: row.tableNumber,
+                                                                      },
+                                                                  )
+                                                                : null,
+                                                            row.agent
+                                                                ? t(
+                                                                      'scan.recent.by',
+                                                                      {
+                                                                          name: row.agent,
+                                                                      },
+                                                                  )
+                                                                : null,
+                                                        ]
+                                                            .filter(Boolean)
+                                                            .join(' · ')}
+                                                    </span>
+                                                    {row.forced ? (
+                                                        <span className="text-muted-foreground block text-xs">
+                                                            {t(
+                                                                'scan.result.forced_badge',
+                                                            )}
+                                                        </span>
+                                                    ) : null}
                                                     {row.manual ? (
                                                         <span className="text-muted-foreground block text-xs">
                                                             {t(

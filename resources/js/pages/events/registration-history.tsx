@@ -123,7 +123,9 @@ export default function RegistrationHistory({
                                                     `registrations.history.kinds.${entry.kind}`,
                                                 )}
                                             </StatusBadge>
-                                            <span>{entry.actor}</span>
+                                            {entry.kind === 'team' ? (
+                                                <span>{entry.actor}</span>
+                                            ) : null}
                                         </div>
                                     </TableCell>
                                     {showsIp ? (

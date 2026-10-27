@@ -78,8 +78,11 @@ class PlanLimits
 
     public function activeEvents(): int
     {
+        // Un evenement dont la fin est passee n'occupe plus le plan, meme si personne ne l'a cloture
+        // (decision du 2026-10-27, comme l'etat affiche : `Event::scopeFinished()`).
         return $this->tenant->run(fn () => Event::query()
             ->whereIn('status', $this->activeStatuses())
+            ->whereNot(fn (Builder $query) => $query->finished())
             ->count());
     }
 

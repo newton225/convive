@@ -80,6 +80,8 @@ return [
     'recent' => [
         'title' => 'Derniers passages',
         'empty' => 'Aucun passage pour le moment.',
+        'table' => 'Table :number',
+        'by' => 'Par :name',
     ],
 
     'pin_setup' => [

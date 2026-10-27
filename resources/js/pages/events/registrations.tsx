@@ -326,7 +326,7 @@ export default function EventRegistrations({
                     </span>
                 ) : (
                     <span
-                        className="text-muted-foreground text-xs"
+                        className="text-destructive text-xs"
                         data-test="registration-card-not-sent"
                     >
                         {t('registrations.card.not_sent')}

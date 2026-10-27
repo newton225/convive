@@ -37,6 +37,9 @@ export type ScanRecentRow = {
     forced: boolean;
     manual: boolean;
     name: string | null;
+    unit: string | null;
+    tableNumber: number | null;
+    agent: string | null;
     scannedAt: string | null;
     station: string | null;
 };

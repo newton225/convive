@@ -16,6 +16,7 @@ use App\Models\Event;
 use App\Models\ScanEvent;
 use App\Models\Tenant;
 use App\Models\Ticket;
+use App\Models\User;
 use App\Support\TicketRevocationList;
 use Carbon\CarbonInterface;
 use Illuminate\Http\RedirectResponse;
@@ -221,11 +222,16 @@ class ScanController extends Controller
      */
     private function recentScans(Event $event): array
     {
-        return ScanEvent::where('event_id', $event->id)
-            ->with('ticket.registration', 'ticket.holderUnit')
+        $scans = ScanEvent::where('event_id', $event->id)
+            ->with('ticket.registration.unit', 'ticket.registration.tableAssignment.seatingTable', 'ticket.holderUnit')
             ->latest('id')
             ->limit(20)
-            ->get()
+            ->get();
+
+        // L'agent vit dans la base centrale : un seul appel pour les vingt lignes.
+        $agents = User::whereIn('id', $scans->pluck('performed_by_user_id')->unique())->pluck('name', 'id');
+
+        return $scans
             ->map(fn (ScanEvent $scan) => [
                 'id' => $scan->id,
                 'result' => $scan->result->value,
@@ -233,6 +239,9 @@ class ScanController extends Controller
                 'manual' => $scan->manual,
                 'station' => $scan->station,
                 'name' => $scan->ticket?->holderName(),
+                'unit' => $scan->ticket?->holderUnitName(),
+                'tableNumber' => $scan->ticket?->registration->tableAssignment?->seatingTable->number,
+                'agent' => $agents->get($scan->performed_by_user_id),
                 'scannedAt' => $scan->created_at?->toISOString(),
             ])
             ->all();

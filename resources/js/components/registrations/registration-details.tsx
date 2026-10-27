@@ -166,7 +166,13 @@ export function RegistrationDetails({ registration }: Props) {
                     <dt className="text-muted-foreground">
                         {t('registrations.card.column')}
                     </dt>
-                    <dd>
+                    <dd
+                        className={
+                            registration.cardSentAt
+                                ? undefined
+                                : 'text-destructive'
+                        }
+                    >
                         {registration.cardSentAt
                             ? t('registrations.card.sent_on', {
                                   date: formatDateTime(

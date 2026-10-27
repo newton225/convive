@@ -89,6 +89,15 @@ class PlanLimitsTest extends TestCase
         $this->assertTrue($this->limits()->canPublishEvent());
     }
 
+    public function test_un_evenement_dont_la_fin_est_passee_ne_compte_plus_meme_sans_etre_cloture(): void
+    {
+        $this->openEvents(1, ['starts_at' => now()->subDays(3), 'ends_at' => now()->subDays(3)->addHours(4)]);
+        $this->openEvents(1, ['starts_at' => now()->addDays(3), 'ends_at' => now()->addDays(3)->addHours(4)]);
+
+        $this->assertSame(1, $this->limits()->activeEvents());
+        $this->assertFalse($this->limits()->canPublishEvent());
+    }
+
     public function test_le_plan_association_autorise_cinq_evenements_actifs(): void
     {
         $this->subscribe(PlanCode::Association);
