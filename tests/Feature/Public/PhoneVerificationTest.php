@@ -120,7 +120,8 @@ class PhoneVerificationTest extends TestCase
         $this->register($this->event(false));
 
         $this->assertSame(RegistrationStatus::Held, $this->registration()->status);
-        Notification::assertNothingSent();
+        // L'alerte d'equipe « nouvelle inscription » part quand meme : seul le code est ecarte.
+        Notification::assertSentOnDemandTimes(PhoneVerificationCode::class, 0);
     }
 
     public function test_activee_le_formulaire_envoie_un_code_sans_bloquer_de_place(): void
@@ -206,7 +207,8 @@ class PhoneVerificationTest extends TestCase
         $this->register($this->event(true), '+33 6 12 34 56 78')->assertSessionHasNoErrors();
 
         $this->assertSame(RegistrationStatus::Held, $this->registration()->status);
-        Notification::assertNothingSent();
+        // L'alerte d'equipe « nouvelle inscription » part quand meme : seul le code est ecarte.
+        Notification::assertSentOnDemandTimes(PhoneVerificationCode::class, 0);
     }
 
     public function test_le_code_tient_en_un_seul_sms(): void

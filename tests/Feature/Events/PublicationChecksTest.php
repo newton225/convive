@@ -179,7 +179,7 @@ class PublicationChecksTest extends TestCase
 
     public function test_la_vitrine_n_affiche_plus_un_evenement_passe(): void
     {
-        ShowcaseEvent::factory()->create(['tenant_id' => $this->tenant->id, 'name' => 'Gala passe', 'starts_at' => now()->subDay()]);
+        ShowcaseEvent::factory()->create(['tenant_id' => $this->tenant->id, 'name' => 'Gala passe', 'starts_at' => now()->subDay(), 'listed_until' => now()->subDay()]);
         ShowcaseEvent::factory()->create(['tenant_id' => $this->tenant->id, 'name' => 'Gala a venir', 'starts_at' => now()->addWeek()]);
 
         $this->get(route('showcase.index'))->assertInertia(fn (Assert $page) => $page
