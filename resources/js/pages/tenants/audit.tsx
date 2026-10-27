@@ -3,6 +3,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import DataTable from '@/components/data-table';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
@@ -134,17 +135,23 @@ export default function Audit({
             <Head title={t('audit.title')} />
 
             <div className="flex flex-col space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('audit.title')}
-                    description={t('audit.description')}
-                />
+                <div className="flex items-center justify-between">
+                    <Heading
+                        variant="small"
+                        title={t('audit.title')}
+                        description={t('audit.description')}
+                    />
+                    <ProductTourButton tour="audit" />
+                </div>
 
                 <p className="text-muted-foreground text-sm">
                     {t('audit.retention')}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div
+                    className="flex flex-wrap items-center gap-2"
+                    data-tour="audit-filters"
+                >
                     <Input
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
@@ -175,28 +182,32 @@ export default function Audit({
                     </Select>
                 </div>
 
-                <DataTable
-                    columns={columns}
-                    data={entries}
-                    meta={meta}
-                    onPageChange={(page) => navigate({ page })}
-                    // Sans parametre, le serveur trie par date decroissante : l'en-tete le montre.
-                    sorting={sortingFromParam(filters.sort ?? '-created_at')}
-                    onSortingChange={(sorting) =>
-                        navigate({ sort: sortingToParam(sorting) })
-                    }
-                    rowTestId="audit-row"
-                    emptyState={
-                        <>
-                            <p className="font-medium">
-                                {t('audit.empty.title')}
-                            </p>
-                            <p className="text-muted-foreground text-sm">
-                                {t('audit.empty.description')}
-                            </p>
-                        </>
-                    }
-                />
+                <div data-tour="audit-table">
+                    <DataTable
+                        columns={columns}
+                        data={entries}
+                        meta={meta}
+                        onPageChange={(page) => navigate({ page })}
+                        // Sans parametre, le serveur trie par date decroissante : l'en-tete le montre.
+                        sorting={sortingFromParam(
+                            filters.sort ?? '-created_at',
+                        )}
+                        onSortingChange={(sorting) =>
+                            navigate({ sort: sortingToParam(sorting) })
+                        }
+                        rowTestId="audit-row"
+                        emptyState={
+                            <>
+                                <p className="font-medium">
+                                    {t('audit.empty.title')}
+                                </p>
+                                <p className="text-muted-foreground text-sm">
+                                    {t('audit.empty.description')}
+                                </p>
+                            </>
+                        }
+                    />
+                </div>
             </div>
         </>
     );

@@ -2,6 +2,7 @@ import { Form, Head, usePage } from '@inertiajs/react';
 import BrandFileField from '@/components/brand-file-field';
 import { CountryField } from '@/components/country-field';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { LabelWithHelp } from '@/components/label-with-help';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -71,16 +72,22 @@ export default function Organisation({
             <h1 className="sr-only">{t('organisation.title')}</h1>
 
             <div className="flex flex-col space-y-8">
-                <Heading
-                    variant="small"
-                    title={t('organisation.title')}
-                    description={t('organisation.description')}
-                />
+                <div className="flex items-center justify-between">
+                    <Heading
+                        variant="small"
+                        title={t('organisation.title')}
+                        description={t('organisation.description')}
+                    />
+                    <ProductTourButton tour="organisation" />
+                </div>
 
                 <PublishingState tenant={tenant} />
 
                 {mayEditLegal ? (
-                    <section className="space-y-4">
+                    <section
+                        className="space-y-4"
+                        data-tour="organisation-legal"
+                    >
                         <Heading
                             variant="small"
                             title={t('organisation.sections.legal.title')}
@@ -304,7 +311,10 @@ export default function Organisation({
                 ) : null}
 
                 {mayEditBrand ? (
-                    <section className="space-y-4">
+                    <section
+                        className="space-y-4"
+                        data-tour="organisation-brand"
+                    >
                         <Heading
                             variant="small"
                             title={t('organisation.sections.brand.title')}
@@ -380,7 +390,10 @@ export default function Organisation({
                 ) : null}
 
                 {mayEditSubdomain ? (
-                    <section className="space-y-4">
+                    <section
+                        className="space-y-4"
+                        data-tour="organisation-subdomain"
+                    >
                         <Heading
                             variant="small"
                             title={t('organisation.sections.subdomain.title')}

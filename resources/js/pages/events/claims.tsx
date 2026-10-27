@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import DataTable from '@/components/data-table';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import type { PaginationMeta } from '@/components/list-pagination';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
@@ -162,13 +163,19 @@ export default function EventClaims({
             <Head title={t('claims.title')} />
 
             <div className="flex flex-col space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('claims.title')}
-                    description={`${event.name} · ${t('claims.description')}`}
-                />
+                <div className="flex items-center justify-between">
+                    <Heading
+                        variant="small"
+                        title={t('claims.title')}
+                        description={`${event.name} · ${t('claims.description')}`}
+                    />
+                    <ProductTourButton tour="claims" />
+                </div>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div
+                    className="flex flex-wrap items-center gap-3"
+                    data-tour="claims-filters"
+                >
                     <div className="relative min-w-56 flex-1 sm:max-w-sm">
                         <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
                         <Input
@@ -206,21 +213,23 @@ export default function EventClaims({
                     </Select>
                 </div>
 
-                <DataTable
-                    columns={columns}
-                    data={rows}
-                    meta={meta}
-                    onPageChange={(page) => visit({ page })}
-                    rowTestId="claim-row"
-                    emptyState={
-                        <p className="text-muted-foreground text-sm">
-                            {filters.status === 'open' &&
-                            filters.search === null
-                                ? t('claims.empty.open')
-                                : t('claims.empty.other')}
-                        </p>
-                    }
-                />
+                <div data-tour="claims-table">
+                    <DataTable
+                        columns={columns}
+                        data={rows}
+                        meta={meta}
+                        onPageChange={(page) => visit({ page })}
+                        rowTestId="claim-row"
+                        emptyState={
+                            <p className="text-muted-foreground text-sm">
+                                {filters.status === 'open' &&
+                                filters.search === null
+                                    ? t('claims.empty.open')
+                                    : t('claims.empty.other')}
+                            </p>
+                        }
+                    />
+                </div>
             </div>
 
             <ConfirmActionDialog

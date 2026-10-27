@@ -6,6 +6,7 @@ import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ConsoleTable } from '@/components/console/console-table';
 import { ExtendSupportAccessDialog } from '@/components/extend-support-access-dialog';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import { SupportRequestCard } from '@/components/support-request-card';
@@ -154,13 +155,16 @@ export default function SupportAccess({
             <Head title={t('support_access.title')} />
 
             <div className="flex flex-col space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('support_access.title')}
-                    description={t('support_access.description')}
-                />
+                <div className="flex items-center justify-between">
+                    <Heading
+                        variant="small"
+                        title={t('support_access.title')}
+                        description={t('support_access.description')}
+                    />
+                    <ProductTourButton tour="support_access" />
+                </div>
 
-                <Card>
+                <Card data-tour="support-access-rules">
                     <CardHeader>
                         <CardTitle>{t('support_access.rules.title')}</CardTitle>
                     </CardHeader>
@@ -289,7 +293,7 @@ export default function SupportAccess({
                     />
                 ) : null}
 
-                <Card>
+                <Card data-tour="support-access-grant">
                     <CardHeader>
                         <CardTitle>{t('support_access.grant.title')}</CardTitle>
                     </CardHeader>
@@ -446,7 +450,10 @@ export default function SupportAccess({
                     </CardContent>
                 </Card>
 
-                <section className="space-y-3">
+                <section
+                    className="space-y-3"
+                    data-tour="support-access-history"
+                >
                     <h3 className="font-medium">
                         {t('support_access.history.title')}
                     </h3>

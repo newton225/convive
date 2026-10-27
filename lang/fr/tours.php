@@ -297,4 +297,164 @@ return [
             'body' => "Une modification prend effet tout de suite et s'inscrit à l'historique des actions, avec l'avant et l'après.",
         ],
     ],
+
+    'claims' => [
+        'intro' => [
+            'title' => 'Les réclamations',
+            'body' => "Les messages que vos invités vous écrivent depuis la page de leur dossier. Aucune de vos coordonnées n'est affichée : c'est vous qui les rappelez.",
+        ],
+        'filters' => [
+            'title' => 'Chercher et filtrer',
+            'body' => 'Cherchez une réclamation, et affichez celles à traiter ou celles déjà traitées.',
+        ],
+        'table' => [
+            'title' => 'La liste',
+            'body' => 'Chaque ligne donne le sujet, le message et le numéro à rappeler. Une fois la personne rappelée, marquez la réclamation comme traitée : le geste est inscrit à l\'historique des actions.',
+        ],
+        'after' => [
+            'title' => 'Sans réponse dans l\'application',
+            'body' => "L'application ne répond pas à l'invité : l'état dit seulement « à traiter » ou « traitée ». Un dossier accepte trois réclamations ouvertes au plus.",
+        ],
+    ],
+
+    'audit' => [
+        'intro' => [
+            'title' => "L'historique des actions",
+            'body' => "Les actions sensibles de l'organisation : qui, quoi, quand et depuis quelle adresse. Il est gardé 24 mois et personne ne peut le modifier ni l'effacer.",
+        ],
+        'filters' => [
+            'title' => 'Chercher et filtrer',
+            'body' => "Cherchez un nom ou un mot, ou limitez la liste à un type d'action : compte de versement, équipe, preuve, entrée sans scan...",
+        ],
+        'table' => [
+            'title' => 'Les actions',
+            'body' => "Triez la liste. Chaque ligne garde l'avant et l'après d'une modification : c'est ce qui permet de repérer un changement discret.",
+        ],
+        'after' => [
+            'title' => 'Qui peut le lire',
+            'body' => "Seuls les membres dont le profil le permet voient cet écran. Les entrées sans scan et les changements de compte de versement préviennent aussi l'équipe.",
+        ],
+    ],
+
+    'units' => [
+        'intro' => [
+            'title' => 'Les unités',
+            'body' => "Les groupes que vos invités choisissent à l'inscription. Chaque organisation compose les siennes.",
+        ],
+        'create' => [
+            'title' => 'Ajouter une unité',
+            'body' => "Saisissez un nom : deux unités ne peuvent pas porter le même nom dans une organisation.",
+        ],
+        'list' => [
+            'title' => 'Vos unités',
+            'body' => "Renommez une unité ou désactivez-la pour la retirer du formulaire : les inscriptions déjà prises la gardent. « Invité spécial » est protégée : toujours en dernier, ni renommée, ni désactivée, ni supprimée.",
+        ],
+        'after' => [
+            'title' => 'Au moins une unité',
+            'body' => "Il en reste toujours au moins une, sans quoi le formulaire d'inscription ne pourrait plus être rempli.",
+        ],
+    ],
+
+    'payment_accounts' => [
+        'intro' => [
+            'title' => 'Les comptes de versement',
+            'body' => "Les numéros où vos invités envoient leur paiement. C'est la partie la plus protégée de l'application : un numéro modifié discrètement détournerait l'argent d'un événement.",
+        ],
+        'add' => [
+            'title' => 'Ajouter un compte',
+            'body' => "Choisissez le canal, le numéro et le titulaire. Le numéro doit correspondre au réseau du canal (par exemple 07 pour Orange Money).",
+        ],
+        'delay' => [
+            'title' => "Le délai de 24 heures",
+            'body' => "Dès qu'un événement payant a été publié, changer le canal, le numéro ou le titulaire n'est actif qu'après 24 heures. L'ancien numéro reste affiché entre-temps, et tous les porteurs de cette permission sont alertés.",
+        ],
+        'list' => [
+            'title' => 'Vos comptes',
+            'body' => "Un second Propriétaire peut lever le délai, jamais celui qui a demandé le changement. Un changement reste signalé sept jours. Chaque geste demande votre mot de passe et s'inscrit à l'historique.",
+        ],
+    ],
+
+    'reconciliation' => [
+        'intro' => [
+            'title' => 'Le rapprochement',
+            'body' => 'Comparez un relevé Mobile Money ou bancaire aux preuves déposées, pour repérer un versement manquant ou un montant différent.',
+        ],
+        'import' => [
+            'title' => 'Importer un relevé',
+            'body' => 'Un fichier CSV avec les colonnes date, référence, émetteur et montant. Les lignes sont comparées aux preuves déposées de cet événement.',
+        ],
+        'stats' => [
+            'title' => "L'état du relevé",
+            'body' => 'Lignes rapprochées, montant divergent, nom approchant, sans inscription. Les lignes à trancher sont celles dont le montant diverge, le nom est approchant ou aucune inscription ne correspond.',
+        ],
+        'table' => [
+            'title' => 'Les lignes',
+            'body' => "Filtrez par résultat. Pour une ligne à trancher, choisissez l'inscription qui correspond ou indiquez qu'aucune ne correspond.",
+        ],
+        'after' => [
+            'title' => 'Rien ne valide seul',
+            'body' => 'Le rapprochement éclaire votre décision, il ne valide aucune preuve à votre place.',
+        ],
+    ],
+
+    'organisation' => [
+        'intro' => [
+            'title' => "L'organisation",
+            'body' => "Qui vous êtes aux yeux de vos invités : identité légale, marque et adresse. Rien n'est obligatoire à la saisie ; ce qui manque est exigé le jour où vous publiez.",
+        ],
+        'legal' => [
+            'title' => 'Identité légale',
+            'body' => "Nom affiché, raison sociale, forme juridique, signataire, ville, pays et téléphone sont exigés pour publier. Ils figurent sur les billets et les reçus : une modification est inscrite à l'historique.",
+        ],
+        'brand' => [
+            'title' => 'La marque',
+            'body' => "Couleurs, logo, bandeau, cachet et signature. Elles s'appliquent au parcours invité, au billet et aux messages, jamais au back-office. Images JPEG, PNG ou WebP, 5 Mo au plus ; le SVG est refusé.",
+        ],
+        'subdomain' => [
+            'title' => 'Le sous-domaine',
+            'body' => "L'adresse de vos liens publics. Publier un événement le fige : le changer casserait les liens déjà distribués.",
+        ],
+        'after' => [
+            'title' => 'Prêt à publier',
+            'body' => 'Le bandeau en haut de la page nomme ce qui manque encore avant de pouvoir publier.',
+        ],
+    ],
+
+    'billing' => [
+        'intro' => [
+            'title' => 'La facturation',
+            'body' => "Votre plan, votre consommation et vos factures. Rien n'est supprimé si une limite est atteinte : l'organisation retombe simplement sur les limites de son plan.",
+        ],
+        'plan' => [
+            'title' => 'Votre plan',
+            'body' => "Le plan en cours, la période d'essai et les gestes d'abonnement : moyen de paiement, changement de plan, résiliation.",
+        ],
+        'usage' => [
+            'title' => 'Votre consommation',
+            'body' => "Événements actifs, inscrits, membres et messages du mois, face aux limites du plan. Un événement dont la fin est passée ne compte plus comme actif, même sans être clôturé.",
+        ],
+        'invoices' => [
+            'title' => 'Les factures',
+            'body' => 'Les factures de votre abonnement, avec un lien pour les consulter en ligne.',
+        ],
+    ],
+
+    'support_access' => [
+        'intro' => [
+            'title' => "L'accès du support",
+            'body' => "Vous seul décidez si l'équipe Convive peut consulter votre organisation, pour combien de temps et sur quoi.",
+        ],
+        'rules' => [
+            'title' => 'Les règles',
+            'body' => "Lecture seule, durée limitée, personne nommée, chaque consultation tracée et un bandeau visible pendant l'accès.",
+        ],
+        'grant' => [
+            'title' => 'Accorder un accès',
+            'body' => "Choisissez la personne du support, la durée, et si besoin un seul événement. Un seul accès à la fois ; vous pouvez le révoquer ou le prolonger, avec votre mot de passe.",
+        ],
+        'history' => [
+            'title' => "L'historique",
+            'body' => 'Les accès passés : qui, quand, pour quelle portée.',
+        ],
+    ],
 ];

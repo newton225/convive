@@ -15,7 +15,15 @@ export type ProductTourId =
     | 'registrations'
     | 'report'
     | 'team'
-    | 'profiles';
+    | 'profiles'
+    | 'claims'
+    | 'audit'
+    | 'units'
+    | 'payment_accounts'
+    | 'reconciliation'
+    | 'organisation'
+    | 'billing'
+    | 'support_access';
 
 export type ProductTourStep = {
     // Le repere vise, sans le selecteur : `nav-events` pour `[data-tour="nav-events"]`.
@@ -114,5 +122,55 @@ export const productTours: Record<ProductTourId, ProductTourStep[]> = {
         { anchor: 'profiles-list', key: 'list', side: 'top' },
         { key: 'two_factor' },
         { key: 'after' },
+    ],
+    claims: [
+        { key: 'intro' },
+        { anchor: 'claims-filters', key: 'filters', side: 'bottom' },
+        { anchor: 'claims-table', key: 'table', side: 'top' },
+        { key: 'after' },
+    ],
+    audit: [
+        { key: 'intro' },
+        { anchor: 'audit-filters', key: 'filters', side: 'bottom' },
+        { anchor: 'audit-table', key: 'table', side: 'top' },
+        { key: 'after' },
+    ],
+    units: [
+        { key: 'intro' },
+        { anchor: 'units-create', key: 'create', side: 'bottom' },
+        { anchor: 'units-list', key: 'list', side: 'top' },
+        { key: 'after' },
+    ],
+    payment_accounts: [
+        { key: 'intro' },
+        { anchor: 'payment-accounts-add', key: 'add', side: 'bottom' },
+        { key: 'delay' },
+        { anchor: 'payment-accounts-list', key: 'list', side: 'top' },
+    ],
+    reconciliation: [
+        { key: 'intro' },
+        { anchor: 'reconciliation-import', key: 'import', side: 'bottom' },
+        { anchor: 'reconciliation-stats', key: 'stats', side: 'bottom' },
+        { anchor: 'reconciliation-table', key: 'table', side: 'top' },
+        { key: 'after' },
+    ],
+    organisation: [
+        { key: 'intro' },
+        { anchor: 'organisation-legal', key: 'legal', side: 'top' },
+        { anchor: 'organisation-brand', key: 'brand', side: 'top' },
+        { anchor: 'organisation-subdomain', key: 'subdomain', side: 'top' },
+        { key: 'after' },
+    ],
+    billing: [
+        { key: 'intro' },
+        { anchor: 'billing-plan', key: 'plan', side: 'bottom' },
+        { anchor: 'billing-usage', key: 'usage', side: 'top' },
+        { anchor: 'billing-invoices', key: 'invoices', side: 'top' },
+    ],
+    support_access: [
+        { key: 'intro' },
+        { anchor: 'support-access-rules', key: 'rules', side: 'bottom' },
+        { anchor: 'support-access-grant', key: 'grant', side: 'top' },
+        { anchor: 'support-access-history', key: 'history', side: 'top' },
     ],
 };

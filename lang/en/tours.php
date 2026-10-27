@@ -297,4 +297,164 @@ return [
             'body' => 'A change takes effect at once and is written to the action history, with the before and after.',
         ],
     ],
+
+    'claims' => [
+        'intro' => [
+            'title' => 'Claims',
+            'body' => 'The messages your guests write from their booking page. None of your contact details is shown: you call them back.',
+        ],
+        'filters' => [
+            'title' => 'Search and filter',
+            'body' => 'Search for a claim, and show the ones to handle or the ones already handled.',
+        ],
+        'table' => [
+            'title' => 'The list',
+            'body' => 'Each row gives the subject, the message and the number to call back. Once the person has been called, mark the claim as handled: the action is written to the action history.',
+        ],
+        'after' => [
+            'title' => 'No reply in the application',
+            'body' => 'The application does not answer the guest: the state only says "to handle" or "handled". A booking can have three open claims at most.',
+        ],
+    ],
+
+    'audit' => [
+        'intro' => [
+            'title' => 'The action history',
+            'body' => "The organisation's sensitive actions: who, what, when and from which address. It is kept for 24 months and nobody can change or erase it.",
+        ],
+        'filters' => [
+            'title' => 'Search and filter',
+            'body' => 'Search for a name or a word, or narrow the list to one type of action: payment account, team, proof, entry without scan...',
+        ],
+        'table' => [
+            'title' => 'The actions',
+            'body' => 'Sort the list. Each row keeps the before and after of a change: this is how a discreet change gets noticed.',
+        ],
+        'after' => [
+            'title' => 'Who can read it',
+            'body' => 'Only members whose profile allows it see this screen. Entries without a scan and payment account changes also alert the team.',
+        ],
+    ],
+
+    'units' => [
+        'intro' => [
+            'title' => 'Units',
+            'body' => 'The groups your guests pick when they register. Each organisation builds its own.',
+        ],
+        'create' => [
+            'title' => 'Add a unit',
+            'body' => 'Type a name: two units cannot share the same name within an organisation.',
+        ],
+        'list' => [
+            'title' => 'Your units',
+            'body' => '"Special guest" is protected: always last, never renamed, deactivated or deleted. Rename a unit, or deactivate it to remove it from the form: registrations already made keep it.',
+        ],
+        'after' => [
+            'title' => 'At least one unit',
+            'body' => 'At least one always remains, otherwise the registration form could no longer be filled in.',
+        ],
+    ],
+
+    'payment_accounts' => [
+        'intro' => [
+            'title' => 'Payment accounts',
+            'body' => 'The numbers where your guests send their payment. This is the most protected part of the application: a number changed quietly would divert the money of an event.',
+        ],
+        'add' => [
+            'title' => 'Add an account',
+            'body' => 'Choose the channel, the number and the holder. The number must match the network of the channel (for example 07 for Orange Money).',
+        ],
+        'delay' => [
+            'title' => 'The 24-hour delay',
+            'body' => 'Once a paid event has been published, changing the channel, the number or the holder only takes effect after 24 hours. The old number stays displayed meanwhile, and everyone holding this permission is alerted.',
+        ],
+        'list' => [
+            'title' => 'Your accounts',
+            'body' => 'A second Owner can lift the delay, never the one who asked for the change. A change stays flagged for seven days. Each action asks for your password and is written to the history.',
+        ],
+    ],
+
+    'reconciliation' => [
+        'intro' => [
+            'title' => 'Reconciliation',
+            'body' => 'Compare a Mobile Money or bank statement with the proofs submitted, to spot a missing payment or a different amount.',
+        ],
+        'import' => [
+            'title' => 'Import a statement',
+            'body' => 'A CSV file with the columns date, reference, issuer and amount. The lines are compared with the proofs submitted for this event.',
+        ],
+        'stats' => [
+            'title' => 'The statement status',
+            'body' => 'Matched lines, amount mismatch, approximate name, no registration. The lines to decide are the ones with a different amount, an approximate name or no matching registration.',
+        ],
+        'table' => [
+            'title' => 'The lines',
+            'body' => 'Filter by outcome. For a line to decide, pick the matching registration or say that none matches.',
+        ],
+        'after' => [
+            'title' => 'Nothing validates by itself',
+            'body' => 'Reconciliation informs your decision, it does not validate any proof for you.',
+        ],
+    ],
+
+    'organisation' => [
+        'intro' => [
+            'title' => 'The organisation',
+            'body' => 'Who you are in your guests\' eyes: legal identity, brand and address. Nothing is required when typing; what is missing is required the day you publish.',
+        ],
+        'legal' => [
+            'title' => 'Legal identity',
+            'body' => 'Display name, company name, legal form, signatory, city, country and phone are required to publish. They appear on tickets and receipts: a change is written to the history.',
+        ],
+        'brand' => [
+            'title' => 'The brand',
+            'body' => 'Colours, logo, banner, stamp and signature. They apply to the guest journey, the ticket and the messages, never to the back office. JPEG, PNG or WebP images, 5 MB at most; SVG is refused.',
+        ],
+        'subdomain' => [
+            'title' => 'The subdomain',
+            'body' => 'The address of your public links. Publishing an event freezes it: changing it would break the links already handed out.',
+        ],
+        'after' => [
+            'title' => 'Ready to publish',
+            'body' => 'The banner at the top of the page names what is still missing before you can publish.',
+        ],
+    ],
+
+    'billing' => [
+        'intro' => [
+            'title' => 'Billing',
+            'body' => 'Your plan, your usage and your invoices. Nothing is deleted when a limit is reached: the organisation simply falls back to the limits of its plan.',
+        ],
+        'plan' => [
+            'title' => 'Your plan',
+            'body' => 'The current plan, the trial period and the subscription actions: payment method, plan change, cancellation.',
+        ],
+        'usage' => [
+            'title' => 'Your usage',
+            'body' => 'Active events, registrations, members and messages of the month, against the plan limits. An event whose end has passed no longer counts as active, even if it has not been closed.',
+        ],
+        'invoices' => [
+            'title' => 'Invoices',
+            'body' => 'The invoices of your subscription, with a link to view each one online.',
+        ],
+    ],
+
+    'support_access' => [
+        'intro' => [
+            'title' => 'Support access',
+            'body' => 'You alone decide whether the Convive team may look at your organisation, for how long and on what.',
+        ],
+        'rules' => [
+            'title' => 'The rules',
+            'body' => 'Read only, limited time, a named person, every consultation logged and a banner shown during the access.',
+        ],
+        'grant' => [
+            'title' => 'Grant an access',
+            'body' => 'Pick the support person, the duration, and if needed a single event. One access at a time; you can revoke or extend it, with your password.',
+        ],
+        'history' => [
+            'title' => 'History',
+            'body' => 'Past accesses: who, when, and for what scope.',
+        ],
+    ],
 ];

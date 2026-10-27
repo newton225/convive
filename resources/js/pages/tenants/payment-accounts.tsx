@@ -6,6 +6,7 @@ import { ConfirmSummary } from '@/components/confirm-summary';
 import { AddPaymentAccount } from '@/components/payment-accounts/add-payment-account';
 import { PaymentAccountCard } from '@/components/payment-accounts/payment-account-card';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { TwoFactorReconfirmDialog } from '@/components/two-factor-reconfirm-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -77,16 +78,19 @@ export default function PaymentAccounts({
             <h1 className="sr-only">{t('payment_accounts.title')}</h1>
 
             <div className="flex flex-col space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('payment_accounts.title')}
-                    description={t(
-                        delayActive
-                            ? 'payment_accounts.description'
-                            : 'payment_accounts.description_before_publication',
-                        { hours: activationDelayHours },
-                    )}
-                />
+                <div className="flex items-center justify-between">
+                    <Heading
+                        variant="small"
+                        title={t('payment_accounts.title')}
+                        description={t(
+                            delayActive
+                                ? 'payment_accounts.description'
+                                : 'payment_accounts.description_before_publication',
+                            { hours: activationDelayHours },
+                        )}
+                    />
+                    <ProductTourButton tour="payment_accounts" />
+                </div>
 
                 {twoFactorEnabled ? null : (
                     <Alert data-test="payment-account-two-factor-required">
@@ -124,17 +128,22 @@ export default function PaymentAccounts({
                     </p>
                 ) : null}
 
-                <AddPaymentAccount
-                    key={accounts.length}
-                    tenantSlug={tenant.slug}
-                    gettingStartedReturn={gettingStartedReturn}
-                    channels={channels}
-                    delayActive={delayActive}
-                    hasAccounts={accounts.length > 0}
-                />
+                <div data-tour="payment-accounts-add">
+                    <AddPaymentAccount
+                        key={accounts.length}
+                        tenantSlug={tenant.slug}
+                        gettingStartedReturn={gettingStartedReturn}
+                        channels={channels}
+                        delayActive={delayActive}
+                        hasAccounts={accounts.length > 0}
+                    />
+                </div>
 
                 {accounts.length > 0 ? (
-                    <div className="space-y-4">
+                    <div
+                        className="space-y-4"
+                        data-tour="payment-accounts-list"
+                    >
                         {accounts.map((account) => (
                             <PaymentAccountCard
                                 key={account.id}

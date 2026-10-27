@@ -18,4 +18,12 @@ enum ProductTour: string
     case Report = 'report';
     case Team = 'team';
     case Profiles = 'profiles';
+    case Claims = 'claims';
+    case Audit = 'audit';
+    case Units = 'units';
+    case PaymentAccounts = 'payment_accounts';
+    case Reconciliation = 'reconciliation';
+    case Organisation = 'organisation';
+    case Billing = 'billing';
+    case SupportAccess = 'support_access';
 }

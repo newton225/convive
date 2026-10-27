@@ -2,6 +2,7 @@ import { Form, Head, router } from '@inertiajs/react';
 import { Lock, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { SubmitButton } from '@/components/submit-button';
@@ -38,16 +39,20 @@ export default function Units({ tenant, units }: Props) {
             <h1 className="sr-only">{t('units.title')}</h1>
 
             <div className="flex flex-col space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('units.title')}
-                    description={t('units.description')}
-                />
+                <div className="flex items-center justify-between">
+                    <Heading
+                        variant="small"
+                        title={t('units.title')}
+                        description={t('units.description')}
+                    />
+                    <ProductTourButton tour="units" />
+                </div>
 
                 <Form
                     {...store.form(tenant.slug)}
                     resetOnSuccess
                     className="flex flex-wrap items-start gap-2"
+                    data-tour="units-create"
                 >
                     {({ errors, processing }) => (
                         <>
@@ -81,7 +86,7 @@ export default function Units({ tenant, units }: Props) {
                     )}
                 </Form>
 
-                <div className="space-y-2">
+                <div className="space-y-2" data-tour="units-list">
                     {units.map((unit) =>
                         unit.isNone ? (
                             <div

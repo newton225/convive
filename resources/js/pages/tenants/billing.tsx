@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useId, useState } from 'react';
 import AlertError from '@/components/alert-error';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { NonceStyle } from '@/components/nonce-style';
 import { StatusBadge } from '@/components/status-badge';
 import { Badge } from '@/components/ui/badge';
@@ -175,6 +176,7 @@ export default function Billing({
                         title={t('billing.title')}
                         description={tenant.name}
                     />
+                    <ProductTourButton tour="billing" />
                     <Button variant="ghost" size="sm" asChild>
                         <Link href={edit(tenant.slug)}>
                             {t('billing.back')}
@@ -209,7 +211,7 @@ export default function Billing({
                 ) : null}
 
                 <div className="grid gap-4 lg:grid-cols-2">
-                    <Card data-test="billing-plan">
+                    <Card data-test="billing-plan" data-tour="billing-plan">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 {plan.name}
@@ -350,7 +352,7 @@ export default function Billing({
                         </CardContent>
                     </Card>
 
-                    <Card data-test="billing-usage">
+                    <Card data-test="billing-usage" data-tour="billing-usage">
                         <CardHeader>
                             <CardTitle>{t('billing.usage.title')}</CardTitle>
                         </CardHeader>
@@ -512,7 +514,7 @@ export default function Billing({
                     </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3" data-tour="billing-invoices">
                     <Heading
                         variant="small"
                         title={t('billing.invoices.title')}

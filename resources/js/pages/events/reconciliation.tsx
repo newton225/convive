@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { ConfirmSummary } from '@/components/confirm-summary';
 import DataTable from '@/components/data-table';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import InputError from '@/components/input-error';
 import { StatusBadge } from '@/components/status-badge';
 import { SubmitButton } from '@/components/submit-button';
@@ -235,17 +236,21 @@ export default function EventReconciliation({
             <Head title={t('reconciliation.title')} />
 
             <div className="flex flex-col space-y-6">
-                <Heading
-                    variant="small"
-                    title={t('reconciliation.title')}
-                    description={event.name}
-                />
+                <div className="flex items-center justify-between">
+                    <Heading
+                        variant="small"
+                        title={t('reconciliation.title')}
+                        description={event.name}
+                    />
+                    <ProductTourButton tour="reconciliation" />
+                </div>
 
                 {canImport ? (
                     <Form
                         {...importMethod.form([tenant.slug, event.id])}
                         resetOnSuccess
                         className="space-y-2"
+                        data-tour="reconciliation-import"
                     >
                         {({ errors, processing }) => (
                             <>
@@ -312,7 +317,10 @@ export default function EventReconciliation({
                     </div>
                 ) : null}
 
-                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <div
+                    className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+                    data-tour="reconciliation-stats"
+                >
                     {StatCards.map(({ key, stat }) => (
                         <Card
                             key={key}
@@ -387,27 +395,31 @@ export default function EventReconciliation({
                     </div>
                 ) : null}
 
-                <DataTable
-                    columns={columns}
-                    data={rows}
-                    meta={meta}
-                    onPageChange={(page) => navigate({ page })}
-                    sorting={sortingFromParam(filters.sort ?? 'line_number')}
-                    onSortingChange={(sorting) =>
-                        navigate({ sort: sortingToParam(sorting) })
-                    }
-                    rowTestId="reconciliation-row"
-                    emptyState={
-                        <>
-                            <p className="font-medium">
-                                {t('reconciliation.empty.title')}
-                            </p>
-                            <p className="text-muted-foreground text-sm">
-                                {t('reconciliation.empty.description')}
-                            </p>
-                        </>
-                    }
-                />
+                <div data-tour="reconciliation-table">
+                    <DataTable
+                        columns={columns}
+                        data={rows}
+                        meta={meta}
+                        onPageChange={(page) => navigate({ page })}
+                        sorting={sortingFromParam(
+                            filters.sort ?? 'line_number',
+                        )}
+                        onSortingChange={(sorting) =>
+                            navigate({ sort: sortingToParam(sorting) })
+                        }
+                        rowTestId="reconciliation-row"
+                        emptyState={
+                            <>
+                                <p className="font-medium">
+                                    {t('reconciliation.empty.title')}
+                                </p>
+                                <p className="text-muted-foreground text-sm">
+                                    {t('reconciliation.empty.description')}
+                                </p>
+                            </>
+                        }
+                    />
+                </div>
             </div>
 
             <Dialog
