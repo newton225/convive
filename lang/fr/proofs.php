@@ -87,6 +87,10 @@ return [
         'status' => 'Statut du dossier',
     ],
 
+    'purged_match' => [
+        'name' => 'Dossier purgé (preuve rejetée)',
+    ],
+
     'duplicate_reference' => [
         'title' => 'Même référence ailleurs',
         'description' => 'La référence de transaction déposée par :name figure aussi sur ces autres preuves. Deux versements réels n’ont jamais la même référence : vérifiez avant de valider.',

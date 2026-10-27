@@ -22,6 +22,8 @@ export type DuplicateImageMatch = {
     submittedAt: string | null;
     reference: string | null;
     receiptUrl: string | null;
+    // Reste d'une preuve rejetee dont le dossier a ete purge : ni nom, ni dossier, ni capture.
+    purged: boolean;
 };
 
 // Un evenement propose par le selecteur de la file de preuves, avec ses preuves en attente.

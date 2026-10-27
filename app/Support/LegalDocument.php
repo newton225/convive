@@ -18,7 +18,7 @@ class LegalDocument
      * Date de la version en vigueur, enregistree avec le compte qui l'accepte. Elle avance a
      * chaque changement de fond des textes.
      */
-    public const Version = '2026-10-25';
+    public const Version = '2026-10-27';
 
     /**
      * Les documents et l'adresse sous laquelle chacun est publie.

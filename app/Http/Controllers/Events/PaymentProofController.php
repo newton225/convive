@@ -13,6 +13,7 @@ use App\Models\Event;
 use App\Models\PaymentProof;
 use App\Models\Registration;
 use App\Models\RegistrationCompanion;
+use App\Models\RejectedProofTrace;
 use App\Models\Tenant;
 use App\Support\ListPage;
 use App\Support\ProofQueueEvents;
@@ -280,6 +281,31 @@ class PaymentProofController extends Controller
     }
 
     /**
+     * Une preuve rejetee dont le dossier a ete purge, presentee comme les autres doublons : sans nom,
+     * sans dossier ni capture, il n'en reste que la reference, la date et l'evenement. L'identifiant est
+     * negatif pour ne jamais croiser celui d'une vraie preuve dans une liste.
+     *
+     * @return array<string, mixed>
+     */
+    private function traceMatch(RejectedProofTrace $trace, Registration $registration, bool $withRegistration = false): array
+    {
+        return [
+            'proofId' => -$trace->id,
+            'registrationReference' => null,
+            'name' => (string) __('proofs.purged_match.name'),
+            'eventName' => $trace->event->name,
+            'sameEvent' => $trace->event_id === $registration->event_id,
+            'status' => RegistrationStatus::ProofRejected->value,
+            'statusLabel' => RegistrationStatus::ProofRejected->label(),
+            'submittedAt' => $trace->submitted_at?->toISOString(),
+            'reference' => $trace->reference,
+            'receiptUrl' => null,
+            'purged' => true,
+            ...($withRegistration ? ['sameRegistration' => false] : []),
+        ];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function row(Registration $registration): array
@@ -320,7 +346,9 @@ class PaymentProofController extends Controller
                 'submittedAt' => $match->created_at?->toISOString(),
                 'reference' => $match->reference,
                 'receiptUrl' => $this->receiptUrl($match, $match->registration->event_id),
-            ])->values()->all(),
+                'purged' => false,
+            ])->concat($proof->duplicateImageTraces()->map(fn (RejectedProofTrace $trace) => $this->traceMatch($trace, $registration)))
+                ->values()->all(),
             // Les autres preuves qui portent la meme reference : meme dossier (nouveau depot) ou autre
             // inscription, d'un autre evenement le cas echeant.
             'duplicateReferenceMatches' => ($this->referenceMatches->get($proof->reference_key) ?? new Collection)
@@ -337,10 +365,12 @@ class PaymentProofController extends Controller
                     'submittedAt' => $match->created_at?->toISOString(),
                     'reference' => $match->reference,
                     'receiptUrl' => $this->receiptUrl($match, $match->registration->event_id),
-                ])->values()->all(),
+                    'purged' => false,
+                ])->concat($proof->duplicateReferenceTraces()->map(fn (RejectedProofTrace $trace) => $this->traceMatch($trace, $registration, withRegistration: true)))
+                ->values()->all(),
             'signals' => [
                 'duplicateReference' => $proof->hasDuplicateReference(),
-                'duplicateImage' => $duplicateImageProofs->isNotEmpty(),
+                'duplicateImage' => $proof->hasDuplicateImage(),
                 'referenceMissingFromStatement' => $proof->referenceMissingFromStatement(),
                 'statementAmountMismatch' => $proof->hasStatementAmountMismatch(),
                 // Pas un soupcon : une information que le tresorier doit lire avant de valider.

@@ -94,7 +94,7 @@ return [
                     'items' => [
                         'Compte : jusqu’à ce que vous le supprimiez.',
                         'Organisation et tout son contenu (événements, invités, preuves, billets) : tant que l’organisation existe. C’est elle qui décide de la durée de conservation des données de ses invités.',
-                        'Inscriptions non finalisées (sans preuve validée) : supprimées à l’échéance fixée par l’organisateur, avec la capture de la preuve éventuellement déposée.',
+                        'Inscriptions non finalisées (sans preuve validée) : supprimées à l’échéance fixée par l’organisateur, avec la capture de la preuve éventuellement déposée. D’une preuve rejetée, il ne reste qu’une trace sans nom ni numéro (référence de la transaction, empreinte de la capture, motif), gardée avec l’événement pour reconnaître un versement déjà refusé.',
                         'Organisation supprimée : invisible immédiatement, puis effacée définitivement 30 jours plus tard.',
                         'Événement supprimé : effacé définitivement 30 jours plus tard.',
                         'Journal des actions : 24 mois.',

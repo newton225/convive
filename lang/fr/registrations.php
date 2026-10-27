@@ -165,7 +165,7 @@ return [
         ],
         'purge' => [
             'title' => 'Purger les inscriptions non finalisées',
-            'description' => 'Les dossiers brouillon, en réservation expirée ou à preuve rejetée sont supprimés. Les réservations dont le décompte tourne encore sont conservées : un invité est peut-être en train de payer. Pour en supprimer certains seulement, cochez-les dans la liste.',
+            'description' => 'Les dossiers brouillon, en réservation expirée ou à preuve rejetée sont supprimés. Les réservations dont le décompte tourne encore sont conservées : un invité est peut-être en train de payer. Pour en supprimer certains seulement, cochez-les dans la liste. Pour une preuve rejetée, seule une trace sans nom ni numéro est gardée (référence, empreinte de la capture, motif) : elle permet de reconnaître un versement déjà refusé s’il est redéposé.',
             'submit' => 'Confirmer la purge',
         ],
         'purge_selection' => [

@@ -299,7 +299,7 @@ return [
         'help' => [
             'reference' => 'Le code de la transaction, indiqué dans le message de confirmation de Wave, Orange Money, MTN ou Moov, ou sur votre reçu bancaire. Il permet à l’organisateur de retrouver votre paiement.',
             'full_payment' => 'Le montant de :amount doit parvenir à l’organisation en une seule fois, dans son intégralité. Si votre opérateur prélève des frais de transaction, ajoutez-les pour que la somme reçue soit complète. Un paiement partiel ou en plusieurs fois n’est pas accepté.',
-            'receipt_authentic' => 'Envoyez la capture d’écran d’origine, telle que votre application l’a produite. Une capture d’écran éditée, modifiée ou retouchée est systématiquement rejetée.',
+            'receipt_authentic' => 'Envoyez la capture d’écran d’origine, telle que votre application l’a produite. Une capture d’écran éditée, modifiée ou retouchée est systématiquement rejetée. La capture doit être entière, sans rognage : on doit y voir le montant, la date et l’heure, la référence de la transaction et le bénéficiaire, de quoi identifier la transaction.',
             'guest_note' => 'Tout ce que l’organisateur doit savoir pour retrouver votre paiement : montant différent, envoi par une autre personne. Il le lira avant de valider.',
         ],
         'submit' => 'Envoyer ma preuve',

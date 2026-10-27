@@ -165,7 +165,7 @@ return [
         ],
         'purge' => [
             'title' => 'Purge unfinalized registrations',
-            'description' => 'Draft, expired and rejected-proof records are deleted. Reservations whose countdown is still running are kept: a guest may be paying. To delete only some, tick them in the list.',
+            'description' => 'Draft, expired and rejected-proof records are deleted. Reservations whose countdown is still running are kept: a guest may be paying. To delete only some, tick them in the list. For a rejected proof, only a trace with no name or number is kept (reference, screenshot fingerprint, reason): it lets you recognise a payment already refused if it is submitted again.',
             'submit' => 'Confirm purge',
         ],
         'purge_selection' => [

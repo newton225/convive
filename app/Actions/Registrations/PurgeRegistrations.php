@@ -9,6 +9,7 @@ use App\Enums\RegistrationStatus;
 use App\Models\Event;
 use App\Models\PaymentProof;
 use App\Models\Registration;
+use App\Models\RejectedProofTrace;
 use App\Models\Tenant;
 
 /**
@@ -60,9 +61,25 @@ class PurgeRegistrations
         // disque. La suppression groupee ci-dessous emporte bien leurs lignes (cle etrangere en
         // cascade), mais sans passer par le modele : les captures, qui portent le nom, le numero et
         // le montant de l'invite, resteraient sur le disque sans plus rien pour les retrouver.
+        //
+        // Une preuve rejetee laisse une trace anonyme (decision du 2026-10-27) : sans elle, la meme fausse
+        // reference ou la meme capture, redeposee, ne serait plus reconnue.
         PaymentProof::whereIn('registration_id', (clone $query)->select('id'))
             ->get()
-            ->each(fn (PaymentProof $proof) => $proof->delete());
+            ->each(function (PaymentProof $proof) use ($event) {
+                if ($proof->rejection_reason !== null) {
+                    RejectedProofTrace::create([
+                        'event_id' => $event->id,
+                        'reference' => $proof->reference,
+                        'reference_key' => $proof->reference_key,
+                        'perceptual_hash' => $proof->perceptual_hash,
+                        'rejection_reason' => $proof->rejection_reason,
+                        'submitted_at' => $proof->created_at,
+                    ]);
+                }
+
+                $proof->delete();
+            });
 
         // Les references seules (jamais les noms ni les numeros) : de quoi retrouver ce qui a ete
         // purge sans conserver de donnees personnelles dans le journal.
@@ -73,11 +90,11 @@ class PurgeRegistrations
         activity()
             ->performedOn($event)
             ->event('purged')
-            ->withProperties(array_filter([
+            ->withProperties([
                 'count' => $count,
                 'seats_freed' => $seatsFreed,
-                'references' => $only !== null ? $references : null,
-            ], fn ($value) => $value !== null))
+                'references' => $references,
+            ])
             ->log('registrations.purged');
 
         app(SendAlert::class)->toTenantMembers(

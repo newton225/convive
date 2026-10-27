@@ -92,7 +92,7 @@ return [
                     'items' => [
                         'Account: until you delete it.',
                         'Organisation and all its content (events, guests, proofs, tickets): as long as the organisation exists. The organisation decides how long the data of its guests is kept.',
-                        'Unfinished registrations (no approved proof): deleted at the deadline set by the organiser, with the screenshot of any proof submitted.',
+                        'Unfinished registrations (no approved proof): deleted at the deadline set by the organiser, with the screenshot of any proof submitted. Of a rejected proof, only a trace with no name or number remains (transaction reference, screenshot fingerprint, reason), kept with the event to recognise a payment that was already refused.',
                         'Deleted organisation: invisible immediately, then erased for good 30 days later.',
                         'Deleted event: erased for good 30 days later.',
                         'Action log: 24 months.',

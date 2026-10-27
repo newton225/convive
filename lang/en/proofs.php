@@ -87,6 +87,10 @@ return [
         'status' => 'Registration status',
     ],
 
+    'purged_match' => [
+        'name' => 'Purged record (rejected proof)',
+    ],
+
     'duplicate_reference' => [
         'title' => 'Same reference elsewhere',
         'description' => 'The transaction reference submitted by :name also appears on these other proofs. Two real payments never share a reference: check before approving.',

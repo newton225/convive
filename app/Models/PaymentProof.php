@@ -48,7 +48,7 @@ class PaymentProof extends Model implements HasMedia
      * Les signaux deja calcules en lot par `preloadSignals()`, ou null : les methodes de signal
      * interrogent alors la base elles-memes (une preuve isolee).
      *
-     * @var array{duplicateReference: bool, duplicateImageIds: array<int, int>, referenceMissingFromStatement: bool, statementAmountMismatch: bool}|null
+     * @var array{duplicateReference: bool, duplicateImageIds: array<int, int>, referenceTraces: SupportCollection<int, RejectedProofTrace>, imageTraces: SupportCollection<int, RejectedProofTrace>, referenceMissingFromStatement: bool, statementAmountMismatch: bool}|null
      */
     private ?array $signals = null;
 
@@ -142,7 +142,60 @@ class PaymentProof extends Model implements HasMedia
         return self::query()
             ->where('reference_key', $this->reference_key)
             ->whereKeyNot($this->getKey())
-            ->exists();
+            ->exists()
+            || RejectedProofTrace::query()->where('reference_key', $this->reference_key)->exists();
+    }
+
+    /**
+     * Les traces de preuves rejetees dont le dossier a ete purge (decision du 2026-10-27) qui portent la
+     * meme reference : ce qu'on sait encore d'un versement deja refuse.
+     *
+     * @return SupportCollection<int, RejectedProofTrace>
+     */
+    public function duplicateReferenceTraces(): SupportCollection
+    {
+        if ($this->reference_key === null) {
+            return new SupportCollection;
+        }
+
+        if ($this->signals !== null) {
+            return $this->signals['referenceTraces'];
+        }
+
+        return RejectedProofTrace::query()
+            ->with('event')
+            ->where('reference_key', $this->reference_key)
+            ->orderBy('submitted_at')
+            ->get()
+            ->toBase();
+    }
+
+    /**
+     * Les traces de preuves rejetees dont la capture ressemble a celle-ci, a l'empreinte pres.
+     *
+     * @return SupportCollection<int, RejectedProofTrace>
+     */
+    public function duplicateImageTraces(): SupportCollection
+    {
+        if ($this->perceptual_hash === null) {
+            return new SupportCollection;
+        }
+
+        if ($this->signals !== null) {
+            return $this->signals['imageTraces'];
+        }
+
+        return RejectedProofTrace::query()
+            ->with('event')
+            ->whereNotNull('perceptual_hash')
+            ->orderBy('submitted_at')
+            ->get()
+            ->filter(fn (RejectedProofTrace $trace) => PerceptualHash::hammingDistance(
+                $this->perceptual_hash,
+                $trace->perceptual_hash,
+            ) <= self::DuplicateHashThreshold)
+            ->values()
+            ->toBase();
     }
 
     /**
@@ -151,7 +204,7 @@ class PaymentProof extends Model implements HasMedia
      */
     public function hasDuplicateImage(): bool
     {
-        return $this->duplicateImageProofIds()->isNotEmpty();
+        return $this->duplicateImageProofIds()->isNotEmpty() || $this->duplicateImageTraces()->isNotEmpty();
     }
 
     /**
@@ -270,6 +323,11 @@ class PaymentProof extends Model implements HasMedia
         $byReference = $all->whereNotNull('reference_key')->groupBy('reference_key');
         $hashed = $all->whereNotNull('perceptual_hash');
 
+        // Les traces des dossiers purges, lues une fois pour toute la page.
+        $traces = RejectedProofTrace::query()->with('event')->orderBy('submitted_at')->get()->toBase();
+        $tracesByReference = $traces->whereNotNull('reference_key')->groupBy('reference_key');
+        $hashedTraces = $traces->whereNotNull('perceptual_hash');
+
         // Les lignes de releve de chaque evenement concerne, pour les references de la page.
         $statement = [];
 
@@ -295,9 +353,16 @@ class PaymentProof extends Model implements HasMedia
             $lines = $statement[$proof->registration->event_id];
             $amounts = $lines['amounts']->get($key, collect());
 
+            $referenceTraces = $proof->reference_key === null ? collect() : $tracesByReference->get($proof->reference_key, collect())->values();
+
             $proof->signals = [
                 'duplicateReference' => $proof->reference_key !== null
-                    && $byReference->get($proof->reference_key, collect())->contains(fn (self $other) => $other->id !== $proof->id),
+                    && ($byReference->get($proof->reference_key, collect())->contains(fn (self $other) => $other->id !== $proof->id)
+                        || $referenceTraces->isNotEmpty()),
+                'referenceTraces' => $referenceTraces,
+                'imageTraces' => $proof->perceptual_hash === null ? collect() : $hashedTraces
+                    ->filter(fn (RejectedProofTrace $trace) => PerceptualHash::hammingDistance($proof->perceptual_hash, $trace->perceptual_hash) <= self::DuplicateHashThreshold)
+                    ->values(),
                 'duplicateImageIds' => $proof->perceptual_hash === null ? [] : $hashed
                     ->filter(fn (self $other) => $other->id !== $proof->id
                         && PerceptualHash::hammingDistance($proof->perceptual_hash, $other->perceptual_hash) <= self::DuplicateHashThreshold)
