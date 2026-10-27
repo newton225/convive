@@ -27,6 +27,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property int $payment_account_id
  * @property PaymentChannel $channel
  * @property string|null $reference
+ * @property string|null $reference_key
  * @property string|null $guest_note
  * @property ProofRejectionReason|null $rejection_reason
  * @property string|null $rejection_note
@@ -105,12 +106,32 @@ class PaymentProof extends Model implements HasMedia
     }
 
     /**
-     * Determine whether another proof carries the same transaction reference (README 2.9).
-     * Une reference vide (versement en especes) n'est jamais consideree comme un doublon.
+     * La forme sous laquelle deux references se comparent (decision du 2026-10-27) : lettres et chiffres
+     * seulement, en majuscules. « ci2410 abc-123 » et « CI2410ABC123 » designent la meme transaction.
+     * Nulle pour une reference vide ou sans aucun caractere utile.
+     */
+    public static function referenceKey(?string $reference): ?string
+    {
+        $key = mb_strtoupper((string) preg_replace('/[^\p{L}\p{N}]+/u', '', (string) $reference));
+
+        return $key === '' ? null : $key;
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $proof) {
+            $proof->reference_key = self::referenceKey($proof->reference);
+        });
+    }
+
+    /**
+     * Determine whether another proof carries the same transaction reference (README 2.9), compared in
+     * its normalised form (`referenceKey()`). Une reference vide (versement en especes) n'est jamais
+     * consideree comme un doublon.
      */
     public function hasDuplicateReference(): bool
     {
-        if ($this->reference === null) {
+        if ($this->reference_key === null) {
             return false;
         }
 
@@ -119,7 +140,7 @@ class PaymentProof extends Model implements HasMedia
         }
 
         return self::query()
-            ->where('reference', $this->reference)
+            ->where('reference_key', $this->reference_key)
             ->whereKeyNot($this->getKey())
             ->exists();
     }
@@ -245,8 +266,8 @@ class PaymentProof extends Model implements HasMedia
             return;
         }
 
-        $all = self::query()->get(['id', 'reference', 'perceptual_hash']);
-        $byReference = $all->whereNotNull('reference')->groupBy('reference');
+        $all = self::query()->get(['id', 'reference', 'reference_key', 'perceptual_hash']);
+        $byReference = $all->whereNotNull('reference_key')->groupBy('reference_key');
         $hashed = $all->whereNotNull('perceptual_hash');
 
         // Les lignes de releve de chaque evenement concerne, pour les references de la page.
@@ -275,8 +296,8 @@ class PaymentProof extends Model implements HasMedia
             $amounts = $lines['amounts']->get($key, collect());
 
             $proof->signals = [
-                'duplicateReference' => $proof->reference !== null
-                    && $byReference->get($proof->reference, collect())->contains(fn (self $other) => $other->id !== $proof->id),
+                'duplicateReference' => $proof->reference_key !== null
+                    && $byReference->get($proof->reference_key, collect())->contains(fn (self $other) => $other->id !== $proof->id),
                 'duplicateImageIds' => $proof->perceptual_hash === null ? [] : $hashed
                     ->filter(fn (self $other) => $other->id !== $proof->id
                         && PerceptualHash::hammingDistance($proof->perceptual_hash, $other->perceptual_hash) <= self::DuplicateHashThreshold)

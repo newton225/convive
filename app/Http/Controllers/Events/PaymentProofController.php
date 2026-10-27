@@ -266,17 +266,17 @@ class PaymentProofController extends Controller
      */
     private function loadReferenceMatches(Collection $registrations): void
     {
-        $references = $registrations->map(fn (Registration $registration) => $registration->latestProof?->reference)->filter()->unique()->values();
+        $references = $registrations->map(fn (Registration $registration) => $registration->latestProof?->reference_key)->filter()->unique()->values();
 
         $this->referenceMatches = $references->isEmpty()
             ? new Collection
             : PaymentProof::query()
-                ->whereIn('reference', $references)
+                ->whereIn('reference_key', $references)
                 ->with(['registration.event', 'media'])
                 ->orderBy('created_at')
                 ->get()
                 ->toBase()
-                ->groupBy('reference');
+                ->groupBy('reference_key');
     }
 
     /**
@@ -323,7 +323,7 @@ class PaymentProofController extends Controller
             ])->values()->all(),
             // Les autres preuves qui portent la meme reference : meme dossier (nouveau depot) ou autre
             // inscription, d'un autre evenement le cas echeant.
-            'duplicateReferenceMatches' => ($this->referenceMatches->get($proof->reference) ?? new Collection)
+            'duplicateReferenceMatches' => ($this->referenceMatches->get($proof->reference_key) ?? new Collection)
                 ->reject(fn (PaymentProof $match) => $match->id === $proof->id)
                 ->map(fn (PaymentProof $match) => [
                     'proofId' => $match->id,

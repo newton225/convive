@@ -251,6 +251,49 @@ class SubmitPaymentProofTest extends TestCase
         $this->assertTrue($tenant->asCurrent(fn () => $second->hasDuplicateReference()));
     }
 
+    public function test_une_reference_recopiee_avec_des_espaces_ou_des_tirets_est_un_doublon(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        [$original, $copy] = $tenant->asCurrent(fn () => [
+            PaymentProof::factory()->withReference('CI2410ABC123')->create(),
+            PaymentProof::factory()->withReference('ci2410 abc-123')->create(),
+        ]);
+
+        $this->assertSame('CI2410ABC123', $copy->reference_key);
+        $this->assertSame('ci2410 abc-123', $copy->reference);
+        $this->assertTrue($tenant->asCurrent(fn () => $original->hasDuplicateReference()));
+        $this->assertTrue($tenant->asCurrent(fn () => $copy->hasDuplicateReference()));
+    }
+
+    public function test_une_reference_sans_aucun_caractere_utile_n_est_jamais_un_doublon(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        [$first, $second] = $tenant->asCurrent(fn () => [
+            PaymentProof::factory()->withReference('---')->create(),
+            PaymentProof::factory()->withReference(' . ')->create(),
+        ]);
+
+        $this->assertNull($first->reference_key);
+        $this->assertFalse($tenant->asCurrent(fn () => $second->hasDuplicateReference()));
+    }
+
+    public function test_deux_references_differentes_apres_normalisation_ne_sont_pas_un_doublon(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+
+        [$first] = $tenant->asCurrent(fn () => [
+            PaymentProof::factory()->withReference('WAVE-1234')->create(),
+            PaymentProof::factory()->withReference('WAVE-1235')->create(),
+        ]);
+
+        $this->assertFalse($tenant->asCurrent(fn () => $first->hasDuplicateReference()));
+    }
+
     public function test_une_reference_isolee_n_est_pas_signalee_comme_doublon(): void
     {
         $owner = User::factory()->withTwoFactor()->create();
