@@ -343,11 +343,11 @@ return [
         ],
         'create' => [
             'title' => 'Ajouter une unité',
-            'body' => "Saisissez un nom : deux unités ne peuvent pas porter le même nom dans une organisation.",
+            'body' => 'Saisissez un nom : deux unités ne peuvent pas porter le même nom dans une organisation.',
         ],
         'list' => [
             'title' => 'Vos unités',
-            'body' => "Renommez une unité ou désactivez-la pour la retirer du formulaire : les inscriptions déjà prises la gardent. « Invité spécial » est protégée : toujours en dernier, ni renommée, ni désactivée, ni supprimée.",
+            'body' => 'Renommez une unité ou désactivez-la pour la retirer du formulaire : les inscriptions déjà prises la gardent. « Invité spécial » est protégée : toujours en dernier, ni renommée, ni désactivée, ni supprimée.',
         ],
         'after' => [
             'title' => 'Au moins une unité',
@@ -362,10 +362,10 @@ return [
         ],
         'add' => [
             'title' => 'Ajouter un compte',
-            'body' => "Choisissez le canal, le numéro et le titulaire. Le numéro doit correspondre au réseau du canal (par exemple 07 pour Orange Money).",
+            'body' => 'Choisissez le canal, le numéro et le titulaire. Le numéro doit correspondre au réseau du canal (par exemple 07 pour Orange Money).',
         ],
         'delay' => [
-            'title' => "Le délai de 24 heures",
+            'title' => 'Le délai de 24 heures',
             'body' => "Dès qu'un événement payant a été publié, changer le canal, le numéro ou le titulaire n'est actif qu'après 24 heures. L'ancien numéro reste affiché entre-temps, et tous les porteurs de cette permission sont alertés.",
         ],
         'list' => [
@@ -431,7 +431,7 @@ return [
         ],
         'usage' => [
             'title' => 'Votre consommation',
-            'body' => "Événements actifs, inscrits, membres et messages du mois, face aux limites du plan. Un événement dont la fin est passée ne compte plus comme actif, même sans être clôturé.",
+            'body' => 'Événements actifs, inscrits, membres et messages du mois, face aux limites du plan. Un événement dont la fin est passée ne compte plus comme actif, même sans être clôturé.',
         ],
         'invoices' => [
             'title' => 'Les factures',
@@ -450,7 +450,7 @@ return [
         ],
         'grant' => [
             'title' => 'Accorder un accès',
-            'body' => "Choisissez la personne du support, la durée, et si besoin un seul événement. Un seul accès à la fois ; vous pouvez le révoquer ou le prolonger, avec votre mot de passe.",
+            'body' => 'Choisissez la personne du support, la durée, et si besoin un seul événement. Un seul accès à la fois ; vous pouvez le révoquer ou le prolonger, avec votre mot de passe.',
         ],
         'history' => [
             'title' => "L'historique",

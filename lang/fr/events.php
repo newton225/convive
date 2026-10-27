@@ -312,6 +312,12 @@ return [
         'pending_proofs' => 'Preuves en attente',
     ],
 
+    'confirm_duplicate' => [
+        'title' => "Dupliquer l'événement",
+        'description' => "Une copie de « :name » sera créée en brouillon, avec ses dates, ses tarifs, son plan de salle, ses comptes de versement et ses réglages. Elle aura son propre lien public. Aucune inscription ni aucune preuve n'est copiée.",
+        'confirm' => 'Dupliquer',
+    ],
+
     'settings' => [
         'link' => 'Réglages',
     ],

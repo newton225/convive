@@ -312,6 +312,12 @@ return [
         'pending_proofs' => 'Pending proofs',
     ],
 
+    'confirm_duplicate' => [
+        'title' => 'Duplicate event',
+        'description' => 'A draft copy of ":name" will be created, with its dates, prices, seating plan, payment accounts and settings. It gets its own public link. No registration or proof is copied.',
+        'confirm' => 'Duplicate',
+    ],
+
     'settings' => [
         'link' => 'Settings',
     ],

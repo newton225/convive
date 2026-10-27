@@ -1,6 +1,8 @@
 import { Link, router } from '@inertiajs/react';
 import { Ellipsis } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -47,6 +49,8 @@ export function EventActionsMenu({
 }: Props) {
     const { t } = useTranslation();
     const { download } = useFileDownload();
+    const [confirmingDuplicate, setConfirmingDuplicate] = useState(false);
+    const [duplicating, setDuplicating] = useState(false);
     // Venu de la carte « Premiers pas » : la publication depuis la fiche ramene au tableau de bord.
     const gettingStartedReturn = useGettingStartedReturn();
     const target: [string, number] = [tenantSlug, event.id];
@@ -130,43 +134,27 @@ export function EventActionsMenu({
     // Radix laisse `pointer-events: none` sur la page quand un dialogue s'ouvre pendant la
     // fermeture du menu, et les boutons de la confirmation ne repondent plus.
     return (
-        <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t('events.card.more_actions', {
-                        name: event.name,
-                    })}
-                    data-test="event-actions"
-                >
-                    <Ellipsis />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-                {follow.length > 0 ? (
-                    <DropdownMenuGroup>
-                        <DropdownMenuLabel className="text-muted-foreground text-xs">
-                            {t('events.card.group_follow')}
-                        </DropdownMenuLabel>
-                        {follow.map((item) => (
-                            <DropdownMenuItem key={item.test} asChild>
-                                <Link href={item.href} data-test={item.test}>
-                                    {item.label}
-                                </Link>
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuGroup>
-                ) : null}
-
-                {dayOf.length > 0 || showChecklists ? (
-                    <>
-                        <DropdownMenuSeparator />
+        <>
+            <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t('events.card.more_actions', {
+                            name: event.name,
+                        })}
+                        data-test="event-actions"
+                    >
+                        <Ellipsis />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                    {follow.length > 0 ? (
                         <DropdownMenuGroup>
                             <DropdownMenuLabel className="text-muted-foreground text-xs">
-                                {t('events.card.group_day')}
+                                {t('events.card.group_follow')}
                             </DropdownMenuLabel>
-                            {dayOf.map((item) => (
+                            {follow.map((item) => (
                                 <DropdownMenuItem key={item.test} asChild>
                                     <Link
                                         href={item.href}
@@ -176,64 +164,112 @@ export function EventActionsMenu({
                                     </Link>
                                 </DropdownMenuItem>
                             ))}
-                            {showChecklists ? (
-                                <DropdownMenuItem
-                                    onSelect={() =>
-                                        void download(checklists(target).url)
-                                    }
-                                    data-test="event-checklists"
-                                >
-                                    {t('events.actions.checklists')}
-                                </DropdownMenuItem>
-                            ) : null}
                         </DropdownMenuGroup>
-                    </>
-                ) : null}
-
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                    <DropdownMenuLabel className="text-muted-foreground text-xs">
-                        {t('events.card.group_event')}
-                    </DropdownMenuLabel>
-                    {sheet.map((item) => (
-                        <DropdownMenuItem key={item.test} asChild>
-                            <Link href={item.href} data-test={item.test}>
-                                {item.label}
-                            </Link>
-                        </DropdownMenuItem>
-                    ))}
-                    {event.publicUrl ? (
-                        <DropdownMenuItem
-                            onSelect={copyLink}
-                            data-test="event-copy-link"
-                        >
-                            {t('events.actions.copy_link')}
-                        </DropdownMenuItem>
                     ) : null}
-                    {allowed(Permission.EventsDuplicate) ? (
-                        <DropdownMenuItem
-                            onSelect={() => router.post(duplicate(target).url)}
-                            data-test="event-duplicate"
-                        >
-                            {t('events.actions.duplicate')}
-                        </DropdownMenuItem>
-                    ) : null}
-                </DropdownMenuGroup>
 
-                {allowed(Permission.EventsClose) &&
-                event.status !== 'closed' ? (
-                    <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            variant="destructive"
-                            onSelect={onClose}
-                            data-test="event-close"
-                        >
-                            {t('events.actions.close')}
-                        </DropdownMenuItem>
-                    </>
-                ) : null}
-            </DropdownMenuContent>
-        </DropdownMenu>
+                    {dayOf.length > 0 || showChecklists ? (
+                        <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
+                                <DropdownMenuLabel className="text-muted-foreground text-xs">
+                                    {t('events.card.group_day')}
+                                </DropdownMenuLabel>
+                                {dayOf.map((item) => (
+                                    <DropdownMenuItem key={item.test} asChild>
+                                        <Link
+                                            href={item.href}
+                                            data-test={item.test}
+                                        >
+                                            {item.label}
+                                        </Link>
+                                    </DropdownMenuItem>
+                                ))}
+                                {showChecklists ? (
+                                    <DropdownMenuItem
+                                        onSelect={() =>
+                                            void download(
+                                                checklists(target).url,
+                                            )
+                                        }
+                                        data-test="event-checklists"
+                                    >
+                                        {t('events.actions.checklists')}
+                                    </DropdownMenuItem>
+                                ) : null}
+                            </DropdownMenuGroup>
+                        </>
+                    ) : null}
+
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                        <DropdownMenuLabel className="text-muted-foreground text-xs">
+                            {t('events.card.group_event')}
+                        </DropdownMenuLabel>
+                        {sheet.map((item) => (
+                            <DropdownMenuItem key={item.test} asChild>
+                                <Link href={item.href} data-test={item.test}>
+                                    {item.label}
+                                </Link>
+                            </DropdownMenuItem>
+                        ))}
+                        {event.publicUrl ? (
+                            <DropdownMenuItem
+                                onSelect={copyLink}
+                                data-test="event-copy-link"
+                            >
+                                {t('events.actions.copy_link')}
+                            </DropdownMenuItem>
+                        ) : null}
+                        {allowed(Permission.EventsDuplicate) ? (
+                            <DropdownMenuItem
+                                onSelect={() => setConfirmingDuplicate(true)}
+                                data-test="event-duplicate"
+                            >
+                                {t('events.actions.duplicate')}
+                            </DropdownMenuItem>
+                        ) : null}
+                    </DropdownMenuGroup>
+
+                    {allowed(Permission.EventsClose) &&
+                    event.status !== 'closed' ? (
+                        <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                variant="destructive"
+                                onSelect={onClose}
+                                data-test="event-close"
+                            >
+                                {t('events.actions.close')}
+                            </DropdownMenuItem>
+                        </>
+                    ) : null}
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <ConfirmActionDialog
+                open={confirmingDuplicate}
+                onOpenChange={setConfirmingDuplicate}
+                title={t('events.confirm_duplicate.title')}
+                description={t('events.confirm_duplicate.description', {
+                    name: event.name,
+                })}
+                confirmLabel={t('events.confirm_duplicate.confirm')}
+                processing={duplicating}
+                testId="event-duplicate-dialog"
+                onConfirm={() =>
+                    router.post(
+                        duplicate(target).url,
+                        {},
+                        {
+                            onStart: () => setDuplicating(true),
+                            onFinish: () => {
+                                setDuplicating(false);
+                                setConfirmingDuplicate(false);
+                            },
+                        },
+                    )
+                }
+            />
+        </>
     );
 }

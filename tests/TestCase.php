@@ -41,6 +41,12 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
+        // Les pages se rendent sans lire `public/build/manifest.json` : un test ne depend pas de l'etat
+        // de la derniere compilation. Sans cela, une page ajoutee depuis le dernier `npm run build`
+        // repondait 500 (« Unable to locate file in Vite manifest »), et seul un `public/hot` perime le
+        // masquait.
+        $this->withoutVite();
+
         if (self::onPostgres()) {
             $this->prepareTenantDatabasesOnPostgres();
         }

@@ -177,7 +177,9 @@ class RejectedProofTraceTest extends TestCase
         $this->tenant->asCurrent(function () {
             $this->assertSame(1, RejectedProofTrace::count());
 
-            $this->event->delete();
+            // La suppression d'un evenement passe d'abord par la corbeille (30 jours) : c'est l'effacement
+            // definitif qui emporte ses traces.
+            $this->event->forceDelete();
 
             $this->assertSame(0, RejectedProofTrace::count());
         });
@@ -189,7 +191,7 @@ class RejectedProofTraceTest extends TestCase
 
         $this->purge();
 
-        $activity = Activity::where('description', 'registrations.purged')->latest('id')->firstOrFail();
+        $activity = $this->tenant->asCurrent(fn () => Activity::where('description', 'registrations.purged')->latest('id')->firstOrFail());
 
         $this->assertSame(['CO-2026-0099'], $activity->properties['references']);
         $this->assertStringNotContainsString('Awa Kone', (string) json_encode($activity->properties));

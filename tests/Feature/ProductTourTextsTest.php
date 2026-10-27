@@ -85,17 +85,29 @@ class ProductTourTextsTest extends TestCase
 
     public function test_chaque_repere_d_etape_existe_dans_une_page(): void
     {
-        $pages = collect(glob(resource_path('js/{pages,components}/{*,*/*}.tsx'), GLOB_BRACE))
-            ->map(fn (string $file) => (string) file_get_contents($file))
-            ->implode("\n");
+        $files = new \RegexIterator(
+            new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(resource_path('js'))),
+            '/\.tsx$/',
+        );
+
+        $pages = '';
+
+        foreach ($files as $file) {
+            $pages .= file_get_contents($file->getPathname())."\n";
+        }
 
         $source = (string) file_get_contents(resource_path('js/lib/product-tours.ts'));
         preg_match_all("/anchor: '([\w-]+)'/", $source, $anchors);
 
         foreach (array_unique($anchors[1]) as $anchor) {
-            $this->assertStringContainsString(
-                'data-tour="'.$anchor.'"',
-                $pages,
+            // Un repere s'ecrit en attribut (`data-tour="x"`), dans un menu (`tourId: 'x'`) ou, pour une
+            // suite numerotee (`event-step-2`), dans un gabarit (`data-tour={`event-step-${step}`}`).
+            $prefix = preg_replace('/\d+$/', '', $anchor);
+
+            $this->assertTrue(
+                str_contains($pages, '"'.$anchor.'"')
+                    || str_contains($pages, "'".$anchor."'")
+                    || ($prefix !== $anchor && str_contains($pages, '`'.$prefix.'$')),
                 "Repere sans page : $anchor",
             );
         }
