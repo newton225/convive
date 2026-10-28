@@ -14,6 +14,7 @@ enum ProofRejectionReason: string
     case IncompleteAmount = 'incomplete_amount';
     case SplitPayment = 'split_payment';
     case Unreadable = 'unreadable';
+    case IncompleteCapture = 'incomplete_capture';
     case Other = 'other';
 
     public function label(): string

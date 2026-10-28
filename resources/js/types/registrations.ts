@@ -160,6 +160,9 @@ export type RegistrationRow = {
     enteredCount: number;
     enteredAt: string | null;
     cardSentAt: string | null;
+    // Telechargements du billet par l'invite : combien, et le dernier (journal du dossier).
+    ticketDownloads: number;
+    ticketDownloadedAt: string | null;
     people: RegistrationPerson[];
     // Liens de la carte et des billets (README 2.7) : null sans la permission d'envoi, ou pour
     // une inscription qui n'est pas validee.
@@ -208,9 +211,18 @@ export type RegistrationCancellation = {
     refundKeptReason: string | null;
 };
 
+// Les inscrits confirmes de l'evenement : combien ont telecharge leur billet, combien ne l'ont jamais fait.
+export type TicketDownloadStats = {
+    confirmed: number;
+    downloaded: number;
+    never: number;
+};
+
 export type RegistrationsFilters = {
     search: string | null;
     status: string | null;
+    // `downloaded` ou `never_downloaded`.
+    ticket: string | null;
     // Parametre `sort` de spatie/laravel-query-builder : `name`, `-amount_due`...
     sort: string | null;
 };

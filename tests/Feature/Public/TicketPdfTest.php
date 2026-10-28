@@ -5,16 +5,21 @@ namespace Tests\Feature\Public;
 use App\Actions\Tenants\CreateTenant;
 use App\Actions\Tickets\IssueTicket;
 use App\Enums\LegalForm;
+use App\Enums\RegistrationEventActor;
+use App\Enums\RegistrationEventType;
 use App\Models\Event;
 use App\Models\EventPriceCategory;
 use App\Models\PaymentAccount;
 use App\Models\Registration;
+use App\Models\RegistrationEvent;
 use App\Models\Tenant;
 use App\Models\Ticket;
 use App\Models\Unit;
 use App\Models\User;
 use App\Support\TicketCard;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Spatie\LaravelPdf\PdfBuilder;
 use Tests\TestCase;
@@ -193,6 +198,75 @@ class TicketPdfTest extends TestCase
         Pdf::assertRespondedWithPdf(fn (PdfBuilder $pdf) => isset($pdf->viewData['design']['model'], $pdf->viewData['design']['elements'])
             && $pdf->viewData['tickets'][0]['seats'] === 3
             && $pdf->viewData['tickets'][1]['seats'] === 1);
+    }
+
+    /**
+     * Decision du 2026-10-28 : chaque telechargement d'un billet par l'invite est un fait de l'historique du
+     * dossier, avec son adresse IP (gardee 12 mois), pour retrouver qui a recupere quoi en cas de litige.
+     *
+     * @return Collection<int, RegistrationEvent>
+     */
+    private function downloads(): Collection
+    {
+        return $this->tenant->asCurrent(fn () => RegistrationEvent::where('type', RegistrationEventType::TicketDownloaded)->orderBy('id')->get());
+    }
+
+    public function test_le_telechargement_d_un_billet_seul_est_ecrit_a_l_historique_du_dossier(): void
+    {
+        Pdf::fake();
+        ['registration' => $registration, 'tickets' => $tickets] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $tickets[1]->fresh()->pdfUrl());
+        $this->get($url)->assertOk();
+
+        $downloads = $this->downloads();
+
+        $this->assertCount(1, $downloads);
+        $this->assertSame($registration->id, $downloads[0]->registration_id);
+        $this->assertSame(RegistrationEventActor::Guest, $downloads[0]->actor);
+        $this->assertSame('single', $downloads[0]->properties['scope']);
+        $this->assertSame($tickets[1]->id, $downloads[0]->properties['ticket_id']);
+        $this->assertNotNull($downloads[0]->ip_address);
+    }
+
+    public function test_le_telechargement_de_tout_le_groupe_est_ecrit_avec_le_nombre_de_billets(): void
+    {
+        Pdf::fake();
+        ['registration' => $registration] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $registration->fresh()->ticketsPdfUrl());
+        $this->get($url)->assertOk();
+        $this->get($url)->assertOk();
+
+        $downloads = $this->downloads();
+
+        $this->assertCount(2, $downloads);
+        $this->assertSame('group', $downloads[0]->properties['scope']);
+        $this->assertSame(3, $downloads[0]->properties['count']);
+    }
+
+    public function test_un_lien_altere_n_ecrit_rien_a_l_historique(): void
+    {
+        Pdf::fake();
+        ['tickets' => $tickets] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $tickets[1]->fresh()->pdfUrl());
+        $this->get(preg_replace('/signature=[^&]+/', 'signature=invalide', (string) $url))->assertNotFound();
+
+        $this->assertCount(0, $this->downloads());
+    }
+
+    public function test_un_pdf_se_telecharge_meme_si_l_ecriture_de_l_historique_echoue(): void
+    {
+        Pdf::fake();
+        ['registration' => $registration] = $this->confirmedGroup();
+
+        $url = $this->tenant->asCurrent(fn () => $registration->fresh()->ticketsPdfUrl());
+
+        // Une table d'historique absente ne doit jamais priver l'invite de son billet.
+        $this->tenant->asCurrent(fn () => Schema::drop('registration_events'));
+
+        $this->get($url)->assertOk();
     }
 
     public function test_un_lien_pdf_altere_repond_404(): void

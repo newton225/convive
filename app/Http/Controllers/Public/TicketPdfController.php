@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Public;
 
+use App\Enums\RegistrationEventType;
 use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\Tenant;
 use App\Models\Ticket;
+use App\Support\RegistrationJournal;
 use App\Support\TicketCard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -43,6 +45,8 @@ class TicketPdfController extends Controller
             404,
         );
 
+        RegistrationJournal::guest(RegistrationEventType::TicketDownloaded, $ticket->registration, ['scope' => 'single', 'ticket_id' => $ticket->id]);
+
         return $this->pdf($event, collect([$ticket]), "billet-{$ticket->id}.pdf");
     }
 
@@ -71,6 +75,8 @@ class TicketPdfController extends Controller
             ->each(fn (Ticket $ticket) => $ticket->setRelation('registration', $registration));
 
         abort_if($tickets->isEmpty(), 404);
+
+        RegistrationJournal::guest(RegistrationEventType::TicketDownloaded, $registration, ['scope' => 'group', 'count' => $tickets->count()]);
 
         return $this->pdf($event, $tickets, 'billets-'.($registration->reference ?? $registration->id).'.pdf');
     }

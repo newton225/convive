@@ -144,6 +144,7 @@ return [
             'incomplete_amount' => 'The amount received is incomplete: the payment must cover the full amount, transaction fees included.',
             'split_payment' => 'The payment was split: it must be made in one go.',
             'unreadable' => 'The capture is unreadable: send a clearer one.',
+            'incomplete_capture' => 'The capture is incomplete: send the whole screenshot, not cropped, showing the amount, the date and time, the transaction reference and the recipient.',
             'other' => 'Other reason',
         ],
     ],

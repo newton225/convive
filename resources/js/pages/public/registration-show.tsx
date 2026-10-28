@@ -1,8 +1,8 @@
 import { Form, Head, router } from '@inertiajs/react';
-import { TriangleAlert } from 'lucide-react';
 import { BrandColorStyle } from '@/components/brand-color-style';
 import { GuestClaimCard } from '@/components/public/guest-claim-card';
 import { PreviewBanner } from '@/components/public/preview-banner';
+import { ProofRules } from '@/components/public/proof-rules';
 import { ResumeLinkCard } from '@/components/public/resume-link-card';
 import { RegistrationRecap } from '@/components/public/registration-recap';
 import { RegistrationSummaryCard } from '@/components/public/registration-summary-card';
@@ -412,21 +412,23 @@ export default function PublicRegistrationShow({
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
-                                            <p
-                                                className="text-foreground flex items-start gap-2 text-sm"
-                                                data-test="proof-full-payment"
-                                            >
-                                                <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-                                                {t(
-                                                    'guest.proof.help.full_payment',
-                                                    {
-                                                        amount: formatAmount(
-                                                            registration.amountDue,
-                                                            locale,
-                                                        ),
-                                                    },
+                                            <ProofRules
+                                                testId="proof-full-payment"
+                                                title={t(
+                                                    'guest.proof.help.full_payment_title',
                                                 )}
-                                            </p>
+                                                items={[1, 2, 3].map((index) =>
+                                                    t(
+                                                        `guest.proof.help.full_payment_${index}`,
+                                                        {
+                                                            amount: formatAmount(
+                                                                registration.amountDue,
+                                                                locale,
+                                                            ),
+                                                        },
+                                                    ),
+                                                )}
+                                            />
                                             <RequiredFieldsNote />
                                             <input
                                                 type="hidden"
@@ -555,16 +557,19 @@ export default function PublicRegistrationShow({
                                                     aria-describedby="receipt-authentic"
                                                     data-test="proof-receipt"
                                                 />
-                                                <p
+                                                <ProofRules
                                                     id="receipt-authentic"
-                                                    className="text-foreground flex items-start gap-2 text-sm"
-                                                    data-test="proof-receipt-authentic"
-                                                >
-                                                    <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-                                                    {t(
-                                                        'guest.proof.help.receipt_authentic',
+                                                    testId="proof-receipt-authentic"
+                                                    title={t(
+                                                        'guest.proof.help.receipt_authentic_title',
                                                     )}
-                                                </p>
+                                                    items={[1, 2, 3, 4].map(
+                                                        (index) =>
+                                                            t(
+                                                                `guest.proof.help.receipt_authentic_${index}`,
+                                                            ),
+                                                    )}
+                                                />
                                                 <InputError
                                                     message={errors.receipt}
                                                 />

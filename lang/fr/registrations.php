@@ -46,6 +46,7 @@ return [
             'table_assigned' => 'Table attribuée automatiquement',
             'tickets_issued' => 'Billets émis',
             'claim_submitted' => 'Réclamation déposée',
+            'ticket_downloaded' => 'Billet téléchargé',
         ],
         'details' => [
             'held' => ':count personne(s), :kind',
@@ -57,6 +58,8 @@ return [
             'tickets' => ':count billet(s)',
             'phone_sms' => 'Par code SMS',
             'phone_whatsapp' => 'Par message WhatsApp',
+            'ticket_downloaded_single' => 'Un billet individuel',
+            'ticket_downloaded_group' => 'Tous les billets du dossier (:count)',
         ],
     ],
 
@@ -106,6 +109,7 @@ return [
         'table' => 'Table',
         'channel' => 'Canal',
         'entry' => 'Entrée',
+        'ticket_download' => 'Billet téléchargé',
         'actions' => 'Actions',
         'export' => [
             'name' => 'Nom',
@@ -118,6 +122,23 @@ return [
             'table' => 'Table',
             'cancellation_reason' => "Motif d'annulation",
         ],
+    ],
+
+    'ticket_filters' => [
+        'label' => 'Téléchargement du billet',
+        'all' => 'Tous les billets',
+        'downloaded' => 'Billet téléchargé',
+        'never_downloaded' => 'Billet jamais téléchargé',
+    ],
+
+    'ticket_download' => [
+        'last' => 'Le :date (:count)',
+        'never' => 'Jamais',
+    ],
+
+    'ticket_summary' => [
+        'text' => ':downloaded inscrit(s) sur :confirmed ont téléchargé leur billet.',
+        'never' => 'Voir les :count qui ne l’ont jamais fait',
     ],
 
     'filters' => [
@@ -286,6 +307,10 @@ return [
     ],
 
     'empty' => [
+        'ticket' => [
+            'title' => 'Aucune inscription pour ce filtre',
+            'description' => 'Aucun inscrit confirmé ne correspond à ce critère de téléchargement du billet.',
+        ],
         'all' => [
             'title' => 'Aucune inscription pour le moment',
             'description' => 'Les inscriptions apparaîtront ici dès que des invités s\'inscriront.',

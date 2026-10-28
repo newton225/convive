@@ -89,7 +89,10 @@ class PlanLimits
     public function registrations(): int
     {
         return (int) $this->tenant->run(fn () => Registration::query()
-            ->whereHas('event', fn (Builder $event) => $event->whereIn('status', $this->activeStatuses()))
+            ->whereIn('event_id', Event::query()
+                ->whereIn('status', $this->activeStatuses())
+                ->whereNot(fn (Builder $query) => $query->finished())
+                ->select('id'))
             ->where(fn (Builder $query) => $query
                 ->where('status', RegistrationStatus::ProofSubmitted)
                 ->orWhere(fn (Builder $seated) => $seated->occupyingSeats()))

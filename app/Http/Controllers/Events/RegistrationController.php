@@ -9,6 +9,7 @@ use App\Actions\Registrations\RecordRefund;
 use App\Enums\NotificationType;
 use App\Enums\PaymentChannel;
 use App\Enums\RefundStatus;
+use App\Enums\RegistrationEventType;
 use App\Enums\RegistrationStatus;
 use App\Enums\TenantPermission;
 use App\Exports\RegistrationsExport;
@@ -19,6 +20,7 @@ use App\Http\Requests\Events\RecordRefundRequest;
 use App\Models\Event;
 use App\Models\PaymentProof;
 use App\Models\Registration;
+use App\Models\RegistrationEvent;
 use App\Models\SeatingTable;
 use App\Models\Tenant;
 use App\Models\Ticket;
@@ -26,11 +28,13 @@ use App\Models\User;
 use App\Support\InvitationCardMessage;
 use App\Support\PdfLetterhead;
 use App\Support\Search\UnaccentedSearch;
+use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use DomainException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -75,6 +79,9 @@ class RegistrationController extends Controller
         // Toutes les lignes appartiennent a l'evenement de l'adresse : inutile de le relire pour chacune.
         $registrations->getCollection()->each(fn (Registration $registration) => $registration->setRelation('event', $event));
 
+        // Les telechargements de billets de la page, lus en une requete (pas une par ligne).
+        $downloads = $this->downloadsFor($registrations->getCollection()->pluck('id'));
+
         return Inertia::render('events/registrations', [
             'tenant' => ['slug' => $tenant->slug],
             'event' => ['id' => $event->id, 'name' => $event->name, 'seatsAtTables' => $event->seatsAtTables()],
@@ -83,6 +90,7 @@ class RegistrationController extends Controller
                 $registration,
                 withCardLinks: $canSendCards,
                 withReceiptLink: $canViewReceipts,
+                downloads: $downloads->get($registration->id),
             )),
             'meta' => [
                 'currentPage' => $registrations->currentPage(),
@@ -92,9 +100,11 @@ class RegistrationController extends Controller
             'filters' => [
                 'search' => $request->string('filter.search')->toString() ?: null,
                 'status' => $request->string('filter.status')->toString() ?: null,
+                'ticket' => $request->string('filter.ticket')->toString() ?: null,
                 'sort' => $request->string('sort')->toString() ?: null,
             ],
             'totals' => $this->totals($request, $event),
+            'ticketSummary' => $this->ticketSummary($event),
             'cancellations' => $this->recentCancellations($event),
             // Moyens proposes pour un remboursement (README 2.11) : les memes canaux que les
             // versements, l'argent repart par ou il est venu ou par un autre moyen connu.
@@ -350,6 +360,17 @@ class RegistrationController extends Controller
                         ->where(fn (Builder $own) => UnaccentedSearch::apply($own, ['name', 'reference', 'phone', 'email'], $value))
                         ->orWhereHas('latestProof', fn (Builder $proof) => UnaccentedSearch::apply($proof, ['reference'], $value)));
                 }),
+                // Billets telecharges par l'invite (decision du 2026-10-28) : ceux qui l'ont fait au moins une
+                // fois, ou les inscrits confirmes qui ne l'ont jamais fait.
+                AllowedFilter::callback('ticket', function (Builder $query, string $value) use ($event) {
+                    $downloaded = $this->downloadedRegistrationIds($event);
+
+                    match ($value) {
+                        'downloaded' => $query->whereIn('id', $downloaded),
+                        'never_downloaded' => $query->where('status', RegistrationStatus::Confirmed)->whereNotIn('id', $downloaded),
+                        default => null,
+                    };
+                }),
                 AllowedFilter::callback('status', function (Builder $query, string $value) {
                     match ($value) {
                         'confirmed' => $query->where('status', RegistrationStatus::Confirmed),
@@ -362,6 +383,58 @@ class RegistrationController extends Controller
             )
             ->defaultSort('-created_at')
             ->allowedSorts('name', 'created_at', 'amount_due', 'party_size');
+    }
+
+    /**
+     * Les dossiers de l'evenement dont un billet a ete telecharge au moins une fois. Les faits sans
+     * dossier (liste d'attente) sont ecartes : un `NULL` dans un `NOT IN` ferait taire toute la liste.
+     *
+     * @return Builder<RegistrationEvent>
+     */
+    private function downloadedRegistrationIds(Event $event): Builder
+    {
+        return RegistrationEvent::query()
+            ->select('registration_id')
+            ->where('event_id', $event->id)
+            ->where('type', RegistrationEventType::TicketDownloaded)
+            ->whereNotNull('registration_id');
+    }
+
+    /**
+     * Combien de telechargements, et le dernier, pour chaque dossier de la page.
+     *
+     * @param  Collection<int, int>  $registrationIds
+     * @return Collection<int, RegistrationEvent>
+     */
+    private function downloadsFor(Collection $registrationIds): Collection
+    {
+        if ($registrationIds->isEmpty()) {
+            return new Collection;
+        }
+
+        return RegistrationEvent::query()
+            ->whereIn('registration_id', $registrationIds)
+            ->where('type', RegistrationEventType::TicketDownloaded)
+            ->selectRaw('registration_id, COUNT(*) as downloads, MAX(created_at) as last_at')
+            ->groupBy('registration_id')
+            ->get()
+            ->keyBy('registration_id');
+    }
+
+    /**
+     * Les inscrits confirmes de l'evenement (ceux qui ont un billet) : combien l'ont telecharge, combien ne
+     * l'ont jamais fait. Tout l'evenement, pas le filtre actif.
+     *
+     * @return array{confirmed: int, downloaded: int, never: int}
+     */
+    private function ticketSummary(Event $event): array
+    {
+        $confirmed = Registration::where('event_id', $event->id)->where('status', RegistrationStatus::Confirmed);
+
+        $total = (clone $confirmed)->count();
+        $downloaded = (clone $confirmed)->whereIn('id', $this->downloadedRegistrationIds($event))->count();
+
+        return ['confirmed' => $total, 'downloaded' => $downloaded, 'never' => $total - $downloaded];
     }
 
     /**
@@ -395,7 +468,7 @@ class RegistrationController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function row(Registration $registration, bool $withCardLinks = false, bool $withReceiptLink = false): array
+    private function row(Registration $registration, bool $withCardLinks = false, bool $withReceiptLink = false, ?RegistrationEvent $downloads = null): array
     {
         $arrivals = $registration->tickets->pluck('arrival')->filter();
         $proof = $registration->latestProof;
@@ -431,6 +504,11 @@ class RegistrationController extends Controller
             'enteredCount' => $arrivals->count(),
             'enteredAt' => $arrivals->min('created_at')?->toISOString(),
             'cardSentAt' => $registration->card_sent_at?->toISOString(),
+            // Telechargements du billet par l'invite (journal du dossier) : combien, et le dernier.
+            'ticketDownloads' => (int) ($downloads?->getAttribute('downloads') ?? 0),
+            'ticketDownloadedAt' => $downloads?->getAttribute('last_at') !== null
+                ? Carbon::parse($downloads->getAttribute('last_at'), 'UTC')->toISOString()
+                : null,
             'people' => $this->people($registration),
             'card' => $withCardLinks && $registration->status === RegistrationStatus::Confirmed
                 ? $this->card($registration)

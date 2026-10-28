@@ -144,6 +144,7 @@ return [
             'incomplete_amount' => 'Le montant reçu est incomplet : le paiement doit couvrir la totalité, frais de transaction compris.',
             'split_payment' => 'Le paiement a été fractionné : il doit être fait en une seule fois.',
             'unreadable' => 'La capture est illisible : envoyez-en une plus nette.',
+            'incomplete_capture' => 'La capture est incomplète : envoyez-la en entier, sans rognage, avec le montant, la date et l’heure, la référence de la transaction et le bénéficiaire.',
             'other' => 'Autre motif',
         ],
     ],

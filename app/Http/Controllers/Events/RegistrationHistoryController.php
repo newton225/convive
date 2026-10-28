@@ -128,6 +128,9 @@ class RegistrationHistoryController extends Controller
             RegistrationEventType::ClaimSubmitted => isset($properties['category'])
                 ? ClaimCategory::tryFrom($properties['category'])?->label()
                 : null,
+            RegistrationEventType::TicketDownloaded => ($properties['scope'] ?? null) === 'group'
+                ? $this->text('registrations.history.details.ticket_downloaded_group', ['count' => $properties['count'] ?? 0])
+                : $this->text('registrations.history.details.ticket_downloaded_single'),
             RegistrationEventType::PhoneVerified => match ($properties['method'] ?? null) {
                 'sms' => $this->text('registrations.history.details.phone_sms'),
                 'whatsapp' => $this->text('registrations.history.details.phone_whatsapp'),

@@ -18,6 +18,7 @@ enum RegistrationEventType: string
     case TableAssigned = 'table_assigned';
     case TicketsIssued = 'tickets_issued';
     case ClaimSubmitted = 'claim_submitted';
+    case TicketDownloaded = 'ticket_downloaded';
 
     public function label(): string
     {

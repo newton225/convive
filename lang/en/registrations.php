@@ -46,6 +46,7 @@ return [
             'table_assigned' => 'Table assigned automatically',
             'tickets_issued' => 'Tickets issued',
             'claim_submitted' => 'Claim submitted',
+            'ticket_downloaded' => 'Ticket downloaded',
         ],
         'details' => [
             'held' => ':count person(s), :kind',
@@ -57,6 +58,8 @@ return [
             'tickets' => ':count ticket(s)',
             'phone_sms' => 'By SMS code',
             'phone_whatsapp' => 'By WhatsApp message',
+            'ticket_downloaded_single' => 'One individual ticket',
+            'ticket_downloaded_group' => 'All tickets of the booking (:count)',
         ],
     ],
 
@@ -106,6 +109,7 @@ return [
         'table' => 'Table',
         'channel' => 'Channel',
         'entry' => 'Entry',
+        'ticket_download' => 'Ticket downloaded',
         'actions' => 'Actions',
         'export' => [
             'name' => 'Name',
@@ -118,6 +122,23 @@ return [
             'table' => 'Table',
             'cancellation_reason' => 'Cancellation reason',
         ],
+    ],
+
+    'ticket_filters' => [
+        'label' => 'Ticket download',
+        'all' => 'All tickets',
+        'downloaded' => 'Ticket downloaded',
+        'never_downloaded' => 'Ticket never downloaded',
+    ],
+
+    'ticket_download' => [
+        'last' => 'On :date (:count)',
+        'never' => 'Never',
+    ],
+
+    'ticket_summary' => [
+        'text' => ':downloaded of :confirmed confirmed guests have downloaded their ticket.',
+        'never' => 'Show the :count who never did',
     ],
 
     'filters' => [
@@ -286,6 +307,10 @@ return [
     ],
 
     'empty' => [
+        'ticket' => [
+            'title' => 'No registration for this filter',
+            'description' => 'No confirmed guest matches this ticket download criterion.',
+        ],
         'all' => [
             'title' => 'No registrations yet',
             'description' => 'Registrations will appear here as guests sign up.',

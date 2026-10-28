@@ -175,6 +175,20 @@ class PlanLimitsTest extends TestCase
         $this->assertTrue($this->limits()->canRegister(200));
     }
 
+    public function test_les_inscrits_d_un_evenement_dont_la_fin_est_passee_ne_comptent_plus_meme_sans_cloture(): void
+    {
+        $this->tenant->asCurrent(function () {
+            $over = Event::factory()->open()->create(['starts_at' => now()->subDays(3), 'ends_at' => now()->subDays(3)->addHours(4)]);
+            Registration::factory()->confirmed()->create(['event_id' => $over->id, 'party_size' => 200]);
+
+            $coming = Event::factory()->open()->create(['starts_at' => now()->addDays(3), 'ends_at' => now()->addDays(3)->addHours(4)]);
+            Registration::factory()->confirmed()->create(['event_id' => $coming->id, 'party_size' => 3]);
+        });
+
+        $this->assertSame(3, $this->limits()->registrations());
+        $this->assertTrue($this->limits()->canRegister(100));
+    }
+
     public function test_reserver_au_dela_du_plafond_d_inscrits_est_refuse(): void
     {
         $held = $this->tenant->asCurrent(function () {

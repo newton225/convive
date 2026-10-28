@@ -68,6 +68,21 @@ class RejectPaymentProofTest extends TestCase
         $this->assertSame('split_payment', $activity->properties['attributes']['rejection_reason']);
     }
 
+    public function test_un_rejet_pour_capture_incomplete_dit_a_l_invite_de_l_envoyer_en_entier(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        ['proof' => $proof] = $this->proofSubmitted($tenant);
+
+        $tenant->asCurrent(fn () => app(RejectPaymentProof::class)->handle($proof, $owner, ProofRejectionReason::IncompleteCapture));
+
+        $fresh = $tenant->asCurrent(fn () => $proof->fresh());
+        $this->assertSame(ProofRejectionReason::IncompleteCapture, $fresh->rejection_reason);
+        $this->assertFalse(ProofRejectionReason::IncompleteCapture->requiresNote());
+        $this->assertStringContainsString('sans rognage', ProofRejectionReason::IncompleteCapture->label());
+        $this->assertNotSame('proofs.rejection.reasons.incomplete_capture', ProofRejectionReason::IncompleteCapture->label());
+    }
+
     /**
      * README 2.2 : toute relance revérifie le stock. Une preuve rejetee n'est pas un
      * cul-de-sac, la meme relance que pour une reservation expiree la sort de la, sans

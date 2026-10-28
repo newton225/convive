@@ -13,6 +13,7 @@ import { InvitationCardDialog } from '@/components/registrations/invitation-card
 import { RegistrationDetails } from '@/components/registrations/registration-details';
 import { RegistrationStatusBadge } from '@/components/registrations/registration-status-badge';
 import { RegistrationTotals } from '@/components/registrations/registration-totals';
+import { TicketDownloadSummary } from '@/components/registrations/ticket-download-summary';
 import { SingleExpandToggle } from '@/components/single-expand-toggle';
 import Heading from '@/components/heading';
 import { ProductTourButton } from '@/components/product-tour-button';
@@ -63,6 +64,7 @@ import type {
     RegistrationsFilters,
     RegistrationsMeta,
     RegistrationTotals as RegistrationTotalsData,
+    TicketDownloadStats,
     TenantPermissions,
     Translations,
 } from '@/types';
@@ -76,6 +78,7 @@ type Props = {
     filters: RegistrationsFilters;
     cancellations: RegistrationCancellation[];
     totals: RegistrationTotalsData;
+    ticketSummary: TicketDownloadStats;
     refundChannels: RefundChannelOption[];
 };
 
@@ -86,6 +89,8 @@ const StatusFilters = [
     'without_proof',
     'cancelled',
 ] as const;
+
+const TicketFilters = ['all', 'downloaded', 'never_downloaded'] as const;
 
 /**
  * README ecran 20 : la base d'inscrits, etape 9 de « Ordre de construction ». Recherche, filtre
@@ -101,6 +106,7 @@ export default function EventRegistrations({
     filters,
     cancellations,
     totals,
+    ticketSummary,
     refundChannels,
 }: Props) {
     const { t, locale } = useTranslation();
@@ -134,6 +140,7 @@ export default function EventRegistrations({
         query: {
             'filter[search]': filters.search ?? undefined,
             'filter[status]': filters.status ?? undefined,
+            'filter[ticket]': filters.ticket ?? undefined,
             sort: filters.sort ?? undefined,
         },
     };
@@ -141,6 +148,7 @@ export default function EventRegistrations({
     const navigate = (params: {
         search?: string;
         status?: string;
+        ticket?: string;
         page?: number;
         sort?: string | null;
     }) => {
@@ -153,6 +161,10 @@ export default function EventRegistrations({
                         (params.status ?? filters.status ?? 'all') === 'all'
                             ? undefined
                             : (params.status ?? filters.status),
+                    ticket:
+                        (params.ticket ?? filters.ticket ?? 'all') === 'all'
+                            ? undefined
+                            : (params.ticket ?? filters.ticket),
                 },
                 // `null` retire le tri (retour a l'ordre par defaut du serveur).
                 sort:
@@ -334,6 +346,34 @@ export default function EventRegistrations({
                 ),
         },
         {
+            // Le billet a-t-il ete recupere par l'invite ? Un dossier non confirme n'a pas de billet.
+            header: t('registrations.columns.ticket_download'),
+            cell: ({ row }) =>
+                row.original.status !== 'confirmed' ? (
+                    <span className="text-muted-foreground">-</span>
+                ) : row.original.ticketDownloadedAt ? (
+                    <span
+                        className="text-xs"
+                        data-test="registration-ticket-downloaded"
+                    >
+                        {t('registrations.ticket_download.last', {
+                            date: formatDateTime(
+                                row.original.ticketDownloadedAt,
+                                locale,
+                            ),
+                            count: row.original.ticketDownloads,
+                        })}
+                    </span>
+                ) : (
+                    <span
+                        className="text-muted-foreground text-xs"
+                        data-test="registration-ticket-never"
+                    >
+                        {t('registrations.ticket_download.never')}
+                    </span>
+                ),
+        },
+        {
             header: t('registrations.columns.actions'),
             cell: ({ row }) => {
                 const card = row.original.card;
@@ -478,6 +518,28 @@ export default function EventRegistrations({
                         </SelectContent>
                     </Select>
 
+                    <Select
+                        value={filters.ticket ?? 'all'}
+                        onValueChange={(ticket) => navigate({ ticket })}
+                    >
+                        <SelectTrigger
+                            className="w-56"
+                            aria-label={t('registrations.ticket_filters.label')}
+                            data-test="registrations-ticket-filter"
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {TicketFilters.map((ticket) => (
+                                <SelectItem key={ticket} value={ticket}>
+                                    {t(
+                                        `registrations.ticket_filters.${ticket}`,
+                                    )}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
                     <SingleExpandToggle
                         checked={singleExpand}
                         onCheckedChange={toggleSingleExpand}
@@ -539,6 +601,11 @@ export default function EventRegistrations({
                     ) : null}
                 </div>
 
+                <TicketDownloadSummary
+                    summary={ticketSummary}
+                    onShowNever={() => navigate({ ticket: 'never_downloaded' })}
+                />
+
                 <div data-tour="registrations-table">
                     <DataTable
                         columns={columns}
@@ -592,12 +659,16 @@ export default function EventRegistrations({
                             <>
                                 <p className="font-medium">
                                     {t(
-                                        `registrations.empty.${filters.status ?? 'all'}.title`,
+                                        filters.ticket
+                                            ? 'registrations.empty.ticket.title'
+                                            : `registrations.empty.${filters.status ?? 'all'}.title`,
                                     )}
                                 </p>
                                 <p className="text-muted-foreground text-sm">
                                     {t(
-                                        `registrations.empty.${filters.status ?? 'all'}.description`,
+                                        filters.ticket
+                                            ? 'registrations.empty.ticket.description'
+                                            : `registrations.empty.${filters.status ?? 'all'}.description`,
                                     )}
                                 </p>
                             </>
