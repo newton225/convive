@@ -97,7 +97,13 @@ Deux déclencheurs, tous deux à implémenter comme tâches planifiées + hooks 
 2. **À l'épuisement des places** : si la capacité est atteinte par les seules inscriptions
    `CONFIRMED`, les inscriptions non finalisées sont supprimées immédiatement.
 
-Chaque purge écrit une entrée dans le journal (nombre de dossiers, places libérées).
+Chaque purge écrit une entrée dans le journal (nombre de dossiers, places libérées, références des
+dossiers purgés, jamais un nom ni un numéro de téléphone).
+
+Une preuve rejetée dont le dossier est purgé laisse une **trace anonyme** : la référence de la
+transaction, l'empreinte de la capture et le motif du rejet, sans nom, numéro, image ni lien vers un
+dossier. Elle sert uniquement à reconnaître un versement déjà refusé s'il est redéposé (signaux de
+la section 2.9) et disparaît avec l'événement.
 
 ### 2.5 Accompagnateurs et unités
 
@@ -177,8 +183,10 @@ carte est partie, et quand.
 
 À la réception d'une preuve, calculer et afficher des signaux :
 
-- empreinte perceptuelle de l'image déjà vue sur une autre inscription ;
-- référence de transaction déjà utilisée ;
+- empreinte perceptuelle de l'image déjà vue sur une autre inscription, y compris sur une preuve
+  rejetée dont le dossier a été purgé (trace anonyme, section 2.4) ;
+- référence de transaction déjà utilisée, comparée sans espaces, tirets ni casse (`CI2410 ABC-123`
+  et `ci2410abc123` désignent la même transaction), y compris sur une preuve rejetée purgée ;
 - référence absente du relevé importé ;
 - montant du relevé ≠ montant dû ;
 - précision laissée par l'invité (information à lire, pas une anomalie).

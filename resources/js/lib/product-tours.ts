@@ -23,7 +23,8 @@ export type ProductTourId =
     | 'reconciliation'
     | 'organisation'
     | 'billing'
-    | 'support_access';
+    | 'support_access'
+    | 'console';
 
 export type ProductTourStep = {
     // Le repere vise, sans le selecteur : `nav-events` pour `[data-tour="nav-events"]`.
@@ -166,6 +167,14 @@ export const productTours: Record<ProductTourId, ProductTourStep[]> = {
         { anchor: 'billing-plan', key: 'plan', side: 'bottom' },
         { anchor: 'billing-usage', key: 'usage', side: 'top' },
         { anchor: 'billing-invoices', key: 'invoices', side: 'top' },
+    ],
+    console: [
+        { key: 'intro' },
+        { anchor: 'console-nav-clients', key: 'clients', side: 'right' },
+        { anchor: 'console-nav-platform', key: 'platform', side: 'right' },
+        { anchor: 'console-filters', key: 'filters', side: 'bottom' },
+        { anchor: 'console-table', key: 'table', side: 'top' },
+        { key: 'after' },
     ],
     support_access: [
         { key: 'intro' },

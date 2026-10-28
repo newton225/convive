@@ -431,7 +431,7 @@ return [
         ],
         'usage' => [
             'title' => 'Votre consommation',
-            'body' => 'Événements actifs, inscrits, membres et messages du mois, face aux limites du plan. Un événement dont la fin est passée ne compte plus comme actif, même sans être clôturé.',
+            'body' => 'Événements actifs, inscrits, membres et messages du mois, face aux limites du plan. Un événement dont la fin est passée ne compte plus comme actif, même sans être clôturé, et ses inscrits non plus.',
         ],
         'invoices' => [
             'title' => 'Les factures',
@@ -455,6 +455,33 @@ return [
         'history' => [
             'title' => "L'historique",
             'body' => 'Les accès passés : qui, quand, pour quelle portée.',
+        ],
+    ],
+
+    'console' => [
+        'intro' => [
+            'title' => "La console d'exploitation",
+            'body' => "L'espace de l'éditeur : suivre les organisations clientes et faire tourner la plateforme. Il est réservé aux comptes autorisés, et sans accès du support accordé par une organisation, vous ne lisez aucune de ses données.",
+        ],
+        'clients' => [
+            'title' => 'Clients',
+            'body' => 'Les organisations, les comptes, la récupération d’un compte et le catalogue des plans.',
+        ],
+        'platform' => [
+            'title' => 'Plateforme',
+            'body' => 'La santé technique, les messages, la sécurité, la vitrine, le journal de la console et l’équipe de la console.',
+        ],
+        'filters' => [
+            'title' => 'Chercher et filtrer',
+            'body' => 'Retrouvez une organisation par son nom, ou limitez la liste à un état : essai, à jour, impayé, suspendue, suppression programmée.',
+        ],
+        'table' => [
+            'title' => 'Les organisations',
+            'body' => 'Chaque ligne donne le plan, l’état et la consommation. Le menu de la ligne ouvre les gestes : changer de plan, prolonger l’essai, régler les limites, suspendre, programmer la suppression. Chaque geste est inscrit au journal de la console.',
+        ],
+        'after' => [
+            'title' => 'Aucun effacement immédiat',
+            'body' => 'Une suppression passe par une corbeille de 30 jours : l’organisation disparaît aussitôt pour ses membres, mais peut être restaurée à la demande d’un Propriétaire.',
         ],
     ],
 ];

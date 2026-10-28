@@ -26,4 +26,5 @@ enum ProductTour: string
     case Organisation = 'organisation';
     case Billing = 'billing';
     case SupportAccess = 'support_access';
+    case Console = 'console';
 }

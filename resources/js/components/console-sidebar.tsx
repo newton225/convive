@@ -140,11 +140,13 @@ export function ConsoleSidebar() {
                 <NavMain
                     items={clientItems}
                     label={t('console.nav.group_clients')}
+                    tourId="console-nav-clients"
                 />
                 {platformItems.length > 0 ? (
                     <NavMain
                         items={platformItems}
                         label={t('console.nav.group_platform')}
+                        tourId="console-nav-platform"
                     />
                 ) : null}
             </SidebarContent>

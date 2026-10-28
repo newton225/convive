@@ -5,6 +5,7 @@ import type { PaginationMeta } from '@/components/list-pagination';
 import { OrganisationStatusBadge } from '@/components/console/organisation-status-badge';
 import { QuotaUsage } from '@/components/console/quota-usage';
 import Heading from '@/components/heading';
+import { ProductTourButton } from '@/components/product-tour-button';
 import { SupportGrantsCard } from '@/components/console/support-grants-card';
 import { SampleBanner } from '@/components/sample-banner';
 import { Input } from '@/components/ui/input';
@@ -158,13 +159,19 @@ export default function Organisations({
 
                 {isSample && <SampleBanner />}
 
-                <Heading
-                    variant="small"
-                    title={t('console.organisations.title')}
-                    description={t('console.organisations.description')}
-                />
+                <div className="flex items-center justify-between">
+                    <Heading
+                        variant="small"
+                        title={t('console.organisations.title')}
+                        description={t('console.organisations.description')}
+                    />
+                    <ProductTourButton tour="console" />
+                </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div
+                    className="flex flex-wrap items-center gap-2"
+                    data-tour="console-filters"
+                >
                     <Input
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
@@ -193,13 +200,15 @@ export default function Organisations({
                     </Select>
                 </div>
 
-                <ConsoleTable
-                    columns={columns}
-                    data={organisations}
-                    meta={meta}
-                    onPageChange={(page) => visit({ page })}
-                    emptyState={emptyState}
-                />
+                <div data-tour="console-table">
+                    <ConsoleTable
+                        columns={columns}
+                        data={organisations}
+                        meta={meta}
+                        onPageChange={(page) => visit({ page })}
+                        emptyState={emptyState}
+                    />
+                </div>
             </div>
         </>
     );

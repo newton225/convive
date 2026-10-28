@@ -431,7 +431,7 @@ return [
         ],
         'usage' => [
             'title' => 'Your usage',
-            'body' => 'Active events, registrations, members and messages of the month, against the plan limits. An event whose end has passed no longer counts as active, even if it has not been closed.',
+            'body' => 'Active events, registrations, members and messages of the month, against the plan limits. An event whose end has passed no longer counts as active, even if it has not been closed, and neither do its registrations.',
         ],
         'invoices' => [
             'title' => 'Invoices',
@@ -455,6 +455,33 @@ return [
         'history' => [
             'title' => 'History',
             'body' => 'Past accesses: who, when, and for what scope.',
+        ],
+    ],
+
+    'console' => [
+        'intro' => [
+            'title' => 'The operations console',
+            'body' => 'The publisher\'s space: follow the client organisations and run the platform. It is reserved for authorised accounts, and without a support access granted by an organisation you read none of its data.',
+        ],
+        'clients' => [
+            'title' => 'Clients',
+            'body' => 'Organisations, accounts, account recovery and the plan catalogue.',
+        ],
+        'platform' => [
+            'title' => 'Platform',
+            'body' => 'Technical health, messages, security, the showcase, the console log and the console team.',
+        ],
+        'filters' => [
+            'title' => 'Search and filter',
+            'body' => 'Find an organisation by name, or narrow the list to one state: trial, up to date, unpaid, suspended, deletion scheduled.',
+        ],
+        'table' => [
+            'title' => 'The organisations',
+            'body' => 'Each row gives the plan, the state and the usage. The row menu opens the actions: change plan, extend the trial, set limits, suspend, schedule deletion. Every action is written to the console log.',
+        ],
+        'after' => [
+            'title' => 'No immediate erasure',
+            'body' => 'A deletion goes through a 30-day bin: the organisation disappears at once for its members, but can be restored at the request of an Owner.',
         ],
     ],
 ];
