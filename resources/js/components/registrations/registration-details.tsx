@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
+import { cardStatus } from '@/lib/card-status';
 import { formatDateTime } from '@/lib/format-date';
 import { Duration, EaseOut } from '@/lib/motion';
 import type { RegistrationPerson, RegistrationRow } from '@/types';
@@ -18,6 +19,7 @@ type Props = {
  */
 export function RegistrationDetails({ registration }: Props) {
     const { t, locale } = useTranslation();
+    const card = cardStatus(registration, t, locale);
     const reduceMotion = useReducedMotion() === true;
     const none = t('registrations.details.none');
     // L'invite est deja sur la ligne : le detail ne montre que ceux qui l'accompagnent, comme la file
@@ -168,19 +170,12 @@ export function RegistrationDetails({ registration }: Props) {
                     </dt>
                     <dd
                         className={
-                            registration.cardSentAt
+                            card.state === 'sent'
                                 ? undefined
                                 : 'text-destructive'
                         }
                     >
-                        {registration.cardSentAt
-                            ? t('registrations.card.sent_on', {
-                                  date: formatDateTime(
-                                      registration.cardSentAt,
-                                      locale,
-                                  ),
-                              })
-                            : t('registrations.card.not_sent')}
+                        {card.label}
                     </dd>
                     <dt className="text-muted-foreground">
                         {t('registrations.columns.entry')}

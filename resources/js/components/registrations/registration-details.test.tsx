@@ -55,6 +55,8 @@ const base: RegistrationRow = {
     enteredCount: 0,
     enteredAt: null,
     cardSentAt: null,
+    cardFailedAt: null,
+    cardChannels: ['whatsapp'],
     ticketDownloads: 0,
     ticketDownloadedAt: null,
     people: [],

@@ -44,7 +44,9 @@ export function UnitSummary({ units, selectedId, onSelect }: Props) {
                             size="sm"
                             className={cn(
                                 'h-auto flex-col items-start gap-0 px-3 py-1.5',
-                                unit.people === 0 && 'text-muted-foreground',
+                                unit.people === 0 &&
+                                    selectedId !== String(unit.id) &&
+                                    'text-muted-foreground',
                             )}
                             onClick={() => onSelect(String(unit.id))}
                             data-test="unit-summary-item"

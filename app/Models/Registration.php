@@ -43,6 +43,7 @@ use Illuminate\Support\Str;
  * @property int|null $hold_sequence
  * @property string|null $resume_token_hash
  * @property Carbon|null $card_sent_at
+ * @property Carbon|null $card_failed_at
  * @property Carbon|null $proof_reminder_j7_sent_at
  * @property Carbon|null $proof_reminder_j2_sent_at
  * @property Carbon|null $proof_reminder_j1_sent_at
@@ -70,7 +71,7 @@ use Illuminate\Support\Str;
  */
 #[Fillable([
     'event_id', 'reference', 'status', 'name', 'phone', 'email', 'unit_id', 'price_category_id', 'amount_due', 'party_size',
-    'held_until', 'hold_sequence', 'resume_token_hash', 'card_sent_at',
+    'held_until', 'hold_sequence', 'resume_token_hash', 'card_sent_at', 'card_failed_at',
     'proof_reminder_j7_sent_at', 'proof_reminder_j2_sent_at', 'proof_reminder_j1_sent_at',
     'cancelled_at', 'cancellation_reason', 'cancelled_by_user_id', 'lapsed_holds_count',
     'refund_status', 'refund_channel', 'refunded_on', 'refund_reference', 'refund_fee',
@@ -143,6 +144,17 @@ class Registration extends Model
     public function notificationToken(): string
     {
         return hash_hmac('sha256', (string) $this->id, (string) config('app.key'));
+    }
+
+    /**
+     * Les canaux par lesquels part la carte (voir `InvitationCard::via()`) : WhatsApp toujours, le
+     * courriel quand l'invite en a donne un.
+     *
+     * @return array<int, string>
+     */
+    public function cardChannels(): array
+    {
+        return $this->email !== null && $this->email !== '' ? ['whatsapp', 'mail'] : ['whatsapp'];
     }
 
     /**
@@ -460,6 +472,7 @@ class Registration extends Model
             'held_until' => 'datetime',
             'hold_sequence' => 'integer',
             'card_sent_at' => 'datetime',
+            'card_failed_at' => 'datetime',
             'proof_reminder_j7_sent_at' => 'datetime',
             'proof_reminder_j2_sent_at' => 'datetime',
             'proof_reminder_j1_sent_at' => 'datetime',

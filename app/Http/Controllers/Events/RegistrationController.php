@@ -559,6 +559,10 @@ class RegistrationController extends Controller
             'enteredCount' => $arrivals->count(),
             'enteredAt' => $arrivals->min('created_at')?->toISOString(),
             'cardSentAt' => $registration->card_sent_at?->toISOString(),
+            // L'envoi part en file : `cardFailedAt` dit que le service a refuse le message, `cardChannels`
+            // par ou la carte est partie (WhatsApp, courriel si l'invite en a donne un).
+            'cardFailedAt' => $registration->card_failed_at?->toISOString(),
+            'cardChannels' => $registration->cardChannels(),
             // Telechargements du billet par l'invite (journal du dossier) : combien, et le dernier.
             'ticketDownloads' => (int) ($downloads?->getAttribute('downloads') ?? 0),
             'ticketDownloadedAt' => $downloads?->getAttribute('last_at') !== null

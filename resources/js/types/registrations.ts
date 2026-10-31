@@ -160,6 +160,10 @@ export type RegistrationRow = {
     enteredCount: number;
     enteredAt: string | null;
     cardSentAt: string | null;
+    // Le service d'envoi a refuse le message (la file a echoue apres `cardSentAt`).
+    cardFailedAt: string | null;
+    // `whatsapp`, et `mail` quand l'invite a donne un courriel.
+    cardChannels: string[];
     // Telechargements du billet par l'invite : combien, et le dernier (journal du dossier).
     ticketDownloads: number;
     ticketDownloadedAt: string | null;

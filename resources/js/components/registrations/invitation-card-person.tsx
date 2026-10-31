@@ -96,7 +96,7 @@ export function InvitationCardPerson({
 
     return (
         <li
-            className="space-y-2 py-3"
+            className="min-w-0 space-y-2 py-3"
             data-test={
                 person.isHolder
                     ? 'invitation-card-holder'
@@ -187,7 +187,7 @@ export function InvitationCardPerson({
                     <summary className="text-muted-foreground cursor-pointer">
                         {t('registrations.card.message_preview')}
                     </summary>
-                    <p className="bg-muted mt-2 rounded-md p-3 whitespace-pre-line">
+                    <p className="bg-muted mt-2 rounded-md p-3 [overflow-wrap:anywhere] whitespace-pre-line">
                         {person.message}
                     </p>
                 </details>

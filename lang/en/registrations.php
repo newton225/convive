@@ -216,6 +216,12 @@ return [
     'card' => [
         'column' => 'Card',
         'sent_on' => 'Sent on :date',
+        'sent_via' => 'Sent on :date (:channels)',
+        'failed' => 'Sending failed on :date: send it again',
+        'channels' => [
+            'whatsapp' => 'WhatsApp',
+            'mail' => 'email',
+        ],
         'not_sent' => 'Not sent yet',
         'open' => 'Card',
         'title' => 'Invitation card',

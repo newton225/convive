@@ -53,7 +53,7 @@ class SendInvitationCard
             ->route('mail', $registration->email)
             ->notify(new InvitationCard($registration, $link));
 
-        $registration->update(['card_sent_at' => now()]);
+        $registration->update(['card_sent_at' => now(), 'card_failed_at' => null]);
         GuestMessageQuota::record();
 
         if ($sentBy !== null) {
@@ -61,7 +61,12 @@ class SendInvitationCard
                 ->performedOn($registration)
                 ->causedBy($sentBy)
                 ->event('updated')
-                ->withProperties(['manual' => true, 'phone' => $registration->phone, 'email' => $registration->email])
+                ->withProperties([
+                    'manual' => true,
+                    'phone' => $registration->phone,
+                    'email' => $registration->email,
+                    'channels' => $registration->cardChannels(),
+                ])
                 ->log('registrations.card_sent');
         }
 

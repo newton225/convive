@@ -15,7 +15,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { useTranslation } from '@/hooks/use-translation';
-import { formatDateTime } from '@/lib/format-date';
+import { cardStatus } from '@/lib/card-status';
 import { send } from '@/routes/tenants/events/registrations/card';
 import type { RegistrationCard, RegistrationRow } from '@/types';
 
@@ -38,6 +38,7 @@ export function InvitationCardDialog({
     onClose,
 }: Props) {
     const { t, locale } = useTranslation();
+    const card = cardStatus(registration, t, locale);
     const [sending, setSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -91,18 +92,13 @@ export function InvitationCardDialog({
                         },
                         {
                             label: t('registrations.card.last_sent'),
-                            value: registration.cardSentAt
-                                ? formatDateTime(
-                                      registration.cardSentAt,
-                                      locale,
-                                  )
-                                : t('registrations.card.not_sent'),
-                            warning: registration.cardSentAt === null,
+                            value: card.label,
+                            warning: card.state !== 'sent',
                         },
                     ]}
                 />
 
-                <ul className="divide-y">
+                <ul className="min-w-0 divide-y">
                     {registration.card.people.map((person) => (
                         <InvitationCardPerson
                             key={person.ticketId ?? 'holder'}

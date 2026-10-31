@@ -11,6 +11,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Notifications\Notification;
+use Throwable;
 
 /**
  * La carte d'invitation (README 2.7, ecran 7), etape 8 de « Ordre de construction ». Envoyee a
@@ -97,5 +98,15 @@ class InvitationCard extends Notification implements ShouldQueue
     public function toWhatsApp(mixed $notifiable): string
     {
         return InvitationCardMessage::forHolder($this->registration, $this->link);
+    }
+
+    /**
+     * L'envoi est parti en file avec `card_sent_at` deja ecrit : quand le service refuse le message, l'echec
+     * se marque sur le dossier pour que la liste des inscrits le montre (decision du 2026-10-31). Ne doit
+     * jamais en lever une seconde : l'echec d'origine reste dans les envois en echec de la console.
+     */
+    public function failed(Throwable $exception): void
+    {
+        rescue(fn () => $this->registration->forceFill(['card_failed_at' => now()])->saveQuietly());
     }
 }

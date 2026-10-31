@@ -216,6 +216,12 @@ return [
     'card' => [
         'column' => 'Carte',
         'sent_on' => 'Envoyée le :date',
+        'sent_via' => 'Envoyée le :date (:channels)',
+        'failed' => "Échec de l'envoi le :date : renvoyez-la",
+        'channels' => [
+            'whatsapp' => 'WhatsApp',
+            'mail' => 'e-mail',
+        ],
         'not_sent' => 'Pas encore envoyée',
         'open' => 'Carte',
         'title' => "Carte d'invitation",

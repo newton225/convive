@@ -40,6 +40,7 @@ import {
 import { useExpandedRows } from '@/hooks/use-expanded-rows';
 import { translate, useTranslation } from '@/hooks/use-translation';
 import { formatAmount } from '@/lib/format-currency';
+import { cardStatus } from '@/lib/card-status';
 import { formatDateTime } from '@/lib/format-date';
 import { can, Permission } from '@/lib/permissions';
 import { registrationReceiptFacts } from '@/lib/receipt-facts';
@@ -331,29 +332,32 @@ export default function EventRegistrations({
         {
             // README 2.7 : savoir si la carte est partie, et quand, sans ouvrir la fiche.
             header: t('registrations.card.column'),
-            cell: ({ row }) =>
-                row.original.status !== 'confirmed' ? (
-                    <span className="text-muted-foreground">-</span>
-                ) : row.original.cardSentAt ? (
+            cell: ({ row }) => {
+                if (row.original.status !== 'confirmed') {
+                    return <span className="text-muted-foreground">-</span>;
+                }
+
+                const status = cardStatus(row.original, t, locale);
+
+                return (
                     <span
-                        className="text-xs"
-                        data-test="registration-card-sent"
+                        className={
+                            status.state === 'sent'
+                                ? 'text-xs'
+                                : 'text-destructive text-xs'
+                        }
+                        data-test={
+                            status.state === 'sent'
+                                ? 'registration-card-sent'
+                                : status.state === 'failed'
+                                  ? 'registration-card-failed'
+                                  : 'registration-card-not-sent'
+                        }
                     >
-                        {t('registrations.card.sent_on', {
-                            date: formatDateTime(
-                                row.original.cardSentAt,
-                                locale,
-                            ),
-                        })}
+                        {status.label}
                     </span>
-                ) : (
-                    <span
-                        className="text-destructive text-xs"
-                        data-test="registration-card-not-sent"
-                    >
-                        {t('registrations.card.not_sent')}
-                    </span>
-                ),
+                );
+            },
         },
         {
             // Le billet a-t-il ete recupere par l'invite ? Un dossier non confirme n'a pas de billet.
@@ -643,13 +647,21 @@ export default function EventRegistrations({
                     onSelect={(unit) =>
                         navigate({
                             unit: filters.unit === unit ? 'all' : unit,
+                            status: 'all',
+                            ticket: 'all',
                         })
                     }
                 />
 
                 <TicketDownloadSummary
                     summary={ticketSummary}
-                    onShowNever={() => navigate({ ticket: 'never_downloaded' })}
+                    onShowNever={() =>
+                        navigate({
+                            ticket: 'never_downloaded',
+                            status: 'all',
+                            unit: 'all',
+                        })
+                    }
                 />
 
                 <div data-tour="registrations-table">
