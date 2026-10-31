@@ -124,7 +124,7 @@ class EventTest extends TestCase
         $tenant->asCurrent(fn () => $event->addMedia(UploadedFile::fake()->createWithContent(
             'presentation.mp4',
             "\x00\x00\x00\x18ftypmp42\x00\x00\x00\x00mp42isom".str_repeat("\0", 1024),
-        ))->toMediaCollection(Event::PresentationVideoCollection));
+        )->mimeType('video/mp4'))->toMediaCollection(Event::PresentationVideoCollection));
 
         $this->get($this->publicUrl($tenant, $event))
             ->assertOk()
