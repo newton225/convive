@@ -2,12 +2,15 @@
 
 namespace App\Actions\Tenants;
 
+use App\Enums\PaymentAccountOutcome;
 use App\Enums\PaymentChannel;
 use App\Enums\TenantPermission;
 use App\Models\PaymentAccount;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\Tenants\PaymentAccountChanged;
+use App\Notifications\Tenants\PaymentAccountDecided;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
@@ -65,7 +68,7 @@ class SavePaymentAccount
 
             if ($hasPending && ! $keepsPending && ! $account->neverActive() && ! $this->differsFromLive($account, $requested)) {
                 $account->save();
-                $this->cancel($account, $actor);
+                $this->cancel($tenant, $account, $actor);
 
                 return $account;
             }
@@ -107,9 +110,9 @@ class SavePaymentAccount
      * C'est la soupape prevue : corriger un numero la veille d'un evenement reste possible,
      * mais jamais par la seule personne qui a demande le changement.
      */
-    public function approve(PaymentAccount $account, User $approver): PaymentAccount
+    public function approve(Tenant $tenant, PaymentAccount $account, User $approver): PaymentAccount
     {
-        return DB::transaction(function () use ($account, $approver) {
+        return DB::transaction(function () use ($tenant, $account, $approver) {
             $before = $this->sensitiveValues($account);
 
             $account->pending_approved_by = $approver->id;
@@ -124,6 +127,8 @@ class SavePaymentAccount
                     'approved_by' => $approver->id,
                 ])
                 ->log('payment_account.change_approved');
+
+            $this->notifyOutcome($tenant, $account, PaymentAccountOutcome::Approved, $approver);
 
             return $account;
         });
@@ -153,9 +158,9 @@ class SavePaymentAccount
      * change is its creation : cancelling it deletes the account, rather than leaving a shell with
      * no channel and no number. Returns whether the account was deleted.
      */
-    public function cancel(PaymentAccount $account, User $actor): bool
+    public function cancel(Tenant $tenant, PaymentAccount $account, User $actor): bool
     {
-        return DB::transaction(function () use ($account, $actor) {
+        return DB::transaction(function () use ($tenant, $account, $actor) {
             $discarded = $this->pendingValues($account);
 
             if ($account->neverActive()) {
@@ -168,6 +173,8 @@ class SavePaymentAccount
                     ->log('payment_account.creation_cancelled');
 
                 $account->delete();
+
+                $this->notifyOutcome($tenant, $account, PaymentAccountOutcome::Cancelled, $actor);
 
                 return true;
             }
@@ -189,6 +196,8 @@ class SavePaymentAccount
                 ])
                 ->log('payment_account.change_cancelled');
 
+            $this->notifyOutcome($tenant, $account, PaymentAccountOutcome::Cancelled, $actor);
+
             return false;
         });
     }
@@ -200,13 +209,33 @@ class SavePaymentAccount
      */
     private function notifyWatchers(Tenant $tenant, PaymentAccount $account, array $before, User $actor): void
     {
-        $watchers = $tenant->members()->get()->filter(
-            fn (User $member) => $member->hasTenantPermission($tenant, TenantPermission::TenantPaymentAccounts),
-        );
-
         Notification::send(
-            $watchers,
+            $this->watchers($tenant),
             new PaymentAccountChanged($tenant, $account, $before, $actor),
+        );
+    }
+
+    /**
+     * Notify the same people of how a requested change ended : validated by a second owner, cancelled, or
+     * applied by itself once the delay was over (`$actor` is then null). Le demandeur en fait partie.
+     */
+    public function notifyOutcome(Tenant $tenant, PaymentAccount $account, PaymentAccountOutcome $outcome, ?User $actor): void
+    {
+        Notification::send(
+            $this->watchers($tenant),
+            new PaymentAccountDecided($tenant, $outcome, $account->label, $account->account_number, $actor?->name),
+        );
+    }
+
+    /**
+     * Les membres qui voient l'argent circuler : tous les porteurs de la permission des comptes de versement.
+     *
+     * @return Collection<int, User>
+     */
+    private function watchers(Tenant $tenant): Collection
+    {
+        return $tenant->members()->get()->filter(
+            fn (User $member) => $member->hasTenantPermission($tenant, TenantPermission::TenantPaymentAccounts),
         );
     }
 

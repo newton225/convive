@@ -108,7 +108,7 @@ class PaymentAccountController extends Controller
     {
         Gate::authorize('approve', [$paymentAccount, $tenant]);
 
-        $save->approve($paymentAccount, $request->user());
+        $save->approve($tenant, $paymentAccount, $request->user());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('payment_accounts.flash.change_approved')]);
 
@@ -122,7 +122,7 @@ class PaymentAccountController extends Controller
     {
         Gate::authorize('cancel', [$paymentAccount, $tenant]);
 
-        $deleted = $save->cancel($paymentAccount, $request->user());
+        $deleted = $save->cancel($tenant, $paymentAccount, $request->user());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __($deleted ? 'payment_accounts.flash.creation_cancelled' : 'payment_accounts.flash.change_cancelled')]);
 

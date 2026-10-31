@@ -3,6 +3,7 @@
 namespace Tests\Feature\Tenants;
 
 use App\Actions\Tenants\CreateTenant;
+use App\Enums\PaymentAccountOutcome;
 use App\Enums\PaymentChannel;
 use App\Enums\TenantPermission;
 use App\Http\Middleware\EnforceAbsoluteSessionLifetime;
@@ -11,6 +12,7 @@ use App\Models\Profile;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\Tenants\PaymentAccountChanged;
+use App\Notifications\Tenants\PaymentAccountDecided;
 use App\Support\GettingStarted;
 use Database\Factories\UserFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -764,5 +766,85 @@ class PaymentAccountTest extends TestCase
 
         $this->assertFalse($account->hasPendingChange());
         $this->assertSame('+225 07 00 00 00 01', $account->account_number);
+    }
+
+    public function test_la_validation_par_un_second_proprietaire_previent_le_demandeur_et_les_autres(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $account = $this->createAccount($tenant, $owner);
+
+        $second = User::factory()->withTwoFactor()->create();
+        $tenant->addMember($second, $tenant->run(fn () => Profile::where('name', Profile::Owner)->firstOrFail()));
+
+        $this->actingAsConfirmed($second)
+            ->post(route('tenants.payment-accounts.approve', [$tenant, $account]))
+            ->assertRedirect();
+
+        foreach ([$owner, $second] as $member) {
+            Notification::assertSentTo($member, PaymentAccountDecided::class, fn (PaymentAccountDecided $notification) => $notification->outcome === PaymentAccountOutcome::Approved
+                && $notification->actorName === $second->name
+                && $notification->number === '+225 07 00 00 00 01');
+        }
+    }
+
+    public function test_l_annulation_d_un_changement_previent_les_porteurs_de_la_permission(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $account = $this->createAccount($tenant, $owner);
+
+        $this->travel(25)->hours();
+        $this->artisan('schedule:run')->assertSuccessful();
+        $this->requestChange($tenant, $owner, $this->fresh($tenant, $account), '+225 07 99 99 99 99');
+
+        $this->actingAsConfirmed($owner)
+            ->post(route('tenants.payment-accounts.cancel', [$tenant, $this->fresh($tenant, $account)]))
+            ->assertRedirect();
+
+        Notification::assertSentTo($owner, PaymentAccountDecided::class, fn (PaymentAccountDecided $notification) => $notification->outcome === PaymentAccountOutcome::Cancelled
+            && $notification->number === '+225 07 00 00 00 01');
+    }
+
+    public function test_l_annulation_d_une_creation_previent_sans_garder_de_modele_supprime(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $account = $this->createAccount($tenant, $owner);
+
+        $this->actingAsConfirmed($owner)
+            ->post(route('tenants.payment-accounts.cancel', [$tenant, $account]))
+            ->assertRedirect();
+
+        Notification::assertSentTo($owner, PaymentAccountDecided::class, fn (PaymentAccountDecided $notification) => $notification->outcome === PaymentAccountOutcome::Cancelled
+            && $notification->label === 'Wave principal'
+            && $notification->number === null);
+    }
+
+    public function test_l_activation_automatique_a_la_fin_du_delai_previent_les_porteurs_de_la_permission(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->tenantOwnedBy($owner);
+        $this->createAccount($tenant, $owner);
+
+        $this->travel(25)->hours();
+        $this->artisan('schedule:run')->assertSuccessful();
+
+        Notification::assertSentTo($owner, PaymentAccountDecided::class, fn (PaymentAccountDecided $notification) => $notification->outcome === PaymentAccountOutcome::Activated
+            && $notification->actorName === null
+            && $notification->number === '+225 07 00 00 00 01');
+    }
+
+    public function test_le_message_de_l_alerte_decrit_l_issue_et_le_numero_affiche(): void
+    {
+        $tenant = new Tenant(['name' => 'Association Convive']);
+        $notification = new PaymentAccountDecided($tenant, PaymentAccountOutcome::Approved, 'Wave principal', '+225 07 00 00 00 01', 'Marie');
+
+        $whatsapp = $notification->toWhatsApp(new User);
+
+        $this->assertStringContainsString('Wave principal', $whatsapp);
+        $this->assertStringContainsString('Marie', $whatsapp);
+        $this->assertStringContainsString('+225 07 00 00 00 01', $whatsapp);
+        $this->assertNotSame('payment_accounts.decided.whatsapp', $whatsapp);
     }
 }

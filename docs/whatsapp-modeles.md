@@ -116,3 +116,14 @@ Envoyé aux membres de l'organisation, pas aux invités.
 - Variables : `{{1}}` nom de l'organisation, `{{2}}` libellé du compte, `{{3}}` ancien numéro, `{{4}}` nouveau numéro
 
 > Convive : le compte de versement « {{2}} » de {{1}} a changé. Ancien numéro : {{3}}. Nouveau : {{4}}. Si vous n'êtes pas à l'origine de cette demande, annulez-la immédiatement.
+
+## Alerte : issue d'un changement de compte de versement
+
+Envoyé aux membres de l'organisation, pas aux invités, quand un changement est validé par un second
+propriétaire, annulé, ou appliqué à la fin du délai de 24 heures.
+
+- Réglage : `WHATSAPP_TEMPLATE_PAYMENT_ACCOUNT_DECIDED`
+- Catégorie : utilitaire
+- Variables : `{{1}}` nom de l'organisation, `{{2}}` libellé du compte, `{{3}}` ce qui s'est passé (« changement validé par Marie, il s'applique maintenant », « changement annulé par Marie » ou « le délai de 24 heures est écoulé, le nouveau numéro est maintenant affiché aux invités »), `{{4}}` numéro affiché aux invités
+
+> Convive : compte de versement « {{2}} » de {{1}} : {{3}}. Numéro affiché aux invités : {{4}}.

@@ -139,4 +139,23 @@ return [
     'whatsapp' => [
         'alert' => 'Convive : le compte de versement ":label" de :tenant a changé. Ancien numéro : :before. Nouveau : :after. Si vous n\'êtes pas à l\'origine de cette demande, annulez-la immédiatement.',
     ],
+
+    // Issue d'une demande de changement (decision du 2026-10-31) : validee, annulee ou appliquee d'elle-meme.
+    'decided' => [
+        'subject' => [
+            'approved' => 'Compte de versement : changement validé (:tenant)',
+            'cancelled' => 'Compte de versement : changement annulé (:tenant)',
+            'activated' => 'Compte de versement : nouveau numéro actif (:tenant)',
+        ],
+        'intro' => 'Compte ":label" de :tenant : :sentence.',
+        'sentence' => [
+            'approved' => "changement validé par :actor, il s'applique maintenant",
+            'cancelled' => 'changement annulé par :actor',
+            'activated' => 'le délai de 24 heures est écoulé, le nouveau numéro est maintenant affiché aux invités',
+        ],
+        'number_shown' => 'Numéro affiché aux invités : :value',
+        'number_kept' => 'Numéro affiché aux invités (inchangé) : :value',
+        'outro' => "Si vous ne reconnaissez pas cette décision, vérifiez immédiatement les accès de votre organisation.",
+        'whatsapp' => 'Convive : compte de versement « :label » de :tenant : :sentence. Numéro affiché aux invités : :number.',
+    ],
 ];

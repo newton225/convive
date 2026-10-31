@@ -16,6 +16,7 @@ use App\Actions\Tickets\SendProofReminder;
 use App\Actions\Tickets\SendTicketReminder;
 use App\Actions\Waitlist\PromoteNextWaitlistEntry;
 use App\Enums\EventStatus;
+use App\Enums\PaymentAccountOutcome;
 use App\Enums\RegistrationStatus;
 use App\Enums\ReminderCheckpoint;
 use App\Enums\WaitlistStatus;
@@ -57,7 +58,10 @@ Schedule::call(function (SavePaymentAccount $save) {
         fn () => PaymentAccount::query()
             ->whereNotNull('pending_activates_at')
             ->where('pending_activates_at', '<=', now())
-            ->each(fn (PaymentAccount $account) => $save->apply($account)),
+            ->each(function (PaymentAccount $account) use ($save, $tenant) {
+                $save->apply($account);
+                $save->notifyOutcome($tenant, $account, PaymentAccountOutcome::Activated, null);
+            }),
     ));
 })->everyFiveMinutes()->description('Activate due payment account changes');
 

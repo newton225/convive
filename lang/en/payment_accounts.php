@@ -139,4 +139,23 @@ return [
     'whatsapp' => [
         'alert' => 'Convive: the payment account ":label" of :tenant has changed. Previous number: :before. New: :after. If you did not request this, cancel it immediately.',
     ],
+
+    // How a requested change ended (decision of 2026-10-31): validated, cancelled or applied by itself.
+    'decided' => [
+        'subject' => [
+            'approved' => 'Payment account: change validated (:tenant)',
+            'cancelled' => 'Payment account: change cancelled (:tenant)',
+            'activated' => 'Payment account: new number is live (:tenant)',
+        ],
+        'intro' => 'Account ":label" of :tenant: :sentence.',
+        'sentence' => [
+            'approved' => 'change validated by :actor, it applies now',
+            'cancelled' => 'change cancelled by :actor',
+            'activated' => 'the 24 hour delay is over, the new number is now shown to guests',
+        ],
+        'number_shown' => 'Number shown to guests: :value',
+        'number_kept' => 'Number shown to guests (unchanged): :value',
+        'outro' => 'If you do not recognise this decision, check your organisation\'s access immediately.',
+        'whatsapp' => 'Convive: payment account ":label" of :tenant: :sentence. Number shown to guests: :number.',
+    ],
 ];
