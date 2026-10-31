@@ -26,8 +26,8 @@ export default function ConfirmPassword() {
                     submit: confirmStore(),
                 }}
                 label={t('account.confirm_password.passkey')}
-                loadingLabel="Confirming..."
-                separator="Or confirm with password"
+                loadingLabel={t('account.confirm_password.loading')}
+                separator={t('account.confirm_password.separator')}
             />
 
             <Form {...store.form()} resetOnSuccess={['password']}>

@@ -91,6 +91,8 @@ return [
         'description' => 'Cette zone est protégée : confirmez votre mot de passe pour continuer.',
         'submit' => 'Confirmer le mot de passe',
         'passkey' => 'Confirmer avec une clé d\'accès',
+        'loading' => 'Confirmation en cours',
+        'separator' => 'Ou confirmer avec votre mot de passe',
     ],
 
     'verify_email' => [

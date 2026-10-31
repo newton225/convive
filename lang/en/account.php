@@ -91,6 +91,8 @@ return [
         'description' => 'This is a secure area: confirm your password before continuing.',
         'submit' => 'Confirm password',
         'passkey' => 'Confirm with passkey',
+        'loading' => 'Confirming',
+        'separator' => 'Or confirm with your password',
     ],
 
     'verify_email' => [
