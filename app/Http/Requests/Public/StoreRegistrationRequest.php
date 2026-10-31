@@ -3,8 +3,9 @@
 namespace App\Http\Requests\Public;
 
 use App\Models\Event;
-use App\Rules\GuestPhoneNumber;
+use App\Rules\IvorianPhoneNumber;
 use App\Rules\PassesBotCheck;
+use App\Rules\PersonName;
 use App\Support\BotCheck;
 use App\Support\PhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -31,7 +32,7 @@ class StoreRegistrationRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if ($normalized = PhoneNumber::normalize($this->input('phone'))) {
+        if ($normalized = PhoneNumber::normalizeIvorian($this->input('phone'))) {
             $this->merge(['phone' => $normalized]);
         }
 
@@ -72,8 +73,8 @@ class StoreRegistrationRequest extends FormRequest
             : ['nullable', 'integer'];
 
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:32', new GuestPhoneNumber],
+            'name' => ['required', 'string', 'max:255', new PersonName],
+            'phone' => ['required', 'string', 'max:32', new IvorianPhoneNumber],
             // Facultatif (README 2.5) : WhatsApp, deja garanti par le telephone, reste le canal
             // systematique de la carte d'invitation (2.7), l'email s'y ajoute quand fourni.
             'email' => ['nullable', 'string', 'email', 'max:255'],
@@ -81,7 +82,7 @@ class StoreRegistrationRequest extends FormRequest
             'price_category_id' => $categoryRule,
 
             'companions' => ['array', 'max:'.$this->event()->companion_limit],
-            'companions.*.name' => ['required', 'string', 'max:255'],
+            'companions.*.name' => ['required', 'string', 'max:255', new PersonName],
             'companions.*.unit_id' => ['required', 'integer', $activeUnit],
             'companions.*.price_category_id' => $categoryRule,
 

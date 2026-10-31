@@ -136,6 +136,17 @@ return [
         'never' => 'Never',
     ],
 
+    'unit_filters' => [
+        'label' => 'Unit',
+        'all' => 'All units',
+    ],
+
+    'unit_summary' => [
+        'title' => 'Confirmed guests by unit',
+        'line' => ':people person(s), :registrations booking(s)',
+        'hint' => 'People count the main guest and their companions. Click a unit to filter the list.',
+    ],
+
     'ticket_summary' => [
         'text' => ':downloaded of :confirmed confirmed guests have downloaded their ticket.',
         'never' => 'Show the :count who never did',
@@ -307,6 +318,10 @@ return [
     ],
 
     'empty' => [
+        'unit' => [
+            'title' => 'No registration for this unit',
+            'description' => 'No guest matches this unit with the other criteria chosen.',
+        ],
         'ticket' => [
             'title' => 'No registration for this filter',
             'description' => 'No confirmed guest matches this ticket download criterion.',

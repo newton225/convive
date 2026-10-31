@@ -14,6 +14,7 @@ import { RegistrationDetails } from '@/components/registrations/registration-det
 import { RegistrationStatusBadge } from '@/components/registrations/registration-status-badge';
 import { RegistrationTotals } from '@/components/registrations/registration-totals';
 import { TicketDownloadSummary } from '@/components/registrations/ticket-download-summary';
+import { UnitSummary } from '@/components/registrations/unit-summary';
 import { SingleExpandToggle } from '@/components/single-expand-toggle';
 import Heading from '@/components/heading';
 import { ProductTourButton } from '@/components/product-tour-button';
@@ -67,6 +68,7 @@ import type {
     TicketDownloadStats,
     TenantPermissions,
     Translations,
+    UnitStats,
 } from '@/types';
 
 type Props = {
@@ -79,6 +81,7 @@ type Props = {
     cancellations: RegistrationCancellation[];
     totals: RegistrationTotalsData;
     ticketSummary: TicketDownloadStats;
+    unitSummary: UnitStats[];
     refundChannels: RefundChannelOption[];
 };
 
@@ -107,6 +110,7 @@ export default function EventRegistrations({
     cancellations,
     totals,
     ticketSummary,
+    unitSummary,
     refundChannels,
 }: Props) {
     const { t, locale } = useTranslation();
@@ -141,6 +145,7 @@ export default function EventRegistrations({
             'filter[search]': filters.search ?? undefined,
             'filter[status]': filters.status ?? undefined,
             'filter[ticket]': filters.ticket ?? undefined,
+            'filter[unit]': filters.unit ?? undefined,
             sort: filters.sort ?? undefined,
         },
     };
@@ -149,6 +154,7 @@ export default function EventRegistrations({
         search?: string;
         status?: string;
         ticket?: string;
+        unit?: string;
         page?: number;
         sort?: string | null;
     }) => {
@@ -165,6 +171,10 @@ export default function EventRegistrations({
                         (params.ticket ?? filters.ticket ?? 'all') === 'all'
                             ? undefined
                             : (params.ticket ?? filters.ticket),
+                    unit:
+                        (params.unit ?? filters.unit ?? 'all') === 'all'
+                            ? undefined
+                            : (params.unit ?? filters.unit),
                 },
                 // `null` retire le tri (retour a l'ordre par defaut du serveur).
                 sort:
@@ -540,6 +550,32 @@ export default function EventRegistrations({
                         </SelectContent>
                     </Select>
 
+                    <Select
+                        value={filters.unit ?? 'all'}
+                        onValueChange={(unit) => navigate({ unit })}
+                    >
+                        <SelectTrigger
+                            className="w-56"
+                            aria-label={t('registrations.unit_filters.label')}
+                            data-test="registrations-unit-filter"
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">
+                                {t('registrations.unit_filters.all')}
+                            </SelectItem>
+                            {unitSummary.map((unit) => (
+                                <SelectItem
+                                    key={unit.id}
+                                    value={String(unit.id)}
+                                >
+                                    {unit.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
                     <SingleExpandToggle
                         checked={singleExpand}
                         onCheckedChange={toggleSingleExpand}
@@ -601,6 +637,16 @@ export default function EventRegistrations({
                     ) : null}
                 </div>
 
+                <UnitSummary
+                    units={unitSummary}
+                    selectedId={filters.unit}
+                    onSelect={(unit) =>
+                        navigate({
+                            unit: filters.unit === unit ? 'all' : unit,
+                        })
+                    }
+                />
+
                 <TicketDownloadSummary
                     summary={ticketSummary}
                     onShowNever={() => navigate({ ticket: 'never_downloaded' })}
@@ -661,14 +707,18 @@ export default function EventRegistrations({
                                     {t(
                                         filters.ticket
                                             ? 'registrations.empty.ticket.title'
-                                            : `registrations.empty.${filters.status ?? 'all'}.title`,
+                                            : filters.unit
+                                              ? 'registrations.empty.unit.title'
+                                              : `registrations.empty.${filters.status ?? 'all'}.title`,
                                     )}
                                 </p>
                                 <p className="text-muted-foreground text-sm">
                                     {t(
                                         filters.ticket
                                             ? 'registrations.empty.ticket.description'
-                                            : `registrations.empty.${filters.status ?? 'all'}.description`,
+                                            : filters.unit
+                                              ? 'registrations.empty.unit.description'
+                                              : `registrations.empty.${filters.status ?? 'all'}.description`,
                                     )}
                                 </p>
                             </>

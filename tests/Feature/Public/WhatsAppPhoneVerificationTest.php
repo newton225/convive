@@ -264,18 +264,6 @@ class WhatsAppPhoneVerificationTest extends TestCase
         $this->assertSame(RegistrationStatus::Draft, $this->registration()->status);
     }
 
-    public function test_un_numero_etranger_est_aussi_verifie_par_whatsapp(): void
-    {
-        // WhatsApp joint tous les pays : l'exemption des numeros etrangers ne valait que pour le SMS.
-        $this->register('+33 6 12 34 56 78');
-
-        $this->assertSame(RegistrationStatus::Draft, $this->registration()->status);
-
-        $this->incoming('33612345678', 'Code Convive : '.$this->code());
-
-        $this->assertNotNull($this->registration()->phone_verified_at);
-    }
-
     public function test_un_nouveau_code_remplace_l_ancien(): void
     {
         $verifyPage = $this->register();

@@ -20,10 +20,12 @@ use App\Http\Requests\Events\RecordRefundRequest;
 use App\Models\Event;
 use App\Models\PaymentProof;
 use App\Models\Registration;
+use App\Models\RegistrationCompanion;
 use App\Models\RegistrationEvent;
 use App\Models\SeatingTable;
 use App\Models\Tenant;
 use App\Models\Ticket;
+use App\Models\Unit;
 use App\Models\User;
 use App\Support\InvitationCardMessage;
 use App\Support\PdfLetterhead;
@@ -101,10 +103,12 @@ class RegistrationController extends Controller
                 'search' => $request->string('filter.search')->toString() ?: null,
                 'status' => $request->string('filter.status')->toString() ?: null,
                 'ticket' => $request->string('filter.ticket')->toString() ?: null,
+                'unit' => $request->string('filter.unit')->toString() ?: null,
                 'sort' => $request->string('sort')->toString() ?: null,
             ],
             'totals' => $this->totals($request, $event),
             'ticketSummary' => $this->ticketSummary($event),
+            'unitSummary' => $this->unitSummary($event),
             'cancellations' => $this->recentCancellations($event),
             // Moyens proposes pour un remboursement (README 2.11) : les memes canaux que les
             // versements, l'argent repart par ou il est venu ou par un autre moyen connu.
@@ -371,6 +375,17 @@ class RegistrationController extends Controller
                         default => null,
                     };
                 }),
+                // Une unite (decision du 2026-10-31) : les dossiers dont l'invite principal ou un
+                // accompagnateur en fait partie. Un identifiant qui n'est pas un nombre ne filtre rien.
+                AllowedFilter::callback('unit', function (Builder $query, string $value) {
+                    if (! ctype_digit($value)) {
+                        return;
+                    }
+
+                    $query->where(fn (Builder $any) => $any
+                        ->where('unit_id', (int) $value)
+                        ->orWhereHas('companions', fn (Builder $companion) => $companion->where('unit_id', (int) $value)));
+                }),
                 AllowedFilter::callback('status', function (Builder $query, string $value) {
                     match ($value) {
                         'confirmed' => $query->where('status', RegistrationStatus::Confirmed),
@@ -435,6 +450,46 @@ class RegistrationController extends Controller
         $downloaded = (clone $confirmed)->whereIn('id', $this->downloadedRegistrationIds($event))->count();
 
         return ['confirmed' => $total, 'downloaded' => $downloaded, 'never' => $total - $downloaded];
+    }
+
+    /**
+     * Les inscrits confirmes de l'evenement par unite (decision du 2026-10-31) : les dossiers dont l'invite
+     * principal est de l'unite, et les personnes (invite principal et accompagnateurs) qui en sont. Toutes
+     * les unites actives y figurent, meme a zero, et une unite retiree seulement si elle a des inscrits.
+     * Tout l'evenement, pas le filtre actif.
+     *
+     * @return array<int, array{id: int, name: string, registrations: int, people: int}>
+     */
+    private function unitSummary(Event $event): array
+    {
+        $confirmed = fn (Builder $registration) => $registration
+            ->where('event_id', $event->id)
+            ->where('status', RegistrationStatus::Confirmed);
+
+        $holders = Registration::query()
+            ->tap($confirmed)
+            ->selectRaw('unit_id, COUNT(*) as total')
+            ->groupBy('unit_id')
+            ->pluck('total', 'unit_id');
+
+        $companions = RegistrationCompanion::query()
+            ->whereHas('registration', $confirmed)
+            ->selectRaw('unit_id, COUNT(*) as total')
+            ->groupBy('unit_id')
+            ->pluck('total', 'unit_id');
+
+        $rows = [];
+
+        foreach (Unit::query()->ordered()->get() as $unit) {
+            $registrations = (int) ($holders[$unit->id] ?? 0);
+            $people = $registrations + (int) ($companions[$unit->id] ?? 0);
+
+            if ($unit->is_active || $people > 0) {
+                $rows[] = ['id' => $unit->id, 'name' => $unit->name, 'registrations' => $registrations, 'people' => $people];
+            }
+        }
+
+        return $rows;
     }
 
     /**

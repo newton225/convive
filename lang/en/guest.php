@@ -63,6 +63,8 @@ return [
         'privacy_link' => 'How your data is handled',
         'errors' => [
             'phone_invalid' => 'This number is not valid for the selected country. Check the country chosen in front of the field, then the number.',
+            'phone_ivorian_invalid' => 'Enter an Ivorian number of 10 digits, starting with 01, 05 or 07 (for example 07 00 00 00 00).',
+            'name_invalid' => 'The name can only contain letters, spaces, hyphens and apostrophes.',
             'phone_already_active' => 'A reservation is already in progress for this number. Finish it, or wait for its time limit to end before creating another.',
             'phone_proof_pending' => 'A payment proof is already being checked for this number. Wait for it to be processed before registering again with this number.',
             'phone_proof_rejected' => 'The payment proof for this number was rejected: your file is waiting for a new proof. Find it with the button below instead of registering again.',
@@ -88,7 +90,7 @@ return [
             'phone' => 'Enter it carefully: your invitation card, tickets and reminders are sent to this WhatsApp number. If it is wrong, you will not receive them.',
         ],
         'help' => [
-            'phone' => 'It is used to send your invitation card and reminders by WhatsApp. Foreign number: add the country code (+33, +1…). One reservation at a time per number.',
+            'phone' => 'It is used to send your invitation card and reminders by WhatsApp. Ivorian number of 10 digits. One reservation at a time per number.',
             'unit' => 'It is used to seat members of the same unit at the same tables. If none fits you, choose "Special guest".',
             'companions' => 'The people coming with you. Each one takes a seat, pays the price and gets their own ticket, which you can pass on to them.',
         ],

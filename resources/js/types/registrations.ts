@@ -218,9 +218,19 @@ export type TicketDownloadStats = {
     never: number;
 };
 
+// Les inscrits confirmes d'une unite : dossiers dont l'invite principal en est, et personnes en tout.
+export type UnitStats = {
+    id: number;
+    name: string;
+    registrations: number;
+    people: number;
+};
+
 export type RegistrationsFilters = {
     search: string | null;
     status: string | null;
+    // Identifiant d'une unite.
+    unit: string | null;
     // `downloaded` ou `never_downloaded`.
     ticket: string | null;
     // Parametre `sort` de spatie/laravel-query-builder : `name`, `-amount_due`...

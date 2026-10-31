@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Public;
 
-use App\Rules\GuestPhoneNumber;
+use App\Rules\IvorianPhoneNumber;
 use App\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -22,7 +22,7 @@ class RecoverResumeLinkRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if ($normalized = PhoneNumber::normalize($this->input('phone'))) {
+        if ($normalized = PhoneNumber::normalizeIvorian($this->input('phone'))) {
             $this->merge(['phone' => $normalized]);
         }
     }
@@ -33,7 +33,7 @@ class RecoverResumeLinkRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'phone' => ['required', 'string', 'max:32', new GuestPhoneNumber],
+            'phone' => ['required', 'string', 'max:32', new IvorianPhoneNumber],
         ];
     }
 }

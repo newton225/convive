@@ -3,7 +3,8 @@
 namespace App\Http\Requests\Public;
 
 use App\Models\Event;
-use App\Rules\GuestPhoneNumber;
+use App\Rules\IvorianPhoneNumber;
+use App\Rules\PersonName;
 use App\Support\PhoneNumber;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -26,7 +27,7 @@ class StoreWaitlistEntryRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if ($normalized = PhoneNumber::normalize($this->input('phone'))) {
+        if ($normalized = PhoneNumber::normalizeIvorian($this->input('phone'))) {
             $this->merge(['phone' => $normalized]);
         }
 
@@ -66,13 +67,13 @@ class StoreWaitlistEntryRequest extends FormRequest
             : ['nullable', 'integer'];
 
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:32', new GuestPhoneNumber],
+            'name' => ['required', 'string', 'max:255', new PersonName],
+            'phone' => ['required', 'string', 'max:32', new IvorianPhoneNumber],
             'unit_id' => ['required', 'integer', $activeUnit],
             'price_category_id' => $categoryRule,
 
             'companions' => ['array', 'max:'.$this->event()->companion_limit],
-            'companions.*.name' => ['required', 'string', 'max:255'],
+            'companions.*.name' => ['required', 'string', 'max:255', new PersonName],
             'companions.*.unit_id' => ['required', 'integer', $activeUnit],
             'companions.*.price_category_id' => $categoryRule,
         ];

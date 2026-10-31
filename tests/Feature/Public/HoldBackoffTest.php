@@ -120,8 +120,8 @@ class HoldBackoffTest extends TestCase
         // Le message lui-meme, pas seulement la presence d'une erreur : une cle de traduction
         // absente s'afficherait telle quelle a l'invite. En anglais, la langue que le client de
         // test annonce par defaut (`Accept-Language: en-us`).
-        $message = __('guest.registration.errors.phone_invalid', [], 'en');
-        $this->assertNotSame('guest.registration.errors.phone_invalid', $message);
+        $message = __('guest.registration.errors.phone_ivorian_invalid', [], 'en');
+        $this->assertNotSame('guest.registration.errors.phone_ivorian_invalid', $message);
 
         // Un 06 francais sans son indicatif : sans +33, il est lu comme ivoirien, et invalide.
         $this->register(phone: '06 12 34 56 78')->assertSessionHasErrors(['phone' => $message]);
@@ -129,13 +129,14 @@ class HoldBackoffTest extends TestCase
         $this->assertSame(0, $this->tenant->asCurrent(fn () => Registration::count()));
     }
 
-    public function test_un_invite_peut_s_inscrire_avec_un_numero_etranger(): void
+    public function test_un_numero_etranger_est_refuse(): void
     {
-        $this->register(phone: '+33 6 12 34 56 78')->assertSessionHasNoErrors()->assertRedirect();
+        // Decision du 2026-10-31 : le parcours public n'accepte que les numeros ivoiriens a dix chiffres.
+        $message = __('guest.registration.errors.phone_ivorian_invalid', [], 'en');
 
-        $this->assertSame('+33612345678', $this->tenant->asCurrent(
-            fn () => Registration::latest('id')->value('phone'),
-        ));
+        $this->register(phone: '+33 6 12 34 56 78')->assertSessionHasErrors(['phone' => $message]);
+
+        $this->assertSame(0, $this->tenant->asCurrent(fn () => Registration::count()));
     }
 
     public function test_deux_reservations_expirees_imposent_une_attente(): void

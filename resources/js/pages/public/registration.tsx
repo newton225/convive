@@ -1,12 +1,12 @@
 import { Form, Head, usePage } from '@inertiajs/react';
 import { AlertCircle } from 'lucide-react';
 import { BrandColorStyle } from '@/components/brand-color-style';
-import type { Country } from 'react-phone-number-input';
 import { OfflineBanner } from '@/components/offline-banner';
 import { AdditionalRegistrationNotice } from '@/components/public/additional-registration-notice';
 import { BotCheck } from '@/components/public/bot-check';
 import { OngoingReservationNotice } from '@/components/public/ongoing-reservation-notice';
-import { PhoneField } from '@/components/phone/phone-field';
+import { IvorianPhoneField } from '@/components/phone/ivorian-phone-field';
+import { PersonNameInput } from '@/components/public/person-name-input';
 import { RegistrationReviewDialog } from '@/components/public/registration-review-dialog';
 import { ResumeLinkRecovery } from '@/components/public/resume-link-recovery';
 import { useRef, useState } from 'react';
@@ -40,7 +40,6 @@ type Props = {
     tenant: PublicRegistrationTenant;
     units: PublicUnitOption[];
     token: string;
-    defaultCountry: Country;
     // La politique de confidentialite, sur le site de l'editeur.
     privacyUrl: string;
     // La cle publique du widget anti-robot, quand l'evenement le demande.
@@ -63,7 +62,6 @@ export default function PublicRegistration({
     tenant,
     units,
     token,
-    defaultCountry,
     privacyUrl,
     botCheckSiteKey,
     ongoingReservationUrl,
@@ -167,7 +165,7 @@ export default function PublicRegistration({
                                         )}
                                         error={errors.name}
                                     >
-                                        <Input
+                                        <PersonNameInput
                                             id="name"
                                             name="name"
                                             required
@@ -189,10 +187,9 @@ export default function PublicRegistration({
                                             'guest.registration.hint.phone',
                                         )}
                                     >
-                                        <PhoneField
+                                        <IvorianPhoneField
                                             id="phone"
                                             name="phone"
-                                            defaultCountry={defaultCountry}
                                             required
                                             testId="registration-phone"
                                         />
@@ -201,7 +198,9 @@ export default function PublicRegistration({
                                     {errors.phone && flash.recoverable ? (
                                         <ResumeLinkRecovery
                                             token={token}
-                                            phone={String(getData().phone ?? '')}
+                                            phone={String(
+                                                getData().phone ?? '',
+                                            )}
                                         />
                                     ) : null}
 
@@ -324,7 +323,9 @@ export default function PublicRegistration({
                                     // Le bouton ne soumet plus : on verifie d'abord les champs
                                     // obligatoires comme le ferait le navigateur, puis l'invite
                                     // relit son recapitulatif.
-                                    if (!clicked.currentTarget.form?.reportValidity()) {
+                                    if (
+                                        !clicked.currentTarget.form?.reportValidity()
+                                    ) {
                                         return;
                                     }
 

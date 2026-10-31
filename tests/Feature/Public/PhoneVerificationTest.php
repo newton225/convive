@@ -197,17 +197,14 @@ class PhoneVerificationTest extends TestCase
         Notification::assertSentOnDemandTimes(PhoneVerificationCode::class, 2);
     }
 
-    public function test_un_numero_etranger_reserve_sans_code(): void
+    public function test_un_numero_etranger_est_refuse_sans_envoi_de_code(): void
     {
-        // Decision du 2026-10-03 (option a) : le SMS part par Orange Cote d'Ivoire, qui ne garantit
-        // pas l'envoi a l'etranger. Un invite etranger ne doit pas rester bloque devant un code qui
-        // n'arrivera jamais : la verification ne vaut que pour les numeros ivoiriens.
+        // Decision du 2026-10-31 : plus de numero etranger sur le parcours public (elle remplace
+        // l'exemption de code du 2026-10-03, qui n'avait de sens que pour des numeros etrangers).
         Notification::fake();
 
-        $this->register($this->event(true), '+33 6 12 34 56 78')->assertSessionHasNoErrors();
+        $this->register($this->event(true), '+33 6 12 34 56 78')->assertSessionHasErrors('phone');
 
-        $this->assertSame(RegistrationStatus::Held, $this->registration()->status);
-        // L'alerte d'equipe « nouvelle inscription » part quand meme : seul le code est ecarte.
         Notification::assertSentOnDemandTimes(PhoneVerificationCode::class, 0);
     }
 

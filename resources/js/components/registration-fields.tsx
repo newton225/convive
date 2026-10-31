@@ -4,9 +4,9 @@ import { useEffect, useRef } from 'react';
 import { HelpTip } from '@/components/help-tip';
 import InputError from '@/components/input-error';
 import { LabelWithHelp } from '@/components/label-with-help';
+import { PersonNameInput } from '@/components/public/person-name-input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -52,10 +52,7 @@ export function Field({
             />
             {children}
             {hint && (
-                <p
-                    id={`${id}-hint`}
-                    className="text-sm text-muted-foreground"
-                >
+                <p id={`${id}-hint`} className="text-muted-foreground text-sm">
                     {hint}
                 </p>
             )}
@@ -246,7 +243,7 @@ export function CompanionFields({
                                         'guest.registration.fields.companion_name',
                                     )}
                                 </Label>
-                                <Input
+                                <PersonNameInput
                                     id={`companion-name-${id}`}
                                     name={`companions[${index}][name]`}
                                     placeholder={t(

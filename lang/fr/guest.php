@@ -63,6 +63,8 @@ return [
         'privacy_link' => 'Comment vos données sont traitées',
         'errors' => [
             'phone_invalid' => "Ce numéro n'est pas valide pour le pays choisi. Vérifiez le pays sélectionné devant le champ, puis le numéro.",
+            'phone_ivorian_invalid' => 'Saisissez un numéro ivoirien à 10 chiffres, commençant par 01, 05 ou 07 (par exemple 07 00 00 00 00).',
+            'name_invalid' => 'Le nom ne peut contenir que des lettres, des espaces, des tirets et des apostrophes.',
             'phone_already_active' => 'Une réservation est déjà en cours pour ce numéro. Terminez-la, ou attendez la fin de son délai avant d\'en créer une autre.',
             'phone_proof_pending' => 'Une preuve de paiement est déjà en cours de vérification pour ce numéro. Attendez qu\'elle soit traitée avant de vous inscrire de nouveau avec ce numéro.',
             'phone_proof_rejected' => 'La preuve de paiement de ce numéro a été rejetée : votre dossier attend une nouvelle preuve. Retrouvez-le avec le bouton ci-dessous plutôt que de vous inscrire de nouveau.',
@@ -88,7 +90,7 @@ return [
             'phone' => "Saisissez-le avec soin : c'est sur ce numéro WhatsApp que vous recevrez votre carte d'invitation, vos billets et vos rappels. Une erreur, et ils ne vous parviendront pas.",
         ],
         'help' => [
-            'phone' => 'Il sert à vous envoyer votre carte d’invitation et vos rappels par WhatsApp. Numéro étranger : ajoutez l’indicatif du pays (+33, +1…). Une seule réservation à la fois par numéro.',
+            'phone' => 'Il sert à vous envoyer votre carte d’invitation et vos rappels par WhatsApp. Numéro ivoirien à 10 chiffres. Une seule réservation à la fois par numéro.',
             'unit' => 'Elle sert à placer les membres d’une même unité aux mêmes tables. Si aucune ne vous correspond, choisissez « Invité spécial ».',
             'companions' => 'Les personnes qui viennent avec vous. Chacune occupe une place, paie le tarif et reçoit son propre billet, que vous pourrez lui transmettre.',
         ],

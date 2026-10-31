@@ -136,6 +136,17 @@ return [
         'never' => 'Jamais',
     ],
 
+    'unit_filters' => [
+        'label' => 'Unité',
+        'all' => 'Toutes les unités',
+    ],
+
+    'unit_summary' => [
+        'title' => 'Inscrits confirmés par unité',
+        'line' => ':people personne(s), :registrations dossier(s)',
+        'hint' => 'Les personnes comptent l’invité principal et ses accompagnateurs. Cliquez sur une unité pour filtrer la liste.',
+    ],
+
     'ticket_summary' => [
         'text' => ':downloaded inscrit(s) sur :confirmed ont téléchargé leur billet.',
         'never' => 'Voir les :count qui ne l’ont jamais fait',
@@ -307,6 +318,10 @@ return [
     ],
 
     'empty' => [
+        'unit' => [
+            'title' => 'Aucune inscription pour cette unité',
+            'description' => 'Aucun inscrit ne correspond à cette unité avec les autres critères choisis.',
+        ],
         'ticket' => [
             'title' => 'Aucune inscription pour ce filtre',
             'description' => 'Aucun inscrit confirmé ne correspond à ce critère de téléchargement du billet.',

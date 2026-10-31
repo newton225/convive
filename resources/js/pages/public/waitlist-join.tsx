@@ -1,8 +1,8 @@
 import { Form, Head } from '@inertiajs/react';
 import { BrandColorStyle } from '@/components/brand-color-style';
-import type { Country } from 'react-phone-number-input';
 import { OfflineBanner } from '@/components/offline-banner';
-import { PhoneField } from '@/components/phone/phone-field';
+import { IvorianPhoneField } from '@/components/phone/ivorian-phone-field';
+import { PersonNameInput } from '@/components/public/person-name-input';
 import { useRef, useState } from 'react';
 import LocaleSwitcher from '@/components/locale-switcher';
 import {
@@ -14,7 +14,6 @@ import {
 import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { SubmitButton } from '@/components/submit-button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/hooks/use-translation';
 import { store } from '@/routes/public/waitlist';
 import type {
@@ -32,7 +31,6 @@ type Props = {
     tenant: PublicRegistrationTenant;
     units: PublicUnitOption[];
     token: string;
-    defaultCountry: Country;
 };
 
 /**
@@ -45,7 +43,6 @@ export default function PublicWaitlistJoin({
     tenant,
     units,
     token,
-    defaultCountry,
 }: Props) {
     const { t } = useTranslation();
     const [companionIds, setCompanionIds] = useState<number[]>([]);
@@ -111,7 +108,7 @@ export default function PublicWaitlistJoin({
                                         )}
                                         error={errors.name}
                                     >
-                                        <Input
+                                        <PersonNameInput
                                             id="name"
                                             name="name"
                                             required
@@ -133,10 +130,9 @@ export default function PublicWaitlistJoin({
                                             'guest.registration.hint.phone',
                                         )}
                                     >
-                                        <PhoneField
+                                        <IvorianPhoneField
                                             id="phone"
                                             name="phone"
-                                            defaultCountry={defaultCountry}
                                             required
                                             testId="waitlist-phone"
                                         />
