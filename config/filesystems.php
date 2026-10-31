@@ -63,6 +63,35 @@ return [
         ],
 
         /*
+         * Videos courtes de presentation d'un evenement (decision du 2026-10-31). Sur le disque du
+         * serveur tant que `EVENT_VIDEO_DRIVER` n'est pas `s3` ; avec `s3`, elles vont chez un
+         * stockage compatible S3 (Cloudflare R2 : `R2_ENDPOINT`, `R2_BUCKET`, cles d'acces), prive,
+         * lu par des URL signees expirantes, jamais par une adresse publique. Le paquet
+         * `league/flysystem-aws-s3-v3` est requis pour ce mode.
+         */
+        'event_videos' => env('EVENT_VIDEO_DRIVER', 'local') === 's3'
+            ? [
+                'driver' => 's3',
+                'key' => env('R2_ACCESS_KEY_ID'),
+                'secret' => env('R2_SECRET_ACCESS_KEY'),
+                'region' => env('R2_REGION', 'auto'),
+                'bucket' => env('R2_BUCKET'),
+                'endpoint' => env('R2_ENDPOINT'),
+                // L'adresse du compte, jamais celle du bucket : un seul nom de domaine a declarer dans la CSP.
+                'use_path_style_endpoint' => true,
+                'throw' => true,
+                'report' => false,
+            ]
+            : [
+                'driver' => 'local',
+                'root' => storage_path('app/event-videos'),
+                'url' => rtrim((string) env('APP_URL', 'http://localhost'), '/').'/event-videos',
+                'serve' => true,
+                'throw' => false,
+                'report' => false,
+            ],
+
+        /*
          * Preuves de paiement deposees par les invites (SECURITY.md H1) : disque distinct de
          * `tenant_media`, jamais melange aux fichiers de marque. Un vrai domaine separe reste a
          * batir (DNS, certificat) ; en attendant, `PaymentProofServiceProvider` force ce disque

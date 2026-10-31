@@ -57,6 +57,10 @@ Route::prefix('{tenant}')
         Route::post('events/{event}/visual', [EventController::class, 'storeVisual'])->name('tenants.events.visual.store');
         Route::delete('events/{event}/visual', [EventController::class, 'destroyVisual'])->name('tenants.events.visual.destroy');
 
+        // La video courte de presentation de l'evenement (decision du 2026-10-31).
+        Route::post('events/{event}/video', [EventController::class, 'storeVideo'])->name('tenants.events.video.store');
+        Route::delete('events/{event}/video', [EventController::class, 'destroyVideo'])->name('tenants.events.video.destroy');
+
         // Le gabarit du billet propre a l'evenement (README ecran 15) : active, il l'emporte sur
         // celui de l'organisation. Ses fonds se deposent comme ceux de l'organisation.
         Route::get('events/{event}/ticket-template', [EventTicketTemplateController::class, 'edit'])->name('tenants.events.ticket-template.edit');

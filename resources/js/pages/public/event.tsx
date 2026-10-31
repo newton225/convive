@@ -6,6 +6,7 @@ import LocaleSwitcher from '@/components/locale-switcher';
 import { OfflineBanner } from '@/components/offline-banner';
 import { EventDateTile } from '@/components/public/event-date-tile';
 import { EventHero } from '@/components/public/event-hero';
+import { EventPresentationVideo } from '@/components/public/event-presentation-video';
 import { EventHowItWorks } from '@/components/public/event-how-it-works';
 import { EventRegistrationState } from '@/components/public/event-registration-state';
 import { SeatsMeter } from '@/components/public/seats-meter';
@@ -86,6 +87,14 @@ export default function PublicEvent({ event, tenant, token }: Props) {
                 <div className="mx-auto grid w-full max-w-5xl gap-8 px-5 pt-8 md:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] md:gap-10 md:pt-10">
                     <div className="space-y-8">
                         <InstallPrompt />
+
+                        {event.presentationVideoUrl ? (
+                            <Reveal>
+                                <EventPresentationVideo
+                                    url={event.presentationVideoUrl}
+                                />
+                            </Reveal>
+                        ) : null}
 
                         <Reveal className="grid gap-5 sm:grid-cols-2">
                             <EventDateTile

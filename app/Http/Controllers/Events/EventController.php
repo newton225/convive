@@ -8,6 +8,7 @@ use App\Enums\RegistrationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureTenantMembership;
 use App\Http\Requests\Events\SaveEventRequest;
+use App\Http\Requests\Events\SaveEventVideoRequest;
 use App\Http\Requests\Events\SaveEventVisualRequest;
 use App\Models\Event;
 use App\Models\GuestClaim;
@@ -277,6 +278,32 @@ class EventController extends Controller
     }
 
     /**
+     * Store the event's presentation video (decision du 2026-10-31).
+     */
+    public function storeVideo(SaveEventVideoRequest $request, Tenant $tenant, Event $event, SaveEvent $save): RedirectResponse
+    {
+        $save->presentationVideo($event, $request->file('file'));
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('events.flash.video_updated')]);
+
+        return to_route('tenants.events.edit', [$tenant, $event]);
+    }
+
+    /**
+     * Remove the event's presentation video.
+     */
+    public function destroyVideo(Tenant $tenant, Event $event, SaveEvent $save): RedirectResponse
+    {
+        Gate::authorize('update', [$event, $tenant]);
+
+        $save->removePresentationVideo($event);
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('events.flash.video_deleted')]);
+
+        return to_route('tenants.events.edit', [$tenant, $event]);
+    }
+
+    /**
      * Duplicate the specified event as a fresh draft.
      */
     public function duplicate(Tenant $tenant, Event $event, SaveEvent $save): RedirectResponse
@@ -366,6 +393,7 @@ class EventController extends Controller
             'primaryColor' => $event->primary_color,
             'secondaryColor' => $event->secondary_color,
             'visualUrl' => $event->visualUrl(),
+            'presentationVideoUrl' => $event->presentationVideoUrl(),
             // La salle telle que le formulaire la decrit : groupes de tables de meme taille.
             'seatsAtTables' => $event->seatsAtTables(),
             'seatingModeLocked' => $event->registrations()->occupyingSeats()->exists(),

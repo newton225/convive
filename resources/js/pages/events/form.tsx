@@ -15,6 +15,7 @@ import { HelpTip } from '@/components/help-tip';
 import { LabelWithHelp } from '@/components/label-with-help';
 import { RequiredFieldsNote } from '@/components/required-fields-note';
 import { ProductTourButton } from '@/components/product-tour-button';
+import EventVideoField from '@/components/events/event-video-field';
 import EventVisualField from '@/components/events/event-visual-field';
 import { EventShowcasePreview } from '@/components/events/event-showcase-preview';
 import { HoldDurationField } from '@/components/events/hold-duration-field';
@@ -138,7 +139,10 @@ export default function EventForm({
                     {event ? (
                         <div className="flex flex-wrap items-center gap-2">
                             <StatusBadge
-                                tone={eventStatusTones[event.displayStatus] ?? 'muted'}
+                                tone={
+                                    eventStatusTones[event.displayStatus] ??
+                                    'muted'
+                                }
                             >
                                 {event.statusLabel}
                             </StatusBadge>
@@ -490,11 +494,18 @@ export default function EventForm({
                                     </div>
 
                                     {event ? (
-                                        <EventVisualField
-                                            tenantSlug={tenant.slug}
-                                            eventId={event.id}
-                                            url={event.visualUrl}
-                                        />
+                                        <>
+                                            <EventVisualField
+                                                tenantSlug={tenant.slug}
+                                                eventId={event.id}
+                                                url={event.visualUrl}
+                                            />
+                                            <EventVideoField
+                                                tenantSlug={tenant.slug}
+                                                eventId={event.id}
+                                                url={event.presentationVideoUrl}
+                                            />
+                                        </>
                                     ) : (
                                         <p className="text-muted-foreground text-xs">
                                             {t('events.visual.hint')}

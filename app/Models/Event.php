@@ -107,6 +107,17 @@ class Event extends Model implements HasMedia
     public const VisualCollection = 'visual';
 
     /**
+     * La video courte de presentation de l'evenement (decision du 2026-10-31), un seul fichier, affichee
+     * sur le lien public quand elle existe. Disque `event_videos` : le serveur, ou Cloudflare R2.
+     */
+    public const PresentationVideoCollection = 'presentation_video';
+
+    /**
+     * Taille maximale d'une video de presentation, en kilo-octets (25 Mo, decision du 2026-10-31).
+     */
+    public const PresentationVideoMaxKilobytes = 25600;
+
+    /**
      * Fixe le format plutot que de le demander a la connexion active (`getDateFormat()` sans
      * cette valeur appelle `getConnection()`) : ce modele vit dans la base du locataire, dont
      * la connexion nommee `tenant` est purgee des que la tenancy se termine (voir CLAUDE.md,
@@ -150,6 +161,13 @@ class Event extends Model implements HasMedia
         $this->addMediaCollection(self::VisualCollection)
             ->singleFile()
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+
+        // Une video ne se reencode pas ici : seul son vrai type est verifie a la validation
+        // (`SaveEventVideoRequest`), et elle n'est jamais servie que par une URL signee expirante.
+        $this->addMediaCollection(self::PresentationVideoCollection)
+            ->singleFile()
+            ->useDisk('event_videos')
+            ->acceptsMimeTypes(['video/mp4', 'video/webm']);
 
         // Les fonds du billet propres a l'evenement, sous les memes noms que ceux de l'organisation.
         foreach (BrandFile::ticketBackgrounds() as $file) {
@@ -235,6 +253,19 @@ class Event extends Model implements HasMedia
     public function visualUrl(int $minutes = 30): ?string
     {
         $media = $this->getFirstMedia(self::VisualCollection);
+
+        return $media instanceof Media
+            ? $media->getTemporaryUrl(now()->addMinutes($minutes))
+            : null;
+    }
+
+    /**
+     * Get a signed, expiring URL for the event's presentation video, or null when it has none. Deux heures :
+     * assez pour une page restee ouverte, la lecture demandant le fichier a la volee.
+     */
+    public function presentationVideoUrl(int $minutes = 120): ?string
+    {
+        $media = $this->getFirstMedia(self::PresentationVideoCollection);
 
         return $media instanceof Media
             ? $media->getTemporaryUrl(now()->addMinutes($minutes))

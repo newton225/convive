@@ -71,6 +71,7 @@ class EventController extends Controller
                 // l'evenement n'en definit pas.
                 'colors' => $event->colors(),
                 'visualUrl' => $event->visualUrl(),
+                'presentationVideoUrl' => $event->presentationVideoUrl(),
             ],
             'tenant' => [
                 'name' => $tenant->name,

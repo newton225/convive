@@ -88,8 +88,18 @@ class SetSecurityHeaders
         // ses cles sont reglees. Meme raison que plus haut pour l'ouvrir sur tout le document.
         $botCheck = BotCheck::siteKey() !== null ? BotCheck::ScriptOrigin : '';
 
+        // Les videos de presentation (decision du 2026-10-31) : quand elles sont chez un stockage S3
+        // (Cloudflare R2), le navigateur les lit a l'adresse du compte, a declarer pour `media-src`.
+        $videoEndpoint = config('filesystems.disks.event_videos.driver') === 's3'
+            ? parse_url((string) config('filesystems.disks.event_videos.endpoint'))
+            : null;
+        $videoOrigin = is_array($videoEndpoint) && isset($videoEndpoint['scheme'], $videoEndpoint['host'])
+            ? "{$videoEndpoint['scheme']}://{$videoEndpoint['host']}"
+            : '';
+
         $directives = [
             "default-src 'self'",
+            trim("media-src 'self' {$videoOrigin}"),
             trim("script-src 'self' 'nonce-{$nonce}' {$analytics['script']} {$botCheck} {$devOrigin}"),
             trim("frame-src 'self' {$botCheck}"),
             trim("style-src 'self' 'nonce-{$nonce}' {$devOrigin}"),

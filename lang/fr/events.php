@@ -121,6 +121,27 @@ return [
         'empty' => 'Aucun visuel',
     ],
 
+    // La video courte de presentation, affichee sur le lien public (decision du 2026-10-31).
+    'video' => [
+        'label' => 'Vidéo de présentation',
+        'hint' => 'Facultative. Une courte vidéo (mp4 ou webm, 25 Mo au plus, environ une minute) affichée sur le lien public, avant le formulaire d’inscription.',
+        'choose' => 'Choisir une vidéo',
+        'replace' => 'Remplacer',
+        'remove' => 'Retirer',
+        'uploading' => 'Envoi en cours, patientez',
+        'empty' => 'Aucune vidéo',
+        'remove_confirm' => [
+            'title' => 'Retirer la vidéo de présentation ?',
+            'description' => 'Elle ne s’affichera plus sur le lien public. Pour la remettre, il faudra la déposer à nouveau.',
+            'confirm' => 'Retirer la vidéo',
+        ],
+        'public_label' => 'Vidéo de présentation de l’événement',
+        'errors' => [
+            'type' => 'Ce fichier n’est pas une vidéo mp4 ou webm.',
+            'too_large' => 'Cette vidéo dépasse 25 Mo. Compressez-la ou raccourcissez-la, puis recommencez.',
+        ],
+    ],
+
     'summary' => [
         'capacity' => '{0} Aucune place|{1} 1 place|[2,*] :count places',
         'no_date' => 'Date à définir',
@@ -229,6 +250,8 @@ return [
         'deleted' => 'Événement supprimé.',
         'visual_updated' => "Visuel de l'événement mis à jour.",
         'visual_deleted' => "Visuel de l'événement retiré.",
+        'video_updated' => 'Vidéo de présentation enregistrée.',
+        'video_deleted' => 'Vidéo de présentation retirée.',
     ],
 
     'missing_publish' => [

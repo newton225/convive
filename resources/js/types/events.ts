@@ -50,6 +50,8 @@ export type EventDetails = EventSummary & {
     primaryColor: string | null;
     secondaryColor: string | null;
     visualUrl: string | null;
+    // La video courte de presentation, par une URL signee expirante.
+    presentationVideoUrl: string | null;
     // Le nombre de places d'un evenement sans table, null quand la salle est en tables.
     freeSeats: number | null;
     // Vrai des qu'une inscription occupe une place : le mode avec ou sans tables ne change plus.
@@ -141,6 +143,7 @@ export type PublicEvent = {
     acceptsRegistrations: boolean;
     colors: { primary: string; secondary: string };
     visualUrl: string | null;
+    presentationVideoUrl: string | null;
 };
 
 export type PublicTenant = {

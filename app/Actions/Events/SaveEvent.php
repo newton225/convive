@@ -386,6 +386,44 @@ class SaveEvent
     }
 
     /**
+     * Store the event's presentation video, replacing whatever was there before (decision du 2026-10-31).
+     *
+     * Pas de reencodage : le serveur n'a pas d'outil video, le type reel est verifie par la requete et
+     * le fichier ne se sert que par une URL signee expirante. Le nom d'origine n'est pas conserve.
+     */
+    public function presentationVideo(Event $event, UploadedFile $upload): Event
+    {
+        $extension = $upload->getMimeType() === 'video/webm' ? 'webm' : 'mp4';
+
+        $event->addMedia($upload)
+            ->usingFileName(Str::uuid()->toString().'.'.$extension)
+            ->usingName(Event::PresentationVideoCollection)
+            ->toMediaCollection(Event::PresentationVideoCollection);
+
+        activity()
+            ->performedOn($event)
+            ->event('updated')
+            ->log('event.video_updated');
+
+        return $event;
+    }
+
+    /**
+     * Remove the event's presentation video.
+     */
+    public function removePresentationVideo(Event $event): Event
+    {
+        $event->clearMediaCollection(Event::PresentationVideoCollection);
+
+        activity()
+            ->performedOn($event)
+            ->event('updated')
+            ->log('event.video_deleted');
+
+        return $event;
+    }
+
+    /**
      * Remove the event's visual.
      */
     public function removeVisual(Event $event): Event

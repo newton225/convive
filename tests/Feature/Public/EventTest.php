@@ -10,7 +10,9 @@ use App\Models\PaymentAccount;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -109,6 +111,35 @@ class EventTest extends TestCase
                 ->where('event.name', 'Diner de gala 2026')
                 ->where('tenant.name', $tenant->name),
             );
+    }
+
+    public function test_la_page_publique_porte_la_video_de_presentation_quand_elle_existe(): void
+    {
+        Storage::fake('event_videos');
+
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+
+        $tenant->asCurrent(fn () => $event->addMedia(UploadedFile::fake()->createWithContent(
+            'presentation.mp4',
+            "\x00\x00\x00\x18ftypmp42\x00\x00\x00\x00mp42isom".str_repeat("\0", 1024),
+        ))->toMediaCollection(Event::PresentationVideoCollection));
+
+        $this->get($this->publicUrl($tenant, $event))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->whereNot('event.presentationVideoUrl', null));
+    }
+
+    public function test_la_page_publique_n_a_pas_de_video_quand_l_organisateur_n_en_a_pas_depose(): void
+    {
+        $owner = User::factory()->withTwoFactor()->create();
+        $tenant = $this->publishableTenant($owner);
+        $event = $this->publishedEvent($tenant);
+
+        $this->get($this->publicUrl($tenant, $event))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('event.presentationVideoUrl', null));
     }
 
     public function test_un_jeton_inconnu_recoit_404(): void

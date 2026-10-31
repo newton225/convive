@@ -121,6 +121,27 @@ return [
         'empty' => 'No visual',
     ],
 
+    // The short presentation video shown on the public link (decision of 2026-10-31).
+    'video' => [
+        'label' => 'Presentation video',
+        'hint' => 'Optional. A short video (mp4 or webm, 25 MB at most, about one minute) shown on the public link, before the registration form.',
+        'choose' => 'Choose a video',
+        'replace' => 'Replace',
+        'remove' => 'Remove',
+        'uploading' => 'Uploading, please wait',
+        'empty' => 'No video',
+        'remove_confirm' => [
+            'title' => 'Remove the presentation video?',
+            'description' => 'It will no longer be shown on the public link. To put it back, you will need to upload it again.',
+            'confirm' => 'Remove the video',
+        ],
+        'public_label' => 'Event presentation video',
+        'errors' => [
+            'type' => 'This file is not an mp4 or webm video.',
+            'too_large' => 'This video is over 25 MB. Compress or shorten it, then try again.',
+        ],
+    ],
+
     'summary' => [
         'capacity' => '{0} No seat|{1} 1 seat|[2,*] :count seats',
         'no_date' => 'Date to be set',
@@ -229,6 +250,8 @@ return [
         'deleted' => 'Event deleted.',
         'visual_updated' => 'Event visual updated.',
         'visual_deleted' => 'Event visual removed.',
+        'video_updated' => 'Presentation video saved.',
+        'video_deleted' => 'Presentation video removed.',
     ],
 
     'missing_publish' => [
