@@ -441,7 +441,11 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 4. **Fiche** — nom, téléphone, email (facultatif), unité, compteur d'accompagnateurs (0–10) avec
    nom + unité chacun, total recalculé en direct. L'email facultatif : WhatsApp (le téléphone
    est déjà recueilli) reste le canal systématique de la carte d'invitation (2.7), l'email s'y
-   ajoute quand l'invité l'a renseigné.
+   ajoute quand l'invité l'a renseigné. Le nom (de l'invité et de chaque accompagnateur) ne
+   contient que des lettres, des espaces, des tirets et des apostrophes. Le téléphone est un
+   numéro ivoirien à 10 chiffres (indicatif +225 fixe, préfixes 01, 05, 07 ou fixes 21, 25, 27) :
+   le parcours public n'accepte plus de numéro étranger (décision du 2026-10-31, qui remplace
+   l'ouverture à tout pays du 2026-09-29). Le serveur revalide ces deux règles.
 5. **Paiement en trois étapes** — (1) comptes de versement avec bouton copier et consigne de
    mettre son nom en motif du transfert ; (2) compte versé, référence, capture du reçu,
    précision facultative ;
