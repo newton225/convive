@@ -300,29 +300,32 @@ export default function EventRegistrations({
             header: t('registrations.columns.entry'),
             cell: ({ row }) =>
                 row.original.enteredAt ? (
-                    <StatusBadge
-                        tone={
-                            row.original.enteredCount < row.original.partySize
-                                ? 'warning'
-                                : 'success'
-                        }
-                    >
-                        {row.original.partySize > 1
-                            ? t('registrations.entry.group', {
-                                  count: row.original.enteredCount,
-                                  total: row.original.partySize,
-                                  time: formatDateTime(
-                                      row.original.enteredAt,
-                                      locale,
-                                  ),
-                              })
-                            : t('registrations.entry.entered', {
-                                  time: formatDateTime(
-                                      row.original.enteredAt,
-                                      locale,
-                                  ),
-                              })}
-                    </StatusBadge>
+                    <div className="w-52 whitespace-normal [&>*]:whitespace-normal">
+                        <StatusBadge
+                            tone={
+                                row.original.enteredCount <
+                                row.original.partySize
+                                    ? 'warning'
+                                    : 'success'
+                            }
+                        >
+                            {row.original.partySize > 1
+                                ? t('registrations.entry.group', {
+                                      count: row.original.enteredCount,
+                                      total: row.original.partySize,
+                                      time: formatDateTime(
+                                          row.original.enteredAt,
+                                          locale,
+                                      ),
+                                  })
+                                : t('registrations.entry.entered', {
+                                      time: formatDateTime(
+                                          row.original.enteredAt,
+                                          locale,
+                                      ),
+                                  })}
+                        </StatusBadge>
+                    </div>
                 ) : (
                     <span className="text-muted-foreground text-xs">
                         {t('registrations.entry.not_yet')}
@@ -343,8 +346,8 @@ export default function EventRegistrations({
                     <span
                         className={
                             status.state === 'sent'
-                                ? 'text-xs'
-                                : 'text-destructive text-xs'
+                                ? 'block w-44 text-xs whitespace-normal'
+                                : 'text-destructive block w-44 text-xs whitespace-normal'
                         }
                         data-test={
                             status.state === 'sent'
@@ -367,7 +370,7 @@ export default function EventRegistrations({
                     <span className="text-muted-foreground">-</span>
                 ) : row.original.ticketDownloadedAt ? (
                     <span
-                        className="text-xs"
+                        className="block w-44 text-xs whitespace-normal"
                         data-test="registration-ticket-downloaded"
                     >
                         {t('registrations.ticket_download.last', {
