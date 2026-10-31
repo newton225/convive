@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import {
+    finishPersonName,
     formatIvorianDigits,
     ivorianNationalDigits,
     sanitizePersonName,
@@ -13,9 +14,42 @@ describe('sanitizePersonName', () => {
         expect(sanitizePersonName('N’Dri')).toBe('N’Dri');
     });
 
+    it("ne garde qu'un separateur entre deux groupes de lettres", () => {
+        expect(sanitizePersonName('Jean----Paul')).toBe('Jean-Paul');
+        expect(sanitizePersonName('Jean    Paul')).toBe('Jean Paul');
+        expect(sanitizePersonName("Jean -'Paul")).toBe('Jean Paul');
+        expect(
+            sanitizePersonName('dfdfdf fgfgfèèèèèè---- """""        ddfdfdfd'),
+        ).toBe('dfdfdf fgfgfèè-ddfdfdfd');
+    });
+
+    it("n'ecrit jamais trois fois la meme lettre de suite", () => {
+        expect(sanitizePersonName('Aaaa Kooone')).toBe('Aa Koone');
+        expect(sanitizePersonName('fgfgfèèèèèè')).toBe('fgfgfèè');
+    });
+
+    it('retire les separateurs en tete', () => {
+        expect(sanitizePersonName('  -Aya')).toBe('Aya');
+    });
+
     it('retire les chiffres et les symboles', () => {
         expect(sanitizePersonName('Jean2 <b>Paul</b>@#!')).toBe('Jean bPaulb');
         expect(sanitizePersonName('1234')).toBe('');
+    });
+});
+
+describe('finishPersonName', () => {
+    it('retire le separateur laisse a la fin', () => {
+        expect(finishPersonName('Jean-')).toBe('Jean');
+        expect(finishPersonName("Jean Paul '  ")).toBe('Jean Paul');
+    });
+
+    it('met une majuscule au debut de chaque mot sans toucher au reste', () => {
+        expect(finishPersonName("jean-marc n'guessan")).toBe(
+            "Jean-Marc N'Guessan",
+        );
+        expect(finishPersonName('KONE moussa')).toBe('KONE Moussa');
+        expect(finishPersonName('émile kouamé')).toBe('Émile Kouamé');
     });
 });
 

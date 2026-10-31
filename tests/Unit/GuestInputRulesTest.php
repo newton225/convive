@@ -23,7 +23,10 @@ class GuestInputRulesTest extends TestCase
             'simple' => ['Aya Kouame'],
             'accents' => ['Chantal Kouamé-N’Guessan'],
             'apostrophe' => ["Jean N'Dri"],
-            'tiret' => ['Marie-Claire'],
+            'tiret' => ['Marie-Claire Kone'],
+            'trois mots' => ['Jean Marc Kouame'],
+            'deux lettres par mot' => ['Al Ba'],
+            'lettre doublee' => ['Aaron Kooné'],
         ];
     }
 
@@ -39,6 +42,17 @@ class GuestInputRulesTest extends TestCase
             'que des chiffres' => ['12345'],
             'commence par un tiret' => ['-Aya'],
             'point' => ['A. Kouame'],
+            'tirets de suite' => ['Aya----Kouame'],
+            'espaces de suite' => ['Aya    Kouame'],
+            'separateurs differents de suite' => ["Aya -'Kouame"],
+            'separateur a la fin' => ['Aya-'],
+            'guillemets et suites' => ['dfdfdf fgfgf---- """"" ddfdfdfd'],
+            'un seul mot' => ['Kouame'],
+            'un seul mot compose' => ['Marie-Claire'],
+            'un mot d une lettre' => ['A Kouame'],
+            'lettre repetee trois fois' => ['Aaa Kouame'],
+            'lettre repetee en majuscules' => ['Aya KKK'],
+            'lettres accentuees repetees' => ['Aya Kouèèèè'],
         ];
     }
 

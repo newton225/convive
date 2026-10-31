@@ -4,10 +4,33 @@
 export const IvorianNationalLength = 10;
 
 /**
- * Retire d'un nom tout ce qui n'est pas une lettre (accents compris), un espace, un tiret ou une apostrophe.
+ * Retire d'un nom tout ce qui n'est pas une lettre (accents compris), un espace, un tiret ou une apostrophe,
+ * puis les separateurs en tete et les suites de separateurs (on garde le premier de la suite).
  */
 export function sanitizePersonName(value: string): string {
-    return value.replace(/[^\p{L}\p{M}'’ -]/gu, '');
+    return (
+        value
+            .replace(/[^\p{L}\p{M}'’ -]/gu, '')
+            .replace(/^['’ -]+/, '')
+            .replace(/(['’ -])['’ -]+/g, '$1')
+            // Jamais trois fois la meme lettre de suite : la troisieme ne s'ecrit pas.
+            .replace(/(\p{L})\1{2,}/giu, (run) => run.slice(0, 2))
+    );
+}
+
+/**
+ * Le nom une fois la saisie finie : sans separateur a la fin, une majuscule au debut de chaque mot et apres un
+ * tiret ou une apostrophe (« jean-marc n'guessan » devient « Jean-Marc N'Guessan »). Le reste des lettres
+ * n'est pas touche : « KONE » et « McDonald » restent tels quels.
+ */
+export function finishPersonName(value: string): string {
+    return sanitizePersonName(value)
+        .replace(/['’ -]+$/, '')
+        .replace(
+            /(^|['’ -])(\p{L})/gu,
+            (_, separator: string, letter: string) =>
+                separator + letter.toLocaleUpperCase(),
+        );
 }
 
 /**

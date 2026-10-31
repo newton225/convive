@@ -64,7 +64,9 @@ return [
         'errors' => [
             'phone_invalid' => 'This number is not valid for the selected country. Check the country chosen in front of the field, then the number.',
             'phone_ivorian_invalid' => 'Enter an Ivorian number of 10 digits, starting with 01, 05 or 07 (for example 07 00 00 00 00).',
-            'name_invalid' => 'The name can only contain letters, spaces, hyphens and apostrophes.',
+            'name_invalid' => 'The name can only contain letters, separated by a single space, hyphen or apostrophe (for example Jean-Marc N\'Guessan).',
+            'name_repeated' => 'The name cannot repeat the same letter three times in a row.',
+            'name_words' => 'Enter your first and last name: at least two words, each with at least two letters.',
             'phone_already_active' => 'A reservation is already in progress for this number. Finish it, or wait for its time limit to end before creating another.',
             'phone_proof_pending' => 'A payment proof is already being checked for this number. Wait for it to be processed before registering again with this number.',
             'phone_proof_rejected' => 'The payment proof for this number was rejected: your file is waiting for a new proof. Find it with the button below instead of registering again.',

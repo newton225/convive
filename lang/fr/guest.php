@@ -64,7 +64,9 @@ return [
         'errors' => [
             'phone_invalid' => "Ce numéro n'est pas valide pour le pays choisi. Vérifiez le pays sélectionné devant le champ, puis le numéro.",
             'phone_ivorian_invalid' => 'Saisissez un numéro ivoirien à 10 chiffres, commençant par 01, 05 ou 07 (par exemple 07 00 00 00 00).',
-            'name_invalid' => 'Le nom ne peut contenir que des lettres, des espaces, des tirets et des apostrophes.',
+            'name_invalid' => "Le nom ne peut contenir que des lettres, séparées par un seul espace, tiret ou apostrophe (par exemple Jean-Marc N'Guessan).",
+            'name_repeated' => 'Le nom ne peut pas répéter trois fois la même lettre de suite.',
+            'name_words' => 'Saisissez votre prénom et votre nom : au moins deux mots, de deux lettres chacun au minimum.',
             'phone_already_active' => 'Une réservation est déjà en cours pour ce numéro. Terminez-la, ou attendez la fin de son délai avant d\'en créer une autre.',
             'phone_proof_pending' => 'Une preuve de paiement est déjà en cours de vérification pour ce numéro. Attendez qu\'elle soit traitée avant de vous inscrire de nouveau avec ce numéro.',
             'phone_proof_rejected' => 'La preuve de paiement de ce numéro a été rejetée : votre dossier attend une nouvelle preuve. Retrouvez-le avec le bouton ci-dessous plutôt que de vous inscrire de nouveau.',

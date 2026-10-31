@@ -1,13 +1,14 @@
-import type { ComponentProps, InputEvent } from 'react';
+import type { ComponentProps, FocusEvent, InputEvent } from 'react';
 import { Input } from '@/components/ui/input';
-import { sanitizePersonName } from '@/lib/guest-input';
+import { finishPersonName, sanitizePersonName } from '@/lib/guest-input';
 
 /**
- * Un nom de personne : les chiffres et les symboles ne s'ecrivent pas, et un collage est nettoye. Le
- * serveur revalide (`App\Rules\PersonName`).
+ * Un nom de personne : les chiffres et les symboles ne s'ecrivent pas, jamais deux separateurs de suite, et un
+ * collage est nettoye. Le serveur revalide (`App\Rules\PersonName`).
  */
 export function PersonNameInput({
     onInput,
+    onBlur,
     ...props
 }: ComponentProps<typeof Input>) {
     function handleInput(event: InputEvent<HTMLInputElement>) {
@@ -28,6 +29,12 @@ export function PersonNameInput({
         onInput?.(event);
     }
 
+    // A la sortie du champ, un separateur laisse a la fin ("Jean-") est retire.
+    function handleBlur(event: FocusEvent<HTMLInputElement>) {
+        event.currentTarget.value = finishPersonName(event.currentTarget.value);
+        onBlur?.(event);
+    }
+
     return (
         <Input
             type="text"
@@ -35,6 +42,7 @@ export function PersonNameInput({
             maxLength={255}
             {...props}
             onInput={handleInput}
+            onBlur={handleBlur}
         />
     );
 }
