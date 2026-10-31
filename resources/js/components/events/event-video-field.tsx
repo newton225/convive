@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
-import { Trash2, Upload } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Play, Trash2, Upload } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
@@ -43,12 +43,31 @@ export default function EventVideoField({
 }: Props) {
     const { t, locale } = useTranslation();
     const input = useRef<HTMLInputElement>(null);
+    const preview = useRef<HTMLVideoElement>(null);
+    // Les commandes natives ne s'affichent qu'une fois la lecture de l'apercu lancee.
+    const [previewing, setPreviewing] = useState(false);
     const [upload, setUpload] = useState<Upload | null>(null);
     const [removing, setRemoving] = useState(false);
     const [error, setError] = useState<string>();
     const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 
     const processing = upload !== null || removing;
+    const uploading = upload !== null;
+
+    // Actualiser ou fermer l'onglet pendant l'envoi l'annulerait : le navigateur demande confirmation.
+    useEffect(() => {
+        if (!uploading) {
+            return;
+        }
+
+        const warn = (event: BeforeUnloadEvent) => {
+            event.preventDefault();
+        };
+
+        window.addEventListener('beforeunload', warn);
+
+        return () => window.removeEventListener('beforeunload', warn);
+    }, [uploading]);
     // A 100 %, tout est parti : reste l'enregistrement chez le serveur, qui peut durer quelques secondes.
     const finishing = upload !== null && upload.percentage >= 100;
 
@@ -119,17 +138,40 @@ export default function EventVideoField({
 
             <div className="flex flex-wrap items-start gap-4">
                 <div className="grid shrink-0 gap-1">
-                    <div className="bg-muted flex aspect-video w-48 items-center justify-center overflow-hidden rounded-md">
+                    <div className="bg-muted relative flex aspect-video w-56 items-center justify-center overflow-hidden rounded-md">
                         {url ? (
-                            <video
-                                src={url}
-                                controls
-                                preload="metadata"
-                                playsInline
-                                aria-label={t('events.video.label')}
-                                className="size-full object-cover"
-                                data-test="event-video-preview"
-                            />
+                            <>
+                                {/* Sans commandes natives : sur un apercu de cette taille, elles le recouvrent. Elles
+                                    n'apparaissent qu'une fois la lecture lancee. `#t=0.1` montre une image de la video
+                                    avant la lecture (Safari n'en affiche aucune sans cela). */}
+                                <video
+                                    ref={preview}
+                                    src={`${url}#t=0.1`}
+                                    controls={previewing}
+                                    preload="metadata"
+                                    playsInline
+                                    aria-label={t('events.video.label')}
+                                    className="size-full object-cover"
+                                    data-test="event-video-preview"
+                                    onPause={() => setPreviewing(false)}
+                                />
+                                {previewing ? null : (
+                                    <button
+                                        type="button"
+                                        className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors hover:bg-black/30 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                                        aria-label={t('events.video.play')}
+                                        data-test="event-video-play"
+                                        onClick={() => {
+                                            setPreviewing(true);
+                                            void preview.current?.play();
+                                        }}
+                                    >
+                                        <span className="flex size-10 items-center justify-center rounded-full bg-white/90 text-black">
+                                            <Play className="size-5 fill-current" />
+                                        </span>
+                                    </button>
+                                )}
+                            </>
                         ) : (
                             <span className="text-muted-foreground text-xs">
                                 {t('events.video.empty')}

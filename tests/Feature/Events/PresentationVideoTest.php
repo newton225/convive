@@ -7,6 +7,7 @@ use App\Http\Requests\Events\SaveEventVideoRequest;
 use App\Models\Event;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -120,6 +121,37 @@ class PresentationVideoTest extends TestCase
             ->assertRedirect();
 
         $this->assertFalse($this->hasVideo());
+    }
+
+    public function test_la_video_se_lit_par_morceaux_pour_que_le_navigateur_puisse_la_demarrer(): void
+    {
+        // `Storage::fake()` remplace le disque : le service par morceaux se repose comme au demarrage.
+        AppServiceProvider::configureEventVideoDisk();
+
+        $this->actingAs($this->owner)
+            ->post(route('tenants.events.video.store', [$this->tenant, $this->event]), ['file' => $this->mp4(64)]);
+
+        $url = $this->tenant->asCurrent(fn () => Event::find($this->event->id)->presentationVideoUrl());
+
+        $this->assertNotNull($url);
+
+        $this->get($url, ['Range' => 'bytes=0-99'])
+            ->assertStatus(206)
+            ->assertHeader('Accept-Ranges', 'bytes')
+            ->assertHeader('Content-Length', '100')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+    }
+
+    public function test_un_lien_de_video_modifie_est_refuse(): void
+    {
+        AppServiceProvider::configureEventVideoDisk();
+
+        $this->actingAs($this->owner)
+            ->post(route('tenants.events.video.store', [$this->tenant, $this->event]), ['file' => $this->mp4()]);
+
+        $url = $this->tenant->asCurrent(fn () => Event::find($this->event->id)->presentationVideoUrl());
+
+        $this->get($url.'x')->assertForbidden();
     }
 
     public function test_un_tiers_ne_peut_ni_deposer_ni_retirer_une_video_d_une_autre_organisation(): void

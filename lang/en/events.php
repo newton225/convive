@@ -132,6 +132,7 @@ return [
         'progress' => 'Uploading: :loaded of :total (:percent%)',
         'finishing' => 'Upload complete, saving. Do not close the page.',
         'current_size' => 'Saved video: :size',
+        'play' => 'Play the video',
         'empty' => 'No video',
         'remove_confirm' => [
             'title' => 'Remove the presentation video?',

@@ -132,6 +132,7 @@ return [
         'progress' => 'Envoi : :loaded sur :total (:percent %)',
         'finishing' => 'Envoi terminé, enregistrement en cours. Ne fermez pas la page.',
         'current_size' => 'Vidéo enregistrée : :size',
+        'play' => 'Lire la vidéo',
         'empty' => 'Aucune vidéo',
         'remove_confirm' => [
             'title' => 'Retirer la vidéo de présentation ?',

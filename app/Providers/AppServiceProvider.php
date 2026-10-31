@@ -117,6 +117,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureActivityLog();
         self::configurePaymentProofDisk();
+        self::configureEventVideoDisk();
         $this->configureSessionsAndProxies();
 
         Notification::extend('whatsapp', fn ($app) => $app->make(WhatsAppChannel::class));
@@ -158,6 +159,34 @@ class AppServiceProvider extends ServiceProvider
                     ...$headers,
                 ]),
         );
+    }
+
+    /**
+     * Sert les videos de presentation par morceaux (requetes `Range`) quand elles sont sur le disque du
+     * serveur (decision du 2026-10-31). La route de service de Laravel envoie le fichier d'un bloc, sans
+     * `Accept-Ranges` : un navigateur ne peut alors pas lire un mp4 dont l'index est en fin de fichier avant de
+     * l'avoir telecharge en entier (le quart de cercle qui tourne), et Safari refuse de le lire. Point d'extension
+     * officiel (`serveUsing()`) ; `BinaryFileResponse` traite `Range`, `If-Modified-Since` et les en-tetes de
+     * taille. Chez un stockage S3 (R2), ce sont ses propres URL signees qui s'en chargent.
+     *
+     * Statique et publique, pour la meme raison que `configurePaymentProofDisk()`.
+     */
+    public static function configureEventVideoDisk(): void
+    {
+        if (config('filesystems.disks.event_videos.driver') !== 'local') {
+            return;
+        }
+
+        Storage::disk('event_videos')->serveUsing(function (Request $request, string $path, array $headers) {
+            // Le chemin est signe par la route, mais un fichier sorti du dossier des videos ne se sert jamais.
+            abort_if(str_contains($path, '..'), 404);
+
+            return response()->file(Storage::disk('event_videos')->path($path), [
+                'X-Content-Type-Options' => 'nosniff',
+                'Referrer-Policy' => 'no-referrer',
+                ...$headers,
+            ]);
+        });
     }
 
     /**
