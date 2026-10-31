@@ -129,6 +129,9 @@ return [
         'replace' => 'Remplacer',
         'remove' => 'Retirer',
         'uploading' => 'Envoi en cours, patientez',
+        'progress' => 'Envoi : :loaded sur :total (:percent %)',
+        'finishing' => 'Envoi terminé, enregistrement en cours. Ne fermez pas la page.',
+        'current_size' => 'Vidéo enregistrée : :size',
         'empty' => 'Aucune vidéo',
         'remove_confirm' => [
             'title' => 'Retirer la vidéo de présentation ?',
@@ -139,6 +142,7 @@ return [
         'errors' => [
             'type' => 'Ce fichier n’est pas une vidéo mp4 ou webm.',
             'too_large' => 'Cette vidéo dépasse 25 Mo. Compressez-la ou raccourcissez-la, puis recommencez.',
+            'too_large_chosen' => 'Cette vidéo fait :size, la limite est de :max. Compressez-la ou raccourcissez-la, puis recommencez.',
         ],
     ],
 

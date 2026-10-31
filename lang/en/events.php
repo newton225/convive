@@ -129,6 +129,9 @@ return [
         'replace' => 'Replace',
         'remove' => 'Remove',
         'uploading' => 'Uploading, please wait',
+        'progress' => 'Uploading: :loaded of :total (:percent%)',
+        'finishing' => 'Upload complete, saving. Do not close the page.',
+        'current_size' => 'Saved video: :size',
         'empty' => 'No video',
         'remove_confirm' => [
             'title' => 'Remove the presentation video?',
@@ -139,6 +142,7 @@ return [
         'errors' => [
             'type' => 'This file is not an mp4 or webm video.',
             'too_large' => 'This video is over 25 MB. Compress or shorten it, then try again.',
+            'too_large_chosen' => 'This video is :size, the limit is :max. Compress or shorten it, then try again.',
         ],
     ],
 

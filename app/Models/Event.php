@@ -273,6 +273,16 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * The size in bytes of the event's presentation video, or null when it has none.
+     */
+    public function presentationVideoSize(): ?int
+    {
+        $media = $this->getFirstMedia(self::PresentationVideoCollection);
+
+        return $media instanceof Media ? $media->size : null;
+    }
+
+    /**
      * Get the colours to apply on this event's public page, falling back to the organisation's
      * brand colours when the event does not override them.
      *

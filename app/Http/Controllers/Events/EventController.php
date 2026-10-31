@@ -394,6 +394,7 @@ class EventController extends Controller
             'secondaryColor' => $event->secondary_color,
             'visualUrl' => $event->visualUrl(),
             'presentationVideoUrl' => $event->presentationVideoUrl(),
+            'presentationVideoSize' => $event->presentationVideoSize(),
             // La salle telle que le formulaire la decrit : groupes de tables de meme taille.
             'seatsAtTables' => $event->seatsAtTables(),
             'seatingModeLocked' => $event->registrations()->occupyingSeats()->exists(),

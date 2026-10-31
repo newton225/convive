@@ -52,6 +52,8 @@ export type EventDetails = EventSummary & {
     visualUrl: string | null;
     // La video courte de presentation, par une URL signee expirante.
     presentationVideoUrl: string | null;
+    // La taille de la video enregistree, en octets.
+    presentationVideoSize: number | null;
     // Le nombre de places d'un evenement sans table, null quand la salle est en tables.
     freeSeats: number | null;
     // Vrai des qu'une inscription occupe une place : le mode avec ou sans tables ne change plus.

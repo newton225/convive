@@ -5,29 +5,72 @@ import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import InputError from '@/components/input-error';
 import { SubmitButton } from '@/components/submit-button';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/hooks/use-translation';
+import { formatFileSize } from '@/lib/format-file-size';
 import { destroy, store } from '@/routes/tenants/events/video';
+
+// La meme limite que `Event::PresentationVideoMaxKilobytes` : le navigateur refuse tout de suite, le serveur
+// revalide quoi qu'il arrive.
+const MaxBytes = 25 * 1024 * 1024;
+const AcceptedTypes = ['video/mp4', 'video/webm'];
 
 type Props = {
     tenantSlug: string;
     eventId: number;
     url: string | null;
+    // La taille de la video enregistree, en octets.
+    size: number | null;
+};
+
+type Upload = {
+    name: string;
+    size: number;
+    loaded: number;
+    percentage: number;
 };
 
 /**
  * La video courte de presentation de l'evenement (decision du 2026-10-31), affichee sur le lien public. Meme
- * comportement que `EventVisualField` (choisir, remplacer, retirer) ; l'erreur du serveur (type, taille) se
- * lit sous le champ.
+ * comportement que `EventVisualField` (choisir, remplacer, retirer), avec en plus la taille de la video, le
+ * refus immediat d'un fichier trop lourd ou d'un mauvais type, et la progression de l'envoi.
  */
-export default function EventVideoField({ tenantSlug, eventId, url }: Props) {
-    const { t } = useTranslation();
+export default function EventVideoField({
+    tenantSlug,
+    eventId,
+    url,
+    size,
+}: Props) {
+    const { t, locale } = useTranslation();
     const input = useRef<HTMLInputElement>(null);
-    const [processing, setProcessing] = useState(false);
+    const [upload, setUpload] = useState<Upload | null>(null);
+    const [removing, setRemoving] = useState(false);
     const [error, setError] = useState<string>();
     const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 
+    const processing = upload !== null || removing;
+    // A 100 %, tout est parti : reste l'enregistrement chez le serveur, qui peut durer quelques secondes.
+    const finishing = upload !== null && upload.percentage >= 100;
+
     const send = (chosen: File) => {
         setError(undefined);
+
+        if (!AcceptedTypes.includes(chosen.type)) {
+            setError(t('events.video.errors.type'));
+
+            return;
+        }
+
+        if (chosen.size > MaxBytes) {
+            setError(
+                t('events.video.errors.too_large_chosen', {
+                    size: formatFileSize(chosen.size, locale),
+                    max: formatFileSize(MaxBytes, locale),
+                }),
+            );
+
+            return;
+        }
 
         router.post(
             store([tenantSlug, eventId]).url,
@@ -35,10 +78,23 @@ export default function EventVideoField({ tenantSlug, eventId, url }: Props) {
             {
                 forceFormData: true,
                 preserveScroll: true,
-                onStart: () => setProcessing(true),
+                onStart: () =>
+                    setUpload({
+                        name: chosen.name,
+                        size: chosen.size,
+                        loaded: 0,
+                        percentage: 0,
+                    }),
+                onProgress: (progress) =>
+                    setUpload({
+                        name: chosen.name,
+                        size: chosen.size,
+                        loaded: progress?.loaded ?? 0,
+                        percentage: progress?.percentage ?? 0,
+                    }),
                 onError: (errors) => setError(errors.file),
                 onFinish: () => {
-                    setProcessing(false);
+                    setUpload(null);
 
                     if (input.current) {
                         input.current.value = '';
@@ -51,9 +107,9 @@ export default function EventVideoField({ tenantSlug, eventId, url }: Props) {
     const remove = () => {
         router.delete(destroy([tenantSlug, eventId]).url, {
             preserveScroll: true,
-            onStart: () => setProcessing(true),
+            onStart: () => setRemoving(true),
             onSuccess: () => setConfirmingRemoval(false),
-            onFinish: () => setProcessing(false),
+            onFinish: () => setRemoving(false),
         });
     };
 
@@ -62,22 +118,34 @@ export default function EventVideoField({ tenantSlug, eventId, url }: Props) {
             <Label htmlFor="event-video">{t('events.video.label')}</Label>
 
             <div className="flex flex-wrap items-start gap-4">
-                <div className="bg-muted flex aspect-video w-48 shrink-0 items-center justify-center overflow-hidden rounded-md">
-                    {url ? (
-                        <video
-                            src={url}
-                            controls
-                            preload="metadata"
-                            playsInline
-                            aria-label={t('events.video.label')}
-                            className="size-full object-cover"
-                            data-test="event-video-preview"
-                        />
-                    ) : (
-                        <span className="text-muted-foreground text-xs">
-                            {t('events.video.empty')}
-                        </span>
-                    )}
+                <div className="grid shrink-0 gap-1">
+                    <div className="bg-muted flex aspect-video w-48 items-center justify-center overflow-hidden rounded-md">
+                        {url ? (
+                            <video
+                                src={url}
+                                controls
+                                preload="metadata"
+                                playsInline
+                                aria-label={t('events.video.label')}
+                                className="size-full object-cover"
+                                data-test="event-video-preview"
+                            />
+                        ) : (
+                            <span className="text-muted-foreground text-xs">
+                                {t('events.video.empty')}
+                            </span>
+                        )}
+                    </div>
+                    {url && size !== null ? (
+                        <p
+                            className="text-muted-foreground text-xs"
+                            data-test="event-video-size"
+                        >
+                            {t('events.video.current_size', {
+                                size: formatFileSize(size, locale),
+                            })}
+                        </p>
+                    ) : null}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -126,14 +194,29 @@ export default function EventVideoField({ tenantSlug, eventId, url }: Props) {
                 </div>
             </div>
 
-            {processing ? (
-                <p
-                    className="text-muted-foreground text-xs"
+            {upload ? (
+                <div
+                    className="grid max-w-md gap-1"
                     role="status"
                     data-test="event-video-uploading"
                 >
-                    {t('events.video.uploading')}
-                </p>
+                    <p className="truncate text-sm font-medium">
+                        {upload.name}
+                    </p>
+                    <Progress
+                        value={upload.percentage}
+                        aria-label={t('events.video.uploading')}
+                    />
+                    <p className="text-muted-foreground text-xs">
+                        {finishing
+                            ? t('events.video.finishing')
+                            : t('events.video.progress', {
+                                  loaded: formatFileSize(upload.loaded, locale),
+                                  total: formatFileSize(upload.size, locale),
+                                  percent: Math.round(upload.percentage),
+                              })}
+                    </p>
+                </div>
             ) : null}
             <p className="text-muted-foreground text-xs">
                 {t('events.video.hint')}
@@ -147,7 +230,7 @@ export default function EventVideoField({ tenantSlug, eventId, url }: Props) {
                 description={t('events.video.remove_confirm.description')}
                 confirmLabel={t('events.video.remove_confirm.confirm')}
                 onConfirm={remove}
-                processing={processing}
+                processing={removing}
                 destructive
                 testId="event-video-remove-confirm"
             />

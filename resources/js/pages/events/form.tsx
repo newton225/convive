@@ -504,6 +504,9 @@ export default function EventForm({
                                                 tenantSlug={tenant.slug}
                                                 eventId={event.id}
                                                 url={event.presentationVideoUrl}
+                                                size={
+                                                    event.presentationVideoSize
+                                                }
                                             />
                                         </>
                                     ) : (
