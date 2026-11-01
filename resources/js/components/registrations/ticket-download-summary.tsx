@@ -23,6 +23,7 @@ export function TicketDownloadSummary({ summary, onShowNever }: Props) {
         <div
             className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-sm"
             data-test="ticket-download-summary"
+            data-tour="registrations-tickets"
         >
             <span>
                 {t('registrations.ticket_summary.text', {

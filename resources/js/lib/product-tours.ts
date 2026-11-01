@@ -85,6 +85,7 @@ export const productTours: Record<ProductTourId, ProductTourStep[]> = {
         { anchor: 'seating-tables', key: 'tables', side: 'top' },
         { anchor: 'seating-unseated', key: 'unseated', side: 'top' },
         { anchor: 'seating-constraints', key: 'constraints', side: 'top' },
+        { key: 'notice' },
         { key: 'after' },
     ],
     treasury: [
@@ -99,6 +100,8 @@ export const productTours: Record<ProductTourId, ProductTourStep[]> = {
     registrations: [
         { key: 'intro' },
         { anchor: 'registrations-filters', key: 'filters', side: 'bottom' },
+        { anchor: 'registrations-units', key: 'units', side: 'bottom' },
+        { anchor: 'registrations-tickets', key: 'tickets', side: 'bottom' },
         { anchor: 'registrations-table', key: 'table', side: 'top' },
         { anchor: 'registrations-exports', key: 'exports', side: 'bottom' },
         { anchor: 'registrations-purge', key: 'purge', side: 'left' },
@@ -146,6 +149,7 @@ export const productTours: Record<ProductTourId, ProductTourStep[]> = {
         { key: 'intro' },
         { anchor: 'payment-accounts-add', key: 'add', side: 'bottom' },
         { key: 'delay' },
+        { key: 'alerts' },
         { anchor: 'payment-accounts-list', key: 'list', side: 'top' },
     ],
     reconciliation: [

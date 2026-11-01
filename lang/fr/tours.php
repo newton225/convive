@@ -54,7 +54,7 @@ return [
         ],
         'identity' => [
             'title' => '1. Identité',
-            'body' => "Nom, date, heure de début, fin facultative et lieu (avec un lien de carte si vous le souhaitez), tels que les invités les liront sur le lien et le billet. La fenêtre d'entrée du billet se règle ici aussi.",
+            'body' => "Nom, date, heure de début, fin facultative et lieu (avec un lien de carte si vous le souhaitez), tels que les invités les liront sur le lien et le billet. La fenêtre d'entrée du billet se règle ici aussi. Une fois l'événement enregistré, vous pouvez y ajouter un visuel et une courte vidéo de présentation (mp4 ou webm, 25 Mo au plus), que les invités voient sur le lien avant de s'inscrire.",
         ],
         'seating' => [
             'title' => '2. Places et tarifs',
@@ -169,6 +169,10 @@ return [
             'title' => 'Séparer des unités',
             'body' => 'Deux unités séparées ne partagent jamais une même table, y compris pour le placement automatique.',
         ],
+        'notice' => [
+            'title' => "L'invité est prévenu",
+            'body' => "Quand vous placez ou déplacez un invité dont la carte est déjà partie, il reçoit un message avec sa nouvelle table, dix minutes après votre dernier geste, une seule fois même si vous le déplacez plusieurs fois. Son billet affiche toujours la table à jour.",
+        ],
         'after' => [
             'title' => 'Tout est conservé',
             'body' => "Chaque placement, déplacement ou contrainte est inscrit à l'historique des actions, avec son auteur.",
@@ -213,11 +217,19 @@ return [
         ],
         'filters' => [
             'title' => 'Rechercher et filtrer',
-            'body' => "Cherchez par nom, téléphone, courriel, référence du dossier ou référence d'une transaction, sans tenir compte des accents, puis filtrez par état : réservation en cours, preuve à vérifier, confirmée, annulée.",
+            'body' => "Cherchez par nom, téléphone, courriel, référence du dossier ou référence d'une transaction, sans tenir compte des accents, puis filtrez par état (réservation en cours, preuve à vérifier, confirmée, annulée), par unité ou selon que l'invité a téléchargé son billet.",
+        ],
+        'units' => [
+            'title' => 'Les inscrits par unité',
+            'body' => "Combien de personnes confirmées dans chaque unité (l'invité principal et ses accompagnateurs) et dans combien de dossiers. Cliquez sur une unité pour n'afficher que ses dossiers.",
+        ],
+        'tickets' => [
+            'title' => 'Les billets téléchargés',
+            'body' => "Combien d'inscrits confirmés ont téléchargé leur billet. Le lien « Voir ceux qui ne l'ont jamais fait » affiche ceux à relancer avant l'événement.",
         ],
         'table' => [
             'title' => 'Les dossiers',
-            'body' => "Dépliez une ligne pour voir chaque personne du groupe avec son tarif et sa présence. Depuis la ligne : l'historique du dossier (ce qui s'est passé et qui en est l'auteur), la carte d'invitation, le renvoi du lien de réservation et l'annulation.",
+            'body' => "Dépliez une ligne pour voir chaque personne du groupe avec son tarif et sa présence. La colonne Carte dit si la carte d'invitation est partie, quand et par quel canal, ou si l'envoi a échoué. Depuis la ligne : l'historique du dossier (ce qui s'est passé et qui en est l'auteur), la carte d'invitation, le renvoi du lien de réservation et l'annulation.",
         ],
         'exports' => [
             'title' => 'Exporter',
@@ -367,6 +379,10 @@ return [
         'delay' => [
             'title' => 'Le délai de 24 heures',
             'body' => "Dès qu'un événement payant a été publié, changer le canal, le numéro ou le titulaire n'est actif qu'après 24 heures. L'ancien numéro reste affiché entre-temps, et tous les porteurs de cette permission sont alertés.",
+        ],
+        'alerts' => [
+            'title' => 'Les alertes',
+            'body' => "Chaque demande de changement alerte tous les porteurs de cette permission, vous compris, avec l'ancien et le nouveau numéro. Quand un second Propriétaire le valide, quand il est annulé ou quand il s'applique à la fin du délai, ils en sont prévenus aussi.",
         ],
         'list' => [
             'title' => 'Vos comptes',

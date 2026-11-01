@@ -54,7 +54,7 @@ return [
         ],
         'identity' => [
             'title' => '1. Identity',
-            'body' => 'Name, date, start time, optional end and venue (with a map link if you like), as guests will read them on the link and the ticket. The ticket entry window is set here too.',
+            'body' => 'Name, date, start time, optional end and venue (with a map link if you like), as guests will read them on the link and the ticket. The ticket entry window is set here too. Once the event is saved, you can add a visual and a short presentation video (mp4 or webm, 25 MB at most), which guests see on the link before registering.',
         ],
         'seating' => [
             'title' => '2. Seats and prices',
@@ -169,6 +169,10 @@ return [
             'title' => 'Keep units apart',
             'body' => 'Two separated units never share a table, automatic seating included.',
         ],
+        'notice' => [
+            'title' => 'The guest is told',
+            'body' => 'When you seat or move a guest whose card has already been sent, they get a message with their new table ten minutes after your last move, once even if you move them several times. Their ticket always shows the current table.',
+        ],
         'after' => [
             'title' => 'Everything is kept',
             'body' => 'Every seating, move or rule is written to the action history, with its author.',
@@ -213,11 +217,19 @@ return [
         ],
         'filters' => [
             'title' => 'Search and filter',
-            'body' => 'Search by name, phone, email, registration reference or transaction reference, accents ignored, then filter by status: reservation in progress, proof to check, confirmed, cancelled.',
+            'body' => 'Search by name, phone, email, registration reference or transaction reference, accents ignored, then filter by status (reservation in progress, proof to check, confirmed, cancelled), by unit, or by whether the guest downloaded their ticket.',
+        ],
+        'units' => [
+            'title' => 'Registrations by unit',
+            'body' => 'How many confirmed people in each unit (the main guest and their companions) and in how many bookings. Click a unit to show only its bookings.',
+        ],
+        'tickets' => [
+            'title' => 'Tickets downloaded',
+            'body' => 'How many confirmed guests have downloaded their ticket. The "Show those who never did" link lists the ones to remind before the event.',
         ],
         'table' => [
             'title' => 'The registrations',
-            'body' => 'Unfold a row to see each person of the group with their price and attendance. From the row: the registration history (what happened and who did it), the invitation card, resending the booking link and cancelling.',
+            'body' => 'Unfold a row to see each person of the group with their price and attendance. The Card column says whether the invitation card was sent, when and by which channel, or whether sending failed. From the row: the registration history (what happened and who did it), the invitation card, resending the booking link and cancelling.',
         ],
         'exports' => [
             'title' => 'Export',
@@ -367,6 +379,10 @@ return [
         'delay' => [
             'title' => 'The 24-hour delay',
             'body' => 'Once a paid event has been published, changing the channel, the number or the holder only takes effect after 24 hours. The old number stays displayed meanwhile, and everyone holding this permission is alerted.',
+        ],
+        'alerts' => [
+            'title' => 'The alerts',
+            'body' => 'Every change request alerts everyone holding this permission, you included, with the old and the new number. When a second Owner approves it, when it is cancelled or when it applies at the end of the delay, they are told as well.',
         ],
         'list' => [
             'title' => 'Your accounts',

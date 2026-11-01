@@ -22,7 +22,11 @@ export function UnitSummary({ units, selectedId, onSelect }: Props) {
     }
 
     return (
-        <section className="space-y-2" data-test="unit-summary">
+        <section
+            className="space-y-2"
+            data-test="unit-summary"
+            data-tour="registrations-units"
+        >
             <div>
                 <h2 className="text-sm font-medium">
                     {t('registrations.unit_summary.title')}
