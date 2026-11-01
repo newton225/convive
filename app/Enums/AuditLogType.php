@@ -29,6 +29,9 @@ enum AuditLogType: string
     case EventDeleted = 'event.deleted';
     case EventVisualUpdated = 'event.visual_updated';
     case EventVisualDeleted = 'event.visual_deleted';
+    case EventVideoUpdated = 'event.video_updated';
+    case EventVideoDeleted = 'event.video_deleted';
+    case EventErased = 'event.erased';
 
     case ProofsValidated = 'proofs.validated';
     case ProofsRejected = 'proofs.rejected';
@@ -38,6 +41,7 @@ enum AuditLogType: string
     case RegistrationsRefunded = 'registrations.refunded';
     case RegistrationsClaimResolved = 'registrations.claim_resolved';
     case RegistrationsCardSent = 'registrations.card_sent';
+    case RegistrationsTableChangeNotified = 'registrations.table_change_notified';
     case RegistrationsCardShared = 'registrations.card_shared';
 
     case ReconciliationResolved = 'reconciliation.resolved';
