@@ -130,6 +130,15 @@ Options par événement :
 - un accompagnateur est **toujours** assis avec son invitant.
   Un placement manuel par l'organisateur doit rester possible et tracé.
 
+Quand l'organisateur place ou déplace à la main un invité dont la carte est déjà partie,
+l'invité principal en est prévenu par WhatsApp (et par email s'il en a donné un), avec sa
+nouvelle table et le lien de son billet. Le message part **dix minutes après le dernier
+geste**, une seule fois et avec la table finale, même si l'invité a été déplacé plusieurs
+fois. Rien ne part si la carte n'est pas encore envoyée (elle portera la bonne table), si
+l'invité revient à la table qu'il connaissait ou n'en a plus, si l'inscription n'est plus
+confirmée ou si l'événement est terminé. Le billet affiche toujours la table à jour. Le
+message compte dans le quota d'envois du plan.
+
 ### 2.7 Envoi des cartes d'invitation
 
 **Programmé**, pas immédiat : une date/heure d'envoi par événement. À cette échéance, toutes
@@ -144,7 +153,10 @@ accompagnateurs (voir 2.8) : il peut tout recevoir et se charger de les leur tra
 **Envoi manuel**, depuis la base d'inscrits, quand l'envoi automatique n'a pas fonctionné ou
 qu'un invité a perdu sa carte. Réservé à la permission « Envoyer des messages »
 (`messages.send`), pour les seules inscriptions `CONFIRMED`. La base d'inscrits indique si la
-carte est partie, et quand.
+carte est partie, quand et par quel canal (WhatsApp, et email si l'invité en a donné un).
+L'envoi passe par la file : la date dit que le message a été mis en file, pas qu'il a été
+remis. Si le service d'envoi refuse le message, la ligne passe en erreur (« Échec de l'envoi :
+renvoyez-la ») jusqu'à un envoi réussi.
 
 - **Invité principal** : envoyer ou renvoyer sa carte depuis l'application (WhatsApp, et email
   s'il en a donné un), même si elle est déjà partie ; copier le lien de sa carte ; ou ouvrir
@@ -437,14 +449,18 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 
 3. **Lien d'inscription** — visuel, date, heure, capacité, tarif, places restantes (si
    l'organisateur choisit de les afficher, masquées par défaut ; « Complet » toujours signalé),
-   date limite.
+   date limite. L'organisateur peut y ajouter une courte vidéo de présentation (mp4 ou webm,
+   25 Mo au plus), affichée avant le formulaire, sans lecture automatique. Elle n'est servie
+   que par une adresse signée et expirante, depuis le disque du serveur ou un stockage
+   compatible S3 (Cloudflare R2).
 4. **Fiche** — nom, téléphone, email (facultatif), unité, compteur d'accompagnateurs (0–10) avec
    nom + unité chacun, total recalculé en direct. L'email facultatif : WhatsApp (le téléphone
    est déjà recueilli) reste le canal systématique de la carte d'invitation (2.7), l'email s'y
    ajoute quand l'invité l'a renseigné. Le nom (de l'invité et de chaque accompagnateur) ne
    contient que des lettres, séparées par un seul espace, tiret ou apostrophe (jamais au début,
-   à la fin ou en double). Le téléphone est un
-   numéro ivoirien à 10 chiffres (indicatif +225 fixe, préfixes 01, 05, 07 ou fixes 21, 25, 27) :
+   à la fin ou en double). Il comporte au moins deux mots de deux lettres chacun, sans la même
+   lettre trois fois de suite, et une majuscule est ajoutée au début de chaque mot à la sortie
+   du champ. Le téléphone est un numéro ivoirien à 10 chiffres (indicatif +225 fixe, préfixes 01, 05, 07 ou fixes 21, 25, 27) :
    le parcours public n'accepte plus de numéro étranger (décision du 2026-10-31, qui remplace
    l'ouverture à tout pays du 2026-09-29). Le serveur revalide ces deux règles.
 5. **Paiement en trois étapes** — (1) comptes de versement avec bouton copier et consigne de
@@ -468,7 +484,7 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
     créer, dupliquer, partir d'un modèle. Le menu « ... » de chaque carte donne accès aux listes de
     contrôle par table (jour J, événements avec tables), à imprimer avec cachet et signature.
 13. **Nouvel événement** — assistant 3 étapes : identité (nom, sous-titre, date, heure, lieu,
-    visuel, couleurs) / places & tarif (groupes de tables, par exemple « 3 tables de 12 » et
+    visuel, vidéo de présentation facultative, couleurs) / places & tarif (groupes de tables, par exemple « 3 tables de 12 » et
     « 20 tables de 8 », tarif, plafond d'accompagnateurs, comptes de versement) / échéances
     (date limite, purge, envoi programmé, durée de réservation). La capacité est la somme des
     places de toutes les tables (décision du 2026-09-29 : les tables n'ont pas toutes le même
@@ -489,6 +505,12 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
     (unité, tarif, entrée), paiement (dont le motif du rejet de la preuve), carte et entrée. Sous le
     tableau, trois totaux qui suivent les filtres, sur tous les dossiers et non sur la page affichée :
     encaissé (le chiffre du rapport), en attente de vérification, montant dû au total (payé ou non).
+    Deux filtres s'ajoutent : par unité, et « billet téléchargé / jamais téléchargé ». Au-dessus du
+    tableau, deux résumés portent sur tout l'événement et non sur le filtre : les inscrits confirmés
+    par unité (personnes, invité principal et accompagnateurs, et dossiers), qui filtrent la liste au
+    clic, et le nombre d'inscrits ayant téléchargé leur billet, avec un lien vers ceux qui ne l'ont
+    jamais fait. Deux colonnes : l'état d'envoi de la carte (date, canaux, échec) et le dernier
+    téléchargement du billet (date et nombre, tracé au journal du dossier).
 21. **Plan de salle** — grille de tables, panneau de table avec occupants, regroupement par
     unité, contraintes, déplacement manuel, capacité ajustable table par table (jamais sous le
     nombre de personnes déjà placées).
@@ -550,7 +572,9 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 Événements notifiables : preuve reçue, réservation expirée, preuve rejetée, places épuisées,
 purge effectuée, invitation d'équipe en attente, invitation d'équipe acceptée (à tous les
 Propriétaires, dans l'application et par email par défaut), billet refusé à l'entrée, inscription
-annulée.
+annulée. Changement d'un compte de versement : à la demande, puis quand il est validé par un
+second Propriétaire, annulé ou appliqué à la fin du délai de 24 heures. Tous les porteurs de la
+permission sont prévenus, demandeur compris, par email et WhatsApp.
 Canaux configurables par type : in-app, email, ou les deux. Cloche avec compteur de non-lus,
 clic → écran concerné, « tout marquer comme lu ».
 
