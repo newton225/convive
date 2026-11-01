@@ -2,6 +2,7 @@
 
 namespace App\Actions\Seating;
 
+use App\Jobs\NotifyTableChange;
 use App\Models\Registration;
 use App\Models\RegistrationTableAssignment;
 use App\Models\SeatingTable;
@@ -30,12 +31,17 @@ class MoveRegistrationToTable
         $event = $registration->event;
 
         return Cache::lock("event:{$event->id}:seating", 10)->block(5, function () use ($registration, $table, $actor) {
-            $previous = RegistrationTableAssignment::where('registration_id', $registration->id)->first();
+            $previous = RegistrationTableAssignment::with('seatingTable')->where('registration_id', $registration->id)->first();
+            $previousNumber = $previous?->seatingTable->number;
 
             if ($table === null) {
                 if ($previous !== null) {
                     $this->log($previous, null, $actor);
                     $previous->delete();
+
+                    // Un invite qu'on retire d'une table n'est pas prevenu, mais le message en attente se souvient
+                    // de la table qu'il connaissait s'il est replace avant l'envoi.
+                    NotifyTableChange::schedule($registration, $previousNumber);
                 }
 
                 return null;
@@ -54,6 +60,11 @@ class MoveRegistrationToTable
             });
 
             $this->log($previous, $assignment, $actor);
+
+            // Prevenu un peu plus tard, une seule fois, avec la table finale (voir `NotifyTableChange`).
+            if ($previous?->seating_table_id !== $table->id) {
+                NotifyTableChange::schedule($registration, $previousNumber);
+            }
 
             return $assignment;
         });

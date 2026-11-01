@@ -252,6 +252,11 @@ return [
             'intro' => 'Hello :name, your registration for :event does not have a validated payment proof yet.',
             'action' => 'Send my proof',
         ],
+        'table_changed' => [
+            'subject' => 'Your table for :event has changed',
+            'intro' => 'Hello :name, for :event you are now seated at table :number.',
+            'action' => 'View my ticket',
+        ],
         'ticket_reminder' => [
             'subject' => ':event is coming up soon!',
             'intro' => 'Hello :name, :event starts in three hours. Keep your ticket handy.',
@@ -276,6 +281,7 @@ return [
         'resume_link' => 'Hello :name, here is the link to resume your reservation for :event: :link It replaces the previous one.',
         'proof_reminder' => 'Hello :name, your payment proof for :event is still missing. Send it here: :link',
         'ticket_reminder' => 'Hello :name, :event starts in three hours. Your ticket: :link',
+        'table_changed' => 'Hello :name, your table for :event has changed: you are now at table :number. Your ticket: :link',
         'registration_cancelled' => 'Hello :name, your registration for :event was cancelled by the organisation. Reason: :reason.',
         'refund_sent' => 'Hello :name, your refund for :event has been sent.',
         'companion_tickets_intro' => 'Your companions\' tickets, to forward to them:',

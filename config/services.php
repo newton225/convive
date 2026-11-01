@@ -73,6 +73,7 @@ return [
             'refund_sent' => env('WHATSAPP_TEMPLATE_REFUND_SENT'),
             'payment_account_changed' => env('WHATSAPP_TEMPLATE_PAYMENT_ACCOUNT_CHANGED'),
             'payment_account_decided' => env('WHATSAPP_TEMPLATE_PAYMENT_ACCOUNT_DECIDED'),
+            'table_changed' => env('WHATSAPP_TEMPLATE_TABLE_CHANGED'),
         ],
     ],
 

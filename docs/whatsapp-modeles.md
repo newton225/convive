@@ -127,3 +127,15 @@ propriétaire, annulé, ou appliqué à la fin du délai de 24 heures.
 - Variables : `{{1}}` nom de l'organisation, `{{2}}` libellé du compte, `{{3}}` ce qui s'est passé (« changement validé par Marie, il s'applique maintenant », « changement annulé par Marie » ou « le délai de 24 heures est écoulé, le nouveau numéro est maintenant affiché aux invités »), `{{4}}` numéro affiché aux invités
 
 > Convive : compte de versement « {{2}} » de {{1}} : {{3}}. Numéro affiché aux invités : {{4}}.
+
+## Changement de table
+
+Envoyé à l'invité principal, une seule fois et dix minutes après le dernier déplacement dans le plan de
+salle, avec la table finale. Rien ne part si sa carte n'est pas encore envoyée, s'il n'a plus de table ou
+s'il est revenu à la table qu'il connaissait.
+
+- Réglage : `WHATSAPP_TEMPLATE_TABLE_CHANGED`
+- Catégorie : utilitaire
+- Variables : `{{1}}` nom de l'invité, `{{2}}` nom de l'événement, `{{3}}` numéro de la nouvelle table, `{{4}}` lien du billet
+
+> Bonjour {{1}}, votre table pour {{2}} a changé : vous êtes maintenant à la table {{3}}. Votre billet : {{4}}

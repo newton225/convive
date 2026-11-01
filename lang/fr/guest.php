@@ -252,6 +252,11 @@ return [
             'intro' => "Bonjour :name, votre inscription à :event n'a pas encore de preuve de paiement validée.",
             'action' => 'Envoyer ma preuve',
         ],
+        'table_changed' => [
+            'subject' => 'Votre table pour :event a changé',
+            'intro' => 'Bonjour :name, pour :event, vous êtes maintenant placé à la table :number.',
+            'action' => 'Voir mon billet',
+        ],
         'ticket_reminder' => [
             'subject' => ':event, c\'est bientôt !',
             'intro' => 'Bonjour :name, :event a lieu dans trois heures. Gardez votre billet à portée de main.',
@@ -276,6 +281,7 @@ return [
         'resume_link' => 'Bonjour :name, voici le lien pour reprendre votre réservation pour :event : :link Il remplace le précédent.',
         'proof_reminder' => 'Bonjour :name, il manque votre preuve de paiement pour :event. Envoyez-la ici : :link',
         'ticket_reminder' => 'Bonjour :name, :event a lieu dans trois heures. Votre billet : :link',
+        'table_changed' => 'Bonjour :name, votre table pour :event a changé : vous êtes maintenant à la table :number. Votre billet : :link',
         'registration_cancelled' => 'Bonjour :name, votre inscription à :event a été annulée par l\'organisation. Motif : :reason.',
         'refund_sent' => 'Bonjour :name, votre remboursement pour :event est parti.',
         'companion_tickets_intro' => 'Les billets de vos accompagnateurs, à leur transmettre :',
