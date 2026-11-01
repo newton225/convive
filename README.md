@@ -569,14 +569,46 @@ adresse IP. Conservation 24 mois, comme le journal des organisations.
 
 ## 5. Notifications
 
-Événements notifiables : preuve reçue, réservation expirée, preuve rejetée, places épuisées,
-purge effectuée, invitation d'équipe en attente, invitation d'équipe acceptée (à tous les
-Propriétaires, dans l'application et par email par défaut), billet refusé à l'entrée, inscription
-annulée. Changement d'un compte de versement : à la demande, puis quand il est validé par un
-second Propriétaire, annulé ou appliqué à la fin du délai de 24 heures. Tous les porteurs de la
-permission sont prévenus, demandeur compris, par email et WhatsApp.
-Canaux configurables par type : in-app, email, ou les deux. Cloche avec compteur de non-lus,
-clic → écran concerné, « tout marquer comme lu ».
+Les alertes de l'équipe arrivent dans l'application (cloche avec compteur de non-lus, clic vers
+l'écran concerné, « tout marquer comme lu »), par email, ou les deux. Le catalogue des types est
+fermé. Chaque type a son destinataire, déterminé par une **permission** du profil et non par son
+nom : un profil remanié par l'organisation continue de recevoir ce qu'il peut traiter. Celui qui
+fait le geste n'en est pas alerté.
+
+Chaque membre règle, pour chaque type, où recevoir l'alerte (dans l'application, par email, ou
+les deux). Ce réglage le suit dans toutes ses organisations. Par défaut, l'alerte arrive dans
+l'application seulement ; l'acceptation d'une invitation d'équipe arrive aussi par email.
+
+| Alertes                                                                                       | Qui les reçoit         |
+| --------------------------------------------------------------------------------------------- | ---------------------- |
+| Événement créé, publié, clôturé, terminé ; date limite d'inscription atteinte                 | `events.view`          |
+| Places bientôt épuisées, places épuisées                                                      | `events.view`          |
+| Nouvelle inscription, inscription confirmée, arrivée en liste d'attente, inscription annulée | `registrations.view`   |
+| Réservation expirée, purge programmée dans moins de 24 h, purge effectuée                     | `registrations.view`   |
+| Preuve de paiement reçue, preuve rejetée                                                      | `proofs.view`          |
+| Réclamation d'un invité                                                                       | `registrations.claims` |
+| Billet refusé à l'entrée                                                                      | `scan.log.view`        |
+| Entrée validée sans scan, export volumineux de la base d'inscrits                             | `audit.view`           |
+| Quota d'envois du plan atteint, limites du plan abaissées, fin de la période d'essai          | `billing.view`         |
+| Invitation d'équipe en attente                                                                | la personne invitée    |
+| Invitation d'équipe acceptée                                                                  | tous les Propriétaires |
+
+**Regroupement.** Les nouvelles inscriptions, les inscriptions confirmées et les arrivées en
+liste d'attente se fondent en une seule alerte non lue par événement (« 12 nouvelles
+inscriptions pour X »). Une fois lue, la suivante en ouvre une nouvelle. Le courriel, s'il est
+choisi, ne part qu'avec la première alerte du groupe.
+
+**Hors préférences.** Trois messages ne se règlent pas :
+
+- Les alertes de **compte de versement**, parce qu'elles protègent l'argent : à la demande de
+  changement, puis quand il est validé par un second Propriétaire, annulé ou appliqué à la fin
+  du délai de 24 heures. Tous les porteurs de la permission `tenant.payment_accounts` sont
+  prévenus, demandeur compris, par email et WhatsApp.
+- Les **messages aux invités** (carte, rappels, relance de preuve, annulation, remboursement,
+  lien de reprise, changement de table) : voir 2.7 et 2.11. Ils comptent dans le quota d'envois
+  du plan.
+- Les **alertes techniques** de l'éditeur (santé de l'application, sauvegardes) : par email à
+  l'adresse d'alerte de l'éditeur, voir l'écran 31 « Santé technique ».
 
 ---
 
