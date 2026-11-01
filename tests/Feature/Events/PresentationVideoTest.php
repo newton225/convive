@@ -10,8 +10,10 @@ use App\Models\User;
 use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -28,6 +30,8 @@ class PresentationVideoTest extends TestCase
 
     private Event $event;
 
+    private ?string $realRoot = null;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -37,6 +41,29 @@ class PresentationVideoTest extends TestCase
         $this->owner = User::factory()->withTwoFactor()->create();
         $this->tenant = app(CreateTenant::class)->handle($this->owner, 'Association Convive');
         $this->event = $this->tenant->asCurrent(fn () => Event::factory()->open()->create());
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->realRoot !== null) {
+            File::deleteDirectory($this->realRoot);
+        }
+
+        parent::tearDown();
+    }
+
+    /**
+     * Le vrai disque des videos sur un dossier temporaire, avec son service par morceaux : `Storage::fake()`
+     * fabrique ses propres adresses temporaires (`?expiration=`, sans signature), il ne peut donc pas tester la
+     * route signee du service de fichiers. Meme procede que `PaymentProofTest`.
+     */
+    private function useRealVideoDisk(): void
+    {
+        $this->realRoot = storage_path('framework/testing/event-videos-'.Str::random(8));
+
+        config(['filesystems.disks.event_videos.root' => $this->realRoot]);
+        Storage::forgetDisk('event_videos');
+        AppServiceProvider::configureEventVideoDisk();
     }
 
     /**
@@ -104,11 +131,23 @@ class PresentationVideoTest extends TestCase
         $url = route('tenants.events.video.store', [$this->tenant, $this->event]);
 
         $this->actingAs($this->owner)->post($url, ['file' => $this->mp4(8)]);
+
+        $first = Storage::disk('event_videos')->allFiles();
+        $this->assertCount(1, $first);
+
         $this->actingAs($this->owner)->post($url, ['file' => $this->mp4(16)]);
 
         $count = $this->tenant->asCurrent(fn () => Event::find($this->event->id)->getMedia(Event::PresentationVideoCollection)->count());
 
         $this->assertSame(1, $count);
+
+        // L'ancien fichier n'est plus sur le disque : il ne reste que le nouveau, plus lourd.
+        $remaining = Storage::disk('event_videos')->allFiles();
+
+        $this->assertCount(1, $remaining);
+        $this->assertNotSame($first[0], $remaining[0]);
+        $this->assertGreaterThan(16 * 1024, Storage::disk('event_videos')->size($remaining[0]));
+        Storage::disk('event_videos')->assertMissing($first[0]);
     }
 
     public function test_la_video_se_retire(): void
@@ -116,17 +155,20 @@ class PresentationVideoTest extends TestCase
         $this->actingAs($this->owner)
             ->post(route('tenants.events.video.store', [$this->tenant, $this->event]), ['file' => $this->mp4()]);
 
+        $this->assertCount(1, Storage::disk('event_videos')->allFiles());
+
         $this->actingAs($this->owner)
             ->delete(route('tenants.events.video.destroy', [$this->tenant, $this->event]))
             ->assertRedirect();
 
         $this->assertFalse($this->hasVideo());
+        // Le fichier a quitte le disque avec la video, pas seulement la ligne en base.
+        $this->assertSame([], Storage::disk('event_videos')->allFiles());
     }
 
     public function test_la_video_se_lit_par_morceaux_pour_que_le_navigateur_puisse_la_demarrer(): void
     {
-        // `Storage::fake()` remplace le disque : le service par morceaux se repose comme au demarrage.
-        AppServiceProvider::configureEventVideoDisk();
+        $this->useRealVideoDisk();
 
         $this->actingAs($this->owner)
             ->post(route('tenants.events.video.store', [$this->tenant, $this->event]), ['file' => $this->mp4(64)]);
@@ -144,7 +186,7 @@ class PresentationVideoTest extends TestCase
 
     public function test_un_lien_de_video_modifie_est_refuse(): void
     {
-        AppServiceProvider::configureEventVideoDisk();
+        $this->useRealVideoDisk();
 
         $this->actingAs($this->owner)
             ->post(route('tenants.events.video.store', [$this->tenant, $this->event]), ['file' => $this->mp4()]);
