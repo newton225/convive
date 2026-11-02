@@ -395,10 +395,19 @@ class SaveEvent
     {
         $extension = $upload->getMimeType() === 'video/webm' ? 'webm' : 'mp4';
 
-        $event->addMedia($upload)
-            ->usingFileName(Str::uuid()->toString().'.'.$extension)
-            ->usingName(Event::PresentationVideoCollection)
-            ->toMediaCollection(Event::PresentationVideoCollection);
+        // La limite globale de Media Library (5 Mo, celle des images) refuserait la video : elle est relevee le
+        // temps de ce depot seulement, la taille de la video est deja bornee par `SaveEventVideoRequest`.
+        $imageLimit = config('media-library.max_file_size');
+        config(['media-library.max_file_size' => Event::PresentationVideoMaxKilobytes * 1024]);
+
+        try {
+            $event->addMedia($upload)
+                ->usingFileName(Str::uuid()->toString().'.'.$extension)
+                ->usingName(Event::PresentationVideoCollection)
+                ->toMediaCollection(Event::PresentationVideoCollection);
+        } finally {
+            config(['media-library.max_file_size' => $imageLimit]);
+        }
 
         activity()
             ->performedOn($event)

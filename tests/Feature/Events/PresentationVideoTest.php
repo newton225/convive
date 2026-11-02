@@ -95,6 +95,17 @@ class PresentationVideoTest extends TestCase
         $this->assertTrue($this->hasVideo());
     }
 
+    public function test_une_video_de_plus_de_cinq_mo_passe_la_limite_des_images_de_media_library(): void
+    {
+        $this->actingAs($this->owner)
+            ->post(route('tenants.events.video.store', [$this->tenant, $this->event]), ['file' => $this->mp4(6 * 1024)])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertTrue($this->hasVideo());
+        $this->assertSame(1024 * 1024 * 5, config('media-library.max_file_size'));
+    }
+
     public function test_un_fichier_qui_n_est_pas_une_video_est_refuse_meme_renomme_en_mp4(): void
     {
         // Un vrai fichier (le faux de Laravel rend le type declare, jamais le contenu) : du PHP annonce comme
