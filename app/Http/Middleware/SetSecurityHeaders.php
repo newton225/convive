@@ -108,7 +108,8 @@ class SetSecurityHeaders
             // (SECURITY.md H1), le navigateur l'affiche via une URL `blob:` dans une balise `img`,
             // ou aucun script ne s'execute. Limite a `img-src`, jamais au script ni aux cadres.
             trim("img-src 'self' data: blob: {$analytics['img']}"),
-            trim("connect-src 'self' {$analytics['connect']} {$devOrigin}"),
+            // Le test de debit de la video (`hasFastConnection`) la lit par `fetch` : meme adresse que `media-src`.
+            trim("connect-src 'self' {$analytics['connect']} {$devOrigin} {$videoOrigin}"),
             "worker-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
